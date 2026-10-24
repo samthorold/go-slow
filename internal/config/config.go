@@ -26,7 +26,7 @@ type Config struct {
 	// ReadingModel is the Claude model the Editor reads Items with
 	// (READING_MODEL, such as claude-haiku-5-5).
 	ReadingModel string
-	// AnthropicAPIKey is the key for Anthropic's API (ANTHROPIC_API_KEY).
+	// AnthropicAPIKey is the key for Anthropic's API (GOSLOW_ANTHROPIC_API_KEY).
 	AnthropicAPIKey Secret
 }
 
@@ -52,7 +52,7 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 	}
 	port, dbPath := get("PORT"), get("DATABASE_PATH")
 	contact, interval := get("COLLECTION_CONTACT"), get("COLLECTION_INTERVAL")
-	model, key := get("READING_MODEL"), get("ANTHROPIC_API_KEY")
+	model, key := get("READING_MODEL"), get("GOSLOW_ANTHROPIC_API_KEY")
 	if len(missing) > 0 {
 		return Config{}, fmt.Errorf("missing environment variables: %s", strings.Join(missing, ", "))
 	}

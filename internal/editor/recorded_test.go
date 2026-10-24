@@ -26,7 +26,7 @@ import (
 //
 //	go test ./internal/editor -run TestRecordedReadings -record
 //
-// with ANTHROPIC_API_KEY and READING_MODEL set in the environment.
+// with GOSLOW_ANTHROPIC_API_KEY and READING_MODEL set in the environment.
 var rerecordFlag = flag.Bool("record", false, "call the real model on the fixtures and keep its responses")
 
 // recording is one kept response.
@@ -98,7 +98,7 @@ func TestRecordedReadings(t *testing.T) {
 				// harness landed; the fixture is replayed once it is recorded.
 				t.Skipf("%s has not been recorded yet; record it with: "+
 					"go test -count=1 ./internal/editor -run TestRecordedReadings -record "+
-					"(ANTHROPIC_API_KEY and READING_MODEL set)", name)
+					"(GOSLOW_ANTHROPIC_API_KEY and READING_MODEL set)", name)
 			}
 			if err != nil {
 				t.Fatal(err)
@@ -185,9 +185,9 @@ func normal(s string) string {
 // or not it passes the act's checks: the replay shows if it doesn't.
 func rerecord(t *testing.T, it editor.Item, kept string) {
 	t.Helper()
-	key, model := os.Getenv("ANTHROPIC_API_KEY"), os.Getenv("READING_MODEL")
+	key, model := os.Getenv("GOSLOW_ANTHROPIC_API_KEY"), os.Getenv("READING_MODEL")
 	if key == "" || model == "" {
-		t.Fatal("recording needs ANTHROPIC_API_KEY and READING_MODEL")
+		t.Fatal("recording needs GOSLOW_ANTHROPIC_API_KEY and READING_MODEL")
 	}
 	var rec recording
 	m := recorder{claude.New(claude.Options{APIKey: key, Model: model}), &rec}

@@ -46,11 +46,15 @@ _Avoid_: Allegation, statement
 A **Fact** the editorial work has judged moves a **Story** on. The same **Fact** can be a **Development** in several **Stories**.
 _Avoid_: Update (on the wire, an update is a revised **Item**)
 
+**Assessment**:
+A judgement the **Editor** reaches by reasoning over **Facts**, citing the **Facts** it rests on, as at a date. Unlike a **Fact** it is not corroborated as a single proposition, and unlike a **Claim** it is go-slow's own.
+_Avoid_: Analysis (the format of the **Sunday read**), finding, judgement
+
 **Timeline**:
 A **Story**'s **Developments** in order.
 
 **Connection**:
-An editorial tie between a **Fact** and another **Fact** (such as cause) or an **Entity** (who did it, to whom, where). **Stories** are connected through the **Facts** and **Entities** they share.
+An editorial tie between a **Fact** and another **Fact** (such as cause), an **Entity** (who did it, to whom, where) or an **Assessment** (supporting or undercutting it). **Stories** are connected through the **Facts** and **Entities** they share.
 _Avoid_: Link, relation
 
 ### Output
@@ -74,7 +78,7 @@ The person who sets the **Topics** and their **Depths** and gives the **Editor**
 _Avoid_: User, reader (a reader only reads; the **Owner** also steers)
 
 **Feedback**:
-What the **Owner** tells the **Editor** about a **Story**, **Development**, **Fact** or **Connection**. It is one of four kinds: *missed* (it should be there), *unwanted* (it shouldn't), *wrong* (it is mistaken) or *new to me* (it showed the **Owner** something they hadn't seen).
+What the **Owner** tells the **Editor** about a **Story**, **Development**, **Fact**, **Connection** or **Assessment**. It is one of four kinds: *missed* (it should be there), *unwanted* (it shouldn't), *wrong* (it is mistaken) or *new to me* (it showed the **Owner** something they hadn't seen).
 _Avoid_: Correction (*new to me* corrects nothing), rating
 
 ### Interest

@@ -1,0 +1,98 @@
+# go-slow
+
+The language of a slow-news briefing: the material that arrives from news sources and the editorial work done on it.
+
+## Language
+
+### Material
+
+**Source**:
+An outlet or publisher the owner has chosen, which **Collection** checks for new **Items**: a wire, a government department, Parliament, a pollster.
+_Avoid_: Feed (a feed is one way of reading a **Source**)
+
+**Reference source**:
+A store of background facts about the world, such as Wikidata or a poll archive, consulted for context rather than collected from.
+
+**Collection**:
+Checking the **Sources** on a timetable and bringing their new **Items** into the **Record**.
+_Avoid_: Ingestion, scraping, crawling
+
+**Record**:
+Everything collected, with the editorial work done on it.
+_Avoid_: Archive, database
+
+**Item**:
+One piece of material as collection brought it in from a source: a report, a release, a poll, a comment piece. The IPTC's "news item".
+_Avoid_: Article, piece, story (for a single item)
+
+**Story**:
+An ongoing subject followed across days, made of the **Items** about it. An **Item** belongs to any number of **Stories**, including none.
+_Avoid_: Running story, developing story, thread
+
+**Entity**:
+A thing in the world that can be referred to again: a person, organisation, place, or named occasion (the Budget, the 2024 general election). Some come from Wikidata, others are made by the editorial work.
+_Avoid_: Event (something that happened is a **Fact**)
+
+### Editorial work
+
+**Fact**:
+A proposition the editorial work holds true as at a date, drawn from **Items** and **Reference sources** and corroborated. It carries no author's voice.
+
+**Claim**:
+A proposition attributed to someone and not corroborated. It keeps its attribution.
+_Avoid_: Allegation, statement
+
+**Development**:
+A **Fact** the editorial work has judged moves a **Story** on. The same **Fact** can be a **Development** in several **Stories**.
+_Avoid_: Update (on the wire, an update is a revised **Item**)
+
+**Timeline**:
+A **Story**'s **Developments** in order.
+
+**Connection**:
+An editorial tie between a **Fact** and another **Fact** (such as cause) or an **Entity** (who did it, to whom, where). **Stories** are connected through the **Facts** and **Entities** they share.
+_Avoid_: Link, relation
+
+### Output
+
+**Briefing**:
+The daily output: the day's **Developments** in the **Stories** the **Owner**'s **Topics** and **Depths** select, with their **Connections**.
+_Avoid_: Newsletter, digest, summary
+
+**Sunday read**:
+The weekly output, alongside Sunday's **Briefing**: analysis that puts the week's **Stories** into wider context from the **Record** and **Reference sources**.
+_Avoid_: Weekly briefing, recap, long read
+
+### People
+
+**Editor**:
+The agent that does the editorial work: drawing **Facts** and **Claims** from **Items**, judging **Developments** and making **Connections**.
+_Avoid_: Assistant, pipeline
+
+**Owner**:
+The person who sets the **Topics** and their **Depths** and corrects the **Editor**. Anyone else who reads reads the same output.
+_Avoid_: User, reader (a reader only reads; the **Owner** also steers)
+
+### Interest
+
+**Topic**:
+A standing area of interest the owner follows, at some **Depth**. It has no starting event, unlike a **Story**. It may be about an **Entity** (Reform UK) or be more abstract (standards in public life).
+_Avoid_: Interest, beat, subject
+
+**Depth**:
+How closely the owner follows a **Topic**, which decides how much detail on it matters.
+
+## Flagged ambiguities
+
+- **"Story"** in newsroom usage means both a single published piece and the ongoing subject it belongs to (Reuters uses both senses in one sentence). Here it means only the ongoing subject; a single piece is an **Item**.
+
+- **"Briefing"** at *The Economist* is a long analytical section; for the IPTC it is a summary of many items. Here it is the short daily output; the long weekly analysis is the **Sunday read**.
+
+## Example dialogue
+
+> **Dev:** PA's report on the Solihull councillors resigning came in this morning. Is that a new **Story**?
+> **Owner:** No, it's an **Item** in the investigation into Reform. The **Story** has been running since the 14th.
+> **Dev:** So the resignations go on its **Timeline**?
+> **Owner:** Yes, as a **Development**, connected to the broadcast as its cause. Farage's reaction is in the same **Item**. That he said it is a **Fact**, but it doesn't move the **Story** on, so it isn't a **Development**.
+> **Dev:** And the Ipsos poll?
+> **Owner:** A **Fact**, with fieldwork before the broadcast. It's a **Development** in *Reform's standing*, not in the investigation. The two **Stories** are connected because both involve Reform UK, and the **Sunday read** can draw on that.

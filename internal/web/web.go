@@ -25,6 +25,9 @@ type Briefings interface {
 type Items interface {
 	// ListItems lists the Items in the Record, newest first.
 	ListItems(ctx context.Context) ([]collect.ListedItem, error)
+	// Upcoming lists the scheduled events not yet due at now, soonest
+	// first.
+	Upcoming(ctx context.Context, now time.Time) ([]collect.ListedItem, error)
 	// SourceStatuses reports how each Source stands for going quiet.
 	SourceStatuses(ctx context.Context) ([]collect.SourceStatus, error)
 }

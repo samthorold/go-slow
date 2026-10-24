@@ -106,7 +106,9 @@ func newFixture(t *testing.T, feed, etag string) *fixture {
 		ID:          "number-10",
 		Name:        "Prime Minister's Office, 10 Downing Street",
 		FeedURL:     srv.URL + "/feed.atom",
+		Licence:     collect.OGLv3,
 		Attribution: collect.OGL,
+		Keeps:       collect.KeepFullText,
 		UsualGap:    4 * 24 * time.Hour,
 	}
 	client := polite.New(polite.Options{

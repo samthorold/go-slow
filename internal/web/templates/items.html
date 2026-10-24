@@ -1,5 +1,23 @@
 {{define "title"}}Items{{end}}
 
+{{define "item"}}
+    {{/* Collected text is inert: hx-disable on the elements holding it. */}}
+    <li>
+      <a href="{{.Link}}" hx-boost="false" hx-disable>{{.Title}}</a>
+      <p><small>{{.Source}}{{if .When}}, {{.When}}{{end}}</small></p>
+      <p hx-disable>{{.Summary}}</p>
+      {{- if .Scheduled}}
+      {{- else if .Topics}}
+      <p>Awaiting reading for <span hx-disable>{{range $i, $t := .Topics}}{{if $i}}, {{end}}{{$t}}{{end}}</span></p>
+      {{- else if .Checked}}
+      <p><small>Waiting unread: touches no Topic</small></p>
+      {{- else}}
+      <p><small>Not yet checked against the Topics</small></p>
+      {{- end}}
+      <p><small>{{.Attribution}}</small></p>
+    </li>
+{{- end}}
+
 {{define "content"}}
 <h1>Items</h1>
 <p><a href="/topics">Topics</a></p>
@@ -13,28 +31,23 @@
   </ul>
 </section>
 
+<section aria-labelledby="upcoming">
+  <h2 id="upcoming">Upcoming</h2>
+  {{- if not .Upcoming}}
+  <p>Nothing is scheduled.</p>
+  {{- end}}
+  <ol>
+  {{- range .Upcoming}}{{template "item" .}}{{end}}
+  </ol>
+</section>
+
 <section aria-labelledby="collected">
   <h2 id="collected">Collected</h2>
   {{- if not .Items}}
   <p>Nothing has been collected yet.</p>
   {{- end}}
   <ol>
-  {{- range .Items}}
-    {{/* Collected text is inert: hx-disable on the elements holding it. */}}
-    <li>
-      <a href="{{.Link}}" hx-boost="false" hx-disable>{{.Title}}</a>
-      <p><small>{{.Source}}{{if .Published}}, {{.Published}}{{end}}</small></p>
-      <p hx-disable>{{.Summary}}</p>
-      {{- if .Topics}}
-      <p>Awaiting reading for <span hx-disable>{{range $i, $t := .Topics}}{{if $i}}, {{end}}{{$t}}{{end}}</span></p>
-      {{- else if .Checked}}
-      <p><small>Waiting unread: touches no Topic</small></p>
-      {{- else}}
-      <p><small>Not yet checked against the Topics</small></p>
-      {{- end}}
-      <p><small>{{.Attribution}}</small></p>
-    </li>
-  {{- end}}
+  {{- range .Items}}{{template "item" .}}{{end}}
   </ol>
 </section>
 {{end}}

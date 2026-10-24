@@ -1,0 +1,32 @@
+{{define "title"}}Items{{end}}
+
+{{define "content"}}
+<h1>Items</h1>
+
+<section aria-labelledby="sources">
+  <h2 id="sources">Sources</h2>
+  <ul>
+  {{- range .Sources}}
+    <li>{{.Name}}{{if .Newest}}: newest Item {{.Newest}}{{end}}{{if .Quiet}} <strong>quiet: nothing new past its usual gap</strong>{{end}}</li>
+  {{- end}}
+  </ul>
+</section>
+
+<section aria-labelledby="collected">
+  <h2 id="collected">Collected</h2>
+  {{- if not .Items}}
+  <p>Nothing has been collected yet.</p>
+  {{- end}}
+  <ol>
+  {{- range .Items}}
+    {{/* Collected text is inert: hx-disable on the elements holding it. */}}
+    <li>
+      <a href="{{.Link}}" hx-boost="false" hx-disable>{{.Title}}</a>
+      <p><small>{{.Source}}{{if .Published}}, {{.Published}}{{end}}</small></p>
+      <p hx-disable>{{.Summary}}</p>
+      <p><small>{{.Attribution}}</small></p>
+    </li>
+  {{- end}}
+  </ol>
+</section>
+{{end}}

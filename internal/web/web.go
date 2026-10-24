@@ -10,6 +10,8 @@ import (
 	"log/slog"
 	"net/http"
 	"time"
+
+	"github.com/samthorold/go-slow/internal/collect"
 )
 
 // Briefings answers the queries the Briefing pages need.
@@ -19,10 +21,19 @@ type Briefings interface {
 	HasBriefing(ctx context.Context, t time.Time) (bool, error)
 }
 
+// Items answers the queries the Items page needs.
+type Items interface {
+	// ListItems lists the Items in the Record, newest first.
+	ListItems(ctx context.Context) ([]collect.ListedItem, error)
+	// SourceStatuses reports how each Source stands for going quiet.
+	SourceStatuses(ctx context.Context) ([]collect.SourceStatus, error)
+}
+
 // Deps are the app's dependencies. The app reads nothing from the
 // environment: main builds these and passes them in.
 type Deps struct {
 	Briefings Briefings
+	Items     Items
 	// Now is the clock. The day it returns, in its location, is "today".
 	Now func() time.Time
 	Log *slog.Logger
@@ -38,6 +49,9 @@ var (
 // briefingTmpl is the Briefing page: the layout around its content.
 var briefingTmpl = page("briefing.html")
 
+// itemsTmpl is the Items page.
+var itemsTmpl = page("items.html")
+
 // page parses a page template together with the layout it fills.
 func page(name string) *template.Template {
 	return template.Must(template.ParseFS(templateFS, "templates/layout.html", "templates/"+name))
@@ -49,6 +63,7 @@ func New(d Deps) http.Handler {
 	mux := http.NewServeMux()
 	mux.Handle("GET /static/", http.FileServerFS(staticFS))
 	mux.HandleFunc("GET /{$}", a.todaysBriefing)
+	mux.HandleFunc("GET /items", a.items)
 	return mux
 }
 

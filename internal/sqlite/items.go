@@ -72,12 +72,12 @@ func (s *Store) AddItems(ctx context.Context, items []collect.Item) (int, error)
 	for _, it := range items {
 		res, err := tx.ExecContext(ctx, `
 			INSERT INTO items (source_id, entry_id, title, link, summary, content,
-				published, updated, raw, attribution, collected_at)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+				published, updated, due, raw, attribution, collected_at)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 			ON CONFLICT (source_id, entry_id) DO NOTHING`,
 			it.SourceID, it.EntryID, it.Title, it.Link, it.Summary, it.Content,
-			formatTime(it.Published), formatTime(it.Updated), it.Raw, it.Attribution,
-			formatTime(it.CollectedAt))
+			formatTime(it.Published), formatTime(it.Updated), formatTime(it.Due), it.Raw,
+			it.Attribution, formatTime(it.CollectedAt))
 		if err != nil {
 			return 0, fmt.Errorf("add item %s: %w", it.EntryID, err)
 		}
@@ -93,11 +93,13 @@ func (s *Store) AddItems(ctx context.Context, items []collect.Item) (int, error)
 	return int(added), nil
 }
 
-// ListItems lists the Items in the Record, newest first.
+// ListItems lists the Items in the Record, newest first, apart from
+// scheduled events, which Upcoming lists.
 func (s *Store) ListItems(ctx context.Context) ([]collect.ListedItem, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT sources.name, items.title, items.link, items.summary, items.published, items.attribution
 		FROM items JOIN sources ON sources.id = items.source_id
+		WHERE items.due = ''
 		ORDER BY items.published DESC, items.collected_at DESC`)
 	if err != nil {
 		return nil, fmt.Errorf("list items: %w", err)
@@ -119,12 +121,46 @@ func (s *Store) ListItems(ctx context.Context) ([]collect.ListedItem, error) {
 	return out, nil
 }
 
+// Upcoming lists the scheduled events not yet due at now, soonest first. An
+// event the Source has since rescheduled (a later-collected event at the same
+// link) is shown only at its latest date.
+func (s *Store) Upcoming(ctx context.Context, now time.Time) ([]collect.ListedItem, error) {
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT sources.name, items.title, items.link, items.summary, items.due, items.attribution
+		FROM items JOIN sources ON sources.id = items.source_id
+		WHERE items.due > ?
+			AND NOT EXISTS (
+				SELECT 1 FROM items AS later
+				WHERE later.source_id = items.source_id AND later.link = items.link
+					AND later.due != '' AND later.collected_at > items.collected_at)
+		ORDER BY items.due, items.title`, formatTime(now))
+	if err != nil {
+		return nil, fmt.Errorf("list upcoming: %w", err)
+	}
+	defer func() { _ = rows.Close() }()
+	var out []collect.ListedItem
+	for rows.Next() {
+		var it collect.ListedItem
+		var due string
+		if err := rows.Scan(&it.SourceName, &it.Title, &it.Link, &it.Summary, &due, &it.Attribution); err != nil {
+			return nil, fmt.Errorf("list upcoming: %w", err)
+		}
+		it.Due = parseTime(due)
+		out = append(out, it)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("list upcoming: %w", err)
+	}
+	return out, nil
+}
+
 // SourceStatuses reports, for each Source, when collecting it began and when
-// its newest Item was published.
+// its newest Item was published. An Item with no publication time, such as a
+// scheduled event, counts from when it was collected.
 func (s *Store) SourceStatuses(ctx context.Context) ([]collect.SourceStatus, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT sources.id, sources.name, sources.usual_gap_seconds, sources.added_at,
-			coalesce(max(items.published), '')
+			coalesce(max(iif(items.published = '', items.collected_at, items.published)), '')
 		FROM sources LEFT JOIN items ON items.source_id = sources.id
 		GROUP BY sources.id
 		ORDER BY sources.name`)

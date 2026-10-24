@@ -21,7 +21,7 @@ There is no Go Guide yet; the Go tooling below is this repo's own until there is
   - `cmd/go-slow`: `main`, the composition root. It alone reads the environment.
   - `internal/config`: the typed config.
   - `internal/web`: the web adapter and the app's constructor, `web.New`, with its templates and the vendored htmx.
-  - `internal/collect`: Collection, the Sources list, Atom parsing and the *No Source goes quiet* check, with its ports (`Fetcher`, `Store`). Its timetable runs inside the app process, started by `main`.
+  - `internal/collect`: Collection, the Sources list with each one's terms (licence, attribution, what may be kept) and rate limit, reading each feed format (Atom, the ONS release search, Parliament's written statements) and the *No Source goes quiet* check, with its ports (`Fetcher`, `Store`). Its timetable runs inside the app process, started by `main`.
   - `internal/polite`: the HTTP adapter Collection fetches through, carrying the politeness rules (User-Agent, conditional requests, one request per host at a time, `Retry-After` backoff, daily robots.txt).
   - `internal/sqlite`: the storage adapter, with its migrations.
   - `internal/server`: serving with graceful shutdown.

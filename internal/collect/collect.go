@@ -5,23 +5,57 @@ package collect
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"log/slog"
+	"net/url"
+	"strings"
 	"time"
 )
 
 // OGL is the attribution the Open Government Licence v3.0 asks for.
 const OGL = "Contains public sector information licensed under the Open Government Licence v3.0."
 
+// OPL is the attribution the Open Parliament Licence v3.0 asks for.
+const OPL = "Contains Parliamentary information licensed under the Open Parliament Licence v3.0."
+
+// Keep is how much of an Item a Source's terms let the Record keep (system
+// design: The record keeps everything collected).
+type Keep int
+
+const (
+	// KeepUndeclared is a Source whose terms have not been declared. It is
+	// never collected: the Record keeps nothing it has no licence for.
+	KeepUndeclared Keep = iota
+	// KeepFullText keeps the Item as collected: its full text and its raw
+	// entry.
+	KeepFullText
+	// KeepSummary keeps the Item's title, link, summary and dates, but not
+	// its full text or raw entry.
+	KeepSummary
+)
+
 // Source is an outlet or publisher the Owner has chosen, read through one
-// Atom feed.
+// feed or API endpoint.
 type Source struct {
-	ID          string
-	Name        string
-	FeedURL     string
+	ID      string
+	Name    string
+	FeedURL string
+	Format  Format
+	// Licence names the terms the Source is collected under; Attribution is
+	// the statement they ask for, carried by every Item; Keeps is how much
+	// of an Item they let the Record keep.
+	Licence     string
 	Attribution string
+	Keeps       Keep
 	// UsualGap is how long the Source normally goes between Items; silent
 	// for longer, it is quiet.
 	UsualGap time.Duration
+	// MinInterval is the Source's own rate limit: the least time between two
+	// fetches of it, however often Collection runs. A feed that answers
+	// conditional requests can be asked every run (zero); one that cannot
+	// is asked no more often than it changes.
+	MinInterval time.Duration
 }
 
 // Item is one entry as Collection brought it in, kept in full.
@@ -35,7 +69,11 @@ type Item struct {
 	Content   string
 	Published time.Time
 	Updated   time.Time
-	// Raw is the entry's XML as the feed carried it.
+	// Due is when a scheduled event, such as a release on a statistics
+	// body's release calendar, is to happen; zero for any other Item. A
+	// scheduled event is upcoming until it is due.
+	Due time.Time
+	// Raw is the entry as the feed carried it.
 	Raw         string
 	Attribution string
 	CollectedAt time.Time
@@ -48,6 +86,7 @@ type ListedItem struct {
 	Link        string
 	Summary     string
 	Published   time.Time
+	Due         time.Time
 	Attribution string
 }
 
@@ -92,10 +131,14 @@ type Deps struct {
 // Collector runs Collection over its Sources.
 type Collector struct {
 	Deps
+	// fetched is when each Source was last fetched, for its rate limit.
+	// Runs never overlap, so it needs no lock. It is not kept across
+	// restarts: a restart fetches each Source once at most.
+	fetched map[string]time.Time
 }
 
 // New builds a Collector.
-func New(d Deps) *Collector { return &Collector{Deps: d} }
+func New(d Deps) *Collector { return &Collector{Deps: d, fetched: map[string]time.Time{}} }
 
 // RunOn is Collection's timetable: a run at once, then one on every tick,
 // each at the time now gives, until ctx is done. Runs never overlap. main
@@ -117,6 +160,9 @@ func (c *Collector) RunOn(ctx context.Context, ticks <-chan time.Time, now func(
 // logged and does not stop the others.
 func (c *Collector) Run(ctx context.Context, now time.Time) {
 	for _, s := range c.Sources {
+		if last, ok := c.fetched[s.ID]; ok && now.Sub(last) < s.MinInterval {
+			continue
+		}
 		n, err := c.collect(ctx, s, now)
 		if err != nil {
 			c.Log.ErrorContext(ctx, "collection failed", "source", s.ID, "error", err)
@@ -126,11 +172,41 @@ func (c *Collector) Run(ctx context.Context, now time.Time) {
 	}
 }
 
+// blockedHosts are publishers' sites that block scripted clients, so
+// Collection never fetches them, whatever their robots.txt says: UK
+// Parliament's main site, Hansard, and the Commons Library and Developer Hub
+// sites, all of which answer a scripted client with a challenge page.
+// Parliament is read only through its APIs.
+var blockedHosts = map[string]bool{
+	"parliament.uk":                true,
+	"www.parliament.uk":            true,
+	"hansard.parliament.uk":        true,
+	"commonslibrary.parliament.uk": true,
+	"developer.parliament.uk":      true,
+}
+
+// neverFetched reports whether rawURL is on a blocked host. A URL that does
+// not parse is never fetched either.
+func neverFetched(rawURL string) bool {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return true
+	}
+	return blockedHosts[strings.ToLower(u.Hostname())]
+}
+
 func (c *Collector) collect(ctx context.Context, s Source, now time.Time) (int, error) {
+	if s.Keeps == KeepUndeclared {
+		return 0, errors.New("the Source declares no terms, so nothing of it may be kept")
+	}
+	if neverFetched(s.FeedURL) {
+		return 0, fmt.Errorf("%s is on a host that blocks scripted clients; only its publisher's APIs are fetched", s.FeedURL)
+	}
 	v, err := c.Store.Validators(ctx, s.ID)
 	if err != nil {
 		return 0, err
 	}
+	c.fetched[s.ID] = now
 	f, err := c.Fetcher.Fetch(ctx, s.FeedURL, v)
 	if err != nil {
 		return 0, err
@@ -138,7 +214,7 @@ func (c *Collector) collect(ctx context.Context, s Source, now time.Time) (int, 
 	if f.NotModified {
 		return 0, nil
 	}
-	items, err := parseAtom(f.Body)
+	items, err := s.Format.parse(f.Body)
 	if err != nil {
 		return 0, err
 	}
@@ -146,6 +222,9 @@ func (c *Collector) collect(ctx context.Context, s Source, now time.Time) (int, 
 		items[i].SourceID = s.ID
 		items[i].Attribution = s.Attribution
 		items[i].CollectedAt = now
+		if s.Keeps == KeepSummary {
+			items[i].Content, items[i].Raw = "", ""
+		}
 	}
 	n, err := c.Store.AddItems(ctx, items)
 	if err != nil {

@@ -90,6 +90,34 @@ func TestCollectedTextOnTheItemsPageIsInert(t *testing.T) {
 	}
 }
 
+func TestTheItemsPageShowsAScheduledReleaseAsUpcomingUntilItIsDue(t *testing.T) {
+	store := openStore(t)
+	scheduled := item("gdp", "GDP first quarterly estimate", time.Time{})
+	scheduled.Due = saturday.Add(48 * time.Hour)
+	past := item("cpi", "Consumer price inflation", time.Time{})
+	past.Due = saturday.Add(-48 * time.Hour)
+	seed(t, store, saturday.AddDate(0, 0, -7), scheduled, past)
+	app, _ := newAppWithLog(t, saturday, store)
+
+	res := get(t, app, "/items")
+
+	upcoming := strings.Index(res.body, `id="upcoming"`)
+	collected := strings.Index(res.body, `id="collected"`)
+	if upcoming < 0 || collected < 0 {
+		t.Fatalf("page lacks an upcoming or collected section:\n%s", res.body)
+	}
+	section := res.body[upcoming:collected]
+	if !strings.Contains(section, "GDP first quarterly estimate") || !strings.Contains(section, "Mon 26 Oct 2026") {
+		t.Errorf("upcoming section lacks the scheduled release and its date:\n%s", section)
+	}
+	if strings.Contains(res.body, "Consumer price inflation") {
+		t.Errorf("a release past its date is still shown:\n%s", res.body)
+	}
+	if n := strings.Count(res.body, ">GDP first quarterly estimate</a>"); n != 1 {
+		t.Errorf("scheduled release shown %d times, want once, as upcoming", n)
+	}
+}
+
 func TestTheItemsPageShowsAQuietSource(t *testing.T) {
 	store := openStore(t)
 	seed(t, store, saturday.AddDate(0, -1, 0),

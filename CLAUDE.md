@@ -33,13 +33,13 @@ There is no Go Guide yet; the Go tooling below is this repo's own until there is
 
 - **Inner loop:** `go test ./...` (add `-run <Test>` or a package path to narrow it).
 - **Full check:** `uvx --from pre-commit==4.7.0 pre-commit run --all-files`. It runs every hook below; CI runs exactly this. A `pre-commit` already on PATH works too, if it is at least 4.5.0. Install the git hook once per clone with `uvx --from pre-commit==4.7.0 pre-commit install`.
-- **Re-record the Editor's recorded runs** (deliberately, when an act's instructions or schema change; it calls the real model once per fixture and costs money): `go test -count=1 ./internal/editor -run TestRecordedReadings -record`, with `ANTHROPIC_API_KEY` and `READING_MODEL` set in the environment. Target the package: other packages don't define `-record`. The responses land in `internal/editor/testdata/recorded/`; commit them, and the diff shows what changed. The suite only replays them and never calls a model. **The first recording has not been made yet** (no API key was available when the harness landed): until it is, the replay test skips each fixture with a message naming this command. Fixtures (`internal/editor/testdata/govuk/`) come only from admissible Sources, with their licence attribution.
+- **Re-record the Editor's recorded runs** (deliberately, when an act's instructions or schema change; it calls the real model once per fixture and costs money): `go test -count=1 ./internal/editor -run TestRecordedReadings -record`, with `GOSLOW_ANTHROPIC_API_KEY` and `READING_MODEL` set in the environment. Target the package: other packages don't define `-record`. The responses land in `internal/editor/testdata/recorded/`; commit them, and the diff shows what changed. The suite only replays them and never calls a model. **The first recording has not been made yet** (no API key was available when the harness landed): until it is, the replay test skips each fixture with a message naming this command. Fixtures (`internal/editor/testdata/govuk/`) come only from admissible Sources, with their licence attribution.
 - **Lint and format:** `go tool -modfile=tools/go.mod golangci-lint run ./...` and `... golangci-lint fmt`.
 - **Run locally:** `cp .env.example .env`, then `docker compose up --build`, and open http://localhost:8080. The app logs JSON lines to stdout and stops cleanly on SIGTERM (`docker compose stop`). Outside docker: `go run ./cmd/go-slow` with the variables in `.env.example` set.
 
 ## Config
 
-Only from environment variables, every one listed with a safe local value in `.env.example`, and all required: a missing one fails at start. The real `.env` is gitignored. Add a variable to `internal/config` and `.env.example` together. The model each act runs on is a variable (`READING_MODEL`, a Claude model while only the Claude adapter exists); `ANTHROPIC_API_KEY` is a `config.Secret`, which never formats as its value. Never print, log or commit a real key.
+Only from environment variables, every one listed with a safe local value in `.env.example`, and all required: a missing one fails at start. The real `.env` is gitignored. Add a variable to `internal/config` and `.env.example` together. The model each act runs on is a variable (`READING_MODEL`, a Claude model while only the Claude adapter exists); `GOSLOW_ANTHROPIC_API_KEY` is a `config.Secret`, which never formats as its value. Never print, log or commit a real key.
 
 ## Go toolchain
 
@@ -56,4 +56,5 @@ Only from environment variables, every one listed with a safe local value in `.e
 
 ## Known traps
 
+- **Never name go-slow's key `ANTHROPIC_API_KEY`.** Claude Code reads that variable too: set in the shell `claude` is launched from, it switches Claude Code from the claude.ai login to the key, for its own requests and billing, and claude.ai connectors stop working. go-slow reads `GOSLOW_ANTHROPIC_API_KEY` instead, which agents inherit without Claude Code taking it. *Remove when:* never, while go-slow is built with Claude Code.
 - actionlint shellchecks workflow `run:` steps only when `shellcheck` is on PATH. It is on GitHub's runners, not necessarily locally, so a local run can pass a step CI fails. *Remove when:* the actionlint hook brings its own shellcheck.

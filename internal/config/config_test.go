@@ -19,12 +19,12 @@ func env(vars map[string]string) func(string) (string, bool) {
 
 func TestConfigIsReadFromTheEnvironment(t *testing.T) {
 	cfg, err := config.Load(env(map[string]string{
-		"PORT":                "8080",
-		"DATABASE_PATH":       "data/go-slow.db",
-		"COLLECTION_CONTACT":  "owner@example.org",
-		"COLLECTION_INTERVAL": "15m",
-		"READING_MODEL":       "claude-haiku-5-5",
-		"ANTHROPIC_API_KEY":   "sk-test",
+		"PORT":                     "8080",
+		"DATABASE_PATH":            "data/go-slow.db",
+		"COLLECTION_CONTACT":       "owner@example.org",
+		"COLLECTION_INTERVAL":      "15m",
+		"READING_MODEL":            "claude-haiku-5-5",
+		"GOSLOW_ANTHROPIC_API_KEY": "sk-test",
 	}))
 	if err != nil {
 		t.Fatal(err)
@@ -49,7 +49,7 @@ func TestMissingVariablesAreAllNamed(t *testing.T) {
 	if err == nil {
 		t.Fatal("Load succeeded with nothing set")
 	}
-	for _, name := range []string{"PORT", "DATABASE_PATH", "COLLECTION_CONTACT", "COLLECTION_INTERVAL", "READING_MODEL", "ANTHROPIC_API_KEY"} {
+	for _, name := range []string{"PORT", "DATABASE_PATH", "COLLECTION_CONTACT", "COLLECTION_INTERVAL", "READING_MODEL", "GOSLOW_ANTHROPIC_API_KEY"} {
 		if !strings.Contains(err.Error(), name) {
 			t.Errorf("error %q does not name %s", err, name)
 		}
@@ -80,12 +80,12 @@ func TestCollectionIntervalMustBeAPositiveDuration(t *testing.T) {
 
 func valid() map[string]string {
 	return map[string]string{
-		"PORT":                "8080",
-		"DATABASE_PATH":       "x.db",
-		"COLLECTION_CONTACT":  "owner@example.org",
-		"COLLECTION_INTERVAL": "15m",
-		"READING_MODEL":       "claude-haiku-5-5",
-		"ANTHROPIC_API_KEY":   "sk-test",
+		"PORT":                     "8080",
+		"DATABASE_PATH":            "x.db",
+		"COLLECTION_CONTACT":       "owner@example.org",
+		"COLLECTION_INTERVAL":      "15m",
+		"READING_MODEL":            "claude-haiku-5-5",
+		"GOSLOW_ANTHROPIC_API_KEY": "sk-test",
 	}
 }
 

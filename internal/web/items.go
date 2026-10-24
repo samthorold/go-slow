@@ -34,6 +34,11 @@ type itemRow struct {
 	Checked   bool
 	// Topics are those the Item awaits reading for.
 	Topics []string
+	// Page is the Item's own page, with what reading drew from it.
+	Page   string
+	Read   bool
+	Facts  int
+	Claims int
 }
 
 const shownTime = "Mon 2 Jan 2006, 15:04"
@@ -72,6 +77,7 @@ func (a *app) items(w http.ResponseWriter, r *http.Request) {
 	for _, it := range items {
 		r := row(it, it.Published, now.Location())
 		r.Checked, r.Topics = it.Checked, it.Topics
+		r.Read, r.Facts, r.Claims = it.Read, it.Facts, it.Claims
 		p.Items = append(p.Items, r)
 	}
 	a.render(w, r, itemsTmpl, p)
@@ -87,6 +93,7 @@ func row(it collect.ListedItem, at time.Time, loc *time.Location) itemRow {
 		Source:      it.SourceName,
 		When:        when(at, loc),
 		Attribution: it.Attribution,
+		Page:        itemPath(it.SourceID, it.EntryID),
 	}
 }
 

@@ -96,15 +96,23 @@ func (s *Store) AddItems(ctx context.Context, items []collect.Item) (int, error)
 
 // ListItems lists the Items in the Record, newest first, each with whether
 // the lazy-reading check has looked at it and the Topics it tied it to,
-// apart from scheduled events, which Upcoming lists.
+// and whether it has been read, apart from scheduled events, which Upcoming
+// lists.
 func (s *Store) ListItems(ctx context.Context) ([]collect.ListedItem, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT sources.name, items.title, items.link, items.summary, items.published, items.attribution,
+		SELECT items.source_id, items.entry_id,
+			sources.name, items.title, items.link, items.summary, items.published, items.attribution,
 			EXISTS (SELECT 1 FROM item_checks c
 				WHERE c.source_id = items.source_id AND c.entry_id = items.entry_id),
 			(SELECT json_group_array(topics.name ORDER BY topics.name)
 				FROM item_topics JOIN topics ON topics.id = item_topics.topic_id
-				WHERE item_topics.source_id = items.source_id AND item_topics.entry_id = items.entry_id)
+				WHERE item_topics.source_id = items.source_id AND item_topics.entry_id = items.entry_id),
+			EXISTS (SELECT 1 FROM item_reads r
+				WHERE r.source_id = items.source_id AND r.entry_id = items.entry_id),
+			(SELECT count(*) FROM facts f
+				WHERE f.source_id = items.source_id AND f.entry_id = items.entry_id),
+			(SELECT count(*) FROM claims c
+				WHERE c.source_id = items.source_id AND c.entry_id = items.entry_id)
 		FROM items JOIN sources ON sources.id = items.source_id
 		WHERE items.due = ''
 		ORDER BY items.published DESC, items.collected_at DESC`)
@@ -116,8 +124,9 @@ func (s *Store) ListItems(ctx context.Context) ([]collect.ListedItem, error) {
 	for rows.Next() {
 		var it collect.ListedItem
 		var published, topics string
-		if err := rows.Scan(&it.SourceName, &it.Title, &it.Link, &it.Summary, &published, &it.Attribution,
-			&it.Checked, &topics); err != nil {
+		if err := rows.Scan(&it.SourceID, &it.EntryID,
+			&it.SourceName, &it.Title, &it.Link, &it.Summary, &published, &it.Attribution,
+			&it.Checked, &topics, &it.Read, &it.Facts, &it.Claims); err != nil {
 			return nil, fmt.Errorf("list items: %w", err)
 		}
 		it.Published = parseTime(published)

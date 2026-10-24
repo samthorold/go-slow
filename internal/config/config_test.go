@@ -1,6 +1,7 @@
 package config_test
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -22,6 +23,8 @@ func TestConfigIsReadFromTheEnvironment(t *testing.T) {
 		"DATABASE_PATH":       "data/go-slow.db",
 		"COLLECTION_CONTACT":  "owner@example.org",
 		"COLLECTION_INTERVAL": "15m",
+		"READING_MODEL":       "claude-haiku-5-5",
+		"ANTHROPIC_API_KEY":   "sk-test",
 	}))
 	if err != nil {
 		t.Fatal(err)
@@ -32,6 +35,8 @@ func TestConfigIsReadFromTheEnvironment(t *testing.T) {
 		DatabasePath:       "data/go-slow.db",
 		CollectionContact:  "owner@example.org",
 		CollectionInterval: 15 * time.Minute,
+		ReadingModel:       "claude-haiku-5-5",
+		AnthropicAPIKey:    "sk-test",
 	}
 	if cfg != want {
 		t.Errorf("Load = %+v, want %+v", cfg, want)
@@ -44,7 +49,7 @@ func TestMissingVariablesAreAllNamed(t *testing.T) {
 	if err == nil {
 		t.Fatal("Load succeeded with nothing set")
 	}
-	for _, name := range []string{"PORT", "DATABASE_PATH", "COLLECTION_CONTACT", "COLLECTION_INTERVAL"} {
+	for _, name := range []string{"PORT", "DATABASE_PATH", "COLLECTION_CONTACT", "COLLECTION_INTERVAL", "READING_MODEL", "ANTHROPIC_API_KEY"} {
 		if !strings.Contains(err.Error(), name) {
 			t.Errorf("error %q does not name %s", err, name)
 		}
@@ -79,5 +84,30 @@ func valid() map[string]string {
 		"DATABASE_PATH":       "x.db",
 		"COLLECTION_CONTACT":  "owner@example.org",
 		"COLLECTION_INTERVAL": "15m",
+		"READING_MODEL":       "claude-haiku-5-5",
+		"ANTHROPIC_API_KEY":   "sk-test",
+	}
+}
+
+func TestTheReadingModelMustBeAClaudeModel(t *testing.T) {
+	// Only the Claude adapter exists yet; another provider's model would be
+	// sent to Anthropic's API and fail on every reading.
+	vars := valid()
+	vars["READING_MODEL"] = "glm-5.3-flash"
+	_, err := config.Load(env(vars))
+
+	if err == nil || !strings.Contains(err.Error(), "READING_MODEL") {
+		t.Errorf("Load error = %v, want one naming READING_MODEL", err)
+	}
+}
+
+func TestTheAPIKeyIsNeverShownInTheConfig(t *testing.T) {
+	cfg, err := config.Load(env(valid()))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if s := fmt.Sprintf("%v %+v", cfg, cfg); strings.Contains(s, "sk-test") {
+		t.Errorf("formatting the config shows the key: %s", s)
 	}
 }

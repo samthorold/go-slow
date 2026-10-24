@@ -18,8 +18,10 @@ import (
 	"time"
 	_ "time/tzdata" // the TZ variable works in an image with no zoneinfo
 
+	"github.com/samthorold/go-slow/internal/claude"
 	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/config"
+	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/polite"
 	"github.com/samthorold/go-slow/internal/server"
@@ -64,6 +66,12 @@ func run(log *slog.Logger) error {
 	}
 	// The Topics and the lazy-reading check: plain code, no model adapter.
 	topics := interest.New(store)
+	// The Editor, reading Items on the model the config names.
+	ed := editor.New(editor.Deps{
+		Store: store,
+		Model: claude.New(claude.Options{APIKey: string(cfg.AnthropicAPIKey), Model: cfg.ReadingModel}),
+		Log:   log,
+	})
 	collector := collect.New(collect.Deps{
 		Sources: sources,
 		Fetcher: polite.New(polite.Options{
@@ -74,6 +82,7 @@ func run(log *slog.Logger) error {
 		}),
 		Store: store,
 		Check: topics,
+		Read:  ed,
 		Log:   log,
 	})
 	// The timetable runs inside the app process, stopping with it.
@@ -91,6 +100,7 @@ func run(log *slog.Logger) error {
 	app := web.New(web.Deps{
 		Briefings: store,
 		Items:     store,
+		Readings:  store,
 		Topics:    topics,
 		Now:       time.Now,
 		Log:       log,

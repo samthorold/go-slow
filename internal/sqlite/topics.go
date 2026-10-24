@@ -104,10 +104,12 @@ func (s *Store) RecordChecks(ctx context.Context, checks []interest.Checked) err
 	return tx.Commit()
 }
 
-// WaitingItems are the Items not yet read: until reading lands, every Item.
+// WaitingItems are the Items not yet read, whether or not a Topic ties them.
 func (s *Store) WaitingItems(ctx context.Context) ([]interest.Item, error) {
 	return s.checkItems(ctx, `
-		SELECT source_id, entry_id, title, summary, content FROM items`)
+		SELECT items.source_id, items.entry_id, items.title, items.summary, items.content
+		FROM items LEFT JOIN item_reads USING (source_id, entry_id)
+		WHERE item_reads.source_id IS NULL`)
 }
 
 // Tie adds ties between Items and Topics, all at once.

@@ -41,6 +41,7 @@ func newAppWithLog(t *testing.T, now time.Time, store *sqlite.Store) (http.Handl
 	return web.New(web.Deps{
 		Briefings: store,
 		Items:     store,
+		Readings:  store,
 		Topics:    interest.New(store),
 		Now:       func() time.Time { return now },
 		Log:       slog.New(slog.NewTextHandler(&logs, nil)),

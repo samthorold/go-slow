@@ -1,0 +1,52 @@
+{{define "title"}}Item{{end}}
+
+{{define "content"}}
+{{/* Collected text, and what reading drew from it, is inert: hx-disable on
+     the elements holding it. */}}
+<p><a href="/items">Items</a></p>
+<h1 hx-disable>{{.Title}}</h1>
+<p><small>{{.Source}}{{if .Published}}, {{.Published}}{{end}}</small></p>
+<p><a href="{{.Link}}" hx-boost="false" hx-disable>The original</a></p>
+<p hx-disable>{{.Summary}}</p>
+<p><small>{{.Attribution}}</small></p>
+
+{{- if .Read}}
+<p><small>Read {{.ReadAt}} by {{.Model}}</small></p>
+
+<section aria-labelledby="facts">
+  <h2 id="facts">Facts</h2>
+  {{- if not .Facts}}
+  <p>Reading drew no Facts from this Item.</p>
+  {{- end}}
+  <ul hx-disable>
+  {{- range .Facts}}
+    <li>
+      <p>{{.Statement}} <small>(as at {{.AsAt}})</small></p>
+      <blockquote><p>{{.Quote}}</p></blockquote>
+      {{- if .Entities}}<p><small>Involves {{.Entities}}</small></p>{{end}}
+    </li>
+  {{- end}}
+  </ul>
+</section>
+
+<section aria-labelledby="claims">
+  <h2 id="claims">Claims</h2>
+  {{- if not .Claims}}
+  <p>Reading found no Claims in this Item.</p>
+  {{- end}}
+  <ul hx-disable>
+  {{- range .Claims}}
+    <li>
+      <p>{{.Statement}} <small>(claimed by {{.MadeBy}})</small></p>
+      <blockquote><p>{{.Quote}}</p></blockquote>
+      {{- if .Entities}}<p><small>Involves {{.Entities}}</small></p>{{end}}
+    </li>
+  {{- end}}
+  </ul>
+</section>
+{{- else if .Topics}}
+<p>Awaiting reading for <span hx-disable>{{range $i, $t := .Topics}}{{if $i}}, {{end}}{{$t}}{{end}}</span></p>
+{{- else}}
+<p>Not read: it touches no Topic.</p>
+{{- end}}
+{{end}}

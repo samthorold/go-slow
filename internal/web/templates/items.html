@@ -3,10 +3,17 @@
 {{define "item"}}
     {{/* Collected text is inert: hx-disable on the elements holding it. */}}
     <li>
+      {{- if .Scheduled}}
       <a href="{{.Link}}" hx-boost="false" hx-disable>{{.Title}}</a>
+      {{- else}}
+      <a href="{{.Page}}" hx-disable>{{.Title}}</a>
+      <small>(<a href="{{.Link}}" hx-boost="false">the original</a>)</small>
+      {{- end}}
       <p><small>{{.Source}}{{if .When}}, {{.When}}{{end}}</small></p>
       <p hx-disable>{{.Summary}}</p>
       {{- if .Scheduled}}
+      {{- else if .Read}}
+      <p>Read: {{.Facts}} {{if eq .Facts 1}}Fact{{else}}Facts{{end}}, {{.Claims}} {{if eq .Claims 1}}Claim{{else}}Claims{{end}}</p>
       {{- else if .Topics}}
       <p>Awaiting reading for <span hx-disable>{{range $i, $t := .Topics}}{{if $i}}, {{end}}{{$t}}{{end}}</span></p>
       {{- else if .Checked}}

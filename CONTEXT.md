@@ -11,7 +11,7 @@ An outlet or publisher the owner has chosen, which **Collection** checks for new
 _Avoid_: Feed (a feed is one way of reading a **Source**)
 
 **Reference source**:
-A store of background facts about the world, such as Wikidata or a poll archive, consulted for context rather than collected from.
+A store of background facts about the world, such as Wikidata, a poll archive or a statistical series, consulted for context rather than collected from.
 
 **Collection**:
 Checking the **Sources** on a timetable and bringing their new **Items** into the **Record**.

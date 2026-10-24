@@ -1,0 +1,332 @@
+{
+  "act": "reading",
+  "model": "claude-haiku-5-5",
+  "recorded_at": "2026-10-24T23:47:05.783877Z",
+  "usage": {
+    "input_tokens": 10492,
+    "output_tokens": 7888
+  },
+  "output": {
+    "claims": [
+      {
+        "entities": [
+          "Andy Burnham",
+          "Scotland"
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "I do want good growth in every postcode here and the rest of the UK.",
+        "statement": "Burnham wants good growth in every postcode in Scotland and the rest of the UK."
+      },
+      {
+        "entities": [
+          "Andy Burnham",
+          "EU-UK Summit"
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "working on a new deal for food and farming at the EU-UK Summit on the 20th of November",
+        "statement": "Burnham is working on a new deal for food and farming to be presented at the EU-UK Summit on 20 November."
+      },
+      {
+        "entities": [
+          "National Economic Council"
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "in a couple of weeks, the National Economic Council will meet with the First Ministers of Scotland and Wales",
+        "statement": "The National Economic Council will meet with the First Ministers in a couple of weeks."
+      },
+      {
+        "entities": [
+          "Edinburgh"
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "around one in twenty shops lying empty",
+        "statement": "Around one in twenty shops in Edinburgh are lying empty."
+      },
+      {
+        "entities": [
+          "Dundee"
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "more likely one in five",
+        "statement": "In Dundee it is more likely that one in five shops is empty."
+      },
+      {
+        "entities": [
+          "East Renfrewshire",
+          "Glasgow"
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "A man in East Renfrewshire can live, as I understand, on average seven years longer than a man in Glasgow",
+        "statement": "A man in East Renfrewshire can on average live seven years longer than a man in Glasgow."
+      },
+      {
+        "entities": [
+          "Scotland"
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "around one in six young people here are not in education, employment or training",
+        "statement": "Around one in six young people in Scotland are not in education, employment or training."
+      },
+      {
+        "entities": [
+          "Scotland"
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "Scotland, the most devolved nation in the UK, is itself one of the most centralised nations in Europe.",
+        "statement": "Scotland, the most devolved nation in the UK, is one of the most centralised nations in Europe."
+      },
+      {
+        "entities": [
+          "DWP"
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "An offer of DWP devolution.",
+        "statement": "The UK government is offering Scotland DWP devolution of localised employment support."
+      },
+      {
+        "entities": [
+          "Chemify",
+          "Glasgow"
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "companies like Chemify turn groundbreaking research into real manufacturing jobs in Glasgow",
+        "statement": "Chemify has turned groundbreaking research into real manufacturing jobs in Glasgow."
+      },
+      {
+        "entities": [
+          "Dundee"
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "world-leading video games industry",
+        "statement": "Dundee has a world-leading video games industry."
+      },
+      {
+        "entities": [
+          "UK government"
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "putting a billion pounds into research and innovation across the UK in the coming years",
+        "statement": "The UK government is putting a billion pounds into research and innovation across the UK in the coming years."
+      },
+      {
+        "entities": [
+          "Scotland"
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "a defence sector that already supports 12,000 jobs here in Scotland",
+        "statement": "The defence sector already supports 12,000 jobs in Scotland."
+      }
+    ],
+    "entities": [
+      {
+        "kind": "person",
+        "name": "Andy Burnham"
+      },
+      {
+        "kind": "person",
+        "name": "Douglas"
+      },
+      {
+        "kind": "person",
+        "name": "Alan Milburn"
+      },
+      {
+        "kind": "organisation",
+        "name": "Alexander Dennis"
+      },
+      {
+        "kind": "organisation",
+        "name": "FARE-Scotland"
+      },
+      {
+        "kind": "organisation",
+        "name": "Scottish Violence Reduction Unit"
+      },
+      {
+        "kind": "organisation",
+        "name": "Greater Manchester Violence Reduction Unit"
+      },
+      {
+        "kind": "organisation",
+        "name": "Chemify"
+      },
+      {
+        "kind": "organisation",
+        "name": "Scottish government"
+      },
+      {
+        "kind": "organisation",
+        "name": "UK government"
+      },
+      {
+        "kind": "organisation",
+        "name": "National Economic Council"
+      },
+      {
+        "kind": "organisation",
+        "name": "DWP"
+      },
+      {
+        "kind": "occasion",
+        "name": "EU-UK Summit"
+      },
+      {
+        "kind": "place",
+        "name": "Motherwell"
+      },
+      {
+        "kind": "place",
+        "name": "Scotland"
+      },
+      {
+        "kind": "place",
+        "name": "Greater Manchester"
+      },
+      {
+        "kind": "place",
+        "name": "Easterhouse"
+      },
+      {
+        "kind": "place",
+        "name": "Bannatyne House"
+      },
+      {
+        "kind": "place",
+        "name": "Leigh"
+      },
+      {
+        "kind": "place",
+        "name": "Falkirk"
+      },
+      {
+        "kind": "place",
+        "name": "Edinburgh"
+      },
+      {
+        "kind": "place",
+        "name": "Dundee"
+      },
+      {
+        "kind": "place",
+        "name": "East Renfrewshire"
+      },
+      {
+        "kind": "place",
+        "name": "Glasgow"
+      }
+    ],
+    "facts": [
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          "Andy Burnham",
+          "Motherwell"
+        ],
+        "quote": "to be here in Motherwell",
+        "statement": "Andy Burnham delivered a speech in Motherwell, Scotland."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          "Andy Burnham"
+        ],
+        "quote": "When I walked into Downing Street in July",
+        "statement": "Andy Burnham became Prime Minister in July 2026."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          "Andy Burnham",
+          "Greater Manchester"
+        ],
+        "quote": "I left Westminster in 2017 to become the first Mayor of Greater Manchester",
+        "statement": "Andy Burnham left Westminster in 2017 to become the first Mayor of Greater Manchester."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          "Andy Burnham",
+          "Greater Manchester"
+        ],
+        "quote": "in my ten years as the mayor",
+        "statement": "Andy Burnham served ten years as Mayor of Greater Manchester."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          "Andy Burnham",
+          "Leigh"
+        ],
+        "quote": "I was the MP there for sixteen years from the early 2000s",
+        "statement": "Andy Burnham was MP for Leigh for sixteen years from the early 2000s."
+      },
+      {
+        "as_at": "2023-08-01",
+        "entities": [
+          "Andy Burnham",
+          "FARE-Scotland",
+          "Bannatyne House",
+          "Easterhouse",
+          "Greater Manchester Violence Reduction Unit",
+          "Scottish Violence Reduction Unit"
+        ],
+        "quote": "In August 2023, with the help of the ground-breaking Scottish Violence Reduction Unit, I visited FARE-Scotland at Bannatyne House in Easterhouse with the Greater Manchester Violence Reduction Unit.",
+        "statement": "In August 2023 Andy Burnham visited FARE-Scotland at Bannatyne House in Easterhouse with the Greater Manchester Violence Reduction Unit."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          "Andy Burnham",
+          "Greater Manchester",
+          "Easterhouse"
+        ],
+        "quote": "I used it to pioneer what we called the Live Well model in Greater Manchester",
+        "statement": "Andy Burnham used lessons from Easterhouse to pioneer the Live Well model in Greater Manchester."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          "Alexander Dennis",
+          "Falkirk",
+          "Greater Manchester"
+        ],
+        "quote": "the buses on the roads of Greater Manchester today were built by Alexander Dennis in Falkirk",
+        "statement": "Greater Manchester's buses are built by Alexander Dennis in Falkirk, a choice Andy Burnham made as Mayor."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          "Scottish government",
+          "UK government"
+        ],
+        "quote": "the Scottish government has this week agreed to match",
+        "statement": "The Scottish government has agreed to match the UK government's £10 million to create two defence technical excellence colleges."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          "Scottish government"
+        ],
+        "quote": "the Scottish government has also announced a long-term programme for local government reform",
+        "statement": "The Scottish government has announced a long-term programme for local government reform."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          "Alan Milburn"
+        ],
+        "quote": "The review led by Alan Milburn",
+        "statement": "A review led by Alan Milburn is looking at youth employment and support."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          "Douglas",
+          "Andy Burnham"
+        ],
+        "quote": "Douglas informed me of that news today",
+        "statement": "Douglas informed Andy Burnham of the defence colleges news on 16 October 2026."
+      }
+    ]
+  }
+}

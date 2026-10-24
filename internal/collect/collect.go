@@ -147,7 +147,9 @@ type Deps struct {
 	// Check runs after every run, over the Items not yet checked.
 	Check Checker
 	// Read, if set, runs after the check: the Editor reads the Items
-	// awaiting reading (system design: The acts run as Items arrive).
+	// awaiting reading (system design: The acts run as Items arrive), at
+	// once or by submitting them in a batch and applying the results of
+	// earlier ones (The daily acts run in batches).
 	Read Reader
 	Log  *slog.Logger
 }

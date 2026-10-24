@@ -2,11 +2,14 @@ package web_test
 
 import (
 	"html"
+	"net/http"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/samthorold/go-slow/internal/collect"
+	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
 
@@ -70,6 +73,66 @@ func TestTheItemsPageListsCollectedItemsNewestFirstLinkingToTheirOriginals(t *te
 		if !strings.Contains(res.body, want) {
 			t.Errorf("page lacks %q", want)
 		}
+	}
+}
+
+// itemEntry is the Items page's entry for the Item linking to link.
+func itemEntry(t *testing.T, body, link string) string {
+	t.Helper()
+	start := strings.Index(body, `href="`+link+`"`)
+	if start < 0 {
+		t.Fatalf("page does not list %s:\n%s", link, body)
+	}
+	end := strings.Index(body[start:], "</li>")
+	return body[start : start+end]
+}
+
+func TestTakingUpATopicMarksTheWaitingItemsThatMatchItAsAwaitingReading(t *testing.T) {
+	store := openStore(t)
+	seed(t, store, saturday.AddDate(0, 0, -7),
+		item("budget", "PM statement on the Budget", saturday.Add(-2*time.Hour)),
+		item("call", "PM call with the President", saturday.Add(-48*time.Hour)),
+	)
+	// Collection's check has looked at both, while no Topic was followed.
+	if err := interest.New(store).CheckNew(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	app, _ := newAppWithLog(t, saturday, store)
+	before := get(t, app, "/items")
+	if !strings.Contains(itemEntry(t, before.body, "https://www.gov.uk/government/news/budget"), "touches no Topic") {
+		t.Fatalf("before any Topic, the Budget statement is not shown as touching no Topic:\n%s", before.body)
+	}
+
+	addTopic(t, app, url.Values{"name": {"The Budget"}, "depth": {"close"}, "terms": {"Budget"}})
+
+	after := get(t, app, "/items")
+	budget := itemEntry(t, after.body, "https://www.gov.uk/government/news/budget")
+	if !strings.Contains(budget, "Awaiting reading for") || !strings.Contains(budget, "The Budget") {
+		t.Errorf("the Budget statement is not awaiting reading for The Budget:\n%s", budget)
+	}
+	call := itemEntry(t, after.body, "https://www.gov.uk/government/news/call")
+	if !strings.Contains(call, "touches no Topic") {
+		t.Errorf("the PM call is not shown as touching no Topic:\n%s", call)
+	}
+}
+
+func TestRemovingATopicLeavesItsItemsTouchingNoTopic(t *testing.T) {
+	store := openStore(t)
+	seed(t, store, saturday.AddDate(0, 0, -7),
+		item("budget", "PM statement on the Budget", saturday.Add(-2*time.Hour)))
+	if err := interest.New(store).CheckNew(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	app, _ := newAppWithLog(t, saturday, store)
+	addTopic(t, app, url.Values{"name": {"The Budget"}, "depth": {"close"}, "terms": {"Budget"}})
+
+	if res := send(t, app, http.MethodDelete, "/topics/1", nil); res.status != http.StatusOK {
+		t.Fatalf("remove: status = %d", res.status)
+	}
+
+	budget := itemEntry(t, get(t, app, "/items").body, "https://www.gov.uk/government/news/budget")
+	if strings.Contains(budget, "Awaiting reading") || !strings.Contains(budget, "touches no Topic") {
+		t.Errorf("the Budget statement still awaits reading for a removed Topic:\n%s", budget)
 	}
 }
 

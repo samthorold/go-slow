@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -93,11 +94,17 @@ func (s *Store) AddItems(ctx context.Context, items []collect.Item) (int, error)
 	return int(added), nil
 }
 
-// ListItems lists the Items in the Record, newest first, apart from
-// scheduled events, which Upcoming lists.
+// ListItems lists the Items in the Record, newest first, each with whether
+// the lazy-reading check has looked at it and the Topics it tied it to,
+// apart from scheduled events, which Upcoming lists.
 func (s *Store) ListItems(ctx context.Context) ([]collect.ListedItem, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT sources.name, items.title, items.link, items.summary, items.published, items.attribution
+		SELECT sources.name, items.title, items.link, items.summary, items.published, items.attribution,
+			EXISTS (SELECT 1 FROM item_checks c
+				WHERE c.source_id = items.source_id AND c.entry_id = items.entry_id),
+			(SELECT json_group_array(topics.name ORDER BY topics.name)
+				FROM item_topics JOIN topics ON topics.id = item_topics.topic_id
+				WHERE item_topics.source_id = items.source_id AND item_topics.entry_id = items.entry_id)
 		FROM items JOIN sources ON sources.id = items.source_id
 		WHERE items.due = ''
 		ORDER BY items.published DESC, items.collected_at DESC`)
@@ -108,11 +115,15 @@ func (s *Store) ListItems(ctx context.Context) ([]collect.ListedItem, error) {
 	var out []collect.ListedItem
 	for rows.Next() {
 		var it collect.ListedItem
-		var published string
-		if err := rows.Scan(&it.SourceName, &it.Title, &it.Link, &it.Summary, &published, &it.Attribution); err != nil {
+		var published, topics string
+		if err := rows.Scan(&it.SourceName, &it.Title, &it.Link, &it.Summary, &published, &it.Attribution,
+			&it.Checked, &topics); err != nil {
 			return nil, fmt.Errorf("list items: %w", err)
 		}
 		it.Published = parseTime(published)
+		if err := json.Unmarshal([]byte(topics), &it.Topics); err != nil {
+			return nil, fmt.Errorf("list items: topics: %w", err)
+		}
 		out = append(out, it)
 	}
 	if err := rows.Err(); err != nil {

@@ -88,6 +88,18 @@ type ListedItem struct {
 	Published   time.Time
 	Due         time.Time
 	Attribution string
+	// Checked is whether the lazy-reading check has looked at the Item yet.
+	Checked bool
+	// Topics are the names of the Topics the check tied the Item to: it
+	// awaits reading for each. None, once Checked, is an Item that touches
+	// no Topic.
+	Topics []string
+}
+
+// Checker is the lazy-reading check, run over the Items Collection has just
+// brought in. It is plain code, not a model call.
+type Checker interface {
+	CheckNew(ctx context.Context) error
 }
 
 // Validators are what a server said about the feed last time, sent back to
@@ -125,7 +137,9 @@ type Deps struct {
 	Sources []Source
 	Fetcher Fetcher
 	Store   Store
-	Log     *slog.Logger
+	// Check runs after every run, over the Items not yet checked.
+	Check Checker
+	Log   *slog.Logger
 }
 
 // Collector runs Collection over its Sources.
@@ -156,8 +170,9 @@ func (c *Collector) RunOn(ctx context.Context, ticks <-chan time.Time, now func(
 	}
 }
 
-// Run is one Collection run at now: each Source in turn. A failing Source is
-// logged and does not stop the others.
+// Run is one Collection run at now: each Source in turn, then the
+// lazy-reading check over what is new. A failing Source is logged and does
+// not stop the others.
 func (c *Collector) Run(ctx context.Context, now time.Time) {
 	for _, s := range c.Sources {
 		if last, ok := c.fetched[s.ID]; ok && now.Sub(last) < s.MinInterval {
@@ -169,6 +184,10 @@ func (c *Collector) Run(ctx context.Context, now time.Time) {
 			continue
 		}
 		c.Log.InfoContext(ctx, "collected", "source", s.ID, "new_items", n)
+	}
+	// Items left unchecked by a failure here are checked after the next run.
+	if err := c.Check.CheckNew(ctx); err != nil {
+		c.Log.ErrorContext(ctx, "lazy-reading check failed", "error", err)
 	}
 }
 

@@ -37,6 +37,7 @@ type Items interface {
 type Deps struct {
 	Briefings Briefings
 	Items     Items
+	Topics    Topics
 	// Now is the clock. The day it returns, in its location, is "today".
 	Now func() time.Time
 	Log *slog.Logger
@@ -55,6 +56,9 @@ var briefingTmpl = page("briefing.html")
 // itemsTmpl is the Items page.
 var itemsTmpl = page("items.html")
 
+// topicsTmpl is the Topics page.
+var topicsTmpl = page("topics.html")
+
 // page parses a page template together with the layout it fills.
 func page(name string) *template.Template {
 	return template.Must(template.ParseFS(templateFS, "templates/layout.html", "templates/"+name))
@@ -67,6 +71,10 @@ func New(d Deps) http.Handler {
 	mux.Handle("GET /static/", http.FileServerFS(staticFS))
 	mux.HandleFunc("GET /{$}", a.todaysBriefing)
 	mux.HandleFunc("GET /items", a.items)
+	mux.HandleFunc("GET /topics", a.topics)
+	mux.HandleFunc("POST /topics", a.addTopic)
+	mux.HandleFunc("PUT /topics/{id}", a.setDepth)
+	mux.HandleFunc("DELETE /topics/{id}", a.removeTopic)
 	return mux
 }
 
@@ -96,12 +104,19 @@ func (a *app) todaysBriefing(w http.ResponseWriter, r *http.Request) {
 // render writes a full page, rendered first so a template error can still
 // become a clean 500.
 func (a *app) render(w http.ResponseWriter, r *http.Request, t *template.Template, data any) {
+	a.renderStatus(w, r, http.StatusOK, t, data)
+}
+
+// renderStatus is render with a status other than 200, such as the 422 of a
+// form that failed validation.
+func (a *app) renderStatus(w http.ResponseWriter, r *http.Request, status int, t *template.Template, data any) {
 	var buf bytes.Buffer
 	if err := t.ExecuteTemplate(&buf, "layout", data); err != nil {
 		a.serverError(w, r, err)
 		return
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(status)
 	_, _ = buf.WriteTo(w)
 }
 

@@ -7,11 +7,13 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
+	"slices"
 	"sync"
 	"testing"
 	"time"
 
 	"github.com/samthorold/go-slow/internal/collect"
+	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/polite"
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
@@ -119,6 +121,7 @@ func newFixture(t *testing.T, feed, etag string) *fixture {
 		Sources: []collect.Source{source},
 		Fetcher: client,
 		Store:   store,
+		Check:   interest.New(store),
 		Log:     slog.New(slog.DiscardHandler),
 	})
 	if err := store.SyncSources(t.Context(), []collect.Source{source}, now); err != nil {
@@ -200,6 +203,33 @@ func TestCollectionRunsAtStartAndOnEveryTickUntilStopped(t *testing.T) {
 
 	if n := len(f.pub.feedRequests()); n < 3 {
 		t.Errorf("feed fetched %d times, want at least 3 (at start and on two ticks)", n)
+	}
+}
+
+func TestACollectionRunTiesEachNewItemToTheTopicsTheCheckMatchesOrToNone(t *testing.T) {
+	f := newFixture(t, feedV1, "")
+	topics := interest.New(f.store)
+	if _, errs, err := topics.Add(t.Context(), interest.Draft{
+		Name: "The Budget", Depth: "close", Terms: "Budget",
+	}); err != nil || errs != nil {
+		t.Fatalf("add Topic: %v %v", errs, err)
+	}
+
+	f.collector.Run(t.Context(), now)
+
+	items, err := f.store.ListItems(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(items) != 2 {
+		t.Fatalf("stored %d Items, want 2", len(items))
+	}
+	budget, call := items[0], items[1]
+	if !budget.Checked || !slices.Equal(budget.Topics, []string{"The Budget"}) {
+		t.Errorf("Budget statement: checked %v, Topics %v; want checked, awaiting reading for The Budget", budget.Checked, budget.Topics)
+	}
+	if !call.Checked || len(call.Topics) != 0 {
+		t.Errorf("PM call: checked %v, Topics %v; want checked, touching no Topic", call.Checked, call.Topics)
 	}
 }
 

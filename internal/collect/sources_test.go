@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/samthorold/go-slow/internal/collect"
+	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/polite"
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
@@ -92,6 +93,7 @@ func collectorFor(t *testing.T, sources ...collect.Source) (*collect.Collector, 
 		Sources: sources,
 		Fetcher: client,
 		Store:   store,
+		Check:   interest.New(store),
 		Log:     slog.New(slog.DiscardHandler),
 	}), store
 }

@@ -6,12 +6,21 @@
       <a href="{{.Link}}" hx-boost="false" hx-disable>{{.Title}}</a>
       <p><small>{{.Source}}{{if .When}}, {{.When}}{{end}}</small></p>
       <p hx-disable>{{.Summary}}</p>
+      {{- if .Scheduled}}
+      {{- else if .Topics}}
+      <p>Awaiting reading for <span hx-disable>{{range $i, $t := .Topics}}{{if $i}}, {{end}}{{$t}}{{end}}</span></p>
+      {{- else if .Checked}}
+      <p><small>Waiting unread: touches no Topic</small></p>
+      {{- else}}
+      <p><small>Not yet checked against the Topics</small></p>
+      {{- end}}
       <p><small>{{.Attribution}}</small></p>
     </li>
 {{- end}}
 
 {{define "content"}}
 <h1>Items</h1>
+<p><a href="/topics">Topics</a></p>
 
 <section aria-labelledby="sources">
   <h2 id="sources">Sources</h2>

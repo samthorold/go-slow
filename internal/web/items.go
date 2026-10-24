@@ -28,6 +28,12 @@ type itemRow struct {
 	Source      string
 	When        string
 	Attribution string
+	// Scheduled is set for an upcoming scheduled event, shown with when it
+	// is due rather than how it stands against the Topics.
+	Scheduled bool
+	Checked   bool
+	// Topics are those the Item awaits reading for.
+	Topics []string
 }
 
 const shownTime = "Mon 2 Jan 2006, 15:04"
@@ -59,10 +65,14 @@ func (a *app) items(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 	for _, it := range upcoming {
-		p.Upcoming = append(p.Upcoming, row(it, it.Due, now.Location()))
+		r := row(it, it.Due, now.Location())
+		r.Scheduled = true
+		p.Upcoming = append(p.Upcoming, r)
 	}
 	for _, it := range items {
-		p.Items = append(p.Items, row(it, it.Published, now.Location()))
+		r := row(it, it.Published, now.Location())
+		r.Checked, r.Topics = it.Checked, it.Topics
+		p.Items = append(p.Items, r)
 	}
 	a.render(w, r, itemsTmpl, p)
 }

@@ -1,12 +1,55 @@
 # System design
 
-The design of go-slow: how it models the editorial work of a slow-news briefing, and why it has this shape. Terms are defined in [`CONTEXT.md`](../../CONTEXT.md); where a term here is not yet there, it is provisional.
+The design of go-slow: how it models the editorial work of a slow-news briefing, and why it has this shape. Terms are defined in [`CONTEXT.md`](../../CONTEXT.md). Hypotheses are stated here without status; status is in the register, derived from readings, and until the first reading every hypothesis is Due.
+
+## End state
+
+**The Owner keeps reading the Briefing and the Sunday read.** Continued use is the top because the mechanism of go-slow's value is hard to pin down: whatever it is, a reader who keeps coming back is getting it, and a reader who stops is not. go-slow sits on top of the outlets it collects from, not in place of them, so the test is use, not displacement of other news. The parts below are the faster, finer readings that say why use holds or falls.
+
+*Reading rule.* Over a rolling 8-week window, count every day a **Briefing** is opened and every **Sunday read** opened.
+- **Refuted**, in any window: fewer than 2 days in 7 on average, or 3 or fewer of the 8 **Sunday reads**. Either output being abandoned refutes it, since both are the end state.
+- **Supported**, only in a quiet window (commits to go-slow on no more than 1 day in 7 on average): at least 4 days in 7, and at least 6 of the 8 **Sunday reads**.
+- **Undecided**: anything else.
+
+The **Owner** is also the builder, and opens the outputs to check work as well as to read them. That error inflates use, so a busy window can refute but never support: if even the builder doesn't open the **Briefing**, that is strong evidence; if the builder does, it is weak. Separating reading from checking by excluding days with commits fails while development is daily, because it excludes nearly every day. An undecided window is re-read on the next fresh window, judged alone. Review every 8 weeks once the **Briefing** runs daily.
+
+### Necessary conditions
+
+Three cheap, coarse conditions for any use at all. Each runs on every change and on the running system; any failure refutes, and passing confirms nothing. Without them a broken **Collection** or a missing **Briefing** would surface weeks later, as a dip in use.
+
+- **The outputs appear.** A **Briefing** every day and a **Sunday read** every Sunday, by a time the **Owner** sets. Refuted by any missed day.
+- **Everything traces.** Every **Development** in a **Briefing** traces to at least one **Item** in the **Record**, and every **Fact** to an **Item** or a **Reference source**. Refuted by any untraced one. Statements with nothing behind them are the way AI news summaries fail in public (see [prior art](../research/5-prior-art.md)), and this is the mechanical guard against it.
+- **No Source goes quiet.** Every **Source** yields new **Items** within its usual gap. Refuted by any **Source** silent past it without notice.
+
+### Read from Feedback
+
+The four parts below are all read from one instrument, the **Feedback** in the **Record**, by its kind. The **Owner** gives **Feedback** in the course of reading and building anyway, so these readings cost nothing extra and carry the signal while the top can't be supported. They need no ground truth of what mattered: an outside record (a year-in-review page, an outlet's weekly roundup) is sparse, one outlet's judgement, or not licensed to keep, and the **Owner**'s **Topics** and **Depths** are the only standard of what matters here anyway. Each count is broken down by level (**Story**, **Development**, **Fact**, **Connection**), so a part that moves shows where.
+
+*Shared reading rule for the three parts that should fall.* Count **Feedback** of the part's kind per **Briefing**, from the **Record** and never by hand, over the last 4 weeks against the 4 before. **Refuted** if the rate rose; **supported** if it fell by at least a quarter; **undecided** otherwise. A fall also results from the **Owner** giving less **Feedback** at all, so these are read only while the top is not refuted. Due every 4 weeks and on any change to the **Editor**.
+
+### Coverage: the Editor misses less
+
+*Missed* **Feedback** falls: the **Stories**, **Developments** and **Connections** the **Owner** has to add become fewer.
+
+### Brevity: the Editor includes less that isn't wanted
+
+*Unwanted* **Feedback** falls: the **Owner** cuts less. Brevity is what the **Owner** stops cutting, not a reading-time budget, because a budget would cut what matters on a heavy day and pad a light one.
+
+### Accuracy: the Editor gets less wrong
+
+*Wrong* **Feedback** falls: fewer **Facts** untrue as at their date, **Claims** taken for **Facts**, or mistaken **Connections**. Because the **Record** feeds the editorial work, accuracy is what keeps the other parts from degrading as the **Record** grows.
+
+### Foresight: the Editor shows the Owner what they hadn't seen
+
+*New to me* **Feedback** keeps coming, mostly on **Connections** and on the **Sunday read**. This is where go-slow differs from existing news tools, none of which follows a **Story** as an ongoing subject or connects subjects by cause (see [prior art](../research/5-prior-art.md)).
+
+*Reading rule.* Over each 4-week window, **refuted** if there is no *new to me* **Feedback**; **supported** if there is some in at least 3 of the 4 **Sunday reads**; **undecided** otherwise. Read only while the top is not refuted. Due every 4 weeks.
 
 ## Shape
 
 The editorial work is the one core domain. Collection and storage are adapters around it (the Web apps Guide's ports and adapters): they fetch and keep material, and make no editorial judgement. The value of the project is the editorial work, so it is the part kept free of I/O and tested directly.
 
-**An agent edits, and the Owner steers.** The **Editor** does the editorial work every day without waiting on the **Owner**, guided by the **Owner**'s **Topics** and **Depths**. The **Owner** reads its output and corrects it, and a correction is kept in the **Record**. A briefing the **Owner** had to edit would wait on the **Owner**'s time, the opposite of one they read. An **Editor** with no correction loop would let its mistakes compound, because the **Record** feeds the editorial work: later **Connections** are made over earlier **Facts**, so a wrong **Fact** left in place spreads through every **Connection** built on it. What form the **Editor** takes is open.
+**An agent edits, and the Owner steers.** The **Editor** does the editorial work every day without waiting on the **Owner**, guided by the **Owner**'s **Topics** and **Depths**. The **Owner** reads its output and gives **Feedback** on it, and the **Feedback** is kept in the **Record**. Steering is **Feedback** too: telling the **Editor** a **Story** was missed or unwanted is how the **Owner** influences which **Stories** they are shown. A briefing the **Owner** had to edit would wait on the **Owner**'s time, the opposite of one they read. An **Editor** with no **Feedback** loop would let its mistakes compound, because the **Record** feeds the editorial work: later **Connections** are made over earlier **Facts**, so a wrong **Fact** left in place spreads through every **Connection** built on it. What form the **Editor** takes is open.
 
 **The editorial output is the same for every reader.** The owner's **Topics** and their **Depths** shape the editorial work, and everyone who reads the briefing reads the same one. There is no model of an audience: no per-reader selection, no segments, no engagement signal. A briefing personalised per reader would multiply the editorial work by the number of readers and turn judgement into ranking. One output keeps the editorial work the thing that is done, once.
 
@@ -32,6 +75,6 @@ One way in keeps every request to a news source on one timetable, where politene
 
 **The owner chooses the sources; topics don't.** The known sources are a list the owner maintains by hand. Topics of interest act only in the editorial work, on what collection brings in. Following a new topic may lead the owner to add a source, but nothing derives sources from topics: doing so would need source discovery from a topic, which is topic search under another name, and would let the list grow beyond what can be visited politely.
 
-**Reference sources are consulted, not collected.** Wikidata and historic datasets (past polls, election results) hold background facts about the world rather than news. The editorial work looks things up in them when it needs that background, for instance the Sunday read placing a week's poll against months of earlier ones. 
+**Reference sources are consulted, not collected.** Wikidata and historic datasets (past polls, election results) hold background facts about the world rather than news. The editorial work looks things up in them when it needs that background, for instance the Sunday read placing a week's poll against months of earlier ones.
 
 **The record starts empty and is never backfilled.** Collection's first run sees only what the known sources carry that day, and the record deepens week by week. Early Sunday reads therefore have the long-run facts, from reference sources, but no earlier news: an investigation from last year is not in the record until something brings it back. Backfilling from the sources' archives would close that gap, but it is a heavy one-off visit to every outlet, the kind of fetch politeness rules out, and it would leave months of material with no editorial work done on it. The gap closes on its own as the record grows.

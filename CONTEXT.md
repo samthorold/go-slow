@@ -70,8 +70,12 @@ The agent that does the editorial work: drawing **Facts** and **Claims** from **
 _Avoid_: Assistant, pipeline
 
 **Owner**:
-The person who sets the **Topics** and their **Depths** and corrects the **Editor**. Anyone else who reads reads the same output.
+The person who sets the **Topics** and their **Depths** and gives the **Editor** **Feedback**. Anyone else who reads reads the same output.
 _Avoid_: User, reader (a reader only reads; the **Owner** also steers)
+
+**Feedback**:
+What the **Owner** tells the **Editor** about a **Story**, **Development**, **Fact** or **Connection**. It is one of four kinds: *missed* (it should be there), *unwanted* (it shouldn't), *wrong* (it is mistaken) or *new to me* (it showed the **Owner** something they hadn't seen).
+_Avoid_: Correction (*new to me* corrects nothing), rating
 
 ### Interest
 

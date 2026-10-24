@@ -25,6 +25,9 @@ type itemRow struct {
 	Source      string
 	Published   string
 	Attribution string
+	Checked     bool
+	// Topics are those the Item awaits reading for.
+	Topics []string
 }
 
 const shownTime = "Mon 2 Jan 2006, 15:04"
@@ -58,6 +61,8 @@ func (a *app) items(w http.ResponseWriter, r *http.Request) {
 			Source:      it.SourceName,
 			Published:   when(it.Published, now.Location()),
 			Attribution: it.Attribution,
+			Checked:     it.Checked,
+			Topics:      it.Topics,
 		})
 	}
 	a.render(w, r, itemsTmpl, p)

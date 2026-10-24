@@ -22,6 +22,7 @@ There is no Go Guide yet; the Go tooling below is this repo's own until there is
   - `internal/config`: the typed config.
   - `internal/web`: the web adapter and the app's constructor, `web.New`, with its templates and the vendored htmx.
   - `internal/collect`: Collection, the Sources list, Atom parsing and the *No Source goes quiet* check, with its ports (`Fetcher`, `Store`). Its timetable runs inside the app process, started by `main`.
+  - `internal/interest`: the Owner's Topics and Depths, and the lazy-reading check that ties Items to Topics with no model call. Collection runs the check after every run; taking up a Topic re-runs it for that Topic.
   - `internal/polite`: the HTTP adapter Collection fetches through, carrying the politeness rules (User-Agent, conditional requests, one request per host at a time, `Retry-After` backoff, daily robots.txt).
   - `internal/sqlite`: the storage adapter, with its migrations.
   - `internal/server`: serving with graceful shutdown.

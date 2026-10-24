@@ -20,6 +20,7 @@ import (
 
 	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/config"
+	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/polite"
 	"github.com/samthorold/go-slow/internal/server"
 	"github.com/samthorold/go-slow/internal/sqlite"
@@ -61,6 +62,8 @@ func run(log *slog.Logger) error {
 	if err := store.SyncSources(ctx, sources, time.Now()); err != nil {
 		return err
 	}
+	// The Topics and the lazy-reading check: plain code, no model adapter.
+	topics := interest.New(store)
 	collector := collect.New(collect.Deps{
 		Sources: sources,
 		Fetcher: polite.New(polite.Options{
@@ -70,6 +73,7 @@ func run(log *slog.Logger) error {
 			Sleep:     polite.Sleep,
 		}),
 		Store: store,
+		Check: topics,
 		Log:   log,
 	})
 	// The timetable runs inside the app process, stopping with it.
@@ -87,6 +91,7 @@ func run(log *slog.Logger) error {
 	app := web.New(web.Deps{
 		Briefings: store,
 		Items:     store,
+		Topics:    topics,
 		Now:       time.Now,
 		Log:       log,
 	})

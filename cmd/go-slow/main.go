@@ -1,4 +1,4 @@
-// Command go-slow serves the Briefing.
+// Command go-slow serves the Briefing and runs Collection on its timetable.
 //
 // main is the composition root: it reads the config from the environment,
 // builds the adapters and passes them to the app's constructor. Nothing else
@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
@@ -17,7 +18,9 @@ import (
 	"time"
 	_ "time/tzdata" // the TZ variable works in an image with no zoneinfo
 
+	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/config"
+	"github.com/samthorold/go-slow/internal/polite"
 	"github.com/samthorold/go-slow/internal/server"
 	"github.com/samthorold/go-slow/internal/sqlite"
 	"github.com/samthorold/go-slow/internal/web"
@@ -26,6 +29,9 @@ import (
 // shutdownGrace is how long in-flight requests get to finish after SIGTERM;
 // it is shorter than docker's 10s before it kills the process.
 const shutdownGrace = 5 * time.Second
+
+// fetchTimeout bounds one request to a Source.
+const fetchTimeout = 30 * time.Second
 
 func main() {
 	// Logs are an event stream: JSON lines, unbuffered, to stdout.
@@ -51,8 +57,36 @@ func run(log *slog.Logger) error {
 	}
 	defer func() { _ = store.Close() }()
 
+	sources := collect.Sources()
+	if err := store.SyncSources(ctx, sources, time.Now()); err != nil {
+		return err
+	}
+	collector := collect.New(collect.Deps{
+		Sources: sources,
+		Fetcher: polite.New(polite.Options{
+			HTTP:      &http.Client{Timeout: fetchTimeout},
+			UserAgent: polite.UserAgent(cfg.CollectionContact),
+			Now:       time.Now,
+			Sleep:     polite.Sleep,
+		}),
+		Store: store,
+		Log:   log,
+	})
+	// The timetable runs inside the app process, stopping with it.
+	ticker := time.NewTicker(cfg.CollectionInterval)
+	defer ticker.Stop()
+	collectCtx, stopCollecting := context.WithCancel(ctx)
+	collected := make(chan struct{})
+	go func() {
+		defer close(collected)
+		collector.RunOn(collectCtx, ticker.C, time.Now)
+	}()
+	// Before the store closes: stop Collection and wait for its run to end.
+	defer func() { stopCollecting(); <-collected }()
+
 	app := web.New(web.Deps{
 		Briefings: store,
+		Items:     store,
 		Now:       time.Now,
 		Log:       log,
 	})

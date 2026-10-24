@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // Config is everything that varies between deploys.
@@ -15,6 +16,13 @@ type Config struct {
 	Port int
 	// DatabasePath is the SQLite file holding the Record (DATABASE_PATH).
 	DatabasePath string
+	// CollectionContact is the contact address Collection names in its
+	// User-Agent, so a publisher can reach whoever runs it
+	// (COLLECTION_CONTACT).
+	CollectionContact string
+	// CollectionInterval is how often Collection runs (COLLECTION_INTERVAL,
+	// a Go duration such as 15m).
+	CollectionInterval time.Duration
 }
 
 // Load reads the config through lookup (os.LookupEnv in main). Every
@@ -31,6 +39,7 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 		return v
 	}
 	port, dbPath := get("PORT"), get("DATABASE_PATH")
+	contact, interval := get("COLLECTION_CONTACT"), get("COLLECTION_INTERVAL")
 	if len(missing) > 0 {
 		return Config{}, fmt.Errorf("missing environment variables: %s", strings.Join(missing, ", "))
 	}
@@ -39,5 +48,14 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 	if err != nil || n < 1 || n > 65535 {
 		return Config{}, errors.New("PORT must be a TCP port number, got " + strconv.Quote(port))
 	}
-	return Config{Port: n, DatabasePath: dbPath}, nil
+	every, err := time.ParseDuration(interval)
+	if err != nil || every <= 0 {
+		return Config{}, errors.New("COLLECTION_INTERVAL must be a positive duration such as 15m, got " + strconv.Quote(interval))
+	}
+	return Config{
+		Port:               n,
+		DatabasePath:       dbPath,
+		CollectionContact:  contact,
+		CollectionInterval: every,
+	}, nil
 }

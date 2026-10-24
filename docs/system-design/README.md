@@ -19,7 +19,7 @@ Three cheap, coarse conditions for any use at all. Each runs on every change and
 
 - **The outputs appear.** A **Briefing** every day and a **Sunday read** every Sunday, by a time the **Owner** sets. Refuted by any missed day.
 - **Everything traces.** Every **Development** in a **Briefing** traces to at least one **Item** in the **Record**, and every **Fact** to an **Item** or a **Reference source**. Refuted by any untraced one. Statements with nothing behind them are the way AI news summaries fail in public (see [prior art](../research/5-prior-art.md)), and this is the mechanical guard against it.
-- **No Source goes quiet.** Every **Source** yields new **Items** within its usual gap. Refuted by any **Source** silent past it without notice.
+- **No Source goes quiet.** Every **Source** yields new **Items** within its usual gap. Refuted by any **Source** silent past it without notice. The usual gap is declared with the **Source** when it is added, and silence runs from its newest **Item**'s publication, or from when collecting it began if it has yielded none, so a **Source** that never yields is caught too. Counting from publication rather than from when go-slow last collected means a **Collection** that has stopped running shows every **Source** quiet, which is the notice wanted. The Items page shows the flag.
 
 ### Read from Feedback
 

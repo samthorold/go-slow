@@ -81,6 +81,8 @@ type Item struct {
 
 // ListedItem is an Item as the Items page lists it.
 type ListedItem struct {
+	SourceID    string
+	EntryID     string
 	SourceName  string
 	Title       string
 	Link        string
@@ -94,6 +96,11 @@ type ListedItem struct {
 	// awaits reading for each. None, once Checked, is an Item that touches
 	// no Topic.
 	Topics []string
+	// Read is whether the Editor has read the Item, drawing Facts and
+	// Claims from it.
+	Read   bool
+	Facts  int
+	Claims int
 }
 
 // Checker is the lazy-reading check, run over the Items Collection has just
@@ -139,7 +146,16 @@ type Deps struct {
 	Store   Store
 	// Check runs after every run, over the Items not yet checked.
 	Check Checker
-	Log   *slog.Logger
+	// Read, if set, runs after the check: the Editor reads the Items
+	// awaiting reading (system design: The acts run as Items arrive).
+	Read Reader
+	Log  *slog.Logger
+}
+
+// Reader is the Editor's reading, run over the Items awaiting it. A reading
+// that fails leaves its Item awaiting reading, for the next run.
+type Reader interface {
+	ReadWaiting(ctx context.Context, now time.Time) error
 }
 
 // Collector runs Collection over its Sources.
@@ -188,6 +204,11 @@ func (c *Collector) Run(ctx context.Context, now time.Time) {
 	// Items left unchecked by a failure here are checked after the next run.
 	if err := c.Check.CheckNew(ctx); err != nil {
 		c.Log.ErrorContext(ctx, "lazy-reading check failed", "error", err)
+	}
+	if c.Read != nil {
+		if err := c.Read.ReadWaiting(ctx, now); err != nil {
+			c.Log.ErrorContext(ctx, "reading failed", "error", err)
+		}
 	}
 }
 

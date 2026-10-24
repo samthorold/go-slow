@@ -88,8 +88,7 @@ type Store interface {
 	UncheckedItems(ctx context.Context) ([]Item, error)
 	// RecordChecks marks each Item checked, tied to its Topics.
 	RecordChecks(ctx context.Context, checks []Checked) error
-	// WaitingItems are the Items not yet read. Nothing reads Items yet, so
-	// that is every Item.
+	// WaitingItems are the Items not yet read, tied to a Topic or not.
 	WaitingItems(ctx context.Context) ([]Item, error)
 	// Tie adds ties to Topics, leaving the Items' other ties, and whether
 	// they have been checked, as they were.
@@ -147,6 +146,18 @@ func (s *Service) SetDepth(ctx context.Context, id int64, depth string) (Errors,
 	}
 	if !found {
 		return nil, ErrNoTopic
+	}
+	// Deepening a Topic re-runs the check for it, as taking it up does. The
+	// check ignores Depth, so re-running it on any change is the same as on
+	// deepening alone, and needs no record of the Depth before.
+	topics, err := s.store.Topics(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, t := range topics {
+		if t.ID == id {
+			return nil, s.recheck(ctx, t)
+		}
 	}
 	return nil, nil
 }

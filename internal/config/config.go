@@ -23,7 +23,19 @@ type Config struct {
 	// CollectionInterval is how often Collection runs (COLLECTION_INTERVAL,
 	// a Go duration such as 15m).
 	CollectionInterval time.Duration
+	// ReadingModel is the Claude model the Editor reads Items with
+	// (READING_MODEL, such as claude-haiku-5-5).
+	ReadingModel string
+	// AnthropicAPIKey is the key for Anthropic's API (ANTHROPIC_API_KEY).
+	AnthropicAPIKey Secret
 }
+
+// Secret is a credential: formatting it shows nothing of it, so a logged or
+// printed Config never leaks it.
+type Secret string
+
+func (Secret) String() string   { return "[secret]" }
+func (Secret) GoString() string { return `"[secret]"` }
 
 // Load reads the config through lookup (os.LookupEnv in main). Every
 // variable is required: the safe local values live in .env.example, not in
@@ -40,6 +52,7 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 	}
 	port, dbPath := get("PORT"), get("DATABASE_PATH")
 	contact, interval := get("COLLECTION_CONTACT"), get("COLLECTION_INTERVAL")
+	model, key := get("READING_MODEL"), get("ANTHROPIC_API_KEY")
 	if len(missing) > 0 {
 		return Config{}, fmt.Errorf("missing environment variables: %s", strings.Join(missing, ", "))
 	}
@@ -52,10 +65,17 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 	if err != nil || every <= 0 {
 		return Config{}, errors.New("COLLECTION_INTERVAL must be a positive duration such as 15m, got " + strconv.Quote(interval))
 	}
+	// Only the Claude adapter exists yet (open-weight models come through
+	// OpenRouter later), so any other model would fail on every reading.
+	if !strings.HasPrefix(model, "claude-") {
+		return Config{}, errors.New("READING_MODEL must be a Claude model such as claude-haiku-5-5, got " + strconv.Quote(model))
+	}
 	return Config{
 		Port:               n,
 		DatabasePath:       dbPath,
 		CollectionContact:  contact,
 		CollectionInterval: every,
+		ReadingModel:       model,
+		AnthropicAPIKey:    Secret(key),
 	}, nil
 }

@@ -233,6 +233,26 @@ func TestACollectionRunTiesEachNewItemToTheTopicsTheCheckMatchesOrToNone(t *test
 	}
 }
 
+// readAll stands in for the Editor's reading: it records each run.
+type readAll struct{ runs []time.Time }
+
+func (r *readAll) ReadWaiting(_ context.Context, now time.Time) error {
+	r.runs = append(r.runs, now)
+	return nil
+}
+
+func TestACollectionRunReadsTheItemsAwaitingReadingAfterTheCheck(t *testing.T) {
+	f := newFixture(t, feedV1, "")
+	reader := &readAll{}
+	f.collector.Read = reader
+
+	f.collector.Run(t.Context(), now)
+
+	if len(reader.runs) != 1 || !reader.runs[0].Equal(now) {
+		t.Errorf("reading ran at %v, want once at %v", reader.runs, now)
+	}
+}
+
 func TestRunningCollectionAgainStoresNoDuplicates(t *testing.T) {
 	// No ETag: the server answers in full every time.
 	f := newFixture(t, feedV1, "")

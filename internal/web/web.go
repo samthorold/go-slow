@@ -37,6 +37,7 @@ type Items interface {
 type Deps struct {
 	Briefings Briefings
 	Items     Items
+	Readings  Readings
 	Topics    Topics
 	// Now is the clock. The day it returns, in its location, is "today".
 	Now func() time.Time
@@ -56,6 +57,9 @@ var briefingTmpl = page("briefing.html")
 // itemsTmpl is the Items page.
 var itemsTmpl = page("items.html")
 
+// itemTmpl is an Item's own page.
+var itemTmpl = page("item.html")
+
 // topicsTmpl is the Topics page.
 var topicsTmpl = page("topics.html")
 
@@ -71,6 +75,7 @@ func New(d Deps) http.Handler {
 	mux.Handle("GET /static/", http.FileServerFS(staticFS))
 	mux.HandleFunc("GET /{$}", a.todaysBriefing)
 	mux.HandleFunc("GET /items", a.items)
+	mux.HandleFunc("GET /items/{source}/{entry}", a.item)
 	mux.HandleFunc("GET /topics", a.topics)
 	mux.HandleFunc("POST /topics", a.addTopic)
 	mux.HandleFunc("PUT /topics/{id}", a.setDepth)

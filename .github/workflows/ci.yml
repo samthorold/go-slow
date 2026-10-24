@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  pull_request:
+  # Re-run on main only when pins change, to warm the caches PRs restore from.
+  push:
+    branches: [main]
+    paths:
+      - go.mod
+      - go.sum
+      - tools/go.mod
+      - tools/go.sum
+      - .pre-commit-config.yaml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      # The Go version comes from go.mod's go directive.
+      - uses: actions/setup-go@v7.0.0
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: |
+            go.sum
+            tools/go.sum
+
+      # uv provides pre-commit (and the Python its hooks need).
+      - uses: astral-sh/setup-uv@v10.3.0
+
+      - uses: actions/cache@v6.1.0
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - name: pre-commit
+        run: uvx --from pre-commit==4.7.0 pre-commit run --all-files --show-diff-on-failure

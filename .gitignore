@@ -1,0 +1,15 @@
+# Local config: the real environment, never committed (.env.example is).
+.env
+
+# The local SQLite database.
+/data/
+*.db
+*.db-shm
+*.db-wal
+
+# Claude Code: per-clone settings and agents' worktrees.
+.claude/settings.local.json
+.claude/worktrees/
+
+# Build output.
+/go-slow

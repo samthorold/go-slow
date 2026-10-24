@@ -1,0 +1,15 @@
+# Runs go-slow locally from the same image, configured the same way, as it
+# runs anywhere else. Needs a .env: `cp .env.example .env`.
+services:
+  app:
+    build: .
+    env_file: .env
+    ports:
+      - "${PORT:-8080}:${PORT:-8080}"
+    volumes:
+      - data:/app/data
+    # docker stop sends SIGTERM, then kills after this; the app drains within 5s.
+    stop_grace_period: 10s
+
+volumes:
+  data:

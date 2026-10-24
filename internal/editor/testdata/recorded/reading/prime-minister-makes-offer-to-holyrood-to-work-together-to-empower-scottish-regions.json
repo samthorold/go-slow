@@ -1,0 +1,154 @@
+{
+  "act": "reading",
+  "model": "claude-haiku-5-5",
+  "recorded_at": "2026-10-24T23:48:02.932783Z",
+  "usage": {
+    "input_tokens": 1928,
+    "output_tokens": 3894
+  },
+  "output": {
+    "claims": [
+      {
+        "entities": [
+          "Scottish Government"
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "the Scottish Government is one of the most centralised devolved administrations in Europe",
+        "statement": "The Scottish Government is one of the most centralised devolved administrations in Europe."
+      },
+      {
+        "entities": [
+          "Scottish Parliament"
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "with Holyrood not giving people who know their areas best enough of a say",
+        "statement": "Holyrood is not giving people who know their areas best enough of a say."
+      },
+      {
+        "entities": [
+          "No10 North"
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "Through No10 North, we are rewiring the state",
+        "statement": "Through No10 North, the UK Government is rewiring the state."
+      },
+      {
+        "entities": [],
+        "made_by": "Andy Burnham",
+        "quote": "With us working together, there is no limit to what we can achieve for the Scottish people.",
+        "statement": "Working together, there is no limit to what the UK and Scottish governments can achieve for the Scottish people."
+      },
+      {
+        "entities": [
+          "Scottish Parliament"
+        ],
+        "made_by": "Douglas Alexander",
+        "quote": "power was never supposed to stop at the doors of the Scottish Parliament",
+        "statement": "Power was never supposed to stop at the doors of the Scottish Parliament."
+      },
+      {
+        "entities": [
+          "North Lanarkshire",
+          "Fife",
+          "Highlands"
+        ],
+        "made_by": "Douglas Alexander",
+        "quote": "People in North Lanarkshire, in Fife or in the Highlands know what their communities need better than any minister",
+        "statement": "People in North Lanarkshire, Fife and the Highlands know what their communities need better than any minister."
+      },
+      {
+        "entities": [
+          "Scotland Office"
+        ],
+        "made_by": "Douglas Alexander",
+        "quote": "the Scotland Office is ready to roll up its sleeves alongside them to make it happen",
+        "statement": "The Scotland Office is ready to work alongside the Scottish Government to make the offer happen."
+      }
+    ],
+    "entities": [
+      {
+        "kind": "person",
+        "name": "Andy Burnham"
+      },
+      {
+        "kind": "person",
+        "name": "Douglas Alexander"
+      },
+      {
+        "kind": "organisation",
+        "name": "Scottish Government"
+      },
+      {
+        "kind": "organisation",
+        "name": "Scottish Parliament"
+      },
+      {
+        "kind": "organisation",
+        "name": "No10 North"
+      },
+      {
+        "kind": "organisation",
+        "name": "Scotland Office"
+      },
+      {
+        "kind": "organisation",
+        "name": "UK Government"
+      },
+      {
+        "kind": "place",
+        "name": "Lanarkshire"
+      },
+      {
+        "kind": "place",
+        "name": "North Lanarkshire"
+      },
+      {
+        "kind": "place",
+        "name": "Fife"
+      },
+      {
+        "kind": "place",
+        "name": "Highlands"
+      }
+    ],
+    "facts": [
+      {
+        "as_at": "2026-10-15",
+        "entities": [
+          "Andy Burnham",
+          "Lanarkshire"
+        ],
+        "quote": "after speaking with young people today in Lanarkshire",
+        "statement": "Andy Burnham spoke with young people in Lanarkshire on 2026-10-15."
+      },
+      {
+        "as_at": "2026-10-15",
+        "entities": [
+          "Douglas Alexander"
+        ],
+        "quote": "The Scottish Secretary, Douglas Alexander said:",
+        "statement": "Douglas Alexander, as Scottish Secretary, issued a statement on the offer to the Scottish Government."
+      },
+      {
+        "as_at": "2026-10-15",
+        "entities": [
+          "Andy Burnham"
+        ],
+        "quote": "During my first week in office, I told the First Minister that I wanted to work with him to spread opportunities to communities across Scotland’s regions and cities.",
+        "statement": "Andy Burnham told the First Minister in his first week in office that he wanted to work with him to spread opportunities across Scotland’s regions and cities."
+      },
+      {
+        "as_at": "2026-10-15",
+        "entities": [
+          "Andy Burnham",
+          "Scottish Government",
+          "UK Government",
+          "No10 North",
+          "Scotland Office"
+        ],
+        "quote": "he will call on the Scottish Government to work with the UK Government through No10 North and the Scotland Office to develop a new model of regional empowerment for Scotland",
+        "statement": "Andy Burnham will call on the Scottish Government to work with the UK Government through No10 North and the Scotland Office to develop a new model of regional empowerment for Scotland."
+      }
+    ]
+  }
+}

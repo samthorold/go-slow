@@ -1,0 +1,17 @@
+{{define "layout"}}<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{template "title" .}} · go-slow</title>
+  {{/* htmx swaps 422, so a command that fails validation can re-render its form. */}}
+  <meta name="htmx-config" content='{"responseHandling":[{"code":"204","swap":false},{"code":"[23]..","swap":true},{"code":"422","swap":true},{"code":"[45]..","swap":false,"error":true},{"code":"...","swap":true}]}'>
+  <script src="/static/htmx-2.0.10.min.js"></script>
+</head>
+<body hx-boost="true">
+  <main>
+{{template "content" .}}
+  </main>
+</body>
+</html>
+{{end}}

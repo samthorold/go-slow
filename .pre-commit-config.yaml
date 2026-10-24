@@ -1,0 +1,63 @@
+# The repo's checks. CI runs exactly these: pre-commit run --all-files.
+minimum_pre_commit_version: "4.5.0"
+
+# Vendored files stay byte-identical to upstream, so their hash still matches.
+exclude: ^internal/web/static/
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-added-large-files
+
+  # Also shellchecks workflow run: steps when shellcheck is on PATH (it is on
+  # GitHub's runners).
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.12
+    hooks:
+      - id: actionlint
+
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1
+    hooks:
+      - id: shellcheck
+
+  # Go hooks run the toolchain go.mod pins (GOTOOLCHAIN=auto fetches it) and
+  # the golangci-lint tools/go.mod pins.
+  - repo: local
+    hooks:
+      - id: go-mod-tidy
+        name: go mod tidy
+        entry: go mod tidy -diff
+        language: system
+        files: (^|/)go\.(mod|sum)$|\.go$
+        pass_filenames: false
+      - id: go-mod-tidy-tools
+        name: go mod tidy (tools)
+        entry: go -C tools mod tidy -diff
+        language: system
+        files: ^tools/go\.(mod|sum)$
+        pass_filenames: false
+      - id: golangci-lint-fmt
+        name: golangci-lint fmt
+        entry: go tool -modfile=tools/go.mod golangci-lint fmt
+        language: system
+        types: [go]
+        pass_filenames: false
+      - id: golangci-lint
+        name: golangci-lint run
+        entry: go tool -modfile=tools/go.mod golangci-lint run ./...
+        language: system
+        files: \.go$|^\.golangci\.yml$|(^|/)go\.(mod|sum)$
+        pass_filenames: false
+      - id: go-test
+        name: go test
+        entry: go test -race ./...
+        language: system
+        files: \.go$|\.html$|\.sql$|(^|/)go\.(mod|sum)$
+        pass_filenames: false

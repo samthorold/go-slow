@@ -1,0 +1,78 @@
+{{define "title"}}Topics{{end}}
+
+{{define "content"}}
+<h1>Topics</h1>
+<p><a href="/items">Items</a></p>
+
+<section aria-labelledby="followed">
+  <h2 id="followed">Followed</h2>
+  {{- if not .Topics}}
+  <p>No Topics yet.</p>
+  {{- end}}
+  <ul>
+  {{- $depths := .Depths}}
+  {{- range .Topics}}
+    {{/* What the Owner typed is inert: hx-disable on the elements holding it. */}}
+    <li id="topic-{{.ID}}">
+      <strong hx-disable>{{.Name}}</strong>
+      {{- if .Terms}}
+      <p><small>Terms: <span hx-disable>{{range $i, $t := .Terms}}{{if $i}}, {{end}}{{$t}}{{end}}</span></small></p>
+      {{- end}}
+      {{- if .Sources}}
+      <p><small>Sources: {{range $i, $s := .Sources}}{{if $i}}, {{end}}{{$s}}{{end}}</small></p>
+      {{- end}}
+      <form hx-put="/topics/{{.ID}}" hx-target="body" hx-swap="innerHTML">
+        <label>Depth
+          <select name="depth">
+          {{- $depth := .Depth}}
+          {{- range $depths}}
+            <option value="{{.}}"{{if eq . $depth}} selected{{end}}>{{.}}</option>
+          {{- end}}
+          </select>
+        </label>
+        <button>Change Depth</button>
+        {{- with .DepthError}} <span role="alert">{{.}}</span>{{end}}
+      </form>
+      <button hx-delete="/topics/{{.ID}}" hx-target="#topic-{{.ID}}" hx-swap="outerHTML"
+        hx-confirm="Stop following this Topic?">Remove</button>
+    </li>
+  {{- end}}
+  </ul>
+</section>
+
+<section aria-labelledby="take-up">
+  <h2 id="take-up">Take up a Topic</h2>
+  {{- with .Form}}
+  <form method="post" action="/topics" hx-target="body" hx-swap="innerHTML">
+    {{- with index .Errors ""}}<p role="alert">{{.}}</p>{{end}}
+    <p>
+      <label>Name <input name="name" value="{{.Name}}" required></label>
+      {{- with index .Errors "name"}} <span role="alert">{{.}}</span>{{end}}
+    </p>
+    <p>
+      <label>Depth
+        <select name="depth">
+        {{- $depth := .Depth}}
+        {{- range $.Depths}}
+          <option value="{{.}}"{{if eq . $depth}} selected{{end}}>{{.}}</option>
+        {{- end}}
+        </select>
+      </label>
+      {{- with index .Errors "depth"}} <span role="alert">{{.}}</span>{{end}}
+    </p>
+    <p>
+      <label>Terms, one per line: keywords, or the names of who or what it is about<br>
+        <textarea name="terms" rows="4">{{.Terms}}</textarea></label>
+      {{- with index .Errors "terms"}} <span role="alert">{{.}}</span>{{end}}
+    </p>
+    <fieldset>
+      <legend>Every Item from these Sources</legend>
+      {{- range $.Sources}}
+      <label><input type="checkbox" name="source" value="{{.ID}}"{{if .Checked}} checked{{end}}> {{.Name}}</label>
+      {{- end}}
+    </fieldset>
+    <button>Take up</button>
+  </form>
+  {{- end}}
+</section>
+{{end}}

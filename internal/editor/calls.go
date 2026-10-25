@@ -57,7 +57,58 @@ const (
 	// the model refused or was cut off), or one whose result could not be
 	// written.
 	Failed Outcome = "failed"
+	// Continued is a turn of a conversation that submitted nothing (it called
+	// tools, or ended its turn and was asked to submit), after which the
+	// conversation went on.
+	Continued Outcome = "continued"
 )
+
+// KeptConversation is a conversation an act had with a model, kept turn by
+// turn: one attempt at its piece of work, as the Sunday read's run is. Like a
+// kept call, it is a side record, never rewritten, that no act is shown.
+type KeptConversation struct {
+	// ID is the conversation's in the Record, once it is kept there.
+	ID int64
+	// Act is the act that had it, and Key the piece of work it was for (the
+	// Sunday, for the Sunday read).
+	Act, Key string
+	// At is when it ended.
+	At time.Time
+	// Model is the model asked for.
+	Model string
+	// Instructions and Tools are the act's, the same on every turn.
+	Instructions string
+	Tools        []Tool
+	// Turns are its turns in order.
+	Turns []KeptTurn
+	// Outcome is what came of it, applied or failed, and Why the reason it
+	// failed.
+	Outcome Outcome
+	Why     string
+}
+
+// KeptTurn is one turn of a kept conversation: one model call.
+type KeptTurn struct {
+	// N is its place in the conversation, from 1.
+	N int
+	// At is when its outcome was known.
+	At time.Time
+	// Sent are the messages its request added to the conversation: the act's
+	// opening message, or the tool results of the turn before, and anything
+	// the act said with them. The rest of the request is the conversation's
+	// instructions and tools and the turns before, each turn's Sent then its
+	// Response.
+	Sent []Message
+	// RequestHash is ConversationRequestHash of the whole request as sent,
+	// and the model asked for.
+	RequestHash string
+	// Response is the model's turn exactly as returned; nil when none came.
+	Response *Turn
+	// Outcome is what came of it, and Why what the act's checks told the
+	// agent of a refused submission, or why the turn failed.
+	Outcome Outcome
+	Why     string
+}
 
 // RequestHash is the hash of a request as a model is asked it: its
 // instructions, schema and input, and the model asked for. The act's name is
@@ -72,16 +123,89 @@ const (
 // schema encoded with its object keys sorted (as encoding/json does for a
 // map), so the same request always hashes the same.
 func RequestHash(r Request, model string) string {
-	b, err := json.Marshal(struct {
+	return hashOf(struct {
 		Instructions string         `json:"instructions"`
 		Input        string         `json:"input"`
 		Model        string         `json:"model"`
 		Schema       map[string]any `json:"schema"`
 	}{r.Instructions, r.Input, model, r.Schema})
+}
+
+// ConversationRequestHash is RequestHash for a turn of a conversation: the
+// hash of the turn's request as the model is asked it, its instructions, its
+// tools, the conversation so far and the model asked for. As with
+// RequestHash, the act's name is not in it, nor anything the provider adds.
+//
+// It is the hex SHA-256 of the request's canonical JSON encoding, an object
+// with the keys instructions, messages, model and tools, in that order:
+//   - tools, in the order given, each {name, description, schema}, the schema
+//     with its object keys sorted;
+//   - messages, oldest first, each an object with one key: user (the act's
+//     text), results (each {call_id, content, is_error}), or assistant (the
+//     model's turn as the provider gave it, Raw, compacted; for a turn with no
+//     provider form, {text, calls}, each call {id, name, input}), since what
+//     a provider is sent of the model's own turn is that turn as it came.
+func ConversationRequestHash(r ConversationRequest, model string) string {
+	type tool struct {
+		Name        string         `json:"name"`
+		Description string         `json:"description"`
+		Schema      map[string]any `json:"schema"`
+	}
+	type result struct {
+		CallID  string `json:"call_id"`
+		Content string `json:"content"`
+		IsError bool   `json:"is_error"`
+	}
+	type call struct {
+		ID    string          `json:"id"`
+		Name  string          `json:"name"`
+		Input json.RawMessage `json:"input"`
+	}
+	type turn struct {
+		Text  string `json:"text"`
+		Calls []call `json:"calls"`
+	}
+	tools := make([]tool, 0, len(r.Tools))
+	for _, t := range r.Tools {
+		tools = append(tools, tool(t))
+	}
+	messages := make([]map[string]any, 0, len(r.Messages))
+	for _, m := range r.Messages {
+		switch {
+		case m.Assistant != nil && m.Assistant.Raw != nil:
+			messages = append(messages, map[string]any{"assistant": m.Assistant.Raw})
+		case m.Assistant != nil:
+			t := turn{Text: m.Assistant.Text, Calls: []call{}}
+			for _, c := range m.Assistant.Calls {
+				t.Calls = append(t.Calls, call(c))
+			}
+			messages = append(messages, map[string]any{"assistant": t})
+		case m.Results != nil:
+			rs := make([]result, 0, len(m.Results))
+			for _, res := range m.Results {
+				rs = append(rs, result(res))
+			}
+			messages = append(messages, map[string]any{"results": rs})
+		default:
+			messages = append(messages, map[string]any{"user": m.User})
+		}
+	}
+	return hashOf(struct {
+		Instructions string           `json:"instructions"`
+		Messages     []map[string]any `json:"messages"`
+		Model        string           `json:"model"`
+		Tools        []tool           `json:"tools"`
+	}{r.Instructions, messages, model, tools})
+}
+
+// hashOf is the hex SHA-256 of v's JSON encoding, the one way a request is
+// hashed.
+func hashOf(v any) string {
+	b, err := json.Marshal(v)
 	if err != nil {
-		// A schema is built of JSON values; one that can't be encoded is a
+		// A request is built of JSON values; one that can't be encoded is a
 		// programming error, never input.
-		panic("editor: request schema is not JSON: " + err.Error())
+		panic("editor: request is not JSON: " + err.Error())
 	}
 	sum := sha256.Sum256(b)
 	return hex.EncodeToString(sum[:])

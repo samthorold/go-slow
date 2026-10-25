@@ -6,12 +6,12 @@
      elements holding them, so the boosted links still work. */}}
 <p><a href="{{.BriefingPath}}">The day's Briefing</a> · <a href="/feedback">Feedback</a></p>
 <h1>Sunday read</h1>
-<p>{{.Date}}</p>
+<p>{{.Date}}{{with .Conversation}} · <a href="{{.}}">How it was written</a>{{end}}</p>
 {{- template "gives" .Gives}}
 {{- if not .Exists}}
 <p>There is no Sunday read yet.</p>
 {{- with .Failure}}
-<p>Writing the Sunday read failed at {{.At}}; it is tried again later.</p>
+<p>Writing the Sunday read failed at {{.At}}; it is tried again later.{{with .Conversation}} <a href="{{.}}">How the attempt went</a>.{{end}}</p>
 <pre hx-disable>{{.Reason}}</pre>
 {{- end}}
 {{- else if not .Statements}}
@@ -32,7 +32,7 @@
 {{- range .Assessments}}
 <section id="{{.Anchor}}">
   <p>{{if .Withdrawn}}<del hx-disable>{{.Statement}}</del> <strong>Withdrawn</strong>: you said it was wrong.{{else}}<strong hx-disable>{{.Statement}}</strong>{{end}}
-    <small>as at {{.AsAt}}{{with .Supersedes}}, superseding <a href="{{.}}">an earlier Assessment</a>{{end}}</small></p>
+    <small>as at {{.AsAt}}{{with .Supersedes}}, superseding <a href="{{.}}">an earlier Assessment</a>{{end}}{{with .Reached}} · <a href="{{.}}">How it was reached</a>{{end}}</small></p>
   {{- template "gives" .Gives}}
   <ul>
     {{- range .Facts}}

@@ -12,7 +12,9 @@ import (
 // instructions, its tools and the conversation so far go in, and the model's
 // next turn comes out. The act runs the loop, runs the tools and checks what
 // comes back; an adapter only reports what the model said. It is
-// provider-neutral: nothing of a provider's types crosses it.
+// provider-neutral: nothing of a provider's types crosses it. A turn with no
+// usable answer (ErrRefused, ErrTruncated) still returns what came back, to
+// be kept.
 type Conversation interface {
 	Turn(ctx context.Context, r ConversationRequest) (Turn, error)
 }
@@ -55,7 +57,9 @@ type Turn struct {
 	// (a model's reasoning in a turn is valid only as it was given).
 	Raw   json.RawMessage
 	Model string
-	Usage Usage
+	// StopReason is why the model stopped, as the provider says it.
+	StopReason string
+	Usage      Usage
 }
 
 // ToolCall is the model calling a tool. ID matches it to its result.

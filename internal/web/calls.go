@@ -18,6 +18,9 @@ type Calls interface {
 	// CallsOn are the calls an act made on a piece of work, in the order
 	// they were kept.
 	CallsOn(ctx context.Context, act, key string) ([]editor.Call, error)
+	// Conversation is one kept conversation with its turns, reporting
+	// whether the Record holds it.
+	Conversation(ctx context.Context, id int64) (editor.KeptConversation, bool, error)
 }
 
 // callTmpl is a kept call's page.

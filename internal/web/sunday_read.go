@@ -66,6 +66,9 @@ type sundayReadPage struct {
 	// Feedback is the Feedback on the read and its Assessments, each to
 	// undo here.
 	Feedback []keptRow
+	// Conversation is the page of the conversation that wrote the read; empty
+	// for one written with no model call.
+	Conversation string
 }
 
 type readStatementRow struct {
@@ -95,6 +98,8 @@ type assessmentRow struct {
 	AsAt       string
 	Supersedes string
 	Facts      []readCitationRow
+	// Reached is the turn of the conversation that reached it.
+	Reached string
 }
 
 type startedStoryRow struct {
@@ -130,9 +135,12 @@ func (a *app) sundayRead(w http.ResponseWriter, r *http.Request) {
 		}
 		if len(fs) > 0 {
 			f := fs[len(fs)-1]
-			p.Failure = &failureRow{At: when(f.At, day.Location()), Reason: f.Reason}
+			p.Failure = &failureRow{At: when(f.At, day.Location()), Reason: f.Reason,
+				Conversation: conversationPath(f.ConversationID, 0)}
 		}
 	}
+	conversation, reached := readConversation(read)
+	p.Conversation = conversation
 	for _, st := range read.Statements {
 		row := readStatementRow{Anchor: statementAnchor(st.ID), Text: st.Text}
 		for _, c := range st.Cites {
@@ -142,7 +150,7 @@ func (a *app) sundayRead(w http.ResponseWriter, r *http.Request) {
 	}
 	for _, as := range read.Assessments {
 		row := assessmentRow{Anchor: assessmentAnchor(as.ID), Statement: as.Statement, AsAt: as.AsAt.Format("2 January 2006"),
-			Withdrawn: as.Withdrawn}
+			Withdrawn: as.Withdrawn, Reached: reached}
 		if !as.Withdrawn {
 			row.Gives = assessmentGives(feedbackPath, as.ID)
 		}

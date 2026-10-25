@@ -43,11 +43,15 @@ func (s *Store) SaveSundayRead(ctx context.Context, r editor.SundayRead) error {
 		return err
 	}
 	defer func() { _ = tx.Rollback() }()
+	conversation, err := keepConversation(ctx, tx, r.Conversation)
+	if err != nil {
+		return fmt.Errorf("save sunday read %s: %w", r.Day, err)
+	}
 	var readID int64
 	if err := tx.QueryRowContext(ctx, `
-		INSERT INTO sunday_reads (day, written_at, model, turns, input_tokens, output_tokens)
-		VALUES (?, ?, ?, ?, ?, ?) RETURNING id`,
-		r.Day, formatTime(r.WrittenAt), r.Model, r.Turns, r.Usage.InputTokens, r.Usage.OutputTokens).Scan(&readID); err != nil {
+		INSERT INTO sunday_reads (day, written_at, model, turns, input_tokens, output_tokens, conversation_id)
+		VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id`,
+		r.Day, formatTime(r.WrittenAt), r.Model, r.Turns, r.Usage.InputTokens, r.Usage.OutputTokens, conversation).Scan(&readID); err != nil {
 		return fmt.Errorf("save sunday read %s: %w", r.Day, err)
 	}
 	made := make([]int64, len(r.Assessments))
@@ -136,20 +140,31 @@ func (s *Store) SaveSundayRead(ctx context.Context, r editor.SundayRead) error {
 	return tx.Commit()
 }
 
-// SaveSundayReadFailure keeps a failure to write a Sunday's read.
+// SaveSundayReadFailure keeps a failure to write a Sunday's read, with the
+// conversation of the attempt that failed.
 func (s *Store) SaveSundayReadFailure(ctx context.Context, f editor.SundayReadFailure) error {
-	if _, err := s.db.ExecContext(ctx, `INSERT INTO sunday_read_failures (day, failed_at, reason) VALUES (?, ?, ?)`,
-		f.Day, formatTime(f.At), f.Reason); err != nil {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+	conversation, err := keepConversation(ctx, tx, f.Conversation)
+	if err != nil {
 		return fmt.Errorf("save sunday read failure: %w", err)
 	}
-	return nil
+	if _, err := tx.ExecContext(ctx, `
+		INSERT INTO sunday_read_failures (day, failed_at, reason, conversation_id) VALUES (?, ?, ?, ?)`,
+		f.Day, formatTime(f.At), f.Reason, conversation); err != nil {
+		return fmt.Errorf("save sunday read failure: %w", err)
+	}
+	return tx.Commit()
 }
 
 // SundayReadFailures are the failures to write the day's Sunday read, the
 // earliest first.
 func (s *Store) SundayReadFailures(ctx context.Context, day string) ([]editor.SundayReadFailure, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT failed_at, reason FROM sunday_read_failures WHERE day = ? ORDER BY failed_at, id`, day)
+		SELECT failed_at, reason, coalesce(conversation_id, 0) FROM sunday_read_failures WHERE day = ? ORDER BY failed_at, id`, day)
 	if err != nil {
 		return nil, fmt.Errorf("sunday read failures: %w", err)
 	}
@@ -158,7 +173,7 @@ func (s *Store) SundayReadFailures(ctx context.Context, day string) ([]editor.Su
 	for rows.Next() {
 		f := editor.SundayReadFailure{Day: day}
 		var at string
-		if err := rows.Scan(&at, &f.Reason); err != nil {
+		if err := rows.Scan(&at, &f.Reason, &f.ConversationID); err != nil {
 			return nil, fmt.Errorf("sunday read failures: %w", err)
 		}
 		f.At = parseTime(at)
@@ -176,8 +191,9 @@ func (s *Store) SundayRead(ctx context.Context, day string) (editor.SundayRead, 
 	r := editor.SundayRead{Day: day}
 	var at string
 	err := s.db.QueryRowContext(ctx, `
-		SELECT id, written_at, model, turns, input_tokens, output_tokens FROM sunday_reads WHERE day = ?`, day).
-		Scan(&r.ID, &at, &r.Model, &r.Turns, &r.Usage.InputTokens, &r.Usage.OutputTokens)
+		SELECT id, written_at, model, turns, input_tokens, output_tokens, coalesce(conversation_id, 0)
+		FROM sunday_reads WHERE day = ?`, day).
+		Scan(&r.ID, &at, &r.Model, &r.Turns, &r.Usage.InputTokens, &r.Usage.OutputTokens, &r.ConversationID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return r, false, nil
 	}

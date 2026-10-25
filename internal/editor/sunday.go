@@ -29,6 +29,11 @@ type SundayRead struct {
 	Usage   Usage
 	// Turns is how many turns the agent took to write it.
 	Turns int
+	// Conversation is the agent's conversation that wrote it, turn by turn,
+	// to be kept with it; nil for a read written with no model call. Once
+	// kept, ConversationID is its id in the Record (zero for none).
+	Conversation   *KeptConversation
+	ConversationID int64
 }
 
 // ReadStatement is one statement in the Sunday read, with what it cites.
@@ -104,6 +109,11 @@ type SundayReadFailure struct {
 	Day    string
 	At     time.Time
 	Reason string
+	// Conversation is the agent's conversation in the attempt that failed,
+	// to be kept with it; nil when it made no model call. Once kept,
+	// ConversationID is its id in the Record (zero for none).
+	Conversation   *KeptConversation
+	ConversationID int64
 }
 
 // SundayStore is the part of the Record the Sunday read is written from and
@@ -130,9 +140,11 @@ type SundayStore interface {
 	// the latest first, each with the Facts it cites; none Feedback
 	// withdrew, or that rests on a Fact it withdrew.
 	Assessments(ctx context.Context, limit int) ([]Assessment, error)
-	// SaveSundayRead keeps a Sunday read, all at once.
+	// SaveSundayRead keeps a Sunday read, all at once, with its
+	// conversation.
 	SaveSundayRead(ctx context.Context, r SundayRead) error
-	// SaveSundayReadFailure keeps a failure to write a Sunday's read.
+	// SaveSundayReadFailure keeps a failure to write a Sunday's read, with
+	// the conversation of the attempt that failed.
 	SaveSundayReadFailure(ctx context.Context, f SundayReadFailure) error
 }
 
@@ -157,13 +169,19 @@ func (e *Editor) SundayRead(ctx context.Context, now time.Time) error {
 	if err != nil {
 		return err
 	}
-	run := &sundayRun{model: e.SundayReadModel, store: e.SundayReads, wikidata: e.Wikidata, now: now, seen: map[string]Citation{}}
-	r, err := run.write(ctx, after, stories)
 	day := now.Format(time.DateOnly)
+	run := &sundayRun{
+		model: e.SundayReadModel, store: e.SundayReads, wikidata: e.Wikidata, now: now, seen: map[string]Citation{},
+		kept: KeptConversation{Act: sundayReadAct, Key: day, Model: modelOf(e.ModelFor, sundayReadAct)},
+	}
+	r, err := run.write(ctx, after, stories)
 	if err != nil {
 		e.Log.ErrorContext(ctx, "writing the Sunday read failed", "day", day, "error", err)
-		return e.SundayReads.SaveSundayReadFailure(ctx, SundayReadFailure{Day: day, At: now, Reason: err.Error()})
+		return e.SundayReads.SaveSundayReadFailure(ctx, SundayReadFailure{
+			Day: day, At: now, Reason: err.Error(), Conversation: run.conversation(Failed, err),
+		})
 	}
+	r.Conversation = run.conversation(Applied, nil)
 	if err := e.SundayReads.SaveSundayRead(ctx, r); err != nil {
 		return err
 	}
@@ -183,6 +201,47 @@ type sundayRun struct {
 	seen     map[string]Citation
 	// lookups is how many lookups the run has made, which numbers them.
 	lookups int
+	// kept is the run's conversation as it is kept, turn by turn.
+	kept KeptConversation
+}
+
+// sundayReadAct is the Sunday read's name as an act.
+const sundayReadAct = "sunday_read"
+
+// conversation is the run's conversation as kept, ending with outcome (and
+// why, for a failure); nil if the run made no model call.
+func (r *sundayRun) conversation(outcome Outcome, why error) *KeptConversation {
+	if len(r.kept.Turns) == 0 {
+		return nil
+	}
+	c := r.kept
+	c.At, c.Outcome = r.now, outcome
+	if why != nil {
+		c.Why = why.Error()
+	}
+	return &c
+}
+
+// sending is the next turn of the run's conversation as it is kept, for its
+// request req as sent, of which the messages from sentFrom on are new with
+// it.
+func (r *sundayRun) sending(req ConversationRequest, sentFrom int) KeptTurn {
+	r.kept.Instructions, r.kept.Tools = req.Instructions, req.Tools
+	return KeptTurn{
+		N:           len(r.kept.Turns) + 1,
+		Sent:        slices.Clone(req.Messages[sentFrom:]),
+		RequestHash: ConversationRequestHash(req, r.kept.Model),
+	}
+}
+
+// keep keeps a turn of the run's conversation, with t what came back, if
+// anything did, and what came of it.
+func (r *sundayRun) keep(kt KeptTurn, t Turn, outcome Outcome, why string) {
+	kt.At, kt.Outcome, kt.Why = r.now, outcome, why
+	if t.Raw != nil || t.Model != "" || len(t.Calls) > 0 || t.Text != "" {
+		kt.Response = &t
+	}
+	r.kept.Turns = append(r.kept.Turns, kt)
 }
 
 // sundayReadInstructions are the Sunday read's own instructions.
@@ -234,12 +293,14 @@ func (r *sundayRun) write(ctx context.Context, after time.Time, stories []ToBrie
 		return read, nil
 	}
 	req := ConversationRequest{
-		Act:          "sunday_read",
+		Act:          sundayReadAct,
 		Instructions: sundayReadInstructions,
 		Tools:        r.tools(),
 		Messages:     []Message{{User: r.weekInput(after, stories)}},
 	}
 	asked := false
+	// sentFrom is where the messages not yet sent start.
+	sentFrom := 0
 	for {
 		if read.Turns >= SundayReadMaxTurns {
 			return SundayRead{}, fmt.Errorf("writing the Sunday read for %s: stopped at the bound of %d turns with no read that passes the checks",
@@ -249,32 +310,42 @@ func (r *sundayRun) write(ctx context.Context, after time.Time, stories []ToBrie
 			return SundayRead{}, fmt.Errorf("writing the Sunday read for %s: stopped at the bound of %d tokens (spent %d) with no read that passes the checks",
 				read.Day, SundayReadTokenBudget, spent)
 		}
+		kt := r.sending(req, sentFrom)
 		t, err := r.model.Turn(ctx, req)
 		if err != nil {
+			// What came back with a refusal or a cut-off turn is kept too.
+			r.keep(kt, t, Failed, err.Error())
 			return SundayRead{}, fmt.Errorf("writing the Sunday read for %s: %w", read.Day, err)
 		}
 		read.Turns++
 		read.Model = t.Model
 		read.Usage = read.Usage.add(t.Usage)
 		req.Messages = append(req.Messages, Message{Assistant: &t})
+		sentFrom = len(req.Messages)
 		if len(t.Calls) == 0 {
 			// The model can't be made to call a tool, only asked: it is
 			// asked once to submit, then the read fails.
 			if asked {
-				return SundayRead{}, fmt.Errorf("writing the Sunday read for %s: the agent stopped without submitting a read", read.Day)
+				err := fmt.Errorf("writing the Sunday read for %s: the agent stopped without submitting a read", read.Day)
+				r.keep(kt, t, Failed, err.Error())
+				return SundayRead{}, err
 			}
+			r.keep(kt, t, Continued, "")
 			asked = true
 			req.Messages = append(req.Messages, Message{User: askToSubmit})
 			continue
 		}
 		var results []ToolResult
+		var refused []string
 		for _, c := range t.Calls {
 			if c.Name == submitRead {
 				checked, err := r.check(c.Input)
 				if err == nil {
+					r.keep(kt, t, Applied, "")
 					read.Statements, read.Assessments, read.Stories = checked.Statements, checked.Assessments, checked.Stories
 					return read, nil
 				}
+				refused = append(refused, err.Error())
 				results = append(results, ToolResult{CallID: c.ID, Content: err.Error(), IsError: true})
 				continue
 			}
@@ -284,9 +355,15 @@ func (r *sundayRun) write(ctx context.Context, after time.Time, stories []ToBrie
 				continue
 			}
 			if err != nil {
+				r.keep(kt, t, Failed, err.Error())
 				return SundayRead{}, err
 			}
 			results = append(results, ToolResult{CallID: c.ID, Content: out})
+		}
+		if refused != nil {
+			r.keep(kt, t, Refused, strings.Join(refused, "\n"))
+		} else {
+			r.keep(kt, t, Continued, "")
 		}
 		req.Messages = append(req.Messages, Message{Results: results})
 	}

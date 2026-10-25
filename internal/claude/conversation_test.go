@@ -134,6 +134,9 @@ func TestATurnsToolCallsComeBackAndItIsPassedBackUnchanged(t *testing.T) {
 	if c := turn.Calls[0]; c.ID != "toolu_1" || c.Name != "story" || string(c.Input) != `{"story":"S1"}` {
 		t.Errorf("call = %+v", c)
 	}
+	if turn.StopReason != "tool_use" {
+		t.Errorf("stop reason = %q", turn.StopReason)
+	}
 	if turn.Usage != (editor.Usage{InputTokens: 1200, OutputTokens: 120, CacheReadTokens: 4000}) {
 		t.Errorf("usage = %+v", turn.Usage)
 	}
@@ -168,8 +171,13 @@ func TestARefusedOrTruncatedTurnIsAnError(t *testing.T) {
 			}
 			model, _, _ := conversationAPI(t, msg)
 
-			if _, err := model.Turn(t.Context(), conversation); !errors.Is(err, want) {
+			turn, err := model.Turn(t.Context(), conversation)
+			if !errors.Is(err, want) {
 				t.Errorf("err = %v, want %v", err, want)
+			}
+			// What came back is returned with the error, to be kept.
+			if turn.StopReason != stop || turn.Model != "claude-opus-5-5" || !strings.Contains(string(turn.Raw), `"msg_1"`) {
+				t.Errorf("turn = %+v, want what came back", turn)
 			}
 		})
 	}

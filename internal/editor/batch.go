@@ -337,7 +337,11 @@ func (e *Editor) Reading() BatchAct {
 			}
 			jobs := make([]Job, 0, len(items))
 			for _, it := range items {
-				req, err := readingRequest(it)
+				ps, err := e.Store.ReadingPrecedents(ctx, it, precedentsShown)
+				if err != nil {
+					return nil, err
+				}
+				req, err := readingRequest(it, ps)
 				if err != nil {
 					continue
 				}
@@ -345,7 +349,7 @@ func (e *Editor) Reading() BatchAct {
 					Key:     it.SourceID + "\n" + it.EntryID,
 					Request: req,
 					Apply: func(ctx context.Context, res Response, now time.Time) error {
-						return e.keep(ctx, it, res, now)
+						return e.keep(ctx, it, ps, res, now)
 					},
 				})
 			}

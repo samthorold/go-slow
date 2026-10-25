@@ -42,6 +42,9 @@ type Source struct {
 	Name    string
 	FeedURL string
 	Format  Format
+	// Text is how the Source's entries get their full text, where the feed
+	// carries only a summary or an opening.
+	Text Text
 	// Licence names the terms the Source is collected under; Attribution is
 	// the statement they ask for, carried by every Item; Keeps is how much
 	// of an Item they let the Record keep.
@@ -137,6 +140,9 @@ type Store interface {
 	// AddItems stores the Items not already in the Record, and returns how
 	// many were new.
 	AddItems(ctx context.Context, items []Item) (int, error)
+	// Known reports which of the Source's entries are already in the
+	// Record.
+	Known(ctx context.Context, sourceID string, entryIDs []string) (map[string]bool, error)
 }
 
 // Deps are the Collector's dependencies.
@@ -268,9 +274,53 @@ func (c *Collector) collect(ctx context.Context, s Source, now time.Time) (int, 
 			items[i].Content, items[i].Raw = "", ""
 		}
 	}
+	items, whole, err := c.withText(ctx, s, items)
+	if err != nil {
+		return 0, err
+	}
 	n, err := c.Store.AddItems(ctx, items)
 	if err != nil {
 		return 0, err
 	}
+	if !whole {
+		// The feed is asked in full next time, so the entries left out
+		// are still in what it answers.
+		return n, nil
+	}
 	return n, c.Store.SaveValidators(ctx, s.ID, f.Validators)
+}
+
+// withText gives each of the Source's entries its full text, where the
+// Source declares one is fetched and its terms let it be kept. An entry
+// whose text can't be fetched is left out of this run, to be collected on
+// a later one; whole is false if any was. Only new entries are fetched:
+// those already in the Record are left out, as AddItems would leave them.
+func (c *Collector) withText(ctx context.Context, s Source, items []Item) (kept []Item, whole bool, err error) {
+	if !s.fetchesText() {
+		return items, true, nil
+	}
+	ids := make([]string, len(items))
+	for i, it := range items {
+		ids[i] = it.EntryID
+	}
+	known, err := c.Store.Known(ctx, s.ID, ids)
+	if err != nil {
+		return nil, false, err
+	}
+	whole = true
+	for _, it := range items {
+		if known[it.EntryID] {
+			continue
+		}
+		text, err := fetchText(ctx, c.Fetcher, s, it)
+		if err != nil {
+			c.Log.WarnContext(ctx, "entry's text not fetched; left for a later run",
+				"source", s.ID, "entry", it.EntryID, "error", err)
+			whole = false
+			continue
+		}
+		it.Content = text
+		kept = append(kept, it)
+	}
+	return kept, whole, nil
 }

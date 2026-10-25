@@ -3,6 +3,7 @@ package collect_test
 import (
 	"context"
 	"log/slog"
+	"strings"
 	"testing"
 	"time"
 
@@ -46,6 +47,16 @@ func (s *fakeStore) SaveValidators(context.Context, string, collect.Validators) 
 func (s *fakeStore) AddItems(_ context.Context, items []collect.Item) (int, error) {
 	s.items = append(s.items, items...)
 	return len(items), nil
+}
+
+func (s *fakeStore) Known(_ context.Context, sourceID string, _ []string) (map[string]bool, error) {
+	known := map[string]bool{}
+	for _, it := range s.items {
+		if it.SourceID == sourceID {
+			known[it.EntryID] = true
+		}
+	}
+	return known, nil
 }
 
 // noCheck is a lazy-reading check that does nothing.
@@ -104,6 +115,37 @@ func TestAnItemKeepsOnlyItsSummaryWhereItsSourcesTermsAllowNoMore(t *testing.T) 
 	}
 	if it.Attribution != "Source: A pollster." {
 		t.Errorf("Item attribution = %q", it.Attribution)
+	}
+}
+
+func TestASourceKeepingOnlySummariesFetchesAndKeepsNoText(t *testing.T) {
+	s := pollster(collect.KeepSummary)
+	s.Text = collect.TextFromGOVUKContent
+
+	f, store := runOnce([]collect.Source{s}, fullEntry)
+
+	if len(f.urls) != 1 || f.urls[0] != s.FeedURL {
+		t.Errorf("fetched %v, want only the feed", f.urls)
+	}
+	if len(store.items) != 1 || store.items[0].Content != "" {
+		t.Errorf("kept %+v, want one Item with no text", store.items)
+	}
+}
+
+func TestTheListedSourcesWhoseFeedsCarryOnlySummariesFetchTheirText(t *testing.T) {
+	for _, s := range collect.Sources() {
+		var want collect.Text
+		switch {
+		case s.Format == collect.Atom && strings.HasPrefix(s.FeedURL, "https://www.gov.uk/"):
+			want = collect.TextFromGOVUKContent
+		case s.Format == collect.WrittenStatements:
+			want = collect.TextFromWrittenStatement
+		default:
+			want = collect.TextInEntry
+		}
+		if s.Text != want {
+			t.Errorf("%s gets its text by %d, want %d", s.ID, s.Text, want)
+		}
 	}
 }
 

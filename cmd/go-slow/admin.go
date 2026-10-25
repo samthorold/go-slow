@@ -5,11 +5,16 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"net/http"
 	"slices"
 	"strings"
+	"time"
 
+	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/config"
 	"github.com/samthorold/go-slow/internal/editor"
+	"github.com/samthorold/go-slow/internal/interest"
+	"github.com/samthorold/go-slow/internal/polite"
 	"github.com/samthorold/go-slow/internal/register"
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
@@ -31,8 +36,46 @@ import (
 //	its attempts, so the next run takes that work up again:
 //
 //	  docker compose run --rm app retry placing
-func admin(ctx context.Context, log *slog.Logger, args []string, lookup func(string) (string, bool), stdin io.Reader) error {
+//
+//	backfill: gives their text to the Items of the Sources whose text is
+//	fetched that were collected with only a summary and are still unread,
+//	fetching it politely through web, then runs the lazy-reading check over
+//	them again. Items already read are left as they are:
+//
+//	  docker compose run --rm app backfill
+func admin(ctx context.Context, log *slog.Logger, args []string, lookup func(string) (string, bool), stdin io.Reader, web *http.Client) error {
 	switch args[0] {
+	case "backfill":
+		cfg, err := config.Load(lookup)
+		if err != nil {
+			return err
+		}
+		store, err := sqlite.Open(ctx, cfg.DatabasePath)
+		if err != nil {
+			return err
+		}
+		defer func() { _ = store.Close() }()
+		sources := collect.Sources()
+		if err := store.SyncSources(ctx, sources, time.Now()); err != nil {
+			return err
+		}
+		n, err := collect.Backfill(ctx, collect.BackfillDeps{
+			Sources: sources,
+			Fetcher: polite.New(polite.Options{
+				HTTP:      web,
+				UserAgent: polite.UserAgent(cfg.CollectionContact),
+				Now:       time.Now,
+				Sleep:     polite.Sleep,
+			}),
+			Store: store,
+			Check: interest.New(store),
+			Log:   log,
+		})
+		if err != nil {
+			return err
+		}
+		log.Info("items given their text", "given", n)
+		return nil
 	case "commits":
 		cfg, err := config.Load(lookup)
 		if err != nil {
@@ -81,6 +124,6 @@ func admin(ctx context.Context, log *slog.Logger, args []string, lookup func(str
 		log.Info("failed work cleared for retry", "act", act, "cleared", n)
 		return nil
 	default:
-		return fmt.Errorf("unknown command %q (known: commits, retry)", args[0])
+		return fmt.Errorf("unknown command %q (known: backfill, commits, retry)", args[0])
 	}
 }

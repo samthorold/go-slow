@@ -1,120 +1,42 @@
 package editor_test
 
 import (
-	"bytes"
-	"errors"
-	"io/fs"
-	"log/slog"
-	"os"
 	"path/filepath"
-	"slices"
-	"strings"
 	"testing"
 
-	"github.com/samthorold/go-slow/internal/claude"
-	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/editor"
-	"github.com/samthorold/go-slow/internal/sqlite"
 )
 
-// The recorded runs of connecting. The fixtures' recorded readings and
-// placings are replayed in the order the Items were published, and after
-// each Item is placed its Facts are connected, so later Facts are weighed
-// against earlier ones. Each connecting call is kept under
+// The recorded runs of connecting. The fixtures' readings and placings,
+// from connecting's own frozen copies (testdata/recorded/connecting/inputs),
+// are replayed in the order the Items were published, and after each Item
+// is placed its Facts are connected, so later Facts are weighed against
+// earlier ones. Each connecting call is kept under
 // testdata/recorded/connecting and replayed. Re-recording costs one call per
 // fixture:
 //
 //	go test -count=1 ./internal/editor -run TestRecordedConnectings -record
 //
 // with GOSLOW_ANTHROPIC_API_KEY and CONNECTING_MODEL set in the environment.
-// Re-recording a reading or a placing makes the connectings after it stale,
-// so re-record connecting after either.
-func TestRecordedConnectings(t *testing.T) {
+// Re-recording reading or placing leaves it valid; bringing it onto newer
+// ones is a refresh: copy the current readings and placings together over
+// its inputs, then re-record it.
+func TestRecordedConnectings(t *testing.T) { recordedConnectings(t, recordedDir) }
+
+// recordedConnectings replays (or records) connecting from the recordings
+// under root.
+func recordedConnectings(t *testing.T, root string) {
 	ctx := t.Context()
-	paths, err := filepath.Glob("testdata/govuk/*.json")
-	if err != nil || len(paths) == 0 {
-		t.Fatalf("no fixtures: %v", err)
-	}
-	type fixtureItem struct {
-		name string
-		item editor.Item
-	}
-	var fixtures []fixtureItem
-	for _, path := range paths {
-		it, _ := fixture(t, path)
-		fixtures = append(fixtures, fixtureItem{strings.TrimSuffix(filepath.Base(path), ".json"), it})
-	}
-	slices.SortFunc(fixtures, func(a, b fixtureItem) int { return a.item.Published.Compare(b.item.Published) })
-
-	store, err := sqlite.Open(ctx, filepath.Join(t.TempDir(), "go-slow.db"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = store.Close() })
-	if err := store.SyncSources(ctx, []collect.Source{number10}, saturday); err != nil {
-		t.Fatal(err)
-	}
-
+	store, topics := newRecord(t, nil)
 	var total editor.Usage
-	for _, f := range fixtures {
-		it := f.item
-		if _, err := store.AddItems(ctx, []collect.Item{{
-			SourceID: it.SourceID, EntryID: it.EntryID, Title: it.Title, Link: it.Link, Summary: it.Summary,
-			Content: it.Content, Published: it.Published, Attribution: collect.OGL, CollectedAt: saturday,
-		}}); err != nil {
-			t.Fatal(err)
-		}
-		reading, err := editor.Read(ctx, replay{kept(t, filepath.Join("testdata", "recorded", "reading", f.name+".json"))}, it)
-		if err != nil {
-			t.Fatalf("%s: the recorded reading fails its checks: %v", f.name, err)
-		}
-		if err := store.SaveReading(ctx, reading, saturday); err != nil {
-			t.Fatal(err)
-		}
-		var logs bytes.Buffer
-		log := slog.New(slog.NewTextHandler(&logs, nil))
-		placing := replay{kept(t, filepath.Join("testdata", "recorded", "placing", f.name+".json"))}
-		if err := editor.New(editor.Deps{Store: store, PlacingModel: placing, Log: log}).PlaceWaiting(ctx, saturday); err != nil {
-			t.Fatal(err)
-		}
-		if strings.Contains(logs.String(), "placing failed") {
-			t.Fatalf("%s: the recorded placing fails the act's checks:\n%s", f.name, logs.String())
-		}
-
-		path := filepath.Join("testdata", "recorded", "connecting", f.name+".json")
-		var model editor.Model
-		var rec recording
-		if *rerecordFlag {
-			key, name := os.Getenv("GOSLOW_ANTHROPIC_API_KEY"), os.Getenv("CONNECTING_MODEL")
-			if key == "" || name == "" {
-				t.Fatal("recording needs GOSLOW_ANTHROPIC_API_KEY and CONNECTING_MODEL")
-			}
-			model = recorder{claude.New(claude.Options{APIKey: key, Model: name}), &rec}
-		} else {
-			if _, err := os.Stat(path); errors.Is(err, fs.ErrNotExist) {
-				// Each connecting depends on the ones before it, so the rest
-				// can't be replayed either.
-				t.Skipf("%s has not been recorded yet; record connecting with: "+
-					"go test -count=1 ./internal/editor -run TestRecordedConnectings -record "+
-					"(GOSLOW_ANTHROPIC_API_KEY and CONNECTING_MODEL set)", f.name)
-			}
-			rec = kept(t, path)
-			model = replay{rec}
-		}
-		if err := editor.New(editor.Deps{Store: store, ConnectingModel: model, Log: log}).ConnectWaiting(ctx, saturday); err != nil {
-			t.Fatal(err)
-		}
-		if *rerecordFlag && rec.Output != nil {
-			keep(t, path, rec)
-		}
-		total.InputTokens += rec.Usage.InputTokens
-		total.OutputTokens += rec.Usage.OutputTokens
-		// A failed connecting leaves its Facts waiting, to be connected with
-		// the next fixture's in a call no recording holds, so it stops the
-		// run.
-		if strings.Contains(logs.String(), "connecting failed") {
-			t.Fatalf("%s: the recorded connecting fails the act's checks:\n%s", f.name, logs.String())
-		}
+	c := chain{
+		reading:    replayed(inputsOf(root, "connecting", "reading")),
+		placing:    replayed(inputsOf(root, "connecting", "placing")),
+		connecting: recordedOrReplayed(t, filepath.Join(root, "connecting"), "CONNECTING_MODEL", "TestRecordedConnectings", &total),
+	}
+	fixtures := fixtureItems(t)
+	if err := c.run(ctx, store, topics, fixtures); err != nil {
+		t.Fatal(err)
 	}
 	t.Logf("recorded connecting usage over %d fixtures: %d input, %d output tokens", len(fixtures), total.InputTokens, total.OutputTokens)
 

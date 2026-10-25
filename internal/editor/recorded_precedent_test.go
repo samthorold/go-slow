@@ -32,8 +32,15 @@ import (
 //	go test -count=1 ./internal/editor -run TestRecordedPlacingPrecedent -record
 //
 // with GOSLOW_ANTHROPIC_API_KEY and PLACING_MODEL set in the environment.
-// Re-record it after the reaction's reading.
-func TestRecordedPlacingPrecedent(t *testing.T) {
+// The reaction's reading is its own frozen copy
+// (testdata/recorded/precedent/inputs/reading), so re-recording reading
+// leaves it valid; a refresh copies the current one over it, then
+// re-records this.
+func TestRecordedPlacingPrecedent(t *testing.T) { recordedPlacingPrecedent(t, recordedDir) }
+
+// recordedPlacingPrecedent replays (or records) placing with a precedent
+// from the recordings under root.
+func recordedPlacingPrecedent(t *testing.T, root string) {
 	ctx := t.Context()
 	store, err := sqlite.Open(ctx, filepath.Join(t.TempDir(), "go-slow.db"))
 	if err != nil {
@@ -96,7 +103,7 @@ func TestRecordedPlacingPrecedent(t *testing.T) {
 	name := "uk-government-response-to-agreement-between-us-and-russia-9-october"
 	it, _ := fixture(t, filepath.Join("testdata", "govuk", name+".json"))
 	addItem(it)
-	reading, err := editor.Read(ctx, replay{kept(t, filepath.Join("testdata", "recorded", "reading", name+".json"))}, it)
+	reading, err := editor.Read(ctx, replay{kept(t, filepath.Join(inputsOf(root, "precedent", "reading"), name+".json"))}, it)
 	if err != nil {
 		t.Fatalf("the recorded reading fails its checks: %v", err)
 	}
@@ -108,7 +115,7 @@ func TestRecordedPlacingPrecedent(t *testing.T) {
 		t.Fatalf("awaiting placing: %+v %v; want the reaction, followed at following", waiting, err)
 	}
 
-	path := filepath.Join("testdata", "recorded", "precedent", name+".json")
+	path := filepath.Join(root, "precedent", name+".json")
 	var model editor.Model
 	var rec recording
 	if *rerecordFlag {

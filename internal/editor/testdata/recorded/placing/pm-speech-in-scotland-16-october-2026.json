@@ -1,10 +1,10 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T00:18:41.02223Z",
+  "recorded_at": "2026-10-25T01:10:40.604978Z",
   "usage": {
-    "input_tokens": 3470,
-    "output_tokens": 1288
+    "input_tokens": 3925,
+    "output_tokens": 1061
   },
   "output": {
     "facts": [
@@ -34,12 +34,14 @@
       },
       {
         "developments_in": [
-          "N1"
+          "S11"
         ],
         "fact": "F7"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "S11"
+        ],
         "fact": "F8"
       },
       {
@@ -64,7 +66,7 @@
       },
       {
         "developments_in": [
-          "S10"
+          "S11"
         ],
         "fact": "F14"
       },
@@ -77,11 +79,6 @@
         "fact": "F16"
       }
     ],
-    "new_stories": [
-      {
-        "ref": "N1",
-        "title": "Defence technical skills colleges in Scotland"
-      }
-    ]
+    "new_stories": []
   }
 }

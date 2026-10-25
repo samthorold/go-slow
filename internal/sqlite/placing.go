@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/samthorold/go-slow/internal/editor"
+	"github.com/samthorold/go-slow/internal/interest"
 )
 
 // factEntities is a subquery giving a Fact's Entities as a JSON array.
@@ -32,7 +33,9 @@ func (s *Store) FactsToPlace(ctx context.Context) ([]editor.ToPlace, error) {
 func (s *Store) factsByItem(ctx context.Context, where string, args ...any) ([]editor.ToPlace, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT facts.id, facts.source_id, facts.entry_id, facts.statement, facts.as_at, facts.quote,
-			`+factEntities+`, items.title, items.link, items.published
+			`+factEntities+`, items.title, items.link, items.published,
+			(SELECT coalesce(max(topics.depth), 0) FROM item_topics JOIN topics ON topics.id = item_topics.topic_id
+				WHERE item_topics.source_id = items.source_id AND item_topics.entry_id = items.entry_id)
 		FROM facts JOIN items USING (source_id, entry_id)
 		WHERE facts.withdrawn_by IS NULL AND (`+where+`)
 		ORDER BY items.published, items.collected_at, facts.source_id, facts.entry_id, facts.id`, args...)
@@ -45,8 +48,9 @@ func (s *Store) factsByItem(ctx context.Context, where string, args ...any) ([]e
 		var f editor.Fact
 		var it editor.Item
 		var asAt, ents, published string
+		var depth interest.Depth
 		if err := rows.Scan(&f.ID, &f.SourceID, &f.EntryID, &f.Statement, &asAt, &f.Quote, &ents,
-			&it.Title, &it.Link, &published); err != nil {
+			&it.Title, &it.Link, &published, &depth); err != nil {
 			return nil, err
 		}
 		if err := scanFact(&f, asAt, ents); err != nil {
@@ -54,7 +58,7 @@ func (s *Store) factsByItem(ctx context.Context, where string, args ...any) ([]e
 		}
 		if n := len(out); n == 0 || out[n-1].Item.SourceID != f.SourceID || out[n-1].Item.EntryID != f.EntryID {
 			it.SourceID, it.EntryID, it.Published = f.SourceID, f.EntryID, parseTime(published)
-			out = append(out, editor.ToPlace{Item: it})
+			out = append(out, editor.ToPlace{Item: it, Depth: depth})
 		}
 		out[len(out)-1].Facts = append(out[len(out)-1].Facts, f)
 	}
@@ -252,6 +256,9 @@ func (s *Store) SavePlacing(ctx context.Context, p editor.Placing, placedAt time
 			f, formatTime(placedAt), p.Model); err != nil {
 			return fmt.Errorf("mark fact %d placed: %w", f, err)
 		}
+	}
+	if err := keepPrecedents(ctx, tx, "placing", p.SourceID, p.EntryID, p.Precedents, placedAt); err != nil {
+		return err
 	}
 	return tx.Commit()
 }

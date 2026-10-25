@@ -1,10 +1,10 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T00:36:43.579643Z",
+  "recorded_at": "2026-10-25T01:11:11.440852Z",
   "usage": {
     "input_tokens": 3017,
-    "output_tokens": 1426
+    "output_tokens": 1411
   },
   "output": {
     "causes": [
@@ -100,12 +100,12 @@
             "role": "actor"
           },
           {
-            "entity": "Bangkok",
-            "role": "place"
-          },
-          {
             "entity": "IMF",
             "role": "occasion"
+          },
+          {
+            "entity": "Bangkok",
+            "role": "place"
           }
         ]
       },
@@ -118,7 +118,7 @@
           },
           {
             "entity": "Kyiv",
-            "role": "affected"
+            "role": "place"
           },
           {
             "entity": "Ukraine",

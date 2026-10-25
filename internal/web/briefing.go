@@ -158,6 +158,10 @@ func (a *app) briefingWith(w http.ResponseWriter, r *http.Request, day time.Time
 		a.serverError(w, r, err)
 		return
 	}
+	if exists && r.Method == http.MethodGet {
+		// Opening a Briefing is kept for the register, as a side record.
+		a.opened(r, a.Register.OpenedBriefing, b.Day)
+	}
 	p := briefingPage{
 		Date: day.Format("Monday 2 January 2006"), Exists: exists,
 		FeedbackPath: briefingPath(day.Format(time.DateOnly)) + "/feedback",

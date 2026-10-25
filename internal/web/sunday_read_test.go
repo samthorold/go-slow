@@ -135,6 +135,36 @@ func TestNewToMeOnTheSundayReadIsKept(t *testing.T) {
 	}
 }
 
+func TestTheRegisterCountsSundayReadsWrittenOpenedAndNewToMe(t *testing.T) {
+	store := openStore(t)
+	speechStory(t, store)
+	writeSundayRead(t, store, sunday, assessed)
+	app, _ := newAppWithLog(t, sunday, store)
+
+	get(t, app, "/sunday-reads/2026-10-25")
+	get(t, app, "/sunday-reads/2026-10-25")
+	send(t, app, "POST", readFeedback, url.Values{"kind": {"new to me"}, "level": {"assessment"}, "assessment": {"1"}})
+
+	rec, err := store.RegisterRecord(t.Context(), time.UTC)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rec.SundayReads) != 1 || rec.SundayReads[0] != "2026-10-25" {
+		t.Errorf("Sunday reads written = %v", rec.SundayReads)
+	}
+	if len(rec.SundayReadOpens) != 1 || rec.SundayReadOpens[0].Read != "2026-10-25" || rec.SundayReadOpens[0].On != "2026-10-25" {
+		t.Errorf("Sunday reads opened = %+v, want once", rec.SundayReadOpens)
+	}
+	if len(rec.Feedback) != 1 || rec.Feedback[0].SundayRead != "2026-10-25" {
+		t.Errorf("Feedback = %+v, want it given on the read", rec.Feedback)
+	}
+	// A Sunday with no read is not one opened.
+	get(t, app, "/sunday-reads/2026-10-18")
+	if rec, _ := store.RegisterRecord(t.Context(), time.UTC); len(rec.SundayReadOpens) != 1 {
+		t.Errorf("opens = %+v", rec.SundayReadOpens)
+	}
+}
+
 func TestAnAssessmentsAddressLeadsToItInItsRead(t *testing.T) {
 	store := openStore(t)
 	speechStory(t, store)

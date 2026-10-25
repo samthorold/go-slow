@@ -115,6 +115,7 @@ func (a *app) sundayRead(w http.ResponseWriter, r *http.Request) {
 	p := sundayReadPage{Date: day.Format("Sunday 2 January 2006"), BriefingPath: briefingPath(key), Exists: exists}
 	feedbackPath := sundayReadPath(key) + "/feedback"
 	if exists {
+		a.opened(r, a.Register.OpenedSundayRead, key)
 		p.Gives = readGives(feedbackPath, read.ID)
 	}
 	if !exists {

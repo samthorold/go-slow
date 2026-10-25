@@ -47,6 +47,7 @@ func newAppWithLog(t *testing.T, now time.Time, store *sqlite.Store) (http.Handl
 		Stories:     store,
 		Feedback:    feedback.New(store),
 		Kept:        store,
+		Register:    store,
 		SundayReads: store,
 		BriefingAt:  7 * time.Hour,
 		Now:         func() time.Time { return now },

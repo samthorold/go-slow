@@ -176,6 +176,9 @@ func TestRecordedSundayRead(t *testing.T) {
 		if merr != nil {
 			t.Fatal(merr)
 		}
+		if merr := os.MkdirAll(dir, 0o750); merr != nil {
+			t.Fatal(merr)
+		}
 		if werr := os.WriteFile(path, append(b, '\n'), 0o600); werr != nil {
 			t.Fatal(werr)
 		}

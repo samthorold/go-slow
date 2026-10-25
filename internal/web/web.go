@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/samthorold/go-slow/internal/collect"
+	"github.com/samthorold/go-slow/internal/editor"
 )
 
 // Items answers the queries the Items page needs.
@@ -23,6 +24,9 @@ type Items interface {
 	Upcoming(ctx context.Context, now time.Time) ([]collect.ListedItem, error)
 	// SourceStatuses reports how each Source stands for going quiet.
 	SourceStatuses(ctx context.Context) ([]collect.SourceStatus, error)
+	// FailedWork is the acts' work marked failed, most recently failed
+	// first.
+	FailedWork(ctx context.Context) ([]editor.FailedWork, error)
 }
 
 // Deps are the app's dependencies. The app reads nothing from the

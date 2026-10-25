@@ -114,7 +114,7 @@ func run(log *slog.Logger) error {
 		Readings:  store,
 		Topics:    topics,
 		Stories:   store,
-		Now:      time.Now,
+		Now:       time.Now,
 		Log:       log,
 	})
 

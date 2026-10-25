@@ -69,6 +69,24 @@ func scanFact(f *editor.Fact, asAt, ents string) error {
 // StoriesSharing are the Stories whose Developments involve any of the
 // named Entities, with their Timelines.
 func (s *Store) StoriesSharing(ctx context.Context, entities []string) ([]editor.Story, error) {
+	ids, err := s.storiesSharing(ctx, entities)
+	if err != nil {
+		return nil, fmt.Errorf("stories sharing: %w", err)
+	}
+	out := make([]editor.Story, 0, len(ids))
+	for _, id := range ids {
+		st, _, err := s.Story(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, st)
+	}
+	return out, nil
+}
+
+// storiesSharing are the ids of the Stories whose Developments involve any
+// of the named Entities.
+func (s *Store) storiesSharing(ctx context.Context, entities []string) ([]int64, error) {
 	names, err := json.Marshal(entities)
 	if err != nil {
 		return nil, err
@@ -81,30 +99,18 @@ func (s *Store) StoriesSharing(ctx context.Context, entities []string) ([]editor
 		WHERE entities.name IN (SELECT value FROM json_each(?))
 		ORDER BY developments.story_id`, string(names))
 	if err != nil {
-		return nil, fmt.Errorf("stories sharing: %w", err)
+		return nil, err
 	}
+	defer func() { _ = rows.Close() }()
 	var ids []int64
 	for rows.Next() {
 		var id int64
 		if err := rows.Scan(&id); err != nil {
-			_ = rows.Close()
-			return nil, fmt.Errorf("stories sharing: %w", err)
+			return nil, err
 		}
 		ids = append(ids, id)
 	}
-	_ = rows.Close()
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("stories sharing: %w", err)
-	}
-	out := make([]editor.Story, 0, len(ids))
-	for _, id := range ids {
-		st, _, err := s.Story(ctx, id)
-		if err != nil {
-			return nil, err
-		}
-		out = append(out, st)
-	}
-	return out, nil
+	return ids, rows.Err()
 }
 
 // Story is one Story with its Timeline, reporting whether it is in the

@@ -110,6 +110,29 @@ func TestAPlacingThatFailsTheChecksIsRejected(t *testing.T) {
 	}
 }
 
+func TestTheSchemaOffersOnlyTheFactsToPlaceAndTheirCandidates(t *testing.T) {
+	// A model answering a Fact by its statement rather than its ref fails
+	// the checks; the schema rules it out instead.
+	model := &fakeModel{output: `{"new_stories": [], "facts": [{"fact": "F1", "developments_in": []}]}`}
+	if _, err := editor.Place(t.Context(), model, toPlace, []editor.Story{scotland, tyrone}); err != nil {
+		t.Fatal(err)
+	}
+
+	item := func(m any, path ...string) any {
+		for _, p := range path {
+			m = m.(map[string]any)[p]
+		}
+		return m
+	}
+	facts := item(model.sent[0].Schema, "properties", "facts", "items", "properties")
+	if got := item(facts, "fact", "enum"); !slices.Equal(got.([]string), []string{"F1"}) {
+		t.Errorf("fact refs = %v, want [F1]", got)
+	}
+	if got := item(facts, "developments_in", "items", "enum"); !slices.Equal(got.([]string), []string{"S3", "N1"}) {
+		t.Errorf("Story refs = %v, want the candidate S3 and one new Story per Fact", got)
+	}
+}
+
 func TestAFactThatFitsNoCandidateCanStartANewStory(t *testing.T) {
 	model := &fakeModel{output: `{
 	  "new_stories": [{"ref": "N1", "title": "The Prime Minister's offer to Scotland"}],

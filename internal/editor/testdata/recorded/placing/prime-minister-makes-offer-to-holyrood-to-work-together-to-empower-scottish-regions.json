@@ -1,0 +1,37 @@
+{
+  "act": "placing",
+  "model": "claude-haiku-5-5",
+  "recorded_at": "2026-10-25T00:10:46.435342Z",
+  "usage": {
+    "input_tokens": 2060,
+    "output_tokens": 452
+  },
+  "output": {
+    "facts": [
+      {
+        "developments_in": [],
+        "fact": "F1"
+      },
+      {
+        "developments_in": [],
+        "fact": "F2"
+      },
+      {
+        "developments_in": [],
+        "fact": "F3"
+      },
+      {
+        "developments_in": [
+          "N1"
+        ],
+        "fact": "F4"
+      }
+    ],
+    "new_stories": [
+      {
+        "ref": "N1",
+        "title": "Regional empowerment across Scotland under the UK Government"
+      }
+    ]
+  }
+}

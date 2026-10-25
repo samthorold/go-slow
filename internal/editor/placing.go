@@ -80,20 +80,37 @@ Start a new Story only for a Fact that is a Development but moves on none of its
 
 Answer with every Fact exactly once, by its ref (F1, F2 and so on), giving in developments_in the refs of the Stories it is a Development in (S refs for candidates, N refs for new Stories), or an empty list.`
 
-var placingSchema = map[string]any{
-	"type": "object",
-	"properties": map[string]any{
-		"new_stories": array(object(map[string]any{
-			"ref":   str(),
-			"title": str(),
-		})),
-		"facts": array(object(map[string]any{
-			"fact":            str(),
-			"developments_in": array(str()),
-		})),
-	},
-	"required":             []string{"new_stories", "facts"},
-	"additionalProperties": false,
+// placingSchema is the placing act's output schema for an Item's Facts. Its
+// refs are enumerated, the Facts to place and the Stories they may be placed
+// in (their candidates, and up to one new Story per Fact), so a model can
+// only answer in refs the checks accept.
+func placingSchema(tp ToPlace, stories []Story) map[string]any {
+	var facts, newRefs, storyRefs []string
+	for i, f := range tp.Facts {
+		facts = append(facts, "F"+strconv.Itoa(i+1))
+		newRefs = append(newRefs, "N"+strconv.Itoa(i+1))
+		for _, s := range candidates(f, stories) {
+			if ref := "S" + strconv.FormatInt(s.ID, 10); !slices.Contains(storyRefs, ref) {
+				storyRefs = append(storyRefs, ref)
+			}
+		}
+	}
+	enum := func(values []string) map[string]any { return map[string]any{"type": "string", "enum": values} }
+	return map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"new_stories": array(object(map[string]any{
+				"ref":   enum(newRefs),
+				"title": str(),
+			})),
+			"facts": array(object(map[string]any{
+				"fact":            enum(facts),
+				"developments_in": array(enum(append(storyRefs, newRefs...))),
+			})),
+		},
+		"required":             []string{"new_stories", "facts"},
+		"additionalProperties": false,
+	}
 }
 
 type placingOutput struct {
@@ -126,7 +143,7 @@ func placingRequest(tp ToPlace, stories []Story) Request {
 		Act:          "placing",
 		Instructions: placingInstructions,
 		Input:        placingInput(tp, stories),
-		Schema:       placingSchema,
+		Schema:       placingSchema(tp, stories),
 	}
 }
 

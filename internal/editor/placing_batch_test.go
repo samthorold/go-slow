@@ -19,7 +19,7 @@ func placingBatches(store *sqlite.Store, b editor.Batcher) *editor.Batches {
 }
 
 // tyroneNotice is an Item whose Fact shares no Entity with the speech's.
-var tyroneNotice =collect.Item{
+var tyroneNotice = collect.Item{
 	SourceID: number10.ID, EntryID: "tyrone", Title: "Lord-Lieutenant of County Tyrone",
 	Link: "https://www.gov.uk/tyrone", Published: speech.Published.Add(time.Hour),
 	Attribution: collect.OGL, CollectedAt: saturday,

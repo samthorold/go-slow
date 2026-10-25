@@ -81,6 +81,27 @@ func TestReadingIsShownPastWrongFeedbackOnFactsFromItemsSharingItsTopicsWithThei
 	}
 }
 
+func TestReadingIsShownNoUndoneFeedback(t *testing.T) {
+	store := record(t)
+	f := wrongAt(t, store, readGlasgow(t, store), saturday)
+	if _, err := feedback.New(store).Undo(t.Context(), f.ID, saturday); err != nil {
+		t.Fatal(err)
+	}
+	model := &fakeModel{output: goodReading}
+	ed, _ := newEditor(store, model, &fakeWikidata{})
+
+	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
+		t.Fatal(err)
+	}
+
+	if len(model.sent) != 1 {
+		t.Fatalf("reading called %d times, want once", len(model.sent))
+	}
+	if in := model.sent[0].Input; strings.Contains(in, `"feedback"`) || !strings.Contains(in, "Precedents: none") {
+		t.Errorf("the speech's reading is shown undone Feedback:\n%s", in)
+	}
+}
+
 func TestReadingIsShownNoFeedbackOnFactsFromItemsSharingNoTopicNorFeedbackOtherThanWrong(t *testing.T) {
 	store := record(t)
 	if _, errs, err := interest.New(store).Add(t.Context(),

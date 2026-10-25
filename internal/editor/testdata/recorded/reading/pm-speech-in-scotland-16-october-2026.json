@@ -1,11 +1,11 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "e868021904bab1ffe332a0bed0e0dd98e116fd7a3e8a9fa9e930395a49d5d82d",
-  "recorded_at": "2026-10-25T20:10:31.708575Z",
+  "request_hash": "383b5c322afeb688c7ad7476e6510c42679e48a306d64b75f43136ddfbf34bd1",
+  "recorded_at": "2026-10-25T21:03:44.276504Z",
   "usage": {
-    "input_tokens": 10920,
-    "output_tokens": 7270
+    "input_tokens": 10917,
+    "output_tokens": 5740
   },
   "output": {
     "claims": [
@@ -13,32 +13,8 @@
         "entities": [
           {
             "kind": "place",
-            "name": "Scotland",
-            "role": "place the claim is about"
-          }
-        ],
-        "made_by": "Prime Minister",
-        "quote": "Scotland, the most devolved nation in the UK, is itself one of the most centralised nations in Europe.",
-        "statement": "Scotland is one of the most centralised nations in Europe."
-      },
-      {
-        "entities": [
-          {
-            "kind": "place",
-            "name": "Scotland",
-            "role": "place the statistic concerns"
-          }
-        ],
-        "made_by": "Prime Minister",
-        "quote": "around one in six young people here are not in education, employment or training",
-        "statement": "Around one in six young people in Scotland are not in education, employment or training."
-      },
-      {
-        "entities": [
-          {
-            "kind": "place",
             "name": "Edinburgh",
-            "role": "place with the shop vacancy figure"
+            "role": ""
           }
         ],
         "made_by": "Prime Minister",
@@ -50,24 +26,36 @@
           {
             "kind": "place",
             "name": "Dundee",
-            "role": "place with the shop vacancy figure"
+            "role": ""
           }
         ],
         "made_by": "Prime Minister",
         "quote": "But if you go to Dundee, it’s more likely one in five.",
-        "statement": "Around one in five shops in Dundee are lying empty."
+        "statement": "In Dundee it is more likely that one in five shops is lying empty."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Scotland",
+            "role": ""
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "around one in six young people here are not in education, employment or training.",
+        "statement": "Around one in six young people in Scotland are not in education, employment or training."
       },
       {
         "entities": [
           {
             "kind": "place",
             "name": "East Renfrewshire",
-            "role": "place where men live longer"
+            "role": ""
           },
           {
             "kind": "place",
             "name": "Glasgow",
-            "role": "place where men live shorter lives"
+            "role": ""
           }
         ],
         "made_by": "Prime Minister",
@@ -77,26 +65,9 @@
       {
         "entities": [
           {
-            "kind": "organisation",
-            "name": "Chemify",
-            "role": "company that turned research into manufacturing jobs"
-          },
-          {
-            "kind": "place",
-            "name": "Glasgow",
-            "role": "place of the manufacturing jobs"
-          }
-        ],
-        "made_by": "Prime Minister",
-        "quote": "companies like Chemify turn groundbreaking research into real manufacturing jobs in Glasgow",
-        "statement": "Chemify has turned groundbreaking research into real manufacturing jobs in Glasgow."
-      },
-      {
-        "entities": [
-          {
             "kind": "place",
             "name": "Scotland",
-            "role": "place where the defence sector supports jobs"
+            "role": ""
           }
         ],
         "made_by": "Prime Minister",
@@ -106,75 +77,58 @@
       {
         "entities": [
           {
-            "kind": "organisation",
-            "name": "DWP",
-            "role": "department whose employment support would be devolved to Scotland"
-          },
-          {
             "kind": "place",
-            "name": "Scotland",
-            "role": "place to be offered devolved employment support"
+            "name": "Dundee",
+            "role": ""
           }
         ],
         "made_by": "Prime Minister",
-        "quote": "I want to offer Scotland a model of localised employment support",
-        "statement": "The Prime Minister offers Scotland a model of localised employment support through DWP devolution."
+        "quote": "In Dundee, you’ve got a world-leading video games industry.",
+        "statement": "Dundee has a world-leading video games industry."
+      },
+      {
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "Chemify",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Glasgow",
+            "role": ""
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "companies like Chemify turn groundbreaking research into real manufacturing jobs in Glasgow",
+        "statement": "Chemify has turned groundbreaking research into real manufacturing jobs in Glasgow."
       },
       {
         "entities": [
           {
             "kind": "occasion",
             "name": "EU-UK Summit",
-            "role": "summit where the food and farming deal is being worked on"
+            "role": ""
           }
         ],
         "made_by": "Prime Minister",
         "quote": "It’s also why I am working on a new deal for food and farming at the EU-UK Summit on the 20th of November.",
-        "statement": "The Prime Minister is working on a new deal for food and farming to be considered at the EU-UK Summit on 20 November."
+        "statement": "The Prime Minister is working on a new deal for food and farming to be addressed at the EU-UK Summit on 20 November."
       },
       {
         "entities": [
           {
             "kind": "organisation",
             "name": "National Economic Council",
-            "role": "body that will meet with First Ministers"
+            "role": ""
           }
         ],
         "made_by": "Prime Minister",
-        "quote": "in a couple of weeks, the National Economic Council will meet with the First Ministers of Scotland and Wales",
+        "quote": "So in a couple of weeks, the National Economic Council will meet with the First Ministers of Scotland and Wales",
         "statement": "The National Economic Council will meet with the First Ministers of Scotland and Wales in a couple of weeks."
-      },
-      {
-        "entities": [
-          {
-            "kind": "place",
-            "name": "Greater Manchester",
-            "role": "place where Live Well achieved more for people"
-          }
-        ],
-        "made_by": "Prime Minister",
-        "quote": "we began to achieve more for people than we could have imagined before through Live Well",
-        "statement": "The Live Well model in Greater Manchester achieved more for people than could have been imagined before."
       }
     ],
     "facts": [
-      {
-        "as_at": "2026-10-16",
-        "entities": [
-          {
-            "kind": "person",
-            "name": "Prime Minister",
-            "role": "Prime Minister of the United Kingdom"
-          },
-          {
-            "kind": "place",
-            "name": "Motherwell",
-            "role": "place where the speech was given"
-          }
-        ],
-        "quote": "to be here in Motherwell",
-        "statement": "The Prime Minister gave a speech in Motherwell."
-      },
       {
         "as_at": "2023-08-01",
         "entities": [
@@ -186,21 +140,38 @@
           {
             "kind": "organisation",
             "name": "FARE-Scotland",
-            "role": "organisation visited"
+            "role": ""
           },
           {
             "kind": "place",
             "name": "Easterhouse",
-            "role": "place of the visit"
+            "role": ""
           },
           {
             "kind": "organisation",
             "name": "Greater Manchester Violence Reduction Unit",
-            "role": "unit that accompanied the visit"
+            "role": ""
           }
         ],
-        "quote": "I visited FARE-Scotland at Bannatyne House in Easterhouse with the Greater Manchester Violence Reduction Unit.",
-        "statement": "In August 2023 the Prime Minister visited FARE-Scotland at Bannatyne House in Easterhouse with the Greater Manchester Violence Reduction Unit."
+        "quote": "In August 2023, with the help of the ground-breaking Scottish Violence Reduction Unit, I visited FARE-Scotland at Bannatyne House in Easterhouse with the Greater Manchester Violence Reduction Unit.",
+        "statement": "The Prime Minister visited FARE-Scotland at Bannatyne House in Easterhouse in August 2023 with the Greater Manchester Violence Reduction Unit."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "occasion",
+            "name": "Commonwealth Games",
+            "role": ""
+          }
+        ],
+        "quote": "I was in Scotland for the Opening Ceremony of the Commonwealth Games in the summer",
+        "statement": "The Prime Minister attended the Opening Ceremony of the Commonwealth Games in Scotland in the summer."
       },
       {
         "as_at": "2026-10-16",
@@ -212,8 +183,25 @@
           },
           {
             "kind": "place",
+            "name": "Motherwell",
+            "role": ""
+          }
+        ],
+        "quote": "to be here in Motherwell",
+        "statement": "The Prime Minister was in Motherwell to give a speech."
+      },
+      {
+        "as_at": "2017-01-01",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
             "name": "Greater Manchester",
-            "role": "area of the mayoralty"
+            "role": ""
           }
         ],
         "quote": "I left Westminster in 2017 to become the first Mayor of Greater Manchester",
@@ -223,132 +211,40 @@
         "as_at": "2026-10-16",
         "entities": [
           {
-            "kind": "person",
-            "name": "Prime Minister",
-            "role": "Prime Minister of the United Kingdom"
-          },
-          {
             "kind": "place",
             "name": "Greater Manchester",
-            "role": "place where the Live Well model was pioneered"
-          }
-        ],
-        "quote": "I used it to pioneer what we called the Live Well model in Greater Manchester",
-        "statement": "The Prime Minister pioneered the Live Well model in Greater Manchester."
-      },
-      {
-        "as_at": "2026-10-16",
-        "entities": [
-          {
-            "kind": "person",
-            "name": "Prime Minister",
-            "role": "Prime Minister of the United Kingdom"
-          },
-          {
-            "kind": "place",
-            "name": "Leigh",
-            "role": "constituency the Prime Minister represented"
-          }
-        ],
-        "quote": "I was the MP there for sixteen years from the early 2000s",
-        "statement": "The Prime Minister was MP for Leigh for sixteen years from the early 2000s."
-      },
-      {
-        "as_at": "2026-10-16",
-        "entities": [
-          {
-            "kind": "organisation",
-            "name": "Scottish government",
-            "role": "government agreeing to match funding"
-          },
-          {
-            "kind": "organisation",
-            "name": "UK government",
-            "role": "government providing the £10 million"
-          }
-        ],
-        "quote": "the Scottish government has this week agreed to match the UK government’s £10 million to create two defence technical excellence colleges",
-        "statement": "The Scottish government has agreed to match the UK government's £10 million to create two defence technical excellence colleges."
-      },
-      {
-        "as_at": "2026-10-16",
-        "entities": [
-          {
-            "kind": "organisation",
-            "name": "Scottish government",
-            "role": "government that announced the reform programme"
-          }
-        ],
-        "quote": "the Scottish government has also announced a long-term programme for local government reform",
-        "statement": "The Scottish government has announced a long-term programme for local government reform."
-      },
-      {
-        "as_at": "2026-10-16",
-        "entities": [
-          {
-            "kind": "person",
-            "name": "Alan Milburn",
-            "role": "leader of the review"
-          }
-        ],
-        "quote": "The review led by Alan Milburn is challenging us to look at this very differently.",
-        "statement": "A review led by Alan Milburn is under way."
-      },
-      {
-        "as_at": "2026-10-16",
-        "entities": [
-          {
-            "kind": "place",
-            "name": "Greater Manchester",
-            "role": "place where buses are now running"
+            "role": ""
           },
           {
             "kind": "organisation",
             "name": "Alexander Dennis",
-            "role": "manufacturer of the buses"
+            "role": ""
           },
           {
             "kind": "place",
             "name": "Falkirk",
-            "role": "place where the buses were built"
+            "role": ""
           }
         ],
         "quote": "the buses on the roads of Greater Manchester today were built by Alexander Dennis in Falkirk",
-        "statement": "Buses on the roads of Greater Manchester are built by Alexander Dennis in Falkirk."
+        "statement": "Buses on the roads of Greater Manchester were built by Alexander Dennis in Falkirk."
       },
       {
         "as_at": "2026-10-16",
         "entities": [
           {
-            "kind": "person",
-            "name": "Pamela",
-            "role": "local MP"
-          },
-          {
-            "kind": "place",
-            "name": "Motherwell",
-            "role": "constituency of the local MP"
-          }
-        ],
-        "quote": "it’s important to talk to Pamela today as the local MP",
-        "statement": "Pamela is the local MP for Motherwell."
-      },
-      {
-        "as_at": "2026-10-16",
-        "entities": [
-          {
-            "kind": "person",
-            "name": "Prime Minister",
-            "role": "Prime Minister of the United Kingdom"
+            "kind": "organisation",
+            "name": "Scottish government",
+            "role": ""
           },
           {
             "kind": "organisation",
             "name": "UK government",
-            "role": "government putting money into research and innovation"
+            "role": ""
           }
         ],
-        "quote": "It’s why we’re putting a billion pounds into research and innovation across the UK in the coming years.",
-        "statement": "The UK government is putting a billion pounds into research and innovation across the UK in the coming years."
+        "quote": "It is great that the Scottish government has this week agreed to match the UK government’s £10 million to create two defence technical excellence colleges",
+        "statement": "The Scottish government has agreed to match the UK government’s £10 million to create two defence technical excellence colleges."
       }
     ]
   }

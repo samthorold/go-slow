@@ -233,8 +233,10 @@ func TestAReadingShownPrecedentsIsToldOfThemAfterTheSameInstructions(t *testing.
 }
 
 // involvesDefinition is what it means for a Fact or Claim to involve an
-// Entity, in connecting's four roles (CONTEXT.md, Entity).
-const involvesDefinition = ` A Fact or Claim involves an Entity when the Entity has a role in it: who did it, to whom or what or who it is about, where it happened, or at what named occasion. A name that only says who or where something else is ("Zelenskyy of Ukraine" says who Zelenskyy is) is not involved, and nor is who made a Claim, unless the Claim gives them a role.`
+// Entity, in connecting's four roles (CONTEXT.md, Entity), worded without
+// "role": next to the Entity's role field, that word had the model fill the
+// field for every Entity, not only a person's office.
+const involvesDefinition = ` A Fact or Claim involves an Entity it says did it, was affected by it or is what it is about, is where it happened, or is the occasion it happened at. A name that only says who or where something else is ("Zelenskyy of Ukraine" says who Zelenskyy is) is not involved, and nor is who made a Claim, unless the Claim says one of those things of them.`
 
 // readingInstructionsBeforeTheDefinition is the sha256 of reading's
 // instructions as they were before the definition was added.
@@ -249,9 +251,12 @@ func TestReadingIsToldWhatAFactInvolvesOnceInTheEntitiesParagraph(t *testing.T) 
 
 	var stated []string
 	for line := range strings.SplitSeq(instructions, "\n") {
-		if strings.Contains(line, "has a role in it") {
+		if strings.Contains(line, "is not involved") {
 			stated = append(stated, line)
 		}
+	}
+	if strings.Contains(involvesDefinition, "role") {
+		t.Error("the definition says role, which the model takes for the Entity's role field")
 	}
 	if len(stated) != 1 || !strings.HasPrefix(stated[0], "- Entities:") ||
 		!strings.Contains(stated[0], "it involves, including one the Item names only by an office or title (\"the Prime Minister\"), each with its name, kind and role."+involvesDefinition) {

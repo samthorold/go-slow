@@ -86,9 +86,17 @@ func callPath(id int64) string {
 	return "/calls/" + strconv.FormatInt(id, 10)
 }
 
-// workPage is the page of the work a call was on: an Item, keyed by its
-// Source and entry a line apart, as the acts on Items key their work.
-func workPage(key string) string {
+// briefingAct is the act of writing the Briefing, whose work is keyed by its
+// day.
+const briefingAct = "briefing"
+
+// workPage is the page of the work an act's call was on: the day's Briefing
+// for writing it; otherwise an Item, keyed by its Source and entry a line
+// apart, as the acts on Items key their work.
+func workPage(act, key string) string {
+	if act == briefingAct {
+		return briefingPath(key)
+	}
 	source, entry, ok := strings.Cut(key, "\n")
 	if !ok {
 		return ""
@@ -130,7 +138,7 @@ func (a *app) call(w http.ResponseWriter, r *http.Request) {
 	loc := a.Now().Location()
 	schema, _ := json.Marshal(c.Request.Schema)
 	p := callPage{
-		Act: c.Act, Work: strings.ReplaceAll(c.Key, "\n", " "), WorkPage: workPage(c.Key),
+		Act: c.Act, Work: strings.ReplaceAll(c.Key, "\n", " "), WorkPage: workPage(c.Act, c.Key),
 		At: when(c.At, loc), Batch: c.BatchID, Model: c.Model, Hash: c.RequestHash,
 		Instructions: c.Request.Instructions, Schema: pretty(schema), Input: c.Request.Input,
 		Outcome: string(c.Outcome), Why: c.Why,

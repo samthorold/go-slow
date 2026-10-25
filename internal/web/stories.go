@@ -70,6 +70,9 @@ type developmentRow struct {
 	ItemPath  string
 	// Withdrawn and Unwanted are what Feedback has marked it.
 	Withdrawn, Unwanted, Missed bool
+	// Call is the page of the placing call that made it a Development, if
+	// one was kept; set only on its own Story's Timeline.
+	Call string
 	// Gives is the Feedback the Owner can give on it here.
 	Gives []giveButton
 }
@@ -78,7 +81,10 @@ type developmentRow struct {
 type causeRow struct {
 	Cause, Effect developmentRow
 	Withdrawn     bool
-	Gives         []giveButton
+	// Call is the page of the connecting call that made it, if one was
+	// kept.
+	Call  string
+	Gives []giveButton
 }
 
 // connectedRow is a Story connected to this one, with the shared Facts that
@@ -160,6 +166,7 @@ func (a *app) storyWith(w http.ResponseWriter, r *http.Request, id int64, status
 	}
 	for _, d := range s.Timeline {
 		row := developmentView(d)
+		row.Call = callPath(d.PlacingCall)
 		if !d.Withdrawn {
 			row.Gives = developmentGives(p.FeedbackPath, id, d.ID)
 			if d.Unwanted {
@@ -171,7 +178,7 @@ func (a *app) storyWith(w http.ResponseWriter, r *http.Request, id int64, status
 	for _, c := range s.Causes {
 		p.Causes = append(p.Causes, causeRow{
 			Cause: developmentView(c.Cause), Effect: developmentView(c.Effect),
-			Withdrawn: c.Withdrawn,
+			Withdrawn: c.Withdrawn, Call: callPath(c.Call),
 		})
 		if !c.Withdrawn {
 			p.Causes[len(p.Causes)-1].Gives = connectionGives(p.FeedbackPath, c.Cause.ID, c.Effect.ID)

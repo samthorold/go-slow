@@ -17,6 +17,13 @@ import (
 // answers with a message stopping for stopReason, and keeps the request body.
 func api(t *testing.T, stopReason, text string) (*claude.Model, *map[string]any) {
 	t.Helper()
+	return apiReporting(t, "claude-haiku-5-5", stopReason, text)
+}
+
+// apiReporting is api, its messages reporting they were answered by
+// reported, whatever model was asked for.
+func apiReporting(t *testing.T, reported, stopReason, text string) (*claude.Model, *map[string]any) {
+	t.Helper()
 	var got map[string]any
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/v1/messages" || r.Header.Get("X-Api-Key") != "test-key" {
@@ -28,7 +35,7 @@ func api(t *testing.T, stopReason, text string) (*claude.Model, *map[string]any)
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(map[string]any{
-			"id": "msg_1", "type": "message", "role": "assistant", "model": "claude-haiku-5-5",
+			"id": "msg_1", "type": "message", "role": "assistant", "model": reported,
 			"content":     []map[string]any{{"type": "text", "text": text}},
 			"stop_reason": stopReason,
 			"usage":       map[string]any{"input_tokens": 1200, "output_tokens": 340},
@@ -76,6 +83,19 @@ func TestTheModelIsCalledWithTheActsInstructionsInputAndSchema(t *testing.T) {
 	var raw map[string]any
 	if err := json.Unmarshal(res.Raw, &raw); err != nil || raw["id"] != "msg_1" || res.StopReason != "end_turn" {
 		t.Errorf("raw = %s, stop reason %q", res.Raw, res.StopReason)
+	}
+}
+
+func TestAResponseKeepsTheModelTheAPIReportsNotTheOneAskedFor(t *testing.T) {
+	model, got := apiReporting(t, "claude-haiku-5-5-moved", "end_turn", `{"facts": []}`)
+
+	res, err := model.Complete(t.Context(), request)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if (*got)["model"] != "claude-haiku-5-5" || res.Model != "claude-haiku-5-5-moved" {
+		t.Errorf("asked for %v, kept %q, want the model reported", (*got)["model"], res.Model)
 	}
 }
 

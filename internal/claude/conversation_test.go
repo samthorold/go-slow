@@ -102,6 +102,24 @@ func TestATurnIsCalledWithTheActsToolsAndAdaptiveThinkingOnItsOwnModel(t *testin
 	}
 }
 
+func TestATurnKeepsTheModelTheAPIReportsNotTheOneAskedFor(t *testing.T) {
+	moved := map[string]any{}
+	for k, v := range usesATool {
+		moved[k] = v
+	}
+	moved["model"] = "claude-opus-5-5-moved"
+	model, bodies, _ := conversationAPI(t, moved)
+
+	turn, err := model.Turn(t.Context(), conversation)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if (*bodies)[0]["model"] != "claude-opus-5-5" || turn.Model != "claude-opus-5-5-moved" {
+		t.Errorf("asked for %v, kept %q, want the model reported", (*bodies)[0]["model"], turn.Model)
+	}
+}
+
 func TestATurnsToolCallsComeBackAndItIsPassedBackUnchanged(t *testing.T) {
 	model, bodies, _ := conversationAPI(t, usesATool)
 

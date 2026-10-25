@@ -71,6 +71,7 @@ type BriefingStore interface {
 	SaveBriefing(ctx context.Context, b Briefing) error
 	// SaveBriefingFailure keeps a failure to write a day's Briefing.
 	SaveBriefingFailure(ctx context.Context, f BriefingFailure) error
+	CallKeeper
 }
 
 // firstWindow is how far back the first Briefing ever written looks for
@@ -95,15 +96,24 @@ func (e *Editor) Brief(ctx context.Context, now time.Time) error {
 	if err != nil {
 		return err
 	}
-	b, err := WriteBriefing(ctx, e.BriefingModel, now, stories)
+	b, call, err := writeBriefing(ctx, e.BriefingModel, e.ModelFor, now, stories)
 	if err != nil {
 		day := now.Format(time.DateOnly)
 		e.Log.ErrorContext(ctx, "writing the Briefing failed", "day", day, "error", err)
+		if err := e.Briefings.KeepCall(ctx, *call); err != nil {
+			return err
+		}
 		return e.Briefings.SaveBriefingFailure(ctx, BriefingFailure{Day: day, At: now, Reason: err.Error()})
 	}
 	b.WrittenAt = now
 	if err := e.Briefings.SaveBriefing(ctx, b); err != nil {
 		return err
+	}
+	// A Briefing written empty made no call, and keeps none.
+	if call != nil {
+		if err := e.Briefings.KeepCall(ctx, *call); err != nil {
+			return err
+		}
 	}
 	e.Log.InfoContext(ctx, "Briefing written", "day", b.Day, "stories", len(b.Stories), "model", b.Model,
 		"input_tokens", b.Usage.InputTokens, "output_tokens", b.Usage.OutputTokens)
@@ -187,22 +197,35 @@ func refsFor(stories []ToBrief) briefingRefs {
 // statement that cites no Development, is ErrFailedChecks, and none of it
 // is returned.
 func WriteBriefing(ctx context.Context, m Model, day time.Time, stories []ToBrief) (Briefing, error) {
+	b, _, err := writeBriefing(ctx, m, nil, day, stories)
+	return b, err
+}
+
+// writeBriefing is WriteBriefing with its call, keyed by the day and ended
+// as it came out, its model named by modelFor. A Briefing written empty has
+// no call; any other has one, whether it was written or failed.
+func writeBriefing(ctx context.Context, m Model, modelFor func(string) string, day time.Time, stories []ToBrief) (Briefing, *Call, error) {
 	b := Briefing{Day: day.Format(time.DateOnly)}
 	if len(stories) == 0 {
-		return b, nil
+		return b, nil, nil
 	}
 	refs := refsFor(stories)
-	res, err := m.Complete(ctx, Request{
+	req := Request{
 		Act:          "briefing",
 		Instructions: briefingInstructions,
 		Input:        briefingInput(day, stories, refs),
 		Schema:       briefingSchema(refs),
-	})
-	if err != nil {
-		return Briefing{}, fmt.Errorf("writing the Briefing for %s: %w", b.Day, err)
 	}
-	b.Model, b.Usage = res.Model, res.Usage
-	return checkBriefing(b, stories, refs, res)
+	call, err := callModel(ctx, m, modelOf(modelFor, req.Act), b.Day, "writing the Briefing for "+b.Day, req, nil, day,
+		func(res Response) (err error) {
+			b.Model, b.Usage = res.Model, res.Usage
+			b, err = checkBriefing(b, stories, refs, res)
+			return err
+		})
+	if err != nil {
+		return Briefing{}, &call, err
+	}
+	return b, &call, nil
 }
 
 // checkBriefing decodes the model's Briefing and runs the act's checks:

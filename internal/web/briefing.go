@@ -101,6 +101,14 @@ type briefingPage struct {
 	Missed string
 	// Failure is the latest failure to write the day's Briefing.
 	Failure *failureRow
+	// WrittenBy is the page of the call that wrote the Briefing, and
+	// WithoutCall whether it was written empty, with no model call.
+	// Neither is set for a Briefing written before calls were kept.
+	WrittenBy   string
+	WithoutCall bool
+	// FailedAttempts are the kept calls of the day's failed attempts to
+	// write it, for a day with no Briefing.
+	FailedAttempts []attemptRow
 	// FeedbackPath is where Feedback given on the Briefing goes.
 	FeedbackPath string
 	// MissedStory is the form for a missed Story: what was entered, and why
@@ -198,6 +206,10 @@ func (a *app) briefingWith(w http.ResponseWriter, r *http.Request, day time.Time
 			p.Failure = &failureRow{At: when(f.At, day.Location()), Reason: f.Reason}
 		}
 	}
+	if err := a.briefingCalls(r, &p, b, exists, day.Location()); err != nil {
+		a.serverError(w, r, err)
+		return
+	}
 	for _, bs := range b.Stories {
 		row := briefedStoryRow{
 			ID: bs.Story.ID, Title: bs.Story.Title, Path: storyPath(bs.Story.ID),
@@ -237,6 +249,29 @@ func (a *app) briefingWith(w http.ResponseWriter, r *http.Request, day time.Time
 		}
 	}
 	a.renderStatus(w, r, status, briefingTmpl, p)
+}
+
+// briefingCalls links the day's Briefing page to how it was written: a
+// written Briefing to the call that wrote it, or says it was written with
+// none; a day with no Briefing to each failed attempt to write it.
+func (a *app) briefingCalls(r *http.Request, p *briefingPage, b editor.Briefing, exists bool, loc *time.Location) error {
+	calls, err := a.Calls.CallsOn(r.Context(), briefingAct, b.Day)
+	if err != nil {
+		return err
+	}
+	for _, c := range calls {
+		switch {
+		case !exists:
+			p.FailedAttempts = append(p.FailedAttempts, attemptRow{
+				Page: callPath(c.ID), At: when(c.At, loc), Outcome: string(c.Outcome), Why: c.Why,
+			})
+		case c.Outcome == editor.Applied:
+			p.WrittenBy = callPath(c.ID)
+		}
+	}
+	// A Briefing written empty is the one with no model to name.
+	p.WithoutCall = exists && p.WrittenBy == "" && b.Model == ""
+	return nil
 }
 
 // briefingFeedbackRows lists, on the written Briefing, the Feedback given on

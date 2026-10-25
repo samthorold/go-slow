@@ -146,7 +146,8 @@ func (s *Store) story(ctx context.Context, id int64, withdrawn bool) (editor.Sto
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT facts.id, facts.source_id, facts.entry_id, facts.statement, facts.as_at, facts.quote,
 			`+factEntities+`, items.title,
-			developments.withdrawn_by IS NOT NULL, developments.unwanted_by IS NOT NULL, developments.missed_by IS NOT NULL
+			developments.withdrawn_by IS NOT NULL, developments.unwanted_by IS NOT NULL, developments.missed_by IS NOT NULL,
+			CASE WHEN developments.missed_by IS NULL THEN `+placingCall("facts")+` ELSE 0 END
 		FROM developments JOIN facts ON facts.id = developments.fact_id
 			JOIN items USING (source_id, entry_id)
 		WHERE developments.story_id = ? AND (? OR developments.withdrawn_by IS NULL) AND NOT `+addedByUndone+`
@@ -159,7 +160,7 @@ func (s *Store) story(ctx context.Context, id int64, withdrawn bool) (editor.Sto
 		var d editor.Development
 		var asAt, ents string
 		if err := rows.Scan(&d.ID, &d.SourceID, &d.EntryID, &d.Statement, &asAt, &d.Quote, &ents, &d.ItemTitle,
-			&d.Withdrawn, &d.Unwanted, &d.Missed); err != nil {
+			&d.Withdrawn, &d.Unwanted, &d.Missed, &d.PlacingCall); err != nil {
 			return st, false, fmt.Errorf("story %d: %w", id, err)
 		}
 		if err := scanFact(&d.Fact, asAt, ents); err != nil {

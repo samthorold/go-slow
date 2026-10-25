@@ -2,7 +2,6 @@ package editor
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"time"
 )
@@ -130,25 +129,16 @@ func (e *Editor) readNow(ctx context.Context, it Item, ps []Precedent, now time.
 	if err != nil {
 		return Reading{}, nil, err
 	}
-	call := newCall(req.Act, itemKey(it), "", modelOf(e.ModelFor, req.Act), req, feedbackIDs(ps), now)
-	res, err := e.Model.Complete(ctx, req)
-	call = call.answered(res)
-	if err != nil {
-		err = fmt.Errorf("reading %s: %w", it.EntryID, err)
-		call = call.ended(Failed, err)
-		return Reading{}, &call, err
-	}
-	r, err := checkReading(it, ps, res)
-	if err != nil {
-		call = call.ended(Refused, err)
-		return Reading{}, &call, err
-	}
-	if r, err = resolve(ctx, e.Wikidata, r, it.Published, now); err != nil {
-		call = call.ended(Failed, fmt.Errorf("not written: %w", err))
-		return Reading{}, &call, err
-	}
-	call = call.ended(Applied, nil)
-	return r, &call, nil
+	var r Reading
+	call, err := e.callNow(ctx, e.Model, itemKey(it), req, feedbackIDs(ps), now, func(res Response) error {
+		checked, err := checkReading(it, ps, res)
+		if err != nil {
+			return err
+		}
+		r, err = resolve(ctx, e.Wikidata, checked, it.Published, now)
+		return err
+	})
+	return r, &call, err
 }
 
 // itemKey is the key an act's work on an Item is kept under: its Source and
@@ -174,12 +164,23 @@ func (e *Editor) PlaceWaiting(ctx context.Context, now time.Time) error {
 		if err != nil {
 			return err
 		}
-		p, err := Place(ctx, e.PlacingModel, tp, stories)
+		var p Placing
+		call, err := e.callNow(ctx, e.PlacingModel, itemKey(tp.Item), placingRequest(tp, stories),
+			feedbackIDs(tp.Precedents), now, func(res Response) (err error) {
+				p, err = checkPlacing(tp, stories, res)
+				return err
+			})
 		if err != nil {
+			if err := e.Store.KeepCall(ctx, call); err != nil {
+				return err
+			}
 			e.Log.ErrorContext(ctx, "placing failed", "source", tp.Item.SourceID, "entry", tp.Item.EntryID, "error", err)
 			continue
 		}
 		if err := e.Store.SavePlacing(ctx, p, now); err != nil {
+			return err
+		}
+		if err := e.Store.KeepCall(ctx, call); err != nil {
 			return err
 		}
 		e.Log.InfoContext(ctx, "placed", "source", tp.Item.SourceID, "entry", tp.Item.EntryID,
@@ -226,12 +227,23 @@ func (e *Editor) connectEach(ctx context.Context, waiting []ToConnect, now time.
 		if err != nil {
 			return err
 		}
-		c, err := Connect(ctx, e.ConnectingModel, tc, others)
+		var c Connecting
+		call, err := e.callNow(ctx, e.ConnectingModel, itemKey(tc.Item), connectingRequest(tc, others),
+			nil, now, func(res Response) (err error) {
+				c, err = checkConnecting(tc, others, res)
+				return err
+			})
 		if err != nil {
+			if err := e.Store.KeepCall(ctx, call); err != nil {
+				return err
+			}
 			e.Log.ErrorContext(ctx, "connecting failed", "source", tc.Item.SourceID, "entry", tc.Item.EntryID, "error", err)
 			continue
 		}
 		if err := e.Store.SaveConnecting(ctx, c, now); err != nil {
+			return err
+		}
+		if err := e.Store.KeepCall(ctx, call); err != nil {
 			return err
 		}
 		e.Log.InfoContext(ctx, "connected", "source", tc.Item.SourceID, "entry", tc.Item.EntryID,

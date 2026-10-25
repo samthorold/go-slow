@@ -30,6 +30,9 @@
       <p><time>{{.AsAt}}</time>: <span hx-disable>{{.Statement}}</span></p>
       <blockquote hx-disable><p>{{.Quote}}</p></blockquote>
       <p><small>From <a href="{{.ItemPath}}"><span hx-disable>{{.ItemTitle}}</span></a></small></p>
+      {{- if .Call}}
+      <p><small><a href="{{.Call}}">How it was placed</a></small></p>
+      {{- end}}
       {{- template "gives" .Gives}}
     </li>
   {{- end}}
@@ -50,6 +53,9 @@
       {{- end}}
       <p>{{template "fact" .Cause}}</p>
       <p>led to {{template "fact" .Effect}}</p>
+      {{- if .Call}}
+      <p><small><a href="{{.Call}}">How it was connected</a></small></p>
+      {{- end}}
       {{- template "gives" .Gives}}
     </li>
   {{- end}}

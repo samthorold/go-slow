@@ -149,17 +149,17 @@ func run(log *slog.Logger) error {
 	defer func() { stopBriefing(); <-briefed }()
 
 	app := web.New(web.Deps{
-		Briefings:  store,
-		Items:      store,
-		Readings:   store,
-		Topics:     topics,
-		Stories:    store,
-		Feedback:   feedback.New(store),
+		Briefings:   store,
+		Items:       store,
+		Readings:    store,
+		Topics:      topics,
+		Stories:     store,
+		Feedback:    feedback.New(store),
 		Kept:        store,
 		SundayReads: store,
-		BriefingAt: cfg.BriefingAt,
-		Now:        time.Now,
-		Log:        log,
+		BriefingAt:  cfg.BriefingAt,
+		Now:         time.Now,
+		Log:         log,
 	})
 
 	ln, err := new(net.ListenConfig).Listen(ctx, "tcp", ":"+strconv.Itoa(cfg.Port))

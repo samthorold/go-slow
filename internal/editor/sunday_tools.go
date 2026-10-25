@@ -372,7 +372,7 @@ func beforeText(before string) string {
 func (r *sundayRun) showFact(f Development) string {
 	ref := factRefOf(f.ID)
 	r.seen[ref] = Citation{Kind: CitesFact, Fact: f}
-	return fmt.Sprintf("%s (as at %s, from %q): %s", ref, f.AsAt.Format(time.DateOnly), f.ItemTitle, f.Statement)
+	return fmt.Sprintf("%s (as at %s, from %q): %s%s", ref, f.AsAt.Format(time.DateOnly), f.ItemTitle, f.Statement, entitiesText(f.Fact))
 }
 
 // registerDevelopment registers a Fact as a Development in its Story as
@@ -390,7 +390,15 @@ func (r *sundayRun) registerDevelopment(s Story, d Development) string {
 // registered as seen: as a Development, and as its Fact.
 func (r *sundayRun) showDevelopment(s Story, d Development) string {
 	ref := r.registerDevelopment(s, d)
-	return fmt.Sprintf("%s (as at %s, from %q): %s", ref, d.AsAt.Format(time.DateOnly), d.ItemTitle, d.Statement)
+	return fmt.Sprintf("%s (as at %s, from %q): %s%s", ref, d.AsAt.Format(time.DateOnly), d.ItemTitle, d.Statement, entitiesText(d.Fact))
+}
+
+// entitiesText is the Entities a Fact involves, by the names the tools take.
+func entitiesText(f Fact) string {
+	if len(f.Entities) == 0 {
+		return ""
+	}
+	return " [" + strings.Join(f.Entities, "; ") + "]"
 }
 
 // parseRef is the id in a ref such as S3, with its prefix.

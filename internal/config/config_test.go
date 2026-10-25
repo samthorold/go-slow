@@ -45,7 +45,7 @@ func TestConfigIsReadFromTheEnvironment(t *testing.T) {
 		ConnectingModel:    "claude-haiku-5-5",
 		BriefingModel:      "claude-haiku-5-5",
 		SundayReadModel:    "claude-opus-5-5",
-		BriefingAt:        7*time.Hour + 30*time.Minute,
+		BriefingAt:         7*time.Hour + 30*time.Minute,
 		AnthropicAPIKey:    "sk-test",
 	}
 	if cfg != want {

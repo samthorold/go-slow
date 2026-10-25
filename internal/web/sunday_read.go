@@ -55,10 +55,10 @@ type sundayReadPage struct {
 	BriefingPath string
 	Exists       bool
 	// Gives is the Feedback on the read as a whole.
-	Gives        []giveButton
-	Statements   []readStatementRow
-	Assessments  []assessmentRow
-	Stories      []startedStoryRow
+	Gives       []giveButton
+	Statements  []readStatementRow
+	Assessments []assessmentRow
+	Stories     []startedStoryRow
 	// Failure is the latest failure to write the read, for a Sunday with
 	// none.
 	Failure *failureRow

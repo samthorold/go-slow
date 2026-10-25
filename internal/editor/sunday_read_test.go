@@ -127,7 +127,10 @@ var earlierWeek = saturday.AddDate(0, 0, -10)
 // withAnEarlierCall adds to the Record a Fact from the call readout, placed
 // in the speech's Story a week and more before the Sunday read: in the
 // Record, but not among the week's Developments.
-func withAnEarlierCall(t *testing.T, store *sqlite.Store) { t.Helper(); placeTheCall(t, store, earlierWeek) }
+func withAnEarlierCall(t *testing.T, store *sqlite.Store) {
+	t.Helper()
+	placeTheCall(t, store, earlierWeek)
+}
 
 // placeTheCall reads the call readout into a Fact, F2, placed at placedAt in
 // the speech's Story.
@@ -372,7 +375,7 @@ func TestAStoryTheReadStartsGathersOnlyDevelopmentsItWasShown(t *testing.T) {
 	}
 }
 
-const assessesTheSpeech =`{"statements": [
+const assessesTheSpeech = `{"statements": [
 	{"text": "The Prime Minister is courting Scotland.", "cites": ["N1", "S1:F1"]}],
 	"assessments": [{"ref": "N1", "statement": "The Prime Minister is courting Scottish voters.", "facts": ["F1"], "supersedes": ""}],
 	"stories": []}`

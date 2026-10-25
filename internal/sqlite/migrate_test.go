@@ -38,14 +38,9 @@ func TestTheFeedbackKeptBeforeTheSundayReadSurvivesItsMigration(t *testing.T) {
 	if err := db.QueryRowContext(ctx, `SELECT count(*) FROM feedback WHERE id = 1 AND title = 'Travels' AND depth = 2`).Scan(&n); err != nil || n != 1 {
 		t.Errorf("the Feedback given is not kept: %d, %v", n, err)
 	}
-	rows, err := db.QueryContext(ctx, `PRAGMA foreign_key_check`)
-	if err != nil {
-		t.Fatal(err)
+	if broken, err := brokenForeignKeys(ctx, db); err != nil || broken {
+		t.Errorf("a mark on the Record names Feedback that is gone: %v %v", broken, err)
 	}
-	if rows.Next() {
-		t.Error("a mark on the Record names Feedback that is gone")
-	}
-	_ = rows.Close()
 	var schema string
 	if err := db.QueryRowContext(ctx, `SELECT group_concat(sql, ';') FROM sqlite_master`).Scan(&schema); err != nil {
 		t.Fatal(err)

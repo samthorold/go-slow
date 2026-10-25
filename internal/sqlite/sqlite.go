@@ -106,6 +106,23 @@ func migrateTo(ctx context.Context, db *sql.DB, n int) error {
 	return nil
 }
 
+// querier is a connection, a transaction or the database.
+type querier interface {
+	QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
+}
+
+// brokenForeignKeys reports whether any foreign key names a row that is not
+// there.
+func brokenForeignKeys(ctx context.Context, q querier) (bool, error) {
+	rows, err := q.QueryContext(ctx, `PRAGMA foreign_key_check`)
+	if err != nil {
+		return false, err
+	}
+	defer func() { _ = rows.Close() }()
+	broken := rows.Next()
+	return broken, rows.Err()
+}
+
 // applyMigration runs one migration, numbered n, all at once.
 func applyMigration(ctx context.Context, conn *sql.Conn, name string, n int) error {
 	script, err := migrations.ReadFile(name)
@@ -120,12 +137,10 @@ func applyMigration(ctx context.Context, conn *sql.Conn, name string, n int) err
 	if _, err := tx.ExecContext(ctx, string(script)); err != nil {
 		return fmt.Errorf("apply %s: %w", name, err)
 	}
-	rows, err := tx.QueryContext(ctx, `PRAGMA foreign_key_check`)
+	broken, err := brokenForeignKeys(ctx, tx)
 	if err != nil {
 		return fmt.Errorf("check %s: %w", name, err)
 	}
-	broken := rows.Next()
-	_ = rows.Close()
 	if broken {
 		return fmt.Errorf("check %s: it leaves a foreign key broken", name)
 	}

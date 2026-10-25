@@ -201,10 +201,10 @@ func (a *app) missedDevelopment(r *http.Request, path string, story int64, d fee
 // draftFrom reads Feedback from a form.
 func draftFrom(r *http.Request) feedback.Draft {
 	return feedback.Draft{
-		Kind:   r.PostForm.Get("kind"),
-		Level:  r.PostForm.Get("level"),
-		Story:  r.PostForm.Get("story"),
-		Fact:   r.PostForm.Get("fact"),
+		Kind:       r.PostForm.Get("kind"),
+		Level:      r.PostForm.Get("level"),
+		Story:      r.PostForm.Get("story"),
+		Fact:       r.PostForm.Get("fact"),
 		ToFact:     r.PostForm.Get("to_fact"),
 		Assessment: r.PostForm.Get("assessment"),
 		Read:       r.PostForm.Get("read"),

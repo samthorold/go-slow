@@ -145,6 +145,19 @@ func TestRecordedBriefing(t *testing.T) {
 // before it, so the first that fails stops the run.
 func placedFixtures(t *testing.T) *sqlite.Store {
 	t.Helper()
+	return fixturesRecord(t, false)
+}
+
+// connectedFixtures is placedFixtures with each fixture's recorded
+// connecting replayed after its placing, as the recorded connectings were
+// made.
+func connectedFixtures(t *testing.T) *sqlite.Store {
+	t.Helper()
+	return fixturesRecord(t, true)
+}
+
+func fixturesRecord(t *testing.T, connect bool) *sqlite.Store {
+	t.Helper()
 	ctx := t.Context()
 	paths, err := filepath.Glob("testdata/govuk/*.json")
 	if err != nil || len(paths) == 0 {
@@ -204,6 +217,17 @@ func placedFixtures(t *testing.T) *sqlite.Store {
 		}
 		if strings.Contains(logs.String(), "placing failed") {
 			t.Fatalf("%s: the recorded placing fails the act's checks:\n%s", f.name, logs.String())
+		}
+		if !connect {
+			continue
+		}
+		path = filepath.Join("testdata", "recorded", "connecting", f.name+".json")
+		ed = editor.New(editor.Deps{Store: store, ConnectingModel: replay{kept(t, path)}, Log: slog.New(slog.NewTextHandler(&logs, nil))})
+		if err := ed.ConnectWaiting(ctx, saturday); err != nil {
+			t.Fatal(err)
+		}
+		if strings.Contains(logs.String(), "connecting failed") {
+			t.Fatalf("%s: the recorded connecting fails the act's checks:\n%s", f.name, logs.String())
 		}
 	}
 	return store

@@ -1,0 +1,25 @@
+{{define "title"}}Feedback{{end}}
+
+{{define "content"}}
+{{/* What the Feedback is about was drawn from collected text, and a missed
+     Story's title typed by the Owner: inert, with hx-disable on the elements
+     holding them. */}}
+<p><a href="/">Briefing</a> · <a href="/stories">Stories</a></p>
+<h1>Feedback</h1>
+<p>Everything you have told the Editor, as you said it, newest first.</p>
+{{- if not .Feedback}}
+<p>No Feedback yet.</p>
+{{- end}}
+<ol>
+{{- range .Feedback}}
+  <li>
+    <p><strong>{{.Kind}}</strong> on a {{.Level}}:
+      {{- if .About}} {{if .AboutPath}}<a href="{{.AboutPath}}">{{end}}<span hx-disable>{{.About}}</span>{{if .AboutPath}}</a>{{end}}{{end}}
+      {{- if .Typed}} <q hx-disable>{{.Typed}}</q>{{end}}</p>
+    <p><small>Given {{.GivenAt}}
+      {{- if .Briefing}}, on the <a href="{{.BriefPath}}">Briefing for {{.Briefing}}</a>{{end}}
+      {{- if .Depth}}, at {{.Depth}} Depth{{else}}, on nothing a Topic follows{{end}}.</small></p>
+  </li>
+{{- end}}
+</ol>
+{{end}}

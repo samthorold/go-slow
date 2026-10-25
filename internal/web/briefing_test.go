@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/samthorold/go-slow/internal/feedback"
 	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/sqlite"
 	"github.com/samthorold/go-slow/internal/web"
@@ -44,6 +45,8 @@ func newAppWithLog(t *testing.T, now time.Time, store *sqlite.Store) (http.Handl
 		Readings:   store,
 		Topics:     interest.New(store),
 		Stories:    store,
+		Feedback:   feedback.New(store),
+		Kept:       store,
 		BriefingAt: 7 * time.Hour,
 		Now:        func() time.Time { return now },
 		Log:        slog.New(slog.NewTextHandler(&logs, nil)),

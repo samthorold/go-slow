@@ -21,7 +21,9 @@ type Deps struct {
 	Store Store
 	// Model is the model reading runs on, chosen by configuration.
 	Model Model
-	Log   *slog.Logger
+	// Wikidata is where reading looks Entities up first.
+	Wikidata Wikidata
+	Log      *slog.Logger
 }
 
 // Editor does the editorial work over the Record.
@@ -43,6 +45,9 @@ func (e *Editor) ReadWaiting(ctx context.Context, now time.Time) error {
 	}
 	for _, it := range items {
 		r, err := Read(ctx, e.Model, it)
+		if err == nil {
+			r, err = resolve(ctx, e.Wikidata, r, it.Published, now)
+		}
 		if err != nil {
 			e.Log.ErrorContext(ctx, "reading failed", "source", it.SourceID, "entry", it.EntryID, "error", err)
 			continue
@@ -55,6 +60,18 @@ func (e *Editor) ReadWaiting(ctx context.Context, now time.Time) error {
 			"input_tokens", r.Usage.InputTokens, "output_tokens", r.Usage.OutputTokens)
 	}
 	return nil
+}
+
+// KnownEntity is an Entity as the Record holds it.
+type KnownEntity struct {
+	Name string
+	Kind string
+	// WikidataID is the Wikidata item it is, or empty for the Editor's own.
+	WikidataID string
+	// Aliases are the names the Record's Items have called it by.
+	Aliases []string
+	// Facts are the Facts about it drawn from Reference sources.
+	Facts []Fact
 }
 
 // ReadItem is an Item as its page shows it: what was collected, and what

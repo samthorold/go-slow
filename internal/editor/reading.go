@@ -233,10 +233,8 @@ func checkReading(it Item, precedents []Precedent, res Response) (Reading, error
 	if err := dec.Decode(&out); err != nil {
 		return Reading{}, failed(it, "output does not match the schema: %v", err)
 	}
-	r := Reading{SourceID: it.SourceID, EntryID: it.EntryID, Model: res.Model, Usage: res.Usage}
-	for _, p := range precedents {
-		r.Precedents = append(r.Precedents, p.FeedbackID)
-	}
+	r := Reading{SourceID: it.SourceID, EntryID: it.EntryID, Model: res.Model, Usage: res.Usage,
+		Precedents: feedbackIDs(precedents)}
 	// The Reading's Entities are gathered from its Facts and Claims, once
 	// per name, in the order they are first named.
 	named := map[string]int{}

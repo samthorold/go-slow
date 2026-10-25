@@ -43,7 +43,7 @@ func main() {
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	if len(os.Args) > 1 {
 		ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, os.Interrupt)
-		err := admin(ctx, log, os.Args[1:], os.LookupEnv, os.Stdin)
+		err := admin(ctx, log, os.Args[1:], os.LookupEnv, os.Stdin, &http.Client{Timeout: fetchTimeout})
 		stop()
 		if err != nil {
 			log.Error("go-slow admin command failed", "command", os.Args[1], "error", err)
@@ -106,16 +106,18 @@ func run(log *slog.Logger) error {
 	})
 	ed := editor.New(editor.Deps{
 		Store: store, Model: models, PlacingModel: models, ConnectingModel: models, Wikidata: wd,
-		Briefings: store, BriefingModel: models, SundayReads: store, SundayReadModel: models, Log: log,
+		Briefings: store, BriefingModel: models, SundayReads: store, SundayReadModel: models,
+		ModelFor: models.ModelFor, Log: log,
 	})
 	// The daily acts run in batches: submitted after a Collection run, and
 	// their results applied on later runs as they arrive. One batch carries
 	// every act's requests.
 	batches := editor.NewBatches(editor.BatchDeps{
-		Store:   store,
-		Batcher: models,
-		Acts:    batchActs(ed),
-		Log:     log,
+		Store:    store,
+		Batcher:  models,
+		Acts:     batchActs(ed),
+		ModelFor: models.ModelFor,
+		Log:      log,
 	})
 	collector := collect.New(collect.Deps{
 		Sources: sources,
@@ -174,6 +176,7 @@ func run(log *slog.Logger) error {
 		Kept:        store,
 		Register:    store,
 		SundayReads: store,
+		Calls:       store,
 		BriefingAt:  cfg.BriefingAt,
 		Now:         time.Now,
 		Log:         log,

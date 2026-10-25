@@ -42,6 +42,8 @@ type Deps struct {
 	Register  Register
 	// SundayReads answers the Sunday read's page.
 	SundayReads SundayReads
+	// Calls answers the kept calls' pages.
+	Calls Calls
 	// BriefingAt is the time of day the Briefing is due (7h is 07:00): a
 	// day with none by then is flagged.
 	BriefingAt time.Duration
@@ -103,6 +105,7 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("POST /sunday-reads/{day}/feedback", a.sundayReadFeedback)
 	mux.HandleFunc("PUT /sunday-reads/{day}/feedback/{feedback}/undone", a.undoOnSundayRead)
 	mux.HandleFunc("GET /assessments/{id}", a.assessment)
+	mux.HandleFunc("GET /calls/{id}", a.call)
 	mux.HandleFunc("GET /feedback", a.feedback)
 	mux.HandleFunc("PUT /feedback/{feedback}/undone", a.undoOnFeedbackPage)
 	mux.HandleFunc("GET /items", a.items)

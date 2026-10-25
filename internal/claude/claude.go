@@ -43,8 +43,8 @@ type Model struct {
 	actModels map[string]string
 }
 
-// modelFor is the model an act's requests run on.
-func (m *Model) modelFor(act string) string {
+// ModelFor is the model an act's requests run on: the act's own in ActModels, otherwise Model.
+func (m *Model) ModelFor(act string) string {
 	if am, ok := m.actModels[act]; ok {
 		return am
 	}
@@ -71,11 +71,11 @@ func New(o Options) *Model {
 func (m *Model) Complete(ctx context.Context, r editor.Request) (editor.Response, error) {
 	msg, err := m.client.Messages.New(ctx, m.params(r))
 	if err != nil {
-		return editor.Response{}, fmt.Errorf("%s on %s: %w", r.Act, m.modelFor(r.Act), err)
+		return editor.Response{}, fmt.Errorf("%s on %s: %w", r.Act, m.ModelFor(r.Act), err)
 	}
 	res, err := answer(msg)
 	if err != nil {
-		return editor.Response{}, fmt.Errorf("%s on %s: %w", r.Act, m.modelFor(r.Act), err)
+		return res, fmt.Errorf("%s on %s: %w", r.Act, m.ModelFor(r.Act), err)
 	}
 	return res, nil
 }
@@ -84,7 +84,7 @@ func (m *Model) Complete(ctx context.Context, r editor.Request) (editor.Response
 // prompt, its input as the user's turn, its schema as the output format.
 func (m *Model) params(r editor.Request) anthropic.MessageNewParams {
 	return anthropic.MessageNewParams{
-		Model:     anthropic.Model(m.modelFor(r.Act)),
+		Model:     anthropic.Model(m.ModelFor(r.Act)),
 		MaxTokens: maxTokens,
 		System:    []anthropic.TextBlockParam{{Text: r.Instructions}},
 		Messages: []anthropic.MessageParam{
@@ -97,13 +97,25 @@ func (m *Model) params(r editor.Request) anthropic.MessageNewParams {
 }
 
 // answer is a message as the Editor's port gives it: its text output, or
-// an error for a refusal or an answer cut off at its length.
+// an error for a refusal or an answer cut off at its length. Either way the
+// message as returned comes with it, for the kept call.
 func answer(msg *anthropic.Message) (editor.Response, error) {
+	res := editor.Response{
+		Model:      string(msg.Model),
+		StopReason: string(msg.StopReason),
+		Usage: editor.Usage{
+			InputTokens:  msg.Usage.InputTokens,
+			OutputTokens: msg.Usage.OutputTokens,
+		},
+	}
+	if raw := msg.RawJSON(); raw != "" {
+		res.Raw = json.RawMessage(raw)
+	}
 	switch msg.StopReason {
 	case anthropic.StopReasonRefusal:
-		return editor.Response{}, fmt.Errorf("%w (%s)", editor.ErrRefused, msg.StopDetails.Category)
+		return res, fmt.Errorf("%w (%s)", editor.ErrRefused, msg.StopDetails.Category)
 	case anthropic.StopReasonMaxTokens:
-		return editor.Response{}, editor.ErrTruncated
+		return res, editor.ErrTruncated
 	}
 	var text strings.Builder
 	for _, block := range msg.Content {
@@ -111,12 +123,6 @@ func answer(msg *anthropic.Message) (editor.Response, error) {
 			text.WriteString(b.Text)
 		}
 	}
-	return editor.Response{
-		Output: json.RawMessage(text.String()),
-		Model:  string(msg.Model),
-		Usage: editor.Usage{
-			InputTokens:  msg.Usage.InputTokens,
-			OutputTokens: msg.Usage.OutputTokens,
-		},
-	}, nil
+	res.Output = json.RawMessage(text.String())
+	return res, nil
 }

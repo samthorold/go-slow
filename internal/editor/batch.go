@@ -63,6 +63,9 @@ type Job struct {
 	// Key identifies the work within its act, such as an Item.
 	Key     string
 	Request Request
+	// Precedents are the ids of the Feedback the request shows as
+	// precedent, kept with its call.
+	Precedents []int64
 	// Apply checks a model's answer with the act's own checks and writes
 	// what passes to the Record, at now. A result that fails the checks is
 	// ErrFailedChecks and writes nothing; any other error is the Record's.
@@ -77,12 +80,19 @@ type PendingBatch struct {
 	Requests    []PendingRequest
 }
 
-// PendingRequest is one request in a pending batch: its identifier, and the
-// act and work it is for.
+// PendingRequest is one request in a pending batch: its identifier, the act
+// and work it is for, and the request as sent, kept for its call.
 type PendingRequest struct {
 	ID  string
 	Act string
 	Key string
+	// Request is the request as sent, Model the model it asked for and
+	// Precedents the Feedback it showed. Request is nil for a request
+	// submitted before requests were kept: its call keeps the work's
+	// request as it is when the batch ends.
+	Request    *Request
+	Model      string
+	Precedents []int64
 }
 
 // MaxAttempts is how many times a piece of work is attempted in batches
@@ -105,6 +115,8 @@ type WorkFailure struct {
 	At       time.Time
 	Why      string
 	Failed   bool
+	// Call is the attempt's call, kept with the failure.
+	Call *Call
 }
 
 // FailedWork is a piece of work marked failed, as the Owner is shown it: the
@@ -116,6 +128,9 @@ type FailedWork struct {
 	Attempts          int
 	LastFailedAt      time.Time
 	Why               string
+	// LastCall is the kept call of its last attempt, whose page lists
+	// every attempt; zero if none was kept.
+	LastCall int64
 }
 
 // BatchStore is the part of the Record that keeps the pending batches.
@@ -124,10 +139,18 @@ type BatchStore interface {
 	SaveBatch(ctx context.Context, b PendingBatch) error
 	// Attempts is how many attempts at the act's work with key have failed.
 	Attempts(ctx context.Context, act, key string) (int, error)
-	// EndBatch removes an ended batch, keeping its failed attempts and
-	// saving the batches its failed requests were resubmitted in, all at
-	// once. Work a failure marks failed no longer awaits its act.
+	// EndBatch removes an ended batch, keeping its failed attempts, each
+	// with its call, and saving the batches its failed requests were
+	// resubmitted in, all at once. Work a failure marks failed no longer
+	// awaits its act.
 	EndBatch(ctx context.Context, batchID string, failures []WorkFailure, resubmitted []PendingBatch) error
+	CallKeeper
+}
+
+// CallKeeper is the part of the Record that keeps model calls.
+type CallKeeper interface {
+	// KeepCall keeps a call. A kept call is never rewritten.
+	KeepCall(ctx context.Context, c Call) error
 }
 
 // BatchDeps are the batch runner's dependencies.
@@ -136,7 +159,10 @@ type BatchDeps struct {
 	Batcher Batcher
 	// Acts are the acts run in batches.
 	Acts []BatchAct
-	Log  *slog.Logger
+	// ModelFor is the model the batch interface runs an act's requests on,
+	// kept with each call; nil leaves it unknown.
+	ModelFor func(act string) string
+	Log      *slog.Logger
 }
 
 // Batches runs the daily acts in batches.
@@ -198,7 +224,7 @@ func (b *Batches) ReadWaiting(ctx context.Context, now time.Time) error {
 				continue
 			}
 			requests = append(requests, BatchRequest{ID: id, Request: j.Request})
-			batch.Requests = append(batch.Requests, PendingRequest{ID: id, Act: act.Name, Key: j.Key})
+			batch.Requests = append(batch.Requests, b.pending(id, act.Name, j))
 		}
 	}
 	if len(requests) == 0 {
@@ -211,6 +237,21 @@ func (b *Batches) ReadWaiting(ctx context.Context, now time.Time) error {
 	batch.SubmittedAt = now
 	b.Log.InfoContext(ctx, "batch submitted", "batch", batch.ID, "requests", len(requests))
 	return b.Store.SaveBatch(ctx, batch)
+}
+
+// pending is a job's request as a pending batch keeps it.
+func (b *Batches) pending(id, act string, j Job) PendingRequest {
+	req := j.Request
+	return PendingRequest{ID: id, Act: act, Key: j.Key, Request: &req,
+		Model: modelOf(b.ModelFor, act), Precedents: j.Precedents}
+}
+
+// call is a pending request's call, as it was sent in its batch.
+func (b *Batches) call(batchID string, r PendingRequest, j Job, at time.Time) Call {
+	if r.Request == nil {
+		return newCall(r.Act, r.Key, batchID, modelOf(b.ModelFor, r.Act), j.Request, j.Precedents, at)
+	}
+	return newCall(r.Act, r.Key, batchID, r.Model, *r.Request, r.Precedents, at)
 }
 
 // settled is what settling a pending batch came to: whether it has ended,
@@ -259,13 +300,18 @@ func (b *Batches) settle(ctx context.Context, p PendingBatch, jobs map[string]ma
 		res, ok := results[r.ID]
 		switch {
 		case lost != nil:
-			res.Err = lost
+			res = BatchResult{Err: lost}
 		case !ok:
 			res.Err = errors.New("no result for the request")
 		}
+		call := b.call(p.ID, r, j, now).answered(res.Response)
+		outcome := Failed
 		if res.Err == nil {
 			err := j.Apply(ctx, res.Response, now)
 			if err == nil {
+				if err := b.Store.KeepCall(ctx, call.ended(Applied, nil)); err != nil {
+					return settled{}, err
+				}
 				b.Log.InfoContext(ctx, "batch result applied", "batch", p.ID, "act", r.Act, "key", r.Key,
 					"model", res.Response.Model, "input_tokens", res.Response.Usage.InputTokens,
 					"output_tokens", res.Response.Usage.OutputTokens)
@@ -274,13 +320,14 @@ func (b *Batches) settle(ctx context.Context, p PendingBatch, jobs map[string]ma
 			if !errors.Is(err, ErrFailedChecks) {
 				return settled{}, err
 			}
-			res.Err = err
+			res.Err, outcome = err, Refused
 		}
+		call = call.ended(outcome, res.Err)
 		prior, err := b.Store.Attempts(ctx, r.Act, r.Key)
 		if err != nil {
 			return settled{}, err
 		}
-		f := WorkFailure{Act: r.Act, Key: r.Key, At: now, Why: res.Err.Error(), Failed: prior+1 >= MaxAttempts}
+		f := WorkFailure{Act: r.Act, Key: r.Key, At: now, Why: res.Err.Error(), Failed: prior+1 >= MaxAttempts, Call: &call}
 		s.failures = append(s.failures, f)
 		if f.Failed {
 			b.Log.ErrorContext(ctx, "work failed", "batch", p.ID, "act", r.Act, "key", r.Key,
@@ -296,7 +343,7 @@ func (b *Batches) settle(ctx context.Context, p PendingBatch, jobs map[string]ma
 			b.Log.ErrorContext(ctx, "batch request not resubmitted", "act", r.Act, "key", r.Key, "error", err)
 			continue
 		}
-		s.resubmitted = append(s.resubmitted, PendingBatch{ID: id, SubmittedAt: now, Requests: []PendingRequest{r}})
+		s.resubmitted = append(s.resubmitted, PendingBatch{ID: id, SubmittedAt: now, Requests: []PendingRequest{b.pending(r.ID, r.Act, j)}})
 	}
 	return s, nil
 }
@@ -346,8 +393,9 @@ func (e *Editor) Reading() BatchAct {
 					continue
 				}
 				jobs = append(jobs, Job{
-					Key:     it.SourceID + "\n" + it.EntryID,
-					Request: req,
+					Key:        itemKey(it),
+					Request:    req,
+					Precedents: feedbackIDs(ps),
 					Apply: func(ctx context.Context, res Response, now time.Time) error {
 						return e.keep(ctx, it, ps, res, now)
 					},

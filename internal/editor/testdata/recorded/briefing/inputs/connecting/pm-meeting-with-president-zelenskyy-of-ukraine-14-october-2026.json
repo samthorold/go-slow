@@ -1,0 +1,92 @@
+{
+  "act": "connecting",
+  "model": "claude-haiku-5-5",
+  "recorded_at": "2026-10-25T10:21:30.522098Z",
+  "usage": {
+    "input_tokens": 3089,
+    "output_tokens": 1328
+  },
+  "output": {
+    "causes": [
+      {
+        "cause": "C5",
+        "effect": "F1"
+      }
+    ],
+    "facts": [
+      {
+        "fact": "F1",
+        "roles": [
+          {
+            "entity": "Downing Street",
+            "role": "place"
+          },
+          {
+            "entity": "Prime Minister",
+            "role": "actor"
+          },
+          {
+            "entity": "Volodymyr Zelenskyy",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F2",
+        "roles": [
+          {
+            "entity": "Prime Minister",
+            "role": "actor"
+          },
+          {
+            "entity": "Volodymyr Zelenskyy",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F3",
+        "roles": [
+          {
+            "entity": "Trump",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F4",
+        "roles": [
+          {
+            "entity": "Prime Minister",
+            "role": "actor"
+          },
+          {
+            "entity": "United Kingdom",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F5",
+        "roles": [
+          {
+            "entity": "Prime Minister",
+            "role": "actor"
+          },
+          {
+            "entity": "Volodymyr Zelenskyy",
+            "role": "actor"
+          },
+          {
+            "entity": "Ukraine",
+            "role": "affected"
+          },
+          {
+            "entity": "United Kingdom",
+            "role": "actor"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -94,6 +94,93 @@ func (s *Store) AddItems(ctx context.Context, items []collect.Item) (int, error)
 	return int(added), nil
 }
 
+// Known reports which of the Source's entries are already in the Record.
+func (s *Store) Known(ctx context.Context, sourceID string, entryIDs []string) (map[string]bool, error) {
+	ids, err := json.Marshal(entryIDs)
+	if err != nil {
+		return nil, err
+	}
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT entry_id FROM items
+		WHERE source_id = ? AND entry_id IN (SELECT value FROM json_each(?))`,
+		sourceID, string(ids))
+	if err != nil {
+		return nil, fmt.Errorf("known items of %s: %w", sourceID, err)
+	}
+	defer func() { _ = rows.Close() }()
+	known := map[string]bool{}
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return nil, fmt.Errorf("known items of %s: %w", sourceID, err)
+		}
+		known[id] = true
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("known items of %s: %w", sourceID, err)
+	}
+	return known, nil
+}
+
+// Untexted lists the Source's Items that have no text and are not yet read,
+// apart from scheduled events.
+func (s *Store) Untexted(ctx context.Context, sourceID string) ([]collect.Item, error) {
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT items.source_id, items.entry_id, items.title, items.link, items.summary
+		FROM items LEFT JOIN item_reads USING (source_id, entry_id)
+		WHERE items.source_id = ? AND items.content = '' AND items.due = ''
+			AND item_reads.source_id IS NULL
+		ORDER BY items.published, items.entry_id`, sourceID)
+	if err != nil {
+		return nil, fmt.Errorf("untexted items of %s: %w", sourceID, err)
+	}
+	defer func() { _ = rows.Close() }()
+	var out []collect.Item
+	for rows.Next() {
+		var it collect.Item
+		if err := rows.Scan(&it.SourceID, &it.EntryID, &it.Title, &it.Link, &it.Summary); err != nil {
+			return nil, fmt.Errorf("untexted items of %s: %w", sourceID, err)
+		}
+		out = append(out, it)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("untexted items of %s: %w", sourceID, err)
+	}
+	return out, nil
+}
+
+// GiveText gives an unread Item with no text its text, and clears its
+// check, so the lazy-reading check looks at it again with its text; the
+// Topics it was tied to stay tied. It reports whether the Item was given
+// it: one read meanwhile, or given text already, is left as it was. This
+// is the one change ever made to an Item kept in the Record (system design:
+// An Item is collected with its full text, or not yet).
+func (s *Store) GiveText(ctx context.Context, sourceID, entryID, text string) (bool, error) {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return false, err
+	}
+	defer func() { _ = tx.Rollback() }()
+	res, err := tx.ExecContext(ctx, `
+		UPDATE items SET content = ?
+		WHERE source_id = ? AND entry_id = ? AND content = ''
+			AND NOT EXISTS (SELECT 1 FROM item_reads r
+				WHERE r.source_id = items.source_id AND r.entry_id = items.entry_id)`,
+		text, sourceID, entryID)
+	if err != nil {
+		return false, fmt.Errorf("give text to %s: %w", entryID, err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil || n == 0 {
+		return false, err
+	}
+	if _, err := tx.ExecContext(ctx,
+		`DELETE FROM item_checks WHERE source_id = ? AND entry_id = ?`, sourceID, entryID); err != nil {
+		return false, fmt.Errorf("give text to %s: %w", entryID, err)
+	}
+	return true, tx.Commit()
+}
+
 // ListItems lists the Items in the Record, newest first, each with whether
 // the lazy-reading check has looked at it and the Topics it tied it to,
 // and whether it has been read, apart from scheduled events, which Upcoming

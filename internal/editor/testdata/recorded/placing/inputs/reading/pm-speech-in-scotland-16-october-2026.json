@@ -1,0 +1,384 @@
+{
+  "act": "reading",
+  "model": "claude-haiku-5-5",
+  "recorded_at": "2026-10-25T10:16:57.216874Z",
+  "usage": {
+    "input_tokens": 10801,
+    "output_tokens": 8181
+  },
+  "output": {
+    "claims": [
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "Glasgow",
+            "role": ""
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "When I say I want good growth in every postcode, that means every single postcode in Scotland as well.",
+        "statement": "The Prime Minister wants good growth in every postcode in Scotland."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Edinburgh",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Dundee",
+            "role": ""
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "If you go to Edinburgh today, you’ll see around one in twenty shops lying empty.",
+        "statement": "Around one in twenty shops in Edinburgh are empty, against around one in five in Dundee."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Scotland",
+            "role": ""
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "around one in six young people here are not in education, employment or training.",
+        "statement": "Around one in six young people in Scotland are not in education, employment or training."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "East Renfrewshire",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Glasgow",
+            "role": ""
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "A man in East Renfrewshire can live, as I understand, on average seven years longer than a man in Glasgow",
+        "statement": "A man in East Renfrewshire can on average live seven years longer than a man in Glasgow."
+      },
+      {
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "Chemify",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Glasgow",
+            "role": ""
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "has seen companies like Chemify turn groundbreaking research into real manufacturing jobs in Glasgow.",
+        "statement": "Chemify has turned groundbreaking research into real manufacturing jobs in Glasgow."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "United Kingdom",
+            "role": ""
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "It’s why we’re putting a billion pounds into research and innovation across the UK in the coming years.",
+        "statement": "The UK government is putting a billion pounds into research and innovation across the UK in the coming years."
+      },
+      {
+        "entities": [
+          {
+            "kind": "occasion",
+            "name": "EU-UK Summit",
+            "role": ""
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "It’s also why I am working on a new deal for food and farming at the EU-UK Summit on the 20th of November.",
+        "statement": "The Prime Minister is working on a new deal for food and farming to be taken to the EU-UK Summit on 20 November."
+      },
+      {
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "National Economic Council",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Scotland",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Wales",
+            "role": ""
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "in a couple of weeks, the National Economic Council will meet with the First Ministers of Scotland and Wales",
+        "statement": "The National Economic Council will meet with the First Ministers of Scotland and Wales in a couple of weeks."
+      },
+      {
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "Alexander Dennis",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Falkirk",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Greater Manchester",
+            "role": ""
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "So I was determined that the buses on the roads of Greater Manchester today were built by Alexander Dennis in Falkirk.",
+        "statement": "Greater Manchester buses are built by Alexander Dennis in Falkirk, a choice the Prime Minister made as Mayor."
+      },
+      {
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "DWP",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Scotland",
+            "role": ""
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "An offer of DWP devolution.",
+        "statement": "The Prime Minister offers Scotland devolution of DWP employment support."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Scotland",
+            "role": ""
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "Scotland, the most devolved nation in the UK, is itself one of the most centralised nations in Europe.",
+        "statement": "Scotland, the most devolved nation in the UK, is one of the most centralised nations in Europe."
+      },
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Douglas",
+            "role": ""
+          },
+          {
+            "kind": "person",
+            "name": "John Swinney",
+            "role": ""
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "credit to Douglas and John Swinney for working together on that",
+        "statement": "Douglas and John Swinney deserve credit for working together on the defence technical colleges."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Scotland",
+            "role": ""
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "And if we don’t move now, Scotland could lose out.",
+        "statement": "Scotland could lose out if the government does not move now."
+      }
+    ],
+    "facts": [
+      {
+        "as_at": "2023-08-01",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "organisation",
+            "name": "FARE-Scotland",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Bannatyne House",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Easterhouse",
+            "role": ""
+          },
+          {
+            "kind": "organisation",
+            "name": "Scottish Violence Reduction Unit",
+            "role": ""
+          }
+        ],
+        "quote": "In August 2023, with the help of the ground-breaking Scottish Violence Reduction Unit, I visited FARE-Scotland at Bannatyne House in Easterhouse",
+        "statement": "In August 2023 the Prime Minister visited FARE-Scotland at Bannatyne House in Easterhouse with the help of the Scottish Violence Reduction Unit."
+      },
+      {
+        "as_at": "2017-01-01",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "Westminster",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Greater Manchester",
+            "role": ""
+          }
+        ],
+        "quote": "I left Westminster in 2017 to become the first Mayor of Greater Manchester",
+        "statement": "In 2017 the Prime Minister left Westminster to become the first Mayor of Greater Manchester."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "Motherwell",
+            "role": ""
+          }
+        ],
+        "quote": "to be here in Motherwell",
+        "statement": "The Prime Minister is visiting Motherwell on 16 October 2026."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Pamela",
+            "role": "local MP"
+          },
+          {
+            "kind": "place",
+            "name": "Motherwell",
+            "role": ""
+          }
+        ],
+        "quote": "it’s important to talk to Pamela today as the local MP",
+        "statement": "Pamela is the local MP for Motherwell."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "Leigh",
+            "role": ""
+          }
+        ],
+        "quote": "I was the MP there for sixteen years from the early 2000s",
+        "statement": "The Prime Minister was MP for Leigh for sixteen years from the early 2000s."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "Scottish Government",
+            "role": ""
+          },
+          {
+            "kind": "organisation",
+            "name": "UK Government",
+            "role": ""
+          }
+        ],
+        "quote": "the Scottish government has this week agreed to match the UK government’s £10 million",
+        "statement": "The Scottish Government has agreed to match the UK Government’s £10 million to create two defence technical excellence colleges."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "Scottish Government",
+            "role": ""
+          }
+        ],
+        "quote": "the Scottish government has also announced a long-term programme for local government reform",
+        "statement": "The Scottish Government has announced a long-term programme for local government reform."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Alan Milburn",
+            "role": "leader of the review"
+          }
+        ],
+        "quote": "The review led by Alan Milburn",
+        "statement": "Alan Milburn leads a review on employment support for young people."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "Greater Manchester",
+            "role": ""
+          }
+        ],
+        "quote": "I used it to pioneer what we called the Live Well model in Greater Manchester.",
+        "statement": "The Prime Minister used lessons from Easterhouse to pioneer the Live Well model in Greater Manchester."
+      }
+    ]
+  }
+}

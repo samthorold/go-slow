@@ -1,0 +1,188 @@
+{
+  "act": "reading",
+  "model": "claude-haiku-5-5",
+  "recorded_at": "2026-10-25T10:13:57.503513Z",
+  "usage": {
+    "input_tokens": 1877,
+    "output_tokens": 3309
+  },
+  "output": {
+    "claims": [
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "person",
+            "name": "Volodymyr Zelenskyy",
+            "role": "President of Ukraine"
+          },
+          {
+            "kind": "place",
+            "name": "Russia",
+            "role": ""
+          }
+        ],
+        "made_by": "the leaders (the Prime Minister and President Zelenskyy)",
+        "quote": "It was clear that Russia had no interest in peace, the leaders underlined.",
+        "statement": "Russia had no interest in peace."
+      },
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "United Kingdom",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Ukraine",
+            "role": ""
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "The UK would continue to develop innovative military solutions for use on the battlefield in Ukraine",
+        "statement": "The UK would continue to develop innovative military solutions for use on the battlefield in Ukraine, including retrofitting British capability onto equipment gifted from other partners."
+      },
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "United Kingdom",
+            "role": ""
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "The UK would also continue its diplomatic efforts to support international supplies of defensive equipment too",
+        "statement": "The UK would continue its diplomatic efforts to support international supplies of defensive equipment."
+      },
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "person",
+            "name": "Volodymyr Zelenskyy",
+            "role": "President of Ukraine"
+          }
+        ],
+        "made_by": "the leaders (the Prime Minister and President Zelenskyy)",
+        "quote": "Both looked forward to speaking again soon.",
+        "statement": "The leaders looked forward to speaking again soon."
+      }
+    ],
+    "facts": [
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "person",
+            "name": "Volodymyr Zelenskyy",
+            "role": "President of Ukraine"
+          },
+          {
+            "kind": "place",
+            "name": "Downing Street",
+            "role": ""
+          }
+        ],
+        "quote": "The Prime Minister welcomed President Volodymyr Zelenskyy of Ukraine to Downing Street this afternoon.",
+        "statement": "The Prime Minister welcomed President Volodymyr Zelenskyy of Ukraine to Downing Street on 14 October 2026."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "person",
+            "name": "Volodymyr Zelenskyy",
+            "role": "President of Ukraine"
+          }
+        ],
+        "quote": "The leaders began by reflecting on their call on Saturday",
+        "statement": "The leaders reflected on their call on Saturday."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Trump",
+            "role": "President"
+          }
+        ],
+        "quote": "since President Trump called for an energy ceasefire",
+        "statement": "President Trump called for an energy ceasefire."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "United Kingdom",
+            "role": ""
+          }
+        ],
+        "quote": "the Prime Minister set out the UK’s latest package of Lightweight Multirole Missiles",
+        "statement": "The Prime Minister set out the UK’s latest package of Lightweight Multirole Missiles."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "person",
+            "name": "Volodymyr Zelenskyy",
+            "role": "President of Ukraine"
+          },
+          {
+            "kind": "place",
+            "name": "United Kingdom",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Ukraine",
+            "role": ""
+          }
+        ],
+        "quote": "the leaders discussed how the UK could accelerate defensive support to Ukraine ahead of the winter",
+        "statement": "The leaders discussed how the UK could accelerate defensive support to Ukraine ahead of the winter."
+      }
+    ]
+  }
+}

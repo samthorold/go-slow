@@ -1,0 +1,51 @@
+{{define "title"}}A {{.Act}} call{{end}}
+
+{{define "content"}}
+{{/* What a model was sent and what it answered, and the work's key, are
+     inert, like collected text: hx-disable on the elements holding them. */}}
+<p><a href="/items">Items</a></p>
+<h1>A {{.Act}} call</h1>
+<p>On {{if .WorkPage}}<a href="{{.WorkPage}}" hx-disable>{{.Work}}</a>{{else}}<span hx-disable>{{.Work}}</span>{{end}},
+  {{.At}}{{if .Batch}}, in batch <code hx-disable>{{.Batch}}</code>{{else}}, in real time{{end}}.</p>
+<p><strong>{{.Outcome}}</strong>{{if .Why}}: <span hx-disable>{{.Why}}</span>{{end}}</p>
+
+<section aria-labelledby="request">
+  <h2 id="request">The request</h2>
+  <p>Asked of {{if .Model}}<code hx-disable>{{.Model}}</code>{{else}}a model not recorded{{end}}.
+    Request hash <code>{{.Hash}}</code>.</p>
+  {{- if .Precedents}}
+  <p>Shown as precedent the Feedback {{.Precedents}}.</p>
+  {{- end}}
+  <h3>Instructions</h3>
+  <pre hx-disable>{{.Instructions}}</pre>
+  <h3>Input</h3>
+  <pre hx-disable>{{.Input}}</pre>
+  <h3>Schema</h3>
+  <pre hx-disable>{{.Schema}}</pre>
+</section>
+
+<section aria-labelledby="response">
+  <h2 id="response">The response</h2>
+  {{- if .Answered}}
+  <p>Answered by <code hx-disable>{{.ReportedModel}}</code>, stopping for <code hx-disable>{{.StopReason}}</code>.
+    {{.Tokens.Total}} tokens: {{.Tokens.Input}} input, {{.Tokens.Output}} output{{if .Tokens.CacheRead}}, {{.Tokens.CacheRead}} read from the cache{{end}}.</p>
+  <h3>Output</h3>
+  <pre hx-disable>{{.Output}}</pre>
+  <h3>As the provider returned it</h3>
+  <pre hx-disable>{{.Raw}}</pre>
+  {{- else}}
+  <p>No response came.</p>
+  {{- end}}
+</section>
+
+<section aria-labelledby="attempts">
+  <h2 id="attempts">Every attempt at this work</h2>
+  <p>{{.AttemptTokens.Total}} tokens over {{len .Attempts}} {{if eq (len .Attempts) 1}}attempt{{else}}attempts{{end}}.</p>
+  <ol>
+  {{- range .Attempts}}
+    <li>{{if .This}}{{.At}}: {{.Outcome}} (this call){{else}}<a href="{{.Page}}">{{.At}}</a>: {{.Outcome}}{{end}}
+      {{- if .Why}}<p hx-disable><small>{{.Why}}</small></p>{{end}}</li>
+  {{- end}}
+  </ol>
+</section>
+{{end}}

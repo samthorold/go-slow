@@ -22,10 +22,13 @@ func Sources() []Source {
 			// Number 10's own announcements: the Prime Minister's
 			// statements, speeches, calls and appointments, as published,
 			// which reporting on UK politics most often goes back to.
-			ID:          "govuk-number-10",
-			Name:        "Prime Minister's Office, 10 Downing Street (GOV.UK)",
-			FeedURL:     "https://www.gov.uk/government/organisations/prime-ministers-office-10-downing-street.atom",
-			Format:      Atom,
+			ID:      "govuk-number-10",
+			Name:    "Prime Minister's Office, 10 Downing Street (GOV.UK)",
+			FeedURL: "https://www.gov.uk/government/organisations/prime-ministers-office-10-downing-street.atom",
+			Format:  Atom,
+			// Its entries carry only a summary; the text is the Content
+			// API document for each entry's path.
+			Text:        TextFromGOVUKContent,
 			Licence:     OGLv3,
 			Attribution: OGL,
 			Keeps:       KeepFullText,
@@ -39,10 +42,13 @@ func Sources() []Source {
 			// Written ministerial statements to both Houses: government
 			// announcements made to Parliament, as made. Read through the
 			// Written Questions Service API, never the main site.
-			ID:          "parliament-written-statements",
-			Name:        "UK Parliament: written statements",
-			FeedURL:     "https://questions-statements-api.parliament.uk/api/writtenstatements/statements?take=50",
-			Format:      WrittenStatements,
+			ID:      "parliament-written-statements",
+			Name:    "UK Parliament: written statements",
+			FeedURL: "https://questions-statements-api.parliament.uk/api/writtenstatements/statements?take=50",
+			Format:  WrittenStatements,
+			// The list carries only each statement's opening; the text is
+			// the statement itself, from the same API.
+			Text:        TextFromWrittenStatement,
 			Licence:     OPLv3,
 			Attribution: OPL,
 			Keeps:       KeepFullText,

@@ -47,7 +47,7 @@
   <p>Each failed every attempt and is no longer tried. Once the cause is fixed, take an act's work up again with the <code>retry</code> admin command.</p>
   <ul>
   {{- range .Failed}}
-    <li>{{.Act}} <a href="{{.Page}}" hx-disable>{{.Title}}</a>: failed {{.Attempts}} times, last {{.When}}
+    <li>{{.Act}} <a href="{{.Page}}" hx-disable>{{.Title}}</a>: failed {{if .AttemptsPage}}<a href="{{.AttemptsPage}}">{{.Attempts}} times</a>{{else}}{{.Attempts}} times{{end}}, last {{.When}}
       <p hx-disable><small>{{.Why}}</small></p>
       <p><small><code>retry {{.Act}}</code></small></p>
     </li>

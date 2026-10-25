@@ -39,13 +39,20 @@ type Request struct {
 	Schema map[string]any
 }
 
-// Response is what the model answered.
+// Response is what the model answered. An adapter that reports an error for
+// an answer with no usable output (ErrRefused, ErrTruncated) still returns
+// what came back, so the answer can be kept.
 type Response struct {
 	// Output is the model's JSON output.
 	Output json.RawMessage
+	// Raw is the whole response exactly as the provider returned it, in its
+	// own form (thinking and refusals included), for the kept call.
+	Raw json.RawMessage
 	// Model is the model that answered, as its provider names it.
 	Model string
-	Usage Usage
+	// StopReason is why the model stopped, as its provider says it.
+	StopReason string
+	Usage      Usage
 }
 
 // Usage is what a call cost, in tokens.

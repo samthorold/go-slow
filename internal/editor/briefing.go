@@ -50,6 +50,18 @@ type Statement struct {
 	Developments []Development
 }
 
+// BriefingCitation is a Development a Briefing cites, as it was written,
+// whatever Feedback later took out, with the kept calls behind it: the
+// placing call that made it a Development (in Development.PlacingCall) and
+// ReadingCall, the reading call that drew its Fact; each zero if none was
+// kept.
+type BriefingCitation struct {
+	StoryID     int64
+	StoryTitle  string
+	Development Development
+	ReadingCall int64
+}
+
 // BriefingFailure is a Briefing that failed to be written: its call failed,
 // or its result failed the act's checks.
 type BriefingFailure struct {

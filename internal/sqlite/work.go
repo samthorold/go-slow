@@ -24,6 +24,13 @@ func placingCall(f string) string {
 			AND mc.at = fp.placed_at), 0)`
 }
 
+// readingCall is the id of the latest applied reading call on the Item whose
+// work key is key, or 0: the reading whose Facts the Record holds.
+func readingCall(key string) string {
+	return `coalesce((SELECT max(mc.id) FROM model_calls mc
+		WHERE mc.act = 'reading' AND mc.work_key = ` + key + ` AND mc.outcome = 'applied'), 0)`
+}
+
 // connectingCall is the id of the applied connecting call that made the
 // Connection aliased k, or 0: the one on the Item it was made on, at the
 // time it was made, since SaveConnecting and the call are both written at

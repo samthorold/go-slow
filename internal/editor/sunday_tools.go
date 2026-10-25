@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -59,6 +60,18 @@ func (r *sundayRun) tools() []Tool {
 				"superseded, each with the Facts it rests on. Start from them rather than from scratch; a new Assessment "+
 				"that revises a current one supersedes it.", assessmentsShown),
 			Schema: object(map[string]any{}),
+		},
+		{
+			Name:        "wikidata_search",
+			Description: "Search Wikidata, a Reference source, for items whose label or alias matches the text: their ids and labels, best first.",
+			Schema:      object(map[string]any{"text": refSchema("What to search for, such as a person's or an office's name.")}),
+		},
+		{
+			Name: "wikidata_item",
+			Description: "Look a Wikidata item up by its id: its label, aliases, what it is an instance of, the positions " +
+				"a person has held and the people who have held an office, with their dates. Each lookup is kept, " +
+				"as the item and the revision seen, under a ref (L1, L2 and so on) a statement can cite.",
+			Schema: object(map[string]any{"id": refSchema("The item's id, such as Q14211.")}),
 		},
 		{
 			Name:        submitRead,
@@ -117,6 +130,22 @@ func (r *sundayRun) call(ctx context.Context, c ToolCall) (string, error) {
 			return "", err
 		}
 		return r.assessmentsTool(ctx)
+	case "wikidata_search":
+		var in struct {
+			Text string `json:"text"`
+		}
+		if err := decodeInput(c.Input, &in); err != nil {
+			return "", err
+		}
+		return r.wikidataSearch(ctx, in.Text)
+	case "wikidata_item":
+		var in struct {
+			ID string `json:"id"`
+		}
+		if err := decodeInput(c.Input, &in); err != nil {
+			return "", err
+		}
+		return r.wikidataItem(ctx, in.ID)
 	}
 	return "", toolError("no such tool: %s", c.Name)
 }
@@ -135,7 +164,7 @@ func (r *sundayRun) storyTool(ctx context.Context, ref string) (string, error) {
 	if !ok {
 		return "", toolError("%q is not a Story's ref, such as S3", ref)
 	}
-	s, found, err := r.store.Story(ctx, id)
+	s, found, err := r.store.StoryToRead(ctx, id)
 	if err != nil {
 		return "", err
 	}
@@ -230,6 +259,105 @@ func (r *sundayRun) assessmentsTool(ctx context.Context) (string, error) {
 		}
 	}
 	return b.String(), nil
+}
+
+// holdersShown is how many of an office's holders an item lookup shows, the
+// latest first.
+const holdersShown = 20
+
+func (r *sundayRun) wikidataSearch(ctx context.Context, text string) (string, error) {
+	if strings.TrimSpace(text) == "" {
+		return "", toolError("search for something")
+	}
+	ids, err := r.wikidata.Search(ctx, text)
+	if err != nil {
+		return "", toolError("Wikidata did not answer: %v", err)
+	}
+	if len(ids) == 0 {
+		return fmt.Sprintf("Wikidata has no item matching %q.", text), nil
+	}
+	labels, err := r.wikidata.Labels(ctx, ids)
+	if err != nil {
+		return "", toolError("Wikidata did not answer: %v", err)
+	}
+	var b strings.Builder
+	fmt.Fprintf(&b, "Wikidata items matching %q, best first (look one up with wikidata_item to cite it):\n", text)
+	for _, id := range ids {
+		fmt.Fprintf(&b, "  %s: %s\n", id, labels[id])
+	}
+	return b.String(), nil
+}
+
+func (r *sundayRun) wikidataItem(ctx context.Context, id string) (string, error) {
+	if _, ok := parseRef(id, "Q"); !ok {
+		return "", toolError("%q is not a Wikidata item's id, such as Q14211", id)
+	}
+	items, err := r.wikidata.Items(ctx, []string{id})
+	if err != nil {
+		return "", toolError("Wikidata did not answer: %v", err)
+	}
+	if len(items) == 0 {
+		return "", toolError("Wikidata has no item %s", id)
+	}
+	it := items[0]
+	holders := slices.Clone(it.Holders)
+	slices.SortFunc(holders, func(a, b Tenure) int { return b.Start.Compare(a.Start) })
+	holders = holders[:min(len(holders), holdersShown)]
+	ids := slices.Clone(it.InstanceOf)
+	for _, t := range it.Positions {
+		ids = append(ids, t.Office)
+	}
+	for _, t := range holders {
+		ids = append(ids, t.Holder)
+	}
+	labels := map[string]string{}
+	if len(ids) > 0 {
+		if labels, err = r.wikidata.Labels(ctx, ids); err != nil {
+			return "", toolError("Wikidata did not answer: %v", err)
+		}
+	}
+	r.lookups++
+	ref := "L" + strconv.Itoa(r.lookups)
+	r.seen[ref] = Citation{Kind: CitesLookup, Lookup: Lookup{
+		Reference: "Wikidata", ItemID: it.ID, Revision: it.Revision, At: r.now, Licence: WikidataLicence,
+	}}
+	named := func(id string) string {
+		if l := labels[id]; l != "" {
+			return l + " (" + id + ")"
+		}
+		return id
+	}
+	var b strings.Builder
+	fmt.Fprintf(&b, "%s: Wikidata %s, revision %d, looked up %s: %s\n", ref, it.ID, it.Revision, r.now.Format(time.DateOnly), it.Label)
+	if len(it.Aliases) > 0 {
+		fmt.Fprintf(&b, "  also known as: %s\n", strings.Join(it.Aliases, "; "))
+	}
+	for _, c := range it.InstanceOf {
+		fmt.Fprintf(&b, "  instance of: %s\n", named(c))
+	}
+	for _, t := range it.Positions {
+		fmt.Fprintf(&b, "  position held: %s%s\n", named(t.Office), tenureText(t))
+	}
+	for _, t := range holders {
+		fmt.Fprintf(&b, "  held by: %s%s\n", named(t.Holder), tenureText(t))
+	}
+	return b.String(), nil
+}
+
+// tenureText is a tenure's dates, as Wikidata gives them.
+func tenureText(t Tenure) string {
+	var s string
+	if !t.Start.IsZero() {
+		if t.StartToTheDay {
+			s += " from " + t.Start.Format(time.DateOnly)
+		} else {
+			s += " from " + t.Start.Format("2006")
+		}
+	}
+	if !t.End.IsZero() {
+		s += " until " + t.End.Format(time.DateOnly)
+	}
+	return s
 }
 
 func beforeText(before string) string {

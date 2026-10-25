@@ -52,4 +52,15 @@ type Response struct {
 type Usage struct {
 	InputTokens  int64 `json:"input_tokens"`
 	OutputTokens int64 `json:"output_tokens"`
+	// CacheReadTokens are input tokens read from the provider's prompt
+	// cache, apart from InputTokens: a conversation sends its whole history
+	// on every turn, and most of it is read from the cache.
+	CacheReadTokens int64 `json:"cache_read_input_tokens,omitempty"`
 }
+
+func (u Usage) add(v Usage) Usage {
+	return Usage{u.InputTokens + v.InputTokens, u.OutputTokens + v.OutputTokens, u.CacheReadTokens + v.CacheReadTokens}
+}
+
+// total is every token, input and output, cached or not.
+func (u Usage) total() int64 { return u.InputTokens + u.OutputTokens + u.CacheReadTokens }

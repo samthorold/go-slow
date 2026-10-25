@@ -20,7 +20,22 @@ func (s *Store) LastSundayReadWritten(ctx context.Context) (time.Time, error) {
 	return parseTime(at), nil
 }
 
-// SaveSundayRead keeps a Sunday read: its statements in order, each with
+// HasSundayRead reports whether the day's Sunday read has been written.
+func (s *Store) HasSundayRead(ctx context.Context, day string) (bool, error) {
+	var n int
+	if err := s.db.QueryRowContext(ctx, `SELECT count(*) FROM sunday_reads WHERE day = ?`, day).Scan(&n); err != nil {
+		return false, fmt.Errorf("has sunday read: %w", err)
+	}
+	return n > 0, nil
+}
+
+// StoryToRead is one Story as the acts see it, without what Feedback
+// withdrew.
+func (s *Store) StoryToRead(ctx context.Context, id int64) (editor.Story, bool, error) {
+	return s.story(ctx, id, false)
+}
+
+// SaveSundayRead keeps a Sunday read:its statements in order, each with
 // what it cites, all at once.
 func (s *Store) SaveSundayRead(ctx context.Context, r editor.SundayRead) error {
 	tx, err := s.db.BeginTx(ctx, nil)
@@ -68,6 +83,20 @@ func (s *Store) SaveSundayRead(ctx context.Context, r editor.SundayRead) error {
 			}
 		}
 	}
+	// Each lookup the read cites is kept once, however many statements cite
+	// it.
+	lookups := map[editor.Lookup]int64{}
+	lookup := func(l editor.Lookup) (int64, error) {
+		if id, ok := lookups[l]; ok {
+			return id, nil
+		}
+		var id int64
+		err := tx.QueryRowContext(ctx, `
+			INSERT INTO reference_lookups (reference, item_id, revision, looked_up_at, licence) VALUES (?, ?, ?, ?, ?) RETURNING id`,
+			l.Reference, l.ItemID, l.Revision, formatTime(l.At), l.Licence).Scan(&id)
+		lookups[l] = id
+		return id, err
+	}
 	for i, st := range r.Statements {
 		var id int64
 		if err := tx.QueryRowContext(ctx, `
@@ -76,8 +105,16 @@ func (s *Store) SaveSundayRead(ctx context.Context, r editor.SundayRead) error {
 			return fmt.Errorf("save sunday read %s: statement: %w", r.Day, err)
 		}
 		for j, c := range st.Cites {
-			var fact, story, assessment any
+			var fact, story, assessment, lookupID any
 			switch c.Kind {
+			case editor.CitesLookup:
+				l := c.Lookup
+				l.At = l.At.UTC()
+				id, err := lookup(l)
+				if err != nil {
+					return fmt.Errorf("save sunday read %s: lookup: %w", r.Day, err)
+				}
+				lookupID = id
 			case editor.CitesFact:
 				fact = c.Fact.ID
 			case editor.CitesDevelopment:
@@ -89,9 +126,9 @@ func (s *Store) SaveSundayRead(ctx context.Context, r editor.SundayRead) error {
 				}
 			}
 			if _, err := tx.ExecContext(ctx, `
-				INSERT INTO read_citations (statement_id, position, kind, fact_id, story_id, assessment_id)
-				VALUES (?, ?, ?, ?, ?, ?)`,
-				id, j, string(c.Kind), fact, story, assessment); err != nil {
+				INSERT INTO read_citations (statement_id, position, kind, fact_id, story_id, assessment_id, lookup_id)
+				VALUES (?, ?, ?, ?, ?, ?, ?)`,
+				id, j, string(c.Kind), fact, story, assessment, lookupID); err != nil {
 				return fmt.Errorf("save sunday read %s: citation: %w", r.Day, err)
 			}
 		}
@@ -172,10 +209,13 @@ func (s *Store) readStatements(ctx context.Context, readID int64) ([]editor.Read
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT read_statements.id, read_statements.text, read_citations.kind,
 			coalesce(read_citations.story_id, 0), coalesce(stories.title, ''),
-			coalesce(read_citations.fact_id, 0), coalesce(read_citations.assessment_id, 0)
+			coalesce(read_citations.fact_id, 0), coalesce(read_citations.assessment_id, 0),
+			coalesce(l.id, 0), coalesce(l.reference, ''), coalesce(l.item_id, ''), coalesce(l.revision, 0),
+			coalesce(l.looked_up_at, ''), coalesce(l.licence, '')
 		FROM read_statements
 			JOIN read_citations ON read_citations.statement_id = read_statements.id
 			LEFT JOIN stories ON stories.id = read_citations.story_id
+			LEFT JOIN reference_lookups l ON l.id = read_citations.lookup_id
 		WHERE read_statements.read_id = ?
 		ORDER BY read_statements.position, read_citations.position`, readID)
 	if err != nil {
@@ -190,14 +230,17 @@ func (s *Store) readStatements(ctx context.Context, readID int64) ([]editor.Read
 	var facts []cited
 	for rows.Next() {
 		var id, storyID, factID, assessmentID int64
-		var text, kind, title string
-		if err := rows.Scan(&id, &text, &kind, &storyID, &title, &factID, &assessmentID); err != nil {
+		var text, kind, title, lookedUp string
+		var l editor.Lookup
+		if err := rows.Scan(&id, &text, &kind, &storyID, &title, &factID, &assessmentID,
+			&l.ID, &l.Reference, &l.ItemID, &l.Revision, &lookedUp, &l.Licence); err != nil {
 			return nil, err
 		}
 		if n := len(out); n == 0 || out[n-1].ID != id {
 			out = append(out, editor.ReadStatement{ID: id, Text: text})
 		}
-		c := editor.Citation{Kind: editor.CitationKind(kind), Story: editor.Story{ID: storyID, Title: title}}
+		l.At = parseTime(lookedUp)
+		c := editor.Citation{Kind: editor.CitationKind(kind), Story: editor.Story{ID: storyID, Title: title}, Lookup: l}
 		c.Fact.ID, c.Assessment.ID = factID, assessmentID
 		facts = append(facts, cited{len(out) - 1, c})
 	}
@@ -238,7 +281,7 @@ func (s *Store) FactsAbout(ctx context.Context, entity string, before time.Time,
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT `+traced("f", "i")+`
 		FROM facts f JOIN items i ON i.source_id = f.source_id AND i.entry_id = f.entry_id
-		WHERE f.as_at < ?2 AND EXISTS (
+		WHERE f.as_at < ?2 AND f.withdrawn_by IS NULL AND EXISTS (
 			SELECT 1 FROM fact_entities fe JOIN entities e ON e.id = fe.entity_id
 			WHERE fe.fact_id = f.id AND (e.name = ?1 COLLATE NOCASE OR EXISTS (
 				SELECT 1 FROM entity_names n WHERE n.entity_id = e.id AND n.name = ?1 COLLATE NOCASE)))
@@ -276,7 +319,7 @@ func (s *Store) FactsAbout(ctx context.Context, entity string, before time.Time,
 func (s *Store) storiesOf(ctx context.Context, factID int64) ([]editor.Story, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT stories.id, stories.title FROM developments JOIN stories ON stories.id = developments.story_id
-		WHERE developments.fact_id = ? ORDER BY stories.id`, factID)
+		WHERE developments.fact_id = ? AND developments.withdrawn_by IS NULL ORDER BY stories.id`, factID)
 	if err != nil {
 		return nil, err
 	}
@@ -300,6 +343,18 @@ func (s *Store) Assessments(ctx context.Context, limit int) ([]editor.Assessment
 		return nil, fmt.Errorf("assessments: %w", err)
 	}
 	return out, nil
+}
+
+// Assessment is one Assessment, reporting whether it is in the Record.
+func (s *Store) Assessment(ctx context.Context, id int64) (editor.Assessment, bool, error) {
+	as, err := s.assessments(ctx, `a.id = ?`, -1, id)
+	if err != nil {
+		return editor.Assessment{}, false, fmt.Errorf("assessment %d: %w", id, err)
+	}
+	if len(as) == 0 {
+		return editor.Assessment{}, false, nil
+	}
+	return as[0], true, nil
 }
 
 // ReadAssessments are the Assessments the Sunday read readID made, in order.

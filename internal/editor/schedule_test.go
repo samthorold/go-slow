@@ -90,6 +90,59 @@ func TestABriefingThatFailedIsTriedAgainLater(t *testing.T) {
 	}
 }
 
+// sundaySchedule is schedule with the Sunday read written by agent, and
+// what happened, in order.
+func sundaySchedule(t *testing.T, store *sqlite.Store, agent *fakeAgent) (*editor.Schedule, *[]string) {
+	t.Helper()
+	s, happened := schedule(store, &fakeModel{output: spokeInMotherwell})
+	ed, _ := reader(store, agent)
+	s.SundayRead = func(ctx context.Context, now time.Time) error {
+		*happened = append(*happened, "sunday read")
+		return ed.SundayRead(ctx, now)
+	}
+	return s, happened
+}
+
+func TestTheSundayReadIsWrittenOnSundayAfterTheBriefing(t *testing.T) {
+	store := record(t)
+	readAndPlace(t, store, &fakeModel{output: startsAStory})
+	s, happened := sundaySchedule(t, store, &fakeAgent{turns: []editor.Turn{submits(citesTheSpeech)}})
+	sunday := seven.AddDate(0, 0, 1)
+
+	s.Tick(t.Context(), seven) // Saturday: the Briefing only
+	s.Tick(t.Context(), sunday.Add(-time.Minute))
+	s.Tick(t.Context(), sunday)
+	s.Tick(t.Context(), sunday.Add(time.Minute))
+
+	if want := []string{"brief", "brief", "sunday read"}; !slices.Equal(*happened, want) {
+		t.Errorf("happened = %v, want %v", *happened, want)
+	}
+	if _, found, err := store.SundayRead(t.Context(), "2026-10-25"); err != nil || !found {
+		t.Errorf("no Sunday read written: %v %v", found, err)
+	}
+}
+
+func TestASundayReadThatFailedIsTriedAgainAFewTimes(t *testing.T) {
+	store := record(t)
+	readAndPlace(t, store, &fakeModel{output: startsAStory})
+	s, happened := sundaySchedule(t, store, &fakeAgent{}) // never submits
+	sunday := seven.AddDate(0, 0, 1)
+
+	for _, at := range []time.Duration{0, 30 * time.Minute, time.Hour, 2 * time.Hour, 3 * time.Hour, 4 * time.Hour} {
+		s.Tick(t.Context(), sunday.Add(at))
+	}
+
+	var tries int
+	for _, h := range *happened {
+		if h == "sunday read" {
+			tries++
+		}
+	}
+	if tries != editor.SundayReadTries {
+		t.Errorf("tried %d times, want %d, each %v after the last: %v", tries, editor.SundayReadTries, editor.RetrySundayRead, *happened)
+	}
+}
+
 func TestTheSetTimeIsInTheClocksTimeZone(t *testing.T) {
 	london, err := time.LoadLocation("Europe/London")
 	if err != nil {

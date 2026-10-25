@@ -47,10 +47,12 @@ const (
 	CitesFact        CitationKind = "fact"
 	CitesDevelopment CitationKind = "development"
 	CitesAssessment  CitationKind = "assessment"
+	CitesLookup      CitationKind = "lookup"
 )
 
 // Citation is one thing a statement rests on: a Fact, a Fact as a
-// Development in its Story, or an Assessment.
+// Development in its Story, an Assessment, or a lookup of a Reference
+// source.
 type Citation struct {
 	Kind CitationKind
 	// Fact is the Fact cited, traced to its Item, for a Fact or a
@@ -63,6 +65,9 @@ type Citation struct {
 	// Assessments, counting from 1.
 	Assessment    Assessment
 	NewAssessment int
+	// Lookup is a lookup of a Reference source the read's agent made: the
+	// item and the revision of it seen. It has no ID until it is kept.
+	Lookup Lookup
 }
 
 // Assessment is a judgement the Editor reached in a Sunday read by reasoning
@@ -106,15 +111,16 @@ type SundayStore interface {
 	// ToBrief are the Stories the Owner's Topics select with Developments
 	// placed after after and up to upTo: the week's Stories.
 	ToBrief(ctx context.Context, after, upTo time.Time) ([]ToBrief, error)
-	// Story is one Story with its whole Timeline and its cause
-	// Connections, reporting whether it is in the Record.
-	Story(ctx context.Context, id int64) (Story, bool, error)
+	// StoryToRead is one Story with its whole Timeline and its cause
+	// Connections, as the acts see it, without what Feedback withdrew,
+	// reporting whether it is in the Record.
+	StoryToRead(ctx context.Context, id int64) (Story, bool, error)
 	// ConnectedStories are the Stories connected to the Story id, each with
 	// the shared Facts that connect them.
 	ConnectedStories(ctx context.Context, id int64) ([]StoryConnection, error)
 	// FactsAbout are at most limit Facts involving the named Entity, as at
 	// a date before before (any date, if it is zero), the latest first, each
-	// with the Stories it is a Development in.
+	// with the Stories it is a Development in; none Feedback withdrew.
 	FactsAbout(ctx context.Context, entity string, before time.Time, limit int) ([]RecordFact, error)
 	// Assessments are at most limit Assessments, current and superseded,
 	// the latest first, each with the Facts it cites.
@@ -146,7 +152,7 @@ func (e *Editor) SundayRead(ctx context.Context, now time.Time) error {
 	if err != nil {
 		return err
 	}
-	run := &sundayRun{model: e.SundayReadModel, store: e.SundayReads, now: now, seen: map[string]Citation{}}
+	run := &sundayRun{model: e.SundayReadModel, store: e.SundayReads, wikidata: e.Wikidata, now: now, seen: map[string]Citation{}}
 	r, err := run.write(ctx, after, stories)
 	day := now.Format(time.DateOnly)
 	if err != nil {
@@ -165,36 +171,78 @@ func (e *Editor) SundayRead(ctx context.Context, now time.Time) error {
 // conversation, and everything it has been shown, by ref, which is all a
 // statement may cite.
 type sundayRun struct {
-	model Conversation
-	store SundayStore
-	now   time.Time
-	seen  map[string]Citation
+	model    Conversation
+	store    SundayStore
+	wikidata Wikidata
+	now      time.Time
+	seen     map[string]Citation
+	// lookups is how many lookups the run has made, which numbers them.
+	lookups int
 }
 
 // sundayReadInstructions are the Sunday read's own instructions.
 const sundayReadInstructions = `You are the Editor of a private slow-news briefing, writing this week's Sunday read for its one reader, the Owner.`
 
+// The bounds on the agent's loop. A read that passes the checks within them
+// is published; one that does not fails, and is kept as a failure. The
+// read is weekly and its questions open, so they are generous: an
+// investigation of a dozen Stories, with a few lookups each and a mended
+// submission, takes well under half of them, while a loop that never
+// converges is stopped before it costs more than a few pounds.
+const (
+	// SundayReadMaxTurns is the most turns (model calls) a read may take.
+	SundayReadMaxTurns = 40
+	// SundayReadTokenBudget is the most tokens a read may spend over all its
+	// turns, input (cached or not) and output together, checked before
+	// each turn.
+	SundayReadTokenBudget = 4_000_000
+)
+
+// askToSubmit is what the agent is told when it ends its turn without
+// submitting a read.
+const askToSubmit = "Submit the read with submit_read now; it is not published otherwise."
+
 // write runs the agent until it submits a read that passes the checks.
 func (r *sundayRun) write(ctx context.Context, after time.Time, stories []ToBrief) (SundayRead, error) {
 	read := SundayRead{Day: r.now.Format(time.DateOnly), WrittenAt: r.now}
+	if len(stories) == 0 {
+		// Nothing moved on: the read is written empty, and says so, with no
+		// model call.
+		return read, nil
+	}
 	req := ConversationRequest{
 		Act:          "sunday_read",
 		Instructions: sundayReadInstructions,
 		Tools:        r.tools(),
 		Messages:     []Message{{User: r.weekInput(after, stories)}},
 	}
+	asked := false
 	for {
+		if read.Turns >= SundayReadMaxTurns {
+			return SundayRead{}, fmt.Errorf("writing the Sunday read for %s: stopped at the bound of %d turns with no read that passes the checks",
+				read.Day, SundayReadMaxTurns)
+		}
+		if spent := read.Usage.total(); spent > SundayReadTokenBudget {
+			return SundayRead{}, fmt.Errorf("writing the Sunday read for %s: stopped at the bound of %d tokens (spent %d) with no read that passes the checks",
+				read.Day, SundayReadTokenBudget, spent)
+		}
 		t, err := r.model.Turn(ctx, req)
 		if err != nil {
 			return SundayRead{}, fmt.Errorf("writing the Sunday read for %s: %w", read.Day, err)
 		}
 		read.Turns++
 		read.Model = t.Model
-		read.Usage.InputTokens += t.Usage.InputTokens
-		read.Usage.OutputTokens += t.Usage.OutputTokens
+		read.Usage = read.Usage.add(t.Usage)
 		req.Messages = append(req.Messages, Message{Assistant: &t})
 		if len(t.Calls) == 0 {
-			return SundayRead{}, fmt.Errorf("writing the Sunday read for %s: the agent stopped without submitting a read", read.Day)
+			// The model can't be made to call a tool, only asked: it is
+			// asked once to submit, then the read fails.
+			if asked {
+				return SundayRead{}, fmt.Errorf("writing the Sunday read for %s: the agent stopped without submitting a read", read.Day)
+			}
+			asked = true
+			req.Messages = append(req.Messages, Message{User: askToSubmit})
+			continue
 		}
 		var results []ToolResult
 		for _, c := range t.Calls {

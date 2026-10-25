@@ -35,6 +35,8 @@ type Deps struct {
 	Stories   Stories
 	Feedback  Feedback
 	Kept      Kept
+	// SundayReads answers the Sunday read's page.
+	SundayReads SundayReads
 	// BriefingAt is the time of day the Briefing is due (7h is 07:00): a
 	// day with none by then is flagged.
 	BriefingAt time.Duration
@@ -74,6 +76,9 @@ var (
 // feedbackTmpl is the Feedback page: every piece, as given.
 var feedbackTmpl = page("feedback_list.html")
 
+// sundayReadTmpl is a Sunday read's page.
+var sundayReadTmpl = page("sunday_read.html")
+
 // page parses a page template together with the layout it fills.
 func page(name string) *template.Template {
 	return template.Must(template.ParseFS(templateFS, "templates/layout.html", "templates/feedback.html", "templates/"+name))
@@ -88,6 +93,8 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("GET /briefings", a.briefings)
 	mux.HandleFunc("GET /briefings/{day}", a.pastBriefing)
 	mux.HandleFunc("POST /briefings/{day}/feedback", a.briefingFeedback)
+	mux.HandleFunc("GET /sunday-reads/{day}", a.sundayRead)
+	mux.HandleFunc("GET /assessments/{id}", a.assessment)
 	mux.HandleFunc("GET /feedback", a.feedback)
 	mux.HandleFunc("GET /items", a.items)
 	mux.HandleFunc("GET /items/{source}/{entry}", a.item)

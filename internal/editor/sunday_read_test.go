@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/samthorold/go-slow/internal/editor"
+	"github.com/samthorold/go-slow/internal/feedback"
 	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
@@ -24,16 +25,23 @@ var sundayMorning = saturday.AddDate(0, 0, 1).Add(time.Hour)
 // was sent. Run out of script, it ends its turn saying nothing.
 type fakeAgent struct {
 	turns []editor.Turn
-	sent  []editor.ConversationRequest
+	// then, if set, is every turn after the script's.
+	then *editor.Turn
+	sent []editor.ConversationRequest
 }
 
 func (f *fakeAgent) Turn(_ context.Context, r editor.ConversationRequest) (editor.Turn, error) {
 	f.sent = append(f.sent, r)
 	n := len(f.sent) - 1
-	if n >= len(f.turns) {
+	if n >= len(f.turns) && f.then == nil {
 		return editor.Turn{Model: "fake-agent"}, nil
 	}
-	t := f.turns[n]
+	var t editor.Turn
+	if n < len(f.turns) {
+		t = f.turns[n]
+	} else {
+		t = *f.then
+	}
 	if t.Model == "" {
 		t.Model = "fake-agent"
 	}
@@ -57,12 +65,17 @@ func submits(read string) editor.Turn { return calls("submit_read", read) }
 
 // reader is an Editor over store that writes the Sunday read with agent.
 func reader(store *sqlite.Store, agent editor.Conversation) (*editor.Editor, *bytes.Buffer) {
+	return readerWith(store, agent, &fakeWikidata{})
+}
+
+// readerWith is reader looking things up in wd.
+func readerWith(store *sqlite.Store, agent editor.Conversation, wd editor.Wikidata) (*editor.Editor, *bytes.Buffer) {
 	var logs bytes.Buffer
 	return editor.New(editor.Deps{
 		Store:           store,
 		SundayReads:     store,
 		SundayReadModel: agent,
-		Wikidata:        &fakeWikidata{},
+		Wikidata:        wd,
 		Log:             slog.New(slog.NewTextHandler(&logs, nil)),
 	}), &logs
 }
@@ -188,6 +201,83 @@ func TestTheAgentsToolsQueryTheRecordBackThroughTime(t *testing.T) {
 	if cites := r.Statements[0].Cites; len(cites) != 2 || cites[0].Kind != editor.CitesDevelopment ||
 		cites[1].Kind != editor.CitesFact || cites[1].Fact.Statement != "Andy Burnham spoke to the President of Finland." {
 		t.Errorf("cites = %+v", cites)
+	}
+}
+
+func TestTheAgentLooksThingsUpInWikidataAndCitesTheLookup(t *testing.T) {
+	store := record(t)
+	readAndPlace(t, store, &fakeModel{output: startsAStory})
+	wd := &fakeWikidata{
+		search: map[string][]string{"Andy Burnham": {"Q123"}},
+		items: map[string]editor.WikidataItem{"Q123": {
+			ID: "Q123", Label: "Andy Burnham", Aliases: []string{"Andrew Burnham"}, InstanceOf: []string{"Q5"}, Revision: 42,
+			Positions: []editor.Tenure{{Holder: "Q123", Office: "Q14211", Start: time.Date(2026, time.July, 20, 0, 0, 0, 0, time.UTC), StartToTheDay: true}},
+		}},
+		labels: map[string]string{"Q123": "Andy Burnham", "Q14211": "Prime Minister of the United Kingdom", "Q5": "human"},
+	}
+	agent := &fakeAgent{turns: []editor.Turn{
+		calls("wikidata_search", `{"text": "Andy Burnham"}`),
+		calls("wikidata_item", `{"id": "Q123"}`),
+		submits(`{"statements": [{"text": "Andy Burnham has been Prime Minister since July.", "cites": ["L1", "S1:F1"]}],
+			"assessments": [], "stories": []}`),
+	}}
+	ed, logs := readerWith(store, agent, wd)
+
+	if err := ed.SundayRead(t.Context(), sundayMorning); err != nil {
+		t.Fatal(err)
+	}
+
+	result := func(turn int) string {
+		msgs := agent.sent[turn].Messages
+		return msgs[len(msgs)-1].Results[0].Content
+	}
+	if got := result(1); !strings.Contains(got, "Q123: Andy Burnham") {
+		t.Errorf("the search shows:\n%s", got)
+	}
+	got := result(2)
+	for _, want := range []string{"L1", "Q123", "revision 42", "human", "Prime Minister of the United Kingdom", "2026-07-20"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("the item does not show %q:\n%s", want, got)
+		}
+	}
+	r, found, err := store.SundayRead(t.Context(), "2026-10-25")
+	if err != nil || !found {
+		t.Fatalf("SundayRead: %v %v\n%s", found, err, logs)
+	}
+	// The lookup is kept, as the item and revision seen, under its licence.
+	c := r.Statements[0].Cites[0]
+	if c.Kind != editor.CitesLookup || c.Lookup.ID == 0 || c.Lookup.ItemID != "Q123" || c.Lookup.Revision != 42 ||
+		c.Lookup.Reference != "Wikidata" || c.Lookup.Licence != editor.WikidataLicence || !c.Lookup.At.Equal(sundayMorning) {
+		t.Errorf("cites %+v, want the lookup", c)
+	}
+}
+
+func TestTheAgentIsNeverShownWhatFeedbackWithdrew(t *testing.T) {
+	store := record(t)
+	readAndPlace(t, store, &fakeModel{output: startsAStory})
+	withAnEarlierCall(t, store)
+	if _, errs, err := feedback.New(store).Give(t.Context(), feedback.Draft{Kind: "wrong", Level: "fact", Fact: "2"}, saturday); err != nil || errs != nil {
+		t.Fatalf("give Feedback: %v %v", errs, err)
+	}
+	agent := &fakeAgent{turns: []editor.Turn{
+		calls("story", `{"story": "S1"}`, "facts_about", `{"entity": "Andy Burnham", "before": ""}`),
+		submits(`{"statements": [{"text": "The Prime Minister called Finland.", "cites": ["F2"]}], "assessments": [], "stories": []}`),
+	}}
+	ed, _ := reader(store, agent)
+
+	if err := ed.SundayRead(t.Context(), sundayMorning); err != nil {
+		t.Fatal(err)
+	}
+
+	msgs := agent.sent[1].Messages
+	for _, res := range msgs[len(msgs)-1].Results {
+		if strings.Contains(res.Content, "Finland") {
+			t.Errorf("a withdrawn Fact is shown:\n%s", res.Content)
+		}
+	}
+	// So it can't be cited either.
+	if _, found, _ := store.SundayRead(t.Context(), "2026-10-25"); found {
+		t.Error("a read citing a withdrawn Fact was published")
 	}
 }
 
@@ -376,6 +466,75 @@ func TestAnAssessmentThatFailsTheChecksRejectsTheRead(t *testing.T) {
 const uncited = `{"statements": [{"text": "Scotland is the true north.", "cites": []}]}`
 
 const citesWhatItWasNotShown = `{"statements": [{"text": "The Prime Minister spoke in Motherwell.", "cites": ["F99"]}]}`
+
+func TestTheAgentsLoopIsBoundedInTurnsAndTokens(t *testing.T) {
+	looking := calls("story", `{"story": "S1"}`)
+	expensive := looking
+	expensive.Usage = editor.Usage{InputTokens: editor.SundayReadTokenBudget / 3, OutputTokens: 1000}
+	for name, tc := range map[string]struct {
+		turn  editor.Turn
+		turns int
+	}{
+		"turns":  {looking, editor.SundayReadMaxTurns},
+		"tokens": {expensive, 3},
+	} {
+		t.Run(name, func(t *testing.T) {
+			store := record(t)
+			readAndPlace(t, store, &fakeModel{output: startsAStory})
+			agent := &fakeAgent{then: &tc.turn}
+			ed, _ := reader(store, agent)
+
+			if err := ed.SundayRead(t.Context(), sundayMorning); err != nil {
+				t.Fatal(err)
+			}
+
+			if len(agent.sent) != tc.turns {
+				t.Errorf("the agent took %d turns, want it stopped after %d", len(agent.sent), tc.turns)
+			}
+			fs, err := store.SundayReadFailures(t.Context(), "2026-10-25")
+			if err != nil || len(fs) != 1 || !strings.Contains(fs[0].Reason, name) {
+				t.Errorf("failures = %+v, %v; want one naming the %s bound", fs, err, name)
+			}
+		})
+	}
+}
+
+func TestAnAgentThatStopsWithoutSubmittingIsAskedToSubmit(t *testing.T) {
+	store := record(t)
+	readAndPlace(t, store, &fakeModel{output: startsAStory})
+	agent := &fakeAgent{turns: []editor.Turn{{Text: "I have read the week."}, submits(citesTheSpeech)}}
+	ed, _ := reader(store, agent)
+
+	if err := ed.SundayRead(t.Context(), sundayMorning); err != nil {
+		t.Fatal(err)
+	}
+
+	msgs := agent.sent[1].Messages
+	if last := msgs[len(msgs)-1]; !strings.Contains(last.User, "submit_read") {
+		t.Errorf("the agent was told %+v, want to be asked to submit", last)
+	}
+	if _, found, _ := store.SundayRead(t.Context(), "2026-10-25"); !found {
+		t.Error("the read submitted once asked was not written")
+	}
+}
+
+func TestAWeekWithNothingMovedOnIsWrittenEmptyWithNoCall(t *testing.T) {
+	store := record(t)
+	agent := &fakeAgent{}
+	ed, _ := reader(store, agent)
+
+	if err := ed.SundayRead(t.Context(), sundayMorning); err != nil {
+		t.Fatal(err)
+	}
+
+	if len(agent.sent) != 0 {
+		t.Errorf("the agent was called %d times with nothing to read", len(agent.sent))
+	}
+	r, found, err := store.SundayRead(t.Context(), "2026-10-25")
+	if err != nil || !found || len(r.Statements) != 0 {
+		t.Errorf("read = %+v, %v, %v; want one written empty", r, found, err)
+	}
+}
 
 func TestAReadWithAnUncitedStatementIsRejectedBeforeItIsPublished(t *testing.T) {
 	store := record(t)

@@ -58,6 +58,8 @@ const wikidataHuman = "Q5"
 // Lookup is one consultation of a Reference source, which a Fact drawn from
 // it traces to.
 type Lookup struct {
+	// ID is the lookup's own, once the Record keeps it.
+	ID int64
 	// Reference names the Reference source.
 	Reference string
 	// ItemID and Revision are the Wikidata item and the revision of it the

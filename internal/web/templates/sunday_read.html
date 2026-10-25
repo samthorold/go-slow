@@ -1,0 +1,57 @@
+{{define "title"}}Sunday read for {{.Date}}{{end}}
+
+{{define "content"}}
+{{/* The statements and Assessments are the Editor's words, and what they
+     cite was drawn from collected text: inert, with hx-disable on the
+     elements holding them, so the boosted links still work. */}}
+<p><a href="{{.BriefingPath}}">The day's Briefing</a> · <a href="/feedback">Feedback</a></p>
+<h1>Sunday read</h1>
+<p>{{.Date}}</p>
+{{- template "gives" .Gives}}
+{{- if not .Exists}}
+<p>There is no Sunday read yet.</p>
+{{- with .Failure}}
+<p>Writing the Sunday read failed at {{.At}}; it is tried again later.</p>
+<pre hx-disable>{{.Reason}}</pre>
+{{- end}}
+{{- else if not .Statements}}
+<p>Nothing moved on this week in the Stories your Topics follow.</p>
+{{- end}}
+{{- range .Statements}}
+<section id="{{.Anchor}}">
+  <p hx-disable>{{.Text}}</p>
+  <ul>
+    {{- range .Cites}}
+    <li><small>{{template "readCite" .}}</small></li>
+    {{- end}}
+  </ul>
+</section>
+{{- end}}
+{{- if .Assessments}}
+<h2>Assessments</h2>
+{{- range .Assessments}}
+<section id="{{.Anchor}}">
+  <p>{{if .Withdrawn}}<del hx-disable>{{.Statement}}</del> <strong>Withdrawn</strong>: you said it was wrong.{{else}}<strong hx-disable>{{.Statement}}</strong>{{end}}
+    <small>as at {{.AsAt}}{{with .Supersedes}}, superseding <a href="{{.}}">an earlier Assessment</a>{{end}}</small></p>
+  {{- template "gives" .Gives}}
+  <ul>
+    {{- range .Facts}}
+    <li><small>Rests on {{template "readCite" .}}</small></li>
+    {{- end}}
+  </ul>
+</section>
+{{- end}}
+{{- end}}
+{{- if .Stories}}
+<h2>Stories started</h2>
+<ul>
+  {{- range .Stories}}
+  <li><a href="{{.Path}}"><span hx-disable>{{.Title}}</span></a></li>
+  {{- end}}
+</ul>
+{{- end}}
+{{end}}
+
+{{define "readCite"}}<a href="{{.Path}}">{{.Kind}}</a>{{with .AsAt}} of <time>{{.}}</time>{{end}}:
+  <span hx-disable>{{.Text}}</span>
+  {{- with .ItemPath}}, from <a href="{{.}}"><span hx-disable>{{$.ItemTitle}}</span></a>{{end}}{{end}}

@@ -62,11 +62,17 @@ func (a *app) feedback(w http.ResponseWriter, r *http.Request) {
 			row.About = k.Fact
 		case feedback.Connection:
 			row.About = k.Fact + " led to " + k.ToFact
+		case feedback.Assessment:
+			row.About, row.AboutPath = k.Assessment, assessmentPath(k.AssessmentID)
+		case feedback.SundayRead:
+			row.About, row.AboutPath = "The Sunday read", sundayReadPath(k.ReadDay)
 		}
 		if k.StoryID != 0 {
 			row.AboutPath = storyPath(k.StoryID)
 		}
-		if k.Day != "" {
+		// Feedback on a Sunday read was given on the read, not a Briefing.
+		onRead := k.Level == feedback.Assessment || k.Level == feedback.SundayRead
+		if k.Day != "" && !onRead {
 			if day, err := time.Parse(time.DateOnly, k.Day); err == nil {
 				row.Briefing, row.BriefPath = day.Format("2 January 2006"), briefingPath(k.Day)
 			}
@@ -80,7 +86,23 @@ func (a *app) feedback(w http.ResponseWriter, r *http.Request) {
 type giveButton struct {
 	Path, Kind, Level   string
 	Story, Fact, ToFact int64
+	Assessment, Read    int64
 	Label, Confirm      string
+}
+
+// assessmentGives is the Feedback on an Assessment: wrong, or new to the
+// Owner.
+func assessmentGives(path string, id int64) []giveButton {
+	return []giveButton{
+		{Path: path, Kind: string(feedback.Wrong), Level: string(feedback.Assessment), Assessment: id, Label: "Wrong",
+			Confirm: "Withdraw this Assessment, and the statements that cite it?"},
+		{Path: path, Kind: string(feedback.NewToMe), Level: string(feedback.Assessment), Assessment: id, Label: "New to me"},
+	}
+}
+
+// readGives is the Feedback on a Sunday read as a whole: new to the Owner.
+func readGives(path string, id int64) []giveButton {
+	return []giveButton{{Path: path, Kind: string(feedback.NewToMe), Level: string(feedback.SundayRead), Read: id, Label: "New to me"}}
 }
 
 const confirmWrongFact = "Withdraw this Fact, and the Developments and Connections built on it?"
@@ -179,13 +201,45 @@ func (a *app) missedDevelopment(r *http.Request, path string, story int64, d fee
 // draftFrom reads Feedback from a form.
 func draftFrom(r *http.Request) feedback.Draft {
 	return feedback.Draft{
-		Kind:   r.PostForm.Get("kind"),
-		Level:  r.PostForm.Get("level"),
-		Story:  r.PostForm.Get("story"),
-		Fact:   r.PostForm.Get("fact"),
-		ToFact: r.PostForm.Get("to_fact"),
-		Title:  r.PostForm.Get("title"),
-		Facts:  r.PostForm["facts"],
+		Kind:       r.PostForm.Get("kind"),
+		Level:      r.PostForm.Get("level"),
+		Story:      r.PostForm.Get("story"),
+		Fact:       r.PostForm.Get("fact"),
+		ToFact:     r.PostForm.Get("to_fact"),
+		Assessment: r.PostForm.Get("assessment"),
+		Read:       r.PostForm.Get("read"),
+		Title:      r.PostForm.Get("title"),
+		Facts:      r.PostForm["facts"],
+	}
+}
+
+// sundayReadFeedback is Feedback given on a Sunday read, about the read or
+// its Assessments. It lands back on the read, which re-renders with the
+// Record as Feedback left it.
+func (a *app) sundayReadFeedback(w http.ResponseWriter, r *http.Request) {
+	now := a.Now()
+	day, err := time.ParseInLocation(time.DateOnly, r.PathValue("day"), now.Location())
+	if err != nil || day.After(now) || day.Weekday() != time.Sunday {
+		http.NotFound(w, r)
+		return
+	}
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Bad form.", http.StatusBadRequest)
+		return
+	}
+	d := draftFrom(r)
+	d.Day = day.Format(time.DateOnly)
+	_, errs, err := a.Feedback.Give(r.Context(), d, now)
+	switch {
+	case errors.Is(err, feedback.ErrNotInRecord):
+		http.NotFound(w, r)
+	case err != nil:
+		a.serverError(w, r, err)
+	case len(errs) > 0:
+		// Every piece given here is a button the page offers.
+		http.Error(w, "That Feedback can't be given here.", http.StatusUnprocessableEntity)
+	default:
+		http.Redirect(w, r, sundayReadPath(d.Day), http.StatusSeeOther)
 	}
 }
 

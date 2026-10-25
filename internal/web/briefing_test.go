@@ -40,17 +40,18 @@ func newAppWithLog(t *testing.T, now time.Time, store *sqlite.Store) (http.Handl
 	t.Helper()
 	var logs bytes.Buffer
 	return web.New(web.Deps{
-		Briefings:  store,
-		Items:      store,
-		Readings:   store,
-		Topics:     interest.New(store),
-		Stories:    store,
-		Feedback:   feedback.New(store),
-		Kept:       store,
-		Register:   store,
-		BriefingAt: 7 * time.Hour,
-		Now:        func() time.Time { return now },
-		Log:        slog.New(slog.NewTextHandler(&logs, nil)),
+		Briefings:   store,
+		Items:       store,
+		Readings:    store,
+		Topics:      interest.New(store),
+		Stories:     store,
+		Feedback:    feedback.New(store),
+		Kept:        store,
+		Register:    store,
+		SundayReads: store,
+		BriefingAt:  7 * time.Hour,
+		Now:         func() time.Time { return now },
+		Log:         slog.New(slog.NewTextHandler(&logs, nil)),
 	}), &logs
 }
 

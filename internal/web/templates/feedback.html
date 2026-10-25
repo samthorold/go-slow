@@ -7,6 +7,8 @@
   {{- with .Story}}<input type="hidden" name="story" value="{{.}}">{{end}}
   {{- with .Fact}}<input type="hidden" name="fact" value="{{.}}">{{end}}
   {{- with .ToFact}}<input type="hidden" name="to_fact" value="{{.}}">{{end}}
+  {{- with .Assessment}}<input type="hidden" name="assessment" value="{{.}}">{{end}}
+  {{- with .Read}}<input type="hidden" name="read" value="{{.}}">{{end}}
   <button>{{.Label}}</button>
 </form>{{end}}
 

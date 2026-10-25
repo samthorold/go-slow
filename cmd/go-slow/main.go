@@ -83,6 +83,7 @@ func run(log *slog.Logger) error {
 		ActModels: map[string]string{
 			"reading": cfg.ReadingModel, "placing": cfg.PlacingModel,
 			"connecting": cfg.ConnectingModel, "briefing": cfg.BriefingModel,
+			"sunday_read": cfg.SundayReadModel,
 		},
 	})
 	// Reading looks Entities up in Wikidata first, politely, as go-slow.
@@ -96,7 +97,7 @@ func run(log *slog.Logger) error {
 	})
 	ed := editor.New(editor.Deps{
 		Store: store, Model: models, PlacingModel: models, ConnectingModel: models, Wikidata: wd,
-		Briefings: store, BriefingModel: models, Log: log,
+		Briefings: store, BriefingModel: models, SundayReads: store, SundayReadModel: models, Log: log,
 	})
 	// The daily acts run in batches: submitted after a Collection run, and
 	// their results applied on later runs as they arrive. One batch carries
@@ -134,13 +135,15 @@ func run(log *slog.Logger) error {
 
 	// The Briefing is written in real time at the set time, on its own
 	// clock, checked every minute. Just before it is written, connecting
-	// runs again over the day's Facts.
+	// runs again over the day's Facts. On Sundays the Sunday read is
+	// written just after it.
 	schedule := editor.NewSchedule(editor.ScheduleDeps{
-		Store:  store,
-		At:     cfg.BriefingAt,
-		Before: []func(context.Context, time.Time) error{ed.Reconnect},
-		Brief:  ed.Brief,
-		Log:    log,
+		Store:      store,
+		At:         cfg.BriefingAt,
+		Before:     []func(context.Context, time.Time) error{ed.Reconnect},
+		Brief:      ed.Brief,
+		SundayRead: ed.SundayRead,
+		Log:        log,
 	})
 	minutes := time.NewTicker(time.Minute)
 	defer minutes.Stop()
@@ -153,17 +156,18 @@ func run(log *slog.Logger) error {
 	defer func() { stopBriefing(); <-briefed }()
 
 	app := web.New(web.Deps{
-		Briefings:  store,
-		Items:      store,
-		Readings:   store,
-		Topics:     topics,
-		Stories:    store,
-		Feedback:   feedback.New(store),
-		Kept:       store,
-		Register:   store,
-		BriefingAt: cfg.BriefingAt,
-		Now:        time.Now,
-		Log:        log,
+		Briefings:   store,
+		Items:       store,
+		Readings:    store,
+		Topics:      topics,
+		Stories:     store,
+		Feedback:    feedback.New(store),
+		Kept:        store,
+		Register:    store,
+		SundayReads: store,
+		BriefingAt:  cfg.BriefingAt,
+		Now:         time.Now,
+		Log:         log,
 	})
 
 	ln, err := new(net.ListenConfig).Listen(ctx, "tcp", ":"+strconv.Itoa(cfg.Port))

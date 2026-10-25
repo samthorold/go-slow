@@ -91,6 +91,8 @@ type briefingPage struct {
 	Date    string
 	Exists  bool
 	Stories []briefedStoryRow
+	// SundayReadPath is the Sunday read's page, on a Sunday.
+	SundayReadPath string
 	// Missed is the time the Briefing was due by, for a day with none by
 	// then; empty otherwise.
 	Missed string
@@ -163,6 +165,10 @@ func (a *app) briefingWith(w http.ResponseWriter, r *http.Request, day time.Time
 	p := briefingPage{
 		Date: day.Format("Monday 2 January 2006"), Exists: exists,
 		FeedbackPath: briefingPath(day.Format(time.DateOnly)) + "/feedback",
+	}
+	if day.Weekday() == time.Sunday {
+		// The Sunday read is written alongside Sunday's Briefing.
+		p.SundayReadPath = sundayReadPath(day.Format(time.DateOnly))
 	}
 	if !exists {
 		// The outputs appear: a day with no Briefing by the set time is

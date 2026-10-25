@@ -7,6 +7,9 @@
 <p><a href="/briefings">Briefings</a> · <a href="/feedback">Feedback</a> · <a href="/register">Register</a></p>
 <h1>Briefing</h1>
 <p>{{.Date}}</p>
+{{- with .SundayReadPath}}
+<p><a href="{{.}}">The Sunday read</a>, putting the week into wider context.</p>
+{{- end}}
 {{- if not .Exists}}
 <p>There is no Briefing yet.</p>
 {{- if .Missed}}

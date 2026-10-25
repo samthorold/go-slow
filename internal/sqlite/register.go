@@ -49,9 +49,9 @@ func (s *Store) RegisterRecord(ctx context.Context, loc *time.Location) (registe
 	if r.Briefings, err = s.strings(ctx, `SELECT day FROM briefings ORDER BY day`); err != nil {
 		return r, fmt.Errorf("register: briefings: %w", err)
 	}
-	// The Sunday read's hook: the Record does not keep Sunday reads yet.
-	// Once it does, r.SundayReads is the days they were written for, and
-	// each Given on one carries the read's day, for foresight.
+	if r.SundayReads, err = s.strings(ctx, `SELECT day FROM sunday_reads ORDER BY day`); err != nil {
+		return r, fmt.Errorf("register: sunday reads: %w", err)
+	}
 	if r.Untraced, err = s.strings(ctx, untraced); err != nil {
 		return r, fmt.Errorf("register: untraced: %w", err)
 	}
@@ -149,18 +149,26 @@ func (s *Store) strings(ctx context.Context, query string) ([]string, error) {
 
 // givenFeedback is every piece of Feedback, as the register counts it.
 func (s *Store) givenFeedback(ctx context.Context) ([]register.Given, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT kind, level, given_at FROM feedback ORDER BY given_at, id`)
+	// Feedback on a Sunday read or one of its Assessments was given on that
+	// read, for foresight.
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT f.kind, f.level, f.given_at, coalesce(ar.day, r.day, '')
+		FROM feedback f
+			LEFT JOIN assessments a ON a.id = f.assessment_id
+			LEFT JOIN sunday_reads ar ON ar.id = a.read_id
+			LEFT JOIN sunday_reads r ON r.id = f.read_id
+		ORDER BY f.given_at, f.id`)
 	if err != nil {
 		return nil, fmt.Errorf("register: feedback: %w", err)
 	}
 	defer func() { _ = rows.Close() }()
 	var out []register.Given
 	for rows.Next() {
-		var kind, level, at string
-		if err := rows.Scan(&kind, &level, &at); err != nil {
+		var kind, level, at, read string
+		if err := rows.Scan(&kind, &level, &at, &read); err != nil {
 			return nil, fmt.Errorf("register: feedback: %w", err)
 		}
-		out = append(out, register.Given{Kind: feedback.Kind(kind), Level: feedback.Level(level), At: parseTime(at)})
+		out = append(out, register.Given{Kind: feedback.Kind(kind), Level: feedback.Level(level), At: parseTime(at), SundayRead: read})
 	}
 	return out, rows.Err()
 }

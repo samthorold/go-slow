@@ -11,6 +11,16 @@ import (
 // day, and seldom enough that a lasting one is not a call every minute.
 const RetryBriefing = 15 * time.Minute
 
+// RetrySundayRead is how long after a failure the Sunday read is tried
+// again, and SundayReadTries how many times it is tried on a Sunday. A read
+// is a long agentic run that costs far more than a Briefing, and one that
+// failed its checks or hit its bounds is likely to again, so it is tried a
+// few times, an hour apart, rather than all day.
+const (
+	RetrySundayRead = time.Hour
+	SundayReadTries = 3
+)
+
 // DueAt is when the Briefing for the day that holds day, in day's location,
 // is due: at, as a time of day (7h is 07:00), on that day's clock.
 func DueAt(day time.Time, at time.Duration) time.Time {
@@ -25,6 +35,11 @@ type ScheduleStore interface {
 	HasBriefing(ctx context.Context, t time.Time) (bool, error)
 	// BriefingFailure is the latest failure to write the day's Briefing.
 	BriefingFailure(ctx context.Context, day string) (BriefingFailure, bool, error)
+	// HasSundayRead reports whether the day's Sunday read has been written.
+	HasSundayRead(ctx context.Context, day string) (bool, error)
+	// SundayReadFailures are the failures to write the day's Sunday read,
+	// the earliest first.
+	SundayReadFailures(ctx context.Context, day string) ([]SundayReadFailure, error)
 }
 
 // ScheduleDeps are the schedule's dependencies.
@@ -39,7 +54,11 @@ type ScheduleDeps struct {
 	Before []func(ctx context.Context, now time.Time) error
 	// Brief writes the Briefing at now (Editor.Brief).
 	Brief func(ctx context.Context, now time.Time) error
-	Log   *slog.Logger
+	// SundayRead writes the Sunday read at now (Editor.SundayRead): on a
+	// Sunday, at the Briefing's time, just after the Briefing. Nil writes
+	// none.
+	SundayRead func(ctx context.Context, now time.Time) error
+	Log        *slog.Logger
 }
 
 // Schedule writes the Briefing in real time, once a day at the time the
@@ -67,11 +86,44 @@ func (s *Schedule) RunOn(ctx context.Context, ticks <-chan time.Time, now func()
 }
 
 // Tick writes the day's Briefing if it is due at now and not yet written,
-// and has not failed in the last RetryBriefing.
+// and has not failed in the last RetryBriefing; then, on a Sunday, the
+// Sunday read likewise.
 func (s *Schedule) Tick(ctx context.Context, now time.Time) {
 	if now.Before(DueAt(now, s.At)) {
 		return
 	}
+	s.tickBriefing(ctx, now)
+	if s.SundayRead != nil && now.Weekday() == time.Sunday {
+		s.tickSundayRead(ctx, now)
+	}
+}
+
+// tickSundayRead writes the Sunday read if it is not yet written, has failed
+// fewer than SundayReadTries times today, and not in the last
+// RetrySundayRead.
+func (s *Schedule) tickSundayRead(ctx context.Context, now time.Time) {
+	day := now.Format(time.DateOnly)
+	written, err := s.Store.HasSundayRead(ctx, day)
+	if err != nil || written {
+		if err != nil {
+			s.Log.ErrorContext(ctx, "writing the Sunday read failed", "error", err)
+		}
+		return
+	}
+	fs, err := s.Store.SundayReadFailures(ctx, day)
+	if err != nil {
+		s.Log.ErrorContext(ctx, "writing the Sunday read failed", "error", err)
+		return
+	}
+	if len(fs) >= SundayReadTries || len(fs) > 0 && now.Sub(fs[len(fs)-1].At) < RetrySundayRead {
+		return
+	}
+	if err := s.SundayRead(ctx, now); err != nil {
+		s.Log.ErrorContext(ctx, "writing the Sunday read failed", "error", err)
+	}
+}
+
+func (s *Schedule) tickBriefing(ctx context.Context, now time.Time) {
 	written, err := s.Store.HasBriefing(ctx, now)
 	if err != nil {
 		s.Log.ErrorContext(ctx, "writing the Briefing failed", "error", err)

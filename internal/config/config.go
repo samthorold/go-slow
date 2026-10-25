@@ -35,6 +35,10 @@ type Config struct {
 	// BriefingModel is the Claude model the Editor writes the Briefing with
 	// (BRIEFING_MODEL, such as claude-haiku-5-5).
 	BriefingModel string
+	// SundayReadModel is the Claude model the Editor writes the Sunday read
+	// with, as an agent with tools (SUNDAY_READ_MODEL, such as
+	// claude-opus-5-5).
+	SundayReadModel string
 	// BriefingAt is the time of day, in the Owner's time zone (TZ), the
 	// Briefing is written and due by, as the time since midnight
 	// (BRIEFING_TIME, HH:MM on a 24-hour clock, such as 07:00).
@@ -67,6 +71,7 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 	contact, interval := get("COLLECTION_CONTACT"), get("COLLECTION_INTERVAL")
 	model, placing, connecting := get("READING_MODEL"), get("PLACING_MODEL"), get("CONNECTING_MODEL")
 	briefing, briefingTime := get("BRIEFING_MODEL"), get("BRIEFING_TIME")
+	sundayRead := get("SUNDAY_READ_MODEL")
 	key := get("GOSLOW_ANTHROPIC_API_KEY")
 	if len(missing) > 0 {
 		return Config{}, fmt.Errorf("missing environment variables: %s", strings.Join(missing, ", "))
@@ -84,6 +89,7 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 	// OpenRouter later), so any other model would fail on every call.
 	for _, v := range [][2]string{
 		{"READING_MODEL", model}, {"PLACING_MODEL", placing}, {"CONNECTING_MODEL", connecting}, {"BRIEFING_MODEL", briefing},
+		{"SUNDAY_READ_MODEL", sundayRead},
 	} {
 		if !strings.HasPrefix(v[1], "claude-") {
 			return Config{}, errors.New(v[0] + " must be a Claude model such as claude-haiku-5-5, got " + strconv.Quote(v[1]))
@@ -102,6 +108,7 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 		PlacingModel:       placing,
 		ConnectingModel:    connecting,
 		BriefingModel:      briefing,
+		SundayReadModel:    sundayRead,
 		BriefingAt:         time.Duration(clock.Hour())*time.Hour + time.Duration(clock.Minute())*time.Minute,
 		AnthropicAPIKey:    Secret(key),
 	}, nil

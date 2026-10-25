@@ -304,7 +304,43 @@ func checkReading(it Item, precedents []Precedent, res Response) (Reading, error
 			Quote: c.Quote, Entities: ents,
 		})
 	}
+	// A Fact or Claim involves every Entity of the reading its statement
+	// names: one it leaves out is lost to placing and connecting.
+	for _, f := range r.Facts {
+		if name, ok := leftOut(f.Statement, f.Entities, r.Entities); ok {
+			return Reading{}, failed(it, "a Fact that names %q but does not involve it: %q", name, f.Statement)
+		}
+	}
+	for _, c := range r.Claims {
+		if name, ok := leftOut(c.Statement, c.Entities, r.Entities); ok {
+			return Reading{}, failed(it, "a Claim that names %q but does not involve it: %q", name, c.Statement)
+		}
+	}
 	return r, nil
+}
+
+// leftOut is the first of the reading's Entities a statement names, as whole
+// words whatever their case and punctuation, that is not among the ones it
+// involves. A name met only inside the name of an Entity it involves ("the
+// Scotland Office" for Scotland) is not one it names.
+func leftOut(statement string, involves []string, entities []Entity) (string, bool) {
+	text := words(statement)
+	// Longest first, so a name inside another is cut out after it.
+	longest := slices.Clone(involves)
+	slices.SortFunc(longest, func(a, b string) int { return len(words(b)) - len(words(a)) })
+	for _, name := range longest {
+		// Replaced until none is left: neighbouring matches share a space.
+		for w := words(name); w != "  " && strings.Contains(text, w); {
+			text = strings.Replace(text, w, " | ", 1)
+		}
+	}
+	for _, e := range entities {
+		w := words(e.Name)
+		if w != "  " && !slices.Contains(involves, e.Name) && strings.Contains(text, w) {
+			return e.Name, true
+		}
+	}
+	return "", false
 }
 
 // input is the Item as the model is shown it.

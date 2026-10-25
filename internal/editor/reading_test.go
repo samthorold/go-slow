@@ -146,6 +146,60 @@ func TestAReadingThatFailsTheChecksIsRejected(t *testing.T) {
 	}
 }
 
+func TestAFactThatLeavesOutAnEntityItsStatementNamesIsRefusedNamingBoth(t *testing.T) {
+	// Scotland is an Entity of the reading, given by the Claim; the Fact names
+	// it but does not involve it.
+	output := strings.Replace(goodReading, `"statement": "Andy Burnham gave a speech in Motherwell."`,
+		`"statement": "Andy Burnham gave a speech in Motherwell, in SCOTLAND."`, 1)
+
+	_, err := editor.Read(t.Context(), &fakeModel{output: output}, speech)
+
+	if !errors.Is(err, editor.ErrFailedChecks) {
+		t.Fatalf("err = %v, want ErrFailedChecks", err)
+	}
+	for _, want := range []string{"Andy Burnham gave a speech in Motherwell, in SCOTLAND.", `"Scotland"`} {
+		if !strings.Contains(err.Error(), want) {
+			t.Errorf("err = %v, want it to name %s", err, want)
+		}
+	}
+}
+
+func TestAClaimThatLeavesOutAnEntityItsStatementNamesIsRefused(t *testing.T) {
+	output := strings.Replace(goodReading, `"statement": "Scotland will get £2 billion."`,
+		`"statement": "Scotland will get £2 billion, Andy Burnham says."`, 1)
+	output = strings.Replace(output, `{"name": "Andy Burnham", "kind": "person", "role": "Prime Minister of the United Kingdom"},`, ``, 1)
+
+	_, err := editor.Read(t.Context(), &fakeModel{output: output}, speech)
+
+	if !errors.Is(err, editor.ErrFailedChecks) || !strings.Contains(err.Error(), `"Andy Burnham"`) {
+		t.Errorf("err = %v, want ErrFailedChecks naming Andy Burnham", err)
+	}
+}
+
+func TestANameInsideALongerWordIsNotAnEntityTheStatementNames(t *testing.T) {
+	// "Scotland" inside "Scotlands" and "Motherwell" inside "Motherwellbridge"
+	// are other words.
+	output := strings.Replace(goodReading, `"statement": "Andy Burnham gave a speech in Motherwell."`,
+		`"statement": "Andy Burnham gave a speech in Motherwell, on the Scotlands of the Motherwellbridge."`, 1)
+
+	if _, err := editor.Read(t.Context(), &fakeModel{output: output}, speech); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestANameInsideTheNameOfAnEntityTheFactInvolvesIsNotLeftOut(t *testing.T) {
+	// The Claim involves Scotland; the Fact names the Scotland Office, which
+	// it involves, and not Scotland itself.
+	output := strings.Replace(goodReading, `"statement": "Andy Burnham gave a speech in Motherwell."`,
+		`"statement": "Andy Burnham gave a speech for the Scotland Office in Motherwell."`, 1)
+	output = strings.Replace(output, `{"name": "Motherwell", "kind": "place", "role": ""}`,
+		`{"name": "Motherwell", "kind": "place", "role": ""}, {"name": "Scotland Office", "kind": "organisation", "role": ""}`, 1)
+
+	if _, err := editor.Read(t.Context(), &fakeModel{output: output}, speech); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestAFactsQuoteMatchesTheItemWhateverItsPunctuationAndMarkup(t *testing.T) {
 	// The Item has a curly apostrophe and a paragraph break; the quote, a
 	// straight one and a space.

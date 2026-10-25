@@ -1,0 +1,40 @@
+{
+  "act": "connecting",
+  "model": "claude-haiku-5-5",
+  "recorded_at": "2026-10-25T00:36:25.861365Z",
+  "usage": {
+    "input_tokens": 1186,
+    "output_tokens": 234
+  },
+  "output": {
+    "causes": [],
+    "facts": [
+      {
+        "fact": "F1",
+        "roles": [
+          {
+            "entity": "UK Government",
+            "role": "actor"
+          },
+          {
+            "entity": "United States",
+            "role": "affected"
+          },
+          {
+            "entity": "Ukraine",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F2",
+        "roles": [
+          {
+            "entity": "UK Government",
+            "role": "actor"
+          }
+        ]
+      }
+    ]
+  }
+}

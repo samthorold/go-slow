@@ -3,7 +3,7 @@
 {{define "content"}}
 {{/* The Story's title and its Facts are the Editor's words, drawn from
      collected text: inert, with hx-disable on the elements holding them, so
-     the boosted links to each Item still work. */}}
+     the boosted links to each Item and Story still work. */}}
 <p><a href="/stories">Stories</a></p>
 <h1 hx-disable>{{.Title}}</h1>
 
@@ -19,4 +19,44 @@
   {{- end}}
   </ol>
 </section>
+
+{{- if .Causes}}
+
+<section aria-labelledby="causes">
+  <h2 id="causes">Causes</h2>
+  <ul>
+  {{- range .Causes}}
+    <li>
+      <p>{{template "fact" .Cause}}</p>
+      <p>led to {{template "fact" .Effect}}</p>
+    </li>
+  {{- end}}
+  </ul>
+</section>
+{{- end}}
+
+{{- if .Connected}}
+
+<section aria-labelledby="connected">
+  <h2 id="connected">Connected Stories</h2>
+  <ul>
+  {{- range .Connected}}
+    <li>
+      <p><a href="{{.Path}}"><span hx-disable>{{.Title}}</span></a></p>
+      <ul>
+      {{- range .Shared}}
+        <li>Both have the Development {{template "fact" .}}</li>
+      {{- end}}
+      {{- range .Entities}}
+        <li><span hx-disable>{{.Entity}}</span> as {{.Role}} in both: here {{template "fact" .Here}}; there {{template "fact" .There}}</li>
+      {{- end}}
+      </ul>
+    </li>
+  {{- end}}
+  </ul>
+</section>
+{{- end}}
 {{end}}
+
+{{/* fact is a Fact, its date and the Item it was drawn from. */}}
+{{define "fact"}}<time>{{.AsAt}}</time>: <span hx-disable>{{.Statement}}</span> <small>(from <a href="{{.ItemPath}}"><span hx-disable>{{.ItemTitle}}</span></a>)</small>{{end}}

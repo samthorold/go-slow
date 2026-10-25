@@ -34,6 +34,9 @@ type itemPage struct {
 }
 
 type factRow struct {
+	// Anchor is the Fact's id on the page, which the Briefing's statements
+	// link to.
+	Anchor    string
 	Statement string
 	AsAt      string
 	Quote     string
@@ -78,6 +81,7 @@ func (a *app) item(w http.ResponseWriter, r *http.Request) {
 	}
 	for _, f := range it.Facts {
 		p.Facts = append(p.Facts, factRow{
+			Anchor:    factAnchor(f.ID),
 			Statement: f.Statement,
 			// A Fact's date is a calendar date, in no time zone.
 			AsAt:     f.AsAt.Format("2 January 2006"),

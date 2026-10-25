@@ -20,6 +20,11 @@ type Store interface {
 	// StoriesSharing are the Stories whose Developments involve any of the
 	// named Entities.
 	StoriesSharing(ctx context.Context, entities []string) ([]Story, error)
+	// PlacingPrecedents are at most limit pieces of the Owner's Feedback on
+	// Developments whose Facts share an Entity with tp's Facts, or whose
+	// Items share a Topic with tp's Item: those sharing the most first, then
+	// the newest. Feedback on a withdrawn Fact is never a precedent.
+	PlacingPrecedents(ctx context.Context, tp ToPlace, limit int) ([]Precedent, error)
 	// SavePlacing writes a placing to the Record, all at once, and marks its
 	// Facts placed at placedAt.
 	SavePlacing(ctx context.Context, p Placing, placedAt time.Time) error
@@ -108,6 +113,10 @@ func (e *Editor) PlaceWaiting(ctx context.Context, now time.Time) error {
 		return err
 	}
 	for _, tp := range waiting {
+		tp, err := e.withPrecedents(ctx, tp)
+		if err != nil {
+			return err
+		}
 		stories, err := e.Store.StoriesSharing(ctx, entityNames(tp))
 		if err != nil {
 			return err

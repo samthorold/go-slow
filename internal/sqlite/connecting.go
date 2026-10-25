@@ -40,7 +40,7 @@ func (s *Store) toConnect(ctx context.Context, where string, args ...any) ([]edi
 	}
 	out := make([]editor.ToConnect, 0, len(byItem))
 	for _, tp := range byItem {
-		out = append(out, editor.ToConnect(tp))
+		out = append(out, editor.ToConnect{Item: tp.Item, Facts: tp.Facts})
 	}
 	return out, nil
 }

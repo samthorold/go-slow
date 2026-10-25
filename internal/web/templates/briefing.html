@@ -11,7 +11,7 @@
 <p><a href="{{.}}">The Sunday read</a>, putting the week into wider context.</p>
 {{- end}}
 {{- if not .Exists}}
-<p>There is no Briefing yet.</p>
+{{template "briefingStatus" .Status}}
 {{- if .Missed}}
 <p role="alert"><strong>Missed: no Briefing was written by {{.Missed}}.</strong></p>
 {{- end}}

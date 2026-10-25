@@ -184,6 +184,13 @@ func New(d Deps) *Collector { return &Collector{Deps: d, fetched: map[string]tim
 // dropped by the ticker, not queued.
 func (c *Collector) RunOn(ctx context.Context, ticks <-chan time.Time, now func() time.Time) {
 	c.Run(ctx, now())
+	c.RunEvery(ctx, ticks, now)
+}
+
+// RunEvery is RunOn without the run at once: a run on every tick until ctx
+// is done. main runs the first run itself, so that the Briefing's schedule
+// starts only once it has ended.
+func (c *Collector) RunEvery(ctx context.Context, ticks <-chan time.Time, now func() time.Time) {
 	for {
 		select {
 		case <-ctx.Done():

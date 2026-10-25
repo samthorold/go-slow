@@ -60,7 +60,11 @@ var (
 )
 
 // briefingTmpl is the Briefing page: the layout around its content.
-var briefingTmpl = page("briefing.html")
+var briefingTmpl = page("briefing.html", "briefing_status.html")
+
+// briefingStatusTmpl is the fragment the day's page polls while its
+// Briefing is being written.
+var briefingStatusTmpl = template.Must(template.ParseFS(templateFS, "templates/briefing_status.html"))
 
 // briefingsTmpl is the list of Briefings, by day.
 var briefingsTmpl = page("briefings.html")
@@ -86,9 +90,14 @@ var feedbackTmpl = page("feedback_list.html")
 // sundayReadTmpl is a Sunday read's page.
 var sundayReadTmpl = page("sunday_read.html")
 
-// page parses a page template together with the layout it fills.
-func page(name string) *template.Template {
-	return template.Must(template.ParseFS(templateFS, "templates/layout.html", "templates/feedback.html", "templates/"+name))
+// page parses a page template, and the components it renders, together
+// with the layout it fills.
+func page(name string, components ...string) *template.Template {
+	files := []string{"templates/layout.html", "templates/feedback.html", "templates/" + name}
+	for _, c := range components {
+		files = append(files, "templates/"+c)
+	}
+	return template.Must(template.ParseFS(templateFS, files...))
 }
 
 // New builds the app from its dependencies.
@@ -99,6 +108,7 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("GET /{$}", a.todaysBriefing)
 	mux.HandleFunc("GET /briefings", a.briefings)
 	mux.HandleFunc("GET /briefings/{day}", a.pastBriefing)
+	mux.HandleFunc("GET /briefings/{day}/status", a.briefingStatus)
 	mux.HandleFunc("POST /briefings/{day}/feedback", a.briefingFeedback)
 	mux.HandleFunc("PUT /briefings/{day}/feedback/{feedback}/undone", a.undoOnBriefing)
 	mux.HandleFunc("GET /sunday-reads/{day}", a.sundayRead)
@@ -143,6 +153,17 @@ func (a *app) renderStatus(w http.ResponseWriter, r *http.Request, status int, t
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(status)
+	_, _ = buf.WriteTo(w)
+}
+
+// fragment writes a fragment: the named template alone, with no layout.
+func (a *app) fragment(w http.ResponseWriter, r *http.Request, t *template.Template, name string, data any) {
+	var buf bytes.Buffer
+	if err := t.ExecuteTemplate(&buf, name, data); err != nil {
+		a.serverError(w, r, err)
+		return
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	_, _ = buf.WriteTo(w)
 }
 

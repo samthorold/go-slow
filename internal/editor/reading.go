@@ -171,18 +171,33 @@ type output struct {
 // the Entities they involve. A result that fails the act's checks is
 // ErrFailedChecks, and none of it is returned.
 func Read(ctx context.Context, m Model, it Item) (Reading, error) {
-	if it.SourceID == "" || it.EntryID == "" {
-		return Reading{}, failed(it, "no Item to draw from")
+	req, err := readingRequest(it)
+	if err != nil {
+		return Reading{}, err
 	}
-	res, err := m.Complete(ctx, Request{
+	res, err := m.Complete(ctx, req)
+	if err != nil {
+		return Reading{}, fmt.Errorf("reading %s: %w", it.EntryID, err)
+	}
+	return checkReading(it, res)
+}
+
+// readingRequest is the reading act's call on a model for an Item.
+func readingRequest(it Item) (Request, error) {
+	if it.SourceID == "" || it.EntryID == "" {
+		return Request{}, failed(it, "no Item to draw from")
+	}
+	return Request{
 		Act:          "reading",
 		Instructions: readingInstructions,
 		Input:        input(it),
 		Schema:       readingSchema,
-	})
-	if err != nil {
-		return Reading{}, fmt.Errorf("reading %s: %w", it.EntryID, err)
-	}
+	}, nil
+}
+
+// checkReading decodes the model's answer on an Item and runs the act's
+// checks over it. A result that fails them is ErrFailedChecks.
+func checkReading(it Item, res Response) (Reading, error) {
 	var out output
 	dec := json.NewDecoder(bytes.NewReader(res.Output))
 	dec.DisallowUnknownFields()

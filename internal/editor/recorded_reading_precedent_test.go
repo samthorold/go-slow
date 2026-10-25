@@ -32,7 +32,11 @@ import (
 //	go test -count=1 ./internal/editor -run TestRecordedReadingPrecedent -record
 //
 // with GOSLOW_ANTHROPIC_API_KEY and READING_MODEL set in the environment.
-func TestRecordedReadingPrecedent(t *testing.T) {
+func TestRecordedReadingPrecedent(t *testing.T) { recordedReadingPrecedent(t, recordedDir) }
+
+// recordedReadingPrecedent replays (or records) reading with a precedent
+// from the recordings under root.
+func recordedReadingPrecedent(t *testing.T, root string) {
 	ctx := t.Context()
 	store, err := sqlite.Open(ctx, filepath.Join(t.TempDir(), "go-slow.db"))
 	if err != nil {
@@ -93,7 +97,7 @@ func TestRecordedReadingPrecedent(t *testing.T) {
 	it, _ := fixture(t, filepath.Join("testdata", "govuk", name+".json"))
 	addItem(it)
 
-	path := filepath.Join("testdata", "recorded", "precedent", "reading-"+name+".json")
+	path := filepath.Join(root, "precedent", "reading-"+name+".json")
 	var model editor.Model
 	var rec recording
 	if *rerecordFlag {

@@ -1,25 +1,18 @@
 package editor_test
 
 import (
-	"bytes"
 	"encoding/json"
-	"errors"
-	"io/fs"
-	"log/slog"
+	"fmt"
 	"os"
 	"path/filepath"
-	"slices"
-	"strings"
 	"testing"
 
-	"github.com/samthorold/go-slow/internal/claude"
-	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/editor"
-	"github.com/samthorold/go-slow/internal/sqlite"
 )
 
-// The recorded runs of placing. The fixtures' recorded readings are placed
-// in the order the Items were published, each Item's Facts in one call, so
+// The recorded runs of placing. The fixtures' readings, from placing's own
+// frozen copies (testdata/recorded/placing/inputs/reading), are placed in
+// the order the Items were published, each Item's Facts in one call, so
 // later Facts meet the Stories earlier ones started. Each call is kept under
 // testdata/recorded/placing and replayed; the Stories it builds are the
 // same on every replay because each call is answered as it was when kept.
@@ -28,87 +21,23 @@ import (
 //	go test -count=1 ./internal/editor -run TestRecordedPlacings -record
 //
 // with GOSLOW_ANTHROPIC_API_KEY and PLACING_MODEL set in the environment.
-// Re-recording a reading makes the placings after it stale, so re-record
-// placing after any reading.
-func TestRecordedPlacings(t *testing.T) {
+// Re-recording reading leaves it valid; bringing it onto newer readings is a
+// refresh: copy the current readings over its inputs, then re-record it.
+func TestRecordedPlacings(t *testing.T) { recordedPlacings(t, recordedDir) }
+
+// recordedPlacings replays (or records) placing from the recordings under
+// root.
+func recordedPlacings(t *testing.T, root string) {
 	ctx := t.Context()
-	paths, err := filepath.Glob("testdata/govuk/*.json")
-	if err != nil || len(paths) == 0 {
-		t.Fatalf("no fixtures: %v", err)
-	}
-	type fixtureItem struct {
-		name string
-		item editor.Item
-	}
-	var fixtures []fixtureItem
-	for _, path := range paths {
-		it, _ := fixture(t, path)
-		fixtures = append(fixtures, fixtureItem{strings.TrimSuffix(filepath.Base(path), ".json"), it})
-	}
-	slices.SortFunc(fixtures, func(a, b fixtureItem) int { return a.item.Published.Compare(b.item.Published) })
-
-	store, err := sqlite.Open(ctx, filepath.Join(t.TempDir(), "go-slow.db"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = store.Close() })
-	if err := store.SyncSources(ctx, []collect.Source{number10}, saturday); err != nil {
-		t.Fatal(err)
-	}
-
+	store, topics := newRecord(t, nil)
 	var total editor.Usage
-	for _, f := range fixtures {
-		it := f.item
-		if _, err := store.AddItems(ctx, []collect.Item{{
-			SourceID: it.SourceID, EntryID: it.EntryID, Title: it.Title, Link: it.Link, Summary: it.Summary,
-			Content: it.Content, Published: it.Published, Attribution: collect.OGL, CollectedAt: saturday,
-		}}); err != nil {
-			t.Fatal(err)
-		}
-		reading, err := editor.Read(ctx, replay{kept(t, filepath.Join("testdata", "recorded", "reading", f.name+".json"))}, it)
-		if err != nil {
-			t.Fatalf("%s: the recorded reading fails its checks: %v", f.name, err)
-		}
-		if err := store.SaveReading(ctx, reading, saturday); err != nil {
-			t.Fatal(err)
-		}
-
-		path := filepath.Join("testdata", "recorded", "placing", f.name+".json")
-		var model editor.Model
-		var rec recording
-		if *rerecordFlag {
-			key, name := os.Getenv("GOSLOW_ANTHROPIC_API_KEY"), os.Getenv("PLACING_MODEL")
-			if key == "" || name == "" {
-				t.Fatal("recording needs GOSLOW_ANTHROPIC_API_KEY and PLACING_MODEL")
-			}
-			model = recorder{claude.New(claude.Options{APIKey: key, Model: name}), &rec}
-		} else {
-			if _, err := os.Stat(path); errors.Is(err, fs.ErrNotExist) {
-				// Each placing depends on the ones before it, so the rest
-				// can't be replayed either.
-				t.Skipf("%s has not been recorded yet; record placing with: "+
-					"go test -count=1 ./internal/editor -run TestRecordedPlacings -record "+
-					"(GOSLOW_ANTHROPIC_API_KEY and PLACING_MODEL set)", f.name)
-			}
-			rec = kept(t, path)
-			model = replay{rec}
-		}
-		var logs bytes.Buffer
-		ed := editor.New(editor.Deps{Store: store, PlacingModel: model, Log: slog.New(slog.NewTextHandler(&logs, nil))})
-		if err := ed.PlaceWaiting(ctx, saturday); err != nil {
-			t.Fatal(err)
-		}
-		if *rerecordFlag && rec.Output != nil {
-			keep(t, path, rec)
-		}
-		total.InputTokens += rec.Usage.InputTokens
-		total.OutputTokens += rec.Usage.OutputTokens
-		// A failed placing leaves its Facts waiting, to be placed with the
-		// next fixture's in a second call no recording holds, so it stops
-		// the run.
-		if strings.Contains(logs.String(), "placing failed") {
-			t.Fatalf("%s: the recorded placing fails the act's checks:\n%s", f.name, logs.String())
-		}
+	c := chain{
+		reading: replayed(inputsOf(root, "placing", "reading")),
+		placing: recordedOrReplayed(t, filepath.Join(root, "placing"), "PLACING_MODEL", "TestRecordedPlacings", &total),
+	}
+	fixtures := fixtureItems(t)
+	if err := c.run(ctx, store, topics, fixtures); err != nil {
+		t.Fatal(err)
 	}
 	t.Logf("recorded placing usage over %d fixtures: %d input, %d output tokens", len(fixtures), total.InputTokens, total.OutputTokens)
 
@@ -165,15 +94,24 @@ func TestRecordedPlacings(t *testing.T) {
 // kept is a kept response.
 func kept(t *testing.T, path string) recording {
 	t.Helper()
-	b, err := os.ReadFile(path)
+	rec, err := keptAt(path)
 	if err != nil {
 		t.Fatal(err)
 	}
+	return rec
+}
+
+// keptAt is the response kept at path.
+func keptAt(path string) (recording, error) {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return recording{}, err
+	}
 	var rec recording
 	if err := json.Unmarshal(b, &rec); err != nil {
-		t.Fatalf("%s: %v", path, err)
+		return recording{}, fmt.Errorf("%s: %w", path, err)
 	}
-	return rec
+	return rec, nil
 }
 
 // keep writes a response to be replayed.

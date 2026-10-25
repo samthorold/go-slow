@@ -127,11 +127,16 @@ const testContact = "go-slow-tests@example.org"
 // with GOSLOW_ANTHROPIC_API_KEY and SUNDAY_READ_MODEL set in the
 // environment. Before re-recording it, copy the current recordings of
 // reading, placing and connecting (testdata/recorded/{reading,placing,
-// connecting}) over its inputs. Re-record it after the act's instructions,
-// tools or checks change, or to bring it onto the earlier acts' recordings.
-func TestRecordedSundayRead(t *testing.T) {
+// connecting}) over its inputs, all three together. Re-record it after the
+// act's instructions, tools or checks change, or to bring it onto the
+// earlier acts' recordings, and only on the Owner's say.
+func TestRecordedSundayRead(t *testing.T) { recordedSundayRead(t, recordedDir) }
+
+// recordedSundayRead replays (or records) the Sunday read from the
+// recordings under root.
+func recordedSundayRead(t *testing.T, root string) {
 	ctx := t.Context()
-	dir := filepath.Join("testdata", "recorded", "sunday")
+	dir := filepath.Join(root, "sunday")
 	path := filepath.Join(dir, "conversation.json")
 	wikidataDir := filepath.Join(dir, "wikidata")
 	at := saturday.AddDate(0, 0, 1).Add(time.Hour)
@@ -173,7 +178,7 @@ func TestRecordedSundayRead(t *testing.T) {
 		Now: time.Now, Sleep: polite.Sleep,
 	})
 
-	store := connectedFixtures(t, filepath.Join(dir, "inputs"))
+	store := frozenRecord(t, filepath.Join(dir, "inputs"))
 	var logs bytes.Buffer
 	ed := editor.New(editor.Deps{Store: store, SundayReads: store, SundayReadModel: model, Wikidata: wd,
 		Log: slog.New(slog.NewTextHandler(&logs, nil))})

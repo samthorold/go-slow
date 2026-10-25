@@ -106,7 +106,11 @@ func replayed(dir string) actModel {
 
 // recordedOrReplayed is how a recorded test runs its own act on each
 // fixture under dir: on the real model named by modelVar when recording,
-// keeping each response as it arrives, otherwise replayed. Replaying, the
+// keeping each response as it arrives, otherwise replayed, failing as stale
+// when the act now builds a request the recording did not answer. An act's
+// frozen copies of the recordings it rests on are replayed unchecked
+// (replayed, above): they are the input the act was recorded over, and their
+// own act's recorded test checks its recordings. Replaying, the
 // first fixture not yet recorded skips the rest of the run, which rests on
 // it, naming the command that records it. Each call's usage adds to total.
 func recordedOrReplayed(t *testing.T, dir, modelVar, test string, total *editor.Usage) actModel {
@@ -118,7 +122,7 @@ func recordedOrReplayed(t *testing.T, dir, modelVar, test string, total *editor.
 			if key == "" || model == "" {
 				t.Fatalf("recording needs GOSLOW_ANTHROPIC_API_KEY and %s", modelVar)
 			}
-			return keeping{t, claude.New(claude.Options{APIKey: key, Model: model}), path, total}, nil
+			return keeping{t, claude.New(claude.Options{APIKey: key, Model: model}), model, path, total}, nil
 		}
 		if _, err := os.Stat(path); errors.Is(err, fs.ErrNotExist) {
 			t.Skipf("%s has not been recorded yet; record it with: "+
@@ -131,7 +135,7 @@ func recordedOrReplayed(t *testing.T, dir, modelVar, test string, total *editor.
 		}
 		total.InputTokens += rec.Usage.InputTokens
 		total.OutputTokens += rec.Usage.OutputTokens
-		return replay{rec}, nil
+		return ownReplay(t, rec, name, rerecordCmd{test, modelVar}), nil
 	}
 }
 
@@ -140,13 +144,14 @@ func recordedOrReplayed(t *testing.T, dir, modelVar, test string, total *editor.
 type keeping struct {
 	t     *testing.T
 	model editor.Model
+	asked string
 	path  string
 	total *editor.Usage
 }
 
 func (k keeping) Complete(ctx context.Context, req editor.Request) (editor.Response, error) {
 	var rec recording
-	res, err := recorder{k.model, &rec}.Complete(ctx, req)
+	res, err := recorder{k.model, &rec, k.asked}.Complete(ctx, req)
 	if err != nil {
 		return res, err
 	}
@@ -273,7 +278,8 @@ func TestEachRecordedActReplaysOverItsOwnInputsAlone(t *testing.T) {
 // consistent run of the Editor, and over it every statement of the Briefing
 // traces through a Development and its Fact to a quote in the Item the Fact
 // was drawn from. It asserts only what spans the acts; each act's own
-// properties are its recorded test's.
+// properties, and whether its recording is stale, are its recorded test's,
+// so it replays unchecked.
 func TestRecordedChainTracesEveryBriefingStatementToAQuote(t *testing.T) {
 	ctx := t.Context()
 	path := filepath.Join(recordedDir, "briefing", "saturday.json")

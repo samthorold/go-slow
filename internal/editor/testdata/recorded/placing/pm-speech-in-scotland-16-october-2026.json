@@ -1,10 +1,11 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T10:19:03.169963Z",
+  "request_hash": "6791cbfdfc6b9f5eafcf739a3f12c1f8cfa6663d7afa04ccad2114b778f0d66e",
+  "recorded_at": "2026-10-25T14:19:18.936396Z",
   "usage": {
-    "input_tokens": 3313,
-    "output_tokens": 914
+    "input_tokens": 3335,
+    "output_tokens": 1079
   },
   "output": {
     "facts": [
@@ -36,7 +37,7 @@
       },
       {
         "developments_in": [
-          "S14"
+          "S15"
         ],
         "fact": "F7"
       },
@@ -52,7 +53,7 @@
     "new_stories": [
       {
         "ref": "N1",
-        "title": "Funding for defence technical excellence colleges"
+        "title": "Defence technical education colleges in Scotland"
       }
     ]
   }

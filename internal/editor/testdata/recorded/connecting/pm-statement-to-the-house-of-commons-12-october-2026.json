@@ -1,13 +1,23 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T10:21:17.400782Z",
+  "request_hash": "bdcc747aebccf9d01feec2907b7732a3bc4af7a6208d59a7de2f8546a810502e",
+  "recorded_at": "2026-10-25T14:20:03.456759Z",
   "usage": {
     "input_tokens": 3247,
-    "output_tokens": 2499
+    "output_tokens": 2627
   },
   "output": {
-    "causes": [],
+    "causes": [
+      {
+        "cause": "F5",
+        "effect": "F6"
+      },
+      {
+        "cause": "F11",
+        "effect": "F10"
+      }
+    ],
     "facts": [
       {
         "fact": "F1",

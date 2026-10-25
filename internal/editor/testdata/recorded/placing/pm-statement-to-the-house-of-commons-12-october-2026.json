@@ -1,10 +1,11 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T10:18:29.990213Z",
+  "request_hash": "1a47c1fb04752e742e28d1bb6d2f8756da537f1105ec0211a6951b94f8c372e8",
+  "recorded_at": "2026-10-25T14:18:46.168178Z",
   "usage": {
     "input_tokens": 4046,
-    "output_tokens": 2180
+    "output_tokens": 2201
   },
   "output": {
     "facts": [
@@ -69,7 +70,9 @@
         "fact": "F12"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N5"
+        ],
         "fact": "F13"
       },
       {
@@ -86,17 +89,19 @@
       },
       {
         "developments_in": [
-          "N5"
+          "N6"
         ],
         "fact": "F17"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N7"
+        ],
         "fact": "F18"
       },
       {
         "developments_in": [
-          "N6"
+          "N7"
         ],
         "fact": "F19"
       }
@@ -104,7 +109,7 @@
     "new_stories": [
       {
         "ref": "N1",
-        "title": "Reciprocal energy ceasefire between Russia and Ukraine"
+        "title": "Energy ceasefire in the Russia-Ukraine war"
       },
       {
         "ref": "N2",
@@ -112,7 +117,7 @@
       },
       {
         "ref": "N3",
-        "title": "UK-Germany cooperation on hybrid threats"
+        "title": "UK-Germany security cooperation"
       },
       {
         "ref": "N4",
@@ -120,10 +125,14 @@
       },
       {
         "ref": "N5",
-        "title": "UK-EU summit"
+        "title": "UK air defence deployment to Saudi Arabia"
       },
       {
         "ref": "N6",
+        "title": "UK-EU summit"
+      },
+      {
+        "ref": "N7",
         "title": "UK G20 presidency"
       }
     ]

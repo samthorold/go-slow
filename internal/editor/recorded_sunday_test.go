@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"log/slog"
@@ -12,6 +13,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -33,20 +35,23 @@ type conversationRecording struct {
 	Turns      []keptTurn   `json:"turns"`
 }
 
-// keptTurn is one turn as kept: what the model said and called. The
-// provider's own form of it is not kept; replay needs only what the act
-// reads.
+// keptTurn is one turn as kept: what the model said and called, and the
+// hash of the request it answered. The provider's own form of it is not
+// kept; replay needs only what the act reads.
 type keptTurn struct {
-	Text  string            `json:"text,omitempty"`
-	Calls []editor.ToolCall `json:"calls,omitempty"`
-	Model string            `json:"model"`
-	Usage editor.Usage      `json:"usage"`
+	Text        string            `json:"text,omitempty"`
+	Calls       []editor.ToolCall `json:"calls,omitempty"`
+	Model       string            `json:"model"`
+	RequestHash string            `json:"request_hash,omitempty"`
+	Usage       editor.Usage      `json:"usage"`
 }
 
-// conversationRecorder passes each turn to the real model and keeps it.
+// conversationRecorder passes each turn to the real model and keeps it, with
+// the hash of its request, asked of the model named asked.
 type conversationRecorder struct {
 	model editor.Conversation
 	rec   *conversationRecording
+	asked string
 }
 
 func (r conversationRecorder) Turn(ctx context.Context, req editor.ConversationRequest) (editor.Turn, error) {
@@ -59,23 +64,59 @@ func (r conversationRecorder) Turn(ctx context.Context, req editor.ConversationR
 		InputTokens: r.rec.Usage.InputTokens + t.Usage.InputTokens, OutputTokens: r.rec.Usage.OutputTokens + t.Usage.OutputTokens,
 		CacheReadTokens: r.rec.Usage.CacheReadTokens + t.Usage.CacheReadTokens,
 	}
-	r.rec.Turns = append(r.rec.Turns, keptTurn{Text: t.Text, Calls: t.Calls, Model: t.Model, Usage: t.Usage})
+	r.rec.Turns = append(r.rec.Turns, keptTurn{Text: t.Text, Calls: t.Calls, Model: t.Model,
+		RequestHash: editor.ConversationRequestHash(asReplayed(req), r.asked), Usage: t.Usage})
 	return t, nil
 }
 
-// conversationReplay answers each turn with the next kept one.
-type conversationReplay struct {
-	rec  conversationRecording
-	next *int
+// asReplayed is req as a replay of it is sent: the model's earlier turns
+// without their provider's own form, which a recording does not keep. A
+// recorded turn's hash is of this form, the one its replay can rebuild.
+func asReplayed(req editor.ConversationRequest) editor.ConversationRequest {
+	req.Messages = slices.Clone(req.Messages)
+	for i, m := range req.Messages {
+		if m.Assistant != nil && m.Assistant.Raw != nil {
+			t := *m.Assistant
+			t.Raw = nil
+			req.Messages[i].Assistant = &t
+		}
+	}
+	return req
 }
 
-func (r conversationReplay) Turn(context.Context, editor.ConversationRequest) (editor.Turn, error) {
+// conversationReplay answers each turn with the next kept one, so long as
+// the turn's request is the one it answered, hashed with the model the act
+// is pinned to; otherwise it reports the recording stale and answers with
+// the error. A recording with no hashes at all (unhashed) is replayed
+// unchecked.
+type conversationReplay struct {
+	rec    conversationRecording
+	next   *int
+	model  string
+	cmd    rerecordCmd
+	report func(error)
+}
+
+func (r conversationReplay) Turn(_ context.Context, req editor.ConversationRequest) (editor.Turn, error) {
 	if *r.next >= len(r.rec.Turns) {
 		return editor.Turn{}, errors.New("the recording has no more turns")
 	}
 	k := r.rec.Turns[*r.next]
 	*r.next++
+	if !unhashed(r.rec) {
+		name := fmt.Sprintf("turn %d", *r.next)
+		if err := stale(name, k.RequestHash, editor.ConversationRequestHash(asReplayed(req), r.model), r.cmd); err != nil {
+			r.report(err)
+			return editor.Turn{}, err
+		}
+	}
 	return editor.Turn{Text: k.Text, Calls: k.Calls, Model: k.Model, Usage: k.Usage}, nil
+}
+
+// unhashed is whether rec was recorded before turns kept their request's
+// hash: none of its turns has one.
+func unhashed(rec conversationRecording) bool {
+	return !slices.ContainsFunc(rec.Turns, func(k keptTurn) bool { return k.RequestHash != "" })
 }
 
 // recordingTransport passes Wikidata's answers through and keeps each
@@ -153,14 +194,12 @@ func recordedSundayRead(t *testing.T, root string) {
 		if err := os.RemoveAll(wikidataDir); err != nil {
 			t.Fatal(err)
 		}
-		model = conversationRecorder{claude.New(claude.Options{APIKey: key, Model: name}), &rec}
+		model = conversationRecorder{claude.New(claude.Options{APIKey: key, Model: name}), &rec, name}
 		wdHTTP.Transport = recordingTransport{t, wikidataDir}
 	} else {
 		b, err := os.ReadFile(path)
 		if errors.Is(err, fs.ErrNotExist) {
-			t.Skip("the Sunday read has not been recorded yet; record it with: " +
-				"go test -count=1 ./internal/editor -run TestRecordedSundayRead -record " +
-				"(GOSLOW_ANTHROPIC_API_KEY and SUNDAY_READ_MODEL set)")
+			t.Skipf("the Sunday read has not been recorded yet; record it with: %s", sundayReadCommand)
 		}
 		if err != nil {
 			t.Fatal(err)
@@ -168,7 +207,16 @@ func recordedSundayRead(t *testing.T, root string) {
 		if err := json.Unmarshal(b, &rec); err != nil {
 			t.Fatal(err)
 		}
-		model = conversationReplay{rec, new(int)}
+		if unhashed(rec) {
+			// Recorded before turns kept their request's hash, and not
+			// re-recorded since (it costs dollars): whether the act still
+			// builds the requests it answered is not known, so this replay
+			// checks the act's properties on it, not that it is current.
+			t.Logf("the Sunday read's recording keeps no request hashes, so it is not known to answer "+
+				"the requests the act builds now; re-record it, on the Owner's say, with: %s", sundayReadCommand)
+		}
+		model = conversationReplay{rec: rec, next: new(int), model: pinnedModel(t, sundayReadCommand.modelVar),
+			cmd: sundayReadCommand, report: func(err error) { t.Error(err) }}
 		srv := httptest.NewServer(wikidatatest.Handler(wikidataDir))
 		t.Cleanup(srv.Close)
 		endpoint, gap = srv.URL, 0

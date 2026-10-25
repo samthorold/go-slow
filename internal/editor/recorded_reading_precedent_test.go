@@ -105,15 +105,13 @@ func recordedReadingPrecedent(t *testing.T, root string) {
 		if key == "" || m == "" {
 			t.Fatal("recording needs GOSLOW_ANTHROPIC_API_KEY and READING_MODEL")
 		}
-		model = recorder{claude.New(claude.Options{APIKey: key, Model: m}), &rec}
+		model = recorder{claude.New(claude.Options{APIKey: key, Model: m}), &rec, m}
 	} else {
 		if _, err := os.Stat(path); errors.Is(err, fs.ErrNotExist) {
-			t.Skipf("%s has not been recorded yet; record it with: "+
-				"go test -count=1 ./internal/editor -run TestRecordedReadingPrecedent -record "+
-				"(GOSLOW_ANTHROPIC_API_KEY and READING_MODEL set)", name)
+			t.Skipf("%s has not been recorded yet; record it with: %s", name, readingPrecedentCommand)
 		}
 		rec = kept(t, path)
-		model = replay{rec}
+		model = ownReplay(t, rec, "reading-"+name, readingPrecedentCommand)
 	}
 	var logs bytes.Buffer
 	ed := editor.New(editor.Deps{Store: store, Model: model, Wikidata: &fakeWikidata{},

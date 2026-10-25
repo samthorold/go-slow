@@ -1,0 +1,262 @@
+// Command yield reports how much each of the Editor's acts drew from each
+// fixture in two sets of recorded runs, before → after, so a re-recording's
+// shift in yield is seen without diffing JSON. It is a dev tool, not part of
+// the app: it reads the repository's recordings, never the Record.
+//
+//	go run ./internal/editor/yield <before> <after>
+//
+// Each argument is a recordings directory (internal/editor/testdata/recorded,
+// or an older copy of it, e.g. extracted with git archive). It reports, it
+// never fails on a change in yield.
+package main
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"io/fs"
+	"os"
+	"path/filepath"
+	"sort"
+	"strings"
+)
+
+func main() {
+	if err := run(os.Args[1:], os.Stdout); err != nil {
+		fmt.Fprintln(os.Stderr, "yield:", err)
+		os.Exit(1)
+	}
+}
+
+func run(args []string, w io.Writer) error {
+	if len(args) != 2 {
+		return errors.New("usage: yield <before> <after>")
+	}
+	before, err := load(args[0])
+	if err != nil {
+		return err
+	}
+	after, err := load(args[1])
+	if err != nil {
+		return err
+	}
+	return report(w, before, after)
+}
+
+// recording is the little of a kept response the report needs.
+type recording struct {
+	Act    string          `json:"act"`
+	Output json.RawMessage `json:"output"`
+}
+
+// entity is an Entity a reading names, by kind and name. Readings recorded
+// before Entities carried a kind name them as a plain string, read as a name
+// with no kind.
+type entity struct {
+	Kind string `json:"kind"`
+	Name string `json:"name"`
+}
+
+func (e *entity) UnmarshalJSON(data []byte) error {
+	if len(data) > 0 && data[0] == '"' {
+		*e = entity{}
+		return json.Unmarshal(data, &e.Name)
+	}
+	type plain entity
+	return json.Unmarshal(data, (*plain)(e))
+}
+
+// act is one recorded act's columns and how a recording's output is counted.
+type act struct {
+	name    string
+	columns []string
+	count   func(json.RawMessage) ([]int, error)
+}
+
+var acts = []act{
+	{"reading", []string{"Facts", "Claims", "Entities"}, countReading},
+	{"placing", []string{"Developments", "New Stories"}, countPlacing},
+	{"connecting", []string{"Connections"}, countConnecting},
+	{"briefing", []string{"Statements", "Stories"}, countBriefing},
+}
+
+// countPlacing counts each Fact's Developments (one per Story it is placed
+// in) and the Stories the placing started.
+func countPlacing(out json.RawMessage) ([]int, error) {
+	var r struct {
+		Facts []struct {
+			DevelopmentsIn []string `json:"developments_in"`
+		} `json:"facts"`
+		NewStories []json.RawMessage `json:"new_stories"`
+	}
+	if err := json.Unmarshal(out, &r); err != nil {
+		return nil, err
+	}
+	developments := 0
+	for _, f := range r.Facts {
+		developments += len(f.DevelopmentsIn)
+	}
+	return []int{developments, len(r.NewStories)}, nil
+}
+
+// countConnecting counts the cause Connections the act made.
+func countConnecting(out json.RawMessage) ([]int, error) {
+	var r struct {
+		Causes []json.RawMessage `json:"causes"`
+	}
+	if err := json.Unmarshal(out, &r); err != nil {
+		return nil, err
+	}
+	return []int{len(r.Causes)}, nil
+}
+
+// countBriefing counts the Briefing's statements and the Stories they are in.
+func countBriefing(out json.RawMessage) ([]int, error) {
+	var r struct {
+		Stories []struct {
+			Statements []json.RawMessage `json:"statements"`
+		} `json:"stories"`
+	}
+	if err := json.Unmarshal(out, &r); err != nil {
+		return nil, err
+	}
+	statements := 0
+	for _, s := range r.Stories {
+		statements += len(s.Statements)
+	}
+	return []int{statements, len(r.Stories)}, nil
+}
+
+func countReading(out json.RawMessage) ([]int, error) {
+	type statement struct {
+		Entities []entity `json:"entities"`
+	}
+	var r struct {
+		Facts  []statement `json:"facts"`
+		Claims []statement `json:"claims"`
+	}
+	if err := json.Unmarshal(out, &r); err != nil {
+		return nil, err
+	}
+	distinct := map[entity]bool{}
+	for _, s := range append(append([]statement{}, r.Facts...), r.Claims...) {
+		for _, e := range s.Entities {
+			distinct[e] = true
+		}
+	}
+	return []int{len(r.Facts), len(r.Claims), len(distinct)}, nil
+}
+
+// counts is, per act, each fixture's counts.
+type counts map[string]map[string][]int
+
+func load(dir string) (counts, error) {
+	c := counts{}
+	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			// A downstream act's frozen copies of the recordings it builds
+			// on are not its own yield.
+			if d.Name() == "inputs" && path != dir {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if filepath.Ext(path) != ".json" {
+			return nil
+		}
+		data, err := os.ReadFile(path) //nolint:gosec // a dev tool reading the directory it was given
+		if err != nil {
+			return err
+		}
+		// Files that are not a kept response (a recorded Wikidata answer)
+		// are not counted, nor are acts with no counts below.
+		var rec recording
+		if json.Unmarshal(data, &rec) != nil {
+			return nil
+		}
+		for _, a := range acts {
+			if a.name != rec.Act {
+				continue
+			}
+			n, err := a.count(rec.Output)
+			if err != nil {
+				return fmt.Errorf("%s: %w", path, err)
+			}
+			rel, err := filepath.Rel(dir, path)
+			if err != nil {
+				return err
+			}
+			if c[a.name] == nil {
+				c[a.name] = map[string][]int{}
+			}
+			c[a.name][strings.TrimSuffix(filepath.ToSlash(rel), ".json")] = n
+		}
+		return nil
+	})
+	return c, err
+}
+
+func report(w io.Writer, before, after counts) error {
+	var b strings.Builder
+	for _, a := range acts {
+		fixtures := map[string]bool{}
+		for f := range before[a.name] {
+			fixtures[f] = true
+		}
+		for f := range after[a.name] {
+			fixtures[f] = true
+		}
+		names := make([]string, 0, len(fixtures))
+		for f := range fixtures {
+			names = append(names, f)
+		}
+		if len(names) == 0 {
+			continue
+		}
+		sort.Strings(names)
+		fmt.Fprintf(&b, "### %s\n\n| Fixture | %s |\n|%s\n", a.name, strings.Join(a.columns, " | "), strings.Repeat("---|", len(a.columns)+1))
+		totalBefore, totalAfter := make([]int, len(a.columns)), make([]int, len(a.columns))
+		for _, f := range names {
+			was, inBefore := before[a.name][f]
+			now, inAfter := after[a.name][f]
+			label := f
+			switch {
+			case !inBefore:
+				label += " (added)"
+			case !inAfter:
+				label += " (removed)"
+			}
+			cells := make([]string, len(a.columns))
+			for i := range a.columns {
+				cells[i] = cell(was, i) + " → " + cell(now, i)
+				if inBefore {
+					totalBefore[i] += was[i]
+				}
+				if inAfter {
+					totalAfter[i] += now[i]
+				}
+			}
+			fmt.Fprintf(&b, "| %s | %s |\n", label, strings.Join(cells, " | "))
+		}
+		cells := make([]string, len(a.columns))
+		for i := range a.columns {
+			cells[i] = fmt.Sprintf("%d → %d", totalBefore[i], totalAfter[i])
+		}
+		fmt.Fprintf(&b, "| **Total** | %s |\n\n", strings.Join(cells, " | "))
+	}
+	_, err := io.WriteString(w, b.String())
+	return err
+}
+
+// cell is one side's count in column i, or a dash where the fixture has no
+// recording on that side.
+func cell(n []int, i int) string {
+	if n == nil {
+		return "–"
+	}
+	return fmt.Sprint(n[i])
+}

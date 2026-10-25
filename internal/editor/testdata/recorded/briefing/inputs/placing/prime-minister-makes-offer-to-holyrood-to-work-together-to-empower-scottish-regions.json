@@ -1,0 +1,43 @@
+{
+  "act": "placing",
+  "model": "claude-haiku-5-5",
+  "recorded_at": "2026-10-25T10:18:57.485472Z",
+  "usage": {
+    "input_tokens": 2319,
+    "output_tokens": 472
+  },
+  "output": {
+    "facts": [
+      {
+        "developments_in": [],
+        "fact": "F1"
+      },
+      {
+        "developments_in": [
+          "N1"
+        ],
+        "fact": "F2"
+      },
+      {
+        "developments_in": [],
+        "fact": "F3"
+      },
+      {
+        "developments_in": [
+          "N1"
+        ],
+        "fact": "F4"
+      },
+      {
+        "developments_in": [],
+        "fact": "F5"
+      }
+    ],
+    "new_stories": [
+      {
+        "ref": "N1",
+        "title": "Devolution and regional empowerment in Scotland"
+      }
+    ]
+  }
+}

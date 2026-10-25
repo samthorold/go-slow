@@ -24,6 +24,7 @@
       <p>{{.Statement}} <small>(as at {{.AsAt}})</small></p>
       <blockquote><p>{{.Quote}}</p></blockquote>
       {{- if .Entities}}<p><small>Involves {{.Entities}}</small></p>{{end}}
+      {{- if .Call}}<p><small><a href="{{.Call}}">How it was read</a></small></p>{{end}}
     </li>
   {{- end}}
   </ul>

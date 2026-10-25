@@ -286,12 +286,14 @@ func (s *Store) ReadItem(ctx context.Context, sourceID, entryID string) (editor.
 			coalesce(item_reads.read_at, ''), coalesce(item_reads.model, ''),
 			(SELECT json_group_array(topics.name ORDER BY topics.name)
 				FROM item_topics JOIN topics ON topics.id = item_topics.topic_id
-				WHERE item_topics.source_id = items.source_id AND item_topics.entry_id = items.entry_id)
+				WHERE item_topics.source_id = items.source_id AND item_topics.entry_id = items.entry_id),
+			coalesce((SELECT max(c.id) FROM model_calls c
+				WHERE c.act = 'reading' AND c.work_key = `+itemWorkKey+` AND c.outcome = 'applied'), 0)
 		FROM items JOIN sources ON sources.id = items.source_id
 			LEFT JOIN item_reads USING (source_id, entry_id)
 		WHERE items.source_id = ? AND items.entry_id = ?`, sourceID, entryID,
 	).Scan(&it.SourceID, &it.EntryID, &it.Title, &it.Link, &it.Summary, &it.Content,
-		&published, &it.Attribution, &it.SourceName, &readAt, &it.Model, &topics)
+		&published, &it.Attribution, &it.SourceName, &readAt, &it.Model, &topics, &it.ReadingCall)
 	if errors.Is(err, sql.ErrNoRows) {
 		return it, false, nil
 	}

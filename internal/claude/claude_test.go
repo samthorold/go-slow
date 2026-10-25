@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/samthorold/go-slow/internal/claude"
@@ -71,6 +72,19 @@ func TestTheModelIsCalledWithTheActsInstructionsInputAndSchema(t *testing.T) {
 	if res.Usage != (editor.Usage{InputTokens: 1200, OutputTokens: 340}) {
 		t.Errorf("usage = %+v", res.Usage)
 	}
+	// The whole message as returned, for the kept call.
+	var raw map[string]any
+	if err := json.Unmarshal(res.Raw, &raw); err != nil || raw["id"] != "msg_1" || res.StopReason != "end_turn" {
+		t.Errorf("raw = %s, stop reason %q", res.Raw, res.StopReason)
+	}
+}
+
+func TestTheModelTheAdapterRunsEachActOnIsNamed(t *testing.T) {
+	m := claude.New(claude.Options{APIKey: "k", Model: "claude-haiku-5-5", ActModels: map[string]string{"placing": "claude-sonnet-5"}})
+
+	if m.ModelFor("reading") != "claude-haiku-5-5" || m.ModelFor("placing") != "claude-sonnet-5" {
+		t.Errorf("reading on %q, placing on %q", m.ModelFor("reading"), m.ModelFor("placing"))
+	}
 }
 
 func TestARefusalOrATruncatedAnswerIsNoOutput(t *testing.T) {
@@ -81,10 +95,15 @@ func TestARefusalOrATruncatedAnswerIsNoOutput(t *testing.T) {
 		t.Run(stop, func(t *testing.T) {
 			model, _ := api(t, stop, `{"facts": [`)
 
-			_, err := model.Complete(t.Context(), request)
+			res, err := model.Complete(t.Context(), request)
 
 			if !errors.Is(err, want) {
 				t.Errorf("err = %v, want %v", err, want)
+			}
+			// What came back is still returned, to be kept with the call.
+			if res.StopReason != stop || !strings.Contains(string(res.Raw), `"stop_reason":"`+stop+`"`) ||
+				res.Model != "claude-haiku-5-5" || res.Usage.InputTokens != 1200 {
+				t.Errorf("response = %+v (%s)", res, res.Raw)
 			}
 		})
 	}

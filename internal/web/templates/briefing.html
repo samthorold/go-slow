@@ -51,10 +51,8 @@
   {{- template "missedDevelopment" .MissedDevelopment}}
 </section>
 {{- end}}
-{{- if .WrittenBy}}
-<p id="how-written"><small><a href="{{.WrittenBy}}">How it was written</a></small></p>
-{{- else if .WithoutCall}}
-<p id="how-written"><small>With nothing to tell, it was written without a model call.</small></p>
+{{- with .TrailPath}}
+<p id="how-written"><small>{{if $.WithoutCall}}With nothing to tell, it was written without a model call. {{end}}<a href="{{.}}">How this was written</a></small></p>
 {{- end}}
 {{- if .Exists}}
 {{template "missedStory" .MissedStory}}

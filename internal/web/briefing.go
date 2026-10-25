@@ -101,10 +101,10 @@ type briefingPage struct {
 	Missed string
 	// Failure is the latest failure to write the day's Briefing.
 	Failure *failureRow
-	// WrittenBy is the page of the call that wrote the Briefing, and
+	// TrailPath is the page of how a written Briefing was written, and
 	// WithoutCall whether it was written empty, with no model call.
-	// Neither is set for a Briefing written before calls were kept.
-	WrittenBy   string
+	// That page links the call that wrote it, if one was kept.
+	TrailPath   string
 	WithoutCall bool
 	// FailedAttempts are the kept calls of the day's failed attempts to
 	// write it, for a day with no Briefing.
@@ -252,13 +252,14 @@ func (a *app) briefingWith(w http.ResponseWriter, r *http.Request, day time.Time
 }
 
 // briefingCalls links the day's Briefing page to how it was written: a
-// written Briefing to the call that wrote it, or says it was written with
-// none; a day with no Briefing to each failed attempt to write it.
+// written Briefing to its trail, saying if it was written with no call; a
+// day with no Briefing to each failed attempt to write it.
 func (a *app) briefingCalls(r *http.Request, p *briefingPage, b editor.Briefing, exists bool, loc *time.Location) error {
 	calls, err := a.Calls.CallsOn(r.Context(), briefingAct, b.Day)
 	if err != nil {
 		return err
 	}
+	var writtenBy int64
 	for _, c := range calls {
 		switch {
 		case !exists:
@@ -266,11 +267,14 @@ func (a *app) briefingCalls(r *http.Request, p *briefingPage, b editor.Briefing,
 				Page: callPath(c.ID), At: when(c.At, loc), Outcome: string(c.Outcome), Why: c.Why,
 			})
 		case c.Outcome == editor.Applied:
-			p.WrittenBy = callPath(c.ID)
+			writtenBy = c.ID
 		}
 	}
 	// A Briefing written empty is the one with no model to name.
-	p.WithoutCall = exists && p.WrittenBy == "" && b.Model == ""
+	p.WithoutCall = exists && writtenBy == 0 && b.Model == ""
+	if exists {
+		p.TrailPath = briefingTrailPath(b.Day)
+	}
 	return nil
 }
 

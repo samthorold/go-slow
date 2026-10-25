@@ -99,6 +99,7 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("GET /{$}", a.todaysBriefing)
 	mux.HandleFunc("GET /briefings", a.briefings)
 	mux.HandleFunc("GET /briefings/{day}", a.pastBriefing)
+	mux.HandleFunc("GET /briefings/{day}/trail", a.briefingTrail)
 	mux.HandleFunc("POST /briefings/{day}/feedback", a.briefingFeedback)
 	mux.HandleFunc("PUT /briefings/{day}/feedback/{feedback}/undone", a.undoOnBriefing)
 	mux.HandleFunc("GET /sunday-reads/{day}", a.sundayRead)

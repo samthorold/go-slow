@@ -157,6 +157,44 @@ func TestAFactsQuoteMatchesTheItemWhateverItsPunctuationAndMarkup(t *testing.T) 
 	}
 }
 
+func TestAnItemWithItsTextIsReadWithoutItsSummary(t *testing.T) {
+	model := &fakeModel{output: goodReading}
+	if _, err := editor.Read(t.Context(), model, speech); err != nil {
+		t.Fatal(err)
+	}
+
+	if in := model.sent[0].Input; strings.Contains(in, speech.Summary) || strings.Contains(in, "Summary:") {
+		t.Errorf("the input gives the summary of an Item with its text:\n%s", in)
+	}
+}
+
+func TestAnItemWithNoTextIsReadFromItsSummary(t *testing.T) {
+	noText := speech
+	noText.Content = ""
+	model := &fakeModel{output: `{"claims": [], "facts": [{"statement": "Andy Burnham gave a speech in Scotland.",
+		"as_at": "2026-10-16", "quote": "delivered a speech in Scotland today", "entities": []}]}`}
+
+	r, err := editor.Read(t.Context(), model, noText)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !strings.Contains(model.sent[0].Input, "Summary: "+speech.Summary) || len(r.Facts) != 1 {
+		t.Errorf("an Item with no text is not read from its summary: %+v\n%s", r.Facts, model.sent[0].Input)
+	}
+}
+
+func TestAFactQuotingOnlyTheSummaryOfAnItemWithItsTextIsRefused(t *testing.T) {
+	output := strings.Replace(goodReading, `"quote": "to be here in Motherwell"`,
+		`"quote": "delivered a speech in Scotland today"`, 1)
+
+	_, err := editor.Read(t.Context(), &fakeModel{output: output}, speech)
+
+	if !errors.Is(err, editor.ErrFailedChecks) {
+		t.Errorf("err = %v, want ErrFailedChecks", err)
+	}
+}
+
 func TestThereIsNoReadingWithoutAnItem(t *testing.T) {
 	model := &fakeModel{output: goodReading}
 

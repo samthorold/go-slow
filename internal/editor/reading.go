@@ -104,7 +104,7 @@ const readingInstructions = `You are the Editor of a private slow-news briefing.
 Draw from the Item:
 - Facts: propositions the Item itself establishes as having happened or being so, in no one's voice. That a person said something, announced something, met someone or visited somewhere is a Fact. Each Fact holds as at a date (YYYY-MM-DD): the date the Item gives for it, otherwise the Item's publication date.
 - Claims: propositions someone asserts that the Item does not itself establish: promises, forecasts, judgements, accusations, figures given in a speaker's own voice. Each Claim keeps who made it, by name if the Item gives one.
-- Entities: with each Fact and Claim, every person, organisation, place or named occasion (such as a summit or a Budget) it involves, including one the Item names only by an office or title ("the Prime Minister"), each with its name, kind and role. Name an Entity in its fullest form in the Item, and give it exactly that name and kind in every Fact and Claim that involves it; if the Item never gives a person's name, name them by the office as the Item does. For a person the Item gives an office or position, give that role in full, with its country or body where the Item makes it plain ("Prime Minister of the United Kingdom", "Secretary of State for Defence"); otherwise leave the role empty. A person the Item names is named by their name, with the office as their role, never by the office.
+- Entities: with each Fact and Claim, every person, organisation, place or named occasion (such as a summit or a Budget) it involves, including one the Item names only by an office or title ("the Prime Minister"), each with its name, kind and role. Name an Entity in its fullest form in the Item, and give it exactly that name and kind in every Fact and Claim that involves it; if the Item never gives a person's name, name them by the office as the Item does. For a person the Item gives an office or position, give that role in full, with its country or body where the Item makes it plain ("Prime Minister of the United Kingdom", "Secretary of State for Defence"); otherwise leave the role empty. A person the Item names is named by their name, with the office as their role, never by the office. A place's name the Item also uses for its authority ("Greater Manchester") is one Entity, of kind place throughout.
 
 For each Fact and Claim, give a quote: a short passage copied word for word from the Item that it rests on. Never paraphrase in a quote.
 
@@ -305,7 +305,10 @@ func input(it Item) string {
 	if !it.Published.IsZero() {
 		fmt.Fprintf(&b, "Published: %s\n", it.Published.UTC().Format(time.DateOnly))
 	}
-	if it.Summary != "" {
+	// The summary is the publisher's description of the text, not more of
+	// it: given beside the text, Facts get drawn from the description. It
+	// stands in only for an Item with no text.
+	if it.Summary != "" && it.Content == "" {
 		fmt.Fprintf(&b, "Summary: %s\n", it.Summary)
 	}
 	if it.Content != "" {

@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"log/slog"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -172,6 +173,36 @@ func TestConnectingRunsAgainOverTheDaysFactsBeforeTheBriefing(t *testing.T) {
 	}
 	if len(s.Causes) != 1 || s.Causes[0].Effect.EntryID != laterItem.EntryID {
 		t.Errorf("Causes = %+v, want the one the re-run made", s.Causes)
+	}
+}
+
+// speechRolesWithScotland gives Scotland, which the speech's reading gave
+// only in its Claim, a role in the speech's Fact.
+const speechRolesWithScotland = `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "actor"},
+  {"entity": "Motherwell", "role": "place"}, {"entity": "Scotland", "role": "place"}]}], "causes": []}`
+
+func TestARoleConnectingGivesAnEntityOfTheReadingMakesTheFactInvolveIt(t *testing.T) {
+	store := record(t)
+	readAndPlace(t, store, &fakeModel{output: startsAStory})
+	ed, logs := connector(store, &inTurn{outputs: []string{speechRolesWithScotland}})
+
+	if err := ed.ConnectWaiting(t.Context(), saturday); err != nil {
+		t.Fatal(err)
+	}
+
+	if waiting, err := store.FactsToConnect(t.Context()); err != nil || len(waiting) != 0 {
+		t.Fatalf("awaiting connecting: %+v %v, want the speech's connecting applied\n%s", waiting, err, logs)
+	}
+	s, _, err := store.Story(t.Context(), 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(s.Timeline) != 1 || !slices.Equal(s.Timeline[0].Entities, []string{"Andy Burnham", "Motherwell", "Scotland"}) {
+		t.Errorf("the Story page's Fact involves %+v, want Scotland too", s.Timeline)
+	}
+	stories, err := store.StoriesSharing(t.Context(), []string{"Scotland"})
+	if err != nil || len(stories) != 1 || stories[0].ID != 1 {
+		t.Errorf("placing's candidates for Scotland: %+v %v, want the speech's Story", stories, err)
 	}
 }
 

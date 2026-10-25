@@ -41,9 +41,39 @@ func (s *Store) toConnect(ctx context.Context, where string, args ...any) ([]edi
 	}
 	out := make([]editor.ToConnect, 0, len(byItem))
 	for _, tp := range byItem {
-		out = append(out, editor.ToConnect{Item: tp.Item, Facts: tp.Facts})
+		ents, err := s.readingEntities(ctx, tp.Item.SourceID, tp.Item.EntryID)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, editor.ToConnect{Item: tp.Item, Facts: tp.Facts, Entities: ents})
 	}
 	return out, nil
+}
+
+// readingEntities are the names of the Entities the reading of an Item gave,
+// in any of its Facts or Claims, by name.
+func (s *Store) readingEntities(ctx context.Context, sourceID, entryID string) ([]string, error) {
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT entities.name FROM entities WHERE entities.id IN (
+			SELECT fe.entity_id FROM fact_entities fe JOIN facts f ON f.id = fe.fact_id
+			WHERE f.source_id = ?1 AND f.entry_id = ?2
+			UNION
+			SELECT ce.entity_id FROM claim_entities ce JOIN claims c ON c.id = ce.claim_id
+			WHERE c.source_id = ?1 AND c.entry_id = ?2)
+		ORDER BY entities.name`, sourceID, entryID)
+	if err != nil {
+		return nil, fmt.Errorf("entities of the reading of %s: %w", entryID, err)
+	}
+	defer func() { _ = rows.Close() }()
+	var out []string
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return nil, fmt.Errorf("entities of the reading of %s: %w", entryID, err)
+		}
+		out = append(out, name)
+	}
+	return out, rows.Err()
 }
 
 // FactsNear are at most limit other Facts that share an Entity with any of
@@ -100,7 +130,8 @@ func (s *Store) FactsNear(ctx context.Context, facts []editor.Fact, limit int) (
 	return out, nil
 }
 
-// SaveConnecting gives each Entity its role in its Fact, keeps the cause
+// SaveConnecting gives each Entity its role in its Fact (making the Fact
+// involve it, if its reading did not list it there), keeps the cause
 // Connections, and marks every Fact connected, all at once. A Connection
 // already kept is kept once.
 func (s *Store) SaveConnecting(ctx context.Context, c editor.Connecting, connectedAt time.Time) error {
@@ -110,10 +141,13 @@ func (s *Store) SaveConnecting(ctx context.Context, c editor.Connecting, connect
 	}
 	defer func() { _ = tx.Rollback() }()
 	for _, r := range c.Roles {
+		// An Entity of the Item's reading the Fact did not list is involved
+		// in it from now on, in its role.
 		if _, err := tx.ExecContext(ctx, `
-			UPDATE fact_entities SET role = ?
-			WHERE fact_id = ? AND entity_id = (SELECT id FROM entities WHERE name = ?)`,
-			r.Role, r.FactID, r.Entity); err != nil {
+			INSERT INTO fact_entities (fact_id, entity_id, role)
+			SELECT ?, id, ? FROM entities WHERE name = ?
+			ON CONFLICT (fact_id, entity_id) DO UPDATE SET role = excluded.role`,
+			r.FactID, r.Role, r.Entity); err != nil {
 			return fmt.Errorf("role of %q in fact %d: %w", r.Entity, r.FactID, err)
 		}
 	}

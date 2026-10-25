@@ -53,7 +53,12 @@ type Deps struct {
 	// kept in, and BriefingModel the model it is written with.
 	Briefings     BriefingStore
 	BriefingModel Model
-	Log           *slog.Logger
+	// SundayReads is the part of the Record the Sunday read is written from
+	// and kept in, and SundayReadModel the model it is written with, as an
+	// agent with tools.
+	SundayReads     SundayStore
+	SundayReadModel Conversation
+	Log             *slog.Logger
 }
 
 // Editor does the editorial work over the Record.

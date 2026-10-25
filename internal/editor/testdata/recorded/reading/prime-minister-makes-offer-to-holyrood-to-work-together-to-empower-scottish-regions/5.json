@@ -1,0 +1,206 @@
+{
+  "act": "reading",
+  "model": "claude-haiku-5-5",
+  "request_hash": "a9f00fd6b165740883bc66046a8e2af6fc6d418bab091fb838907d12c5d5b37a",
+  "recorded_at": "2026-10-25T15:07:18.899381Z",
+  "usage": {
+    "input_tokens": 2194,
+    "output_tokens": 4254
+  },
+  "output": {
+    "claims": [
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Andy Burnham",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "organisation",
+            "name": "Scottish Government",
+            "role": ""
+          }
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "the Scottish Government is one of the most centralised devolved administrations in Europe",
+        "statement": "The Scottish Government is one of the most centralised devolved administrations in Europe."
+      },
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Andy Burnham",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "organisation",
+            "name": "No10 North",
+            "role": ""
+          }
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "Through No10 North, we are rewiring the state",
+        "statement": "Through No10 North, the UK Government is rewiring the state."
+      },
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Andy Burnham",
+            "role": "Prime Minister of the United Kingdom"
+          }
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "With us working together, there is no limit to what we can achieve for the Scottish people.",
+        "statement": "Working together, there is no limit to what can be achieved for the Scottish people."
+      },
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Douglas Alexander",
+            "role": "Scottish Secretary"
+          },
+          {
+            "kind": "place",
+            "name": "North Lanarkshire",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Fife",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Highlands",
+            "role": ""
+          }
+        ],
+        "made_by": "Douglas Alexander",
+        "quote": "know what their communities need better than any minister",
+        "statement": "People in North Lanarkshire, Fife and the Highlands know what their communities need better than any minister."
+      },
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Douglas Alexander",
+            "role": "Scottish Secretary"
+          },
+          {
+            "kind": "person",
+            "name": "Andy Burnham",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "organisation",
+            "name": "Scottish Government",
+            "role": ""
+          }
+        ],
+        "made_by": "Douglas Alexander",
+        "quote": "The Prime Minister’s offer to the Scottish Government is a genuine one",
+        "statement": "The Prime Minister’s offer to the Scottish Government is a genuine one."
+      },
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Douglas Alexander",
+            "role": "Scottish Secretary"
+          },
+          {
+            "kind": "organisation",
+            "name": "Scotland Office",
+            "role": ""
+          }
+        ],
+        "made_by": "Douglas Alexander",
+        "quote": "the Scotland Office is ready to roll up its sleeves alongside them",
+        "statement": "The Scotland Office is ready to work alongside the Scottish Government to make the offer happen."
+      }
+    ],
+    "facts": [
+      {
+        "as_at": "2026-10-15",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Andy Burnham",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "Lanarkshire",
+            "role": ""
+          }
+        ],
+        "quote": "after speaking with young people today in Lanarkshire",
+        "statement": "Andy Burnham spoke with young people in Lanarkshire on the day of publication."
+      },
+      {
+        "as_at": "2026-10-15",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Andy Burnham",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "person",
+            "name": "Scotland’s First Minister",
+            "role": "First Minister of Scotland"
+          }
+        ],
+        "quote": "I told the First Minister that I wanted to work with him",
+        "statement": "During his first week in office, Andy Burnham told the First Minister that he wanted to work with him."
+      },
+      {
+        "as_at": "2026-10-15",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Douglas Alexander",
+            "role": "Scottish Secretary"
+          }
+        ],
+        "quote": "The Scottish Secretary, Douglas Alexander said:",
+        "statement": "Douglas Alexander, the Scottish Secretary, made a statement on the Prime Minister’s offer."
+      },
+      {
+        "as_at": "2026-10-15",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Andy Burnham",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "organisation",
+            "name": "Scottish Government",
+            "role": ""
+          },
+          {
+            "kind": "organisation",
+            "name": "UK Government",
+            "role": ""
+          },
+          {
+            "kind": "organisation",
+            "name": "No10 North",
+            "role": ""
+          },
+          {
+            "kind": "organisation",
+            "name": "Scotland Office",
+            "role": ""
+          }
+        ],
+        "quote": "he will call on the Scottish Government to work with the UK Government through No10 North and the Scotland Office",
+        "statement": "The Prime Minister will call on the Scottish Government to work with the UK Government through No10 North and the Scotland Office to develop a new model of regional empowerment for Scotland."
+      }
+    ]
+  }
+}

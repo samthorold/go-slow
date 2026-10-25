@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/fs"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -14,7 +13,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/samthorold/go-slow/internal/claude"
 	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/interest"
@@ -65,8 +63,14 @@ func fixtureItems(t *testing.T) []namedItem {
 // given.
 func newRecord(t *testing.T, topics []interest.Draft) (*sqlite.Store, *interest.Service) {
 	t.Helper()
+	return newRecordAt(t, filepath.Join(t.TempDir(), "go-slow.db"), topics)
+}
+
+// newRecordAt is newRecord, kept at path.
+func newRecordAt(t *testing.T, path string, topics []interest.Draft) (*sqlite.Store, *interest.Service) {
+	t.Helper()
 	ctx := t.Context()
-	store, err := sqlite.Open(ctx, filepath.Join(t.TempDir(), "go-slow.db"))
+	store, err := sqlite.Open(ctx, path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -104,67 +108,42 @@ func replayed(dir string) actModel {
 	}
 }
 
-// recordedOrReplayed is how a recorded test runs its own act on each
-// fixture under dir: on the real model named by modelVar when recording,
-// keeping each response as it arrives, otherwise replayed, failing as stale
-// when the act now builds a request the recording did not answer. An act's
-// frozen copies of the recordings it rests on are replayed unchecked
-// (replayed, above): they are the input the act was recorded over, and their
-// own act's recorded test checks its recordings. Replaying, the
-// first fixture not yet recorded skips the rest of the run, which rests on
-// it, naming the command that records it. Each call's usage adds to total.
-func recordedOrReplayed(t *testing.T, dir, modelVar, test string, total *editor.Usage) actModel {
-	t.Helper()
+// firstSamples answers each fixture's call from the first sample kept for it
+// in dir, attempt by attempt: an act's current recordings, as an act
+// downstream would be given them.
+func firstSamples(dir string) actModel {
 	return func(name string) (editor.Model, error) {
-		path := filepath.Join(dir, name+".json")
-		if *rerecordFlag {
-			key, model := os.Getenv("GOSLOW_ANTHROPIC_API_KEY"), os.Getenv(modelVar)
-			if key == "" || model == "" {
-				t.Fatalf("recording needs GOSLOW_ANTHROPIC_API_KEY and %s", modelVar)
-			}
-			return keeping{t, claude.New(claude.Options{APIKey: key, Model: model}), model, path, total}, nil
-		}
-		if _, err := os.Stat(path); errors.Is(err, fs.ErrNotExist) {
-			t.Skipf("%s has not been recorded yet; record it with: "+
-				"go test -count=1 ./internal/editor -run %s -record "+
-				"(GOSLOW_ANTHROPIC_API_KEY and %s set)", name, test, modelVar)
-		}
-		rec, err := keptAt(path)
+		s, err := sampleAt(samplePath(dir, name, 1))
 		if err != nil {
 			return nil, err
 		}
-		total.InputTokens += rec.Usage.InputTokens
-		total.OutputTokens += rec.Usage.OutputTokens
-		return ownReplay(t, rec, name, rerecordCmd{test, modelVar}), nil
+		return &sampleModel{path: samplePath(dir, name, 1), attempts: s.attempts(), unchecked: true}, nil
 	}
 }
 
-// keeping passes a call to the real model and keeps the response at once,
-// whether or not it passes the act's checks: the replay shows if it doesn't.
-type keeping struct {
-	t     *testing.T
-	model editor.Model
-	asked string
-	path  string
-	total *editor.Usage
+// refused is an act's work on a fixture that failed the act's checks on
+// every attempt it had.
+type refused struct{ act, fixture, why string }
+
+func (e refused) Error() string {
+	return fmt.Sprintf("%s: the %s fails the act's checks:\n%s", e.fixture, e.act, e.why)
 }
 
-func (k keeping) Complete(ctx context.Context, req editor.Request) (editor.Response, error) {
-	var rec recording
-	res, err := recorder{k.model, &rec, k.asked}.Complete(ctx, req)
-	if err != nil {
-		return res, err
+// attempted runs attempt on m: as a sample, up to its attempts, when m is
+// one, otherwise once.
+func attempted(m editor.Model, attempt func(editor.Model) (bool, error)) (bool, error) {
+	if s, ok := m.(*sampleModel); ok {
+		return runSample(s, attempt)
 	}
-	keep(k.t, k.path, rec)
-	k.total.InputTokens += res.Usage.InputTokens
-	k.total.OutputTokens += res.Usage.OutputTokens
-	return res, nil
+	return attempt(m)
 }
 
 // run runs the chain's acts over the fixtures in order into store, as the
 // Editor does: each Item is collected and tied to the Topics, read, and its
 // Facts placed and connected, so later Facts meet what earlier ones made.
-// The first act that fails stops the run: every later call rests on it.
+// The first act that fails stops the run, as refused: every later call rests
+// on it. (A failed placing leaves its Facts waiting, to be placed with the
+// next fixture's in a call no recording holds.)
 func (c chain) run(ctx context.Context, store *sqlite.Store, topics *interest.Service, fixtures []namedItem) error {
 	for _, f := range fixtures {
 		it := f.item
@@ -177,47 +156,167 @@ func (c chain) run(ctx context.Context, store *sqlite.Store, topics *interest.Se
 		if err := topics.CheckNew(ctx); err != nil {
 			return err
 		}
-		m, err := c.reading(f.name)
-		if err != nil {
-			return err
+		var why string
+		steps := []struct {
+			act   string
+			model actModel
+			run   func(editor.Model, *slog.Logger) error
+		}{
+			{"reading", c.reading, func(m editor.Model, _ *slog.Logger) error {
+				reading, err := editor.Read(ctx, m, it)
+				if err != nil {
+					why = err.Error()
+					return nil
+				}
+				return store.SaveReading(ctx, reading, saturday)
+			}},
+			{"placing", c.placing, func(m editor.Model, log *slog.Logger) error {
+				return editor.New(editor.Deps{Store: store, PlacingModel: m, Log: log}).PlaceWaiting(ctx, saturday)
+			}},
+			{"connecting", c.connecting, func(m editor.Model, log *slog.Logger) error {
+				return editor.New(editor.Deps{Store: store, ConnectingModel: m, Log: log}).ConnectWaiting(ctx, saturday)
+			}},
 		}
-		reading, err := editor.Read(ctx, m, it)
-		if err != nil {
-			return fmt.Errorf("%s: the reading fails its checks: %w", f.name, err)
-		}
-		if err := store.SaveReading(ctx, reading, saturday); err != nil {
-			return err
-		}
-		if c.placing == nil {
-			continue
-		}
-		var logs bytes.Buffer
-		log := slog.New(slog.NewTextHandler(&logs, nil))
-		if m, err = c.placing(f.name); err != nil {
-			return err
-		}
-		if err := editor.New(editor.Deps{Store: store, PlacingModel: m, Log: log}).PlaceWaiting(ctx, saturday); err != nil {
-			return err
-		}
-		// A failed placing leaves its Facts waiting, to be placed with the
-		// next fixture's in a call no recording holds.
-		if strings.Contains(logs.String(), "placing failed") {
-			return fmt.Errorf("%s: the placing fails the act's checks:\n%s", f.name, logs.String())
-		}
-		if c.connecting == nil {
-			continue
-		}
-		if m, err = c.connecting(f.name); err != nil {
-			return err
-		}
-		if err := editor.New(editor.Deps{Store: store, ConnectingModel: m, Log: log}).ConnectWaiting(ctx, saturday); err != nil {
-			return err
-		}
-		if strings.Contains(logs.String(), "connecting failed") {
-			return fmt.Errorf("%s: the connecting fails the act's checks:\n%s", f.name, logs.String())
+		for _, s := range steps {
+			if s.model == nil {
+				break
+			}
+			m, err := s.model(f.name)
+			if err != nil {
+				return err
+			}
+			passed, err := attempted(m, func(m editor.Model) (bool, error) {
+				var logs bytes.Buffer
+				why = ""
+				if err := s.run(m, slog.New(slog.NewTextHandler(&logs, nil))); err != nil {
+					return false, err
+				}
+				if strings.Contains(logs.String(), s.act+" failed") {
+					why = logs.String()
+				}
+				return why == "", nil
+			})
+			if err != nil {
+				return err
+			}
+			if !passed {
+				return refused{s.act, f.name, why}
+			}
 		}
 	}
 	return nil
+}
+
+// chainSampled replays (or records) act's samples of each fixture, in the
+// order they were published, under dir, and judges each one's properties by
+// the rule: each failure, naming its fixture. Each sample of a fixture runs
+// over a copy of the Record of the fixtures before it, each carried on by
+// its first sample to pass its checks, so every sample of a fixture answers
+// one request. c is the chain with act's model the one given; assert asserts
+// a sample's test-only properties, for the fixture f, on the Record it left.
+// A fixture with no sample passing ends the run: the fixtures after it rest
+// on one.
+func chainSampled(t *testing.T, dir, act string, topics []interest.Draft, cmd rerecordCmd,
+	c func(actModel) chain, assert func(*testing.T, *sqlite.Store, namedItem, properties),
+) []error {
+	t.Helper()
+	ctx := t.Context()
+	fixtures := fixtureItems(t)
+	model := pinnedModel(t, cmd.modelVar)
+	threads := map[string]int{} // a fixture's first sample to pass its checks
+	threaded := func(name string) (editor.Model, error) {
+		return replayingSample(t, samplePath(dir, name, threads[name]), model, cmd, func(err error) { t.Error(err) }), nil
+	}
+	// The Record of the fixtures carried on so far, kept closed between
+	// fixtures so each sample starts from a copy of its file.
+	carried := filepath.Join(t.TempDir(), "carried.db")
+	store, _ := newRecordAt(t, carried, topics)
+	if err := store.Close(); err != nil {
+		t.Fatal(err)
+	}
+	var errs []error
+	for i, f := range fixtures {
+		errs = append(errs, sampled(t, dir, f.name, dailyRule, cmd, func(m *sampleModel) sampleResult {
+			store := copyOfRecord(t, carried)
+			err := c(func(name string) (editor.Model, error) {
+				if name == f.name {
+					return m, nil
+				}
+				return threaded(name)
+			}).run(ctx, store, interest.New(store), fixtures[i:i+1])
+			var r refused
+			if errors.As(err, &r) && r.act == act && r.fixture == f.name {
+				t.Logf("%s sample %d: refused on its last attempt: %s", f.name, sampleNumber(m.path), r.why)
+				return sampleResult{}
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			if threads[f.name] == 0 {
+				threads[f.name] = sampleNumber(m.path)
+			}
+			p := properties{}
+			assert(t, store, f, p)
+			return sampleResult{passed: true, held: p}
+		})...)
+		if threads[f.name] == 0 {
+			return append(errs, fmt.Errorf("%s: no sample passes its checks, and the fixtures after it rest on one: they are not judged", f.name))
+		}
+		// Carry the Record on by the fixture's first sample to pass.
+		store, err := sqlite.Open(ctx, carried)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := c(threaded).run(ctx, store, interest.New(store), fixtures[i:i+1]); err != nil {
+			t.Fatal(err)
+		}
+		if err := store.Close(); err != nil {
+			t.Fatal(err)
+		}
+	}
+	return errs
+}
+
+// ownDirectory is the recordings root an act's own recorded test replays
+// over: a copy holding the act's own directory alone, so a test that reads
+// another act's recordings fails; recording, the recordings themselves.
+func ownDirectory(t *testing.T, act string) string {
+	t.Helper()
+	if *rerecordFlag {
+		return recordedDir
+	}
+	root := t.TempDir()
+	if err := os.CopyFS(filepath.Join(root, act), os.DirFS(filepath.Join(recordedDir, act))); err != nil {
+		t.Fatal(err)
+	}
+	return root
+}
+
+// copyOfRecord opens a copy of the closed Record at path, in a directory of
+// its own.
+func copyOfRecord(t *testing.T, path string) *sqlite.Store {
+	t.Helper()
+	b, err := os.ReadFile(path) //nolint:gosec // a test's own temporary file
+	if err != nil {
+		t.Fatal(err)
+	}
+	copied := filepath.Join(t.TempDir(), "go-slow.db")
+	if err := os.WriteFile(copied, b, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	store, err := sqlite.Open(t.Context(), copied)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = store.Close() })
+	return store
+}
+
+// sampleNumber is the k of the sample kept at path.
+func sampleNumber(path string) int {
+	var k int
+	_, _ = fmt.Sscanf(filepath.Base(path), "%d.json", &k)
+	return k
 }
 
 // frozenRecord is a Record holding the fixture Items, tied to the
@@ -226,7 +325,13 @@ func (c chain) run(ctx context.Context, store *sqlite.Store, topics *interest.Se
 // on all three.
 func frozenRecord(t *testing.T, dir string) *sqlite.Store {
 	t.Helper()
-	store, topics := newRecord(t, briefingTopics)
+	return frozenRecordAt(t, filepath.Join(t.TempDir(), "go-slow.db"), dir)
+}
+
+// frozenRecordAt is frozenRecord, kept at path.
+func frozenRecordAt(t *testing.T, path, dir string) *sqlite.Store {
+	t.Helper()
+	store, topics := newRecordAt(t, path, briefingTopics)
 	c := chain{
 		reading:    replayed(filepath.Join(dir, "reading")),
 		placing:    replayed(filepath.Join(dir, "placing")),
@@ -238,27 +343,45 @@ func frozenRecord(t *testing.T, dir string) *sqlite.Store {
 	return store
 }
 
+// frozenRecordFile is the file of a closed frozenRecord, to be copied by
+// copyOfRecord: one for each sample of an act that rests on it.
+func frozenRecordFile(t *testing.T, dir string) string {
+	t.Helper()
+	path := filepath.Join(t.TempDir(), "frozen.db")
+	if err := frozenRecordAt(t, path, dir).Close(); err != nil {
+		t.Fatal(err)
+	}
+	return path
+}
+
 // Each recorded act downstream of another replays over its own directory
 // alone: copied away from every other act's recordings, it replays all the
 // way through. So re-recording any act, reading included, changes nothing
 // another act replays.
 func TestEachRecordedActReplaysOverItsOwnInputsAlone(t *testing.T) {
+	t.Parallel()
 	if *rerecordFlag {
 		t.Skip("recording writes the acts' own directories")
 	}
+	// Placing, connecting, the Briefing and the precedents' own recorded tests
+	// replay over their own directories copied alone (ownDirectory), so they
+	// are not replayed twice here.
 	for _, tc := range []struct {
 		act     string
 		replays []func(*testing.T, string)
 	}{
-		{"placing", []func(*testing.T, string){recordedPlacings}},
-		{"connecting", []func(*testing.T, string){recordedConnectings}},
-		{"briefing", []func(*testing.T, string){recordedBriefing}},
-		{"precedent", []func(*testing.T, string){recordedPlacingPrecedent, recordedReadingPrecedent}},
 		{"sunday", []func(*testing.T, string){recordedSundayRead}},
 	} {
 		for i, replay := range tc.replays {
-			done := false
 			t.Run(fmt.Sprintf("%s/%d", tc.act, i), func(t *testing.T) {
+				t.Parallel()
+				done := false
+				// A replay that skipped tested nothing.
+				t.Cleanup(func() {
+					if !done && !t.Failed() {
+						t.Errorf("%s did not replay all the way over its own directory", tc.act)
+					}
+				})
 				root := t.TempDir()
 				if err := os.CopyFS(filepath.Join(root, tc.act), os.DirFS(filepath.Join(recordedDir, tc.act))); err != nil {
 					t.Fatal(err)
@@ -266,61 +389,64 @@ func TestEachRecordedActReplaysOverItsOwnInputsAlone(t *testing.T) {
 				replay(t, root)
 				done = true
 			})
-			// A replay that skipped tested nothing.
-			if !done && !t.Failed() {
-				t.Errorf("%s did not replay all the way over its own directory", tc.act)
-			}
 		}
 	}
 }
 
-// The chain replay: the Briefing's frozen copies and its recording are one
-// consistent run of the Editor, and over it every statement of the Briefing
+// The chain replay: the Briefing's frozen copies and each of its samples are
+// one consistent run of the Editor, and over it every statement of the Briefing
 // traces through a Development and its Fact to a quote in the Item the Fact
 // was drawn from. It asserts only what spans the acts; each act's own
-// properties, and whether its recording is stale, are its recorded test's,
-// so it replays unchecked.
+// properties, whether its recording is stale and how many of its samples
+// pass its checks, are its recorded test's, so it replays unchecked, over
+// every sample of the Briefing that passes.
 func TestRecordedChainTracesEveryBriefingStatementToAQuote(t *testing.T) {
+	t.Parallel()
 	ctx := t.Context()
-	path := filepath.Join(recordedDir, "briefing", "saturday.json")
-	if _, err := os.Stat(path); errors.Is(err, fs.ErrNotExist) {
-		t.Skip("the Briefing has not been recorded yet")
-	}
+	dir := filepath.Join(recordedDir, "briefing")
 	texts := map[string]string{} // EntryID -> the Item's text
 	for _, f := range fixtureItems(t) {
 		texts[f.item.EntryID] = normal(stripTags(f.item.Title + " " + f.item.Summary + " " + f.item.Content))
 	}
-	store := frozenRecord(t, filepath.Join(recordedDir, "briefing", "inputs"))
-	at := saturday.Add(time.Hour)
-	var logs bytes.Buffer
-	ed := editor.New(editor.Deps{Store: store, Briefings: store, BriefingModel: replay{kept(t, path)},
-		Log: slog.New(slog.NewTextHandler(&logs, nil))})
-	if err := ed.Brief(ctx, at); err != nil {
-		t.Fatal(err)
-	}
-	b, found, err := store.Briefing(ctx, at.Format(time.DateOnly))
-	if err != nil || !found {
-		t.Fatalf("no Briefing written: %v %v\n%s", found, err, logs.String())
-	}
-	n := 0
-	for _, bs := range b.Stories {
-		for _, st := range bs.Statements {
-			n++
-			if len(st.Developments) == 0 {
-				t.Errorf("%q: a statement citing no Development: %q", bs.Story.Title, st.Text)
-			}
-			for _, d := range st.Developments {
-				text, ok := texts[d.EntryID]
-				switch {
-				case !ok:
-					t.Errorf("%q: %q cites a Development whose Fact traces to no Item: %+v", bs.Story.Title, st.Text, d)
-				case strings.TrimSpace(d.Quote) == "" || !strings.Contains(text, normal(d.Quote)):
-					t.Errorf("%q: %q cites %q, whose quote is not in its Item: %q", bs.Story.Title, st.Text, d.Statement, d.Quote)
+	traced := 0
+	frozen := frozenRecordFile(t, filepath.Join(dir, "inputs"))
+	for k := 1; k <= dailyRule.samples; k++ {
+		s, err := sampleAt(samplePath(dir, "saturday", k))
+		if err != nil {
+			t.Fatal(err)
+		}
+		store := copyOfRecord(t, frozen)
+		if !briefingSample(t, store, &sampleModel{attempts: s.attempts(), unchecked: true}) {
+			continue
+		}
+		b, found, err := store.Briefing(ctx, briefingAt.Format(time.DateOnly))
+		if err != nil || !found {
+			t.Fatalf("sample %d: no Briefing written: %v %v", k, found, err)
+		}
+		n := 0
+		for _, bs := range b.Stories {
+			for _, st := range bs.Statements {
+				n++
+				if len(st.Developments) == 0 {
+					t.Errorf("sample %d: %q: a statement citing no Development: %q", k, bs.Story.Title, st.Text)
+				}
+				for _, d := range st.Developments {
+					text, ok := texts[d.EntryID]
+					switch {
+					case !ok:
+						t.Errorf("sample %d: %q: %q cites a Development whose Fact traces to no Item: %+v", k, bs.Story.Title, st.Text, d)
+					case strings.TrimSpace(d.Quote) == "" || !strings.Contains(text, normal(d.Quote)):
+						t.Errorf("sample %d: %q: %q cites %q, whose quote is not in its Item: %q", k, bs.Story.Title, st.Text, d.Statement, d.Quote)
+					}
 				}
 			}
 		}
+		if n == 0 {
+			t.Errorf("sample %d: the Briefing makes no statement, so nothing is traced", k)
+		}
+		traced++
 	}
-	if n == 0 {
-		t.Fatal("the Briefing makes no statement, so nothing is traced")
+	if traced == 0 {
+		t.Fatal("no sample of the Briefing passes its checks, so nothing is traced")
 	}
 }

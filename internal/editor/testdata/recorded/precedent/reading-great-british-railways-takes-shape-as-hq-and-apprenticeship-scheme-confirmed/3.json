@@ -1,0 +1,253 @@
+{
+  "act": "reading",
+  "model": "claude-haiku-5-5",
+  "request_hash": "6ba208ab4fe9cc7d74146f1f4bdec03acefa4195dd1b957112a0dc2864359ee6",
+  "recorded_at": "2026-10-25T15:13:13.511772Z",
+  "usage": {
+    "input_tokens": 3616,
+    "output_tokens": 5173
+  },
+  "output": {
+    "claims": [
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Andy Burnham",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "Derby",
+            "role": ""
+          }
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "This will bring investment and good jobs, giving young people the chance to build their future in the place they call home.",
+        "statement": "The Derby headquarters will bring investment and good jobs, giving young people the chance to build their future in Derby."
+      },
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Heidi Alexander",
+            "role": "Transport Secretary"
+          }
+        ],
+        "made_by": "Heidi Alexander",
+        "quote": "The biggest shake-up to our railways in a generation is underway.",
+        "statement": "The changes to Britain's railways are the biggest shake-up in a generation."
+      },
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Heidi Alexander",
+            "role": "Transport Secretary"
+          },
+          {
+            "kind": "organisation",
+            "name": "Great British Railways",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Derby",
+            "role": ""
+          }
+        ],
+        "made_by": "Heidi Alexander",
+        "quote": "Great British Railways will bring the railway together around one mission - better services for passengers",
+        "statement": "Great British Railways will bring the railway together around one mission of better services for passengers."
+      },
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Heidi Alexander",
+            "role": "Transport Secretary"
+          },
+          {
+            "kind": "place",
+            "name": "Derby",
+            "role": ""
+          }
+        ],
+        "made_by": "Heidi Alexander",
+        "quote": "bringing jobs, investment and opportunity to the city",
+        "statement": "Becketwell becoming the GBR headquarters will bring jobs, investment and opportunity to Derby."
+      },
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Pat McFadden",
+            "role": "Work and Pensions Secretary"
+          }
+        ],
+        "made_by": "Pat McFadden",
+        "quote": "This forms part of our £2.5 billion youth employment support package which is creating up to 500,000 opportunities for young people to earn or learn",
+        "statement": "The £2.5 billion youth employment support package is creating up to 500,000 opportunities for young people to earn or learn."
+      },
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Claire Ward",
+            "role": "Mayor of the East Midlands"
+          },
+          {
+            "kind": "place",
+            "name": "Derby",
+            "role": ""
+          }
+        ],
+        "made_by": "Claire Ward",
+        "quote": "This is fantastic news for Derby.",
+        "statement": "The announcement that Great British Railways will be based in Derby is fantastic news for the city."
+      },
+      {
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "Great British Railways",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Derby",
+            "role": ""
+          }
+        ],
+        "made_by": "Government",
+        "quote": "an estimated £151 million boost to the region’s economy",
+        "statement": "The Derby headquarters is estimated to give a £151 million boost to the region's economy."
+      },
+      {
+        "entities": [],
+        "made_by": "Government",
+        "quote": "Bringing operators’ services into public ownership is already delivering benefits",
+        "statement": "Bringing operators' services into public ownership is already delivering benefits for passengers."
+      }
+    ],
+    "facts": [
+      {
+        "as_at": "2026-10-15",
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "Great British Railways",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Derby",
+            "role": ""
+          }
+        ],
+        "quote": "the site of Great British Railways’ (GBR) headquarters is unveiled today (15 October 2026) in Derby",
+        "statement": "The site of the Great British Railways headquarters was unveiled in Derby on 15 October 2026."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Becketwell",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Derby",
+            "role": ""
+          }
+        ],
+        "quote": "Becketwell, a brownfield site in the heart of Derby city centre",
+        "statement": "The Great British Railways headquarters site is Becketwell, a brownfield site in Derby city centre."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [],
+        "quote": "Up to 600 apprentices between 16 and 21 years old will enrol over the next 4 years on the rail foundation apprenticeship",
+        "statement": "Up to 600 apprentices aged 16 to 21 will enrol over the next 4 years on the rail foundation apprenticeship."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "Great British Railways",
+            "role": ""
+          }
+        ],
+        "quote": "The site will accommodate up to 450 GBR staff",
+        "statement": "The Great British Railways headquarters site will accommodate up to 450 staff."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "Alstom",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Derby",
+            "role": ""
+          }
+        ],
+        "quote": "the recent £1 billion investment in a new fleet of trains for the north set to be built at Alstom’s Derby site",
+        "statement": "A £1 billion investment in a new fleet of trains for the north is set to be built at Alstom's Derby site."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Andy Burnham",
+            "role": "Prime Minister of the United Kingdom"
+          }
+        ],
+        "quote": "Prime Minister Andy Burnham said:",
+        "statement": "Prime Minister Andy Burnham made a statement about the Derby headquarters."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Heidi Alexander",
+            "role": "Transport Secretary"
+          }
+        ],
+        "quote": "Transport Secretary Heidi Alexander said:",
+        "statement": "Transport Secretary Heidi Alexander made a statement about the Derby headquarters."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Pat McFadden",
+            "role": "Work and Pensions Secretary"
+          }
+        ],
+        "quote": "Work and Pensions Secretary Pat McFadden said:",
+        "statement": "Work and Pensions Secretary Pat McFadden made a statement about the foundation apprenticeship."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Claire Ward",
+            "role": "Mayor of the East Midlands"
+          }
+        ],
+        "quote": "Mayor of the East Midlands, Claire Ward, said:",
+        "statement": "Mayor of the East Midlands Claire Ward made a statement about the Derby headquarters and apprenticeships."
+      }
+    ]
+  }
+}

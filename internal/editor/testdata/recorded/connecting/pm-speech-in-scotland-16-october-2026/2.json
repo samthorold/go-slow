@@ -1,0 +1,145 @@
+{
+  "act": "connecting",
+  "model": "claude-haiku-5-5",
+  "request_hash": "cb855c5d7b82de8ee378c32139f20a7703833e50302de551b7460e0b7c267fb0",
+  "recorded_at": "2026-10-25T15:13:44.127405Z",
+  "usage": {
+    "input_tokens": 3631,
+    "output_tokens": 1338
+  },
+  "output": {
+    "causes": [
+      {
+        "cause": "F1",
+        "effect": "F9"
+      }
+    ],
+    "facts": [
+      {
+        "fact": "F1",
+        "roles": [
+          {
+            "entity": "Prime Minister",
+            "role": "actor"
+          },
+          {
+            "entity": "FARE-Scotland",
+            "role": "affected"
+          },
+          {
+            "entity": "Bannatyne House",
+            "role": "place"
+          },
+          {
+            "entity": "Easterhouse",
+            "role": "place"
+          },
+          {
+            "entity": "Scottish Violence Reduction Unit",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F2",
+        "roles": [
+          {
+            "entity": "Prime Minister",
+            "role": "actor"
+          },
+          {
+            "entity": "Westminster",
+            "role": "place"
+          },
+          {
+            "entity": "Greater Manchester",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F3",
+        "roles": [
+          {
+            "entity": "Prime Minister",
+            "role": "actor"
+          },
+          {
+            "entity": "Motherwell",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F4",
+        "roles": [
+          {
+            "entity": "Pamela",
+            "role": "affected"
+          },
+          {
+            "entity": "Motherwell",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F5",
+        "roles": [
+          {
+            "entity": "Prime Minister",
+            "role": "affected"
+          },
+          {
+            "entity": "Leigh",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F6",
+        "roles": [
+          {
+            "entity": "Scottish Government",
+            "role": "actor"
+          },
+          {
+            "entity": "UK Government",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F7",
+        "roles": [
+          {
+            "entity": "Scottish Government",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F8",
+        "roles": [
+          {
+            "entity": "Alan Milburn",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F9",
+        "roles": [
+          {
+            "entity": "Prime Minister",
+            "role": "actor"
+          },
+          {
+            "entity": "Greater Manchester",
+            "role": "place"
+          }
+        ]
+      }
+    ]
+  }
+}

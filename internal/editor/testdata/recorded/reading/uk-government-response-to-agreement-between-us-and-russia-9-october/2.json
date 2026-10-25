@@ -1,0 +1,167 @@
+{
+  "act": "reading",
+  "model": "claude-haiku-5-5",
+  "request_hash": "bdcfb3612d8ffe91a782a43654466f7603412e4553a4b27c2fbfba216deb2206",
+  "recorded_at": "2026-10-25T15:07:42.448158Z",
+  "usage": {
+    "input_tokens": 1877,
+    "output_tokens": 3303
+  },
+  "output": {
+    "claims": [
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "UK government spokesperson",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "UK",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Ukraine",
+            "role": ""
+          }
+        ],
+        "made_by": "UK government spokesperson",
+        "quote": "We will continue working closely with international partners to ensure Ukraine has the military and financial support it needs to defend itself.",
+        "statement": "The UK will continue working closely with international partners to ensure Ukraine has the military and financial support it needs to defend itself."
+      },
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "UK government spokesperson",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "UK",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Russia",
+            "role": ""
+          }
+        ],
+        "made_by": "UK government spokesperson",
+        "quote": "We will also maintain pressure on Russia through the toughest sanctions regime ever imposed by the UK",
+        "statement": "The UK will maintain pressure on Russia through the toughest sanctions regime ever imposed by the UK."
+      },
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "UK government spokesperson",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Ukraine",
+            "role": ""
+          }
+        ],
+        "made_by": "UK government spokesperson",
+        "quote": "Ukraine has repeatedly demonstrated it is serious about peace",
+        "statement": "Ukraine has repeatedly demonstrated that it is serious about peace."
+      },
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "UK government spokesperson",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Russia",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Ukraine",
+            "role": ""
+          }
+        ],
+        "made_by": "UK government spokesperson",
+        "quote": "Russia has repeatedly rejected full and partial ceasefires while continuing attacks on Ukrainian civilians and energy",
+        "statement": "Russia has repeatedly rejected full and partial ceasefires while continuing attacks on Ukrainian civilians and energy."
+      },
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "UK government spokesperson",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Russia",
+            "role": ""
+          }
+        ],
+        "made_by": "UK government spokesperson",
+        "quote": "Russia could end this war today.",
+        "statement": "Russia could end the war today."
+      },
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "UK government spokesperson",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Ukraine",
+            "role": ""
+          }
+        ],
+        "made_by": "UK government spokesperson",
+        "quote": "We remain committed to supporting Ukraine for as long as it takes",
+        "statement": "The UK remains committed to supporting Ukraine for as long as it takes."
+      }
+    ],
+    "facts": [
+      {
+        "as_at": "2026-10-10",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "UK government spokesperson",
+            "role": ""
+          }
+        ],
+        "quote": "A UK government spokesperson said:",
+        "statement": "A UK government spokesperson made a statement on the UK's position on Ukraine and Russia."
+      },
+      {
+        "as_at": "2026-10-10",
+        "entities": [
+          {
+            "kind": "place",
+            "name": "UK",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "US",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Ukraine",
+            "role": ""
+          }
+        ],
+        "quote": "remains in close contact with the US, Ukraine and other allies",
+        "statement": "The UK remains in close contact with the US, Ukraine and other allies in support of a just and lasting peace in Ukraine."
+      }
+    ]
+  }
+}

@@ -6,8 +6,11 @@
 //	go run ./internal/editor/yield <before> <after>
 //
 // Each argument is a recordings directory (internal/editor/testdata/recorded,
-// or an older copy of it, e.g. extracted with git archive). It reports, it
-// never fails on a change in yield.
+// or an older copy of it, e.g. extracted with git archive). A fixture
+// recorded as several samples (<fixture>/<k>.json) is counted by each
+// sample's last attempt, and shown as the range its samples drew (least–most);
+// a total is the range from every fixture's least to its most. It reports,
+// it never fails on a change in yield.
 package main
 
 import (
@@ -17,8 +20,10 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -148,8 +153,19 @@ func countReading(out json.RawMessage) ([]int, error) {
 	return []int{len(r.Facts), len(r.Claims), len(distinct)}, nil
 }
 
-// counts is, per act, each fixture's counts.
-type counts map[string]map[string][]int
+// counts is, per act, each fixture's counts, one per sample: a fixture
+// recorded once has one.
+type counts map[string]map[string][][]int
+
+// fixtureOf is the fixture a recording at rel (with no extension) is of: a
+// sample, kept as <fixture>/<k>, is of its directory.
+func fixtureOf(rel string) string {
+	dir, base := path.Split(rel)
+	if _, err := strconv.Atoi(base); err == nil && dir != "" {
+		return strings.TrimSuffix(dir, "/")
+	}
+	return rel
+}
 
 func load(dir string) (counts, error) {
 	c := counts{}
@@ -191,9 +207,10 @@ func load(dir string) (counts, error) {
 				return err
 			}
 			if c[a.name] == nil {
-				c[a.name] = map[string][]int{}
+				c[a.name] = map[string][][]int{}
 			}
-			c[a.name][strings.TrimSuffix(filepath.ToSlash(rel), ".json")] = n
+			f := fixtureOf(strings.TrimSuffix(filepath.ToSlash(rel), ".json"))
+			c[a.name][f] = append(c[a.name][f], n)
 		}
 		return nil
 	})
@@ -219,7 +236,7 @@ func report(w io.Writer, before, after counts) error {
 		}
 		sort.Strings(names)
 		fmt.Fprintf(&b, "### %s\n\n| Fixture | %s |\n|%s\n", a.name, strings.Join(a.columns, " | "), strings.Repeat("---|", len(a.columns)+1))
-		totalBefore, totalAfter := make([]int, len(a.columns)), make([]int, len(a.columns))
+		totalBefore, totalAfter := make([]span, len(a.columns)), make([]span, len(a.columns))
 		for _, f := range names {
 			was, inBefore := before[a.name][f]
 			now, inAfter := after[a.name][f]
@@ -234,17 +251,17 @@ func report(w io.Writer, before, after counts) error {
 			for i := range a.columns {
 				cells[i] = cell(was, i) + " → " + cell(now, i)
 				if inBefore {
-					totalBefore[i] += was[i]
+					totalBefore[i] = totalBefore[i].add(spanOf(was, i))
 				}
 				if inAfter {
-					totalAfter[i] += now[i]
+					totalAfter[i] = totalAfter[i].add(spanOf(now, i))
 				}
 			}
 			fmt.Fprintf(&b, "| %s | %s |\n", label, strings.Join(cells, " | "))
 		}
 		cells := make([]string, len(a.columns))
 		for i := range a.columns {
-			cells[i] = fmt.Sprintf("%d → %d", totalBefore[i], totalAfter[i])
+			cells[i] = totalBefore[i].String() + " → " + totalAfter[i].String()
 		}
 		fmt.Fprintf(&b, "| **Total** | %s |\n\n", strings.Join(cells, " | "))
 	}
@@ -252,11 +269,31 @@ func report(w io.Writer, before, after counts) error {
 	return err
 }
 
-// cell is one side's count in column i, or a dash where the fixture has no
-// recording on that side.
-func cell(n []int, i int) string {
-	if n == nil {
+// span is the least and most a fixture's samples drew in a column.
+type span struct{ least, most int }
+
+func spanOf(samples [][]int, i int) span {
+	s := span{samples[0][i], samples[0][i]}
+	for _, n := range samples[1:] {
+		s.least, s.most = min(s.least, n[i]), max(s.most, n[i])
+	}
+	return s
+}
+
+func (s span) add(o span) span { return span{s.least + o.least, s.most + o.most} }
+
+func (s span) String() string {
+	if s.least == s.most {
+		return fmt.Sprint(s.least)
+	}
+	return fmt.Sprintf("%d–%d", s.least, s.most)
+}
+
+// cell is one side's count in column i, the range its samples drew, or a
+// dash where the fixture has no recording on that side.
+func cell(samples [][]int, i int) string {
+	if samples == nil {
 		return "–"
 	}
-	return fmt.Sprint(n[i])
+	return spanOf(samples, i).String()
 }

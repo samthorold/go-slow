@@ -1,0 +1,365 @@
+{
+  "act": "reading",
+  "model": "claude-haiku-5-5",
+  "request_hash": "bae105f11ffbe89180abe7e5ba28faf9653848ca58e9a4770fb3a70197ec9122",
+  "recorded_at": "2026-10-25T14:56:15.627326Z",
+  "usage": {
+    "input_tokens": 10801,
+    "output_tokens": 9868
+  },
+  "output": {
+    "claims": [
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "occasion",
+            "name": "EU-UK Summit",
+            "role": "summit where the new food and farming deal is to be worked on"
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "I am working on a new deal for food and farming at the EU-UK Summit on the 20th of November",
+        "statement": "The Prime Minister is working on a new deal for food and farming at the EU-UK Summit on 20 November."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Edinburgh",
+            "role": "city"
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "If you go to Edinburgh today, you’ll see around one in twenty shops lying empty.",
+        "statement": "Around one in twenty shops in Edinburgh are lying empty."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Dundee",
+            "role": "city"
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "But if you go to Dundee, it’s more likely one in five.",
+        "statement": "In Dundee it is more likely that one in five shops are lying empty."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Inverclyde",
+            "role": "area of Scotland"
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "where if you say in the West like Inverclyde, the working population has shrunk",
+        "statement": "The working population in Inverclyde has shrunk."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "East Renfrewshire",
+            "role": "area of Scotland"
+          },
+          {
+            "kind": "place",
+            "name": "Glasgow",
+            "role": "city"
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "A man in East Renfrewshire can live, as I understand, on average seven years longer than a man in Glasgow",
+        "statement": "A man in East Renfrewshire can on average live seven years longer than a man in Glasgow."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Scotland",
+            "role": "nation"
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "around one in six young people here are not in education, employment or training",
+        "statement": "Around one in six young people in Scotland are not in education, employment or training."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Scotland",
+            "role": "nation"
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "I want to offer Scotland a model of localised employment support",
+        "statement": "The Prime Minister offers Scotland a model of localised employment support, which amounts to DWP devolution."
+      },
+      {
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "National Economic Council",
+            "role": "body that will meet with the First Ministers"
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "in a couple of weeks, the National Economic Council will meet with the First Ministers of Scotland and Wales",
+        "statement": "The National Economic Council will meet with the First Ministers of Scotland and Wales in a couple of weeks."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Scotland",
+            "role": "nation"
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "And if we don’t move now, Scotland could lose out.",
+        "statement": "Scotland could lose out if the government does not move now."
+      }
+    ],
+    "facts": [
+      {
+        "as_at": "2023-08-01",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "organisation",
+            "name": "FARE-Scotland",
+            "role": "organisation visited at Bannatyne House"
+          },
+          {
+            "kind": "place",
+            "name": "Bannatyne House",
+            "role": "building in Easterhouse"
+          },
+          {
+            "kind": "place",
+            "name": "Easterhouse",
+            "role": "estate in Glasgow"
+          },
+          {
+            "kind": "organisation",
+            "name": "Greater Manchester Violence Reduction Unit",
+            "role": "unit that accompanied the visit"
+          }
+        ],
+        "quote": "I visited FARE-Scotland at Bannatyne House in Easterhouse with the Greater Manchester Violence Reduction Unit",
+        "statement": "In August 2023 the Prime Minister visited FARE-Scotland at Bannatyne House in Easterhouse with the Greater Manchester Violence Reduction Unit."
+      },
+      {
+        "as_at": "2017-01-01",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "Greater Manchester",
+            "role": "combined authority area of which he became the first Mayor"
+          }
+        ],
+        "quote": "I left Westminster in 2017 to become the first Mayor of Greater Manchester",
+        "statement": "In 2017 the Prime Minister left Westminster to become the first Mayor of Greater Manchester."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "Leigh",
+            "role": "former constituency of the Prime Minister as MP"
+          }
+        ],
+        "quote": "I was the MP there for sixteen years from the early 2000s",
+        "statement": "The Prime Minister was MP for Leigh for sixteen years from the early 2000s."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "occasion",
+            "name": "Commonwealth Games",
+            "role": "games whose Opening Ceremony he attended in Glasgow"
+          },
+          {
+            "kind": "place",
+            "name": "Glasgow",
+            "role": "city that hosted the Commonwealth Games"
+          }
+        ],
+        "quote": "I was in Scotland for the Opening Ceremony of the Commonwealth Games in the summer",
+        "statement": "In the summer of 2026 the Prime Minister attended the Opening Ceremony of the Commonwealth Games in Scotland."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "Motherwell",
+            "role": "town where the speech was given"
+          }
+        ],
+        "quote": "to be here in Motherwell",
+        "statement": "The Prime Minister was in Motherwell to give a speech on 16 October 2026."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "Scottish government",
+            "role": "government that agreed to match the funding"
+          },
+          {
+            "kind": "organisation",
+            "name": "UK government",
+            "role": "government that committed the £10 million"
+          }
+        ],
+        "quote": "the Scottish government has this week agreed to match the UK government’s £10 million to create two defence technical excellence colleges",
+        "statement": "The Scottish government has agreed to match the UK government's £10 million to create two defence technical excellence colleges."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "Chemify",
+            "role": "company turning research into manufacturing jobs"
+          },
+          {
+            "kind": "place",
+            "name": "Glasgow",
+            "role": "city where the jobs were created"
+          }
+        ],
+        "quote": "has seen companies like Chemify turn groundbreaking research into real manufacturing jobs in Glasgow",
+        "statement": "Chemify has turned groundbreaking research into real manufacturing jobs in Glasgow."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "Alexander Dennis",
+            "role": "bus manufacturer that built the buses"
+          },
+          {
+            "kind": "place",
+            "name": "Falkirk",
+            "role": "town where the buses were built"
+          },
+          {
+            "kind": "place",
+            "name": "Greater Manchester",
+            "role": "area whose buses were built in Falkirk"
+          }
+        ],
+        "quote": "the buses on the roads of Greater Manchester today were built by Alexander Dennis in Falkirk",
+        "statement": "The buses on the roads of Greater Manchester were built by Alexander Dennis in Falkirk."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "Greater Manchester",
+            "role": "area where the Live Well model was pioneered"
+          }
+        ],
+        "quote": "I used it to pioneer what we called the Live Well model in Greater Manchester",
+        "statement": "The Prime Minister used lessons from Easterhouse to pioneer the Live Well model in Greater Manchester."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "Scottish government",
+            "role": "government that announced the reform programme"
+          }
+        ],
+        "quote": "the Scottish government has also announced a long-term programme for local government reform",
+        "statement": "The Scottish government has announced a long-term programme for local government reform."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Alan Milburn",
+            "role": "leader of the review"
+          }
+        ],
+        "quote": "The review led by Alan Milburn is challenging us to look at this very differently.",
+        "statement": "A review led by Alan Milburn is examining the approach to supporting young people."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Darren McGarvey",
+            "role": "author of Poverty Safari"
+          }
+        ],
+        "quote": "so powerfully described by Darren McGarvey in his book Poverty Safari",
+        "statement": "Darren McGarvey described public services powerfully in his book Poverty Safari."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Pamela",
+            "role": "local MP"
+          },
+          {
+            "kind": "place",
+            "name": "Motherwell",
+            "role": "area of the local MP"
+          }
+        ],
+        "quote": "talk to Pamela today as the local MP",
+        "statement": "Pamela is the local MP for the area of the speech."
+      }
+    ]
+  }
+}

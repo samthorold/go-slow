@@ -32,8 +32,9 @@ func recordedPlacings(t *testing.T, root string) {
 	store, topics := newRecord(t, nil)
 	var total editor.Usage
 	c := chain{
-		reading: replayed(inputsOf(root, "placing", "reading")),
-		placing: recordedOrReplayed(t, filepath.Join(root, "placing"), "PLACING_MODEL", "TestRecordedPlacings", &total),
+		reading:       replayed(inputsOf(root, "placing", "reading")),
+		placing:       recordedOrReplayed(t, filepath.Join(root, "placing"), "PLACING_MODEL", "TestRecordedPlacings", &total),
+		readingFrozen: true,
 	}
 	fixtures := fixtureItems(t)
 	if err := c.run(ctx, store, topics, fixtures); err != nil {

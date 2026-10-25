@@ -104,7 +104,7 @@ const readingInstructions = `You are the Editor of a private slow-news briefing.
 Draw from the Item:
 - Facts: propositions the Item itself establishes as having happened or being so, in no one's voice. That a person said something, announced something, met someone or visited somewhere is a Fact. Each Fact holds as at a date (YYYY-MM-DD): the date the Item gives for it, otherwise the Item's publication date.
 - Claims: propositions someone asserts that the Item does not itself establish: promises, forecasts, judgements, accusations, figures given in a speaker's own voice. Each Claim keeps who made it, by name if the Item gives one.
-- Entities: with each Fact and Claim, every person, organisation, place or named occasion (such as a summit or a Budget) it involves, including one the Item names only by an office or title ("the Prime Minister"), each with its name, kind and role. Name an Entity in its fullest form in the Item, and give it exactly that name and kind in every Fact and Claim that involves it; if the Item never gives a person's name, name them by the office as the Item does. For a person the Item gives an office or position, give that role in full, with its country or body where the Item makes it plain ("Prime Minister of the United Kingdom", "Secretary of State for Defence"); otherwise leave the role empty. A person the Item names is named by their name, with the office as their role, never by the office. A place's name the Item also uses for its authority ("Greater Manchester") is one Entity, of kind place throughout.
+- Entities: with each Fact and Claim, every person, organisation, place or named occasion (such as a summit or a Budget) it involves, including one the Item names only by an office or title ("the Prime Minister") and one the statement names only as a qualifier of another (a person's country, a place's region, a site's town: "Zelenskyy of Ukraine" involves Ukraine, "Motherwell, Scotland" involves Scotland), each with its name, kind and role. Name an Entity in its fullest form in the Item, and give it exactly that name and kind in every Fact and Claim that involves it; if the Item never gives a person's name, name them by the office as the Item does. For a person the Item gives an office or position, give that role in full, with its country or body where the Item makes it plain ("Prime Minister of the United Kingdom", "Secretary of State for Defence"); otherwise leave the role empty. A person the Item names is named by their name, with the office as their role, never by the office. A place's name the Item also uses for its authority ("Greater Manchester") is one Entity, of kind place throughout.
 
 For each Fact and Claim, give a quote: a short passage copied word for word from the Item that it rests on. Never paraphrase in a quote.
 
@@ -202,6 +202,29 @@ func Read(ctx context.Context, m Model, it Item, precedents ...Precedent) (Readi
 	return checkReading(it, precedents, res)
 }
 
+// checkReading decodes the model's answer on an Item, read shown the
+// precedents, and runs the act's checks over it. A result that fails them
+// is ErrFailedChecks.
+func checkReading(it Item, precedents []Precedent, res Response) (Reading, error) {
+	r, err := decodeReading(it, precedents, res)
+	if err != nil {
+		return Reading{}, err
+	}
+	// A Fact or Claim involves every Entity of the reading its statement
+	// names: one it leaves out is lost to placing and connecting.
+	for _, f := range r.Facts {
+		if name, ok := leftOut(f.Statement, f.Entities, r.Entities); ok {
+			return Reading{}, failed(it, "a Fact that names %q but does not involve it: %q", name, f.Statement)
+		}
+	}
+	for _, c := range r.Claims {
+		if name, ok := leftOut(c.Statement, c.Entities, r.Entities); ok {
+			return Reading{}, failed(it, "a Claim that names %q but does not involve it: %q", name, c.Statement)
+		}
+	}
+	return r, nil
+}
+
 // readingRequest is the reading act's call on a model for an Item, shown
 // the precedents after the Item.
 func readingRequest(it Item, precedents []Precedent) (Request, error) {
@@ -223,10 +246,10 @@ func readingRequest(it Item, precedents []Precedent) (Request, error) {
 	}, nil
 }
 
-// checkReading decodes the model's answer on an Item, read shown the
-// precedents, and runs the act's checks over it. A result that fails them
-// is ErrFailedChecks.
-func checkReading(it Item, precedents []Precedent, res Response) (Reading, error) {
+// decodeReading is the model's answer on an Item as a Reading: decoded
+// against the schema, every Fact dated and resting on the Item's own words,
+// every Claim attributed. It is ErrFailedChecks if the answer can't be one.
+func decodeReading(it Item, precedents []Precedent, res Response) (Reading, error) {
 	var out output
 	dec := json.NewDecoder(bytes.NewReader(res.Output))
 	dec.DisallowUnknownFields()
@@ -303,18 +326,6 @@ func checkReading(it Item, precedents []Precedent, res Response) (Reading, error
 			Statement: strings.TrimSpace(c.Statement), MadeBy: strings.TrimSpace(c.MadeBy),
 			Quote: c.Quote, Entities: ents,
 		})
-	}
-	// A Fact or Claim involves every Entity of the reading its statement
-	// names: one it leaves out is lost to placing and connecting.
-	for _, f := range r.Facts {
-		if name, ok := leftOut(f.Statement, f.Entities, r.Entities); ok {
-			return Reading{}, failed(it, "a Fact that names %q but does not involve it: %q", name, f.Statement)
-		}
-	}
-	for _, c := range r.Claims {
-		if name, ok := leftOut(c.Statement, c.Entities, r.Entities); ok {
-			return Reading{}, failed(it, "a Claim that names %q but does not involve it: %q", name, c.Statement)
-		}
 	}
 	return r, nil
 }

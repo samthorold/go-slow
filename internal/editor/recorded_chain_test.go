@@ -87,9 +87,11 @@ func newRecord(t *testing.T, topics []interest.Draft) (*sqlite.Store, *interest.
 type actModel func(name string) (editor.Model, error)
 
 // chain is the models the daily acts run on: reading always, placing and
-// connecting only when set.
+// connecting only when set. When readingFrozen, reading's answers are a
+// frozen copy, taken as kept (editor.ReadAsKept), not judged again.
 type chain struct {
 	reading, placing, connecting actModel
+	readingFrozen                bool
 }
 
 // replayed answers each fixture's call from the recording kept for it in
@@ -181,7 +183,13 @@ func (c chain) run(ctx context.Context, store *sqlite.Store, topics *interest.Se
 		if err != nil {
 			return err
 		}
-		reading, err := editor.Read(ctx, m, it)
+		read := editor.Read
+		if c.readingFrozen {
+			read = func(ctx context.Context, m editor.Model, it editor.Item, _ ...editor.Precedent) (editor.Reading, error) {
+				return editor.ReadAsKept(ctx, m, it)
+			}
+		}
+		reading, err := read(ctx, m, it)
 		if err != nil {
 			return fmt.Errorf("%s: the reading fails its checks: %w", f.name, err)
 		}
@@ -228,9 +236,10 @@ func frozenRecord(t *testing.T, dir string) *sqlite.Store {
 	t.Helper()
 	store, topics := newRecord(t, briefingTopics)
 	c := chain{
-		reading:    replayed(filepath.Join(dir, "reading")),
-		placing:    replayed(filepath.Join(dir, "placing")),
-		connecting: replayed(filepath.Join(dir, "connecting")),
+		reading:       replayed(filepath.Join(dir, "reading")),
+		placing:       replayed(filepath.Join(dir, "placing")),
+		connecting:    replayed(filepath.Join(dir, "connecting")),
+		readingFrozen: true,
 	}
 	if err := c.run(t.Context(), store, topics, fixtureItems(t)); err != nil {
 		t.Fatal(err)

@@ -110,7 +110,10 @@ func feedDownstream(t *testing.T, root, act string) error {
 		f := fakes[down]
 		models[down] = func(string) (editor.Model, error) { return f, nil }
 	}
-	c := chain{reading: models["reading"], placing: models["placing"], connecting: models["connecting"]}
+	// Reading's frozen copies are taken as kept; its current recordings, fed
+	// downstream, are judged by its checks.
+	c := chain{reading: models["reading"], placing: models["placing"], connecting: models["connecting"],
+		readingFrozen: act != "reading"}
 	if err := c.run(ctx, store, topics, fixtures); err != nil {
 		return err
 	}

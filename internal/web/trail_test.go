@@ -144,7 +144,7 @@ func TestATrailCountsEachCallOnceThoughSeveralDevelopmentsShareIt(t *testing.T) 
 	// The speech read into two Facts, each made a Development by one placing
 	// call, and both cited by the Briefing.
 	twoFacts := strings.Replace(reading, `"facts": [`, `"facts": [{"statement": "Andy Burnham was in Motherwell.", "as_at": "2026-10-22",
-             "quote": "here in Motherwell", "entities": [{"name": "Andy Burnham", "kind": "person", "role": ""}]}, `, 1)
+             "quote": "here in Motherwell", "entities": [{"name": "Andy Burnham", "kind": "person", "role": ""}, {"name": "Motherwell", "kind": "place", "role": ""}]}, `, 1)
 	briefSpeech(t, store, twoFacts, `{"new_stories": [{"ref": "N1", "title": "Andy Burnham in Scotland"}],
 		"facts": [{"fact": "F1", "developments_in": ["N1"]}, {"fact": "F2", "developments_in": ["N1"]}]}`,
 		`{"stories": [{"story": "S1", "statements": [

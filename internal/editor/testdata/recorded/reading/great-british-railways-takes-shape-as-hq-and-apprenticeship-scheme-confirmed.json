@@ -1,11 +1,11 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "6ddfe723275b57d574e08b423adca6cb39ae9e44e47755461e4ddcdc50dff6d3",
-  "recorded_at": "2026-10-25T14:16:14.613563Z",
+  "request_hash": "4b3a0d1d7f7d7c574aa4899d23d1f8eb71ab9a1a353dd4f7754fe3bb67ca4a4e",
+  "recorded_at": "2026-10-25T19:23:34.201055Z",
   "usage": {
-    "input_tokens": 3290,
-    "output_tokens": 4149
+    "input_tokens": 3362,
+    "output_tokens": 4192
   },
   "output": {
     "claims": [
@@ -14,34 +14,22 @@
           {
             "kind": "person",
             "name": "Andy Burnham",
-            "role": "Prime Minister of the United Kingdom"
-          }
-        ],
-        "made_by": "Andy Burnham",
-        "quote": "For too long, people have put up with a railway that often lets them down.",
-        "statement": "People have for too long put up with a railway that often lets them down."
-      },
-      {
-        "entities": [
-          {
-            "kind": "person",
-            "name": "Andy Burnham",
-            "role": "Prime Minister of the United Kingdom"
+            "role": "Prime Minister"
           },
           {
             "kind": "organisation",
             "name": "Great British Railways",
-            "role": "publicly owned railway being established by the government"
+            "role": "headquartered in Derby"
           },
           {
             "kind": "place",
             "name": "Derby",
-            "role": ""
+            "role": "city hosting headquarters"
           }
         ],
         "made_by": "Andy Burnham",
-        "quote": "Great British Railways will have its home in Derby, a city that has railways in its DNA.",
-        "statement": "Great British Railways will have its home in Derby."
+        "quote": "Great British Railways will have its home in Derby",
+        "statement": "Great British Railways will have its home in Derby"
       },
       {
         "entities": [
@@ -53,7 +41,31 @@
         ],
         "made_by": "Heidi Alexander",
         "quote": "The biggest shake-up to our railways in a generation is underway.",
-        "statement": "The biggest shake-up to the railways in a generation is underway."
+        "statement": "The biggest shake-up to our railways in a generation is underway."
+      },
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Heidi Alexander",
+            "role": "Transport Secretary"
+          }
+        ],
+        "made_by": "Heidi Alexander",
+        "quote": "With 600 apprenticeships opening up, we’re investing not just in the railway of tomorrow, but in the people who will build it.",
+        "statement": "600 apprenticeships are opening up as an investment in the people who will build the railway of tomorrow"
+      },
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Pat McFadden",
+            "role": "Work and Pensions Secretary"
+          }
+        ],
+        "made_by": "Pat McFadden",
+        "quote": "This forms part of our £2.5 billion youth employment support package which is creating up to 500,000 opportunities for young people to earn or learn",
+        "statement": "The £2.5 billion youth employment support package is creating up to 500,000 opportunities for young people to earn or learn"
       },
       {
         "entities": [
@@ -65,24 +77,12 @@
           {
             "kind": "place",
             "name": "Derby",
-            "role": ""
+            "role": "city receiving headquarters and jobs"
           }
         ],
         "made_by": "Claire Ward",
         "quote": "This is fantastic news for Derby.",
-        "statement": "The announcement is fantastic news for Derby."
-      },
-      {
-        "entities": [
-          {
-            "kind": "person",
-            "name": "Pat McFadden",
-            "role": "Work and Pensions Secretary"
-          }
-        ],
-        "made_by": "Pat McFadden",
-        "quote": "We are determined to build the strong pipeline of skilled workers on which a thriving rail sector depends.",
-        "statement": "The government is determined to build a strong pipeline of skilled workers on which a thriving rail sector depends."
+        "statement": "The announcement is fantastic news for Derby"
       }
     ],
     "facts": [
@@ -92,45 +92,69 @@
           {
             "kind": "organisation",
             "name": "Great British Railways",
-            "role": "publicly owned railway being established by the government"
+            "role": "organisation whose headquarters site was unveiled"
           },
           {
             "kind": "place",
             "name": "Derby",
-            "role": ""
-          }
-        ],
-        "quote": "the site of Great British Railways’ (GBR) headquarters is unveiled today (15 October 2026) in Derby",
-        "statement": "The site of the Great British Railways headquarters was unveiled in Derby on 15 October 2026."
-      },
-      {
-        "as_at": "2026-10-14",
-        "entities": [
+            "role": "city where headquarters site is located"
+          },
           {
             "kind": "place",
             "name": "Becketwell",
-            "role": "brownfield site in Derby city centre"
-          },
-          {
-            "kind": "place",
-            "name": "Derby",
-            "role": ""
+            "role": "brownfield site in Derby city centre chosen for headquarters"
           }
         ],
-        "quote": "Becketwell, a brownfield site in the heart of Derby city centre",
-        "statement": "The headquarters is to be built at Becketwell, a brownfield site in Derby city centre."
+        "quote": "the site of Great British Railways’ (GBR) headquarters is unveiled today (15 October 2026) in Derby",
+        "statement": "The site of Great British Railways headquarters at Becketwell in Derby was unveiled"
       },
       {
         "as_at": "2026-10-14",
         "entities": [
           {
-            "kind": "organisation",
-            "name": "Great British Railways",
-            "role": "publicly owned railway being established by the government"
+            "kind": "person",
+            "name": "Andy Burnham",
+            "role": "Prime Minister"
           }
         ],
-        "quote": "The site will accommodate up to 450 GBR staff",
-        "statement": "The headquarters site will accommodate up to 450 Great British Railways staff."
+        "quote": "Prime Minister Andy Burnham said:",
+        "statement": "Andy Burnham, Prime Minister, made a statement on the railway headquarters"
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Heidi Alexander",
+            "role": "Transport Secretary"
+          }
+        ],
+        "quote": "Transport Secretary Heidi Alexander said:",
+        "statement": "Heidi Alexander, Transport Secretary, made a statement on the railway headquarters"
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Pat McFadden",
+            "role": "Work and Pensions Secretary"
+          }
+        ],
+        "quote": "Work and Pensions Secretary Pat McFadden said:",
+        "statement": "Pat McFadden, Work and Pensions Secretary, made a statement on apprenticeships and youth employment"
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Claire Ward",
+            "role": "Mayor of the East Midlands"
+          }
+        ],
+        "quote": "Mayor of the East Midlands, Claire Ward, said:",
+        "statement": "Claire Ward, Mayor of the East Midlands, made a statement welcoming the announcement"
       },
       {
         "as_at": "2026-10-14",
@@ -138,68 +162,22 @@
           {
             "kind": "organisation",
             "name": "Alstom",
-            "role": "train manufacturer"
+            "role": "manufacturer building new trains at its Derby site"
           },
           {
             "kind": "place",
             "name": "Derby",
-            "role": ""
+            "role": "city where Alstom's site is located"
           }
         ],
-        "quote": "the recent £1 billion investment in a new fleet of trains for the north set to be built at Alstom’s Derby site",
-        "statement": "A recent £1 billion investment is funding a new fleet of trains for the north to be built at Alstom’s Derby site."
-      },
-      {
-        "as_at": "2026-10-14",
-        "entities": [
-          {
-            "kind": "place",
-            "name": "Derby",
-            "role": ""
-          }
-        ],
-        "quote": "Up to 600 apprentices between 16 and 21 years old will enrol over the next 4 years on the rail foundation apprenticeship",
-        "statement": "Up to 600 apprentices aged 16 to 21 will enrol over the next four years on the rail foundation apprenticeship."
-      },
-      {
-        "as_at": "2026-10-14",
-        "entities": [
-          {
-            "kind": "organisation",
-            "name": "Department for Transport",
-            "role": ""
-          },
-          {
-            "kind": "organisation",
-            "name": "Derby City Council",
-            "role": ""
-          },
-          {
-            "kind": "organisation",
-            "name": "East Midlands Combined Authority",
-            "role": ""
-          }
-        ],
-        "quote": "delivered in partnership with the Department for Transport, Derby City Council and the East Midlands Combined Authority",
-        "statement": "Better public transport links and walking routes at the site are to be delivered in partnership with the Department for Transport, Derby City Council and the East Midlands Combined Authority."
+        "quote": "recent £1 billion investment in a new fleet of trains for the north set to be built at Alstom’s Derby site",
+        "statement": "A £1 billion investment in a new fleet of trains for the north is set to be built at Alstom's Derby site"
       },
       {
         "as_at": "2026-10-14",
         "entities": [],
         "quote": "less than 7% of the railway’s workforce is under 25",
-        "statement": "Less than 7% of the railway's workforce is under 25."
-      },
-      {
-        "as_at": "2026-10-14",
-        "entities": [
-          {
-            "kind": "organisation",
-            "name": "Great British Railways",
-            "role": "publicly owned railway being established by the government"
-          }
-        ],
-        "quote": "fares frozen for the first time in 30 years",
-        "statement": "Fares have been frozen for the first time in 30 years as public ownership of operators' services is being established."
+        "statement": "Less than 7% of the railway's workforce is under 25"
       }
     ]
   }

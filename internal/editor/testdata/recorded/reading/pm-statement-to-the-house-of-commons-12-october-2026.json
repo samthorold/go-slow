@@ -1,11 +1,11 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "6182e342234b0e0d1afc10df59b5e77e0771e99da33a57861a48bb54577aa270",
-  "recorded_at": "2026-10-25T14:17:12.740779Z",
+  "request_hash": "aa4ec6a6c9e39876eacbfd5f55910b76d83eef2fc6f405a177c1980417389f78",
+  "recorded_at": "2026-10-25T19:35:51.734512Z",
   "usage": {
-    "input_tokens": 4378,
-    "output_tokens": 6024
+    "input_tokens": 4450,
+    "output_tokens": 13286
   },
   "output": {
     "claims": [
@@ -17,19 +17,38 @@
             "role": "Prime Minister of the United Kingdom"
           },
           {
-            "kind": "person",
-            "name": "President Zelenskyy",
-            "role": "President of Ukraine"
-          },
+            "kind": "place",
+            "name": "Britain",
+            "role": "country"
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "after a decade of turbulence, Britain is back and can be relied upon as a consistent and stable partner in an uncertain world",
+        "statement": "Britain is back and can be relied upon as a consistent and stable partner in an uncertain world"
+      },
+      {
+        "entities": [
           {
-            "kind": "organisation",
+            "kind": "place",
             "name": "Russia",
-            "role": ""
+            "role": "country conducting strikes"
           }
         ],
         "made_by": "Prime Minister",
         "quote": "Russian strikes have intensified even further",
-        "statement": "Russian strikes against Ukraine have intensified even further in the three weeks since the meeting with President Zelenskyy in New York."
+        "statement": "Russian strikes on Ukraine have intensified even further in the three weeks since the New York meeting"
+      },
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "that will never happen",
+        "statement": "Russia's attempts to break Ukraine's will through daylight attacks will never succeed"
       },
       {
         "entities": [
@@ -39,14 +58,48 @@
             "role": "Prime Minister of the United Kingdom"
           },
           {
-            "kind": "organisation",
+            "kind": "place",
             "name": "Russia",
-            "role": ""
+            "role": "aggressor"
           }
         ],
         "made_by": "Prime Minister",
-        "quote": "We know Russia is conducting a campaign of hybrid attacks and sabotage across Europe.",
-        "statement": "Russia is conducting a campaign of hybrid attacks and sabotage across Europe."
+        "quote": "the quickest way to get it back onto world markets without rewarding the aggressor is an energy ceasefire, with both sides stopping their attacks",
+        "statement": "An energy ceasefire with both sides stopping their attacks is the quickest way to return diesel to world markets without rewarding the aggressor"
+      },
+      {
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "NATO",
+            "role": "defensive alliance"
+          },
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "we will meet our NATO commitments in full",
+        "statement": "The UK will meet its NATO commitments in full"
+      },
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "Saudi Arabia",
+            "role": "partner state"
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "it has already completed 14 operational missions",
+        "statement": "The Voyager aircraft sent to Saudi Arabia has already completed 14 operational missions"
       },
       {
         "entities": [
@@ -58,85 +111,155 @@
           {
             "kind": "place",
             "name": "King Khalid International Airport",
-            "role": ""
+            "role": "site of attacks"
           }
         ],
         "made_by": "Prime Minister",
-        "quote": "I condemn the appalling attacks on the King Khalid International Airport.",
-        "statement": "The attacks on King Khalid International Airport were appalling."
+        "quote": "I condemn the appalling attacks on the King Khalid International Airport",
+        "statement": "The Prime Minister condemns the attacks on King Khalid International Airport"
       },
       {
         "entities": [
           {
-            "kind": "person",
-            "name": "Prime Minister",
-            "role": "Prime Minister of the United Kingdom"
+            "kind": "place",
+            "name": "Saudi Arabia",
+            "role": "partner state"
+          },
+          {
+            "kind": "organisation",
+            "name": "Houthis",
+            "role": "adversary"
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "We will continue to stand with Saudi Arabia against the Houthis",
+        "statement": "The UK will continue to stand with Saudi Arabia against the Houthis"
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Iran",
+            "role": "state behind the incidents"
+          },
+          {
+            "kind": "organisation",
+            "name": "Islamic Revolutionary Guard",
+            "role": "directing body"
           },
           {
             "kind": "place",
             "name": "RAF Fairford",
-            "role": ""
-          },
-          {
-            "kind": "organisation",
-            "name": "Islamic Revolutionary Guard Corps",
-            "role": ""
-          },
-          {
-            "kind": "organisation",
-            "name": "Iran",
-            "role": ""
+            "role": "site of incident"
           }
         ],
         "made_by": "Prime Minister",
-        "quote": "our assessment that it is highly likely to have been coordinated in Iran, almost certainly directed by Iran’s Islamic Revolutionary Guard",
-        "statement": "The incident at RAF Fairford is highly likely to have been coordinated in Iran and almost certainly directed by Iran’s Islamic Revolutionary Guard."
+        "quote": "it is highly likely to have been coordinated in Iran, almost certainly directed by Iran’s Islamic Revolutionary Guard",
+        "statement": "The UK assesses that the incident at RAF Fairford is highly likely to have been coordinated in Iran and almost certainly directed by the Islamic Revolutionary Guard"
       },
       {
         "entities": [
           {
+            "kind": "place",
+            "name": "Iran",
+            "role": "state whose criminal networks are targeted"
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "We will crack down on Iran’s use of criminal networks",
+        "statement": "The UK will crack down on Iran's use of criminal networks and bring further sanctions against Iran and the IRGC"
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Falkland Islands",
+            "role": "territory"
+          },
+          {
             "kind": "person",
             "name": "Prime Minister",
             "role": "Prime Minister of the United Kingdom"
-          },
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "we will also always do whatever it takes to uphold their will",
+        "statement": "The UK will always do whatever it takes to uphold the will of the Falkland Islanders to remain British"
+      },
+      {
+        "entities": [
           {
             "kind": "occasion",
             "name": "UK-EU summit",
-            "role": ""
+            "role": "forthcoming summit"
+          },
+          {
+            "kind": "place",
+            "name": "Brussels",
+            "role": "location of summit"
+          },
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "it will take place in Brussels on the 20th November",
+        "statement": "The UK-EU summit will take place in Brussels on 20 November"
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "UK",
+            "role": "economy"
           }
         ],
         "made_by": "Prime Minister",
         "quote": "Together, these deals will add the equivalent of over 10 billion pounds per year to the UK economy by 2040",
-        "statement": "Trade and related deals under discussion with the EU would add the equivalent of over 10 billion pounds per year to the UK economy by 2040."
+        "statement": "The UK-EU deals will add over 10 billion pounds per year to the UK economy by 2040"
       },
       {
         "entities": [
           {
-            "kind": "person",
-            "name": "Prime Minister",
-            "role": "Prime Minister of the United Kingdom"
-          }
-        ],
-        "made_by": "Prime Minister",
-        "quote": "I will work hard over the next 5 weeks to achieve it.",
-        "statement": "The Prime Minister will work hard over the next five weeks to secure a deal with the EU."
-      },
-      {
-        "entities": [
-          {
-            "kind": "person",
-            "name": "Prime Minister",
-            "role": "Prime Minister of the United Kingdom"
+            "kind": "place",
+            "name": "Scotland",
+            "role": "origin of salmon"
           },
           {
-            "kind": "organisation",
-            "name": "United Nations",
-            "role": ""
+            "kind": "place",
+            "name": "UK",
+            "role": "exporter"
           }
         ],
         "made_by": "Prime Minister",
-        "quote": "that after a decade of turbulence, Britain is back and can be relied upon as a consistent and stable partner in an uncertain world",
-        "statement": "Britain is back after a decade of turbulence and can be relied upon as a consistent and stable partner in an uncertain world."
+        "quote": "Our largest food export, Scottish salmon, faces a 100% rate of document checks at the border, costing us around 100 million pounds in lost exports",
+        "statement": "Scottish salmon faces a 100% rate of document checks at the border, costing the UK around 100 million pounds in lost exports"
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Northern Ireland",
+            "role": "region"
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "In Northern Ireland, the proposed energy deal could cut wholesale energy costs by 20%",
+        "statement": "The proposed energy deal could cut wholesale energy costs in Northern Ireland by 20%"
+      },
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "I will work hard over the next 5 weeks to achieve it",
+        "statement": "The Prime Minister will work hard over the next 5 weeks to secure a deal with the EU"
       },
       {
         "entities": [
@@ -146,14 +269,19 @@
             "role": "President of Microsoft"
           },
           {
+            "kind": "organisation",
+            "name": "Microsoft",
+            "role": "technology company"
+          },
+          {
             "kind": "place",
             "name": "Britain",
-            "role": ""
+            "role": "country"
           }
         ],
         "made_by": "President of Microsoft",
-        "quote": "Leading voices like the President of Microsoft are saying Britain is the world leader in AI safety.",
-        "statement": "Britain is the world leader in AI safety."
+        "quote": "Leading voices like the President of Microsoft are saying Britain is the world leader in AI safety",
+        "statement": "Britain is the world leader in AI safety"
       },
       {
         "entities": [
@@ -164,18 +292,13 @@
           },
           {
             "kind": "place",
-            "name": "RAF Fairford",
-            "role": ""
-          },
-          {
-            "kind": "place",
-            "name": "Scotland",
-            "role": ""
+            "name": "Britain",
+            "role": "country"
           }
         ],
         "made_by": "Prime Minister",
-        "quote": "Our largest food export, Scottish salmon, faces a 100% rate of document checks at the border, costing us around 100 million pounds in lost exports.",
-        "statement": "Scottish salmon faces a 100% rate of document checks at the border, costing around 100 million pounds in lost exports."
+        "quote": "public opinion currently supports a pragmatic approach like the one I am suggesting",
+        "statement": "Public opinion currently supports a pragmatic approach to the UK's relationship with the EU"
       }
     ],
     "facts": [
@@ -189,12 +312,39 @@
           },
           {
             "kind": "organisation",
-            "name": "United Nations",
-            "role": ""
+            "name": "House of Commons",
+            "role": "chamber addressed"
+          },
+          {
+            "kind": "occasion",
+            "name": "United Nations General Assembly",
+            "role": "event reported on"
           }
         ],
-        "quote": "I took a clear message to the UN",
-        "statement": "The Prime Minister took a message to the United Nations General Assembly."
+        "quote": "I wish to make a statement on the United Nations General Assembly",
+        "statement": "The Prime Minister made a statement to the House of Commons on the United Nations General Assembly and related international events"
+      },
+      {
+        "as_at": "2026-10-12",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "person",
+            "name": "new member for Holborn and St Pancras",
+            "role": "Member of Parliament for Holborn and St Pancras"
+          },
+          {
+            "kind": "place",
+            "name": "Holborn and St Pancras",
+            "role": "constituency"
+          }
+        ],
+        "quote": "let me first welcome the new member for Holborn and St Pancras to her place",
+        "statement": "The Prime Minister welcomed the new member for Holborn and St Pancras to the House"
       },
       {
         "as_at": "2026-10-12",
@@ -212,11 +362,11 @@
           {
             "kind": "place",
             "name": "New York",
-            "role": ""
+            "role": "location of meeting"
           }
         ],
         "quote": "as I assure President Zelenskyy at our meeting in New York",
-        "statement": "The Prime Minister met President Zelenskyy in New York."
+        "statement": "The Prime Minister met President Zelenskyy in New York"
       },
       {
         "as_at": "2026-10-12",
@@ -228,51 +378,46 @@
           },
           {
             "kind": "person",
-            "name": "President Trump",
-            "role": "President of the United States"
-          },
-          {
-            "kind": "place",
-            "name": "New York",
-            "role": ""
+            "name": "President Zelenskyy",
+            "role": "President of Ukraine"
           }
         ],
-        "quote": "I raised this with President Trump in New York.",
-        "statement": "The Prime Minister raised an energy ceasefire with President Trump in New York."
+        "quote": "When I spoke to President Zelenskyy on Saturday",
+        "statement": "The Prime Minister spoke to President Zelenskyy on Saturday"
       },
       {
         "as_at": "2026-10-12",
         "entities": [
-          {
-            "kind": "person",
-            "name": "Prime Minister",
-            "role": "Prime Minister of the United Kingdom"
-          },
-          {
-            "kind": "person",
-            "name": "President Trump",
-            "role": "President of the United States"
-          }
-        ],
-        "quote": "I welcome President Trump’s announcement yesterday of a reciprocal energy ceasefire.",
-        "statement": "President Trump announced a reciprocal energy ceasefire."
-      },
-      {
-        "as_at": "2026-10-12",
-        "entities": [
-          {
-            "kind": "person",
-            "name": "Prime Minister",
-            "role": "Prime Minister of the United Kingdom"
-          },
           {
             "kind": "organisation",
-            "name": "Saudi Arabia",
-            "role": ""
+            "name": "UK Government",
+            "role": "announcing government"
+          },
+          {
+            "kind": "place",
+            "name": "Ukraine",
+            "role": "recipient of funding"
           }
         ],
-        "quote": "I confirmed Britain’s decision to send air defence and a Voyager aircraft to Saudi Arabia to provide air-to-air refuelling support.",
-        "statement": "Britain decided to send air defence and a Voyager aircraft to Saudi Arabia to provide air-to-air refuelling support."
+        "quote": "we have announced new funding to help them get through their fifth winter under Russian bombardment",
+        "statement": "The UK Government has announced new funding to help Ukraine through its fifth winter under Russian bombardment"
+      },
+      {
+        "as_at": "2026-10-12",
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "UK Government",
+            "role": "announcing government"
+          },
+          {
+            "kind": "place",
+            "name": "Russia",
+            "role": "target of sanctions"
+          }
+        ],
+        "quote": "a new sanctions package so that over 90% of Russia’s oil producing capacity is now covered by UK sanctions",
+        "statement": "The UK Government has announced a new sanctions package against Russia"
       },
       {
         "as_at": "2026-10-12",
@@ -284,34 +429,73 @@
           },
           {
             "kind": "person",
-            "name": "Ursula von der Leyen",
-            "role": "President of the European Commission"
+            "name": "President Trump",
+            "role": "President of the United States"
           },
           {
             "kind": "place",
             "name": "New York",
-            "role": ""
+            "role": "location of meeting"
           }
         ],
-        "quote": "in New York, I also had a positive meeting with the President of the European Commission, Ursula von der Leyen",
-        "statement": "The Prime Minister met Ursula von der Leyen, President of the European Commission, in New York."
+        "quote": "I raised this with President Trump in New York",
+        "statement": "The Prime Minister raised an energy ceasefire with President Trump in New York"
+      },
+      {
+        "as_at": "2026-10-11",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "President Trump",
+            "role": "President of the United States"
+          }
+        ],
+        "quote": "President Trump’s announcement yesterday of a reciprocal energy ceasefire",
+        "statement": "President Trump announced a reciprocal energy ceasefire"
       },
       {
         "as_at": "2026-10-12",
         "entities": [
           {
-            "kind": "occasion",
-            "name": "UK-EU summit",
-            "role": ""
+            "kind": "person",
+            "name": "President Zelenskyy",
+            "role": "President of Ukraine"
           },
           {
             "kind": "place",
-            "name": "Brussels",
-            "role": ""
+            "name": "Ukraine",
+            "role": "country"
+          },
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
           }
         ],
-        "quote": "it will take place in Brussels on the 20th November.",
-        "statement": "The UK-EU summit will take place in Brussels on 20 November."
+        "quote": "President Zelenskyy has assured me Ukraine would immediately implement it when a start date is confirmed",
+        "statement": "President Zelenskyy assured the Prime Minister that Ukraine would immediately implement the energy ceasefire when a start date is confirmed"
+      },
+      {
+        "as_at": "2026-10-12",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "person",
+            "name": "NATO Secretary General",
+            "role": "Secretary General of NATO"
+          },
+          {
+            "kind": "place",
+            "name": "Oxfordshire",
+            "role": "location of meeting"
+          }
+        ],
+        "quote": "including with the NATO Secretary General in Oxfordshire",
+        "statement": "The Prime Minister met the NATO Secretary General in Oxfordshire"
       },
       {
         "as_at": "2026-10-12",
@@ -329,11 +513,16 @@
           {
             "kind": "place",
             "name": "Berlin",
-            "role": ""
+            "role": "location of meeting"
+          },
+          {
+            "kind": "place",
+            "name": "Germany",
+            "role": "country"
           }
         ],
-        "quote": "In Berlin last week, Chancellor Merz and I agreed a new partnership to tackle these hybrid threats.",
-        "statement": "The Prime Minister and Chancellor Merz agreed a new partnership in Berlin to tackle hybrid threats."
+        "quote": "In Berlin last week, Chancellor Merz and I agreed a new partnership to tackle these hybrid threats",
+        "statement": "The Prime Minister and Chancellor Merz agreed a new partnership to tackle hybrid threats in Berlin"
       },
       {
         "as_at": "2026-10-12",
@@ -344,18 +533,35 @@
             "role": "Prime Minister of the United Kingdom"
           },
           {
-            "kind": "organisation",
-            "name": "National Centre for Information Defence",
-            "role": ""
+            "kind": "occasion",
+            "name": "United Nations General Assembly",
+            "role": "speech occasion"
           },
           {
             "kind": "organisation",
-            "name": "Foreign Affairs Select Committee",
-            "role": ""
+            "name": "National Centre for Information Defence",
+            "role": "planned body"
           }
         ],
-        "quote": "I confirmed our commitment to establish a new National Centre for Information Defence – as recommended by the Foreign Affairs Select Committee.",
-        "statement": "The Prime Minister confirmed a commitment to establish a National Centre for Information Defence, as recommended by the Foreign Affairs Select Committee."
+        "quote": "in my speech to the UN General Assembly, I confirmed our commitment to establish a new National Centre for Information Defence",
+        "statement": "The Prime Minister confirmed in his UN General Assembly speech a commitment to establish a National Centre for Information Defence"
+      },
+      {
+        "as_at": "2026-10-12",
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "Foreign Affairs Select Committee",
+            "role": "recommending committee"
+          },
+          {
+            "kind": "organisation",
+            "name": "National Centre for Information Defence",
+            "role": "planned body"
+          }
+        ],
+        "quote": "as recommended by the Foreign Affairs Select Committee",
+        "statement": "The Foreign Affairs Select Committee recommended the National Centre for Information Defence"
       },
       {
         "as_at": "2026-10-12",
@@ -367,12 +573,154 @@
           },
           {
             "kind": "place",
-            "name": "Holborn and St Pancras",
-            "role": ""
+            "name": "Berlin",
+            "role": "location"
+          },
+          {
+            "kind": "place",
+            "name": "Germany",
+            "role": "country"
+          },
+          {
+            "kind": "organisation",
+            "name": "Global Combat Air Programme",
+            "role": "programme"
+          },
+          {
+            "kind": "place",
+            "name": "Italy",
+            "role": "partner country"
+          },
+          {
+            "kind": "place",
+            "name": "Japan",
+            "role": "partner country"
           }
         ],
-        "quote": "let me first welcome the new member for Holborn and St Pancras to her place",
-        "statement": "The House welcomed the new member for Holborn and St Pancras to her place."
+        "quote": "in Berlin I indicated Britain’s openness to Germany joining the Global Combat Air Programme alongside Italy and Japan",
+        "statement": "The Prime Minister indicated in Berlin the UK's openness to Germany joining the Global Combat Air Programme alongside Italy and Japan"
+      },
+      {
+        "as_at": "2026-10-12",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "Saudi Arabia",
+            "role": "recipient of support"
+          }
+        ],
+        "quote": "I confirmed Britain’s decision to send air defence and a Voyager aircraft to Saudi Arabia",
+        "statement": "The UK decided to send air defence and a Voyager aircraft to Saudi Arabia to provide air-to-air refuelling support"
+      },
+      {
+        "as_at": "2026-10-12",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "person",
+            "name": "President Trump",
+            "role": "President of the United States"
+          },
+          {
+            "kind": "place",
+            "name": "Middle East",
+            "role": "region discussed"
+          }
+        ],
+        "quote": "In my meeting with President Trump, we discussed the situation in the Middle East",
+        "statement": "The Prime Minister and President Trump discussed the situation in the Middle East"
+      },
+      {
+        "as_at": "2026-10-12",
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "UK Government",
+            "role": "government in contact"
+          },
+          {
+            "kind": "place",
+            "name": "US",
+            "role": "country"
+          }
+        ],
+        "quote": "we have been in close contact with the US about protective security at our shared bases",
+        "statement": "The UK has been in close contact with the US since UNGA about protective security at shared bases"
+      },
+      {
+        "as_at": "2026-10-12",
+        "entities": [
+          {
+            "kind": "place",
+            "name": "RAF Fairford",
+            "role": "site of incident"
+          },
+          {
+            "kind": "place",
+            "name": "RAF Molesworth",
+            "role": "site of incident"
+          }
+        ],
+        "quote": "to the incidents at RAF Fairford and RAF Molesworth",
+        "statement": "There were incidents at RAF Fairford and RAF Molesworth"
+      },
+      {
+        "as_at": "2026-10-12",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "person",
+            "name": "President Trump",
+            "role": "President of the United States"
+          },
+          {
+            "kind": "place",
+            "name": "Falkland Islands",
+            "role": "territory"
+          }
+        ],
+        "quote": "In my meeting with the President, I also raised the Falkland Islands",
+        "statement": "The Prime Minister raised the Falkland Islands with President Trump"
+      },
+      {
+        "as_at": "2026-10-12",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "person",
+            "name": "Ursula von der Leyen",
+            "role": "President of the European Commission"
+          },
+          {
+            "kind": "organisation",
+            "name": "European Commission",
+            "role": "EU executive"
+          },
+          {
+            "kind": "place",
+            "name": "New York",
+            "role": "location of meeting"
+          }
+        ],
+        "quote": "I had a positive meeting with the President of the European Commission, Ursula von der Leyen",
+        "statement": "The Prime Minister met Ursula von der Leyen in New York"
       },
       {
         "as_at": "2026-10-12",
@@ -385,11 +733,33 @@
           {
             "kind": "organisation",
             "name": "G20",
-            "role": ""
+            "role": "forum"
           }
         ],
         "quote": "as we take up the presidency of the G20 in 2027",
-        "statement": "Britain takes up the presidency of the G20 in 2027."
+        "statement": "The UK will take up the presidency of the G20 in 2027"
+      },
+      {
+        "as_at": "2026-10-12",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "organisation",
+            "name": "G20",
+            "role": "forum"
+          },
+          {
+            "kind": "place",
+            "name": "New York",
+            "role": "location of meeting"
+          }
+        ],
+        "quote": "I confirmed in New York that we will place AI centre stage in our presidency",
+        "statement": "The Prime Minister confirmed in New York that AI will be central to the UK's G20 presidency"
       }
     ]
   }

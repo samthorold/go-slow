@@ -284,6 +284,25 @@ func TestAReadingShownPrecedentsIsToldOfThemAfterTheSameInstructions(t *testing.
 	}
 }
 
+func TestReadingIsToldThatAQualifierIsAnEntityTheFactInvolves(t *testing.T) {
+	model := &fakeModel{output: goodReading}
+	if _, err := editor.Read(t.Context(), model, speech); err != nil {
+		t.Fatal(err)
+	}
+
+	// Stated once, in the Entities paragraph: "Zelenskyy of Ukraine" involves
+	// Ukraine, "Motherwell, Scotland" Scotland.
+	var entities []string
+	for line := range strings.SplitSeq(model.sent[0].Instructions, "\n") {
+		if strings.Contains(line, "qualifier") {
+			entities = append(entities, line)
+		}
+	}
+	if len(entities) != 1 || !strings.HasPrefix(entities[0], "- Entities:") {
+		t.Errorf("the qualifier standard is not stated once, in the Entities paragraph: %q", entities)
+	}
+}
+
 func TestThereIsNoReadingWithoutAnItem(t *testing.T) {
 	model := &fakeModel{output: goodReading}
 

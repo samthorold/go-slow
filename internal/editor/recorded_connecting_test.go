@@ -30,9 +30,10 @@ func recordedConnectings(t *testing.T, root string) {
 	store, topics := newRecord(t, nil)
 	var total editor.Usage
 	c := chain{
-		reading:    replayed(inputsOf(root, "connecting", "reading")),
-		placing:    replayed(inputsOf(root, "connecting", "placing")),
-		connecting: recordedOrReplayed(t, filepath.Join(root, "connecting"), "CONNECTING_MODEL", "TestRecordedConnectings", &total),
+		reading:       replayed(inputsOf(root, "connecting", "reading")),
+		placing:       replayed(inputsOf(root, "connecting", "placing")),
+		connecting:    recordedOrReplayed(t, filepath.Join(root, "connecting"), "CONNECTING_MODEL", "TestRecordedConnectings", &total),
+		readingFrozen: true,
 	}
 	fixtures := fixtureItems(t)
 	if err := c.run(ctx, store, topics, fixtures); err != nil {

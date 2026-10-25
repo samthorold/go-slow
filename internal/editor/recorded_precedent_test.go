@@ -103,7 +103,7 @@ func recordedPlacingPrecedent(t *testing.T, root string) {
 	name := "uk-government-response-to-agreement-between-us-and-russia-9-october"
 	it, _ := fixture(t, filepath.Join("testdata", "govuk", name+".json"))
 	addItem(it)
-	reading, err := editor.Read(ctx, replay{kept(t, filepath.Join(inputsOf(root, "precedent", "reading"), name+".json"))}, it)
+	reading, err := editor.ReadAsKept(ctx, replay{kept(t, filepath.Join(inputsOf(root, "precedent", "reading"), name+".json"))}, it)
 	if err != nil {
 		t.Fatalf("the recorded reading fails its checks: %v", err)
 	}

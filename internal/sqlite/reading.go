@@ -23,6 +23,7 @@ func (s *Store) ItemsToRead(ctx context.Context) ([]editor.Item, error) {
 				WHERE t.source_id = items.source_id AND t.entry_id = items.entry_id)
 			AND NOT EXISTS (SELECT 1 FROM item_reads r
 				WHERE r.source_id = items.source_id AND r.entry_id = items.entry_id)
+			AND `+notFailed("reading")+`
 		ORDER BY items.published, items.collected_at`)
 	if err != nil {
 		return nil, fmt.Errorf("items to read: %w", err)

@@ -49,9 +49,9 @@ func (s *Store) SaveBatch(ctx context.Context, b editor.PendingBatch) error {
 	return tx.Commit()
 }
 
-// EndBatch removes an ended batch and keeps the batches its failed requests
-// were resubmitted in, all at once.
-func (s *Store) EndBatch(ctx context.Context, batchID string, resubmitted []editor.PendingBatch) error {
+// EndBatch removes an ended batch, keeps its failed attempts and keeps the
+// batches its failed requests were resubmitted in, all at once.
+func (s *Store) EndBatch(ctx context.Context, batchID string, failures []editor.WorkFailure, resubmitted []editor.PendingBatch) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -59,6 +59,17 @@ func (s *Store) EndBatch(ctx context.Context, batchID string, resubmitted []edit
 	defer func() { _ = tx.Rollback() }()
 	if _, err := tx.ExecContext(ctx, `DELETE FROM batches WHERE id = ?`, batchID); err != nil {
 		return fmt.Errorf("end batch %s: %w", batchID, err)
+	}
+	for _, f := range failures {
+		if _, err := tx.ExecContext(ctx, `
+			INSERT INTO work_attempts (act, work_key, attempts, last_failed_at, last_error, failed)
+			VALUES (?, ?, 1, ?, ?, ?)
+			ON CONFLICT (act, work_key) DO UPDATE SET attempts = attempts + 1,
+				last_failed_at = excluded.last_failed_at, last_error = excluded.last_error,
+				failed = excluded.failed`,
+			f.Act, f.Key, formatTime(f.At), f.Why, boolInt(f.Failed)); err != nil {
+			return fmt.Errorf("end batch %s: %w", batchID, err)
+		}
 	}
 	for _, b := range resubmitted {
 		if err := saveBatch(ctx, tx, b); err != nil {

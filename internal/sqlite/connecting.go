@@ -14,7 +14,8 @@ import (
 // Facts a Fact is weighed against include those in its Stories.
 func (s *Store) FactsToConnect(ctx context.Context) ([]editor.ToConnect, error) {
 	out, err := s.toConnect(ctx, `EXISTS (SELECT 1 FROM fact_placings p WHERE p.fact_id = facts.id)
-		AND NOT EXISTS (SELECT 1 FROM fact_connectings c WHERE c.fact_id = facts.id)`)
+		AND NOT EXISTS (SELECT 1 FROM fact_connectings c WHERE c.fact_id = facts.id)
+		AND `+notFailed("connecting"))
 	if err != nil {
 		return nil, fmt.Errorf("facts to connect: %w", err)
 	}

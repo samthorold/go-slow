@@ -62,6 +62,23 @@ func (e *Editor) ReadWaiting(ctx context.Context, now time.Time) error {
 	return nil
 }
 
+// keep checks a model's answer on an Item, looks its Entities up in
+// Wikidata and writes the reading to the Record, at now. A result that fails
+// the checks is ErrFailedChecks and writes nothing. A failed lookup writes
+// nothing either and is an error like the Record's: in a batch, the batch
+// stays pending and its results are applied once Wikidata answers, with no
+// new model call.
+func (e *Editor) keep(ctx context.Context, it Item, res Response, now time.Time) error {
+	r, err := checkReading(it, res)
+	if err != nil {
+		return err
+	}
+	if r, err = resolve(ctx, e.Wikidata, r, it.Published, now); err != nil {
+		return err
+	}
+	return e.Store.SaveReading(ctx, r, now)
+}
+
 // KnownEntity is an Entity as the Record holds it.
 type KnownEntity struct {
 	Name string

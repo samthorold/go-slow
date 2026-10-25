@@ -273,11 +273,7 @@ func (e *Editor) Reading() BatchAct {
 					Key:     it.SourceID + "\n" + it.EntryID,
 					Request: req,
 					Apply: func(ctx context.Context, res Response, now time.Time) error {
-						r, err := checkReading(it, res)
-						if err != nil {
-							return err
-						}
-						return e.Store.SaveReading(ctx, r, now)
+						return e.keep(ctx, it, res, now)
 					},
 				})
 			}

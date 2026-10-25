@@ -49,7 +49,7 @@ There is no Go Guide yet; the Go tooling below is this repo's own until there is
 
 ## Config
 
-Only from environment variables, every one listed with a safe local value in `.env.example`, and all required: a missing one fails at start. The real `.env` is gitignored. Add a variable to `internal/config` and `.env.example` together. The model each act runs on is a variable (`READING_MODEL`, `PLACING_MODEL`, `BRIEFING_MODEL`, each a Claude model while only the Claude adapter exists); `BRIEFING_TIME` is when the Briefing is written and due by, `HH:MM` in `TZ`; `GOSLOW_ANTHROPIC_API_KEY` is a `config.Secret`, which never formats as its value. Never print, log or commit a real key.
+Only from environment variables, every one listed with a safe local value in `.env.example`, and all required: a missing one fails at start. The real `.env` is gitignored. Add a variable to `internal/config` and `.env.example` together. The model each act runs on is a variable (`READING_MODEL`, `PLACING_MODEL`, `BRIEFING_MODEL`, each a Claude model, since Claude is the one adapter); `BRIEFING_TIME` is when the Briefing is written and due by, `HH:MM` in `TZ`; `GOSLOW_ANTHROPIC_API_KEY` is a `config.Secret`, which never formats as its value. Never print, log or commit a real key.
 
 ## Go toolchain
 

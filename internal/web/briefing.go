@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/samthorold/go-slow/internal/editor"
+	"github.com/samthorold/go-slow/internal/feedback"
 )
 
 // Briefings answers the queries the Briefing pages need.
@@ -95,6 +96,11 @@ type briefingPage struct {
 	Missed string
 	// Failure is the latest failure to write the day's Briefing.
 	Failure *failureRow
+	// FeedbackPath is where Feedback given on the Briefing goes.
+	FeedbackPath string
+	// MissedStory is the form for a missed Story: what was entered, and why
+	// it failed.
+	MissedStory missedStoryForm
 }
 
 type failureRow struct {
@@ -103,9 +109,13 @@ type failureRow struct {
 }
 
 type briefedStoryRow struct {
-	Title      string
-	Path       string
-	Statements []statementRow
+	ID    int64
+	Gives []giveButton
+	// MissedDevelopment is the form for a Development the Story missed.
+	MissedDevelopment missedDevelopmentForm
+	Title             string
+	Path              string
+	Statements        []statementRow
 }
 
 // statementRow is one statement, with what it cites: each Development, on
@@ -116,6 +126,7 @@ type statementRow struct {
 }
 
 type citationRow struct {
+	Gives           []giveButton
 	AsAt            string
 	Statement       string
 	DevelopmentPath string
@@ -134,12 +145,21 @@ func (a *app) todaysBriefing(w http.ResponseWriter, r *http.Request) {
 
 // briefing renders the Briefing page for the day that holds day.
 func (a *app) briefing(w http.ResponseWriter, r *http.Request, day time.Time) {
+	a.briefingWith(w, r, day, http.StatusOK, feedback.Draft{}, nil)
+}
+
+// briefingWith renders the Briefing page with the Feedback last entered on
+// it and why it failed, if it did.
+func (a *app) briefingWith(w http.ResponseWriter, r *http.Request, day time.Time, status int, d feedback.Draft, errs feedback.Errors) {
 	b, exists, err := a.Briefings.Briefing(r.Context(), day.Format(time.DateOnly))
 	if err != nil {
 		a.serverError(w, r, err)
 		return
 	}
-	p := briefingPage{Date: day.Format("Monday 2 January 2006"), Exists: exists}
+	p := briefingPage{
+		Date: day.Format("Monday 2 January 2006"), Exists: exists,
+		FeedbackPath: briefingPath(day.Format(time.DateOnly)) + "/feedback",
+	}
 	if !exists {
 		// The outputs appear: a day with no Briefing by the set time is
 		// flagged, with the latest failure to write it, if there was one.
@@ -157,13 +177,21 @@ func (a *app) briefing(w http.ResponseWriter, r *http.Request, day time.Time) {
 		}
 	}
 	for _, bs := range b.Stories {
-		row := briefedStoryRow{Title: bs.Story.Title, Path: storyPath(bs.Story.ID)}
+		row := briefedStoryRow{
+			ID: bs.Story.ID, Title: bs.Story.Title, Path: storyPath(bs.Story.ID),
+			Gives: storyGives(p.FeedbackPath, bs.Story.ID),
+		}
+		if row.MissedDevelopment, err = a.missedDevelopment(r, p.FeedbackPath, bs.Story.ID, d, errs); err != nil {
+			a.serverError(w, r, err)
+			return
+		}
 		for _, st := range bs.Statements {
 			sr := statementRow{Text: st.Text}
 			for _, d := range st.Developments {
 				item := itemPath(d.SourceID, d.EntryID)
 				sr.Cites = append(sr.Cites, citationRow{
-					AsAt: factDate(d.Fact), Statement: d.Statement,
+					Gives: developmentGives(p.FeedbackPath, bs.Story.ID, d.ID),
+					AsAt:  factDate(d.Fact), Statement: d.Statement,
 					DevelopmentPath: storyPath(bs.Story.ID) + "#" + developmentAnchor(d.ID),
 					FactPath:        item + "#" + factAnchor(d.ID),
 					ItemTitle:       d.ItemTitle, ItemPath: item,
@@ -173,5 +201,14 @@ func (a *app) briefing(w http.ResponseWriter, r *http.Request, day time.Time) {
 		}
 		p.Stories = append(p.Stories, row)
 	}
-	a.render(w, r, briefingTmpl, p)
+	var facts []editor.Development
+	for _, bs := range b.Stories {
+		for _, st := range bs.Statements {
+			facts = append(facts, st.Developments...)
+		}
+	}
+	if exists {
+		p.MissedStory = missedStory(p.FeedbackPath, facts, d, errs)
+	}
+	a.renderStatus(w, r, status, briefingTmpl, p)
 }

@@ -6,19 +6,37 @@
      the boosted links to each Item and Story still work. */}}
 <p><a href="/stories">Stories</a></p>
 <h1 hx-disable>{{.Title}}</h1>
+{{- if .Missed}}
+<p>You started this Story, saying it was missed.</p>
+{{- end}}
+{{- if .Unwanted}}
+<p><strong>Unwanted in the Briefing:</strong> you said this Story should not be in it.</p>
+{{- end}}
+{{- template "gives" .Gives}}
 
 <section aria-labelledby="timeline">
   <h2 id="timeline">Timeline</h2>
   <ol>
   {{- range .Timeline}}
     <li id="{{.Anchor}}">
+      {{- if .Withdrawn}}
+      <p><strong>Withdrawn:</strong> its Fact was marked wrong.</p>
+      {{- else if .Unwanted}}
+      <p><strong>Unwanted in the Briefing:</strong> you said this Development should not be in it.</p>
+      {{- end}}
+      {{- if .Missed}}
+      <p>You added this Development, saying it was missed.</p>
+      {{- end}}
       <p><time>{{.AsAt}}</time>: <span hx-disable>{{.Statement}}</span></p>
       <blockquote hx-disable><p>{{.Quote}}</p></blockquote>
       <p><small>From <a href="{{.ItemPath}}"><span hx-disable>{{.ItemTitle}}</span></a></small></p>
+      {{- template "gives" .Gives}}
     </li>
   {{- end}}
   </ol>
+  {{- template "missedDevelopment" .MissedDevelopment}}
 </section>
+{{template "missedStory" .MissedStory}}
 
 {{- if .Causes}}
 
@@ -27,8 +45,12 @@
   <ul>
   {{- range .Causes}}
     <li>
+      {{- if .Withdrawn}}
+      <p><strong>Withdrawn:</strong> this Connection, or a Fact it connects, was marked wrong.</p>
+      {{- end}}
       <p>{{template "fact" .Cause}}</p>
       <p>led to {{template "fact" .Effect}}</p>
+      {{- template "gives" .Gives}}
     </li>
   {{- end}}
   </ul>

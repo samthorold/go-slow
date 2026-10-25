@@ -27,6 +27,9 @@ type Story struct {
 	Entities []string
 	// Timeline is the Story's Developments in order.
 	Timeline []Development
+	// Unwanted is set once the Owner said it should not be in the
+	// Briefing, and Missed when the Owner started it, saying it was missed.
+	Unwanted, Missed bool
 	// Causes are the cause Connections to or from its Developments.
 	Causes []CauseConnection
 }
@@ -57,6 +60,9 @@ type SharedEntity struct {
 type CauseConnection struct {
 	Cause  Development
 	Effect Development
+	// Withdrawn is set once Feedback said it, or a Fact it connects, was
+	// wrong.
+	Withdrawn bool
 }
 
 // Development is a Fact that moves a Story on, with the title of the Item it
@@ -64,6 +70,11 @@ type CauseConnection struct {
 type Development struct {
 	Fact
 	ItemTitle string
+	// Withdrawn is set once Feedback said its Fact was wrong, and Unwanted
+	// once the Owner said it should not be in the Briefing. The acts never
+	// see a withdrawn Development; the Record keeps it, marked. Missed is
+	// set when the Owner added it, saying it was missed.
+	Withdrawn, Unwanted, Missed bool
 }
 
 // Placing is the result of placing an Item's Facts.

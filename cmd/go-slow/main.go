@@ -22,6 +22,7 @@ import (
 	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/config"
 	"github.com/samthorold/go-slow/internal/editor"
+	"github.com/samthorold/go-slow/internal/feedback"
 	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/polite"
 	"github.com/samthorold/go-slow/internal/server"
@@ -150,6 +151,8 @@ func run(log *slog.Logger) error {
 		Readings:   store,
 		Topics:     topics,
 		Stories:    store,
+		Feedback:   feedback.New(store),
+		Kept:       store,
 		BriefingAt: cfg.BriefingAt,
 		Now:        time.Now,
 		Log:        log,

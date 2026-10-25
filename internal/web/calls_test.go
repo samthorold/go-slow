@@ -3,6 +3,7 @@ package web_test
 import (
 	"encoding/json"
 	"html"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -51,6 +52,84 @@ func TestAFactLinksToTheReadingCallThatDrewIt(t *testing.T) {
 	}
 	if !regexp.MustCompile(`[0-9a-f]{64}`).MatchString(res.body) {
 		t.Errorf("the call's page shows no request hash:\n%s", res.body)
+	}
+}
+
+func TestADevelopmentLinksToThePlacingCallThatMadeIt(t *testing.T) {
+	store := openStore(t)
+	readSpeech(t, store, reading)
+	placeWaiting(t, store, `{"new_stories": [{"ref": "N1", "title": "Andy Burnham in Scotland"}],
+		"facts": [{"fact": "F1", "developments_in": ["N1"]}]}`)
+	app, _ := newAppWithLog(t, saturday, store)
+
+	story := get(t, app, "/stories/1")
+	timeline := story.body[strings.Index(story.body, `id="timeline"`):]
+	res := get(t, app, callLink(t, timeline, "Andy Burnham spoke in Motherwell."))
+
+	if res.status != 200 {
+		t.Fatalf("status %d", res.status)
+	}
+	for _, want := range []string{"placing", "applied", "You are placing the Facts drawn from one Item.",
+		"Facts to place:", "Andy Burnham spoke in Motherwell.", `id="attempts"`} {
+		if !strings.Contains(res.body, want) {
+			t.Errorf("the placing call's page lacks %q:\n%s", want, res.body)
+		}
+	}
+}
+
+func TestADevelopmentTheOwnerAddedLinksToNoPlacingCall(t *testing.T) {
+	store := openStore(t)
+	speechStory(t, store)
+	app, _ := newAppWithLog(t, saturday, store)
+	if res := send(t, app, "POST", "/stories/1/feedback", url.Values{"kind": {"missed"}, "level": {"story"},
+		"title": {"Scottish politics"}, "facts": {"1"}}); res.status != 303 {
+		t.Fatalf("status %d:\n%s", res.status, res.body)
+	}
+
+	missed := get(t, app, "/stories/2")
+
+	if !strings.Contains(missed.body, "Andy Burnham spoke in Motherwell.") || strings.Contains(missed.body, "How it was placed") {
+		t.Errorf("the Development the Owner added links to a placing call, or is not shown:\n%s", missed.body)
+	}
+	if placed := get(t, app, "/stories/1"); !strings.Contains(placed.body, "How it was placed") {
+		t.Errorf("the Development placing made does not link to its call:\n%s", placed.body)
+	}
+}
+
+func TestAConnectionLinksToTheConnectingCallThatMadeIt(t *testing.T) {
+	store := openStore(t)
+	offer := item("offer", "Offer to Holyrood", saturday.Add(-72*time.Hour))
+	seed(t, store, saturday.AddDate(0, 0, -7), offer)
+	if err := store.SaveReading(t.Context(), editor.Reading{
+		SourceID: offer.SourceID, EntryID: offer.EntryID, Model: "fake",
+		Entities: []editor.Entity{{Name: "Andy Burnham", Kind: "person"}},
+		Facts: []editor.Fact{{Statement: "Andy Burnham made an offer to Holyrood.",
+			AsAt: time.Date(2026, time.October, 21, 0, 0, 0, 0, time.UTC), Quote: "offer", Entities: []string{"Andy Burnham"}}},
+	}, saturday); err != nil {
+		t.Fatal(err)
+	}
+	placeWaiting(t, store, `{"new_stories": [{"ref": "N1", "title": "Scottish devolution"}],
+		"facts": [{"fact": "F1", "developments_in": ["N1"]}]}`)
+	connectWaiting(t, store, `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "actor"}]}], "causes": []}`)
+	readSpeech(t, store, reading)
+	placeWaiting(t, store, `{"new_stories": [], "facts": [{"fact": "F1", "developments_in": ["S1"]}]}`)
+	connectWaiting(t, store, `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "actor"}, {"entity": "Motherwell", "role": "place"}]}],
+		  "causes": [{"cause": "C1", "effect": "F1"}]}`)
+	app, _ := newAppWithLog(t, saturday, store)
+
+	story := get(t, app, "/stories/1")
+	causes := story.body[strings.Index(story.body, `id="causes"`):]
+	res := get(t, app, callLink(t, causes, "led to"))
+
+	if res.status != 200 {
+		t.Fatalf("status %d", res.status)
+	}
+	// The call that made it is the speech's, which weighed the offer.
+	for _, want := range []string{"connecting", "applied", "Facts to connect:", "Item: PM speech in Scotland",
+		"C1 (as at 2026-10-21): Andy Burnham made an offer to Holyrood."} {
+		if !strings.Contains(res.body, want) {
+			t.Errorf("the connecting call's page lacks %q:\n%s", want, res.body)
+		}
 	}
 }
 

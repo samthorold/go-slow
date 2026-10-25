@@ -1,9 +1,12 @@
 package editor
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"time"
 )
 
@@ -109,6 +112,30 @@ func (c Call) ended(o Outcome, why error) Call {
 		c.Why = why.Error()
 	}
 	return c
+}
+
+// callNow makes an act's request on m in real time, at now, on the work
+// keyed key, and checks what comes back with check: the call, ended as it
+// came out, and the error that ended it, if one did. An answer check refuses
+// with ErrFailedChecks is Refused; any other error check returns means the
+// answer passed and could not be made ready to write, and is Failed.
+func (e *Editor) callNow(ctx context.Context, m Model, key string, req Request, precedents []int64,
+	now time.Time, check func(Response) error,
+) (Call, error) {
+	call := newCall(req.Act, key, "", modelOf(e.ModelFor, req.Act), req, precedents, now)
+	res, err := m.Complete(ctx, req)
+	call = call.answered(res)
+	if err != nil {
+		err = fmt.Errorf("%s: %w", req.Act, err)
+		return call.ended(Failed, err), err
+	}
+	if err := check(res); err != nil {
+		if errors.Is(err, ErrFailedChecks) {
+			return call.ended(Refused, err), err
+		}
+		return call.ended(Failed, fmt.Errorf("not written: %w", err)), err
+	}
+	return call.ended(Applied, nil), nil
 }
 
 // modelOf is the model the act asks for, by modelFor; empty if there is no

@@ -248,7 +248,7 @@ func (e *Editor) Connecting() BatchAct {
 					return nil, err
 				}
 				jobs = append(jobs, Job{
-					Key:     tc.Item.SourceID + "\n" + tc.Item.EntryID,
+					Key:     itemKey(tc.Item),
 					Request: connectingRequest(tc, others),
 					Apply: func(ctx context.Context, res Response, now time.Time) error {
 						c, err := checkConnecting(tc, others, res)

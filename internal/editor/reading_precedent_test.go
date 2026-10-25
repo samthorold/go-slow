@@ -97,7 +97,7 @@ func TestReadingIsShownNoUndoneFeedback(t *testing.T) {
 	if len(model.sent) != 1 {
 		t.Fatalf("reading called %d times, want once", len(model.sent))
 	}
-	if in := model.sent[0].Input; strings.Contains(in, `"feedback"`) || !strings.Contains(in, "Precedents: none") {
+	if in := model.sent[0].Input; strings.Contains(in, `"feedback"`) || strings.Contains(in, "Precedents") {
 		t.Errorf("the speech's reading is shown undone Feedback:\n%s", in)
 	}
 }
@@ -133,7 +133,7 @@ func TestReadingIsShownNoFeedbackOnFactsFromItemsSharingNoTopicNorFeedbackOtherT
 	if len(model.sent) != 1 {
 		t.Fatalf("reading called %d times, want once", len(model.sent))
 	}
-	if in := model.sent[0].Input; strings.Contains(in, `"feedback"`) || !strings.Contains(in, "Precedents: none") {
+	if in := model.sent[0].Input; strings.Contains(in, `"feedback"`) || strings.Contains(in, "Precedents") {
 		t.Errorf("the speech's reading is shown a precedent it should not be:\n%s", in)
 	}
 }

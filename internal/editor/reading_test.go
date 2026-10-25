@@ -195,6 +195,41 @@ func TestAFactQuotingOnlyTheSummaryOfAnItemWithItsTextIsRefused(t *testing.T) {
 	}
 }
 
+func TestAReadingShownNoPrecedentsIsToldNothingOfThem(t *testing.T) {
+	model := &fakeModel{output: goodReading}
+	if _, err := editor.Read(t.Context(), model, speech); err != nil {
+		t.Fatal(err)
+	}
+
+	r := model.sent[0]
+	if strings.Contains(strings.ToLower(r.Instructions), "precedent") || strings.Contains(r.Input, "Precedents") {
+		t.Errorf("a reading shown no precedents is told of them:\n%s\n---\n%s", r.Instructions, r.Input)
+	}
+}
+
+func TestAReadingShownPrecedentsIsToldOfThemAfterTheSameInstructions(t *testing.T) {
+	without, with := &fakeModel{output: goodReading}, &fakeModel{output: goodReading}
+	if _, err := editor.Read(t.Context(), without, speech); err != nil {
+		t.Fatal(err)
+	}
+	precedent := editor.Precedent{FeedbackID: 1, Kind: "wrong", Fact: "Scotland will get £2 billion.", Quote: "Scotland will get £2 billion."}
+	if _, err := editor.Read(t.Context(), with, speech, precedent); err != nil {
+		t.Fatal(err)
+	}
+
+	base, shown := without.sent[0].Instructions, with.sent[0].Instructions
+	if !strings.HasPrefix(shown, base) || !strings.Contains(shown[len(base):], "precedent") {
+		t.Errorf("the precedent block does not follow the act's own instructions:\n%s", shown)
+	}
+	// A precedent is a case, never a rule: the block restates no standard.
+	if strings.Contains(shown[len(base):], "A Fact is wrong when") {
+		t.Errorf("the precedent block restates what a Fact is:\n%s", shown[len(base):])
+	}
+	if !strings.Contains(with.sent[0].Input, `"feedback"`) {
+		t.Errorf("the precedent is not in the input:\n%s", with.sent[0].Input)
+	}
+}
+
 func TestThereIsNoReadingWithoutAnItem(t *testing.T) {
 	model := &fakeModel{output: goodReading}
 

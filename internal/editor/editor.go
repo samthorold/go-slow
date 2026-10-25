@@ -2,6 +2,7 @@ package editor
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"time"
 )
@@ -44,6 +45,7 @@ type Store interface {
 	// SaveConnecting writes a connecting to the Record, all at once, and
 	// marks its Facts connected at connectedAt.
 	SaveConnecting(ctx context.Context, c Connecting, connectedAt time.Time) error
+	CallKeeper
 }
 
 // Deps are the Editor's dependencies.
@@ -67,7 +69,10 @@ type Deps struct {
 	// agent with tools.
 	SundayReads     SundayStore
 	SundayReadModel Conversation
-	Log             *slog.Logger
+	// ModelFor is the model an act's calls run on, as the model adapter
+	// chooses it, kept with each call; nil leaves it unknown.
+	ModelFor func(act string) string
+	Log      *slog.Logger
 }
 
 // Editor does the editorial work over the Record.
@@ -92,15 +97,20 @@ func (e *Editor) ReadWaiting(ctx context.Context, now time.Time) error {
 		if err != nil {
 			return err
 		}
-		r, err := Read(ctx, e.Model, it, ps...)
-		if err == nil {
-			r, err = resolve(ctx, e.Wikidata, r, it.Published, now)
-		}
+		r, call, err := e.readNow(ctx, it, ps, now)
 		if err != nil {
+			if call != nil {
+				if err := e.Store.KeepCall(ctx, *call); err != nil {
+					return err
+				}
+			}
 			e.Log.ErrorContext(ctx, "reading failed", "source", it.SourceID, "entry", it.EntryID, "error", err)
 			continue
 		}
 		if err := e.Store.SaveReading(ctx, r, now); err != nil {
+			return err
+		}
+		if err := e.Store.KeepCall(ctx, *call); err != nil {
 			return err
 		}
 		e.Log.InfoContext(ctx, "read", "source", it.SourceID, "entry", it.EntryID,
@@ -109,6 +119,41 @@ func (e *Editor) ReadWaiting(ctx context.Context, now time.Time) error {
 	}
 	return nil
 }
+
+// readNow reads an Item in real time, shown the precedents, at now: the
+// reading, ready to write, and its call, ended as it came out. The call is
+// nil only when no request could be made. A reading whose call failed, whose
+// result fails the checks or whose Entities could not be looked up is an
+// error, and its call says which.
+func (e *Editor) readNow(ctx context.Context, it Item, ps []Precedent, now time.Time) (Reading, *Call, error) {
+	req, err := readingRequest(it, ps)
+	if err != nil {
+		return Reading{}, nil, err
+	}
+	call := newCall(req.Act, itemKey(it), "", modelOf(e.ModelFor, req.Act), req, feedbackIDs(ps), now)
+	res, err := e.Model.Complete(ctx, req)
+	call = call.answered(res)
+	if err != nil {
+		err = fmt.Errorf("reading %s: %w", it.EntryID, err)
+		call = call.ended(Failed, err)
+		return Reading{}, &call, err
+	}
+	r, err := checkReading(it, ps, res)
+	if err != nil {
+		call = call.ended(Refused, err)
+		return Reading{}, &call, err
+	}
+	if r, err = resolve(ctx, e.Wikidata, r, it.Published, now); err != nil {
+		call = call.ended(Failed, fmt.Errorf("not written: %w", err))
+		return Reading{}, &call, err
+	}
+	call = call.ended(Applied, nil)
+	return r, &call, nil
+}
+
+// itemKey is the key an act's work on an Item is kept under: its Source and
+// entry, a line apart.
+func itemKey(it Item) string { return it.SourceID + "\n" + it.EntryID }
 
 // PlaceWaiting places every Fact awaiting placing, an Item at a time in the
 // order the Items were published, so a later Fact meets the Stories earlier
@@ -245,6 +290,9 @@ type ReadItem struct {
 	Read   bool
 	ReadAt time.Time
 	Model  string
+	// ReadingCall is the kept call whose reading drew its Facts; zero if
+	// none was kept.
+	ReadingCall int64
 	// Topics are the names of the Topics the check tied the Item to.
 	Topics []string
 	Facts  []Fact

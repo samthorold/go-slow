@@ -41,6 +41,8 @@ type factRow struct {
 	AsAt      string
 	Quote     string
 	Entities  string
+	// Call is the page of the reading call that drew it, if one was kept.
+	Call string
 }
 
 type claimRow struct {
@@ -87,6 +89,7 @@ func (a *app) item(w http.ResponseWriter, r *http.Request) {
 			AsAt:     f.AsAt.Format("2 January 2006"),
 			Quote:    f.Quote,
 			Entities: strings.Join(f.Entities, ", "),
+			Call:     callPath(it.ReadingCall),
 		})
 	}
 	for _, c := range it.Claims {

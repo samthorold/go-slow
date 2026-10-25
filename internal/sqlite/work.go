@@ -34,7 +34,8 @@ func (s *Store) Attempts(ctx context.Context, act, key string) (int, error) {
 // failed first.
 func (s *Store) FailedWork(ctx context.Context) ([]editor.FailedWork, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT w.act, items.source_id, items.entry_id, items.title, w.attempts, w.last_failed_at, w.last_error
+		SELECT w.act, items.source_id, items.entry_id, items.title, w.attempts, w.last_failed_at, w.last_error,
+			coalesce((SELECT max(c.id) FROM model_calls c WHERE c.act = w.act AND c.work_key = w.work_key), 0)
 		FROM work_attempts w JOIN items ON w.work_key = `+itemWorkKey+`
 		WHERE w.failed = 1
 		ORDER BY w.last_failed_at DESC, w.act, w.work_key`)
@@ -46,7 +47,7 @@ func (s *Store) FailedWork(ctx context.Context) ([]editor.FailedWork, error) {
 	for rows.Next() {
 		var f editor.FailedWork
 		var at string
-		if err := rows.Scan(&f.Act, &f.SourceID, &f.EntryID, &f.Title, &f.Attempts, &at, &f.Why); err != nil {
+		if err := rows.Scan(&f.Act, &f.SourceID, &f.EntryID, &f.Title, &f.Attempts, &at, &f.Why, &f.LastCall); err != nil {
 			return nil, fmt.Errorf("failed work: %w", err)
 		}
 		f.LastFailedAt = parseTime(at)

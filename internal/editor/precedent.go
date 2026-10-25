@@ -27,6 +27,15 @@ type Precedent struct {
 	GivenAt time.Time
 }
 
+// feedbackIDs are the ids of the precedents' Feedback, in order.
+func feedbackIDs(ps []Precedent) []int64 {
+	var out []int64
+	for _, p := range ps {
+		out = append(out, p.FeedbackID)
+	}
+	return out
+}
+
 // precedentsShown is the most precedents an act is shown in one call: the
 // most relevant first (sharing the most Entities and Topics with the case),
 // then the most recent. Enough to carry the Owner's judgements on the case's

@@ -8,8 +8,8 @@ RUN go mod download
 COPY . .
 # Pure Go (modernc.org/sqlite needs no cgo), so the binary runs on a static base.
 RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/go-slow ./cmd/go-slow
-# The data directory exists in the image owned by the nonroot user, so a named
-# volume mounted over it starts out writable.
+# The data directory exists in the image owned by the nonroot user, so it is
+# writable when run without a mount; docker compose bind-mounts RECORD_DIR on it.
 RUN mkdir -p /out/data
 
 FROM gcr.io/distroless/static-debian13:nonroot@sha256:18f4cc26c9ffa7f20a359298be7deadac5c607c8e03a02b8119f1a5fc2f82c99

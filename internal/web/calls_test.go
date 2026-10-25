@@ -139,7 +139,8 @@ func TestTheBriefingLinksToTheCallThatWroteIt(t *testing.T) {
 	writeBriefing(t, store, saturday, spoke)
 	app, _ := newAppWithLog(t, saturday, store)
 
-	res := get(t, app, callLink(t, get(t, app, "/briefings/2026-10-24").body, `id="how-written"`))
+	trail := get(t, app, regexp.MustCompile(`id="how-written".*?href="([^"]+)"`).FindStringSubmatch(get(t, app, "/briefings/2026-10-24").body)[1])
+	res := get(t, app, callLink(t, trail.body, `id="writing"`))
 
 	if res.status != 200 {
 		t.Fatalf("status %d", res.status)

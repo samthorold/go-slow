@@ -37,6 +37,18 @@ func schedule(store *sqlite.Store, writer *fakeModel, before ...string) (*editor
 	}), &happened
 }
 
+// readPlaceAndConnect does all the speech's work, so nothing collected
+// awaits an act and the Briefing has nothing to wait for.
+func readPlaceAndConnect(t *testing.T, store *sqlite.Store) {
+	t.Helper()
+	readAndPlace(t, store, &fakeModel{output: startsAStory})
+	ed := editor.New(editor.Deps{Store: store, ConnectingModel: &fakeModel{output: speechRoles},
+		Log: slog.New(slog.DiscardHandler)})
+	if err := ed.ConnectWaiting(t.Context(), saturday); err != nil {
+		t.Fatal(err)
+	}
+}
+
 var (
 	sixFiftyNine = time.Date(2026, time.October, 24, 6, 59, 0, 0, time.UTC)
 	seven        = time.Date(2026, time.October, 24, 7, 0, 0, 0, time.UTC)
@@ -44,7 +56,7 @@ var (
 
 func TestTheBriefingIsWrittenOnceADayAtTheSetTimeAfterTheStepsBeforeIt(t *testing.T) {
 	store := record(t)
-	readAndPlace(t, store, &fakeModel{output: startsAStory})
+	readPlaceAndConnect(t, store)
 	writer := &fakeModel{output: spokeInMotherwell}
 	s, happened := schedule(store, writer, "connecting")
 
@@ -73,7 +85,7 @@ func TestTheBriefingIsWrittenOnceADayAtTheSetTimeAfterTheStepsBeforeIt(t *testin
 
 func TestABriefingThatFailedIsTriedAgainLater(t *testing.T) {
 	store := record(t)
-	readAndPlace(t, store, &fakeModel{output: startsAStory})
+	readPlaceAndConnect(t, store)
 	writer := &fakeModel{err: errors.New("overloaded")}
 	s, happened := schedule(store, writer)
 
@@ -105,7 +117,7 @@ func sundaySchedule(t *testing.T, store *sqlite.Store, agent *fakeAgent) (*edito
 
 func TestTheSundayReadIsWrittenOnSundayAfterTheBriefing(t *testing.T) {
 	store := record(t)
-	readAndPlace(t, store, &fakeModel{output: startsAStory})
+	readPlaceAndConnect(t, store)
 	s, happened := sundaySchedule(t, store, &fakeAgent{turns: []editor.Turn{submits(citesTheSpeech)}})
 	sunday := seven.AddDate(0, 0, 1)
 
@@ -124,7 +136,7 @@ func TestTheSundayReadIsWrittenOnSundayAfterTheBriefing(t *testing.T) {
 
 func TestASundayReadThatFailedIsTriedAgainAFewTimes(t *testing.T) {
 	store := record(t)
-	readAndPlace(t, store, &fakeModel{output: startsAStory})
+	readPlaceAndConnect(t, store)
 	s, happened := sundaySchedule(t, store, &fakeAgent{}) // never submits
 	sunday := seven.AddDate(0, 0, 1)
 

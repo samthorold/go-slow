@@ -91,7 +91,13 @@ type Feedback struct {
 	// it was when the Feedback was given; zero if no Topic ties it.
 	Depth   interest.Depth
 	GivenAt time.Time
+	// UndoneAt is when the Owner undid it, or zero. An undone piece is kept
+	// as given, and fixes the Record no more.
+	UndoneAt time.Time
 }
+
+// Undone reports whether the Owner has undone f.
+func (f Feedback) Undone() bool { return !f.UndoneAt.IsZero() }
 
 // Kept is a piece of Feedback as the Record keeps it, with what it is about
 // named as it stands in the Record: the Story's title, and each Fact's
@@ -133,6 +139,12 @@ type Store interface {
 	// Give keeps f as given and applies e to the Record, all at once,
 	// returning f's id.
 	Give(ctx context.Context, f Feedback, e Effect) (int64, error)
+	// Feedback is the piece with id, as given, reporting whether it is in
+	// the Record.
+	Feedback(ctx context.Context, id int64) (Feedback, bool, error)
+	// Undo marks f undone at at and lifts the marks e made, all at once. A
+	// mark another piece not undone also makes stays.
+	Undo(ctx context.Context, f Feedback, e Effect, at time.Time) error
 }
 
 // About is what the Record holds of what Feedback is about.
@@ -174,6 +186,25 @@ func (s *Service) Give(ctx context.Context, d Draft, now time.Time) (Feedback, E
 	f.Depth = about.Depth
 	f.ID, err = s.store.Give(ctx, f, EffectOf(f))
 	return f, nil, err
+}
+
+// Undo undoes the piece of Feedback with id, at now: it stays kept as
+// given, marked undone with when, and the marks it made on the Record are
+// lifted. Undoing a piece already undone changes nothing. A piece not in
+// the Record is ErrNotInRecord.
+func (s *Service) Undo(ctx context.Context, id int64, now time.Time) (Feedback, error) {
+	f, found, err := s.store.Feedback(ctx, id)
+	if err != nil {
+		return f, err
+	}
+	if !found {
+		return f, ErrNotInRecord
+	}
+	if f.Undone() {
+		return f, nil
+	}
+	f.UndoneAt = now
+	return f, s.store.Undo(ctx, f, EffectOf(f), now)
 }
 
 func validate(d Draft) (Feedback, Errors) {

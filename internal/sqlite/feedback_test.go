@@ -2,6 +2,7 @@ package sqlite_test
 
 import (
 	"path/filepath"
+	"slices"
 	"testing"
 	"time"
 
@@ -80,5 +81,151 @@ func TestTheActsNeverSeeAWithdrawnFact(t *testing.T) {
 	toBrief, err := store.ToBrief(ctx, saturday.AddDate(0, 0, -1), saturday)
 	if err != nil || len(toBrief) != 1 || len(toBrief[0].Today) != 1 || toBrief[0].Today[0].ID != 2 {
 		t.Errorf("the Briefing is given a withdrawn Development: %+v %v", toBrief, err)
+	}
+}
+
+// give gives the Owner's Feedback, returning its id.
+func give(t *testing.T, store *sqlite.Store, d feedback.Draft) int64 {
+	t.Helper()
+	f, errs, err := feedback.New(store).Give(t.Context(), d, saturday)
+	if err != nil || errs != nil {
+		t.Fatalf("give Feedback %+v: %v %v", d, errs, err)
+	}
+	return f.ID
+}
+
+// undo undoes a piece of the Owner's Feedback, an hour after it was given.
+func undo(t *testing.T, store *sqlite.Store, id int64) {
+	t.Helper()
+	if _, err := feedback.New(store).Undo(t.Context(), id, saturday.Add(time.Hour)); err != nil {
+		t.Fatalf("undo Feedback %d: %v", id, err)
+	}
+}
+
+// briefed are the ids of the Facts the Briefing would be given today.
+func briefed(t *testing.T, store *sqlite.Store) []int64 {
+	t.Helper()
+	toBrief, err := store.ToBrief(t.Context(), saturday.AddDate(0, 0, -1), saturday)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var ids []int64
+	for _, tb := range toBrief {
+		for _, d := range tb.Today {
+			ids = append(ids, d.ID)
+		}
+	}
+	return ids
+}
+
+func TestUndoingAWrongFactRestoresItAndKeepsThePieceMarkedUndone(t *testing.T) {
+	store := threeFacts(t)
+	id := give(t, store, feedback.Draft{Kind: "wrong", Level: "fact", Fact: "1"})
+
+	undo(t, store, id)
+
+	if got := briefed(t, store); !slices.Equal(got, []int64{1, 2}) {
+		t.Errorf("the Briefing is given %v, want the undone Fact back with the other: [1 2]", got)
+	}
+	kept, err := store.KeptFeedback(t.Context())
+	if err != nil || len(kept) != 1 {
+		t.Fatalf("the undone piece is not kept: %+v %v", kept, err)
+	}
+	if !kept[0].UndoneAt.Equal(saturday.Add(time.Hour)) || kept[0].Kind != feedback.Wrong || kept[0].FactID != 1 {
+		t.Errorf("the piece is not kept as given, marked undone with when: %+v", kept[0])
+	}
+}
+
+func TestUndoingUnwantedPutsTheStoryOrDevelopmentBackInTheBriefing(t *testing.T) {
+	for _, d := range []feedback.Draft{
+		{Kind: "unwanted", Level: "story", Story: "1"},
+		{Kind: "unwanted", Level: "development", Story: "1", Fact: "1"},
+	} {
+		store := threeFacts(t)
+		id := give(t, store, d)
+		if got := briefed(t, store); slices.Contains(got, 1) {
+			t.Fatalf("%s: the unwanted is still briefed: %v", d.Level, got)
+		}
+
+		undo(t, store, id)
+
+		if got := briefed(t, store); !slices.Equal(got, []int64{1, 2}) {
+			t.Errorf("%s: the Briefing is given %v, want it wanted again: [1 2]", d.Level, got)
+		}
+		st, _, err := store.Story(t.Context(), 1)
+		if err != nil || st.Unwanted || st.Timeline[0].Unwanted {
+			t.Errorf("%s: the Record still marks it unwanted: %+v %v", d.Level, st, err)
+		}
+	}
+}
+
+// timeline are the ids of the Facts on the Story's Timeline, as its page
+// shows it and as the acts see it.
+func timeline(t *testing.T, store *sqlite.Store, story int64) (page, acts []int64) {
+	t.Helper()
+	st, _, err := store.Story(t.Context(), story)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, d := range st.Timeline {
+		page = append(page, d.ID)
+	}
+	seen, err := store.StoriesSharing(t.Context(), []string{"Andy Burnham"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, s := range seen {
+		if s.ID == story {
+			for _, d := range s.Timeline {
+				acts = append(acts, d.ID)
+			}
+		}
+	}
+	return page, acts
+}
+
+func TestUndoingAMissedDevelopmentTakesItOutAndItCanBeAddedAgain(t *testing.T) {
+	store := threeFacts(t)
+	missed := feedback.Draft{Kind: "missed", Level: "development", Story: "1", Fact: "3"}
+	id := give(t, store, missed)
+
+	undo(t, store, id)
+
+	if page, acts := timeline(t, store, 1); !slices.Equal(page, []int64{1, 2}) || !slices.Equal(acts, []int64{1, 2}) {
+		t.Errorf("the undone Development is still added: page %v, acts %v, want [1 2]", page, acts)
+	}
+	give(t, store, missed)
+	if page, _ := timeline(t, store, 1); !slices.Equal(page, []int64{1, 2, 3}) {
+		t.Errorf("giving it again did not add it: %v", page)
+	}
+}
+
+func TestUndoingAMissedStoryTakesItOut(t *testing.T) {
+	store := threeFacts(t)
+	id := give(t, store, feedback.Draft{Kind: "missed", Level: "story", Title: "Travels", Facts: []string{"3"}})
+
+	undo(t, store, id)
+
+	if _, acts := timeline(t, store, 2); len(acts) != 0 {
+		t.Errorf("the acts still see the undone Story: %v", acts)
+	}
+	list, err := store.ListStories(t.Context())
+	if err != nil || len(list) != 1 || list[0].ID != 1 {
+		t.Errorf("the undone Story is still listed: %+v %v", list, err)
+	}
+}
+
+func TestAMarkAnotherPieceAlsoMadeStaysUntilBothAreUndone(t *testing.T) {
+	store := threeFacts(t)
+	first := give(t, store, feedback.Draft{Kind: "wrong", Level: "fact", Fact: "1"})
+	second := give(t, store, feedback.Draft{Kind: "wrong", Level: "fact", Fact: "1"})
+
+	undo(t, store, first)
+	if got := briefed(t, store); !slices.Equal(got, []int64{2}) {
+		t.Errorf("after undoing one of two wrong pieces the Briefing is given %v, want the Fact still withdrawn: [2]", got)
+	}
+	undo(t, store, second)
+	if got := briefed(t, store); !slices.Equal(got, []int64{1, 2}) {
+		t.Errorf("after undoing both the Briefing is given %v, want [1 2]", got)
 	}
 }

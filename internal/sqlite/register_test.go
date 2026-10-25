@@ -36,6 +36,22 @@ func TestTheRegisterCountsFeedbackAsGiven(t *testing.T) {
 	}
 }
 
+func TestTheRegisterDoesNotCountUndoneFeedback(t *testing.T) {
+	store := threeFacts(t)
+	id := give(t, store, feedback.Draft{Kind: "unwanted", Level: "story", Story: "1"})
+	give(t, store, feedback.Draft{Kind: "new to me", Level: "story", Story: "1"})
+	undo(t, store, id)
+
+	r, err := store.RegisterRecord(t.Context(), time.UTC)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(r.Feedback) != 1 || r.Feedback[0].Kind != feedback.NewToMe {
+		t.Errorf("Feedback %+v, want only the piece standing", r.Feedback)
+	}
+}
+
 func TestCommitsAreKeptOnceHoweverOftenTheyAreRecorded(t *testing.T) {
 	store := threeFacts(t)
 	commits := []register.Commit{

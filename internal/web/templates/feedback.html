@@ -14,6 +14,31 @@
 
 {{define "gives"}}{{range .}}{{template "give" .}}{{end}}{{end}}
 
+{{/* kept lists pieces of Feedback as given, each undone with a button, or
+     marked undone with when. An undo re-renders the whole page, since
+     lifting a mark can change several regions of it. What a piece is about
+     was drawn from collected text, and a missed Story's title typed by the
+     Owner: inert. */}}
+{{define "kept"}}
+<ol>
+{{- range .}}
+  <li>
+    <p><strong>{{.Kind}}</strong> on a {{.Level}}:
+      {{- if .About}} {{if .AboutPath}}<a href="{{.AboutPath}}">{{end}}<span hx-disable>{{.About}}</span>{{if .AboutPath}}</a>{{end}}{{end}}
+      {{- if .Typed}} <q hx-disable>{{.Typed}}</q>{{end}}</p>
+    <p><small>Given {{.GivenAt}}
+      {{- if .Briefing}}, on the <a href="{{.BriefPath}}">Briefing for {{.Briefing}}</a>{{end}}
+      {{- if .Depth}}, at {{.Depth}} Depth{{else}}, on nothing a Topic follows{{end}}.</small></p>
+    {{- if .Undone}}
+    <p><strong>Undone {{.Undone}}:</strong> kept as given, it fixes the Record no more.</p>
+    {{- else}}
+    <form class="feedback" hx-put="{{.UndoPath}}" hx-target="body" hx-swap="innerHTML"><button>Undo</button></form>
+    {{- end}}
+  </li>
+{{- end}}
+</ol>
+{{end}}
+
 {{/* missedDevelopment is the form for a Development the Owner says a Story
      missed, chosen from the Facts that share an Entity with it. */}}
 {{define "missedDevelopment"}}

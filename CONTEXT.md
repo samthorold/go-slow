@@ -78,8 +78,8 @@ The person who sets the **Topics** and their **Depths** and gives the **Editor**
 _Avoid_: User, reader (a reader only reads; the **Owner** also steers)
 
 **Feedback**:
-What the **Owner** tells the **Editor** about a **Story**, **Development**, **Fact**, **Connection** or **Assessment**. It is one of four kinds: *missed* (it should be there), *unwanted* (it shouldn't), *wrong* (it is mistaken) or *new to me* (it showed the **Owner** something they hadn't seen).
-_Avoid_: Correction (*new to me* corrects nothing), rating
+What the **Owner** tells the **Editor** about a **Story**, **Development**, **Fact**, **Connection** or **Assessment**. It is one of four kinds: *missed* (it should be there), *unwanted* (it shouldn't), *wrong* (it is mistaken) or *new to me* (it showed the **Owner** something they hadn't seen). A piece the **Owner** takes back is *undone*: still kept, but no longer standing.
+_Avoid_: Correction (*new to me* corrects nothing), rating; deleted or retracted (for undone)
 
 ### Interest
 

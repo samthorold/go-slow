@@ -22,6 +22,9 @@ type Briefings interface {
 	// day one was written or tried, from which a Briefing is owed every day
 	// (empty if none ever was).
 	BriefingDays(ctx context.Context) (written []string, first string, err error)
+	// TakenOutBy are the ids of the Feedback that takes something of the
+	// day's written Briefing out of it.
+	TakenOutBy(ctx context.Context, day string) ([]int64, error)
 }
 
 // briefingsPage is the view model for the list of Briefings: every day
@@ -103,6 +106,12 @@ type briefingPage struct {
 	// MissedStory is the form for a missed Story: what was entered, and why
 	// it failed.
 	MissedStory missedStoryForm
+	// Emptied is whether Feedback took every Story out of the written
+	// Briefing, and TakenOut the Feedback that did.
+	Emptied  bool
+	TakenOut []keptRow
+	// Feedback is the rest of the Feedback given on the Briefing.
+	Feedback []keptRow
 }
 
 type failureRow struct {
@@ -219,6 +228,50 @@ func (a *app) briefingWith(w http.ResponseWriter, r *http.Request, day time.Time
 	}
 	if exists {
 		p.MissedStory = missedStory(p.FeedbackPath, facts, d, errs)
+		if err := a.briefingFeedbackRows(r, &p, b); err != nil {
+			a.serverError(w, r, err)
+			return
+		}
 	}
 	a.renderStatus(w, r, status, briefingTmpl, p)
+}
+
+// briefingFeedbackRows lists, on the written Briefing, the Feedback given on
+// it, each to undo there; and, when Feedback took every Story out, says so,
+// listing the Feedback that did.
+func (a *app) briefingFeedbackRows(r *http.Request, p *briefingPage, b editor.Briefing) error {
+	takenOut, err := a.Briefings.TakenOutBy(r.Context(), b.Day)
+	if err != nil {
+		return err
+	}
+	kept, err := a.Kept.KeptFeedback(r.Context())
+	if err != nil {
+		return err
+	}
+	p.Emptied = len(b.Stories) == 0 && len(takenOut) > 0
+	page := briefingPath(b.Day)
+	for _, k := range kept {
+		switch day, onBriefing := briefingGivenOn(k.Feedback); {
+		case p.Emptied && slices.Contains(takenOut, k.ID):
+			p.TakenOut = append(p.TakenOut, a.keptRow(k, page))
+		case onBriefing && day == b.Day:
+			p.Feedback = append(p.Feedback, a.keptRow(k, page))
+		}
+	}
+	return nil
+}
+
+// undoOnBriefing is an undo from a day's Briefing, which it lands back on.
+func (a *app) undoOnBriefing(w http.ResponseWriter, r *http.Request) {
+	now := a.Now()
+	day, err := time.ParseInLocation(time.DateOnly, r.PathValue("day"), now.Location())
+	if err != nil || day.After(now) {
+		http.NotFound(w, r)
+		return
+	}
+	to := briefingPath(r.PathValue("day"))
+	if r.PathValue("day") == now.Format(time.DateOnly) {
+		to = "/"
+	}
+	a.undo(w, r, to)
 }

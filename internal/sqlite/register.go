@@ -147,7 +147,9 @@ func (s *Store) strings(ctx context.Context, query string) ([]string, error) {
 	return out, rows.Err()
 }
 
-// givenFeedback is every piece of Feedback, as the register counts it.
+// givenFeedback is every piece of Feedback standing, as the register counts
+// it. A piece the Owner undid was a mistake in giving, not a reading of the
+// Editor, so it is not counted.
 func (s *Store) givenFeedback(ctx context.Context) ([]register.Given, error) {
 	// Feedback on a Sunday read or one of its Assessments was given on that
 	// read, for foresight.
@@ -157,6 +159,7 @@ func (s *Store) givenFeedback(ctx context.Context) ([]register.Given, error) {
 			LEFT JOIN assessments a ON a.id = f.assessment_id
 			LEFT JOIN sunday_reads ar ON ar.id = a.read_id
 			LEFT JOIN sunday_reads r ON r.id = f.read_id
+		WHERE f.undone_at IS NULL
 		ORDER BY f.given_at, f.id`)
 	if err != nil {
 		return nil, fmt.Errorf("register: feedback: %w", err)

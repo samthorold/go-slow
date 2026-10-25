@@ -78,6 +78,14 @@
   </ul>
 </section>
 {{- end}}
+
+{{- if .Feedback}}
+
+<section aria-labelledby="your-feedback">
+  <h2 id="your-feedback">Your Feedback on this Story</h2>
+  {{- template "kept" .Feedback}}
+</section>
+{{- end}}
 {{end}}
 
 {{/* fact is a Fact, its date and the Item it was drawn from. */}}

@@ -14,7 +14,7 @@ import (
 // Developments whose Facts share an Entity with tp's Facts, or whose Items
 // share a Topic with tp's Item: those sharing the most Entities and Topics
 // first, then the newest. Feedback on a withdrawn Fact is never one: the
-// acts never see what was withdrawn.
+// acts never see what was withdrawn. Nor is Feedback the Owner undid.
 func (s *Store) PlacingPrecedents(ctx context.Context, tp editor.ToPlace, limit int) ([]editor.Precedent, error) {
 	names, err := json.Marshal(entityNamesOf(tp))
 	if err != nil {
@@ -32,7 +32,7 @@ func (s *Store) PlacingPrecedents(ctx context.Context, tp editor.ToPlace, limit 
 			FROM feedback
 				JOIN facts ON facts.id = feedback.fact_id
 				LEFT JOIN stories ON stories.id = feedback.story_id
-			WHERE feedback.level = 'development' AND facts.withdrawn_by IS NULL)
+			WHERE feedback.level = 'development' AND feedback.undone_at IS NULL AND facts.withdrawn_by IS NULL)
 		WHERE shared > 0
 		ORDER BY shared DESC, given_at DESC, id DESC
 		LIMIT ?4`, string(names), tp.Item.SourceID, tp.Item.EntryID, limit)

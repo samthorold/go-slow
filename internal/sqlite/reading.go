@@ -143,6 +143,9 @@ func (s *Store) SaveReading(ctx context.Context, r editor.Reading, readAt time.T
 		r.SourceID, r.EntryID, formatTime(readAt), r.Model); err != nil {
 		return fmt.Errorf("mark %s read: %w", r.EntryID, err)
 	}
+	if err := keepPrecedents(ctx, tx, "reading", r.SourceID, r.EntryID, r.Precedents, readAt); err != nil {
+		return err
+	}
 	return tx.Commit()
 }
 

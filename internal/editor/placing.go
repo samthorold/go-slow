@@ -448,7 +448,8 @@ func placingInput(tp ToPlace, stories []Story) string {
 			fmt.Fprintf(&b, "  - %s: %s\n", d.AsAt.Format(time.DateOnly), d.Statement)
 		}
 	}
-	precedentsInput(&b, tp.Depth, tp.Precedents)
+	depthInput(&b, tp.Depth)
+	precedentsInput(&b, tp.Precedents, precedentLine)
 	return b.String()
 }
 

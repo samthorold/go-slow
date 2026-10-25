@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"log/slog"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -119,6 +120,17 @@ func placingPrecedentSample(t *testing.T, root, name string, m *sampleModel) sam
 	if err != nil {
 		t.Fatalf("the recorded reading fails its checks: %v", err)
 	}
+	// The reaction's own Fact: the UK government's response to the
+	// agreement. The reading may draw other Facts, such as the agreement
+	// itself, which may start a Story of its own; the property below rests on
+	// this one, so it must be there.
+	i := slices.IndexFunc(reading.Facts, func(f editor.Fact) bool {
+		return strings.Contains(strings.ToLower(f.Statement), "respon")
+	})
+	if i < 0 {
+		t.Fatalf("the reading draws no Fact of the government's response, so placing is not tested on the reaction: %s", joinFacts(reading))
+	}
+	response := reading.Facts[i].Statement
 	if err := store.SaveReading(ctx, reading, saturday); err != nil {
 		t.Fatal(err)
 	}
@@ -160,10 +172,25 @@ func placingPrecedentSample(t *testing.T, root, name string, m *sampleModel) sam
 			notMade("the reaction's Fact %q is a Development in %q", d.Statement, s.Title)
 		}
 	}
+	// No Story placing starts holds the reaction's Fact.
+	started := p.property("no Story placing starts holds the reaction's Fact")
 	stories, err := store.ListStories(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
-	p.holds("no Story is started for the reaction", len(stories) == 1, "placing started a Story for the reaction: %+v", stories)
+	for _, l := range stories {
+		if l.ID == story {
+			continue
+		}
+		s, _, err := store.Story(ctx, l.ID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, d := range s.Timeline {
+			if d.EntryID == it.EntryID && d.Statement == response {
+				started("placing started %q for the reaction's Fact %q", s.Title, response)
+			}
+		}
+	}
 	return sampleResult{passed: true, held: p}
 }

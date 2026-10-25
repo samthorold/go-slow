@@ -1,10 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T10:21:43.909127Z",
+  "request_hash": "25935b204585f541a3519f644cc56162f76db0a33c6107da951c24815c6ddfea",
+  "recorded_at": "2026-10-25T14:20:29.26188Z",
   "usage": {
     "input_tokens": 2329,
-    "output_tokens": 1643
+    "output_tokens": 1732
   },
   "output": {
     "causes": [],
@@ -13,16 +14,16 @@
         "fact": "F1",
         "roles": [
           {
-            "entity": "County Tyrone",
-            "role": "place"
-          },
-          {
             "entity": "The King",
             "role": "actor"
           },
           {
             "entity": "William James Baxter",
             "role": "affected"
+          },
+          {
+            "entity": "County Tyrone",
+            "role": "place"
           }
         ]
       },
@@ -31,7 +32,7 @@
         "roles": [
           {
             "entity": "Sir Robert William Lowry Scott",
-            "role": "actor"
+            "role": "affected"
           }
         ]
       },
@@ -39,12 +40,12 @@
         "fact": "F3",
         "roles": [
           {
-            "entity": "RUC/PSNI",
-            "role": "place"
+            "entity": "William James Baxter",
+            "role": "affected"
           },
           {
-            "entity": "William James Baxter",
-            "role": "actor"
+            "entity": "RUC/PSNI",
+            "role": "place"
           }
         ]
       },
@@ -52,16 +53,16 @@
         "fact": "F4",
         "roles": [
           {
+            "entity": "William James Baxter",
+            "role": "affected"
+          },
+          {
             "entity": "Omagh",
             "role": "place"
           },
           {
             "entity": "RUC/PSNI",
             "role": "place"
-          },
-          {
-            "entity": "William James Baxter",
-            "role": "actor"
           }
         ]
       },
@@ -69,12 +70,12 @@
         "fact": "F5",
         "roles": [
           {
-            "entity": "Omagh bombing",
-            "role": "occasion"
+            "entity": "William James Baxter",
+            "role": "affected"
           },
           {
-            "entity": "William James Baxter",
-            "role": "actor"
+            "entity": "Omagh bombing",
+            "role": "occasion"
           }
         ]
       },
@@ -82,12 +83,12 @@
         "fact": "F6",
         "roles": [
           {
-            "entity": "Omagh Police District Voluntary Welfare Support Group",
+            "entity": "William James Baxter",
             "role": "affected"
           },
           {
-            "entity": "William James Baxter",
-            "role": "actor"
+            "entity": "Omagh Police District Voluntary Welfare Support Group",
+            "role": "place"
           }
         ]
       },
@@ -95,12 +96,12 @@
         "fact": "F7",
         "roles": [
           {
-            "entity": "Newtownstewart Presbyterian Church",
-            "role": "place"
+            "entity": "William James Baxter",
+            "role": "affected"
           },
           {
-            "entity": "William James Baxter",
-            "role": "actor"
+            "entity": "Newtownstewart Presbyterian Church",
+            "role": "place"
           }
         ]
       },
@@ -109,7 +110,7 @@
         "roles": [
           {
             "entity": "William James Baxter",
-            "role": "actor"
+            "role": "affected"
           }
         ]
       },
@@ -117,12 +118,12 @@
         "fact": "F9",
         "roles": [
           {
-            "entity": "County Tyrone",
-            "role": "place"
+            "entity": "William James Baxter",
+            "role": "affected"
           },
           {
-            "entity": "William James Baxter",
-            "role": "actor"
+            "entity": "County Tyrone",
+            "role": "place"
           }
         ]
       },
@@ -130,16 +131,16 @@
         "fact": "F10",
         "roles": [
           {
+            "entity": "William James Baxter",
+            "role": "affected"
+          },
+          {
             "entity": "Newtownstewart",
             "role": "place"
           },
           {
             "entity": "Royal British Legion",
-            "role": "affected"
-          },
-          {
-            "entity": "William James Baxter",
-            "role": "actor"
+            "role": "place"
           }
         ]
       },
@@ -156,12 +157,12 @@
         "fact": "F12",
         "roles": [
           {
-            "entity": "County Tyrone",
-            "role": "place"
+            "entity": "William James Baxter",
+            "role": "affected"
           },
           {
-            "entity": "William James Baxter",
-            "role": "actor"
+            "entity": "County Tyrone",
+            "role": "place"
           }
         ]
       },
@@ -169,12 +170,12 @@
         "fact": "F13",
         "roles": [
           {
-            "entity": "County Tyrone",
-            "role": "place"
+            "entity": "William James Baxter",
+            "role": "affected"
           },
           {
-            "entity": "William James Baxter",
-            "role": "actor"
+            "entity": "County Tyrone",
+            "role": "place"
           }
         ]
       }

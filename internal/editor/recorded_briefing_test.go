@@ -71,15 +71,13 @@ func recordedBriefing(t *testing.T, root string) {
 		if key == "" || name == "" {
 			t.Fatal("recording needs GOSLOW_ANTHROPIC_API_KEY and BRIEFING_MODEL")
 		}
-		model = recorder{claude.New(claude.Options{APIKey: key, Model: name}), &rec}
+		model = recorder{claude.New(claude.Options{APIKey: key, Model: name}), &rec, name}
 	} else {
 		if _, err := os.Stat(path); errors.Is(err, fs.ErrNotExist) {
-			t.Skip("the Briefing has not been recorded yet; record it with: " +
-				"go test -count=1 ./internal/editor -run TestRecordedBriefing -record " +
-				"(GOSLOW_ANTHROPIC_API_KEY and BRIEFING_MODEL set)")
+			t.Skipf("the Briefing has not been recorded yet; record it with: %s", briefingCommand)
 		}
 		rec = kept(t, path)
-		model = replay{rec}
+		model = ownReplay(t, rec, "saturday", briefingCommand)
 	}
 	var logs bytes.Buffer
 	ed := editor.New(editor.Deps{Store: store, Briefings: store, BriefingModel: model, Log: slog.New(slog.NewTextHandler(&logs, nil))})

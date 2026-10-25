@@ -1,10 +1,11 @@
 {
   "act": "briefing",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T10:22:14.453486Z",
+  "request_hash": "bb15d8ece7889ecd7e7d4b9765d488bf3cd24d5d51387506cbf5e7956ba69296",
+  "recorded_at": "2026-10-25T14:20:55.917873Z",
   "usage": {
     "input_tokens": 3144,
-    "output_tokens": 2093
+    "output_tokens": 1970
   },
   "output": {
     "stories": [
@@ -15,7 +16,7 @@
               "D1",
               "D2"
             ],
-            "text": "President Trump announced a reciprocal energy ceasefire between Russia and Ukraine. President Zelenskyy assured the Prime Minister that Ukraine would immediately implement it when a start date is confirmed."
+            "text": "President Trump announced a reciprocal energy ceasefire between Russia and Ukraine. President Zelenskyy assured the Prime Minister that Ukraine would implement it immediately once a start date is confirmed."
           }
         ],
         "story": "S1"
@@ -35,25 +36,18 @@
         "statements": [
           {
             "developments": [
-              "D9",
+              "D9"
+            ],
+            "text": "The UK is delivering £45 million of surface-to-air missiles to Ukraine."
+          },
+          {
+            "developments": [
               "D10"
             ],
-            "text": "The UK is delivering £45 million of surface-to-air missiles to Ukraine. The UK has also committed £1.6 billion to deliver more than 5000 Lightweight Multirole Missiles to Ukraine over the next four years."
+            "text": "The UK has committed £1.6 billion to deliver more than 5000 Lightweight Multirole Missiles to Ukraine over the next four years."
           }
         ],
         "story": "S7"
-      },
-      {
-        "statements": [
-          {
-            "developments": [
-              "D5",
-              "D6"
-            ],
-            "text": "The Prime Minister confirmed in his speech to the United Nations General Assembly the commitment to establish a National Centre for Information Defence. The Foreign Affairs Select Committee recommended the National Centre for Information Defence."
-          }
-        ],
-        "story": "S4"
       },
       {
         "statements": [
@@ -65,6 +59,18 @@
           }
         ],
         "story": "S3"
+      },
+      {
+        "statements": [
+          {
+            "developments": [
+              "D5",
+              "D6"
+            ],
+            "text": "The Prime Minister confirmed in his speech to the United Nations General Assembly the commitment to establish a National Centre for Information Defence. The Foreign Affairs Select Committee recommended the Centre."
+          }
+        ],
+        "story": "S4"
       },
       {
         "statements": [
@@ -95,7 +101,7 @@
               "D11",
               "D12"
             ],
-            "text": "The Derby site will accommodate up to 450 Great British Railways staff. The site of the Great British Railways headquarters was unveiled in Derby on 15 October 2026."
+            "text": "The site of the Great British Railways headquarters was unveiled in Derby on 15 October 2026. It will accommodate up to 450 GBR staff."
           }
         ],
         "story": "S8"
@@ -106,7 +112,7 @@
             "developments": [
               "D13"
             ],
-            "text": "Up to 600 apprentices aged 16 to 21 will enrol over the next 4 years on the rail foundation apprenticeship."
+            "text": "Up to 600 apprentices aged 16 to 21 will enrol over the next four years on the rail foundation apprenticeship."
           }
         ],
         "story": "S9"
@@ -148,24 +154,12 @@
         "statements": [
           {
             "developments": [
-              "D17",
-              "D18"
+              "D19"
             ],
-            "text": "The Prime Minister is to invite Scotland's First Minister to work with him on pushing more power out of Westminster and Holyrood. He will call on the Scottish Government to work with the UK Government through No10 North and the Scotland Office to develop a new model of regional empowerment for Scotland."
+            "text": "The Scottish Government has announced a long-term programme for local government reform."
           }
         ],
         "story": "S14"
-      },
-      {
-        "statements": [
-          {
-            "developments": [
-              "D20"
-            ],
-            "text": "The Scottish Government has agreed to match the UK Government's £10 million to create two defence technical excellence colleges."
-          }
-        ],
-        "story": "S15"
       }
     ]
   }

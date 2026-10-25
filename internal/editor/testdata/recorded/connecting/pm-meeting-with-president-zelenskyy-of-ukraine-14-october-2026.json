@@ -1,18 +1,14 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T10:21:30.522098Z",
+  "request_hash": "fdbb8b2b7fbb640314c08638e7c2c86757495eaa4496ce9d2083353107ab8d89",
+  "recorded_at": "2026-10-25T14:20:16.20235Z",
   "usage": {
     "input_tokens": 3089,
-    "output_tokens": 1328
+    "output_tokens": 1286
   },
   "output": {
-    "causes": [
-      {
-        "cause": "C5",
-        "effect": "F1"
-      }
-    ],
+    "causes": [],
     "facts": [
       {
         "fact": "F1",
@@ -74,15 +70,15 @@
             "role": "actor"
           },
           {
-            "entity": "Volodymyr Zelenskyy",
-            "role": "actor"
-          },
-          {
             "entity": "Ukraine",
             "role": "affected"
           },
           {
             "entity": "United Kingdom",
+            "role": "actor"
+          },
+          {
+            "entity": "Volodymyr Zelenskyy",
             "role": "actor"
           }
         ]

@@ -1,10 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T10:21:35.95036Z",
+  "request_hash": "92f7cf0772beb6cb4192e9935a211a6b00514c956435c67fcb750e6e6b4dd0c5",
+  "recorded_at": "2026-10-25T14:20:21.623358Z",
   "usage": {
     "input_tokens": 2109,
-    "output_tokens": 1056
+    "output_tokens": 1083
   },
   "output": {
     "causes": [],
@@ -13,12 +14,12 @@
         "fact": "F1",
         "roles": [
           {
-            "entity": "Derby",
-            "role": "place"
-          },
-          {
             "entity": "Great British Railways",
             "role": "actor"
+          },
+          {
+            "entity": "Derby",
+            "role": "place"
           }
         ]
       },
@@ -36,7 +37,7 @@
         "roles": [
           {
             "entity": "Great British Railways",
-            "role": "actor"
+            "role": "affected"
           }
         ]
       },

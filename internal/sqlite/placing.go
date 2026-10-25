@@ -126,7 +126,8 @@ func (s *Store) Story(ctx context.Context, id int64) (editor.Story, bool, error)
 	}
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT facts.id, facts.source_id, facts.entry_id, facts.statement, facts.as_at, facts.quote,
-			`+factEntities+`, items.title
+			`+factEntities+`, items.title,
+			developments.withdrawn_by IS NOT NULL, developments.unwanted_by IS NOT NULL
 		FROM developments JOIN facts ON facts.id = developments.fact_id
 			JOIN items USING (source_id, entry_id)
 		WHERE developments.story_id = ?
@@ -138,7 +139,8 @@ func (s *Store) Story(ctx context.Context, id int64) (editor.Story, bool, error)
 	for rows.Next() {
 		var d editor.Development
 		var asAt, ents string
-		if err := rows.Scan(&d.ID, &d.SourceID, &d.EntryID, &d.Statement, &asAt, &d.Quote, &ents, &d.ItemTitle); err != nil {
+		if err := rows.Scan(&d.ID, &d.SourceID, &d.EntryID, &d.Statement, &asAt, &d.Quote, &ents, &d.ItemTitle,
+			&d.Withdrawn, &d.Unwanted); err != nil {
 			return st, false, fmt.Errorf("story %d: %w", id, err)
 		}
 		if err := scanFact(&d.Fact, asAt, ents); err != nil {

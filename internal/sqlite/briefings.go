@@ -220,7 +220,13 @@ func (s *Store) Briefing(ctx context.Context, day string) (editor.Briefing, bool
 			JOIN statement_developments ON statement_developments.statement_id = briefing_statements.id
 			JOIN facts ON facts.id = statement_developments.fact_id
 			JOIN items ON items.source_id = facts.source_id AND items.entry_id = facts.entry_id
-		WHERE briefing_stories.day = ?
+		WHERE briefing_stories.day = ? AND stories.unwanted_by IS NULL
+			-- Feedback takes out of the Briefing every statement that rests
+			-- on a Development withdrawn, or not wanted.
+			AND NOT EXISTS (SELECT 1 FROM statement_developments cited
+				JOIN developments d ON d.story_id = cited.story_id AND d.fact_id = cited.fact_id
+				WHERE cited.statement_id = briefing_statements.id
+					AND (d.withdrawn_by IS NOT NULL OR d.unwanted_by IS NOT NULL))
 		ORDER BY briefing_stories.position, briefing_statements.position, statement_developments.position`, day)
 	if err != nil {
 		return b, false, fmt.Errorf("briefing %s: %w", day, err)

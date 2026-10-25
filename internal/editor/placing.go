@@ -34,6 +34,10 @@ type Story struct {
 type Development struct {
 	Fact
 	ItemTitle string
+	// Withdrawn is set once Feedback said its Fact was wrong, and Unwanted
+	// once the Owner said it should not be in the Briefing. The acts never
+	// see a withdrawn Development; the Record keeps it, marked.
+	Withdrawn, Unwanted bool
 }
 
 // Placing is the result of placing an Item's Facts.

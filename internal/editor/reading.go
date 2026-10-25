@@ -31,7 +31,7 @@ type Entity struct {
 	Name string
 	Kind string
 	// Role is the office or position the Item gives a person, if any, in
-	// full ("Prime Minister of the United Kingdom").
+	// full ("Prime Minister of the United Kingdom"). Only a person has one.
 	Role string
 	// WikidataID and Label are the Wikidata item it matched, if any.
 	WikidataID string
@@ -244,6 +244,13 @@ func checkReading(it Item, precedents []Precedent, res Response) (Reading, error
 			name, role := strings.TrimSpace(e.Name), strings.TrimSpace(e.Role)
 			if name == "" || !slices.Contains(entityKinds, e.Kind) {
 				return nil, failed(it, "an Entity with no name or kind: %+v", e)
+			}
+			if e.Kind != "person" {
+				// Only a person has a role, an office to find them by among
+				// its holders. The model fills the field for other kinds
+				// whenever anything near it describes what an Entity does, so
+				// any other kind's role is dropped here, whatever it writes.
+				role = ""
 			}
 			i, ok := named[name]
 			switch {

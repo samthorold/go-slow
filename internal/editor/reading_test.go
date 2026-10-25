@@ -114,6 +114,35 @@ func TestAnEntityNamedWithTwoRolesKeepsTheFirstGiven(t *testing.T) {
 	}
 }
 
+func TestOnlyAPersonKeepsTheRoleReadingGivesIt(t *testing.T) {
+	output := `{
+  "facts": [
+    {"statement": "Andy Burnham gave a speech at the Labour conference in Motherwell.", "as_at": "2026-10-16",
+     "quote": "to be here in Motherwell", "entities": [
+       {"name": "Andy Burnham", "kind": "person", "role": "Prime Minister of the United Kingdom"},
+       {"name": "Labour Party", "kind": "organisation", "role": "host"},
+       {"name": "Motherwell", "kind": "place", "role": "venue"},
+       {"name": "Labour conference", "kind": "occasion", "role": "setting"}]}
+  ],
+  "claims": []
+}`
+
+	r, err := editor.Read(t.Context(), &fakeModel{output: output}, speech)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := []editor.Entity{
+		{Name: "Andy Burnham", Kind: "person", Role: "Prime Minister of the United Kingdom"},
+		{Name: "Labour Party", Kind: "organisation"},
+		{Name: "Motherwell", Kind: "place"},
+		{Name: "Labour conference", Kind: "occasion"},
+	}
+	if !slices.Equal(r.Entities, want) {
+		t.Errorf("Entities = %+v, want %+v", r.Entities, want)
+	}
+}
+
 func TestReadingKeepsWhoMadeEachClaim(t *testing.T) {
 	r, err := editor.Read(t.Context(), &fakeModel{output: goodReading}, speech)
 	if err != nil {

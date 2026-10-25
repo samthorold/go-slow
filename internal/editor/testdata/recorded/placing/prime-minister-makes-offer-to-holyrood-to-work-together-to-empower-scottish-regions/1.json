@@ -1,11 +1,11 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "request_hash": "1640483e375e72db21a992ceb2ef772bbf4009d33f61895c1043f8656a3b6428",
-  "recorded_at": "2026-10-25T15:11:33.688122Z",
+  "request_hash": "df49445e35b795e4cbf5c0ce0baaeb1b0d20e4d7d494f0c88b2303a03b92734d",
+  "recorded_at": "2026-10-25T23:43:39.209965Z",
   "usage": {
-    "input_tokens": 2499,
-    "output_tokens": 563
+    "input_tokens": 2198,
+    "output_tokens": 465
   },
   "output": {
     "facts": [
@@ -14,9 +14,7 @@
         "fact": "F1"
       },
       {
-        "developments_in": [
-          "N1"
-        ],
+        "developments_in": [],
         "fact": "F2"
       },
       {
@@ -28,16 +26,12 @@
           "N1"
         ],
         "fact": "F4"
-      },
-      {
-        "developments_in": [],
-        "fact": "F5"
       }
     ],
     "new_stories": [
       {
         "ref": "N1",
-        "title": "Power devolution to Scotland's regions and cities"
+        "title": "UK and Scottish Government working relations on devolved powers"
       }
     ]
   }

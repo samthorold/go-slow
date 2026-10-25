@@ -1,11 +1,11 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "request_hash": "28c9bb1e292d9bcd1a813402d2e4bce8b1777fe0a1be2caff0ac69aecf592f70",
-  "recorded_at": "2026-10-25T15:12:15.250134Z",
+  "request_hash": "7b4b892273fb2a25d7480c20425abbcdbcc3c648440629b2f3a549ceaf45b64f",
+  "recorded_at": "2026-10-25T23:44:05.153289Z",
   "usage": {
-    "input_tokens": 3336,
-    "output_tokens": 1164
+    "input_tokens": 2888,
+    "output_tokens": 506
   },
   "output": {
     "facts": [
@@ -26,34 +26,20 @@
         "fact": "F4"
       },
       {
-        "developments_in": [],
-        "fact": "F5"
-      },
-      {
         "developments_in": [
           "N1"
         ],
+        "fact": "F5"
+      },
+      {
+        "developments_in": [],
         "fact": "F6"
-      },
-      {
-        "developments_in": [
-          "S12"
-        ],
-        "fact": "F7"
-      },
-      {
-        "developments_in": [],
-        "fact": "F8"
-      },
-      {
-        "developments_in": [],
-        "fact": "F9"
       }
     ],
     "new_stories": [
       {
         "ref": "N1",
-        "title": "UK-Scotland defence technical education colleges"
+        "title": "Defence technical excellence colleges in Scotland"
       }
     ]
   }

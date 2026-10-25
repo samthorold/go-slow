@@ -1,11 +1,11 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "request_hash": "8acb33da1d46cae4650f6375a89a3f5778e8618252fdfaf6a41f850337ff25d8",
-  "recorded_at": "2026-10-25T15:11:05.622278Z",
+  "request_hash": "320c2deb230fd4329a44773b6849311f0cafc6c73f440b91384bc8a58963836c",
+  "recorded_at": "2026-10-25T23:43:12.172333Z",
   "usage": {
-    "input_tokens": 3042,
-    "output_tokens": 1117
+    "input_tokens": 2729,
+    "output_tokens": 1087
   },
   "output": {
     "facts": [
@@ -17,36 +17,36 @@
       },
       {
         "developments_in": [
-          "N2"
+          "N1"
         ],
         "fact": "F2"
+      },
+      {
+        "developments_in": [],
+        "fact": "F3"
       },
       {
         "developments_in": [
           "N1"
         ],
-        "fact": "F3"
-      },
-      {
-        "developments_in": [
-          "N3"
-        ],
         "fact": "F4"
       },
       {
         "developments_in": [
-          "N4"
+          "N2"
         ],
         "fact": "F5"
       },
       {
         "developments_in": [
-          "N5"
+          "N3"
         ],
         "fact": "F6"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N4"
+        ],
         "fact": "F7"
       },
       {
@@ -54,22 +54,16 @@
         "fact": "F8"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N1"
+        ],
         "fact": "F9"
-      },
-      {
-        "developments_in": [],
-        "fact": "F10"
-      },
-      {
-        "developments_in": [],
-        "fact": "F11"
       }
     ],
     "new_stories": [
       {
         "ref": "N1",
-        "title": "Great British Railways headquarters"
+        "title": "Great British Railways headquarters in Derby"
       },
       {
         "ref": "N2",
@@ -77,15 +71,11 @@
       },
       {
         "ref": "N3",
-        "title": "Rail fares policy"
+        "title": "Rail fares under public ownership"
       },
       {
         "ref": "N4",
-        "title": "Rail network capacity"
-      },
-      {
-        "ref": "N5",
-        "title": "Northern rail fleet investment"
+        "title": "New rolling stock fleet for the north"
       }
     ]
   }

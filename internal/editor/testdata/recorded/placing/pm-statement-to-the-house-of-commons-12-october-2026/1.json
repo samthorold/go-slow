@@ -1,11 +1,11 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "request_hash": "1a47c1fb04752e742e28d1bb6d2f8756da537f1105ec0211a6951b94f8c372e8",
-  "recorded_at": "2026-10-25T15:09:10.715433Z",
+  "request_hash": "976e2225f0ffec40244d0a4ee86255b5733a7c5fe0e43dd70ff5a776c2811149",
+  "recorded_at": "2026-10-25T23:41:12.980209Z",
   "usage": {
-    "input_tokens": 4046,
-    "output_tokens": 1793
+    "input_tokens": 3894,
+    "output_tokens": 2076
   },
   "output": {
     "facts": [
@@ -22,46 +22,44 @@
         "fact": "F3"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N1"
+        ],
         "fact": "F4"
       },
       {
         "developments_in": [
-          "N1"
+          "S1"
         ],
         "fact": "F5"
       },
       {
-        "developments_in": [
-          "N1"
-        ],
-        "fact": "F6"
-      },
-      {
-        "developments_in": [
-          "N2"
-        ],
-        "fact": "F7"
-      },
-      {
         "developments_in": [],
-        "fact": "F8"
+        "fact": "F6"
       },
       {
         "developments_in": [
           "N3"
         ],
-        "fact": "F9"
+        "fact": "F7"
       },
       {
         "developments_in": [
-          "N4"
+          "N3"
         ],
+        "fact": "F8"
+      },
+      {
+        "developments_in": [],
+        "fact": "F9"
+      },
+      {
+        "developments_in": [],
         "fact": "F10"
       },
       {
         "developments_in": [
-          "N4"
+          "N2"
         ],
         "fact": "F11"
       },
@@ -70,9 +68,7 @@
         "fact": "F12"
       },
       {
-        "developments_in": [
-          "N5"
-        ],
+        "developments_in": [],
         "fact": "F13"
       },
       {
@@ -80,7 +76,9 @@
         "fact": "F14"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N4"
+        ],
         "fact": "F15"
       },
       {
@@ -88,52 +86,26 @@
         "fact": "F16"
       },
       {
-        "developments_in": [
-          "N6"
-        ],
+        "developments_in": [],
         "fact": "F17"
-      },
-      {
-        "developments_in": [
-          "N7"
-        ],
-        "fact": "F18"
-      },
-      {
-        "developments_in": [
-          "N7"
-        ],
-        "fact": "F19"
       }
     ],
     "new_stories": [
       {
         "ref": "N1",
-        "title": "Russia-Ukraine energy ceasefire"
+        "title": "UK sanctions on Russia"
       },
       {
         "ref": "N2",
-        "title": "UK sanctions on Russia's oil sector"
+        "title": "UK military deployments to the Middle East"
       },
       {
         "ref": "N3",
-        "title": "UK-Germany partnership on hybrid threats"
+        "title": "UK response to hybrid threats"
       },
       {
         "ref": "N4",
-        "title": "National Centre for Information Defence"
-      },
-      {
-        "ref": "N5",
-        "title": "UK air defence deployment to Saudi Arabia"
-      },
-      {
-        "ref": "N6",
-        "title": "UK-EU summit"
-      },
-      {
-        "ref": "N7",
-        "title": "UK G20 presidency"
+        "title": "UK–EU summit"
       }
     ]
   }

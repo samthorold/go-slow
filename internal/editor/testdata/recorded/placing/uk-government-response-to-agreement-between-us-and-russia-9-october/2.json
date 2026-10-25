@@ -1,11 +1,11 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "request_hash": "9fc4733073d1e44bb90b62300fd2990087d9c28911982a64bb300a080df0bb1d",
-  "recorded_at": "2026-10-25T15:08:55.865485Z",
+  "request_hash": "47eacc51e7245026e487a53d1b08cdb0bb309d822bb99059e881da1687db8bcb",
+  "recorded_at": "2026-10-25T23:40:57.108498Z",
   "usage": {
-    "input_tokens": 2025,
-    "output_tokens": 210
+    "input_tokens": 1771,
+    "output_tokens": 226
   },
   "output": {
     "facts": [
@@ -14,18 +14,17 @@
         "fact": "F1"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N1"
+        ],
         "fact": "F2"
-      },
-      {
-        "developments_in": [],
-        "fact": "F3"
-      },
-      {
-        "developments_in": [],
-        "fact": "F4"
       }
     ],
-    "new_stories": []
+    "new_stories": [
+      {
+        "ref": "N1",
+        "title": "US–Russia agreements"
+      }
+    ]
   }
 }

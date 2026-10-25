@@ -1,11 +1,11 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "request_hash": "4791009c4dd2d028cb42d40a99740a8129415cd0844c98abdcea797394c02afb",
-  "recorded_at": "2026-10-25T15:10:16.147275Z",
+  "request_hash": "00f4f69f91f8dbac9c0e1bf18d13b4863da5fe0e44c5254b58e46e563d8b90fd",
+  "recorded_at": "2026-10-25T23:42:18.722424Z",
   "usage": {
-    "input_tokens": 2936,
-    "output_tokens": 936
+    "input_tokens": 2815,
+    "output_tokens": 1106
   },
   "output": {
     "facts": [
@@ -14,7 +14,9 @@
         "fact": "F1"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N1"
+        ],
         "fact": "F2"
       },
       {
@@ -24,9 +26,7 @@
         "fact": "F3"
       },
       {
-        "developments_in": [
-          "N1"
-        ],
+        "developments_in": [],
         "fact": "F4"
       },
       {
@@ -38,20 +38,14 @@
         "fact": "F6"
       },
       {
-        "developments_in": [
-          "N1"
-        ],
-        "fact": "F7"
-      },
-      {
         "developments_in": [],
-        "fact": "F8"
+        "fact": "F7"
       }
     ],
     "new_stories": [
       {
         "ref": "N1",
-        "title": "UK support for Ukraine"
+        "title": "UK military and financial support for Ukraine"
       }
     ]
   }

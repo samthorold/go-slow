@@ -1,10 +1,10 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T00:18:12.026224Z",
+  "recorded_at": "2026-10-25T01:10:11.554904Z",
   "usage": {
-    "input_tokens": 3098,
-    "output_tokens": 1857
+    "input_tokens": 3541,
+    "output_tokens": 1705
   },
   "output": {
     "facts": [
@@ -73,7 +73,9 @@
         "fact": "F13"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N6"
+        ],
         "fact": "F14"
       },
       {
@@ -88,7 +90,7 @@
     "new_stories": [
       {
         "ref": "N1",
-        "title": "Russia-Ukraine energy ceasefire"
+        "title": "Energy ceasefire in the war in Ukraine"
       },
       {
         "ref": "N2",
@@ -104,7 +106,11 @@
       },
       {
         "ref": "N5",
-        "title": "UK response to hybrid threats"
+        "title": "UK–Germany cooperation on hybrid threats"
+      },
+      {
+        "ref": "N6",
+        "title": "UK information defence capability"
       }
     ]
   }

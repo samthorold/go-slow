@@ -1,16 +1,20 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T00:37:20.525754Z",
+  "recorded_at": "2026-10-25T01:11:42.415519Z",
   "usage": {
     "input_tokens": 3919,
-    "output_tokens": 2580
+    "output_tokens": 2458
   },
   "output": {
     "causes": [
       {
         "cause": "F2",
         "effect": "F9"
+      },
+      {
+        "cause": "F5",
+        "effect": "F6"
       }
     ],
     "facts": [
@@ -165,7 +169,7 @@
         "roles": [
           {
             "entity": "Andy Burnham",
-            "role": "affected"
+            "role": "actor"
           },
           {
             "entity": "Leigh",
@@ -178,7 +182,7 @@
         "roles": [
           {
             "entity": "Andy Burnham",
-            "role": "affected"
+            "role": "actor"
           },
           {
             "entity": "Motherwell",
@@ -213,7 +217,7 @@
         "roles": [
           {
             "entity": "Andy Burnham",
-            "role": "affected"
+            "role": "actor"
           },
           {
             "entity": "Scottish Parliament",
@@ -226,7 +230,7 @@
         "roles": [
           {
             "entity": "Andy Burnham",
-            "role": "affected"
+            "role": "actor"
           },
           {
             "entity": "Chemify",

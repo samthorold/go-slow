@@ -53,6 +53,41 @@ func (s *Store) PlacingPrecedents(ctx context.Context, tp editor.ToPlace, limit 
 	return out, rows.Err()
 }
 
+// ReadingPrecedents are at most limit pieces of the Owner's Feedback that a
+// Fact was wrong, on Facts drawn from Items sharing a Topic with it: those
+// sharing the most Topics first, then the newest. An Item's Entities are
+// known only once it is read, so a Topic is all reading can be matched by.
+// The Facts are withdrawn, by that Feedback; they are shown as what the
+// Editor got wrong, never as part of the Record.
+func (s *Store) ReadingPrecedents(ctx context.Context, it editor.Item, limit int) ([]editor.Precedent, error) {
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT id, kind, depth, given_at, statement, quote FROM (
+			SELECT feedback.id, feedback.kind, feedback.depth, feedback.given_at, facts.statement, facts.quote,
+				(SELECT count(*) FROM item_topics theirs JOIN item_topics mine ON mine.topic_id = theirs.topic_id
+					WHERE theirs.source_id = facts.source_id AND theirs.entry_id = facts.entry_id
+						AND mine.source_id = ?1 AND mine.entry_id = ?2) AS shared
+			FROM feedback JOIN facts ON facts.id = feedback.fact_id
+			WHERE feedback.kind = 'wrong' AND feedback.level = 'fact')
+		WHERE shared > 0
+		ORDER BY shared DESC, given_at DESC, id DESC
+		LIMIT ?3`, it.SourceID, it.EntryID, limit)
+	if err != nil {
+		return nil, fmt.Errorf("reading precedents: %w", err)
+	}
+	defer func() { _ = rows.Close() }()
+	var out []editor.Precedent
+	for rows.Next() {
+		var p editor.Precedent
+		var at string
+		if err := rows.Scan(&p.FeedbackID, &p.Kind, &p.Depth, &at, &p.Fact, &p.Quote); err != nil {
+			return nil, fmt.Errorf("reading precedents: %w", err)
+		}
+		p.GivenAt = parseTime(at)
+		out = append(out, p)
+	}
+	return out, rows.Err()
+}
+
 // keepPrecedents keeps, with an act's result on an Item, the Feedback it was
 // shown as precedent, in the order shown.
 func keepPrecedents(ctx context.Context, tx *sql.Tx, act, sourceID, entryID string, feedbackIDs []int64, at time.Time) error {

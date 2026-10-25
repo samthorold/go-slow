@@ -11,6 +11,10 @@ type Store interface {
 	// ItemsToRead are the Items awaiting reading: tied to a Topic by the
 	// lazy-reading check, and not yet read.
 	ItemsToRead(ctx context.Context) ([]Item, error)
+	// ReadingPrecedents are at most limit pieces of the Owner's Feedback
+	// that a Fact was wrong, on Facts from Items sharing a Topic with it:
+	// those sharing the most Topics first, then the newest.
+	ReadingPrecedents(ctx context.Context, it Item, limit int) ([]Precedent, error)
 	// SaveReading writes a reading to the Record, all at once, and marks
 	// its Item read at readAt.
 	SaveReading(ctx context.Context, r Reading, readAt time.Time) error
@@ -84,7 +88,11 @@ func (e *Editor) ReadWaiting(ctx context.Context, now time.Time) error {
 		return err
 	}
 	for _, it := range items {
-		r, err := Read(ctx, e.Model, it)
+		ps, err := e.Store.ReadingPrecedents(ctx, it, precedentsShown)
+		if err != nil {
+			return err
+		}
+		r, err := Read(ctx, e.Model, it, ps...)
 		if err == nil {
 			r, err = resolve(ctx, e.Wikidata, r, it.Published, now)
 		}
@@ -203,8 +211,8 @@ type StoryListing struct {
 // nothing either and is an error like the Record's: in a batch, the batch
 // stays pending and its results are applied once Wikidata answers, with no
 // new model call.
-func (e *Editor) keep(ctx context.Context, it Item, res Response, now time.Time) error {
-	r, err := checkReading(it, res)
+func (e *Editor) keep(ctx context.Context, it Item, precedents []Precedent, res Response, now time.Time) error {
+	r, err := checkReading(it, precedents, res)
 	if err != nil {
 		return err
 	}

@@ -38,6 +38,24 @@
   </ul>
 </section>
 
+<section aria-labelledby="failed">
+  <h2 id="failed">Failed work</h2>
+  {{- if not .Failed}}
+  <p>No work has failed.</p>
+  {{- else}}
+  {{/* The reasons can quote what a model answered: inert, like collected text. */}}
+  <p>Each failed every attempt and is no longer tried. Once the cause is fixed, take an act's work up again with the <code>retry</code> admin command.</p>
+  <ul>
+  {{- range .Failed}}
+    <li>{{.Act}} <a href="{{.Page}}" hx-disable>{{.Title}}</a>: failed {{.Attempts}} times, last {{.When}}
+      <p hx-disable><small>{{.Why}}</small></p>
+      <p><small><code>retry {{.Act}}</code></small></p>
+    </li>
+  {{- end}}
+  </ul>
+  {{- end}}
+</section>
+
 <section aria-labelledby="upcoming">
   <h2 id="upcoming">Upcoming</h2>
   {{- if not .Upcoming}}

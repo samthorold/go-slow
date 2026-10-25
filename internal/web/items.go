@@ -8,11 +8,23 @@ import (
 )
 
 // itemsPage is the view model for the Items page: what has been collected,
-// and whether each Source has gone quiet.
+// whether each Source has gone quiet, and the acts' work on Items that has
+// failed.
 type itemsPage struct {
 	Sources  []sourceRow
+	Failed   []failedRow
 	Upcoming []itemRow
 	Items    []itemRow
+}
+
+// failedRow is an act's work on an Item that failed every attempt.
+type failedRow struct {
+	Act      string
+	Title    string
+	Page     string
+	Attempts int
+	When     string
+	Why      string
 }
 
 type sourceRow struct {
@@ -61,7 +73,19 @@ func (a *app) items(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	failed, err := a.Items.FailedWork(r.Context())
+	if err != nil {
+		a.serverError(w, r, err)
+		return
+	}
+
 	var p itemsPage
+	for _, f := range failed {
+		p.Failed = append(p.Failed, failedRow{
+			Act: f.Act, Title: f.Title, Page: itemPath(f.SourceID, f.EntryID),
+			Attempts: f.Attempts, When: when(f.LastFailedAt, now.Location()), Why: f.Why,
+		})
+	}
 	for _, s := range statuses {
 		p.Sources = append(p.Sources, sourceRow{
 			Name:   s.Name,

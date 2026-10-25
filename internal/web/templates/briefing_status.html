@@ -1,0 +1,11 @@
+{{/* The day's Briefing status: the swap target the day's page polls while
+     the Briefing is being written, re-polling only while it is. */}}
+{{define "briefingStatus"}}
+{{- if .Written}}
+<p id="briefing-status">The Briefing is written: <a href="{{.BriefingPath}}">read it</a>.</p>
+{{- else if .Polled}}
+<p id="briefing-status" hx-get="{{.Path}}" hx-trigger="every 30s" hx-target="this" hx-swap="outerHTML">There is no Briefing yet: it is being written, once what was collected before it is read, placed and connected.</p>
+{{- else}}
+<p id="briefing-status">There is no Briefing yet.</p>
+{{- end}}
+{{- end}}

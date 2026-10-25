@@ -137,17 +137,25 @@ func run(log *slog.Logger) error {
 	defer ticker.Stop()
 	collectCtx, stopCollecting := context.WithCancel(ctx)
 	collected := make(chan struct{})
+	// firstRun closes once the start's Collection run has ended, so the
+	// Briefing waits for what it collected (system design: go-slow runs
+	// when the Owner starts it).
+	firstRun := make(chan struct{})
 	go func() {
 		defer close(collected)
-		collector.RunOn(collectCtx, ticker.C, time.Now)
+		collector.Run(collectCtx, time.Now())
+		close(firstRun)
+		collector.RunEvery(collectCtx, ticker.C, time.Now)
 	}()
 	// Before the store closes: stop Collection and wait for its run to end.
 	defer func() { stopCollecting(); <-collected }()
 
 	// The Briefing is written in real time at the set time, on its own
-	// clock, checked every minute. Just before it is written, connecting
-	// runs again over the day's Facts. On Sundays the Sunday read is
-	// written just after it.
+	// clock, checked every minute from the end of the start's Collection
+	// run. Past the set time it waits for the work collected before it to
+	// be done, up to editor.BriefingWait. Just before it is written,
+	// connecting runs again over the day's Facts. On Sundays the Sunday
+	// read is written just after it.
 	schedule := editor.NewSchedule(editor.ScheduleDeps{
 		Store:      store,
 		At:         cfg.BriefingAt,
@@ -162,6 +170,11 @@ func run(log *slog.Logger) error {
 	briefed := make(chan struct{})
 	go func() {
 		defer close(briefed)
+		select {
+		case <-firstRun:
+		case <-briefCtx.Done():
+			return
+		}
 		schedule.RunOn(briefCtx, minutes.C, time.Now)
 	}()
 	defer func() { stopBriefing(); <-briefed }()

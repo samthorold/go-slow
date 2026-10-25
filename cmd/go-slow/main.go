@@ -66,11 +66,12 @@ func run(log *slog.Logger) error {
 	}
 	// The Topics and the lazy-reading check: plain code, no model adapter.
 	topics := interest.New(store)
-	// The Editor, reading Items on the model the config names.
+	// The Editor, each act on the model the config names for it.
 	ed := editor.New(editor.Deps{
-		Store: store,
-		Model: claude.New(claude.Options{APIKey: string(cfg.AnthropicAPIKey), Model: cfg.ReadingModel}),
-		Log:   log,
+		Store:   store,
+		Model:   claude.New(claude.Options{APIKey: string(cfg.AnthropicAPIKey), Model: cfg.ReadingModel}),
+		Placing: claude.New(claude.Options{APIKey: string(cfg.AnthropicAPIKey), Model: cfg.PlacingModel}),
+		Log:     log,
 	})
 	collector := collect.New(collect.Deps{
 		Sources: sources,
@@ -83,6 +84,7 @@ func run(log *slog.Logger) error {
 		Store: store,
 		Check: topics,
 		Read:  ed,
+		Place: ed,
 		Log:   log,
 	})
 	// The timetable runs inside the app process, stopping with it.
@@ -102,7 +104,8 @@ func run(log *slog.Logger) error {
 		Items:     store,
 		Readings:  store,
 		Topics:    topics,
-		Now:       time.Now,
+		Stories:   store,
+		Now:      time.Now,
 		Log:       log,
 	})
 

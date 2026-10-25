@@ -24,6 +24,7 @@ func TestConfigIsReadFromTheEnvironment(t *testing.T) {
 		"COLLECTION_CONTACT":       "owner@example.org",
 		"COLLECTION_INTERVAL":      "15m",
 		"READING_MODEL":            "claude-haiku-5-5",
+		"PLACING_MODEL":            "claude-sonnet-5-5",
 		"GOSLOW_ANTHROPIC_API_KEY": "sk-test",
 	}))
 	if err != nil {
@@ -36,6 +37,7 @@ func TestConfigIsReadFromTheEnvironment(t *testing.T) {
 		CollectionContact:  "owner@example.org",
 		CollectionInterval: 15 * time.Minute,
 		ReadingModel:       "claude-haiku-5-5",
+		PlacingModel:       "claude-sonnet-5-5",
 		AnthropicAPIKey:    "sk-test",
 	}
 	if cfg != want {
@@ -49,7 +51,7 @@ func TestMissingVariablesAreAllNamed(t *testing.T) {
 	if err == nil {
 		t.Fatal("Load succeeded with nothing set")
 	}
-	for _, name := range []string{"PORT", "DATABASE_PATH", "COLLECTION_CONTACT", "COLLECTION_INTERVAL", "READING_MODEL", "GOSLOW_ANTHROPIC_API_KEY"} {
+	for _, name := range []string{"PORT", "DATABASE_PATH", "COLLECTION_CONTACT", "COLLECTION_INTERVAL", "READING_MODEL", "PLACING_MODEL", "GOSLOW_ANTHROPIC_API_KEY"} {
 		if !strings.Contains(err.Error(), name) {
 			t.Errorf("error %q does not name %s", err, name)
 		}
@@ -85,19 +87,22 @@ func valid() map[string]string {
 		"COLLECTION_CONTACT":       "owner@example.org",
 		"COLLECTION_INTERVAL":      "15m",
 		"READING_MODEL":            "claude-haiku-5-5",
+		"PLACING_MODEL":            "claude-sonnet-5-5",
 		"GOSLOW_ANTHROPIC_API_KEY": "sk-test",
 	}
 }
 
-func TestTheReadingModelMustBeAClaudeModel(t *testing.T) {
+func TestEachActsModelMustBeAClaudeModel(t *testing.T) {
 	// Only the Claude adapter exists yet; another provider's model would be
-	// sent to Anthropic's API and fail on every reading.
-	vars := valid()
-	vars["READING_MODEL"] = "glm-5.3-flash"
-	_, err := config.Load(env(vars))
+	// sent to Anthropic's API and fail on every call.
+	for _, name := range []string{"READING_MODEL", "PLACING_MODEL"} {
+		vars := valid()
+		vars[name] = "glm-5.3-flash"
+		_, err := config.Load(env(vars))
 
-	if err == nil || !strings.Contains(err.Error(), "READING_MODEL") {
-		t.Errorf("Load error = %v, want one naming READING_MODEL", err)
+		if err == nil || !strings.Contains(err.Error(), name) {
+			t.Errorf("Load error = %v, want one naming %s", err, name)
+		}
 	}
 }
 

@@ -253,6 +253,31 @@ func TestACollectionRunReadsTheItemsAwaitingReadingAfterTheCheck(t *testing.T) {
 	}
 }
 
+// editorAll stands in for the Editor: it records the acts it ran, in order.
+type editorAll struct{ acts []string }
+
+func (e *editorAll) ReadWaiting(context.Context, time.Time) error {
+	e.acts = append(e.acts, "read")
+	return nil
+}
+
+func (e *editorAll) PlaceWaiting(context.Context, time.Time) error {
+	e.acts = append(e.acts, "place")
+	return nil
+}
+
+func TestACollectionRunPlacesTheFactsAwaitingPlacingAfterReading(t *testing.T) {
+	f := newFixture(t, feedV1, "")
+	ed := &editorAll{}
+	f.collector.Read, f.collector.Place = ed, ed
+
+	f.collector.Run(t.Context(), now)
+
+	if !slices.Equal(ed.acts, []string{"read", "place"}) {
+		t.Errorf("acts run = %v, want reading then placing", ed.acts)
+	}
+}
+
 func TestRunningCollectionAgainStoresNoDuplicates(t *testing.T) {
 	// No ETag: the server answers in full every time.
 	f := newFixture(t, feedV1, "")

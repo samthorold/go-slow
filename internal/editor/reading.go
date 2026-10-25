@@ -35,6 +35,8 @@ var entityKinds = []string{"person", "organisation", "place", "occasion"}
 // Fact is a proposition drawn from an Item, holding as at a date. It carries
 // the Item it was drawn from.
 type Fact struct {
+	// ID is the Fact's in the Record, once it is kept there.
+	ID        int64
 	SourceID  string
 	EntryID   string
 	Statement string

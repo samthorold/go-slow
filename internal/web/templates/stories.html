@@ -1,0 +1,16 @@
+{{define "title"}}Stories{{end}}
+
+{{define "content"}}
+<h1>Stories</h1>
+<p><a href="/items">Items</a></p>
+{{- if not .Stories}}
+<p>No Stories yet: placing starts one when a Fact moves on a subject no Story follows.</p>
+{{- end}}
+{{/* Story titles are the Editor's words: inert, with hx-disable on the
+     element holding each, so the boosted link around it still works. */}}
+<ul>
+{{- range .Stories}}
+  <li><a href="{{.Path}}"><span hx-disable>{{.Title}}</span></a> <small>{{.Developments}} Development{{if ne .Developments 1}}s{{end}}{{if .Latest}}, latest {{.Latest}}{{end}}</small></li>
+{{- end}}
+</ul>
+{{end}}

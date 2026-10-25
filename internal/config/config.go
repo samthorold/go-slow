@@ -26,6 +26,9 @@ type Config struct {
 	// ReadingModel is the Claude model the Editor reads Items with
 	// (READING_MODEL, such as claude-haiku-5-5).
 	ReadingModel string
+	// PlacingModel is the Claude model the Editor places Facts with
+	// (PLACING_MODEL, such as claude-haiku-5-5).
+	PlacingModel string
 	// AnthropicAPIKey is the key for Anthropic's API (GOSLOW_ANTHROPIC_API_KEY).
 	AnthropicAPIKey Secret
 }
@@ -52,7 +55,8 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 	}
 	port, dbPath := get("PORT"), get("DATABASE_PATH")
 	contact, interval := get("COLLECTION_CONTACT"), get("COLLECTION_INTERVAL")
-	model, key := get("READING_MODEL"), get("GOSLOW_ANTHROPIC_API_KEY")
+	model, placing := get("READING_MODEL"), get("PLACING_MODEL")
+	key := get("GOSLOW_ANTHROPIC_API_KEY")
 	if len(missing) > 0 {
 		return Config{}, fmt.Errorf("missing environment variables: %s", strings.Join(missing, ", "))
 	}
@@ -66,9 +70,11 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 		return Config{}, errors.New("COLLECTION_INTERVAL must be a positive duration such as 15m, got " + strconv.Quote(interval))
 	}
 	// Only the Claude adapter exists yet (open-weight models come through
-	// OpenRouter later), so any other model would fail on every reading.
-	if !strings.HasPrefix(model, "claude-") {
-		return Config{}, errors.New("READING_MODEL must be a Claude model such as claude-haiku-5-5, got " + strconv.Quote(model))
+	// OpenRouter later), so any other model would fail on every call.
+	for _, v := range [][2]string{{"READING_MODEL", model}, {"PLACING_MODEL", placing}} {
+		if !strings.HasPrefix(v[1], "claude-") {
+			return Config{}, errors.New(v[0] + " must be a Claude model such as claude-haiku-5-5, got " + strconv.Quote(v[1]))
+		}
 	}
 	return Config{
 		Port:               n,
@@ -76,6 +82,7 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 		CollectionContact:  contact,
 		CollectionInterval: every,
 		ReadingModel:       model,
+		PlacingModel:       placing,
 		AnthropicAPIKey:    Secret(key),
 	}, nil
 }

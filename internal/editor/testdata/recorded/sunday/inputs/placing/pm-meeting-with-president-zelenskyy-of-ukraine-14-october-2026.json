@@ -1,0 +1,37 @@
+{
+  "act": "placing",
+  "model": "claude-haiku-5-5",
+  "recorded_at": "2026-10-25T01:10:21.721716Z",
+  "usage": {
+    "input_tokens": 2144,
+    "output_tokens": 500
+  },
+  "output": {
+    "facts": [
+      {
+        "developments_in": [],
+        "fact": "F1"
+      },
+      {
+        "developments_in": [],
+        "fact": "F2"
+      },
+      {
+        "developments_in": [
+          "N1"
+        ],
+        "fact": "F3"
+      },
+      {
+        "developments_in": [],
+        "fact": "F4"
+      }
+    ],
+    "new_stories": [
+      {
+        "ref": "N1",
+        "title": "UK military support for Ukraine"
+      }
+    ]
+  }
+}

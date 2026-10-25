@@ -1,59 +1,173 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T00:07:34.324758Z",
+  "recorded_at": "2026-10-25T09:43:05.992099Z",
   "usage": {
-    "input_tokens": 4209,
-    "output_tokens": 11775
+    "input_tokens": 4652,
+    "output_tokens": 7359
   },
   "output": {
     "claims": [
       {
         "entities": [
-          "Russia"
+          {
+            "kind": "person",
+            "name": "Andy Burnham",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "United Nations General Assembly",
+            "role": ""
+          }
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "Britain is back and can be relied upon as a consistent and stable partner",
+        "statement": "Britain is back and can be relied upon as a consistent and stable partner in an uncertain world."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Russia",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Ukraine",
+            "role": ""
+          }
         ],
         "made_by": "Andy Burnham",
         "quote": "Russian strikes have intensified even further",
-        "statement": "Russian strikes have intensified even further in the three weeks since the meeting with President Zelenskyy."
+        "statement": "Russian strikes have intensified even further in the three weeks since the New York meeting."
       },
       {
         "entities": [
-          "President Zelenskyy",
-          "Ukraine"
-        ],
-        "made_by": "President Zelenskyy",
-        "quote": "he described the step change from Russia",
-        "statement": "President Zelenskyy described a step change from Russia, including daylight attacks intended to break Ukraine's will."
-      },
-      {
-        "entities": [
-          "Andy Burnham",
-          "Russia"
-        ],
-        "made_by": "Andy Burnham",
-        "quote": "I can tell you, Mr Speaker, that will never happen.",
-        "statement": "The daylight attacks intended to break Ukraine's will will never happen."
-      },
-      {
-        "entities": [
-          "President Zelenskyy",
-          "Ukraine"
-        ],
-        "made_by": "President Zelenskyy",
-        "quote": "President Zelenskyy has assured me Ukraine would immediately implement it when a start date is confirmed",
-        "statement": "Ukraine would immediately implement the reciprocal energy ceasefire when a start date is confirmed."
-      },
-      {
-        "entities": [
-          "Russia"
+          {
+            "kind": "place",
+            "name": "Iran",
+            "role": ""
+          },
+          {
+            "kind": "organisation",
+            "name": "Islamic Revolutionary Guard",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "RAF Fairford",
+            "role": ""
+          }
         ],
         "made_by": "Andy Burnham",
-        "quote": "We know Russia is conducting a campaign of hybrid attacks and sabotage across Europe.",
-        "statement": "Russia is conducting a campaign of hybrid attacks and sabotage across Europe."
+        "quote": "it is highly likely to have been coordinated in Iran, almost certainly directed by Iran’s Islamic Revolutionary Guard",
+        "statement": "The incident at RAF Fairford is highly likely to have been coordinated in Iran and almost certainly directed by the Islamic Revolutionary Guard."
       },
       {
         "entities": [
-          "NATO"
+          {
+            "kind": "place",
+            "name": "Iran",
+            "role": ""
+          },
+          {
+            "kind": "organisation",
+            "name": "Islamic Revolutionary Guard",
+            "role": ""
+          }
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "we will bring further sanctions to restrict the capacity of Iran and the IRGC to do us harm",
+        "statement": "The UK will bring further sanctions to restrict the capacity of Iran and the IRGC to do the UK harm."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Russia",
+            "role": ""
+          },
+          {
+            "kind": "occasion",
+            "name": "UK sanctions package",
+            "role": ""
+          }
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "so that over 90% of Russia’s oil producing capacity is now covered by UK sanctions",
+        "statement": "Over 90% of Russia’s oil producing capacity is now covered by UK sanctions."
+      },
+      {
+        "entities": [
+          {
+            "kind": "occasion",
+            "name": "UK-EU summit",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "United Kingdom",
+            "role": ""
+          }
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "Together, these deals will add the equivalent of over 10 billion pounds per year to the UK economy by 2040",
+        "statement": "The deals at the UK-EU summit will add the equivalent of over 10 billion pounds per year to the UK economy by 2040."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Scotland",
+            "role": ""
+          }
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "Our largest food export, Scottish salmon, faces a 100% rate of document checks at the border, costing us around 100 million pounds in lost exports",
+        "statement": "Scottish salmon, the largest food export, faces a 100% rate of document checks at the border, costing around 100 million pounds in lost exports."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Northern Ireland",
+            "role": ""
+          },
+          {
+            "kind": "occasion",
+            "name": "UK-EU summit",
+            "role": ""
+          }
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "the proposed energy deal could cut wholesale energy costs by 20%",
+        "statement": "The proposed energy deal could cut wholesale energy costs in Northern Ireland by 20%."
+      },
+      {
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "National Centre for Information Defence",
+            "role": ""
+          },
+          {
+            "kind": "organisation",
+            "name": "Foreign Affairs Select Committee",
+            "role": ""
+          }
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "I confirmed our commitment to establish a new National Centre for Information Defence",
+        "statement": "The UK is committed to establishing a new National Centre for Information Defence, as recommended by the Foreign Affairs Select Committee."
+      },
+      {
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "NATO",
+            "role": ""
+          }
         ],
         "made_by": "Andy Burnham",
         "quote": "we will meet our NATO commitments in full",
@@ -61,364 +175,202 @@
       },
       {
         "entities": [
-          "National Centre for Information Defence"
+          {
+            "kind": "place",
+            "name": "Saudi Arabia",
+            "role": ""
+          },
+          {
+            "kind": "organisation",
+            "name": "Royal Air Force",
+            "role": ""
+          }
         ],
         "made_by": "Andy Burnham",
-        "quote": "I confirmed our commitment to establish a new National Centre for Information Defence",
-        "statement": "The UK is committed to establishing a new National Centre for Information Defence."
+        "quote": "it has already completed 14 operational missions",
+        "statement": "The Voyager aircraft sent to Saudi Arabia has already completed 14 operational missions."
       },
       {
         "entities": [
-          "Iran",
-          "Islamic Revolutionary Guard",
-          "RAF Fairford"
-        ],
-        "made_by": "Andy Burnham",
-        "quote": "our assessment that it is highly likely to have been coordinated in Iran, almost certainly directed by Iran’s Islamic Revolutionary Guard.",
-        "statement": "The incident at RAF Fairford is highly likely to have been coordinated in Iran and almost certainly directed by the Islamic Revolutionary Guard."
-      },
-      {
-        "entities": [
-          "Iran"
-        ],
-        "made_by": "Andy Burnham",
-        "quote": "We will crack down on Iran’s use of criminal networks",
-        "statement": "The UK will crack down on Iran's use of criminal networks, using its full range of powers to target them and their funding streams."
-      },
-      {
-        "entities": [
-          "Iran",
-          "Islamic Revolutionary Guard"
-        ],
-        "made_by": "Andy Burnham",
-        "quote": "we will bring further sanctions to restrict the capacity of Iran and the IRGC to do us harm.",
-        "statement": "The UK will bring further sanctions to restrict the capacity of Iran and the Islamic Revolutionary Guard to do harm to the UK."
-      },
-      {
-        "entities": [
-          "King Khalid International Airport",
-          "Saudi Arabia"
-        ],
-        "made_by": "Andy Burnham",
-        "quote": "I condemn the appalling attacks on the King Khalid International Airport.",
-        "statement": "The attacks on King Khalid International Airport are appalling and are condemned."
-      },
-      {
-        "entities": [
-          "Saudi Arabia",
-          "Houthis"
-        ],
-        "made_by": "Andy Burnham",
-        "quote": "We will continue to stand with Saudi Arabia against the Houthis.",
-        "statement": "The UK will continue to stand with Saudi Arabia against the Houthis."
-      },
-      {
-        "entities": [
-          "UK-EU summit",
-          "Brussels"
-        ],
-        "made_by": "Andy Burnham",
-        "quote": "it will take place in Brussels on the 20th November",
-        "statement": "The UK-EU summit will take place in Brussels on 20 November."
-      },
-      {
-        "entities": [
-          "United Kingdom",
-          "UK-EU summit"
-        ],
-        "made_by": "Andy Burnham",
-        "quote": "Together, these deals will add the equivalent of over 10 billion pounds per year to the UK economy by 2040",
-        "statement": "The deals under discussion at the UK-EU summit would add the equivalent of over 10 billion pounds per year to the UK economy by 2040."
-      },
-      {
-        "entities": [
-          "United Kingdom"
-        ],
-        "made_by": "Andy Burnham",
-        "quote": "Our largest food export, Scottish salmon, faces a 100% rate of document checks at the border, costing us around 100 million pounds in lost exports.",
-        "statement": "Scottish salmon, the UK's largest food export, faces a 100% rate of document checks at the border, costing around 100 million pounds in lost exports."
-      },
-      {
-        "entities": [
-          "UK-EU summit"
-        ],
-        "made_by": "Andy Burnham",
-        "quote": "I will work hard over the next 5 weeks to achieve it.",
-        "statement": "Andy Burnham will work hard over the next five weeks to secure a deal along the lines discussed for the UK-EU summit."
-      },
-      {
-        "entities": [
-          "UK-EU summit"
-        ],
-        "made_by": "Andy Burnham",
-        "quote": "I believe we should then set up a serious dialogue about the different options for our relationship in the long term.",
-        "statement": "After the summit, the UK should set up a serious dialogue about the different options for its long-term relationship with the EU."
-      },
-      {
-        "entities": [],
-        "made_by": "Andy Burnham",
-        "quote": "public opinion currently supports a pragmatic approach like the one I am suggesting",
-        "statement": "Public opinion currently supports a pragmatic approach to the UK's relationship with the EU."
-      },
-      {
-        "entities": [
-          "G20"
-        ],
-        "made_by": "Andy Burnham",
-        "quote": "we will place AI centre stage in our presidency",
-        "statement": "The UK will place AI centre stage in its G20 presidency."
-      },
-      {
-        "entities": [
-          "United Kingdom"
+          {
+            "kind": "person",
+            "name": "President of Microsoft",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "United Kingdom",
+            "role": ""
+          },
+          {
+            "kind": "occasion",
+            "name": "G20",
+            "role": ""
+          }
         ],
         "made_by": "President of Microsoft",
-        "quote": "Leading voices like the President of Microsoft are saying Britain is the world leader in AI safety.",
+        "quote": "Britain is the world leader in AI safety",
         "statement": "Britain is the world leader in AI safety."
-      }
-    ],
-    "entities": [
-      {
-        "kind": "person",
-        "name": "Andy Burnham",
-        "role": "Prime Minister of the United Kingdom"
-      },
-      {
-        "kind": "person",
-        "name": "President Zelenskyy",
-        "role": ""
-      },
-      {
-        "kind": "person",
-        "name": "President Trump",
-        "role": ""
-      },
-      {
-        "kind": "person",
-        "name": "Ursula von der Leyen",
-        "role": "President of the European Commission"
-      },
-      {
-        "kind": "person",
-        "name": "Chancellor Merz",
-        "role": "Chancellor of Germany"
-      },
-      {
-        "kind": "person",
-        "name": "NATO Secretary General",
-        "role": "NATO Secretary General"
-      },
-      {
-        "kind": "person",
-        "name": "President of Microsoft",
-        "role": "President of Microsoft"
-      },
-      {
-        "kind": "occasion",
-        "name": "United Nations General Assembly",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "New York",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Ukraine",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Russia",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Saudi Arabia",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "King Khalid International Airport",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
-        "name": "Houthis",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "RAF Fairford",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "RAF Molesworth",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Iran",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
-        "name": "Islamic Revolutionary Guard",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Falkland Islands",
-        "role": ""
-      },
-      {
-        "kind": "occasion",
-        "name": "UK-EU summit",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Brussels",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Berlin",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
-        "name": "Foreign Affairs Select Committee",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
-        "name": "National Centre for Information Defence",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
-        "name": "NATO",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Oxfordshire",
-        "role": ""
-      },
-      {
-        "kind": "occasion",
-        "name": "G20",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "United Kingdom",
-        "role": ""
       }
     ],
     "facts": [
       {
         "as_at": "2026-10-12",
         "entities": [
-          "Andy Burnham",
-          "President Zelenskyy",
-          "New York"
+          {
+            "kind": "person",
+            "name": "Zelenskyy",
+            "role": "President of Ukraine"
+          },
+          {
+            "kind": "person",
+            "name": "Andy Burnham",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "New York",
+            "role": ""
+          }
         ],
-        "quote": "as I assure President Zelenskyy at our meeting in New York",
-        "statement": "Andy Burnham met President Zelenskyy in New York."
+        "quote": "I assure President Zelenskyy at our meeting in New York",
+        "statement": "Andy Burnham met President Zelenskyy in New York at the United Nations General Assembly."
       },
       {
         "as_at": "2026-10-12",
         "entities": [
-          "Andy Burnham",
-          "President Zelenskyy"
+          {
+            "kind": "person",
+            "name": "Trump",
+            "role": ""
+          },
+          {
+            "kind": "person",
+            "name": "Andy Burnham",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "New York",
+            "role": ""
+          }
         ],
-        "quote": "When I spoke to President Zelenskyy on Saturday",
-        "statement": "Andy Burnham spoke to President Zelenskyy on Saturday."
+        "quote": "In my meeting with the President, I also raised the Falkland Islands",
+        "statement": "Andy Burnham met President Trump in New York and raised the Falkland Islands with him."
       },
       {
         "as_at": "2026-10-12",
         "entities": [
-          "Andy Burnham",
-          "President Trump",
-          "New York"
+          {
+            "kind": "person",
+            "name": "Ursula von der Leyen",
+            "role": "President of the European Commission"
+          },
+          {
+            "kind": "person",
+            "name": "Andy Burnham",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "New York",
+            "role": ""
+          }
         ],
-        "quote": "I raised this with President Trump in New York.",
-        "statement": "Andy Burnham raised an energy ceasefire with President Trump in New York."
+        "quote": "in New York, I also had a positive meeting with the President of the European Commission, Ursula von der Leyen",
+        "statement": "Andy Burnham had a meeting with Ursula von der Leyen in New York about the forthcoming UK-EU summit."
+      },
+      {
+        "as_at": "2026-11-20",
+        "entities": [
+          {
+            "kind": "occasion",
+            "name": "UK-EU summit",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Brussels",
+            "role": ""
+          }
+        ],
+        "quote": "it will take place in Brussels on the 20th November",
+        "statement": "The UK-EU summit will take place in Brussels on 20 November 2026."
+      },
+      {
+        "as_at": "2026-10-12",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Merz",
+            "role": "Chancellor of Germany"
+          },
+          {
+            "kind": "person",
+            "name": "Andy Burnham",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "Berlin",
+            "role": ""
+          }
+        ],
+        "quote": "Chancellor Merz and I agreed a new partnership to tackle these hybrid threats",
+        "statement": "Andy Burnham and Chancellor Merz agreed a new partnership to tackle hybrid threats in Berlin."
+      },
+      {
+        "as_at": "2026-10-12",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Andy Burnham",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "Saudi Arabia",
+            "role": ""
+          },
+          {
+            "kind": "organisation",
+            "name": "Royal Air Force",
+            "role": ""
+          }
+        ],
+        "quote": "I confirmed Britain’s decision to send air defence and a Voyager aircraft to Saudi Arabia",
+        "statement": "Britain decided to send air defence and a Voyager aircraft to Saudi Arabia to provide air-to-air refuelling support."
       },
       {
         "as_at": "2026-10-11",
         "entities": [
-          "President Trump"
+          {
+            "kind": "person",
+            "name": "Trump",
+            "role": ""
+          },
+          {
+            "kind": "occasion",
+            "name": "reciprocal energy ceasefire",
+            "role": ""
+          }
         ],
-        "quote": "President Trump’s announcement yesterday of a reciprocal energy ceasefire",
-        "statement": "President Trump announced a reciprocal energy ceasefire."
+        "quote": "I welcome President Trump’s announcement yesterday of a reciprocal energy ceasefire",
+        "statement": "President Trump announced a reciprocal energy ceasefire on 11 October 2026."
       },
       {
         "as_at": "2026-10-12",
         "entities": [
-          "United Kingdom",
-          "Ukraine",
-          "Russia"
-        ],
-        "quote": "we have announced new funding to help them get through their fifth winter under Russian bombardment",
-        "statement": "The UK has announced new funding to help Ukraine through its fifth winter under Russian bombardment."
-      },
-      {
-        "as_at": "2026-10-12",
-        "entities": [
-          "United Kingdom",
-          "Russia"
-        ],
-        "quote": "a new sanctions package so that over 90% of Russia’s oil producing capacity is now covered by UK sanctions",
-        "statement": "A new UK sanctions package now covers over 90% of Russia's oil producing capacity."
-      },
-      {
-        "as_at": "2026-10-12",
-        "entities": [
-          "United Kingdom",
-          "Saudi Arabia"
-        ],
-        "quote": "I confirmed Britain’s decision to send air defence and a Voyager aircraft to Saudi Arabia",
-        "statement": "Britain has decided to send air defence and a Voyager aircraft to Saudi Arabia."
-      },
-      {
-        "as_at": "2026-10-12",
-        "entities": [
-          "United Kingdom",
-          "Saudi Arabia"
-        ],
-        "quote": "it has already completed 14 operational missions",
-        "statement": "The Voyager aircraft sent to Saudi Arabia has completed 14 operational missions."
-      },
-      {
-        "as_at": "2026-10-12",
-        "entities": [
-          "Andy Burnham",
-          "Chancellor Merz",
-          "Berlin"
-        ],
-        "quote": "Chancellor Merz and I agreed a new partnership to tackle these hybrid threats.",
-        "statement": "Andy Burnham and Chancellor Merz agreed a new partnership in Berlin to tackle hybrid threats."
-      },
-      {
-        "as_at": "2026-10-12",
-        "entities": [
-          "Andy Burnham",
-          "NATO Secretary General",
-          "Oxfordshire"
-        ],
-        "quote": "including with the NATO Secretary General in Oxfordshire",
-        "statement": "Andy Burnham met the NATO Secretary General in Oxfordshire."
-      },
-      {
-        "as_at": "2026-10-12",
-        "entities": [
-          "RAF Fairford",
-          "RAF Molesworth"
+          {
+            "kind": "place",
+            "name": "RAF Fairford",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "RAF Molesworth",
+            "role": ""
+          }
         ],
         "quote": "the incidents at RAF Fairford and RAF Molesworth",
         "statement": "There were incidents at RAF Fairford and RAF Molesworth."
@@ -426,48 +378,70 @@
       {
         "as_at": "2026-10-12",
         "entities": [
-          "Andy Burnham",
-          "Ursula von der Leyen",
-          "New York"
-        ],
-        "quote": "I also had a positive meeting with the President of the European Commission, Ursula von der Leyen",
-        "statement": "Andy Burnham had a positive meeting with Ursula von der Leyen in New York."
-      },
-      {
-        "as_at": "2026-10-12",
-        "entities": [
-          "Andy Burnham",
-          "President Trump",
-          "Falkland Islands"
-        ],
-        "quote": "In my meeting with the President, I also raised the Falkland Islands",
-        "statement": "Andy Burnham raised the Falkland Islands with President Trump."
-      },
-      {
-        "as_at": "2026-10-12",
-        "entities": [
-          "Foreign Affairs Select Committee",
-          "National Centre for Information Defence"
-        ],
-        "quote": "as recommended by the Foreign Affairs Select Committee",
-        "statement": "The Foreign Affairs Select Committee recommended a National Centre for Information Defence."
-      },
-      {
-        "as_at": "2026-10-12",
-        "entities": [
-          "Andy Burnham",
-          "United Nations General Assembly"
-        ],
-        "quote": "in my speech to the UN General Assembly",
-        "statement": "Andy Burnham gave a speech to the United Nations General Assembly."
-      },
-      {
-        "as_at": "2026-10-12",
-        "entities": [
-          "G20"
+          {
+            "kind": "occasion",
+            "name": "G20",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "United Kingdom",
+            "role": ""
+          }
         ],
         "quote": "as we take up the presidency of the G20 in 2027",
-        "statement": "The UK takes up the presidency of the G20 in 2027."
+        "statement": "The UK will take up the presidency of the G20 in 2027."
+      },
+      {
+        "as_at": "2026-10-12",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "the new member for Holborn and St Pancras",
+            "role": "Member of Parliament for Holborn and St Pancras"
+          }
+        ],
+        "quote": "welcome the new member for Holborn and St Pancras to her place",
+        "statement": "The House of Commons welcomed the new member for Holborn and St Pancras to her place."
+      },
+      {
+        "as_at": "2026-10-12",
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Ukraine",
+            "role": ""
+          },
+          {
+            "kind": "person",
+            "name": "Andy Burnham",
+            "role": "Prime Minister of the United Kingdom"
+          }
+        ],
+        "quote": "we have announced new funding to help them get through their fifth winter under Russian bombardment",
+        "statement": "The UK has announced new funding to help Ukraine through its fifth winter under Russian bombardment."
+      },
+      {
+        "as_at": "2026-10-12",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "NATO Secretary General",
+            "role": "Secretary General of NATO"
+          },
+          {
+            "kind": "place",
+            "name": "Oxfordshire",
+            "role": ""
+          },
+          {
+            "kind": "person",
+            "name": "Andy Burnham",
+            "role": "Prime Minister of the United Kingdom"
+          }
+        ],
+        "quote": "including with the NATO Secretary General in Oxfordshire",
+        "statement": "Andy Burnham met the NATO Secretary General in Oxfordshire."
       }
     ]
   }

@@ -145,18 +145,21 @@ func TestRecordedBriefing(t *testing.T) {
 // before it, so the first that fails stops the run.
 func placedFixtures(t *testing.T) *sqlite.Store {
 	t.Helper()
-	return fixturesRecord(t, false)
+	return fixturesRecord(t, recordedDir, false)
 }
 
 // connectedFixtures is placedFixtures with each fixture's recorded
 // connecting replayed after its placing, as the recorded connectings were
-// made.
-func connectedFixtures(t *testing.T) *sqlite.Store {
+// made, from the recordings under dir.
+func connectedFixtures(t *testing.T, dir string) *sqlite.Store {
 	t.Helper()
-	return fixturesRecord(t, true)
+	return fixturesRecord(t, dir, true)
 }
 
-func fixturesRecord(t *testing.T, connect bool) *sqlite.Store {
+// recordedDir holds the recordings of each act, one directory per act.
+var recordedDir = filepath.Join("testdata", "recorded")
+
+func fixturesRecord(t *testing.T, dir string, connect bool) *sqlite.Store {
 	t.Helper()
 	ctx := t.Context()
 	paths, err := filepath.Glob("testdata/govuk/*.json")
@@ -199,14 +202,14 @@ func fixturesRecord(t *testing.T, connect bool) *sqlite.Store {
 		if err := topics.CheckNew(ctx); err != nil {
 			t.Fatal(err)
 		}
-		reading, err := editor.Read(ctx, replay{kept(t, filepath.Join("testdata", "recorded", "reading", f.name+".json"))}, it)
+		reading, err := editor.Read(ctx, replay{kept(t, filepath.Join(dir, "reading", f.name+".json"))}, it)
 		if err != nil {
 			t.Fatalf("%s: the recorded reading fails its checks: %v", f.name, err)
 		}
 		if err := store.SaveReading(ctx, reading, saturday); err != nil {
 			t.Fatal(err)
 		}
-		path := filepath.Join("testdata", "recorded", "placing", f.name+".json")
+		path := filepath.Join(dir, "placing", f.name+".json")
 		if _, err := os.Stat(path); errors.Is(err, fs.ErrNotExist) {
 			t.Skipf("%s: placing has not been recorded, so the Briefing can't be written from it", f.name)
 		}
@@ -221,7 +224,7 @@ func fixturesRecord(t *testing.T, connect bool) *sqlite.Store {
 		if !connect {
 			continue
 		}
-		path = filepath.Join("testdata", "recorded", "connecting", f.name+".json")
+		path = filepath.Join(dir, "connecting", f.name+".json")
 		ed = editor.New(editor.Deps{Store: store, ConnectingModel: replay{kept(t, path)}, Log: slog.New(slog.NewTextHandler(&logs, nil))})
 		if err := ed.ConnectWaiting(ctx, saturday); err != nil {
 			t.Fatal(err)

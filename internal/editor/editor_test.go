@@ -141,7 +141,7 @@ func TestTakingUpATopicTiesOnlyItemsNotYetRead(t *testing.T) {
 
 func TestAReadingThatFailsWritesNothingAndTheItemStaysAwaitingReading(t *testing.T) {
 	for name, model := range map[string]*fakeModel{
-		"failing the checks": {output: `{"entities": [], "facts": [], "claims": [{"statement": "x", "made_by": "", "quote": "x", "entities": []}]}`},
+		"failing the checks": {output: `{"facts": [], "claims": [{"statement": "x", "made_by": "", "quote": "x", "entities": []}]}`},
 		"a failed call":      {err: errors.New("overloaded")},
 	} {
 		t.Run(name, func(t *testing.T) {

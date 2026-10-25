@@ -124,6 +124,29 @@ func (s *Store) Feedback(ctx context.Context, id int64) (feedback.Feedback, bool
 	return kept[0].Feedback, true, nil
 }
 
+// feedbackCalls is, for the kept query, the JSON array of the kept calls
+// behind what the piece of Feedback is about, worked out by the same
+// lookups the pages of the things themselves use.
+var feedbackCalls = `CASE level
+		WHEN 'fact' THEN json_array(` + readingCall(factWorkKey("f")) + `)
+		WHEN 'development' THEN json_array(coalesce((SELECT ` + placingCall("f") + ` FROM developments d
+			WHERE d.story_id = feedback.story_id AND d.fact_id = feedback.fact_id AND d.missed_by IS NULL), 0))
+		WHEN 'story' THEN (SELECT json_group_array(call) FROM (SELECT DISTINCT ` + placingCall("pf") + ` AS call
+			FROM developments d JOIN facts pf ON pf.id = d.fact_id
+			WHERE d.story_id = feedback.story_id AND d.missed_by IS NULL ORDER BY call))
+		WHEN 'connection' THEN json_array(coalesce((SELECT ` + connectingCall("c") + ` FROM fact_connections c
+			WHERE c.from_fact_id = feedback.fact_id AND c.to_fact_id = feedback.to_fact_id), 0))
+		ELSE json_array() END`
+
+// feedbackByOwner is, for the kept query, whether what the piece of
+// Feedback is about was made by the Owner through missed, not by an act:
+// the piece is itself missed, or is about a Story or Development a missed
+// piece added (kept marked so even once that piece is undone).
+const feedbackByOwner = `(kind = 'missed'
+		OR (level = 'story' AND stories.missed_by IS NOT NULL)
+		OR (level = 'development' AND EXISTS (SELECT 1 FROM developments d
+			WHERE d.story_id = feedback.story_id AND d.fact_id = feedback.fact_id AND d.missed_by IS NOT NULL)))`
+
 // kept is the Feedback the where clause selects, newest first.
 func (s *Store) kept(ctx context.Context, where string, args ...any) ([]feedback.Kept, error) {
 	rows, err := s.db.QueryContext(ctx, `
@@ -131,7 +154,8 @@ func (s *Store) kept(ctx context.Context, where string, args ...any) ([]feedback
 			feedback.title, fact_ids, feedback.day, depth, given_at, coalesce(undone_at, ''),
 			coalesce(stories.title, ''), coalesce(f.statement, ''), coalesce(g.statement, ''),
 			coalesce(feedback.assessment_id, 0), coalesce(a.statement, ''), coalesce(feedback.read_id, 0),
-			coalesce(ar.day, r.day, '')
+			coalesce(ar.day, r.day, ''), `+feedbackCalls+`, coalesce(ar.conversation_id, r.conversation_id, 0),
+			`+feedbackByOwner+`
 		FROM feedback
 			LEFT JOIN stories ON stories.id = feedback.story_id
 			LEFT JOIN facts f ON f.id = feedback.fact_id
@@ -148,9 +172,13 @@ func (s *Store) kept(ctx context.Context, where string, args ...any) ([]feedback
 	var out []feedback.Kept
 	for rows.Next() {
 		var k feedback.Kept
-		var kind, level, facts, at, undone string
+		var kind, level, facts, at, undone, calls string
 		if err := rows.Scan(&k.ID, &kind, &level, &k.StoryID, &k.FactID, &k.ToFactID, &k.Title, &facts, &k.Day,
-			&k.Depth, &at, &undone, &k.Story, &k.Fact, &k.ToFact, &k.AssessmentID, &k.Assessment, &k.ReadID, &k.ReadDay); err != nil {
+			&k.Depth, &at, &undone, &k.Story, &k.Fact, &k.ToFact, &k.AssessmentID, &k.Assessment, &k.ReadID, &k.ReadDay,
+			&calls, &k.Conversation, &k.ByOwner); err != nil {
+			return nil, fmt.Errorf("kept feedback: %w", err)
+		}
+		if err := json.Unmarshal([]byte(calls), &k.Calls); err != nil {
 			return nil, fmt.Errorf("kept feedback: %w", err)
 		}
 		k.Kind, k.Level, k.GivenAt, k.UndoneAt = feedback.Kind(kind), feedback.Level(level), parseTime(at), parseTime(undone)

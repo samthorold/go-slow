@@ -1,0 +1,247 @@
+{
+  "act": "connecting",
+  "model": "claude-haiku-5-5",
+  "recorded_at": "2026-10-25T00:36:36.224463Z",
+  "usage": {
+    "input_tokens": 2650,
+    "output_tokens": 2346
+  },
+  "output": {
+    "causes": [
+      {
+        "cause": "F7",
+        "effect": "F8"
+      }
+    ],
+    "facts": [
+      {
+        "fact": "F1",
+        "roles": [
+          {
+            "entity": "Andy Burnham",
+            "role": "actor"
+          },
+          {
+            "entity": "New York",
+            "role": "place"
+          },
+          {
+            "entity": "President Zelenskyy",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F2",
+        "roles": [
+          {
+            "entity": "Andy Burnham",
+            "role": "actor"
+          },
+          {
+            "entity": "President Zelenskyy",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F3",
+        "roles": [
+          {
+            "entity": "Andy Burnham",
+            "role": "actor"
+          },
+          {
+            "entity": "New York",
+            "role": "place"
+          },
+          {
+            "entity": "President Trump",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F4",
+        "roles": [
+          {
+            "entity": "President Trump",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F5",
+        "roles": [
+          {
+            "entity": "United Kingdom",
+            "role": "actor"
+          },
+          {
+            "entity": "Ukraine",
+            "role": "affected"
+          },
+          {
+            "entity": "Russia",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F6",
+        "roles": [
+          {
+            "entity": "United Kingdom",
+            "role": "actor"
+          },
+          {
+            "entity": "Russia",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F7",
+        "roles": [
+          {
+            "entity": "United Kingdom",
+            "role": "actor"
+          },
+          {
+            "entity": "Saudi Arabia",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F8",
+        "roles": [
+          {
+            "entity": "United Kingdom",
+            "role": "actor"
+          },
+          {
+            "entity": "Saudi Arabia",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F9",
+        "roles": [
+          {
+            "entity": "Andy Burnham",
+            "role": "actor"
+          },
+          {
+            "entity": "Chancellor Merz",
+            "role": "affected"
+          },
+          {
+            "entity": "Berlin",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F10",
+        "roles": [
+          {
+            "entity": "Andy Burnham",
+            "role": "actor"
+          },
+          {
+            "entity": "NATO Secretary General",
+            "role": "affected"
+          },
+          {
+            "entity": "Oxfordshire",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F11",
+        "roles": [
+          {
+            "entity": "RAF Fairford",
+            "role": "place"
+          },
+          {
+            "entity": "RAF Molesworth",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F12",
+        "roles": [
+          {
+            "entity": "Andy Burnham",
+            "role": "actor"
+          },
+          {
+            "entity": "Ursula von der Leyen",
+            "role": "affected"
+          },
+          {
+            "entity": "New York",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F13",
+        "roles": [
+          {
+            "entity": "Andy Burnham",
+            "role": "actor"
+          },
+          {
+            "entity": "President Trump",
+            "role": "affected"
+          },
+          {
+            "entity": "Falkland Islands",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F14",
+        "roles": [
+          {
+            "entity": "Foreign Affairs Select Committee",
+            "role": "actor"
+          },
+          {
+            "entity": "National Centre for Information Defence",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F15",
+        "roles": [
+          {
+            "entity": "Andy Burnham",
+            "role": "actor"
+          },
+          {
+            "entity": "United Nations General Assembly",
+            "role": "occasion"
+          }
+        ]
+      },
+      {
+        "fact": "F16",
+        "roles": [
+          {
+            "entity": "G20",
+            "role": "occasion"
+          }
+        ]
+      }
+    ]
+  }
+}

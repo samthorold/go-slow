@@ -27,6 +27,36 @@ type Story struct {
 	Entities []string
 	// Timeline is the Story's Developments in order.
 	Timeline []Development
+	// Causes are the cause Connections to or from its Developments.
+	Causes []CauseConnection
+}
+
+// StoryConnection is another Story connected to a Story, and why. It is
+// derived from what the Stories share, never stored (system design:
+// Connections are made between Facts and derived between Stories).
+type StoryConnection struct {
+	ID    int64
+	Title string
+	// Shared are the Developments the two Stories share.
+	Shared []Development
+	// Entities are the Entities their Facts involve in the same role.
+	Entities []SharedEntity
+}
+
+// SharedEntity is an Entity that Facts in two Stories involve in the same
+// role: Here is a Fact in the Story, There one in the Story connected to it.
+type SharedEntity struct {
+	Entity string
+	Role   string
+	Here   Development
+	There  Development
+}
+
+// CauseConnection is a cause Connection as the Record holds it: the Fact
+// that caused another, each with the title of the Item it was drawn from.
+type CauseConnection struct {
+	Cause  Development
+	Effect Development
 }
 
 // Development is a Fact that moves a Story on, with the title of the Item it

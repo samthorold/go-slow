@@ -70,9 +70,12 @@ func run(log *slog.Logger) error {
 	// The Editor, each act on the model the config names for it. One
 	// adapter serves every act, sending each act's requests to its model.
 	models := claude.New(claude.Options{
-		APIKey:    string(cfg.AnthropicAPIKey),
-		Model:     cfg.ReadingModel,
-		ActModels: map[string]string{"reading": cfg.ReadingModel, "placing": cfg.PlacingModel, "briefing": cfg.BriefingModel},
+		APIKey: string(cfg.AnthropicAPIKey),
+		Model:  cfg.ReadingModel,
+		ActModels: map[string]string{
+			"reading": cfg.ReadingModel, "placing": cfg.PlacingModel,
+			"connecting": cfg.ConnectingModel, "briefing": cfg.BriefingModel,
+		},
 	})
 	// Reading looks Entities up in Wikidata first, politely, as go-slow.
 	wd := wikidata.New(wikidata.Options{
@@ -84,7 +87,7 @@ func run(log *slog.Logger) error {
 		Sleep:     polite.Sleep,
 	})
 	ed := editor.New(editor.Deps{
-		Store: store, Model: models, PlacingModel: models, Wikidata: wd,
+		Store: store, Model: models, PlacingModel: models, ConnectingModel: models, Wikidata: wd,
 		Briefings: store, BriefingModel: models, Log: log,
 	})
 	// The daily acts run in batches: submitted after a Collection run, and
@@ -93,7 +96,7 @@ func run(log *slog.Logger) error {
 	batches := editor.NewBatches(editor.BatchDeps{
 		Store:   store,
 		Batcher: models,
-		Acts:    []editor.BatchAct{ed.Reading(), ed.Placing()},
+		Acts:    []editor.BatchAct{ed.Reading(), ed.Placing(), ed.Connecting()},
 		Log:     log,
 	})
 	collector := collect.New(collect.Deps{
@@ -122,13 +125,14 @@ func run(log *slog.Logger) error {
 	defer func() { stopCollecting(); <-collected }()
 
 	// The Briefing is written in real time at the set time, on its own
-	// clock, checked every minute. Before steps (connecting over the day's
-	// Facts, once it exists) run just before it is written.
+	// clock, checked every minute. Just before it is written, connecting
+	// runs again over the day's Facts.
 	schedule := editor.NewSchedule(editor.ScheduleDeps{
-		Store: store,
-		At:    cfg.BriefingAt,
-		Brief: ed.Brief,
-		Log:   log,
+		Store:  store,
+		At:     cfg.BriefingAt,
+		Before: []func(context.Context, time.Time) error{ed.Reconnect},
+		Brief:  ed.Brief,
+		Log:    log,
 	})
 	minutes := time.NewTicker(time.Minute)
 	defer minutes.Stop()

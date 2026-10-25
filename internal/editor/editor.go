@@ -23,6 +23,18 @@ type Store interface {
 	// SavePlacing writes a placing to the Record, all at once, and marks its
 	// Facts placed at placedAt.
 	SavePlacing(ctx context.Context, p Placing, placedAt time.Time) error
+	// FactsToConnect are the Facts placed and awaiting connecting, by Item,
+	// oldest Item first.
+	FactsToConnect(ctx context.Context) ([]ToConnect, error)
+	// FactsPlacedSince are the Facts placed at or after since, by Item,
+	// oldest Item first.
+	FactsPlacedSince(ctx context.Context, since time.Time) ([]ToConnect, error)
+	// FactsNear are at most limit other Facts that share an Entity or a
+	// Story with any of facts, those nearest them in date first.
+	FactsNear(ctx context.Context, facts []Fact, limit int) ([]Fact, error)
+	// SaveConnecting writes a connecting to the Record, all at once, and
+	// marks its Facts connected at connectedAt.
+	SaveConnecting(ctx context.Context, c Connecting, connectedAt time.Time) error
 }
 
 // Deps are the Editor's dependencies.
@@ -32,6 +44,9 @@ type Deps struct {
 	Model Model
 	// PlacingModel is the model placing runs on, chosen by configuration.
 	PlacingModel Model
+	// ConnectingModel is the model connecting runs on, chosen by
+	// configuration.
+	ConnectingModel Model
 	// Wikidata is where reading looks Entities up first.
 	Wikidata Wikidata
 	// Briefings is the part of the Record the Briefing is written from and
@@ -103,6 +118,58 @@ func (e *Editor) PlaceWaiting(ctx context.Context, now time.Time) error {
 		e.Log.InfoContext(ctx, "placed", "source", tp.Item.SourceID, "entry", tp.Item.EntryID,
 			"facts", len(p.Facts), "developments", len(p.Developments), "new_stories", len(p.NewStories),
 			"model", p.Model, "input_tokens", p.Usage.InputTokens, "output_tokens", p.Usage.OutputTokens)
+	}
+	return nil
+}
+
+// ConnectWaiting connects every Fact awaiting connecting, an Item at a time
+// in the order the Items were published. A connecting that fails is logged
+// and writes nothing, so its Facts await connecting on the next run. Only a
+// failing Record is an error.
+func (e *Editor) ConnectWaiting(ctx context.Context, now time.Time) error {
+	waiting, err := e.Store.FactsToConnect(ctx)
+	if err != nil {
+		return err
+	}
+	return e.connectEach(ctx, waiting, now)
+}
+
+// Reconnect runs connecting again at now, in real time, over the day's
+// Facts: those placed in the day before now, an Item at a time. It is a step
+// the Briefing's Schedule runs just before writing (ScheduleDeps.Before); a
+// day rather than since midnight, since the Briefing covers what was placed
+// since the previous one, a day earlier. A Fact connected early in the
+// day was weighed against the Facts in the Record then; by the time the
+// Briefing is written, later Items have brought in Facts it may be connected
+// to (system design: The acts run as Items arrive). It only adds: a
+// Connection made earlier stays. It runs just before the Briefing is
+// written, which is due at once, so it does not wait on a batch.
+func (e *Editor) Reconnect(ctx context.Context, now time.Time) error {
+	day, err := e.Store.FactsPlacedSince(ctx, now.Add(-24*time.Hour))
+	if err != nil {
+		return err
+	}
+	return e.connectEach(ctx, day, now)
+}
+
+// connectEach connects each Item's Facts in turn, in real time.
+func (e *Editor) connectEach(ctx context.Context, waiting []ToConnect, now time.Time) error {
+	for _, tc := range waiting {
+		others, err := e.Store.FactsNear(ctx, tc.Facts, factsShown)
+		if err != nil {
+			return err
+		}
+		c, err := Connect(ctx, e.ConnectingModel, tc, others)
+		if err != nil {
+			e.Log.ErrorContext(ctx, "connecting failed", "source", tc.Item.SourceID, "entry", tc.Item.EntryID, "error", err)
+			continue
+		}
+		if err := e.Store.SaveConnecting(ctx, c, now); err != nil {
+			return err
+		}
+		e.Log.InfoContext(ctx, "connected", "source", tc.Item.SourceID, "entry", tc.Item.EntryID,
+			"facts", len(c.Facts), "causes", len(c.Causes),
+			"model", c.Model, "input_tokens", c.Usage.InputTokens, "output_tokens", c.Usage.OutputTokens)
 	}
 	return nil
 }

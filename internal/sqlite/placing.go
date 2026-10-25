@@ -20,14 +20,24 @@ const factEntities = `(SELECT json_group_array(entities.name ORDER BY entities.n
 // FactsToPlace are the Facts not yet placed, by Item, in the order the
 // Items were published.
 func (s *Store) FactsToPlace(ctx context.Context) ([]editor.ToPlace, error) {
+	out, err := s.factsByItem(ctx, `NOT EXISTS (SELECT 1 FROM fact_placings p WHERE p.fact_id = facts.id)`)
+	if err != nil {
+		return nil, fmt.Errorf("facts to place: %w", err)
+	}
+	return out, nil
+}
+
+// factsByItem are the Facts matching where, by Item, in the order the Items
+// were published.
+func (s *Store) factsByItem(ctx context.Context, where string, args ...any) ([]editor.ToPlace, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT facts.id, facts.source_id, facts.entry_id, facts.statement, facts.as_at, facts.quote,
 			`+factEntities+`, items.title, items.link, items.published
 		FROM facts JOIN items USING (source_id, entry_id)
-		WHERE NOT EXISTS (SELECT 1 FROM fact_placings p WHERE p.fact_id = facts.id)
-		ORDER BY items.published, items.collected_at, facts.source_id, facts.entry_id, facts.id`)
+		WHERE `+where+`
+		ORDER BY items.published, items.collected_at, facts.source_id, facts.entry_id, facts.id`, args...)
 	if err != nil {
-		return nil, fmt.Errorf("facts to place: %w", err)
+		return nil, err
 	}
 	defer func() { _ = rows.Close() }()
 	var out []editor.ToPlace
@@ -37,10 +47,10 @@ func (s *Store) FactsToPlace(ctx context.Context) ([]editor.ToPlace, error) {
 		var asAt, ents, published string
 		if err := rows.Scan(&f.ID, &f.SourceID, &f.EntryID, &f.Statement, &asAt, &f.Quote, &ents,
 			&it.Title, &it.Link, &published); err != nil {
-			return nil, fmt.Errorf("facts to place: %w", err)
+			return nil, err
 		}
 		if err := scanFact(&f, asAt, ents); err != nil {
-			return nil, fmt.Errorf("facts to place: %w", err)
+			return nil, err
 		}
 		if n := len(out); n == 0 || out[n-1].Item.SourceID != f.SourceID || out[n-1].Item.EntryID != f.EntryID {
 			it.SourceID, it.EntryID, it.Published = f.SourceID, f.EntryID, parseTime(published)
@@ -48,10 +58,7 @@ func (s *Store) FactsToPlace(ctx context.Context) ([]editor.ToPlace, error) {
 		}
 		out[len(out)-1].Facts = append(out[len(out)-1].Facts, f)
 	}
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("facts to place: %w", err)
-	}
-	return out, nil
+	return out, rows.Err()
 }
 
 func scanFact(f *editor.Fact, asAt, ents string) error {
@@ -157,6 +164,9 @@ func (s *Store) Story(ctx context.Context, id int64) (editor.Story, bool, error)
 		return st, false, fmt.Errorf("story %d: %w", id, err)
 	}
 	slices.Sort(st.Entities)
+	if st.Causes, err = s.storyCauses(ctx, id); err != nil {
+		return st, false, fmt.Errorf("story %d: %w", id, err)
+	}
 	return st, true, nil
 }
 

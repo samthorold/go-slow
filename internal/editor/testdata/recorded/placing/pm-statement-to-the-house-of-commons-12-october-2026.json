@@ -1,10 +1,10 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T01:10:11.554904Z",
+  "recorded_at": "2026-10-25T09:57:47.134467Z",
   "usage": {
-    "input_tokens": 3541,
-    "output_tokens": 1705
+    "input_tokens": 3249,
+    "output_tokens": 1646
   },
   "output": {
     "facts": [
@@ -17,24 +17,26 @@
         "fact": "F2"
       },
       {
-        "developments_in": [],
-        "fact": "F3"
-      },
-      {
         "developments_in": [
           "N1"
         ],
-        "fact": "F4"
+        "fact": "F3"
       },
       {
         "developments_in": [
           "N2"
         ],
-        "fact": "F5"
+        "fact": "F4"
       },
       {
         "developments_in": [
           "N3"
+        ],
+        "fact": "F5"
+      },
+      {
+        "developments_in": [
+          "N4"
         ],
         "fact": "F6"
       },
@@ -46,7 +48,7 @@
       },
       {
         "developments_in": [
-          "N4"
+          "N5"
         ],
         "fact": "F8"
       },
@@ -61,7 +63,9 @@
         "fact": "F10"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N6"
+        ],
         "fact": "F11"
       },
       {
@@ -71,26 +75,12 @@
       {
         "developments_in": [],
         "fact": "F13"
-      },
-      {
-        "developments_in": [
-          "N6"
-        ],
-        "fact": "F14"
-      },
-      {
-        "developments_in": [],
-        "fact": "F15"
-      },
-      {
-        "developments_in": [],
-        "fact": "F16"
       }
     ],
     "new_stories": [
       {
         "ref": "N1",
-        "title": "Energy ceasefire in the war in Ukraine"
+        "title": "Russia-Ukraine energy ceasefire"
       },
       {
         "ref": "N2",
@@ -102,15 +92,15 @@
       },
       {
         "ref": "N4",
-        "title": "UK military deployment to Saudi Arabia"
+        "title": "UK air defence deployment to Saudi Arabia"
       },
       {
         "ref": "N5",
-        "title": "UK–Germany cooperation on hybrid threats"
+        "title": "UK response to hybrid threats"
       },
       {
         "ref": "N6",
-        "title": "UK information defence capability"
+        "title": "UK-EU summit"
       }
     ]
   }

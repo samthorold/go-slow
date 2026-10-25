@@ -1,10 +1,10 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T01:11:16.335124Z",
+  "recorded_at": "2026-10-25T10:00:20.896013Z",
   "usage": {
-    "input_tokens": 1657,
-    "output_tokens": 989
+    "input_tokens": 1816,
+    "output_tokens": 986
   },
   "output": {
     "causes": [],
@@ -17,12 +17,12 @@
             "role": "place"
           },
           {
-            "entity": "Prime Minister",
-            "role": "actor"
-          },
-          {
             "entity": "Volodymyr Zelenskyy",
             "role": "affected"
+          },
+          {
+            "entity": "the Prime Minister",
+            "role": "actor"
           }
         ]
       },
@@ -30,11 +30,11 @@
         "fact": "F2",
         "roles": [
           {
-            "entity": "Prime Minister",
+            "entity": "Volodymyr Zelenskyy",
             "role": "actor"
           },
           {
-            "entity": "Volodymyr Zelenskyy",
+            "entity": "the Prime Minister",
             "role": "actor"
           }
         ]
@@ -43,12 +43,12 @@
         "fact": "F3",
         "roles": [
           {
-            "entity": "Prime Minister",
+            "entity": "UK",
             "role": "actor"
           },
           {
-            "entity": "UK",
-            "role": "affected"
+            "entity": "the Prime Minister",
+            "role": "actor"
           }
         ]
       },
@@ -56,15 +56,19 @@
         "fact": "F4",
         "roles": [
           {
-            "entity": "Prime Minister",
+            "entity": "UK",
             "role": "actor"
           },
           {
-            "entity": "UK",
+            "entity": "Ukraine",
             "role": "affected"
           },
           {
             "entity": "Volodymyr Zelenskyy",
+            "role": "actor"
+          },
+          {
+            "entity": "the Prime Minister",
             "role": "actor"
           }
         ]

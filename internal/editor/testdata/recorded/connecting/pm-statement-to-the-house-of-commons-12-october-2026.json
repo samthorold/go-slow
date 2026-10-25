@@ -1,16 +1,16 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T01:11:03.52135Z",
+  "recorded_at": "2026-10-25T10:00:10.189324Z",
   "usage": {
-    "input_tokens": 2650,
-    "output_tokens": 2321
+    "input_tokens": 2532,
+    "output_tokens": 2001
   },
   "output": {
     "causes": [
       {
-        "cause": "F7",
-        "effect": "F8"
+        "cause": "F6",
+        "effect": "F7"
       }
     ],
     "facts": [
@@ -18,15 +18,11 @@
         "fact": "F1",
         "roles": [
           {
-            "entity": "Andy Burnham",
+            "entity": "Prime Minister",
             "role": "actor"
           },
           {
-            "entity": "New York",
-            "role": "place"
-          },
-          {
-            "entity": "President Zelenskyy",
+            "entity": "United Nations",
             "role": "affected"
           }
         ]
@@ -35,7 +31,37 @@
         "fact": "F2",
         "roles": [
           {
-            "entity": "Andy Burnham",
+            "entity": "Prime Minister",
+            "role": "actor"
+          },
+          {
+            "entity": "President Zelenskyy",
+            "role": "affected"
+          },
+          {
+            "entity": "New York",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F3",
+        "roles": [
+          {
+            "entity": "President Trump",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F4",
+        "roles": [
+          {
+            "entity": "UK Government",
+            "role": "actor"
+          },
+          {
+            "entity": "Prime Minister",
             "role": "actor"
           },
           {
@@ -45,41 +71,11 @@
         ]
       },
       {
-        "fact": "F3",
-        "roles": [
-          {
-            "entity": "Andy Burnham",
-            "role": "actor"
-          },
-          {
-            "entity": "New York",
-            "role": "place"
-          },
-          {
-            "entity": "President Trump",
-            "role": "affected"
-          }
-        ]
-      },
-      {
-        "fact": "F4",
-        "roles": [
-          {
-            "entity": "President Trump",
-            "role": "actor"
-          }
-        ]
-      },
-      {
         "fact": "F5",
         "roles": [
           {
-            "entity": "United Kingdom",
+            "entity": "UK Government",
             "role": "actor"
-          },
-          {
-            "entity": "Ukraine",
-            "role": "affected"
           },
           {
             "entity": "Russia",
@@ -91,11 +87,15 @@
         "fact": "F6",
         "roles": [
           {
-            "entity": "United Kingdom",
+            "entity": "Prime Minister",
             "role": "actor"
           },
           {
-            "entity": "Russia",
+            "entity": "Royal Air Force",
+            "role": "actor"
+          },
+          {
+            "entity": "Saudi Arabia",
             "role": "affected"
           }
         ]
@@ -104,20 +104,7 @@
         "fact": "F7",
         "roles": [
           {
-            "entity": "United Kingdom",
-            "role": "actor"
-          },
-          {
-            "entity": "Saudi Arabia",
-            "role": "affected"
-          }
-        ]
-      },
-      {
-        "fact": "F8",
-        "roles": [
-          {
-            "entity": "United Kingdom",
+            "entity": "Royal Air Force",
             "role": "actor"
           },
           {
@@ -127,15 +114,15 @@
         ]
       },
       {
-        "fact": "F9",
+        "fact": "F8",
         "roles": [
           {
-            "entity": "Andy Burnham",
+            "entity": "Prime Minister",
             "role": "actor"
           },
           {
             "entity": "Chancellor Merz",
-            "role": "affected"
+            "role": "actor"
           },
           {
             "entity": "Berlin",
@@ -144,40 +131,23 @@
         ]
       },
       {
-        "fact": "F10",
+        "fact": "F9",
         "roles": [
           {
-            "entity": "Andy Burnham",
+            "entity": "Prime Minister",
             "role": "actor"
           },
           {
-            "entity": "NATO Secretary General",
-            "role": "affected"
-          },
-          {
-            "entity": "Oxfordshire",
-            "role": "place"
+            "entity": "United Nations",
+            "role": "occasion"
           }
         ]
       },
       {
-        "fact": "F11",
+        "fact": "F10",
         "roles": [
           {
-            "entity": "RAF Fairford",
-            "role": "place"
-          },
-          {
-            "entity": "RAF Molesworth",
-            "role": "place"
-          }
-        ]
-      },
-      {
-        "fact": "F12",
-        "roles": [
-          {
-            "entity": "Andy Burnham",
+            "entity": "Prime Minister",
             "role": "actor"
           },
           {
@@ -191,54 +161,37 @@
         ]
       },
       {
-        "fact": "F13",
+        "fact": "F11",
         "roles": [
           {
-            "entity": "Andy Burnham",
-            "role": "actor"
-          },
-          {
-            "entity": "President Trump",
+            "entity": "UK-EU summit",
             "role": "affected"
           },
           {
-            "entity": "Falkland Islands",
-            "role": "affected"
+            "entity": "Brussels",
+            "role": "place"
           }
         ]
       },
       {
-        "fact": "F14",
-        "roles": [
-          {
-            "entity": "Foreign Affairs Select Committee",
-            "role": "actor"
-          },
-          {
-            "entity": "National Centre for Information Defence",
-            "role": "affected"
-          }
-        ]
-      },
-      {
-        "fact": "F15",
-        "roles": [
-          {
-            "entity": "Andy Burnham",
-            "role": "actor"
-          },
-          {
-            "entity": "United Nations General Assembly",
-            "role": "occasion"
-          }
-        ]
-      },
-      {
-        "fact": "F16",
+        "fact": "F12",
         "roles": [
           {
             "entity": "G20",
-            "role": "occasion"
+            "role": "affected"
+          },
+          {
+            "entity": "Prime Minister",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F13",
+        "roles": [
+          {
+            "entity": "the new member for Holborn and St Pancras",
+            "role": "affected"
           }
         ]
       }

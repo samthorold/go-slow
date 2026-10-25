@@ -1,99 +1,33 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T01:11:11.440852Z",
+  "recorded_at": "2026-10-25T10:00:16.340818Z",
   "usage": {
-    "input_tokens": 3017,
-    "output_tokens": 1411
+    "input_tokens": 1898,
+    "output_tokens": 1015
   },
   "output": {
-    "causes": [
-      {
-        "cause": "F1",
-        "effect": "F2"
-      }
-    ],
+    "causes": [],
     "facts": [
       {
         "fact": "F1",
         "roles": [
           {
-            "entity": "United Kingdom",
-            "role": "place"
+            "entity": "Andy Burnham",
+            "role": "actor"
           },
           {
             "entity": "Volodymyr Zelenskyy",
-            "role": "actor"
+            "role": "affected"
+          },
+          {
+            "entity": "Downing Street",
+            "role": "place"
           }
         ]
       },
       {
         "fact": "F2",
-        "roles": [
-          {
-            "entity": "Andy Burnham",
-            "role": "actor"
-          },
-          {
-            "entity": "Downing Street",
-            "role": "place"
-          },
-          {
-            "entity": "Volodymyr Zelenskyy",
-            "role": "affected"
-          }
-        ]
-      },
-      {
-        "fact": "F3",
-        "roles": [
-          {
-            "entity": "Andy Burnham",
-            "role": "actor"
-          }
-        ]
-      },
-      {
-        "fact": "F4",
-        "roles": [
-          {
-            "entity": "United Kingdom",
-            "role": "actor"
-          },
-          {
-            "entity": "Ukraine",
-            "role": "affected"
-          }
-        ]
-      },
-      {
-        "fact": "F5",
-        "roles": [
-          {
-            "entity": "United Kingdom",
-            "role": "actor"
-          },
-          {
-            "entity": "Ukraine",
-            "role": "affected"
-          }
-        ]
-      },
-      {
-        "fact": "F6",
-        "roles": [
-          {
-            "entity": "Foreign Secretary",
-            "role": "actor"
-          },
-          {
-            "entity": "Warsaw Security Forum",
-            "role": "occasion"
-          }
-        ]
-      },
-      {
-        "fact": "F7",
         "roles": [
           {
             "entity": "John Healey",
@@ -110,15 +44,11 @@
         ]
       },
       {
-        "fact": "F8",
+        "fact": "F3",
         "roles": [
           {
-            "entity": "Russia",
+            "entity": "UK",
             "role": "actor"
-          },
-          {
-            "entity": "Kyiv",
-            "role": "place"
           },
           {
             "entity": "Ukraine",
@@ -127,15 +57,41 @@
         ]
       },
       {
-        "fact": "F9",
+        "fact": "F4",
         "roles": [
           {
-            "entity": "United Kingdom",
+            "entity": "Foreign Secretary",
             "role": "actor"
           },
           {
+            "entity": "Warsaw Security Forum",
+            "role": "occasion"
+          }
+        ]
+      },
+      {
+        "fact": "F5",
+        "roles": [
+          {
+            "entity": "Andy Burnham",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F6",
+        "roles": [
+          {
             "entity": "Russia",
+            "role": "actor"
+          },
+          {
+            "entity": "Ukraine",
             "role": "affected"
+          },
+          {
+            "entity": "Kyiv",
+            "role": "place"
           }
         ]
       }

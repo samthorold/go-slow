@@ -1,10 +1,10 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T09:41:53.494505Z",
+  "recorded_at": "2026-10-25T09:55:00.441452Z",
   "usage": {
-    "input_tokens": 2264,
-    "output_tokens": 2786
+    "input_tokens": 2246,
+    "output_tokens": 2420
   },
   "output": {
     "claims": [],
@@ -19,37 +19,37 @@
           },
           {
             "kind": "person",
-            "name": "Mr William James Baxter QPM DL",
+            "name": "William James Baxter",
             "role": "Lord-Lieutenant of County Tyrone"
           },
           {
             "kind": "place",
             "name": "County Tyrone",
-            "role": "county"
+            "role": ""
           }
         ],
         "quote": "The King has been pleased to appoint Mr William James Baxter QPM DL as His Majesty’s Lord-Lieutenant of County Tyrone",
-        "statement": "The King appointed Mr William James Baxter QPM DL as Lord-Lieutenant of County Tyrone."
+        "statement": "The King appointed William James Baxter as Lord-Lieutenant of County Tyrone."
       },
       {
         "as_at": "2026-06-17",
         "entities": [
           {
             "kind": "person",
-            "name": "Sir Robert William Lowry Scott KCVO OBE",
+            "name": "Sir Robert William Lowry Scott",
             "role": "Lord-Lieutenant of County Tyrone"
           }
         ],
         "quote": "following his retirement on 17th June 2026",
-        "statement": "Sir Robert William Lowry Scott KCVO OBE retired from the office of Lord-Lieutenant of County Tyrone on 17 June 2026."
+        "statement": "Sir Robert William Lowry Scott retired from the office of Lord-Lieutenant of County Tyrone on 17 June 2026."
       },
       {
         "as_at": "2026-10-15",
         "entities": [
           {
             "kind": "person",
-            "name": "Mr William James Baxter QPM DL",
-            "role": "Superintendent"
+            "name": "William James Baxter",
+            "role": ""
           },
           {
             "kind": "organisation",
@@ -58,37 +58,59 @@
           }
         ],
         "quote": "Mr Baxter served in the RUC/PSNI from 1973 until his retirement in 2003 when he held the rank of Superintendent",
-        "statement": "Mr William James Baxter served in the RUC/PSNI from 1973 until his retirement in 2003, holding the rank of Superintendent."
+        "statement": "William James Baxter served in the RUC/PSNI from 1973 until his retirement in 2003, when he held the rank of Superintendent."
       },
       {
-        "as_at": "2026-10-15",
+        "as_at": "1998-01-01",
         "entities": [
           {
             "kind": "person",
-            "name": "Mr William James Baxter QPM DL",
-            "role": "District Commander"
+            "name": "William James Baxter",
+            "role": ""
+          },
+          {
+            "kind": "organisation",
+            "name": "RUC/PSNI",
+            "role": "police service"
           },
           {
             "kind": "place",
             "name": "Omagh",
-            "role": "police district"
+            "role": ""
+          }
+        ],
+        "quote": "was District Commander in Omagh from 1997",
+        "statement": "William James Baxter was District Commander in Omagh from 1997."
+      },
+      {
+        "as_at": "1998-01-01",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "William James Baxter",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Omagh",
+            "role": ""
           },
           {
             "kind": "occasion",
             "name": "Omagh bombing",
-            "role": "bombing"
+            "role": "bombing in Omagh in 1998"
           }
         ],
-        "quote": "was District Commander in Omagh from 1997 - including the day of the Omagh bombing in 1998",
-        "statement": "Mr William James Baxter was District Commander in Omagh from 1997, including on the day of the Omagh bombing in 1998."
+        "quote": "including the day of the Omagh bombing in 1998",
+        "statement": "William James Baxter was District Commander in Omagh on the day of the Omagh bombing in 1998."
       },
       {
         "as_at": "2026-10-15",
         "entities": [
           {
             "kind": "person",
-            "name": "Mr William James Baxter QPM DL",
-            "role": "Chairperson"
+            "name": "William James Baxter",
+            "role": ""
           },
           {
             "kind": "organisation",
@@ -97,15 +119,15 @@
           }
         ],
         "quote": "He has served as Chairperson of the Omagh Police District Voluntary Welfare Support Group",
-        "statement": "Mr William James Baxter has served as Chairperson of the Omagh Police District Voluntary Welfare Support Group."
+        "statement": "William James Baxter has served as Chairperson of the Omagh Police District Voluntary Welfare Support Group."
       },
       {
         "as_at": "2026-10-15",
         "entities": [
           {
             "kind": "person",
-            "name": "Mr William James Baxter QPM DL",
-            "role": "Clerk of Kirk Session"
+            "name": "William James Baxter",
+            "role": ""
           },
           {
             "kind": "organisation",
@@ -113,42 +135,42 @@
             "role": "church"
           }
         ],
-        "quote": "He served as Clerk of Kirk Session, Newtownstewart Presbyterian Church, for 26 years",
-        "statement": "Mr William James Baxter served as Clerk of Kirk Session at Newtownstewart Presbyterian Church for 26 years."
+        "quote": "He served as Clerk of Kirk Session, Newtownstewart Presbyterian Church, for 26 years and was an Elder for 31 years",
+        "statement": "William James Baxter served as Clerk of Kirk Session at Newtownstewart Presbyterian Church for 26 years and was an Elder there for 31 years."
       },
       {
-        "as_at": "2026-10-15",
+        "as_at": "2013-01-01",
         "entities": [
           {
             "kind": "person",
-            "name": "Mr William James Baxter QPM DL",
-            "role": "Sheriff"
+            "name": "William James Baxter",
+            "role": ""
           },
           {
             "kind": "place",
             "name": "County Tyrone",
-            "role": "county"
+            "role": ""
           }
         ],
         "quote": "Mr Baxter has served as Sheriff for County Tyrone in 2013",
-        "statement": "Mr William James Baxter served as Sheriff for County Tyrone in 2013."
+        "statement": "William James Baxter served as Sheriff for County Tyrone in 2013."
       },
       {
         "as_at": "2026-10-15",
         "entities": [
           {
             "kind": "person",
-            "name": "Mr William James Baxter QPM DL",
+            "name": "William James Baxter",
             "role": "Deputy Lieutenant of County Tyrone"
           },
           {
             "kind": "place",
             "name": "County Tyrone",
-            "role": "county"
+            "role": ""
           }
         ],
         "quote": "Mr Baxter has served as Deputy Lieutenant of County Tyrone for 14 years",
-        "statement": "Mr William James Baxter has served as Deputy Lieutenant of County Tyrone for 14 years."
+        "statement": "William James Baxter has served as Deputy Lieutenant of County Tyrone for 14 years."
       }
     ]
   }

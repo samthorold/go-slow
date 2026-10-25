@@ -1,10 +1,10 @@
 {
   "act": "briefing",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T01:11:55.328379Z",
+  "recorded_at": "2026-10-25T10:01:00.636464Z",
   "usage": {
-    "input_tokens": 2941,
-    "output_tokens": 1732
+    "input_tokens": 2472,
+    "output_tokens": 1646
   },
   "output": {
     "stories": [
@@ -14,7 +14,7 @@
             "developments": [
               "D1"
             ],
-            "text": "President Trump announced a reciprocal energy ceasefire in the war in Ukraine."
+            "text": "President Trump announced a reciprocal energy ceasefire between Russia and Ukraine on 11 October 2026."
           }
         ],
         "story": "S1"
@@ -23,60 +23,15 @@
         "statements": [
           {
             "developments": [
-              "D2"
+              "D9"
             ],
-            "text": "The UK has announced new funding to help Ukraine through its fifth winter under Russian bombardment."
+            "text": "The UK has committed £1.6 billion to deliver more than 5,000 LMMs to Ukraine over the next four years."
           },
-          {
-            "developments": [
-              "D3"
-            ],
-            "text": "The UK is delivering £45 million of surface-to-air missiles to Ukraine."
-          },
-          {
-            "developments": [
-              "D4"
-            ],
-            "text": "The UK has committed £1.6 billion to deliver more than 5000 Lightweight Multirole Missiles to Ukraine over four years."
-          }
-        ],
-        "story": "S2"
-      },
-      {
-        "statements": [
-          {
-            "developments": [
-              "D5"
-            ],
-            "text": "A new UK sanctions package now covers over 90% of Russia's oil producing capacity."
-          }
-        ],
-        "story": "S3"
-      },
-      {
-        "statements": [
-          {
-            "developments": [
-              "D6"
-            ],
-            "text": "Britain has decided to send air defence and a Voyager aircraft to Saudi Arabia."
-          },
-          {
-            "developments": [
-              "D7"
-            ],
-            "text": "The Voyager aircraft sent to Saudi Arabia has completed 14 operational missions."
-          }
-        ],
-        "story": "S4"
-      },
-      {
-        "statements": [
           {
             "developments": [
               "D10"
             ],
-            "text": "The Prime Minister set out the UK's latest package of Lightweight Multirole Missiles for Ukraine."
+            "text": "Prime Minister Andy Burnham has asked Ministers to draw up further sanctions, military aid and fiscal packages for Ukraine."
           }
         ],
         "story": "S7"
@@ -85,9 +40,54 @@
         "statements": [
           {
             "developments": [
-              "D8"
+              "D2"
             ],
-            "text": "Andy Burnham and Chancellor Merz agreed a new partnership in Berlin to tackle hybrid threats."
+            "text": "The UK government has announced new funding to help Ukraine through its fifth winter under Russian bombardment."
+          }
+        ],
+        "story": "S2"
+      },
+      {
+        "statements": [
+          {
+            "developments": [
+              "D3"
+            ],
+            "text": "The UK has announced a new sanctions package, so that over 90% of Russia's oil producing capacity is now covered by UK sanctions."
+          }
+        ],
+        "story": "S3"
+      },
+      {
+        "statements": [
+          {
+            "developments": [
+              "D4"
+            ],
+            "text": "The UK decided to send air defence and a Voyager aircraft to Saudi Arabia to provide air-to-air refuelling support."
+          },
+          {
+            "developments": [
+              "D5"
+            ],
+            "text": "The Voyager aircraft sent to Saudi Arabia has already completed 14 operational missions."
+          }
+        ],
+        "story": "S4"
+      },
+      {
+        "statements": [
+          {
+            "developments": [
+              "D6"
+            ],
+            "text": "The Prime Minister and Chancellor Merz agreed a new partnership in Berlin to tackle hybrid threats."
+          },
+          {
+            "developments": [
+              "D7"
+            ],
+            "text": "In his speech to the UN General Assembly, the Prime Minister confirmed the UK's commitment to establish a new National Centre for Information Defence."
           }
         ],
         "story": "S5"
@@ -96,9 +96,9 @@
         "statements": [
           {
             "developments": [
-              "D9"
+              "D8"
             ],
-            "text": "The Foreign Affairs Select Committee recommended a National Centre for Information Defence."
+            "text": "The UK-EU summit will take place in Brussels on 20 November 2026."
           }
         ],
         "story": "S6"
@@ -107,24 +107,12 @@
         "statements": [
           {
             "developments": [
-              "D11"
-            ],
-            "text": "Construction of the new Great British Railways headquarters at Becketwell, a brownfield site in Derby city centre, is expected to begin in early 2027 and be completed by spring 2029."
-          },
-          {
-            "developments": [
-              "D12"
-            ],
-            "text": "The headquarters site in Derby will accommodate up to 450 staff."
-          },
-          {
-            "developments": [
               "D13"
             ],
-            "text": "The site of the Great British Railways headquarters was unveiled in Derby on 15 October 2026."
+            "text": "In a speech in Scotland, the Prime Minister made an offer of DWP devolution to Scotland."
           }
         ],
-        "story": "S8"
+        "story": "S10"
       },
       {
         "statements": [
@@ -132,22 +120,21 @@
             "developments": [
               "D14"
             ],
-            "text": "Up to 600 apprentices aged 16 to 21 will enrol over the next four years on the rail foundation apprenticeship, with the first starters based in Derby."
+            "text": "The Scottish Government has announced a long-term programme for local government reform."
           }
         ],
-        "story": "S9"
+        "story": "S11"
       },
       {
         "statements": [
           {
             "developments": [
-              "D15",
-              "D16"
+              "D12"
             ],
-            "text": "Andy Burnham made an offer to the Scottish Government to work together to empower Scottish regions, and will call on it to develop a new model of regional empowerment for Scotland through No10 North and the Scotland Office."
+            "text": "The Scottish Government has agreed this week to match the UK Government's £10 million to create two defence technical excellence colleges."
           }
         ],
-        "story": "S11"
+        "story": "S9"
       }
     ]
   }

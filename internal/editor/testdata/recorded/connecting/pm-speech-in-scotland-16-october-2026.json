@@ -1,32 +1,27 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T01:11:42.415519Z",
+  "recorded_at": "2026-10-25T10:00:44.557846Z",
   "usage": {
-    "input_tokens": 3919,
-    "output_tokens": 2458
+    "input_tokens": 2868,
+    "output_tokens": 1183
   },
   "output": {
-    "causes": [
-      {
-        "cause": "F2",
-        "effect": "F9"
-      },
-      {
-        "cause": "F5",
-        "effect": "F6"
-      }
-    ],
+    "causes": [],
     "facts": [
       {
         "fact": "F1",
         "roles": [
           {
-            "entity": "Andy Burnham",
+            "entity": "Motherwell",
+            "role": "place"
+          },
+          {
+            "entity": "Prime Minister",
             "role": "actor"
           },
           {
-            "entity": "Motherwell",
+            "entity": "the college",
             "role": "place"
           }
         ]
@@ -35,8 +30,8 @@
         "fact": "F2",
         "roles": [
           {
-            "entity": "Andy Burnham",
-            "role": "actor"
+            "entity": "Bannatyne House",
+            "role": "place"
           },
           {
             "entity": "Easterhouse",
@@ -49,60 +44,16 @@
           {
             "entity": "Greater Manchester Violence Reduction Unit",
             "role": "actor"
+          },
+          {
+            "entity": "Prime Minister",
+            "role": "actor"
           }
         ]
       },
       {
         "fact": "F3",
         "roles": [
-          {
-            "entity": "Andy Burnham",
-            "role": "actor"
-          },
-          {
-            "entity": "Commonwealth Games",
-            "role": "occasion"
-          }
-        ]
-      },
-      {
-        "fact": "F4",
-        "roles": [
-          {
-            "entity": "Andy Burnham",
-            "role": "actor"
-          },
-          {
-            "entity": "Greater Manchester",
-            "role": "place"
-          }
-        ]
-      },
-      {
-        "fact": "F5",
-        "roles": [
-          {
-            "entity": "Andy Burnham",
-            "role": "actor"
-          }
-        ]
-      },
-      {
-        "fact": "F6",
-        "roles": [
-          {
-            "entity": "Andy Burnham",
-            "role": "actor"
-          }
-        ]
-      },
-      {
-        "fact": "F7",
-        "roles": [
-          {
-            "entity": "Scotland",
-            "role": "place"
-          },
           {
             "entity": "Scottish Government",
             "role": "actor"
@@ -114,88 +65,16 @@
         ]
       },
       {
-        "fact": "F8",
+        "fact": "F4",
         "roles": [
           {
-            "entity": "Andy Burnham",
-            "role": "actor"
-          },
-          {
-            "entity": "Grangemouth",
-            "role": "affected"
-          },
-          {
-            "entity": "Scottish Government",
+            "entity": "Prime Minister",
             "role": "actor"
           }
         ]
       },
       {
-        "fact": "F9",
-        "roles": [
-          {
-            "entity": "Andy Burnham",
-            "role": "actor"
-          },
-          {
-            "entity": "Greater Manchester",
-            "role": "place"
-          }
-        ]
-      },
-      {
-        "fact": "F10",
-        "roles": [
-          {
-            "entity": "Alexander Dennis",
-            "role": "actor"
-          },
-          {
-            "entity": "Andy Burnham",
-            "role": "actor"
-          },
-          {
-            "entity": "Falkirk",
-            "role": "place"
-          },
-          {
-            "entity": "Greater Manchester",
-            "role": "place"
-          }
-        ]
-      },
-      {
-        "fact": "F11",
-        "roles": [
-          {
-            "entity": "Andy Burnham",
-            "role": "actor"
-          },
-          {
-            "entity": "Leigh",
-            "role": "place"
-          }
-        ]
-      },
-      {
-        "fact": "F12",
-        "roles": [
-          {
-            "entity": "Andy Burnham",
-            "role": "actor"
-          },
-          {
-            "entity": "Motherwell",
-            "role": "place"
-          },
-          {
-            "entity": "Pamela",
-            "role": "affected"
-          }
-        ]
-      },
-      {
-        "fact": "F13",
+        "fact": "F5",
         "roles": [
           {
             "entity": "Alan Milburn",
@@ -204,7 +83,7 @@
         ]
       },
       {
-        "fact": "F14",
+        "fact": "F6",
         "roles": [
           {
             "entity": "Scottish Government",
@@ -213,31 +92,18 @@
         ]
       },
       {
-        "fact": "F15",
+        "fact": "F7",
         "roles": [
           {
-            "entity": "Andy Burnham",
+            "entity": "Commonwealth Games",
+            "role": "occasion"
+          },
+          {
+            "entity": "Prime Minister",
             "role": "actor"
           },
           {
-            "entity": "Scottish Parliament",
-            "role": "affected"
-          }
-        ]
-      },
-      {
-        "fact": "F16",
-        "roles": [
-          {
-            "entity": "Andy Burnham",
-            "role": "actor"
-          },
-          {
-            "entity": "Chemify",
-            "role": "actor"
-          },
-          {
-            "entity": "Glasgow",
+            "entity": "Scotland",
             "role": "place"
           }
         ]

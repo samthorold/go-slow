@@ -1,29 +1,23 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T01:10:26.012078Z",
+  "recorded_at": "2026-10-25T09:58:00.668936Z",
   "usage": {
-    "input_tokens": 2663,
-    "output_tokens": 851
+    "input_tokens": 2856,
+    "output_tokens": 655
   },
   "output": {
     "facts": [
       {
-        "developments_in": [
-          "N1"
-        ],
+        "developments_in": [],
         "fact": "F1"
       },
       {
-        "developments_in": [
-          "N1"
-        ],
+        "developments_in": [],
         "fact": "F2"
       },
       {
-        "developments_in": [
-          "N1"
-        ],
+        "developments_in": [],
         "fact": "F3"
       },
       {
@@ -31,9 +25,7 @@
         "fact": "F4"
       },
       {
-        "developments_in": [
-          "N2"
-        ],
+        "developments_in": [],
         "fact": "F5"
       },
       {
@@ -47,17 +39,16 @@
       {
         "developments_in": [],
         "fact": "F8"
-      }
-    ],
-    "new_stories": [
-      {
-        "ref": "N1",
-        "title": "Great British Railways headquarters in Derby"
       },
       {
-        "ref": "N2",
-        "title": "Rail foundation apprenticeship scheme"
+        "developments_in": [],
+        "fact": "F9"
+      },
+      {
+        "developments_in": [],
+        "fact": "F10"
       }
-    ]
+    ],
+    "new_stories": []
   }
 }

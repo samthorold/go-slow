@@ -1,0 +1,26 @@
+{{define "title"}}Register{{end}}
+
+{{define "content"}}
+<p><a href="/">Today's Briefing</a></p>
+<h1>Register</h1>
+<p>Each hypothesis of the end state, with its status and its last reading, derived from the Record by its reading rule.</p>
+<table>
+  <thead>
+    <tr><th>Hypothesis</th><th>Part</th><th>Status</th><th>Last reading</th></tr>
+  </thead>
+  <tbody>
+{{- range .Hypotheses}}
+    <tr>
+      <td>{{.Name}}</td>
+      <td>{{.Part}}</td>
+      <td><strong>{{.Status}}</strong>{{if .Why}}: {{.Why}}{{end}}</td>
+      <td>
+        {{- if .HasLast}}{{.Last}}{{if .Window}}, {{.Window}}{{end}}
+        {{- if .Found}}<ul>{{range .Found}}<li>{{.}}</li>{{end}}</ul>{{end}}
+        {{- else}}None.{{end}}
+      </td>
+    </tr>
+{{- end}}
+  </tbody>
+</table>
+{{end}}

@@ -41,6 +41,13 @@ const fetchTimeout = 30 * time.Second
 func main() {
 	// Logs are an event stream: JSON lines, unbuffered, to stdout.
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	if len(os.Args) > 1 {
+		if err := admin(log, os.Args[1:]); err != nil {
+			log.Error("go-slow admin command failed", "command", os.Args[1], "error", err)
+			os.Exit(1)
+		}
+		return
+	}
 	if err := run(log); err != nil {
 		log.Error("go-slow stopped", "error", err)
 		os.Exit(1)
@@ -153,6 +160,7 @@ func run(log *slog.Logger) error {
 		Stories:    store,
 		Feedback:   feedback.New(store),
 		Kept:       store,
+		Register:   store,
 		BriefingAt: cfg.BriefingAt,
 		Now:        time.Now,
 		Log:        log,

@@ -38,6 +38,9 @@ type storyPage struct {
 // developmentRow is one Development on a Timeline, tracing to its Fact and
 // the Item the Fact was drawn from.
 type developmentRow struct {
+	// Anchor is the Development's id on the page, which the Briefing's
+	// statements link to.
+	Anchor    string
 	AsAt      string
 	Statement string
 	Quote     string
@@ -85,7 +88,8 @@ func (a *app) story(w http.ResponseWriter, r *http.Request) {
 	p := storyPage{Title: s.Title}
 	for _, d := range s.Timeline {
 		p.Timeline = append(p.Timeline, developmentRow{
-			AsAt: factDate(d.Fact), Statement: d.Statement, Quote: d.Quote,
+			Anchor: developmentAnchor(d.ID),
+			AsAt:   factDate(d.Fact), Statement: d.Statement, Quote: d.Quote,
 			ItemTitle: d.ItemTitle, ItemPath: itemPath(d.SourceID, d.EntryID),
 		})
 	}

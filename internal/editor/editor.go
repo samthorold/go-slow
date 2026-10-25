@@ -34,7 +34,11 @@ type Deps struct {
 	PlacingModel Model
 	// Wikidata is where reading looks Entities up first.
 	Wikidata Wikidata
-	Log      *slog.Logger
+	// Briefings is the part of the Record the Briefing is written from and
+	// kept in, and BriefingModel the model it is written with.
+	Briefings     BriefingStore
+	BriefingModel Model
+	Log           *slog.Logger
 }
 
 // Editor does the editorial work over the Record.

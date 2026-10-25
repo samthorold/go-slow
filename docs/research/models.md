@@ -12,16 +12,11 @@ The question: what are the options for the models behind the **Editor**'s acts, 
 - **Providers differ most on data handling.** Fireworks retains nothing by default for serverless inference, but its JSON-schema mode turns reasoning off. OpenRouter retains nothing unless opted in and can be restricted to zero-retention endpoints per request, behind one API for open and closed models (its pricing was not researched). Together stores requests until zero retention is switched on. DeepSeek's own API stores data in China and lists training on inputs, so it is excluded.
 - **Licences** of the leading open models are MIT or MIT-like, restricting only model-as-a-service businesses at scale. Meta's Muse Spark Open is the exception (branding, usage policy, gated download).
 
-**Providers: Claude, and open-weight models through OpenRouter.** The **Owner** keeps Claude as the only closed provider. Open-weight models go through OpenRouter, with zero retention enforced per request and the underlying host pinned per act: one API across many open models suits a choice of model that changes every few months. Hosts per hour (dedicated endpoints, rented GPUs such as Hugging Face Inference Endpoints or Paperspace) were not researched; they buy control and privacy at the cost of running a server, and at go-slow's volume per-token pricing is a few dollars a month.
+**Provider: Claude only.** Open-weight models from an inference provider are paid per token like Claude, and at go-slow's volume the difference is a few dollars a month at most, less than a second adapter, a second set of recordings and a measurement between them cost to build and keep. The findings above on open-weight models stay as the grounding for that call. Hosts per hour (dedicated endpoints, rented GPUs) were not researched; a model the **Owner** runs is the one way open-weight is free at the margin, and it needs a machine running all day (see *Self-hosting* above).
 
-**Shortlist for the first recorded runs**, so measurement decides:
+**Models**, chosen by recorded runs among Claude models: Claude Haiku 5.5 for the daily acts, Claude Opus 5.5 for the **Sunday read**.
 
-| Workload | Open-weight (via OpenRouter) | Claude |
-|---|---|---|
-| Daily acts | GLM-5.3-Flash, DeepSeek V4.1 Flash | Claude Haiku 5.5 |
-| Sunday read | Kimi K3, GLM-5.3 | Claude Opus 5.5 |
-
-**To check against sources before relying on them:** Anthropic's API retention and training terms (that it doesn't train on API requests and keeps them for a limited period is recalled, not sourced), and OpenRouter's pricing (not researched).
+**To check against sources before relying on them:** Anthropic's API retention and training terms (that it doesn't train on API requests and keeps them for a limited period is recalled, not sourced).
 
 ## Grounding
 

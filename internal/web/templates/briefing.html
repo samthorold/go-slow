@@ -19,6 +19,9 @@
 <p>Writing the Briefing failed at {{.At}}; it is tried again shortly.</p>
 <pre hx-disable>{{.Reason}}</pre>
 {{- end}}
+{{- else if .Emptied}}
+<p>Your Feedback took every Story out of this Briefing. Something did move on; this is the Feedback that took it out, which you can undo:</p>
+{{template "kept" .TakenOut}}
 {{- else if not .Stories}}
 <p>Nothing moved on in the Stories your Topics follow.</p>
 {{- end}}
@@ -42,5 +45,11 @@
 {{- end}}
 {{- if .Exists}}
 {{template "missedStory" .MissedStory}}
+{{- end}}
+{{- if .Feedback}}
+<section aria-labelledby="your-feedback">
+  <h2 id="your-feedback">Your Feedback on this Briefing</h2>
+  {{- template "kept" .Feedback}}
+</section>
 {{- end}}
 {{end}}

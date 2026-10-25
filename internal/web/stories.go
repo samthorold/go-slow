@@ -52,6 +52,9 @@ type storyPage struct {
 	Timeline          []developmentRow
 	Causes            []causeRow
 	Connected         []connectedRow
+	// Feedback is the Feedback on the Story, its Developments, their Facts
+	// and its Connections, each to undo here.
+	Feedback []keptRow
 }
 
 // developmentRow is one Development on a Timeline, tracing to its Fact and
@@ -191,5 +194,45 @@ func (a *app) storyWith(w http.ResponseWriter, r *http.Request, id int64, status
 		}
 		p.Connected = append(p.Connected, row)
 	}
+	if p.Feedback, err = a.storyFeedbackRows(r, s); err != nil {
+		a.serverError(w, r, err)
+		return
+	}
 	a.renderStatus(w, r, status, storyTmpl, p)
+}
+
+// storyFeedbackRows is the Feedback about s: on the Story or one of its
+// Developments, or on a Fact or Connection its page shows.
+func (a *app) storyFeedbackRows(r *http.Request, s editor.Story) ([]keptRow, error) {
+	kept, err := a.Kept.KeptFeedback(r.Context())
+	if err != nil {
+		return nil, err
+	}
+	facts := map[int64]bool{}
+	for _, d := range s.Timeline {
+		facts[d.ID] = true
+	}
+	for _, c := range s.Causes {
+		facts[c.Cause.ID], facts[c.Effect.ID] = true, true
+	}
+	var out []keptRow
+	for _, k := range kept {
+		about := k.StoryID == s.ID ||
+			(k.Level == feedback.Fact && facts[k.FactID]) ||
+			(k.Level == feedback.Connection && facts[k.FactID] && facts[k.ToFactID])
+		if about {
+			out = append(out, a.keptRow(k, storyPath(s.ID)))
+		}
+	}
+	return out, nil
+}
+
+// undoOnStory is an undo from a Story's page, which it lands back on.
+func (a *app) undoOnStory(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	a.undo(w, r, storyPath(id))
 }

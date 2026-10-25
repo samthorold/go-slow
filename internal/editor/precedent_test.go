@@ -189,6 +189,26 @@ func TestFeedbackOnAWithdrawnFactIsNoPrecedent(t *testing.T) {
 	}
 }
 
+func TestUndoneFeedbackIsNoPrecedent(t *testing.T) {
+	store := record(t)
+	story, fact := speechStory(t, store)
+	f := give(t, store, "unwanted", story, fact)
+	if _, err := feedback.New(store).Undo(t.Context(), f.ID, saturday); err != nil {
+		t.Fatal(err)
+	}
+	readLater(t, store)
+	placing := &fakeModel{output: `{"new_stories": [], "facts": [{"fact": "F1", "developments_in": []}]}`}
+	ed, _ := placer(store, placing)
+
+	if err := ed.PlaceWaiting(t.Context(), saturday); err != nil {
+		t.Fatal(err)
+	}
+
+	if in := placing.sent[0].Input; !strings.Contains(in, "Precedents: none") {
+		t.Errorf("the placing is shown undone Feedback:\n%s", in)
+	}
+}
+
 // storyTitled is the Story with the title, and its first Development's Fact.
 func storyTitled(t *testing.T, store *sqlite.Store, title string) (story, fact int64) {
 	t.Helper()

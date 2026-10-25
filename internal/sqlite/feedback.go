@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/feedback"
@@ -24,7 +25,8 @@ func (s *Store) About(ctx context.Context, f feedback.Feedback) (feedback.About,
 	story := func() (bool, error) { return exists(`SELECT 1 FROM stories WHERE id = ?`, f.StoryID) }
 	fact := func(id int64) (bool, error) { return exists(`SELECT 1 FROM facts WHERE id = ?`, id) }
 	development := func() (bool, error) {
-		return exists(`SELECT 1 FROM developments WHERE story_id = ? AND fact_id = ?`, f.StoryID, f.FactID)
+		return exists(`SELECT 1 FROM developments WHERE story_id = ? AND fact_id = ? AND NOT `+addedByUndone,
+			f.StoryID, f.FactID)
 	}
 	var err error
 	var facts []int64
@@ -106,11 +108,27 @@ func (s *Store) About(ctx context.Context, f feedback.Feedback) (feedback.About,
 	return a, nil
 }
 
-// KeptFeedback is every piece of Feedback, as given, newest first.
+// KeptFeedback is every piece of Feedback, as given, newest first, the
+// undone with the rest.
 func (s *Store) KeptFeedback(ctx context.Context) ([]feedback.Kept, error) {
+	return s.kept(ctx, ``)
+}
+
+// Feedback is the piece with id, as given, reporting whether it is in the
+// Record.
+func (s *Store) Feedback(ctx context.Context, id int64) (feedback.Feedback, bool, error) {
+	kept, err := s.kept(ctx, `WHERE feedback.id = ?`, id)
+	if err != nil || len(kept) == 0 {
+		return feedback.Feedback{}, false, err
+	}
+	return kept[0].Feedback, true, nil
+}
+
+// kept is the Feedback the where clause selects, newest first.
+func (s *Store) kept(ctx context.Context, where string, args ...any) ([]feedback.Kept, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT feedback.id, kind, level, coalesce(story_id, 0), coalesce(fact_id, 0), coalesce(to_fact_id, 0),
-			feedback.title, fact_ids, feedback.day, depth, given_at,
+			feedback.title, fact_ids, feedback.day, depth, given_at, coalesce(undone_at, ''),
 			coalesce(stories.title, ''), coalesce(f.statement, ''), coalesce(g.statement, ''),
 			coalesce(feedback.assessment_id, 0), coalesce(a.statement, ''), coalesce(feedback.read_id, 0),
 			coalesce(ar.day, r.day, '')
@@ -121,7 +139,8 @@ func (s *Store) KeptFeedback(ctx context.Context) ([]feedback.Kept, error) {
 			LEFT JOIN assessments a ON a.id = feedback.assessment_id
 			LEFT JOIN sunday_reads ar ON ar.id = a.read_id
 			LEFT JOIN sunday_reads r ON r.id = feedback.read_id
-		ORDER BY given_at DESC, feedback.id DESC`)
+		`+where+`
+		ORDER BY given_at DESC, feedback.id DESC`, args...)
 	if err != nil {
 		return nil, fmt.Errorf("kept feedback: %w", err)
 	}
@@ -129,12 +148,12 @@ func (s *Store) KeptFeedback(ctx context.Context) ([]feedback.Kept, error) {
 	var out []feedback.Kept
 	for rows.Next() {
 		var k feedback.Kept
-		var kind, level, facts, at string
+		var kind, level, facts, at, undone string
 		if err := rows.Scan(&k.ID, &kind, &level, &k.StoryID, &k.FactID, &k.ToFactID, &k.Title, &facts, &k.Day,
-			&k.Depth, &at, &k.Story, &k.Fact, &k.ToFact, &k.AssessmentID, &k.Assessment, &k.ReadID, &k.ReadDay); err != nil {
+			&k.Depth, &at, &undone, &k.Story, &k.Fact, &k.ToFact, &k.AssessmentID, &k.Assessment, &k.ReadID, &k.ReadDay); err != nil {
 			return nil, fmt.Errorf("kept feedback: %w", err)
 		}
-		k.Kind, k.Level, k.GivenAt = feedback.Kind(kind), feedback.Level(level), parseTime(at)
+		k.Kind, k.Level, k.GivenAt, k.UndoneAt = feedback.Kind(kind), feedback.Level(level), parseTime(at), parseTime(undone)
 		if err := json.Unmarshal([]byte(facts), &k.FactIDs); err != nil {
 			return nil, fmt.Errorf("kept feedback: %w", err)
 		}
@@ -235,7 +254,14 @@ func apply(ctx context.Context, tx *sql.Tx, by int64, f feedback.Feedback, e fee
 		}
 	}
 	if d := e.AddDevelopment; d != nil {
-		if err := exec(`INSERT INTO developments (story_id, fact_id, missed_by) VALUES (?, ?, ?)`, d.A, d.B, by); err != nil {
+		// A Development an undone missed piece added is in the Record,
+		// withdrawn; adding it again names the new piece.
+		if err := exec(`INSERT INTO developments (story_id, fact_id, missed_by) VALUES (?, ?, ?)
+			ON CONFLICT (story_id, fact_id) DO UPDATE SET missed_by = excluded.missed_by`, d.A, d.B, by); err != nil {
+			return err
+		}
+		if err := exec(`UPDATE developments SET withdrawn_by = `+developmentWithdrawnBy+` WHERE story_id = ? AND fact_id = ?`,
+			d.A, d.B); err != nil {
 			return err
 		}
 	}
@@ -270,6 +296,113 @@ func apply(ctx context.Context, tx *sql.Tx, by int64, f feedback.Feedback, e fee
 	if c := e.WithdrawConnection; c != nil {
 		if err := exec(`UPDATE fact_connections SET withdrawn_by = coalesce(withdrawn_by, ?)
 			WHERE from_fact_id = ? AND to_fact_id = ?`, by, c.A, c.B); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Undo marks f undone at at and lifts the marks e made, all at once. A mark
+// is lifted by working it out again from the Feedback still standing: the
+// earliest piece that makes it, as Give's marks name, or none.
+func (s *Store) Undo(ctx context.Context, f feedback.Feedback, e feedback.Effect, at time.Time) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+	res, err := tx.ExecContext(ctx, `UPDATE feedback SET undone_at = ? WHERE id = ? AND undone_at IS NULL`,
+		formatTime(at), f.ID)
+	if err != nil {
+		return fmt.Errorf("undo feedback %d: %w", f.ID, err)
+	}
+	if n, err := res.RowsAffected(); err != nil || n == 0 {
+		// Already undone: nothing changes.
+		return err
+	}
+	if err := lift(ctx, tx, f, e); err != nil {
+		return fmt.Errorf("undo feedback %d: %w", f.ID, err)
+	}
+	return tx.Commit()
+}
+
+// addedByUndone is whether a Development, or a Story, was added by a
+// missed piece since undone: it is no longer added, and is shown nowhere.
+const (
+	addedByUndone      = `EXISTS (SELECT 1 FROM feedback u WHERE u.id = developments.missed_by AND u.undone_at IS NOT NULL)`
+	storyAddedByUndone = `EXISTS (SELECT 1 FROM feedback u WHERE u.id = stories.missed_by AND u.undone_at IS NOT NULL)`
+)
+
+// Each mark, worked out from the Feedback standing: the earliest piece not
+// undone that makes it, or NULL.
+const (
+	// A Fact is withdrawn by a wrong Fact.
+	factWithdrawnBy = `(SELECT min(w.id) FROM feedback w WHERE w.undone_at IS NULL
+		AND w.kind = 'wrong' AND w.level = 'fact' AND w.fact_id = facts.id)`
+	// A Development is withdrawn with its wrong Fact, or by undoing the
+	// missed piece that added it, which then no longer adds it.
+	developmentWithdrawnBy = `coalesce((SELECT min(w.id) FROM feedback w WHERE w.undone_at IS NULL
+		AND w.kind = 'wrong' AND w.level = 'fact' AND w.fact_id = developments.fact_id),
+		(SELECT m.id FROM feedback m WHERE m.id = developments.missed_by AND m.undone_at IS NOT NULL))`
+	// A Connection is withdrawn by a wrong Connection, or with a wrong Fact
+	// it connects.
+	connectionWithdrawnBy = `(SELECT min(w.id) FROM feedback w WHERE w.undone_at IS NULL AND w.kind = 'wrong'
+		AND ((w.level = 'fact' AND w.fact_id IN (fact_connections.from_fact_id, fact_connections.to_fact_id))
+			OR (w.level = 'connection' AND w.fact_id = fact_connections.from_fact_id
+				AND w.to_fact_id = fact_connections.to_fact_id)))`
+	// An Assessment is withdrawn by a wrong Assessment.
+	assessmentWithdrawnBy = `(SELECT min(w.id) FROM feedback w WHERE w.undone_at IS NULL
+		AND w.kind = 'wrong' AND w.level = 'assessment' AND w.assessment_id = assessments.id)`
+	// A Story or a Development is out of the Briefing by unwanted.
+	storyUnwantedBy = `(SELECT min(w.id) FROM feedback w WHERE w.undone_at IS NULL
+		AND w.kind = 'unwanted' AND w.level = 'story' AND w.story_id = stories.id)`
+	developmentUnwantedBy = `(SELECT min(w.id) FROM feedback w WHERE w.undone_at IS NULL
+		AND w.kind = 'unwanted' AND w.level = 'development'
+		AND w.story_id = developments.story_id AND w.fact_id = developments.fact_id)`
+)
+
+// lift works out again each mark e made, from the Feedback standing.
+func lift(ctx context.Context, tx *sql.Tx, f feedback.Feedback, e feedback.Effect) error {
+	exec := func(query string, args ...any) error {
+		_, err := tx.ExecContext(ctx, query, args...)
+		return err
+	}
+	if e.WithdrawFact != 0 {
+		if err := exec(`UPDATE facts SET withdrawn_by = `+factWithdrawnBy+` WHERE id = ?`, e.WithdrawFact); err != nil {
+			return err
+		}
+		if err := exec(`UPDATE developments SET withdrawn_by = `+developmentWithdrawnBy+` WHERE fact_id = ?`, e.WithdrawFact); err != nil {
+			return err
+		}
+		if err := exec(`UPDATE fact_connections SET withdrawn_by = `+connectionWithdrawnBy+`
+			WHERE from_fact_id = ?1 OR to_fact_id = ?1`, e.WithdrawFact); err != nil {
+			return err
+		}
+	}
+	if c := e.WithdrawConnection; c != nil {
+		if err := exec(`UPDATE fact_connections SET withdrawn_by = `+connectionWithdrawnBy+`
+			WHERE from_fact_id = ? AND to_fact_id = ?`, c.A, c.B); err != nil {
+			return err
+		}
+	}
+	if e.WithdrawAssessment != 0 {
+		if err := exec(`UPDATE assessments SET withdrawn_by = `+assessmentWithdrawnBy+` WHERE id = ?`, e.WithdrawAssessment); err != nil {
+			return err
+		}
+	}
+	if e.NewStory != nil || e.AddDevelopment != nil {
+		if err := exec(`UPDATE developments SET withdrawn_by = `+developmentWithdrawnBy+` WHERE missed_by = ?`, f.ID); err != nil {
+			return err
+		}
+	}
+	if e.UnwantedStory != 0 {
+		if err := exec(`UPDATE stories SET unwanted_by = `+storyUnwantedBy+` WHERE id = ?`, e.UnwantedStory); err != nil {
+			return err
+		}
+	}
+	if d := e.UnwantedDevelopment; d != nil {
+		if err := exec(`UPDATE developments SET unwanted_by = `+developmentUnwantedBy+` WHERE story_id = ? AND fact_id = ?`,
+			d.A, d.B); err != nil {
 			return err
 		}
 	}

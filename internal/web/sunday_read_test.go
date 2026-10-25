@@ -111,6 +111,33 @@ func TestWrongOnAnAssessmentWithdrawsItAndTheReadReRendersWithoutWhatCitesIt(t *
 	}
 }
 
+func TestWrongOnAnAssessmentIsUndoneFromTheReadWhichReRendersWithWhatCitesIt(t *testing.T) {
+	store := openStore(t)
+	speechStory(t, store)
+	writeSundayRead(t, store, sunday, `{"statements": [
+		{"text": "The Prime Minister is courting Scotland.", "cites": ["N1"]}],
+		"assessments": [{"ref": "N1", "statement": "The Prime Minister is courting Scottish voters.", "facts": ["F1"], "supersedes": ""}],
+		"stories": []}`)
+	app, _ := newAppWithLog(t, sunday, store)
+	send(t, app, "POST", readFeedback, url.Values{"kind": {"wrong"}, "level": {"assessment"}, "assessment": {"1"}})
+	send(t, app, "POST", readFeedback, url.Values{"kind": {"new to me"}, "level": {"sunday read"}, "read": {"1"}})
+	page := get(t, app, "/sunday-reads/2026-10-25")
+	path := undoForm(page.body, 1)
+	if path != "/sunday-reads/2026-10-25/feedback/1/undone" || undoForm(page.body, 2) == "" {
+		t.Fatalf("the read offers no undo of its Feedback: %q\n%s", path, page.body)
+	}
+
+	res := send(t, app, "PUT", path, nil)
+
+	if res.status != 303 || res.header.Get("Location") != "/sunday-reads/2026-10-25" {
+		t.Fatalf("status %d, Location %q:\n%s", res.status, res.header.Get("Location"), res.body)
+	}
+	after := get(t, app, "/sunday-reads/2026-10-25")
+	if !strings.Contains(after.body, "The Prime Minister is courting Scotland.") || strings.Contains(after.body, "<strong>Withdrawn</strong>") {
+		t.Errorf("the read does not re-render with the Assessment and what cites it:\n%s", after.body)
+	}
+}
+
 func TestNewToMeOnTheSundayReadIsKept(t *testing.T) {
 	store := openStore(t)
 	speechStory(t, store)

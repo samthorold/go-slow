@@ -14,7 +14,7 @@ import (
 // Developments whose Facts share an Entity with tp's Facts, or whose Items
 // share a Topic with tp's Item: those sharing the most Entities and Topics
 // first, then the newest. Feedback on a withdrawn Fact is never one: the
-// acts never see what was withdrawn.
+// acts never see what was withdrawn. Nor is Feedback the Owner undid.
 func (s *Store) PlacingPrecedents(ctx context.Context, tp editor.ToPlace, limit int) ([]editor.Precedent, error) {
 	names, err := json.Marshal(entityNamesOf(tp))
 	if err != nil {
@@ -32,7 +32,7 @@ func (s *Store) PlacingPrecedents(ctx context.Context, tp editor.ToPlace, limit 
 			FROM feedback
 				JOIN facts ON facts.id = feedback.fact_id
 				LEFT JOIN stories ON stories.id = feedback.story_id
-			WHERE feedback.level = 'development' AND facts.withdrawn_by IS NULL)
+			WHERE feedback.level = 'development' AND feedback.undone_at IS NULL AND facts.withdrawn_by IS NULL)
 		WHERE shared > 0
 		ORDER BY shared DESC, given_at DESC, id DESC
 		LIMIT ?4`, string(names), tp.Item.SourceID, tp.Item.EntryID, limit)
@@ -58,7 +58,8 @@ func (s *Store) PlacingPrecedents(ctx context.Context, tp editor.ToPlace, limit 
 // sharing the most Topics first, then the newest. An Item's Entities are
 // known only once it is read, so a Topic is all reading can be matched by.
 // The Facts are withdrawn, by that Feedback; they are shown as what the
-// Editor got wrong, never as part of the Record.
+// Editor got wrong, never as part of the Record. Feedback the Owner undid is
+// never one.
 func (s *Store) ReadingPrecedents(ctx context.Context, it editor.Item, limit int) ([]editor.Precedent, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT id, kind, depth, given_at, statement, quote FROM (
@@ -67,7 +68,7 @@ func (s *Store) ReadingPrecedents(ctx context.Context, it editor.Item, limit int
 					WHERE theirs.source_id = facts.source_id AND theirs.entry_id = facts.entry_id
 						AND mine.source_id = ?1 AND mine.entry_id = ?2) AS shared
 			FROM feedback JOIN facts ON facts.id = feedback.fact_id
-			WHERE feedback.kind = 'wrong' AND feedback.level = 'fact')
+			WHERE feedback.kind = 'wrong' AND feedback.level = 'fact' AND feedback.undone_at IS NULL)
 		WHERE shared > 0
 		ORDER BY shared DESC, given_at DESC, id DESC
 		LIMIT ?3`, it.SourceID, it.EntryID, limit)

@@ -16,6 +16,9 @@ import (
 type Feedback interface {
 	// Give keeps Feedback as given, at now, and fixes the Record by it.
 	Give(ctx context.Context, d feedback.Draft, now time.Time) (feedback.Feedback, feedback.Errors, error)
+	// Undo undoes the piece of Feedback with id, at now, lifting the marks
+	// it made; undoing it again changes nothing.
+	Undo(ctx context.Context, id int64, now time.Time) (feedback.Feedback, error)
 }
 
 // Kept answers the query the Feedback page needs.
@@ -40,6 +43,15 @@ type keptRow struct {
 	Briefing  string
 	BriefPath string
 	GivenAt   string
+	// Undone is when the Owner undid it; UndoPath, for a piece standing, is
+	// where its undo goes from this page.
+	Undone, UndoPath string
+}
+
+// undonePath is where the undo of the piece id goes from the page at page
+// ("" for the Feedback page).
+func undonePath(page string, id int64) string {
+	return page + "/feedback/" + strconv.FormatInt(id, 10) + "/undone"
 }
 
 func (a *app) feedback(w http.ResponseWriter, r *http.Request) {
@@ -48,38 +60,78 @@ func (a *app) feedback(w http.ResponseWriter, r *http.Request) {
 		a.serverError(w, r, err)
 		return
 	}
-	loc := a.Now().Location()
 	var p feedbackPage
 	for _, k := range kept {
-		row := keptRow{Kind: string(k.Kind), Level: string(k.Level), Typed: k.Title,
-			Depth: k.Depth.String(), GivenAt: when(k.GivenAt, loc)}
-		switch k.Level {
-		case feedback.Story:
-			row.About = k.Story
-		case feedback.Development:
-			row.About = k.Fact + " in " + k.Story
-		case feedback.Fact:
-			row.About = k.Fact
-		case feedback.Connection:
-			row.About = k.Fact + " led to " + k.ToFact
-		case feedback.Assessment:
-			row.About, row.AboutPath = k.Assessment, assessmentPath(k.AssessmentID)
-		case feedback.SundayRead:
-			row.About, row.AboutPath = "The Sunday read", sundayReadPath(k.ReadDay)
-		}
-		if k.StoryID != 0 {
-			row.AboutPath = storyPath(k.StoryID)
-		}
-		// Feedback on a Sunday read was given on the read, not a Briefing.
-		onRead := k.Level == feedback.Assessment || k.Level == feedback.SundayRead
-		if k.Day != "" && !onRead {
-			if day, err := time.Parse(time.DateOnly, k.Day); err == nil {
-				row.Briefing, row.BriefPath = day.Format("2 January 2006"), briefingPath(k.Day)
-			}
-		}
-		p.Feedback = append(p.Feedback, row)
+		p.Feedback = append(p.Feedback, a.keptRow(k, ""))
 	}
 	a.render(w, r, feedbackTmpl, p)
+}
+
+// keptRow is a piece of Feedback as a page lists it, undone from the page
+// at page.
+func (a *app) keptRow(k feedback.Kept, page string) keptRow {
+	loc := a.Now().Location()
+	row := keptRow{Kind: string(k.Kind), Level: string(k.Level), Typed: k.Title,
+		Depth: k.Depth.String(), GivenAt: when(k.GivenAt, loc)}
+	if k.Undone() {
+		row.Undone = when(k.UndoneAt, loc)
+	} else {
+		row.UndoPath = undonePath(page, k.ID)
+	}
+	switch k.Level {
+	case feedback.Story:
+		row.About = k.Story
+	case feedback.Development:
+		row.About = k.Fact + " in " + k.Story
+	case feedback.Fact:
+		row.About = k.Fact
+	case feedback.Connection:
+		row.About = k.Fact + " led to " + k.ToFact
+	case feedback.Assessment:
+		row.About, row.AboutPath = k.Assessment, assessmentPath(k.AssessmentID)
+	case feedback.SundayRead:
+		row.About, row.AboutPath = "The Sunday read", sundayReadPath(k.ReadDay)
+	}
+	if k.StoryID != 0 {
+		row.AboutPath = storyPath(k.StoryID)
+	}
+	if day, ok := briefingGivenOn(k.Feedback); ok {
+		if d, err := time.Parse(time.DateOnly, day); err == nil {
+			row.Briefing, row.BriefPath = d.Format("2 January 2006"), briefingPath(day)
+		}
+	}
+	return row
+}
+
+// briefingGivenOn is the day of the Briefing f was given on, if it was.
+// Feedback on a Sunday read was given on the read, not a Briefing.
+func briefingGivenOn(f feedback.Feedback) (string, bool) {
+	onRead := f.Level == feedback.Assessment || f.Level == feedback.SundayRead
+	return f.Day, f.Day != "" && !onRead
+}
+
+// undo undoes the piece of Feedback the path names, landing back on the
+// page to: the page re-renders with the Record as the undo left it.
+func (a *app) undo(w http.ResponseWriter, r *http.Request, to string) {
+	id, err := strconv.ParseInt(r.PathValue("feedback"), 10, 64)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	_, err = a.Feedback.Undo(r.Context(), id, a.Now())
+	switch {
+	case errors.Is(err, feedback.ErrNotInRecord):
+		http.NotFound(w, r)
+	case err != nil:
+		a.serverError(w, r, err)
+	default:
+		http.Redirect(w, r, to, http.StatusSeeOther)
+	}
+}
+
+// undoOnFeedbackPage is an undo from the Feedback page.
+func (a *app) undoOnFeedbackPage(w http.ResponseWriter, r *http.Request) {
+	a.undo(w, r, "/feedback")
 }
 
 // giveButton is a piece of Feedback given with one button.

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/samthorold/go-slow/internal/editor"
+	"github.com/samthorold/go-slow/internal/feedback"
 )
 
 // SundayReads answers the queries the Sunday read's page needs.
@@ -62,6 +63,9 @@ type sundayReadPage struct {
 	// Failure is the latest failure to write the read, for a Sunday with
 	// none.
 	Failure *failureRow
+	// Feedback is the Feedback on the read and its Assessments, each to
+	// undo here.
+	Feedback []keptRow
 }
 
 type readStatementRow struct {
@@ -153,7 +157,30 @@ func (a *app) sundayRead(w http.ResponseWriter, r *http.Request) {
 	for _, s := range read.Stories {
 		p.Stories = append(p.Stories, startedStoryRow{Title: s.Title, Path: storyPath(s.ID)})
 	}
+	if exists {
+		kept, err := a.Kept.KeptFeedback(r.Context())
+		if err != nil {
+			a.serverError(w, r, err)
+			return
+		}
+		for _, k := range kept {
+			if (k.Level == feedback.SundayRead || k.Level == feedback.Assessment) && k.ReadDay == key {
+				p.Feedback = append(p.Feedback, a.keptRow(k, sundayReadPath(key)))
+			}
+		}
+	}
 	a.render(w, r, sundayReadTmpl, p)
+}
+
+// undoOnSundayRead is an undo from a Sunday read, which it lands back on.
+func (a *app) undoOnSundayRead(w http.ResponseWriter, r *http.Request) {
+	now := a.Now()
+	day, err := time.ParseInLocation(time.DateOnly, r.PathValue("day"), now.Location())
+	if err != nil || day.After(now) || day.Weekday() != time.Sunday {
+		http.NotFound(w, r)
+		return
+	}
+	a.undo(w, r, sundayReadPath(day.Format(time.DateOnly)))
 }
 
 // citation is what a statement in the read for day cites, as the page

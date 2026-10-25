@@ -135,8 +135,8 @@ func (s *Store) Story(ctx context.Context, id int64) (editor.Story, bool, error)
 // otherwise without it, as the acts see the Story.
 func (s *Store) story(ctx context.Context, id int64, withdrawn bool) (editor.Story, bool, error) {
 	st := editor.Story{ID: id}
-	err := s.db.QueryRowContext(ctx, `SELECT title, unwanted_by IS NOT NULL, missed_by IS NOT NULL FROM stories WHERE id = ?`,
-		id).Scan(&st.Title, &st.Unwanted, &st.Missed)
+	err := s.db.QueryRowContext(ctx, `SELECT title, unwanted_by IS NOT NULL, missed_by IS NOT NULL AND NOT `+storyAddedByUndone+`
+		FROM stories WHERE id = ?`, id).Scan(&st.Title, &st.Unwanted, &st.Missed)
 	if errors.Is(err, sql.ErrNoRows) {
 		return st, false, nil
 	}
@@ -149,7 +149,7 @@ func (s *Store) story(ctx context.Context, id int64, withdrawn bool) (editor.Sto
 			developments.withdrawn_by IS NOT NULL, developments.unwanted_by IS NOT NULL, developments.missed_by IS NOT NULL
 		FROM developments JOIN facts ON facts.id = developments.fact_id
 			JOIN items USING (source_id, entry_id)
-		WHERE developments.story_id = ? AND (? OR developments.withdrawn_by IS NULL)
+		WHERE developments.story_id = ? AND (? OR developments.withdrawn_by IS NULL) AND NOT `+addedByUndone+`
 		ORDER BY facts.as_at, items.published, facts.id`, id, withdrawn)
 	if err != nil {
 		return st, false, fmt.Errorf("story %d: %w", id, err)
@@ -191,6 +191,7 @@ func (s *Store) ListStories(ctx context.Context) ([]editor.StoryListing, error) 
 		SELECT stories.id, stories.title, count(facts.id), coalesce(max(facts.as_at), '')
 		FROM stories LEFT JOIN developments ON developments.story_id = stories.id
 			LEFT JOIN facts ON facts.id = developments.fact_id
+		WHERE NOT `+storyAddedByUndone+`
 		GROUP BY stories.id
 		ORDER BY max(facts.as_at) DESC, stories.id DESC`)
 	if err != nil {

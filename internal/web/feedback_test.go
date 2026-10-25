@@ -3,6 +3,7 @@ package web_test
 import (
 	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -188,6 +189,145 @@ func TestEveryPieceOfFeedbackIsKeptAsGivenWithItsDepthAndWhen(t *testing.T) {
 		if !strings.Contains(res.body, want) {
 			t.Errorf("the Feedback page lacks %q:\n%s", want, res.body)
 		}
+	}
+}
+
+// undoForm is the path the page's undo of the piece of Feedback goes to, or
+// "" if the page offers none.
+func undoForm(body string, id int) string {
+	m := regexp.MustCompile(`<form[^>]*hx-put="([^"]*/feedback/` + strconv.Itoa(id) + `/undone)"[^>]*hx-target="body"`).FindStringSubmatch(body)
+	if m == nil {
+		return ""
+	}
+	return m[1]
+}
+
+func TestFeedbackIsUndoneFromTheFeedbackPageAndTheBriefingReRendersWithWhatItHid(t *testing.T) {
+	store := openStore(t)
+	speechStory(t, store)
+	writeBriefing(t, store, saturday, spoke)
+	app, _ := newAppWithLog(t, saturday, store)
+	send(t, app, "POST", today, url.Values{"kind": {"wrong"}, "level": {"fact"}, "fact": {"1"}})
+	path := undoForm(get(t, app, "/feedback").body, 1)
+	if path != "/feedback/1/undone" {
+		t.Fatalf("the Feedback page offers no undo of the piece: %q", path)
+	}
+
+	res := send(t, app, "PUT", path, nil)
+
+	if res.status != 303 || res.header.Get("Location") != "/feedback" {
+		t.Fatalf("status %d, Location %q, want 303 to /feedback:\n%s", res.status, res.header.Get("Location"), res.body)
+	}
+	list := get(t, app, "/feedback")
+	if !strings.Contains(list.body, "Undone Sat 24 Oct 2026") || undoForm(list.body, 1) != "" {
+		t.Errorf("the piece is not listed marked undone, or can be undone again:\n%s", list.body)
+	}
+	if after := get(t, app, "/"); !strings.Contains(after.body, "The Prime Minister spoke in Motherwell.") {
+		t.Errorf("the Briefing does not re-render with the statement the undone piece hid:\n%s", after.body)
+	}
+	if again := send(t, app, "PUT", path, nil); again.status != 303 {
+		t.Errorf("undoing it again: status %d, want 303 with nothing changed", again.status)
+	}
+	if res := send(t, app, "PUT", "/feedback/9/undone", nil); res.status != 404 {
+		t.Errorf("undoing a piece not in the Record: status %d, want 404", res.status)
+	}
+}
+
+func TestABriefingEmptiedByFeedbackSaysSoAndTheFeedbackIsUndoneFromIt(t *testing.T) {
+	store := openStore(t)
+	speechStory(t, store)
+	writeBriefing(t, store, saturday, spoke)
+	app, _ := newAppWithLog(t, saturday, store)
+	send(t, app, "POST", today, url.Values{"kind": {"unwanted"}, "level": {"story"}, "story": {"1"}})
+
+	emptied := get(t, app, "/")
+
+	if strings.Contains(emptied.body, "Nothing moved on") || !strings.Contains(emptied.body, "Your Feedback took every Story out of this Briefing") {
+		t.Errorf("the emptied Briefing does not say Feedback took its Stories out:\n%s", emptied.body)
+	}
+	path := undoForm(emptied.body, 1)
+	if path != "/briefings/2026-10-24/feedback/1/undone" {
+		t.Fatalf("the emptied Briefing does not point to the Feedback that took its Stories out, to undo: %q\n%s", path, emptied.body)
+	}
+
+	res := send(t, app, "PUT", path, nil)
+
+	if res.status != 303 || res.header.Get("Location") != "/" {
+		t.Fatalf("status %d, Location %q, want 303 to /:\n%s", res.status, res.header.Get("Location"), res.body)
+	}
+	if after := get(t, app, "/"); !strings.Contains(after.body, "The Prime Minister spoke in Motherwell.") {
+		t.Errorf("the Briefing does not re-render with the Story the undone piece took out:\n%s", after.body)
+	}
+}
+
+func TestFeedbackGivenOnTheBriefingIsUndoneFromIt(t *testing.T) {
+	store := openStore(t)
+	speechStory(t, store)
+	writeBriefing(t, store, saturday, spoke)
+	app, _ := newAppWithLog(t, saturday, store)
+	send(t, app, "POST", today, url.Values{"kind": {"new to me"}, "level": {"development"}, "story": {"1"}, "fact": {"1"}})
+	send(t, app, "POST", today, url.Values{"kind": {"missed"}, "level": {"story"}, "title": {"Scottish politics"}, "facts": {"1"}})
+	page := get(t, app, "/")
+	if undoForm(page.body, 1) == "" || !strings.Contains(page.body, "Your Feedback on this Briefing") {
+		t.Fatalf("the Briefing does not list the Feedback given on it, to undo:\n%s", page.body)
+	}
+	path := undoForm(page.body, 2)
+
+	res := send(t, app, "PUT", path, nil)
+
+	if res.status != 303 || res.header.Get("Location") != "/" {
+		t.Fatalf("status %d, Location %q, want 303 to /:\n%s", res.status, res.header.Get("Location"), res.body)
+	}
+	if list := get(t, app, "/stories"); strings.Contains(list.body, "Scottish politics") {
+		t.Errorf("the Story the undone missed piece started is still listed:\n%s", list.body)
+	}
+	if after := get(t, app, "/"); !strings.Contains(after.body, "Undone Sat 24 Oct 2026") || undoForm(after.body, 1) == "" {
+		t.Errorf("the Briefing does not list the piece undone beside the one standing:\n%s", after.body)
+	}
+}
+
+func TestFeedbackIsUndoneFromAStorysPage(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		form url.Values
+		// gone is what the piece's mark shows, which its undo lifts.
+		gone string
+	}{
+		{"wrong connection", url.Values{"kind": {"wrong"}, "level": {"connection"}, "fact": {"1"}, "to_fact": {"2"}},
+			"Withdrawn:</strong> this Connection"},
+		{"wrong fact", url.Values{"kind": {"wrong"}, "level": {"fact"}, "fact": {"2"}}, "Withdrawn:</strong> its Fact"},
+		{"missed development", url.Values{"kind": {"missed"}, "level": {"development"}, "story": {"2"}, "fact": {"1"}},
+			"You added this Development"},
+		{"unwanted story", url.Values{"kind": {"unwanted"}, "level": {"story"}, "story": {"2"}}, "Unwanted in the Briefing"},
+		{"new to me", url.Values{"kind": {"new to me"}, "level": {"story"}, "story": {"2"}}, ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			store := openStore(t)
+			connectedStories(t, store)
+			app, _ := newAppWithLog(t, saturday, store)
+			send(t, app, "POST", "/stories/2/feedback", tc.form)
+			page := get(t, app, "/stories/2")
+			if tc.gone != "" && !strings.Contains(page.body, tc.gone) {
+				t.Fatalf("the piece made no mark %q:\n%s", tc.gone, page.body)
+			}
+			path := undoForm(page.body, 1)
+			if path != "/stories/2/feedback/1/undone" {
+				t.Fatalf("the Story's page offers no undo of the piece: %q\n%s", path, page.body)
+			}
+
+			res := send(t, app, "PUT", path, nil)
+
+			if res.status != 303 || res.header.Get("Location") != "/stories/2" {
+				t.Fatalf("status %d, Location %q, want 303 to the Story:\n%s", res.status, res.header.Get("Location"), res.body)
+			}
+			after := get(t, app, "/stories/2")
+			if tc.gone != "" && strings.Contains(after.body, tc.gone) {
+				t.Errorf("the undo did not lift the mark %q:\n%s", tc.gone, after.body)
+			}
+			if !strings.Contains(after.body, "Undone Sat 24 Oct 2026") {
+				t.Errorf("the Story's page does not list the piece marked undone:\n%s", after.body)
+			}
+		})
 	}
 }
 

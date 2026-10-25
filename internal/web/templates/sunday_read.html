@@ -50,6 +50,12 @@
   {{- end}}
 </ul>
 {{- end}}
+{{- if .Feedback}}
+<section aria-labelledby="your-feedback">
+  <h2 id="your-feedback">Your Feedback on this read</h2>
+  {{- template "kept" .Feedback}}
+</section>
+{{- end}}
 {{end}}
 
 {{define "readCite"}}<a href="{{.Path}}">{{.Kind}}</a>{{with .AsAt}} of <time>{{.}}</time>{{end}}:

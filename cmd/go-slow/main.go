@@ -27,6 +27,7 @@ import (
 	"github.com/samthorold/go-slow/internal/server"
 	"github.com/samthorold/go-slow/internal/sqlite"
 	"github.com/samthorold/go-slow/internal/web"
+	"github.com/samthorold/go-slow/internal/wikidata"
 )
 
 // shutdownGrace is how long in-flight requests get to finish after SIGTERM;
@@ -66,14 +67,23 @@ func run(log *slog.Logger) error {
 	}
 	// The Topics and the lazy-reading check: plain code, no model adapter.
 	topics := interest.New(store)
-	// The Editor, each act on the model the config names for it.
-	// One adapter serves every act, sending each act's requests to its model.
+	// The Editor, each act on the model the config names for it. One
+	// adapter serves every act, sending each act's requests to its model.
 	models := claude.New(claude.Options{
 		APIKey:    string(cfg.AnthropicAPIKey),
 		Model:     cfg.ReadingModel,
 		ActModels: map[string]string{"reading": cfg.ReadingModel, "placing": cfg.PlacingModel},
 	})
-	ed := editor.New(editor.Deps{Store: store, Model: models, PlacingModel: models, Log: log})
+	// Reading looks Entities up in Wikidata first, politely, as go-slow.
+	wd := wikidata.New(wikidata.Options{
+		HTTP:      &http.Client{Timeout: fetchTimeout},
+		Endpoint:  wikidata.Endpoint,
+		UserAgent: polite.UserAgent(cfg.CollectionContact),
+		Gap:       wikidata.Gap,
+		Now:       time.Now,
+		Sleep:     polite.Sleep,
+	})
+	ed := editor.New(editor.Deps{Store: store, Model: models, PlacingModel: models, Wikidata: wd, Log: log})
 	// The daily acts run in batches: submitted after a Collection run, and
 	// their results applied on later runs as they arrive. One batch carries
 	// every act's requests.

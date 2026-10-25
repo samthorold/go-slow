@@ -191,14 +191,14 @@ func (c *Client) get(ctx context.Context, host *hostState, rawURL string, h http
 	}
 	if res.StatusCode == http.StatusTooManyRequests || res.StatusCode == http.StatusServiceUnavailable {
 		now := c.Now()
-		host.backoffUntil = now.Add(retryAfter(res.Header.Get("Retry-After"), now))
+		host.backoffUntil = now.Add(RetryAfter(res.Header.Get("Retry-After"), now))
 	}
 	return res, nil
 }
 
-// retryAfter reads a Retry-After header, in seconds or as an HTTP date, as
+// RetryAfter reads a Retry-After header, in seconds or as an HTTP date, as
 // a wait from now.
-func retryAfter(v string, now time.Time) time.Duration {
+func RetryAfter(v string, now time.Time) time.Duration {
 	v = strings.TrimSpace(v)
 	if secs, err := strconv.Atoi(v); err == nil && secs >= 0 {
 		return time.Duration(secs) * time.Second

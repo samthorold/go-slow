@@ -1,10 +1,10 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T00:10:16.382926Z",
+  "recorded_at": "2026-10-25T00:18:12.026224Z",
   "usage": {
-    "input_tokens": 3719,
-    "output_tokens": 2011
+    "input_tokens": 3098,
+    "output_tokens": 1857
   },
   "output": {
     "facts": [
@@ -27,28 +27,32 @@
         "fact": "F4"
       },
       {
-        "developments_in": [],
-        "fact": "F5"
-      },
-      {
         "developments_in": [
           "N2"
         ],
-        "fact": "F6"
+        "fact": "F5"
       },
       {
         "developments_in": [
           "N3"
         ],
-        "fact": "F7"
-      },
-      {
-        "developments_in": [],
-        "fact": "F8"
+        "fact": "F6"
       },
       {
         "developments_in": [
           "N4"
+        ],
+        "fact": "F7"
+      },
+      {
+        "developments_in": [
+          "N4"
+        ],
+        "fact": "F8"
+      },
+      {
+        "developments_in": [
+          "N5"
         ],
         "fact": "F9"
       },
@@ -57,9 +61,7 @@
         "fact": "F10"
       },
       {
-        "developments_in": [
-          "N5"
-        ],
+        "developments_in": [],
         "fact": "F11"
       },
       {
@@ -71,9 +73,7 @@
         "fact": "F13"
       },
       {
-        "developments_in": [
-          "N6"
-        ],
+        "developments_in": [],
         "fact": "F14"
       },
       {
@@ -83,32 +83,12 @@
       {
         "developments_in": [],
         "fact": "F16"
-      },
-      {
-        "developments_in": [
-          "N7"
-        ],
-        "fact": "F17"
-      },
-      {
-        "developments_in": [],
-        "fact": "F18"
-      },
-      {
-        "developments_in": [
-          "N8"
-        ],
-        "fact": "F19"
-      },
-      {
-        "developments_in": [],
-        "fact": "F20"
       }
     ],
     "new_stories": [
       {
         "ref": "N1",
-        "title": "Energy infrastructure ceasefire diplomacy"
+        "title": "Russia-Ukraine energy ceasefire"
       },
       {
         "ref": "N2",
@@ -120,23 +100,11 @@
       },
       {
         "ref": "N4",
-        "title": "UK defence against hybrid threats"
+        "title": "UK military deployment to Saudi Arabia"
       },
       {
         "ref": "N5",
-        "title": "UK military deployments to the Middle East"
-      },
-      {
-        "ref": "N6",
-        "title": "UK-EU summit"
-      },
-      {
-        "ref": "N7",
-        "title": "National Centre for Information Defence"
-      },
-      {
-        "ref": "N8",
-        "title": "UK G20 presidency"
+        "title": "UK response to hybrid threats"
       }
     ]
   }

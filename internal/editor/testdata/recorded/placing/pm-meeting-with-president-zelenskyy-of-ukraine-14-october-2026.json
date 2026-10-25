@@ -1,10 +1,10 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T00:10:30.731377Z",
+  "recorded_at": "2026-10-25T00:18:21.276456Z",
   "usage": {
-    "input_tokens": 2176,
-    "output_tokens": 627
+    "input_tokens": 1701,
+    "output_tokens": 296
   },
   "output": {
     "facts": [
@@ -17,18 +17,21 @@
         "fact": "F2"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N1"
+        ],
         "fact": "F3"
       },
       {
         "developments_in": [],
         "fact": "F4"
-      },
-      {
-        "developments_in": [],
-        "fact": "F5"
       }
     ],
-    "new_stories": []
+    "new_stories": [
+      {
+        "ref": "N1",
+        "title": "UK military support for Ukraine"
+      }
+    ]
   }
 }

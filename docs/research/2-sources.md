@@ -28,6 +28,12 @@ Not legal advice. Where the law or the terms are unclear, it says so.
 | Restricted reporting | BBC, Guardian, Reuters, Full Fact, the Local Democracy Reporting Service; The Conversation (robots.txt blocks AI agents) | Nothing | As above |
 | No licence found | Institute for Government, Constitution Unit, UK in a Changing Europe, IFS, NIESR, The Ferret, Nation.Cymru | Nothing (treat as all rights reserved) | |
 
+Reference sources, consulted rather than collected:
+
+| Reference source | Admissible | What the Record may keep | Licence or terms |
+|---|---|---|---|
+| Wikidata | Yes: the Action API (`wbsearchentities`, `wbgetentities`); the SPARQL service (query.wikidata.org) too, but go-slow doesn't need it | Items' ids, labels and statements, and Facts drawn from them, traced to the item's revision | Structured data (main, Property, Lexeme, EntitySchema namespaces) is CC0, public domain, no attribution needed; text in other namespaces is CC BY-SA 4.0. Every request needs a descriptive User-Agent with contact details, or it may be blocked (403); requests in series, not in parallel; `maxlag` on non-interactive requests; unauthenticated bots with a compliant User-Agent get 200 requests a minute (10 without one). The SPARQL service allows 60 s of query time a minute and 5 parallel queries per IP, and throttles with 429 and `Retry-After` |
+
 Mechanics found along the way: GOV.UK honours conditional requests (a live request returned 304); BBC feeds send no ETag (`max-age=3`, `ttl` 15). AI-use signals such as IETF `Content-Usage` and TDMRep are drafts or EU-only. Personal data in stored items (names in Hansard and releases) falls outside the open licences and makes the operator a controller under UK GDPR; this was recalled, not researched, and is open in the design.
 
 ## Grounding
@@ -39,4 +45,5 @@ Evidence quality:
 - **Snippets or press coverage only:** publisher deal terms and lawsuit status; the Leicester Gazette and LDRS arrangements; the Open Parliament Licence wording; some API rate limits.
 - **Not sourced:** ITV's and PA Media's terms (unreachable); the RSL specification.
 - **Where sources corrected recall:** the UK has no private-copying exception (quashed 2015); the BBC forbids taking even headlines and links from its feeds; YouGov bans bots despite its CC BY-NC licence; FRED now bans storage and LLM use; CC NoDerivatives 4.0 permits private summaries; Full Fact is not openly licensed; a 403 on robots.txt permits access under RFC 9309; `Crawl-delay` is not in the RFC.
+- **Wikidata (issue 22), read from Wikimedia's own pages:** Wikidata:Licensing (CC0 for structured data); the Wikimedia Foundation User-Agent Policy; MediaWiki's API:Etiquette (serial requests, `maxlag`); Wikimedia APIs/Rate limits (10 and 200 requests a minute, new in 2026 and "subject to experimentation and change", and not naming wikidata.org specifically, so the Action API is assumed covered); the Wikidata Query Service User Manual (its limits). Wikidata agreed with the design docs: Andy Burnham (Q269909) holds Prime Minister of the United Kingdom (Q14211) from 20 July 2026, on both the person (P39) and the office (P1308).
 - **Method:** WebFetch was blocked for the BBC, Guardian and Reuters, so those pages were fetched with curl or Python using an honest User-Agent.

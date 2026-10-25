@@ -32,7 +32,9 @@ type Deps struct {
 	Model Model
 	// PlacingModel is the model placing runs on, chosen by configuration.
 	PlacingModel Model
-	Log          *slog.Logger
+	// Wikidata is where reading looks Entities up first.
+	Wikidata Wikidata
+	Log      *slog.Logger
 }
 
 // Editor does the editorial work over the Record.
@@ -54,6 +56,9 @@ func (e *Editor) ReadWaiting(ctx context.Context, now time.Time) error {
 	}
 	for _, it := range items {
 		r, err := Read(ctx, e.Model, it)
+		if err == nil {
+			r, err = resolve(ctx, e.Wikidata, r, it.Published, now)
+		}
 		if err != nil {
 			e.Log.ErrorContext(ctx, "reading failed", "source", it.SourceID, "entry", it.EntryID, "error", err)
 			continue
@@ -105,6 +110,35 @@ type StoryListing struct {
 	// Developments is how many it has, and Latest the date of the latest.
 	Developments int
 	Latest       time.Time
+}
+
+// keep checks a model's answer on an Item, looks its Entities up in
+// Wikidata and writes the reading to the Record, at now. A result that fails
+// the checks is ErrFailedChecks and writes nothing. A failed lookup writes
+// nothing either and is an error like the Record's: in a batch, the batch
+// stays pending and its results are applied once Wikidata answers, with no
+// new model call.
+func (e *Editor) keep(ctx context.Context, it Item, res Response, now time.Time) error {
+	r, err := checkReading(it, res)
+	if err != nil {
+		return err
+	}
+	if r, err = resolve(ctx, e.Wikidata, r, it.Published, now); err != nil {
+		return err
+	}
+	return e.Store.SaveReading(ctx, r, now)
+}
+
+// KnownEntity is an Entity as the Record holds it.
+type KnownEntity struct {
+	Name string
+	Kind string
+	// WikidataID is the Wikidata item it is, or empty for the Editor's own.
+	WikidataID string
+	// Aliases are the names the Record's Items have called it by.
+	Aliases []string
+	// Facts are the Facts about it drawn from Reference sources.
+	Facts []Fact
 }
 
 // ReadItem is an Item as its page shows it: what was collected, and what

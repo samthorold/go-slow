@@ -1,25 +1,27 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T00:10:38.07847Z",
+  "recorded_at": "2026-10-25T00:18:26.703705Z",
   "usage": {
-    "input_tokens": 2747,
-    "output_tokens": 1055
+    "input_tokens": 2220,
+    "output_tokens": 1007
   },
   "output": {
     "facts": [
       {
-        "developments_in": [
-          "N1"
-        ],
+        "developments_in": [],
         "fact": "F1"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N1"
+        ],
         "fact": "F2"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N1"
+        ],
         "fact": "F3"
       },
       {
@@ -27,52 +29,32 @@
         "fact": "F4"
       },
       {
-        "developments_in": [],
-        "fact": "F5"
-      },
-      {
-        "developments_in": [
-          "N1"
-        ],
-        "fact": "F6"
-      },
-      {
-        "developments_in": [
-          "N1"
-        ],
-        "fact": "F7"
-      },
-      {
-        "developments_in": [
-          "N1"
-        ],
-        "fact": "F8"
-      },
-      {
         "developments_in": [
           "N2"
         ],
-        "fact": "F9"
+        "fact": "F5"
       },
       {
         "developments_in": [],
-        "fact": "F10"
+        "fact": "F6"
       },
       {
-        "developments_in": [
-          "N1"
-        ],
-        "fact": "F11"
+        "developments_in": [],
+        "fact": "F7"
+      },
+      {
+        "developments_in": [],
+        "fact": "F8"
       }
     ],
     "new_stories": [
       {
         "ref": "N1",
-        "title": "Great British Railways rollout"
+        "title": "Great British Railways headquarters in Derby"
       },
       {
         "ref": "N2",
-        "title": "Northern fleet investment at Alstom Derby"
+        "title": "Rail foundation apprenticeship scheme"
       }
     ]
   }

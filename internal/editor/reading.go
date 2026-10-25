@@ -22,21 +22,33 @@ type Item struct {
 	Published time.Time
 }
 
-// Entity is a thing in the world a Fact or Claim involves. For now every
-// Entity is go-slow's own, made by reading; Wikidata comes later.
+// Entity is a thing in the world a Fact or Claim involves, as an Item names
+// it. One Wikidata matched is that item; one with no match is the Editor's
+// own.
 type Entity struct {
+	// Name is how the Item names it, and how its Facts and Claims refer to
+	// it.
 	Name string
 	Kind string
+	// Role is the office or position the Item gives a person, if any, in
+	// full ("Prime Minister of the United Kingdom").
+	Role string
+	// WikidataID and Label are the Wikidata item it matched, if any.
+	WikidataID string
+	Label      string
 }
 
 // The kinds of Entity.
 var entityKinds = []string{"person", "organisation", "place", "occasion"}
 
-// Fact is a proposition drawn from an Item, holding as at a date. It carries
-// the Item it was drawn from.
+// Fact is a proposition drawn from an Item or a Reference source, holding as
+// at a date. It carries the Item it was drawn from, or the Lookup.
 type Fact struct {
 	// ID is the Fact's in the Record, once it is kept there.
-	ID        int64
+	ID int64
+	// Lookup is the Reference source lookup a Fact not drawn from an Item
+	// came from; nil for one drawn from an Item.
+	Lookup    *Lookup
 	SourceID  string
 	EntryID   string
 	Statement string
@@ -67,6 +79,9 @@ type Reading struct {
 	Entities []Entity
 	Facts    []Fact
 	Claims   []Claim
+	// ReferenceFacts are Facts about its Entities that looking them up
+	// brought in, each traced to its Lookup.
+	ReferenceFacts []Fact
 	// Model is the model that read the Item.
 	Model string
 	Usage Usage
@@ -86,7 +101,7 @@ const readingInstructions = `You are the Editor of a private slow-news briefing.
 Draw from the Item:
 - Facts: propositions the Item itself establishes as having happened or being so, in no one's voice. That a person said something, announced something, met someone or visited somewhere is a Fact. Each Fact holds as at a date (YYYY-MM-DD): the date the Item gives for it, otherwise the Item's publication date.
 - Claims: propositions someone asserts that the Item does not itself establish: promises, forecasts, judgements, accusations, figures given in a speaker's own voice. Each Claim keeps who made it, by name if the Item gives one.
-- Entities: every person, organisation, place or named occasion (such as a summit or a Budget) a Fact or Claim involves. Name each Entity once, in its fullest form in the Item, and refer to it by exactly that name.
+- Entities: every person, organisation, place or named occasion (such as a summit or a Budget) a Fact or Claim involves, including one the Item names only by an office or title ("the Prime Minister"). Name each Entity once, in its fullest form in the Item, and refer to it by exactly that name; if the Item never gives a person's name, name them by the office as the Item does. For a person the Item gives an office or position, give that role in full, with its country or body where the Item makes it plain ("Prime Minister of the United Kingdom", "Secretary of State for Defence"); otherwise leave the role empty.
 
 For each Fact and Claim, give a quote: a short passage copied word for word from the Item that it rests on. Never paraphrase in a quote.
 
@@ -99,6 +114,7 @@ var readingSchema = map[string]any{
 		"entities": array(object(map[string]any{
 			"name": str(),
 			"kind": map[string]any{"type": "string", "enum": entityKinds},
+			"role": str(),
 		})),
 		"facts": array(object(map[string]any{
 			"statement": str(),
@@ -137,6 +153,7 @@ type output struct {
 	Entities []struct {
 		Name string `json:"name"`
 		Kind string `json:"kind"`
+		Role string `json:"role"`
 	} `json:"entities"`
 	Facts []struct {
 		Statement string   `json:"statement"`
@@ -198,7 +215,7 @@ func checkReading(it Item, res Response) (Reading, error) {
 		}
 		if !named[name] {
 			named[name] = true
-			r.Entities = append(r.Entities, Entity{Name: name, Kind: e.Kind})
+			r.Entities = append(r.Entities, Entity{Name: name, Kind: e.Kind, Role: strings.TrimSpace(e.Role)})
 		}
 	}
 	involves := func(names []string) ([]string, error) {

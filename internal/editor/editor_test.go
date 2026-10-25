@@ -58,19 +58,20 @@ func record(t *testing.T) *sqlite.Store {
 	return store
 }
 
-func newEditor(store *sqlite.Store, model editor.Model) (*editor.Editor, *bytes.Buffer) {
+func newEditor(store *sqlite.Store, model editor.Model, wd editor.Wikidata) (*editor.Editor, *bytes.Buffer) {
 	var logs bytes.Buffer
 	return editor.New(editor.Deps{
-		Store: store,
-		Model: model,
-		Log:   slog.New(slog.NewTextHandler(&logs, nil)),
+		Store:    store,
+		Model:    model,
+		Wikidata: wd,
+		Log:      slog.New(slog.NewTextHandler(&logs, nil)),
 	}), &logs
 }
 
 func TestTheEditorReadsTheItemsAwaitingReadingIntoTheRecord(t *testing.T) {
 	store := record(t)
 	model := &fakeModel{output: goodReading}
-	ed, _ := newEditor(store, model)
+	ed, _ := newEditor(store, model, &fakeWikidata{})
 
 	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
@@ -104,7 +105,7 @@ func TestTheEditorReadsTheItemsAwaitingReadingIntoTheRecord(t *testing.T) {
 func TestAnItemOnceReadIsNotReadAgain(t *testing.T) {
 	store := record(t)
 	model := &fakeModel{output: goodReading}
-	ed, _ := newEditor(store, model)
+	ed, _ := newEditor(store, model, &fakeWikidata{})
 
 	for range 2 {
 		if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
@@ -119,7 +120,7 @@ func TestAnItemOnceReadIsNotReadAgain(t *testing.T) {
 
 func TestTakingUpATopicTiesOnlyItemsNotYetRead(t *testing.T) {
 	store := record(t)
-	ed, _ := newEditor(store, &fakeModel{output: goodReading})
+	ed, _ := newEditor(store, &fakeModel{output: goodReading}, &fakeWikidata{})
 	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
@@ -145,7 +146,7 @@ func TestAReadingThatFailsWritesNothingAndTheItemStaysAwaitingReading(t *testing
 	} {
 		t.Run(name, func(t *testing.T) {
 			store := record(t)
-			ed, logs := newEditor(store, model)
+			ed, logs := newEditor(store, model, &fakeWikidata{})
 
 			if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
 				t.Fatal(err)

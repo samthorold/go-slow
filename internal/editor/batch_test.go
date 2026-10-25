@@ -60,7 +60,7 @@ func answering(output string) func(editor.BatchRequest) editor.BatchResult {
 func newBatches(store *sqlite.Store, b editor.Batcher) (*editor.Batches, *bytes.Buffer) {
 	var logs bytes.Buffer
 	log := slog.New(slog.NewTextHandler(&logs, nil))
-	ed := editor.New(editor.Deps{Store: store, Log: log})
+	ed := editor.New(editor.Deps{Store: store, Wikidata: &fakeWikidata{}, Log: log})
 	return editor.NewBatches(editor.BatchDeps{
 		Store:   store,
 		Batcher: b,

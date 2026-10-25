@@ -144,37 +144,22 @@ func TestRecordedPlacings(t *testing.T) {
 	if !threaded {
 		t.Error("no Story has Developments from more than one Item")
 	}
-	// A reaction is not a Development: the East Midlands mayor welcoming
-	// the Derby headquarters moves no Story on.
-	isReaction := func(statement string) bool { return strings.Contains(statement, "Claire Ward") }
-	if !slices.ContainsFunc(readFacts(t, store), isReaction) {
-		t.Fatal("the readings hold no reaction to test placing on: Claire Ward's welcome is missing")
-	}
-	for statement, in := range developments {
-		if isReaction(statement) {
-			t.Errorf("the reaction %q is a Development in %v", statement, in)
-		}
-	}
-}
-
-// readFacts are the statements of every Fact in the Record.
-func readFacts(t *testing.T, store *sqlite.Store) []string {
-	t.Helper()
-	items, err := store.ListItems(t.Context())
+	// A reaction is not a Development: the government's response to the
+	// US-Russia agreement is a reaction as a whole, so none of its Facts
+	// moves a Story on.
+	reaction := "tag:www.gov.uk,2005:/government/news/uk-government-response-to-agreement-between-us-and-russia-9-october"
+	got, _, err := store.ReadItem(ctx, number10.ID, reaction)
 	if err != nil {
 		t.Fatal(err)
 	}
-	var out []string
-	for _, li := range items {
-		it, _, err := store.ReadItem(t.Context(), li.SourceID, li.EntryID)
-		if err != nil {
-			t.Fatal(err)
-		}
-		for _, f := range it.Facts {
-			out = append(out, f.Statement)
+	if len(got.Facts) == 0 {
+		t.Fatal("reading drew no Facts from the reaction, so placing is not tested on one")
+	}
+	for _, f := range got.Facts {
+		if in := developments[f.Statement]; len(in) > 0 {
+			t.Errorf("the reaction's Fact %q is a Development in %v", f.Statement, in)
 		}
 	}
-	return out
 }
 
 // kept is a kept response.

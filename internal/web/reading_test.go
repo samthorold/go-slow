@@ -24,6 +24,16 @@ func (f fakeModel) Complete(context.Context, editor.Request) (editor.Response, e
 	return editor.Response{Output: json.RawMessage(f.output), Model: "fake"}, nil
 }
 
+// noWikidata is a Wikidata that finds nothing, so every Entity is the
+// Editor's own.
+type noWikidata struct{}
+
+func (noWikidata) Search(context.Context, string) ([]string, error) { return nil, nil }
+
+func (noWikidata) Items(context.Context, []string) ([]editor.WikidataItem, error) { return nil, nil }
+
+func (noWikidata) Labels(context.Context, []string) (map[string]string, error) { return nil, nil }
+
 // readSpeech seeds a speech, ties it to a Topic and reads it with output.
 func readSpeech(t *testing.T, store *sqlite.Store, output string) {
 	t.Helper()
@@ -36,7 +46,7 @@ func readSpeech(t *testing.T, store *sqlite.Store, output string) {
 	if _, errs, err := topics.Add(t.Context(), interest.Draft{Name: "Scotland", Depth: "close", Terms: "Scotland"}); err != nil || errs != nil {
 		t.Fatalf("add Topic: %v %v", errs, err)
 	}
-	ed := editor.New(editor.Deps{Store: store, Model: fakeModel{output}, Log: slog.New(slog.DiscardHandler)})
+	ed := editor.New(editor.Deps{Store: store, Model: fakeModel{output}, Wikidata: noWikidata{}, Log: slog.New(slog.DiscardHandler)})
 	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}

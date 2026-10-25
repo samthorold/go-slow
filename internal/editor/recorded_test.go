@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -132,6 +133,15 @@ func TestRecordedReadings(t *testing.T) {
 			for _, c := range r.Claims {
 				if strings.TrimSpace(c.MadeBy) == "" {
 					t.Errorf("Claim %q has no attribution", c.Statement)
+				}
+			}
+			if name == "pm-meeting-with-president-zelenskyy-of-ukraine-14-october-2026" {
+				// The readout names the Prime Minister only by office: the
+				// Entity carries the role, which Wikidata resolves by date.
+				if !slices.ContainsFunc(r.Entities, func(e editor.Entity) bool {
+					return e.Kind == "person" && strings.Contains(e.Role, "Prime Minister")
+				}) {
+					t.Errorf("no person is given the role of Prime Minister: %+v", r.Entities)
 				}
 			}
 			if name == "pm-speech-in-scotland-16-october-2026" {

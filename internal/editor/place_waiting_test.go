@@ -22,6 +22,7 @@ func placer(store *sqlite.Store, placing *fakeModel) (*editor.Editor, *bytes.Buf
 		Store:        store,
 		Model:        &fakeModel{output: goodReading},
 		PlacingModel: placing,
+		Wikidata:     &fakeWikidata{},
 		Log:          slog.New(slog.NewTextHandler(&logs, nil)),
 	}), &logs
 }

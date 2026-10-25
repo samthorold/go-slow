@@ -309,7 +309,7 @@ func (s *Store) ReadItem(ctx context.Context, sourceID, entryID string) (editor.
 
 func (s *Store) facts(ctx context.Context, sourceID, entryID string) ([]editor.Fact, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT facts.statement, facts.as_at, facts.quote,
+		SELECT facts.id, facts.statement, facts.as_at, facts.quote,
 			(SELECT json_group_array(entities.name ORDER BY entities.name)
 				FROM fact_entities JOIN entities ON entities.id = fact_entities.entity_id
 				WHERE fact_entities.fact_id = facts.id)
@@ -322,7 +322,7 @@ func (s *Store) facts(ctx context.Context, sourceID, entryID string) ([]editor.F
 	for rows.Next() {
 		f := editor.Fact{SourceID: sourceID, EntryID: entryID}
 		var asAt, ents string
-		if err := rows.Scan(&f.Statement, &asAt, &f.Quote, &ents); err != nil {
+		if err := rows.Scan(&f.ID, &f.Statement, &asAt, &f.Quote, &ents); err != nil {
 			return nil, fmt.Errorf("facts of %s: %w", entryID, err)
 		}
 		if f.AsAt, err = time.Parse(time.DateOnly, asAt); err != nil {

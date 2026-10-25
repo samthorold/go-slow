@@ -157,8 +157,9 @@ func TestConnectingRunsAgainOverTheDaysFactsBeforeTheBriefing(t *testing.T) {
 	}
 
 	model.outputs = []string{readoutCausedBySpeech}
-	startOfDay := time.Date(2026, time.October, 24, 0, 0, 0, 0, time.UTC)
-	if err := ed.Reconnect(t.Context(), startOfDay, saturday.Add(time.Hour)); err != nil {
+	// Just before the Briefing, over the Facts placed in the day before it:
+	// the readout's, not the speech's.
+	if err := ed.Reconnect(t.Context(), saturday.Add(time.Hour)); err != nil {
 		t.Fatal(err)
 	}
 

@@ -26,6 +26,8 @@ func TestConfigIsReadFromTheEnvironment(t *testing.T) {
 		"READING_MODEL":            "claude-haiku-5-5",
 		"PLACING_MODEL":            "claude-sonnet-5-5",
 		"CONNECTING_MODEL":         "claude-haiku-5-5",
+		"BRIEFING_MODEL":           "claude-haiku-5-5",
+		"BRIEFING_TIME":            "07:30",
 		"GOSLOW_ANTHROPIC_API_KEY": "sk-test",
 	}))
 	if err != nil {
@@ -40,6 +42,8 @@ func TestConfigIsReadFromTheEnvironment(t *testing.T) {
 		ReadingModel:       "claude-haiku-5-5",
 		PlacingModel:       "claude-sonnet-5-5",
 		ConnectingModel:    "claude-haiku-5-5",
+		BriefingModel:      "claude-haiku-5-5",
+		BriefingAt:         7*time.Hour + 30*time.Minute,
 		AnthropicAPIKey:    "sk-test",
 	}
 	if cfg != want {
@@ -53,7 +57,7 @@ func TestMissingVariablesAreAllNamed(t *testing.T) {
 	if err == nil {
 		t.Fatal("Load succeeded with nothing set")
 	}
-	for _, name := range []string{"PORT", "DATABASE_PATH", "COLLECTION_CONTACT", "COLLECTION_INTERVAL", "READING_MODEL", "PLACING_MODEL", "CONNECTING_MODEL", "GOSLOW_ANTHROPIC_API_KEY"} {
+	for _, name := range []string{"PORT", "DATABASE_PATH", "COLLECTION_CONTACT", "COLLECTION_INTERVAL", "READING_MODEL", "PLACING_MODEL", "CONNECTING_MODEL", "BRIEFING_MODEL", "BRIEFING_TIME", "GOSLOW_ANTHROPIC_API_KEY"} {
 		if !strings.Contains(err.Error(), name) {
 			t.Errorf("error %q does not name %s", err, name)
 		}
@@ -91,14 +95,28 @@ func valid() map[string]string {
 		"READING_MODEL":            "claude-haiku-5-5",
 		"PLACING_MODEL":            "claude-sonnet-5-5",
 		"CONNECTING_MODEL":         "claude-haiku-5-5",
+		"BRIEFING_MODEL":           "claude-haiku-5-5",
+		"BRIEFING_TIME":            "07:00",
 		"GOSLOW_ANTHROPIC_API_KEY": "sk-test",
+	}
+}
+
+func TestBriefingTimeMustBeATimeOfDay(t *testing.T) {
+	for _, bad := range []string{"7am", "24:00", "07:60", "7", "-1:00"} {
+		vars := valid()
+		vars["BRIEFING_TIME"] = bad
+		_, err := config.Load(env(vars))
+
+		if err == nil || !strings.Contains(err.Error(), "BRIEFING_TIME") {
+			t.Errorf("Load(%q) error = %v, want one naming BRIEFING_TIME", bad, err)
+		}
 	}
 }
 
 func TestEachActsModelMustBeAClaudeModel(t *testing.T) {
 	// Only the Claude adapter exists yet; another provider's model would be
 	// sent to Anthropic's API and fail on every call.
-	for _, name := range []string{"READING_MODEL", "PLACING_MODEL", "CONNECTING_MODEL"} {
+	for _, name := range []string{"READING_MODEL", "PLACING_MODEL", "CONNECTING_MODEL", "BRIEFING_MODEL"} {
 		vars := valid()
 		vars[name] = "glm-5.3-flash"
 		_, err := config.Load(env(vars))

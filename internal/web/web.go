@@ -14,13 +14,6 @@ import (
 	"github.com/samthorold/go-slow/internal/collect"
 )
 
-// Briefings answers the queries the Briefing pages need.
-type Briefings interface {
-	// HasBriefing reports whether a Briefing has been written for the day
-	// that contains t.
-	HasBriefing(ctx context.Context, t time.Time) (bool, error)
-}
-
 // Items answers the queries the Items page needs.
 type Items interface {
 	// ListItems lists the Items in the Record, newest first.
@@ -40,6 +33,9 @@ type Deps struct {
 	Readings  Readings
 	Topics    Topics
 	Stories   Stories
+	// BriefingAt is the time of day the Briefing is due (7h is 07:00): a
+	// day with none by then is flagged.
+	BriefingAt time.Duration
 	// Now is the clock. The day it returns, in its location, is "today".
 	Now func() time.Time
 	Log *slog.Logger
@@ -54,6 +50,9 @@ var (
 
 // briefingTmpl is the Briefing page: the layout around its content.
 var briefingTmpl = page("briefing.html")
+
+// briefingsTmpl is the list of Briefings, by day.
+var briefingsTmpl = page("briefings.html")
 
 // itemsTmpl is the Items page.
 var itemsTmpl = page("items.html")
@@ -81,6 +80,8 @@ func New(d Deps) http.Handler {
 	mux := http.NewServeMux()
 	mux.Handle("GET /static/", http.FileServerFS(staticFS))
 	mux.HandleFunc("GET /{$}", a.todaysBriefing)
+	mux.HandleFunc("GET /briefings", a.briefings)
+	mux.HandleFunc("GET /briefings/{day}", a.pastBriefing)
 	mux.HandleFunc("GET /items", a.items)
 	mux.HandleFunc("GET /items/{source}/{entry}", a.item)
 	mux.HandleFunc("GET /stories", a.stories)
@@ -94,25 +95,6 @@ func New(d Deps) http.Handler {
 
 type app struct {
 	Deps
-}
-
-// briefingPage is the view model for a day's Briefing page.
-type briefingPage struct {
-	Date   string
-	Exists bool
-}
-
-func (a *app) todaysBriefing(w http.ResponseWriter, r *http.Request) {
-	now := a.Now()
-	exists, err := a.Briefings.HasBriefing(r.Context(), now)
-	if err != nil {
-		a.serverError(w, r, err)
-		return
-	}
-	a.render(w, r, briefingTmpl, briefingPage{
-		Date:   now.Format("Monday 2 January 2006"),
-		Exists: exists,
-	})
 }
 
 // render writes a full page, rendered first so a template error can still

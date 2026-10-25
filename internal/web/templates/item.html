@@ -20,7 +20,7 @@
   {{- end}}
   <ul hx-disable>
   {{- range .Facts}}
-    <li>
+    <li id="{{.Anchor}}">
       <p>{{.Statement}} <small>(as at {{.AsAt}})</small></p>
       <blockquote><p>{{.Quote}}</p></blockquote>
       {{- if .Entities}}<p><small>Involves {{.Entities}}</small></p>{{end}}

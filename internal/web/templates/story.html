@@ -11,7 +11,7 @@
   <h2 id="timeline">Timeline</h2>
   <ol>
   {{- range .Timeline}}
-    <li>
+    <li id="{{.Anchor}}">
       <p><time>{{.AsAt}}</time>: <span hx-disable>{{.Statement}}</span></p>
       <blockquote hx-disable><p>{{.Quote}}</p></blockquote>
       <p><small>From <a href="{{.ItemPath}}"><span hx-disable>{{.ItemTitle}}</span></a></small></p>

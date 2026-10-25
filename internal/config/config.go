@@ -32,6 +32,13 @@ type Config struct {
 	// ConnectingModel is the Claude model the Editor connects Facts with
 	// (CONNECTING_MODEL, such as claude-haiku-5-5).
 	ConnectingModel string
+	// BriefingModel is the Claude model the Editor writes the Briefing with
+	// (BRIEFING_MODEL, such as claude-haiku-5-5).
+	BriefingModel string
+	// BriefingAt is the time of day, in the Owner's time zone (TZ), the
+	// Briefing is written and due by, as the time since midnight
+	// (BRIEFING_TIME, HH:MM on a 24-hour clock, such as 07:00).
+	BriefingAt time.Duration
 	// AnthropicAPIKey is the key for Anthropic's API (GOSLOW_ANTHROPIC_API_KEY).
 	AnthropicAPIKey Secret
 }
@@ -59,6 +66,7 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 	port, dbPath := get("PORT"), get("DATABASE_PATH")
 	contact, interval := get("COLLECTION_CONTACT"), get("COLLECTION_INTERVAL")
 	model, placing, connecting := get("READING_MODEL"), get("PLACING_MODEL"), get("CONNECTING_MODEL")
+	briefing, briefingTime := get("BRIEFING_MODEL"), get("BRIEFING_TIME")
 	key := get("GOSLOW_ANTHROPIC_API_KEY")
 	if len(missing) > 0 {
 		return Config{}, fmt.Errorf("missing environment variables: %s", strings.Join(missing, ", "))
@@ -74,10 +82,16 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 	}
 	// Only the Claude adapter exists yet (open-weight models come through
 	// OpenRouter later), so any other model would fail on every call.
-	for _, v := range [][2]string{{"READING_MODEL", model}, {"PLACING_MODEL", placing}, {"CONNECTING_MODEL", connecting}} {
+	for _, v := range [][2]string{
+		{"READING_MODEL", model}, {"PLACING_MODEL", placing}, {"CONNECTING_MODEL", connecting}, {"BRIEFING_MODEL", briefing},
+	} {
 		if !strings.HasPrefix(v[1], "claude-") {
 			return Config{}, errors.New(v[0] + " must be a Claude model such as claude-haiku-5-5, got " + strconv.Quote(v[1]))
 		}
+	}
+	clock, err := time.Parse("15:04", briefingTime)
+	if err != nil || len(briefingTime) != len("15:04") {
+		return Config{}, errors.New("BRIEFING_TIME must be a time of day such as 07:00, got " + strconv.Quote(briefingTime))
 	}
 	return Config{
 		Port:               n,
@@ -87,6 +101,8 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 		ReadingModel:       model,
 		PlacingModel:       placing,
 		ConnectingModel:    connecting,
+		BriefingModel:      briefing,
+		BriefingAt:         time.Duration(clock.Hour())*time.Hour + time.Duration(clock.Minute())*time.Minute,
 		AnthropicAPIKey:    Secret(key),
 	}, nil
 }

@@ -49,7 +49,11 @@ type Deps struct {
 	ConnectingModel Model
 	// Wikidata is where reading looks Entities up first.
 	Wikidata Wikidata
-	Log      *slog.Logger
+	// Briefings is the part of the Record the Briefing is written from and
+	// kept in, and BriefingModel the model it is written with.
+	Briefings     BriefingStore
+	BriefingModel Model
+	Log           *slog.Logger
 }
 
 // Editor does the editorial work over the Record.
@@ -130,15 +134,18 @@ func (e *Editor) ConnectWaiting(ctx context.Context, now time.Time) error {
 	return e.connectEach(ctx, waiting, now)
 }
 
-// Reconnect runs connecting again, in real time, over the day's Facts: those
-// placed at or after since, an Item at a time. A Fact connected early in the
+// Reconnect runs connecting again at now, in real time, over the day's
+// Facts: those placed in the day before now, an Item at a time. It is a step
+// the Briefing's Schedule runs just before writing (ScheduleDeps.Before); a
+// day rather than since midnight, since the Briefing covers what was placed
+// since the previous one, a day earlier. A Fact connected early in the
 // day was weighed against the Facts in the Record then; by the time the
 // Briefing is written, later Items have brought in Facts it may be connected
 // to (system design: The acts run as Items arrive). It only adds: a
 // Connection made earlier stays. It runs just before the Briefing is
 // written, which is due at once, so it does not wait on a batch.
-func (e *Editor) Reconnect(ctx context.Context, since, now time.Time) error {
-	day, err := e.Store.FactsPlacedSince(ctx, since)
+func (e *Editor) Reconnect(ctx context.Context, now time.Time) error {
+	day, err := e.Store.FactsPlacedSince(ctx, now.Add(-24*time.Hour))
 	if err != nil {
 		return err
 	}

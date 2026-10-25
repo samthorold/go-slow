@@ -1,5 +1,6 @@
 // Package feedback is the Owner's Feedback: what they tell the Editor about
-// a Story, Development, Fact or Connection. Each piece is kept as given
+// a Story, Development, Fact or Connection, or a Sunday read or its
+// Assessments. Each piece is kept as given
 // (what was said, about what, at what Depth, when) and then fixes the
 // Record (system design: Feedback is kept as given, apart from how it is
 // applied; Feedback fixes the Record and becomes precedent).

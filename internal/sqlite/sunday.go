@@ -217,6 +217,17 @@ func (s *Store) readStatements(ctx context.Context, readID int64) ([]editor.Read
 			LEFT JOIN stories ON stories.id = read_citations.story_id
 			LEFT JOIN reference_lookups l ON l.id = read_citations.lookup_id
 		WHERE read_statements.read_id = ?
+			-- Feedback takes out of the read every statement that rests on
+			-- something it withdrew: a Fact, a Development or an Assessment,
+			-- or an Assessment resting on a withdrawn Fact.
+			AND NOT EXISTS (SELECT 1 FROM read_citations cited
+				LEFT JOIN facts f ON f.id = cited.fact_id
+				LEFT JOIN developments d ON d.story_id = cited.story_id AND d.fact_id = cited.fact_id
+				LEFT JOIN assessments a ON a.id = cited.assessment_id
+				WHERE cited.statement_id = read_statements.id
+					AND (f.withdrawn_by IS NOT NULL OR d.withdrawn_by IS NOT NULL OR a.withdrawn_by IS NOT NULL
+						OR EXISTS (SELECT 1 FROM assessment_facts af JOIN facts g ON g.id = af.fact_id
+							WHERE af.assessment_id = a.id AND g.withdrawn_by IS NOT NULL)))
 		ORDER BY read_statements.position, read_citations.position`, readID)
 	if err != nil {
 		return nil, err
@@ -336,9 +347,12 @@ func (s *Store) storiesOf(ctx context.Context, factID int64) ([]editor.Story, er
 }
 
 // Assessments are at most limit Assessments, the latest first, each with the
-// Facts it cites and what supersedes it.
+// Facts it cites and what supersedes it, without what Feedback withdrew.
 func (s *Store) Assessments(ctx context.Context, limit int) ([]editor.Assessment, error) {
-	out, err := s.assessments(ctx, `1`, limit)
+	// As the acts see them: none Feedback withdrew, or that rests on a Fact
+	// it withdrew.
+	out, err := s.assessments(ctx, `a.withdrawn_by IS NULL AND NOT EXISTS (SELECT 1 FROM assessment_facts af
+		JOIN facts g ON g.id = af.fact_id WHERE af.assessment_id = a.id AND g.withdrawn_by IS NOT NULL)`, limit)
 	if err != nil {
 		return nil, fmt.Errorf("assessments: %w", err)
 	}
@@ -369,7 +383,8 @@ func (s *Store) readAssessments(ctx context.Context, readID int64) ([]editor.Ass
 func (s *Store) assessments(ctx context.Context, where string, limit int, args ...any) ([]editor.Assessment, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT a.id, a.statement, a.as_at, coalesce(a.supersedes_id, 0),
-			coalesce((SELECT later.id FROM assessments later WHERE later.supersedes_id = a.id), 0), r.day
+			coalesce((SELECT later.id FROM assessments later WHERE later.supersedes_id = a.id), 0), r.day,
+			a.withdrawn_by IS NOT NULL
 		FROM assessments a JOIN sunday_reads r ON r.id = a.read_id
 		WHERE `+where+`
 		ORDER BY a.as_at DESC, a.id DESC
@@ -382,7 +397,7 @@ func (s *Store) assessments(ctx context.Context, where string, limit int, args .
 	for rows.Next() {
 		var a editor.Assessment
 		var asAt string
-		if err := rows.Scan(&a.ID, &a.Statement, &asAt, &a.Supersedes, &a.SupersededBy, &a.Day); err != nil {
+		if err := rows.Scan(&a.ID, &a.Statement, &asAt, &a.Supersedes, &a.SupersededBy, &a.Day, &a.Withdrawn); err != nil {
 			return nil, err
 		}
 		if a.AsAt, err = time.Parse(time.DateOnly, asAt); err != nil {

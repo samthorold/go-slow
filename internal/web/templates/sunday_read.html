@@ -7,6 +7,7 @@
 <p><a href="{{.BriefingPath}}">The day's Briefing</a> · <a href="/feedback">Feedback</a></p>
 <h1>Sunday read</h1>
 <p>{{.Date}}</p>
+{{- template "gives" .Gives}}
 {{- if not .Exists}}
 <p>There is no Sunday read yet.</p>
 {{- with .Failure}}
@@ -30,7 +31,9 @@
 <h2>Assessments</h2>
 {{- range .Assessments}}
 <section id="{{.Anchor}}">
-  <p><strong hx-disable>{{.Statement}}</strong> <small>as at {{.AsAt}}{{with .Supersedes}}, superseding <a href="{{.}}">an earlier Assessment</a>{{end}}</small></p>
+  <p>{{if .Withdrawn}}<del hx-disable>{{.Statement}}</del> <strong>Withdrawn</strong>: you said it was wrong.{{else}}<strong hx-disable>{{.Statement}}</strong>{{end}}
+    <small>as at {{.AsAt}}{{with .Supersedes}}, superseding <a href="{{.}}">an earlier Assessment</a>{{end}}</small></p>
+  {{- template "gives" .Gives}}
   <ul>
     {{- range .Facts}}
     <li><small>Rests on {{template "readCite" .}}</small></li>

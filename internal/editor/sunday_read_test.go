@@ -433,6 +433,31 @@ func TestAnAssessmentIsKeptWithTheFactsItCitesAndALaterOneSupersedesIt(t *testin
 	}
 }
 
+func TestAWithdrawnAssessmentIsNotShownToALaterRead(t *testing.T) {
+	store := record(t)
+	readAndPlace(t, store, &fakeModel{output: startsAStory})
+	ed, _ := reader(store, &fakeAgent{turns: []editor.Turn{submits(assessesTheSpeech)}})
+	if err := ed.SundayRead(t.Context(), sundayMorning); err != nil {
+		t.Fatal(err)
+	}
+	if _, errs, err := feedback.New(store).Give(t.Context(), feedback.Draft{Kind: "wrong", Level: "assessment", Assessment: "1"}, sundayMorning); err != nil || errs != nil {
+		t.Fatalf("give Feedback: %v %v", errs, err)
+	}
+	nextSunday := sundayMorning.AddDate(0, 0, 7)
+	placeTheCall(t, store, nextSunday.Add(-24*time.Hour))
+	agent := &fakeAgent{turns: []editor.Turn{calls("assessments", `{}`)}}
+	ed, _ = reader(store, agent)
+
+	if err := ed.SundayRead(t.Context(), nextSunday); err != nil {
+		t.Fatal(err)
+	}
+
+	msgs := agent.sent[1].Messages
+	if got := msgs[len(msgs)-1].Results[0].Content; strings.Contains(got, "courting") {
+		t.Errorf("a withdrawn Assessment is shown:\n%s", got)
+	}
+}
+
 func TestAnAssessmentThatFailsTheChecksRejectsTheRead(t *testing.T) {
 	for name, read := range map[string]string{
 		"citing no Fact": `{"statements": [{"text": "x", "cites": ["N1"]}],

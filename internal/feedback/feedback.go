@@ -40,6 +40,10 @@ const (
 	Development Level = "development"
 	Fact        Level = "fact"
 	Connection  Level = "connection"
+	// Assessment is an Assessment a Sunday read reached, and SundayRead the
+	// read as a whole.
+	Assessment Level = "assessment"
+	SundayRead Level = "sunday read"
 )
 
 // allowed are the kinds each level takes. *Wrong* is about a proposition
@@ -47,12 +51,17 @@ const (
 // never wrong: a Development that should not be one is unwanted. *Missed*
 // adds a Story or a Development; a missed Fact or Connection would need the
 // Owner to write it, which is the Editor's work. Only a Story or a
-// Development is in the Briefing to be unwanted.
+// Development is in the Briefing to be unwanted. An Assessment is a
+// judgement, so it can be wrong; the Sunday read as a whole is new to the
+// Owner or not, which is what Foresight reads, and its statements are
+// mended through what they cite.
 var allowed = map[Level][]Kind{
 	Story:       {Missed, Unwanted, NewToMe},
 	Development: {Missed, Unwanted, NewToMe},
 	Fact:        {Wrong, NewToMe},
 	Connection:  {Wrong, NewToMe},
+	Assessment:  {Wrong, NewToMe},
+	SundayRead:  {NewToMe},
 }
 
 // Feedback is one piece of Feedback, as given.
@@ -68,6 +77,9 @@ type Feedback struct {
 	FactID int64
 	// ToFactID is a Connection's effect.
 	ToFactID int64
+	// AssessmentID is the Assessment it is about, and ReadID the Sunday
+	// read.
+	AssessmentID, ReadID int64
 	// Title is a missed Story's, as the Owner typed it.
 	Title string
 	// FactIDs are the Facts a missed Story gathers, as its Developments.
@@ -86,6 +98,9 @@ type Feedback struct {
 type Kept struct {
 	Feedback
 	Story, Fact, ToFact string
+	// Assessment is the Assessment's statement, and ReadDay the Sunday of
+	// the read it, or the read the Feedback is about, belongs to.
+	Assessment, ReadDay string
 }
 
 // Draft is Feedback as the Owner's form sent it, not yet validated.
@@ -93,6 +108,7 @@ type Draft struct {
 	Kind, Level string
 	// Story, Fact and ToFact are ids, as typed.
 	Story, Fact, ToFact string
+	Assessment, Read    string
 	Title               string
 	Facts               []string
 	Day                 string
@@ -174,6 +190,14 @@ func validate(d Draft) (Feedback, Errors) {
 		}
 		return n
 	}
+	switch f.Level {
+	case Assessment:
+		f.AssessmentID = id("assessment", d.Assessment, true)
+		return f, errs
+	case SundayRead:
+		f.ReadID = id("read", d.Read, true)
+		return f, errs
+	}
 	newStory := f.Kind == Missed && f.Level == Story
 	f.StoryID = id("story", d.Story, (f.Level == Story && !newStory) || f.Level == Development)
 	f.FactID = id("fact", d.Fact, f.Level != Story)
@@ -210,6 +234,9 @@ type Effect struct {
 	WithdrawFact int64
 	// WithdrawConnection is a wrong Connection: cause, then effect.
 	WithdrawConnection *Pair
+	// WithdrawAssessment is a wrong Assessment, withdrawn with the
+	// statements of the reads that cite it.
+	WithdrawAssessment int64
 }
 
 // NewStory is a Story the Owner said was missed.
@@ -237,6 +264,8 @@ func EffectOf(f Feedback) Effect {
 		e.WithdrawFact = f.FactID
 	case f.Kind == Wrong && f.Level == Connection:
 		e.WithdrawConnection = &Pair{f.FactID, f.ToFactID}
+	case f.Kind == Wrong && f.Level == Assessment:
+		e.WithdrawAssessment = f.AssessmentID
 	}
 	return e
 }

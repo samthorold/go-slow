@@ -28,6 +28,27 @@ func (s *Store) About(ctx context.Context, f feedback.Feedback) (feedback.About,
 	}
 	var err error
 	var facts []int64
+	switch f.Level {
+	case feedback.Assessment:
+		if a.Found, err = exists(`SELECT 1 FROM assessments WHERE id = ?`, f.AssessmentID); err != nil {
+			return a, fmt.Errorf("about feedback: %w", err)
+		}
+		a.Depth, err = s.depthOf(ctx, `SELECT fact_id FROM assessment_facts WHERE assessment_id = ?`, f.AssessmentID)
+		if err != nil {
+			return a, fmt.Errorf("about feedback: %w", err)
+		}
+		return a, nil
+	case feedback.SundayRead:
+		if a.Found, err = exists(`SELECT 1 FROM sunday_reads WHERE id = ?`, f.ReadID); err != nil {
+			return a, fmt.Errorf("about feedback: %w", err)
+		}
+		a.Depth, err = s.depthOf(ctx, `SELECT c.fact_id FROM read_citations c
+			JOIN read_statements st ON st.id = c.statement_id WHERE st.read_id = ? AND c.fact_id IS NOT NULL`, f.ReadID)
+		if err != nil {
+			return a, fmt.Errorf("about feedback: %w", err)
+		}
+		return a, nil
+	}
 	switch {
 	case f.Level == feedback.Story && f.Kind == feedback.Missed:
 		a.Found = true
@@ -89,12 +110,17 @@ func (s *Store) About(ctx context.Context, f feedback.Feedback) (feedback.About,
 func (s *Store) KeptFeedback(ctx context.Context) ([]feedback.Kept, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT feedback.id, kind, level, coalesce(story_id, 0), coalesce(fact_id, 0), coalesce(to_fact_id, 0),
-			feedback.title, fact_ids, day, depth, given_at,
-			coalesce(stories.title, ''), coalesce(f.statement, ''), coalesce(g.statement, '')
+			feedback.title, fact_ids, feedback.day, depth, given_at,
+			coalesce(stories.title, ''), coalesce(f.statement, ''), coalesce(g.statement, ''),
+			coalesce(feedback.assessment_id, 0), coalesce(a.statement, ''), coalesce(feedback.read_id, 0),
+			coalesce(ar.day, r.day, '')
 		FROM feedback
 			LEFT JOIN stories ON stories.id = feedback.story_id
 			LEFT JOIN facts f ON f.id = feedback.fact_id
 			LEFT JOIN facts g ON g.id = feedback.to_fact_id
+			LEFT JOIN assessments a ON a.id = feedback.assessment_id
+			LEFT JOIN sunday_reads ar ON ar.id = a.read_id
+			LEFT JOIN sunday_reads r ON r.id = feedback.read_id
 		ORDER BY given_at DESC, feedback.id DESC`)
 	if err != nil {
 		return nil, fmt.Errorf("kept feedback: %w", err)
@@ -105,7 +131,7 @@ func (s *Store) KeptFeedback(ctx context.Context) ([]feedback.Kept, error) {
 		var k feedback.Kept
 		var kind, level, facts, at string
 		if err := rows.Scan(&k.ID, &kind, &level, &k.StoryID, &k.FactID, &k.ToFactID, &k.Title, &facts, &k.Day,
-			&k.Depth, &at, &k.Story, &k.Fact, &k.ToFact); err != nil {
+			&k.Depth, &at, &k.Story, &k.Fact, &k.ToFact, &k.AssessmentID, &k.Assessment, &k.ReadID, &k.ReadDay); err != nil {
 			return nil, fmt.Errorf("kept feedback: %w", err)
 		}
 		k.Kind, k.Level, k.GivenAt = feedback.Kind(kind), feedback.Level(level), parseTime(at)
@@ -177,10 +203,12 @@ func (s *Store) Give(ctx context.Context, f feedback.Feedback, e feedback.Effect
 	}
 	var id int64
 	if err := tx.QueryRowContext(ctx, `
-		INSERT INTO feedback (kind, level, story_id, fact_id, to_fact_id, title, fact_ids, day, depth, given_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
+		INSERT INTO feedback (kind, level, story_id, fact_id, to_fact_id, title, fact_ids, day, depth, given_at,
+			assessment_id, read_id)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
 		string(f.Kind), string(f.Level), nullID(f.StoryID), nullID(f.FactID), nullID(f.ToFactID),
-		f.Title, string(facts), f.Day, int(f.Depth), formatTime(f.GivenAt)).Scan(&id); err != nil {
+		f.Title, string(facts), f.Day, int(f.Depth), formatTime(f.GivenAt),
+		nullID(f.AssessmentID), nullID(f.ReadID)).Scan(&id); err != nil {
 		return 0, fmt.Errorf("keep feedback: %w", err)
 	}
 	if err := apply(ctx, tx, id, f, e); err != nil {
@@ -231,6 +259,11 @@ func apply(ctx context.Context, tx *sql.Tx, by int64, f feedback.Feedback, e fee
 		}
 		if err := exec(`UPDATE fact_connections SET withdrawn_by = coalesce(withdrawn_by, ?)
 			WHERE from_fact_id = ?2 OR to_fact_id = ?2`, by, e.WithdrawFact); err != nil {
+			return err
+		}
+	}
+	if e.WithdrawAssessment != 0 {
+		if err := exec(`UPDATE assessments SET withdrawn_by = coalesce(withdrawn_by, ?) WHERE id = ?`, by, e.WithdrawAssessment); err != nil {
 			return err
 		}
 	}

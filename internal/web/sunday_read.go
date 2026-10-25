@@ -54,6 +54,8 @@ type sundayReadPage struct {
 	Date         string
 	BriefingPath string
 	Exists       bool
+	// Gives is the Feedback on the read as a whole.
+	Gives        []giveButton
 	Statements   []readStatementRow
 	Assessments  []assessmentRow
 	Stories      []startedStoryRow
@@ -83,6 +85,8 @@ type readCitationRow struct {
 
 type assessmentRow struct {
 	Anchor     string
+	Gives      []giveButton
+	Withdrawn  bool
 	Statement  string
 	AsAt       string
 	Supersedes string
@@ -109,6 +113,10 @@ func (a *app) sundayRead(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	p := sundayReadPage{Date: day.Format("Sunday 2 January 2006"), BriefingPath: briefingPath(key), Exists: exists}
+	feedbackPath := sundayReadPath(key) + "/feedback"
+	if exists {
+		p.Gives = readGives(feedbackPath, read.ID)
+	}
 	if !exists {
 		fs, err := a.SundayReads.SundayReadFailures(r.Context(), key)
 		if err != nil {
@@ -128,7 +136,11 @@ func (a *app) sundayRead(w http.ResponseWriter, r *http.Request) {
 		p.Statements = append(p.Statements, row)
 	}
 	for _, as := range read.Assessments {
-		row := assessmentRow{Anchor: assessmentAnchor(as.ID), Statement: as.Statement, AsAt: as.AsAt.Format("2 January 2006")}
+		row := assessmentRow{Anchor: assessmentAnchor(as.ID), Statement: as.Statement, AsAt: as.AsAt.Format("2 January 2006"),
+			Withdrawn: as.Withdrawn}
+		if !as.Withdrawn {
+			row.Gives = assessmentGives(feedbackPath, as.ID)
+		}
 		if as.Supersedes != 0 {
 			row.Supersedes = assessmentPath(as.Supersedes)
 		}

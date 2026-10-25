@@ -86,6 +86,10 @@ type Assessment struct {
 	SupersededBy int64
 	// Day is the Sunday of the read that made it.
 	Day string
+	// Withdrawn is set once Feedback said it was wrong. The agent never sees
+	// a withdrawn Assessment, or one resting on a withdrawn Fact; the Record
+	// keeps it, marked.
+	Withdrawn bool
 }
 
 // RecordFact is a Fact as the Record holds it, traced to its Item, with the
@@ -123,7 +127,8 @@ type SundayStore interface {
 	// with the Stories it is a Development in; none Feedback withdrew.
 	FactsAbout(ctx context.Context, entity string, before time.Time, limit int) ([]RecordFact, error)
 	// Assessments are at most limit Assessments, current and superseded,
-	// the latest first, each with the Facts it cites.
+	// the latest first, each with the Facts it cites; none Feedback
+	// withdrew, or that rests on a Fact it withdrew.
 	Assessments(ctx context.Context, limit int) ([]Assessment, error)
 	// SaveSundayRead keeps a Sunday read, all at once.
 	SaveSundayRead(ctx context.Context, r SundayRead) error

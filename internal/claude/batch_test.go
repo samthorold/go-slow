@@ -177,8 +177,11 @@ func TestAnEndedBatchsResultsCarryTheirRequestsIdentifiers(t *testing.T) {
 			t.Errorf("%s has no error: %+v", id, byID[id])
 		}
 	}
-	if r := byID["reading-4"]; !errors.Is(r.Err, editor.ErrRefused) {
+	if r := byID["reading-4"]; !errors.Is(r.Err, editor.ErrRefused) || r.Response.StopReason != "refusal" || r.Response.Raw == nil {
 		t.Errorf("refused = %+v", r)
+	}
+	if r := byID["reading-2"]; !strings.Contains(string(r.Response.Raw), `"stop_reason":"end_turn"`) || r.Response.StopReason != "end_turn" {
+		t.Errorf("succeeded raw = %s", r.Response.Raw)
 	}
 	if r := byID["reading-5"]; !errors.Is(r.Err, editor.ErrTruncated) {
 		t.Errorf("truncated = %+v", r)

@@ -25,6 +25,9 @@ type failedRow struct {
 	Attempts int
 	When     string
 	Why      string
+	// Attempts is the page of its last attempt's call, which lists every
+	// attempt; empty if none was kept.
+	AttemptsPage string
 }
 
 type sourceRow struct {
@@ -84,6 +87,7 @@ func (a *app) items(w http.ResponseWriter, r *http.Request) {
 		p.Failed = append(p.Failed, failedRow{
 			Act: f.Act, Title: f.Title, Page: itemPath(f.SourceID, f.EntryID),
 			Attempts: f.Attempts, When: when(f.LastFailedAt, now.Location()), Why: f.Why,
+			AttemptsPage: callPath(f.LastCall),
 		})
 	}
 	for _, s := range statuses {

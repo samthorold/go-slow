@@ -45,7 +45,7 @@ const turnEffort = anthropic.BetaOutputConfigEffortHigh
 // the conversation's prefix is cached. A refusal or a turn cut off at its
 // length is an error, never output.
 func (m *Model) Turn(ctx context.Context, r editor.ConversationRequest) (editor.Turn, error) {
-	model := m.modelFor(r.Act)
+	model := m.ModelFor(r.Act)
 	params, err := turnParams(model, r)
 	if err != nil {
 		return editor.Turn{}, fmt.Errorf("%s on %s: %w", r.Act, model, err)

@@ -29,6 +29,11 @@
     <p><small>Given {{.GivenAt}}
       {{- if .Briefing}}, on the <a href="{{.BriefPath}}">Briefing for {{.Briefing}}</a>{{end}}
       {{- if .Depth}}, at {{.Depth}} Depth{{else}}, on nothing a Topic follows{{end}}.</small></p>
+    {{- if .ByOwner}}
+    <p><small>You made what it is about, not an act: no call is behind it.</small></p>
+    {{- else if .Behind}}
+    <p><small>Behind it:{{range $i, $b := .Behind}}{{if $i}},{{end}} <a href="{{$b.Path}}">{{$b.Label}}</a>{{end}}.</small></p>
+    {{- end}}
     {{- if .Undone}}
     <p><strong>Undone {{.Undone}}:</strong> kept as given, it fixes the Record no more.</p>
     {{- else}}

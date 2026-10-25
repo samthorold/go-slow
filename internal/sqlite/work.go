@@ -14,6 +14,13 @@ const itemWorkKey = `items.source_id || char(10) || items.entry_id`
 // factWorkKey is the work key of the Item the Fact aliased f was drawn from.
 func factWorkKey(f string) string { return f + `.source_id || char(10) || ` + f + `.entry_id` }
 
+// readingCall is the id of the latest applied reading call on the Item
+// whose work key is key, or 0: the reading whose Facts the Item keeps.
+func readingCall(key string) string {
+	return `coalesce((SELECT max(c.id) FROM model_calls c
+		WHERE c.act = 'reading' AND c.work_key = ` + key + ` AND c.outcome = 'applied'), 0)`
+}
+
 // placingCall is the id of the applied placing call that placed the Fact
 // aliased f, or 0: the one on its Item at the time it was placed, since
 // SavePlacing and the call are both written at the time the result was
@@ -22,13 +29,6 @@ func placingCall(f string) string {
 	return `coalesce((SELECT min(mc.id) FROM model_calls mc JOIN fact_placings fp ON fp.fact_id = ` + f + `.id
 		WHERE mc.act = 'placing' AND mc.outcome = 'applied' AND mc.work_key = ` + factWorkKey(f) + `
 			AND mc.at = fp.placed_at), 0)`
-}
-
-// readingCall is the id of the latest applied reading call on the Item whose
-// work key is key, or 0: the reading whose Facts the Record holds.
-func readingCall(key string) string {
-	return `coalesce((SELECT max(mc.id) FROM model_calls mc
-		WHERE mc.act = 'reading' AND mc.work_key = ` + key + ` AND mc.outcome = 'applied'), 0)`
 }
 
 // connectingCall is the id of the applied connecting call that made the

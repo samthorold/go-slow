@@ -1,0 +1,127 @@
+{
+  "act": "reading",
+  "model": "claude-haiku-5-5",
+  "request_hash": "f3adf8372d5b518c99289b165eb19e3a7bf265c5a6906f29d3d9cf43a5630edb",
+  "recorded_at": "2026-10-25T21:55:54.475334Z",
+  "usage": {
+    "input_tokens": 3732,
+    "output_tokens": 3687
+  },
+  "output": {
+    "claims": [
+      {
+        "entities": [],
+        "made_by": "Andy Burnham",
+        "quote": "For too long, people have put up with a railway that often lets them down.",
+        "statement": "The railway has for too long let people down."
+      },
+      {
+        "entities": [],
+        "made_by": "Heidi Alexander",
+        "quote": "The biggest shake-up to our railways in a generation is underway.",
+        "statement": "The biggest shake-up to the railways in a generation is underway."
+      },
+      {
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "Great British Railways",
+            "role": "national railway body"
+          },
+          {
+            "kind": "place",
+            "name": "Derby",
+            "role": "city hosting the headquarters"
+          }
+        ],
+        "made_by": "Heidi Alexander",
+        "quote": "Great British Railways will bring the railway together around one mission - better services for passengers - with Derby at the heart of its future.",
+        "statement": "Great British Railways will bring the railway together around better services for passengers, with Derby at the heart of its future."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Derby",
+            "role": "city hosting the headquarters"
+          }
+        ],
+        "made_by": "Claire Ward",
+        "quote": "This is fantastic news for Derby.",
+        "statement": "The announcement of Great British Railways' headquarters in Derby is fantastic news for the city."
+      },
+      {
+        "entities": [],
+        "made_by": "Pat McFadden",
+        "quote": "which is creating up to 500,000 opportunities for young people to earn or learn",
+        "statement": "The £2.5 billion youth employment support package is creating up to 500,000 opportunities for young people to earn or learn."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Derby",
+            "role": "city hosting the headquarters"
+          }
+        ],
+        "made_by": "the government",
+        "quote": "an estimated £151 million boost to the region’s economy",
+        "statement": "The Derby headquarters is estimated to give the region's economy a £151 million boost."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Becketwell",
+            "role": "headquarters site"
+          }
+        ],
+        "made_by": "the government",
+        "quote": "is expected to begin in early 2027 and be completed by spring 2029",
+        "statement": "Construction of the Becketwell headquarters is expected to begin in early 2027 and be completed by spring 2029."
+      }
+    ],
+    "facts": [
+      {
+        "as_at": "2026-10-15",
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "Great British Railways",
+            "role": "national railway body"
+          },
+          {
+            "kind": "place",
+            "name": "Derby",
+            "role": "city hosting the headquarters"
+          },
+          {
+            "kind": "place",
+            "name": "Becketwell",
+            "role": "headquarters site"
+          }
+        ],
+        "quote": "the site of Great British Railways’ (GBR) headquarters is unveiled today (15 October 2026) in Derby",
+        "statement": "The site of the Great British Railways headquarters was unveiled in Derby at Becketwell."
+      },
+      {
+        "as_at": "2026-10-15",
+        "entities": [],
+        "quote": "fares frozen for the first time in 30 years",
+        "statement": "Fares have been frozen for the first time in 30 years."
+      },
+      {
+        "as_at": "2026-10-15",
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Derby",
+            "role": "location of first apprentice starters"
+          }
+        ],
+        "quote": "Up to 600 apprentices between 16 and 21 years old will enrol over the next 4 years on the rail foundation apprenticeship",
+        "statement": "Up to 600 apprentices aged 16 to 21 will enrol over the next 4 years on the rail foundation apprenticeship, with the first starters based in Derby."
+      }
+    ]
+  }
+}

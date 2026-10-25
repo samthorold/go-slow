@@ -1,0 +1,140 @@
+{
+  "act": "reading",
+  "model": "claude-haiku-5-5",
+  "request_hash": "f3adf8372d5b518c99289b165eb19e3a7bf265c5a6906f29d3d9cf43a5630edb",
+  "recorded_at": "2026-10-25T21:55:25.510905Z",
+  "usage": {
+    "input_tokens": 3732,
+    "output_tokens": 4434
+  },
+  "output": {
+    "claims": [
+      {
+        "entities": [],
+        "made_by": "Andy Burnham",
+        "quote": "you should be able to rely on your train turning up",
+        "statement": "Passengers should be able to rely on their trains turning up."
+      },
+      {
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "Great British Railways",
+            "role": "publicly owned railway being established"
+          }
+        ],
+        "made_by": "Heidi Alexander",
+        "quote": "Great British Railways will bring the railway together around one mission - better services for passengers",
+        "statement": "Great British Railways will bring the railway together around one mission of better services for passengers."
+      },
+      {
+        "entities": [],
+        "made_by": "Heidi Alexander",
+        "quote": "With 600 apprenticeships opening up",
+        "statement": "Up to 600 apprenticeships are opening up."
+      },
+      {
+        "entities": [],
+        "made_by": "Pat McFadden",
+        "quote": "This forms part of our £2.5 billion youth employment support package which is creating up to 500,000 opportunities for young people to earn or learn",
+        "statement": "The £2.5 billion youth employment support package is creating up to 500,000 opportunities for young people to earn or learn."
+      }
+    ],
+    "facts": [
+      {
+        "as_at": "2026-10-15",
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "Great British Railways",
+            "role": "publicly owned railway being established"
+          },
+          {
+            "kind": "place",
+            "name": "Derby",
+            "role": "city where the GBR headquarters site is unveiled"
+          }
+        ],
+        "quote": "the site of Great British Railways’ (GBR) headquarters is unveiled today (15 October 2026) in Derby",
+        "statement": "The site of the Great British Railways headquarters was unveiled in Derby on 15 October 2026."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Becketwell",
+            "role": "brownfield site in Derby city centre chosen for the GBR headquarters"
+          },
+          {
+            "kind": "organisation",
+            "name": "Great British Railways",
+            "role": "publicly owned railway being established"
+          }
+        ],
+        "quote": "Becketwell, a brownfield site in the heart of Derby city centre",
+        "statement": "The Great British Railways headquarters site is Becketwell, a brownfield site in the heart of Derby city centre."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "Great British Railways",
+            "role": "publicly owned railway being established"
+          }
+        ],
+        "quote": "The site will accommodate up to 450 GBR staff",
+        "statement": "The Great British Railways headquarters site will accommodate up to 450 staff."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Andy Burnham",
+            "role": "Prime Minister of the United Kingdom"
+          }
+        ],
+        "quote": "Prime Minister Andy Burnham said:",
+        "statement": "Prime Minister Andy Burnham made a statement on the Great British Railways headquarters and apprenticeships."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Heidi Alexander",
+            "role": "Transport Secretary of the United Kingdom"
+          }
+        ],
+        "quote": "Transport Secretary Heidi Alexander said:",
+        "statement": "Transport Secretary Heidi Alexander made a statement on the Great British Railways headquarters and apprenticeships."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Pat McFadden",
+            "role": "Work and Pensions Secretary of the United Kingdom"
+          }
+        ],
+        "quote": "Work and Pensions Secretary Pat McFadden said:",
+        "statement": "Work and Pensions Secretary Pat McFadden made a statement on the foundation apprenticeship and youth employment support."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Claire Ward",
+            "role": "Mayor of the East Midlands"
+          }
+        ],
+        "quote": "Mayor of the East Midlands, Claire Ward, said:",
+        "statement": "Mayor of the East Midlands Claire Ward made a statement on the Great British Railways headquarters and apprenticeships."
+      }
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+{{define "title"}}Story{{end}}
+
+{{define "content"}}
+{{/* The Story's title and its Facts are the Editor's words, drawn from
+     collected text: inert, with hx-disable on the elements holding them, so
+     the boosted links to each Item still work. */}}
+<p><a href="/stories">Stories</a></p>
+<h1 hx-disable>{{.Title}}</h1>
+
+<section aria-labelledby="timeline">
+  <h2 id="timeline">Timeline</h2>
+  <ol>
+  {{- range .Timeline}}
+    <li>
+      <p><time>{{.AsAt}}</time>: <span hx-disable>{{.Statement}}</span></p>
+      <blockquote hx-disable><p>{{.Quote}}</p></blockquote>
+      <p><small>From <a href="{{.ItemPath}}"><span hx-disable>{{.ItemTitle}}</span></a></small></p>
+    </li>
+  {{- end}}
+  </ol>
+</section>
+{{end}}

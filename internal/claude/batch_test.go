@@ -18,6 +18,12 @@ import (
 // the body of the batch created.
 func batchAPI(t *testing.T, status string, results ...map[string]any) (*claude.Model, *map[string]any) {
 	t.Helper()
+	return batchAPIWith(t, claude.Options{Model: "claude-haiku-5-5"}, status, results...)
+}
+
+// batchAPIWith is batchAPI with the adapter built from o.
+func batchAPIWith(t *testing.T, o claude.Options, status string, results ...map[string]any) (*claude.Model, *map[string]any) {
+	t.Helper()
 	var created map[string]any
 	batch := func(w http.ResponseWriter) {
 		w.Header().Set("Content-Type", "application/json")
@@ -55,7 +61,34 @@ func batchAPI(t *testing.T, status string, results ...map[string]any) (*claude.M
 		}
 	}))
 	t.Cleanup(srv.Close)
-	return claude.New(claude.Options{APIKey: "test-key", Model: "claude-haiku-5-5", BaseURL: srv.URL}), &created
+	o.APIKey, o.BaseURL = "test-key", srv.URL
+	return claude.New(o), &created
+}
+
+func TestEachRequestInABatchRunsOnItsActsModel(t *testing.T) {
+	model, created := batchAPIWith(t, claude.Options{
+		Model: "claude-haiku-5-5", ActModels: map[string]string{"placing": "claude-sonnet-5-5"},
+	}, "in_progress")
+	placing := request
+	placing.Act = "placing"
+
+	if _, err := model.Submit(t.Context(), []editor.BatchRequest{
+		{ID: "reading-1", Request: request},
+		{ID: "placing-1", Request: placing},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	reqs, _ := (*created)["requests"].([]any)
+	if len(reqs) != 2 {
+		t.Fatalf("batch body = %v", *created)
+	}
+	for i, want := range []string{"claude-haiku-5-5", "claude-sonnet-5-5"} {
+		params, _ := reqs[i].(map[string]any)["params"].(map[string]any)
+		if params["model"] != want {
+			t.Errorf("request %d on %v, want %s", i, params["model"], want)
+		}
+	}
 }
 
 func message(stopReason, text string) map[string]any {

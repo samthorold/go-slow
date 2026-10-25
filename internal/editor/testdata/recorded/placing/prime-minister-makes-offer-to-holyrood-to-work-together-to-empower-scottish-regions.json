@@ -1,0 +1,43 @@
+{
+  "act": "placing",
+  "model": "claude-haiku-5-5",
+  "recorded_at": "2026-10-25T00:18:34.136912Z",
+  "usage": {
+    "input_tokens": 1928,
+    "output_tokens": 538
+  },
+  "output": {
+    "facts": [
+      {
+        "developments_in": [],
+        "fact": "F1"
+      },
+      {
+        "developments_in": [],
+        "fact": "F2"
+      },
+      {
+        "developments_in": [
+          "N1"
+        ],
+        "fact": "F3"
+      },
+      {
+        "developments_in": [
+          "N1"
+        ],
+        "fact": "F4"
+      },
+      {
+        "developments_in": [],
+        "fact": "F5"
+      }
+    ],
+    "new_stories": [
+      {
+        "ref": "N1",
+        "title": "Regional empowerment model for Scotland"
+      }
+    ]
+  }
+}

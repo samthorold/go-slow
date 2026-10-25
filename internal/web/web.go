@@ -39,6 +39,7 @@ type Deps struct {
 	Items     Items
 	Readings  Readings
 	Topics    Topics
+	Stories   Stories
 	// Now is the clock. The day it returns, in its location, is "today".
 	Now func() time.Time
 	Log *slog.Logger
@@ -63,6 +64,12 @@ var itemTmpl = page("item.html")
 // topicsTmpl is the Topics page.
 var topicsTmpl = page("topics.html")
 
+// storiesTmpl is the Stories page, and storyTmpl a Story's own page.
+var (
+	storiesTmpl = page("stories.html")
+	storyTmpl   = page("story.html")
+)
+
 // page parses a page template together with the layout it fills.
 func page(name string) *template.Template {
 	return template.Must(template.ParseFS(templateFS, "templates/layout.html", "templates/"+name))
@@ -76,6 +83,8 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("GET /{$}", a.todaysBriefing)
 	mux.HandleFunc("GET /items", a.items)
 	mux.HandleFunc("GET /items/{source}/{entry}", a.item)
+	mux.HandleFunc("GET /stories", a.stories)
+	mux.HandleFunc("GET /stories/{id}", a.story)
 	mux.HandleFunc("GET /topics", a.topics)
 	mux.HandleFunc("POST /topics", a.addTopic)
 	mux.HandleFunc("PUT /topics/{id}", a.setDepth)

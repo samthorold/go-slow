@@ -44,6 +44,8 @@ var entityKinds = []string{"person", "organisation", "place", "occasion"}
 // Fact is a proposition drawn from an Item or a Reference source, holding as
 // at a date. It carries the Item it was drawn from, or the Lookup.
 type Fact struct {
+	// ID is the Fact's in the Record, once it is kept there.
+	ID int64
 	// Lookup is the Reference source lookup a Fact not drawn from an Item
 	// came from; nil for one drawn from an Item.
 	Lookup    *Lookup

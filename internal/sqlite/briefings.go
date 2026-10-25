@@ -299,3 +299,49 @@ func (s *Store) Briefing(ctx context.Context, day string) (editor.Briefing, bool
 	}
 	return b, true, nil
 }
+
+// BriefingCitations are the Developments the day's Briefing cites, each once,
+// in the order it first cites them, as it was written: Feedback that later
+// took a statement out leaves what was cited, and the calls behind it.
+func (s *Store) BriefingCitations(ctx context.Context, day string) ([]editor.BriefingCitation, error) {
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT d.story_id, stories.title, facts.id, facts.source_id, facts.entry_id, facts.statement,
+			facts.as_at, facts.quote, `+factEntities+`, items.title, d.missed_by IS NOT NULL,
+			CASE WHEN d.missed_by IS NULL THEN `+placingCall("facts")+` ELSE 0 END,
+			`+readingCall(factWorkKey("facts"))+`
+		FROM briefing_stories
+			JOIN stories ON stories.id = briefing_stories.story_id
+			JOIN briefing_statements USING (day, story_id)
+			JOIN statement_developments sd ON sd.statement_id = briefing_statements.id
+			JOIN developments d ON d.story_id = sd.story_id AND d.fact_id = sd.fact_id
+			JOIN facts ON facts.id = sd.fact_id
+			JOIN items ON items.source_id = facts.source_id AND items.entry_id = facts.entry_id
+		WHERE briefing_stories.day = ?
+		ORDER BY briefing_stories.position, briefing_statements.position, sd.position`, day)
+	if err != nil {
+		return nil, fmt.Errorf("briefing citations %s: %w", day, err)
+	}
+	defer func() { _ = rows.Close() }()
+	var out []editor.BriefingCitation
+	seen := map[[2]int64]bool{}
+	for rows.Next() {
+		var c editor.BriefingCitation
+		var asAt, ents string
+		d := &c.Development
+		if err := rows.Scan(&c.StoryID, &c.StoryTitle, &d.ID, &d.SourceID, &d.EntryID, &d.Statement,
+			&asAt, &d.Quote, &ents, &d.ItemTitle, &d.Missed, &d.PlacingCall, &c.ReadingCall); err != nil {
+			return nil, fmt.Errorf("briefing citations %s: %w", day, err)
+		}
+		if err := scanFact(&d.Fact, asAt, ents); err != nil {
+			return nil, fmt.Errorf("briefing citations %s: %w", day, err)
+		}
+		if k := [2]int64{c.StoryID, d.ID}; !seen[k] {
+			seen[k] = true
+			out = append(out, c)
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("briefing citations %s: %w", day, err)
+	}
+	return out, nil
+}

@@ -1,10 +1,10 @@
 {
   "act": "briefing",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T10:01:00.636464Z",
+  "recorded_at": "2026-10-25T10:22:14.453486Z",
   "usage": {
-    "input_tokens": 2472,
-    "output_tokens": 1646
+    "input_tokens": 3144,
+    "output_tokens": 2093
   },
   "output": {
     "stories": [
@@ -12,9 +12,10 @@
         "statements": [
           {
             "developments": [
-              "D1"
+              "D1",
+              "D2"
             ],
-            "text": "President Trump announced a reciprocal energy ceasefire between Russia and Ukraine on 11 October 2026."
+            "text": "President Trump announced a reciprocal energy ceasefire between Russia and Ukraine. President Zelenskyy assured the Prime Minister that Ukraine would immediately implement it when a start date is confirmed."
           }
         ],
         "story": "S1"
@@ -23,26 +24,9 @@
         "statements": [
           {
             "developments": [
-              "D9"
+              "D3"
             ],
-            "text": "The UK has committed £1.6 billion to deliver more than 5,000 LMMs to Ukraine over the next four years."
-          },
-          {
-            "developments": [
-              "D10"
-            ],
-            "text": "Prime Minister Andy Burnham has asked Ministers to draw up further sanctions, military aid and fiscal packages for Ukraine."
-          }
-        ],
-        "story": "S7"
-      },
-      {
-        "statements": [
-          {
-            "developments": [
-              "D2"
-            ],
-            "text": "The UK government has announced new funding to help Ukraine through its fifth winter under Russian bombardment."
+            "text": "The UK has announced a new sanctions package covering over 90% of Russia's oil producing capacity."
           }
         ],
         "story": "S2"
@@ -51,26 +35,22 @@
         "statements": [
           {
             "developments": [
-              "D3"
+              "D9",
+              "D10"
             ],
-            "text": "The UK has announced a new sanctions package, so that over 90% of Russia's oil producing capacity is now covered by UK sanctions."
+            "text": "The UK is delivering £45 million of surface-to-air missiles to Ukraine. The UK has also committed £1.6 billion to deliver more than 5000 Lightweight Multirole Missiles to Ukraine over the next four years."
           }
         ],
-        "story": "S3"
+        "story": "S7"
       },
       {
         "statements": [
           {
             "developments": [
-              "D4"
+              "D5",
+              "D6"
             ],
-            "text": "The UK decided to send air defence and a Voyager aircraft to Saudi Arabia to provide air-to-air refuelling support."
-          },
-          {
-            "developments": [
-              "D5"
-            ],
-            "text": "The Voyager aircraft sent to Saudi Arabia has already completed 14 operational missions."
+            "text": "The Prime Minister confirmed in his speech to the United Nations General Assembly the commitment to establish a National Centre for Information Defence. The Foreign Affairs Select Committee recommended the National Centre for Information Defence."
           }
         ],
         "story": "S4"
@@ -79,15 +59,20 @@
         "statements": [
           {
             "developments": [
-              "D6"
+              "D4"
             ],
-            "text": "The Prime Minister and Chancellor Merz agreed a new partnership in Berlin to tackle hybrid threats."
-          },
+            "text": "The Prime Minister and Chancellor Merz agreed a new partnership to tackle hybrid threats in Berlin."
+          }
+        ],
+        "story": "S3"
+      },
+      {
+        "statements": [
           {
             "developments": [
               "D7"
             ],
-            "text": "In his speech to the UN General Assembly, the Prime Minister confirmed the UK's commitment to establish a new National Centre for Information Defence."
+            "text": "The UK-EU summit will take place in Brussels on 20 November."
           }
         ],
         "story": "S5"
@@ -98,7 +83,7 @@
             "developments": [
               "D8"
             ],
-            "text": "The UK-EU summit will take place in Brussels on 20 November 2026."
+            "text": "The Prime Minister confirmed in New York that AI will be centre stage in the UK's G20 presidency."
           }
         ],
         "story": "S6"
@@ -107,9 +92,32 @@
         "statements": [
           {
             "developments": [
+              "D11",
+              "D12"
+            ],
+            "text": "The Derby site will accommodate up to 450 Great British Railways staff. The site of the Great British Railways headquarters was unveiled in Derby on 15 October 2026."
+          }
+        ],
+        "story": "S8"
+      },
+      {
+        "statements": [
+          {
+            "developments": [
               "D13"
             ],
-            "text": "In a speech in Scotland, the Prime Minister made an offer of DWP devolution to Scotland."
+            "text": "Up to 600 apprentices aged 16 to 21 will enrol over the next 4 years on the rail foundation apprenticeship."
+          }
+        ],
+        "story": "S9"
+      },
+      {
+        "statements": [
+          {
+            "developments": [
+              "D14"
+            ],
+            "text": "Fares have been frozen for the first time in 30 years."
           }
         ],
         "story": "S10"
@@ -118,9 +126,9 @@
         "statements": [
           {
             "developments": [
-              "D14"
+              "D15"
             ],
-            "text": "The Scottish Government has announced a long-term programme for local government reform."
+            "text": "76,000 extra seats a week have been introduced across the network."
           }
         ],
         "story": "S11"
@@ -129,12 +137,35 @@
         "statements": [
           {
             "developments": [
-              "D12"
+              "D16"
             ],
-            "text": "The Scottish Government has agreed this week to match the UK Government's £10 million to create two defence technical excellence colleges."
+            "text": "A £1 billion investment in a new fleet of trains for the north is set to be built at Alstom's Derby site."
           }
         ],
-        "story": "S9"
+        "story": "S12"
+      },
+      {
+        "statements": [
+          {
+            "developments": [
+              "D17",
+              "D18"
+            ],
+            "text": "The Prime Minister is to invite Scotland's First Minister to work with him on pushing more power out of Westminster and Holyrood. He will call on the Scottish Government to work with the UK Government through No10 North and the Scotland Office to develop a new model of regional empowerment for Scotland."
+          }
+        ],
+        "story": "S14"
+      },
+      {
+        "statements": [
+          {
+            "developments": [
+              "D20"
+            ],
+            "text": "The Scottish Government has agreed to match the UK Government's £10 million to create two defence technical excellence colleges."
+          }
+        ],
+        "story": "S15"
       }
     ]
   }

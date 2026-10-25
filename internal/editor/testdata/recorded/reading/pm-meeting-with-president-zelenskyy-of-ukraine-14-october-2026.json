@@ -1,19 +1,19 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T09:55:37.305675Z",
+  "recorded_at": "2026-10-25T10:13:57.503513Z",
   "usage": {
-    "input_tokens": 2160,
-    "output_tokens": 3414
+    "input_tokens": 1877,
+    "output_tokens": 3309
   },
   "output": {
     "claims": [
       {
         "entities": [
           {
-            "kind": "place",
-            "name": "Russia",
-            "role": ""
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
           },
           {
             "kind": "person",
@@ -21,37 +21,25 @@
             "role": "President of Ukraine"
           },
           {
-            "kind": "person",
-            "name": "the Prime Minister",
-            "role": "Prime Minister of the United Kingdom"
-          }
-        ],
-        "made_by": "the leaders",
-        "quote": "It was clear that Russia had no interest in peace",
-        "statement": "Russia has no interest in peace."
-      },
-      {
-        "entities": [
-          {
             "kind": "place",
             "name": "Russia",
             "role": ""
           }
         ],
-        "made_by": "the leaders",
-        "quote": "Russia’s blatant indiscriminate attacks on civilians and energy infrastructure",
-        "statement": "Russia has carried out blatant indiscriminate attacks on civilians and energy infrastructure since President Trump called for an energy ceasefire."
+        "made_by": "the leaders (the Prime Minister and President Zelenskyy)",
+        "quote": "It was clear that Russia had no interest in peace, the leaders underlined.",
+        "statement": "Russia had no interest in peace."
       },
       {
         "entities": [
           {
             "kind": "person",
-            "name": "the Prime Minister",
+            "name": "Prime Minister",
             "role": "Prime Minister of the United Kingdom"
           },
           {
             "kind": "place",
-            "name": "UK",
+            "name": "United Kingdom",
             "role": ""
           },
           {
@@ -60,43 +48,43 @@
             "role": ""
           }
         ],
-        "made_by": "the Prime Minister",
+        "made_by": "Prime Minister",
         "quote": "The UK would continue to develop innovative military solutions for use on the battlefield in Ukraine",
-        "statement": "The UK will continue to develop innovative military solutions for use on the battlefield in Ukraine."
+        "statement": "The UK would continue to develop innovative military solutions for use on the battlefield in Ukraine, including retrofitting British capability onto equipment gifted from other partners."
       },
       {
         "entities": [
-          {
-            "kind": "place",
-            "name": "UK",
-            "role": ""
-          },
           {
             "kind": "person",
-            "name": "the Prime Minister",
+            "name": "Prime Minister",
             "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "United Kingdom",
+            "role": ""
           }
         ],
-        "made_by": "the Prime Minister",
-        "quote": "The UK would also continue its diplomatic efforts to support international supplies of defensive equipment",
-        "statement": "The UK will continue its diplomatic efforts to support international supplies of defensive equipment."
+        "made_by": "Prime Minister",
+        "quote": "The UK would also continue its diplomatic efforts to support international supplies of defensive equipment too",
+        "statement": "The UK would continue its diplomatic efforts to support international supplies of defensive equipment."
       },
       {
         "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
           {
             "kind": "person",
             "name": "Volodymyr Zelenskyy",
             "role": "President of Ukraine"
-          },
-          {
-            "kind": "person",
-            "name": "the Prime Minister",
-            "role": "Prime Minister of the United Kingdom"
           }
         ],
-        "made_by": "the leaders",
+        "made_by": "the leaders (the Prime Minister and President Zelenskyy)",
         "quote": "Both looked forward to speaking again soon.",
-        "statement": "The leaders look forward to speaking again soon."
+        "statement": "The leaders looked forward to speaking again soon."
       }
     ],
     "facts": [
@@ -105,7 +93,7 @@
         "entities": [
           {
             "kind": "person",
-            "name": "the Prime Minister",
+            "name": "Prime Minister",
             "role": "Prime Minister of the United Kingdom"
           },
           {
@@ -119,59 +107,71 @@
             "role": ""
           }
         ],
-        "quote": "welcomed President Volodymyr Zelenskyy of Ukraine to Downing Street this afternoon",
-        "statement": "The Prime Minister welcomed President Volodymyr Zelenskyy of Ukraine to Downing Street on 2026-10-14."
+        "quote": "The Prime Minister welcomed President Volodymyr Zelenskyy of Ukraine to Downing Street this afternoon.",
+        "statement": "The Prime Minister welcomed President Volodymyr Zelenskyy of Ukraine to Downing Street on 14 October 2026."
       },
       {
         "as_at": "2026-10-14",
         "entities": [
           {
             "kind": "person",
-            "name": "Volodymyr Zelenskyy",
-            "role": "President of Ukraine"
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
           },
           {
             "kind": "person",
-            "name": "the Prime Minister",
-            "role": "Prime Minister of the United Kingdom"
+            "name": "Volodymyr Zelenskyy",
+            "role": "President of Ukraine"
           }
         ],
         "quote": "The leaders began by reflecting on their call on Saturday",
-        "statement": "The leaders reflected on their call on Saturday at the start of the meeting."
+        "statement": "The leaders reflected on their call on Saturday."
       },
       {
         "as_at": "2026-10-14",
         "entities": [
           {
             "kind": "person",
-            "name": "the Prime Minister",
-            "role": "Prime Minister of the United Kingdom"
-          },
-          {
-            "kind": "place",
-            "name": "UK",
-            "role": ""
+            "name": "Trump",
+            "role": "President"
           }
         ],
-        "quote": "set out the UK’s latest package of Lightweight Multirole Missiles",
-        "statement": "The Prime Minister set out the UK's latest package of Lightweight Multirole Missiles."
+        "quote": "since President Trump called for an energy ceasefire",
+        "statement": "President Trump called for an energy ceasefire."
       },
       {
         "as_at": "2026-10-14",
         "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "United Kingdom",
+            "role": ""
+          }
+        ],
+        "quote": "the Prime Minister set out the UK’s latest package of Lightweight Multirole Missiles",
+        "statement": "The Prime Minister set out the UK’s latest package of Lightweight Multirole Missiles."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
           {
             "kind": "person",
             "name": "Volodymyr Zelenskyy",
             "role": "President of Ukraine"
           },
           {
-            "kind": "person",
-            "name": "the Prime Minister",
-            "role": "Prime Minister of the United Kingdom"
-          },
-          {
             "kind": "place",
-            "name": "UK",
+            "name": "United Kingdom",
             "role": ""
           },
           {

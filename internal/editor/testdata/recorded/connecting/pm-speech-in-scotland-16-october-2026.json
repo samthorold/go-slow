@@ -1,33 +1,21 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T10:00:44.557846Z",
+  "recorded_at": "2026-10-25T10:21:52.334631Z",
   "usage": {
-    "input_tokens": 2868,
-    "output_tokens": 1183
+    "input_tokens": 3631,
+    "output_tokens": 1254
   },
   "output": {
-    "causes": [],
+    "causes": [
+      {
+        "cause": "F1",
+        "effect": "F9"
+      }
+    ],
     "facts": [
       {
         "fact": "F1",
-        "roles": [
-          {
-            "entity": "Motherwell",
-            "role": "place"
-          },
-          {
-            "entity": "Prime Minister",
-            "role": "actor"
-          },
-          {
-            "entity": "the college",
-            "role": "place"
-          }
-        ]
-      },
-      {
-        "fact": "F2",
         "roles": [
           {
             "entity": "Bannatyne House",
@@ -42,12 +30,29 @@
             "role": "affected"
           },
           {
-            "entity": "Greater Manchester Violence Reduction Unit",
+            "entity": "Prime Minister",
             "role": "actor"
+          },
+          {
+            "entity": "Scottish Violence Reduction Unit",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F2",
+        "roles": [
+          {
+            "entity": "Greater Manchester",
+            "role": "place"
           },
           {
             "entity": "Prime Minister",
             "role": "actor"
+          },
+          {
+            "entity": "Westminster",
+            "role": "place"
           }
         ]
       },
@@ -55,11 +60,11 @@
         "fact": "F3",
         "roles": [
           {
-            "entity": "Scottish Government",
-            "role": "actor"
+            "entity": "Motherwell",
+            "role": "place"
           },
           {
-            "entity": "UK Government",
+            "entity": "Prime Minister",
             "role": "actor"
           }
         ]
@@ -68,8 +73,12 @@
         "fact": "F4",
         "roles": [
           {
-            "entity": "Prime Minister",
-            "role": "actor"
+            "entity": "Motherwell",
+            "role": "place"
+          },
+          {
+            "entity": "Pamela",
+            "role": "affected"
           }
         ]
       },
@@ -77,8 +86,12 @@
         "fact": "F5",
         "roles": [
           {
-            "entity": "Alan Milburn",
-            "role": "actor"
+            "entity": "Leigh",
+            "role": "place"
+          },
+          {
+            "entity": "Prime Minister",
+            "role": "affected"
           }
         ]
       },
@@ -88,6 +101,10 @@
           {
             "entity": "Scottish Government",
             "role": "actor"
+          },
+          {
+            "entity": "UK Government",
+            "role": "affected"
           }
         ]
       },
@@ -95,16 +112,30 @@
         "fact": "F7",
         "roles": [
           {
-            "entity": "Commonwealth Games",
-            "role": "occasion"
+            "entity": "Scottish Government",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F8",
+        "roles": [
+          {
+            "entity": "Alan Milburn",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F9",
+        "roles": [
+          {
+            "entity": "Greater Manchester",
+            "role": "place"
           },
           {
             "entity": "Prime Minister",
             "role": "actor"
-          },
-          {
-            "entity": "Scotland",
-            "role": "place"
           }
         ]
       }

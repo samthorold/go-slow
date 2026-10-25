@@ -1,10 +1,10 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T09:55:00.441452Z",
+  "recorded_at": "2026-10-25T10:13:28.848304Z",
   "usage": {
-    "input_tokens": 2246,
-    "output_tokens": 2420
+    "input_tokens": 1963,
+    "output_tokens": 4978
   },
   "output": {
     "claims": [],
@@ -14,22 +14,22 @@
         "entities": [
           {
             "kind": "person",
-            "name": "The King",
-            "role": "King"
-          },
-          {
-            "kind": "person",
             "name": "William James Baxter",
             "role": "Lord-Lieutenant of County Tyrone"
           },
           {
+            "kind": "person",
+            "name": "The King",
+            "role": ""
+          },
+          {
             "kind": "place",
             "name": "County Tyrone",
-            "role": ""
+            "role": "county"
           }
         ],
-        "quote": "The King has been pleased to appoint Mr William James Baxter QPM DL as His Majesty’s Lord-Lieutenant of County Tyrone",
-        "statement": "The King appointed William James Baxter as Lord-Lieutenant of County Tyrone."
+        "quote": "His Majesty’s Lord-Lieutenant of County Tyrone",
+        "statement": "The King appointed William James Baxter as His Majesty’s Lord-Lieutenant of County Tyrone."
       },
       {
         "as_at": "2026-06-17",
@@ -41,7 +41,7 @@
           }
         ],
         "quote": "following his retirement on 17th June 2026",
-        "statement": "Sir Robert William Lowry Scott retired from the office of Lord-Lieutenant of County Tyrone on 17 June 2026."
+        "statement": "Sir Robert William Lowry Scott retired as Lord-Lieutenant of County Tyrone on 17 June 2026."
       },
       {
         "as_at": "2026-10-15",
@@ -49,33 +49,33 @@
           {
             "kind": "person",
             "name": "William James Baxter",
-            "role": ""
+            "role": "Superintendent"
           },
           {
             "kind": "organisation",
             "name": "RUC/PSNI",
-            "role": "police service"
+            "role": ""
           }
         ],
-        "quote": "Mr Baxter served in the RUC/PSNI from 1973 until his retirement in 2003 when he held the rank of Superintendent",
+        "quote": "served in the RUC/PSNI from 1973 until his retirement in 2003 when he held the rank of Superintendent",
         "statement": "William James Baxter served in the RUC/PSNI from 1973 until his retirement in 2003, when he held the rank of Superintendent."
       },
       {
-        "as_at": "1998-01-01",
+        "as_at": "2026-10-15",
         "entities": [
           {
             "kind": "person",
             "name": "William James Baxter",
+            "role": "District Commander"
+          },
+          {
+            "kind": "place",
+            "name": "Omagh",
             "role": ""
           },
           {
             "kind": "organisation",
             "name": "RUC/PSNI",
-            "role": "police service"
-          },
-          {
-            "kind": "place",
-            "name": "Omagh",
             "role": ""
           }
         ],
@@ -83,22 +83,17 @@
         "statement": "William James Baxter was District Commander in Omagh from 1997."
       },
       {
-        "as_at": "1998-01-01",
+        "as_at": "2026-10-15",
         "entities": [
           {
             "kind": "person",
             "name": "William James Baxter",
-            "role": ""
-          },
-          {
-            "kind": "place",
-            "name": "Omagh",
-            "role": ""
+            "role": "District Commander"
           },
           {
             "kind": "occasion",
             "name": "Omagh bombing",
-            "role": "bombing in Omagh in 1998"
+            "role": ""
           }
         ],
         "quote": "including the day of the Omagh bombing in 1998",
@@ -110,12 +105,12 @@
           {
             "kind": "person",
             "name": "William James Baxter",
-            "role": ""
+            "role": "Chairperson"
           },
           {
             "kind": "organisation",
             "name": "Omagh Police District Voluntary Welfare Support Group",
-            "role": "voluntary welfare group"
+            "role": ""
           }
         ],
         "quote": "He has served as Chairperson of the Omagh Police District Voluntary Welfare Support Group",
@@ -127,33 +122,79 @@
           {
             "kind": "person",
             "name": "William James Baxter",
-            "role": ""
+            "role": "Clerk of Kirk Session"
           },
           {
             "kind": "organisation",
             "name": "Newtownstewart Presbyterian Church",
-            "role": "church"
+            "role": ""
           }
         ],
-        "quote": "He served as Clerk of Kirk Session, Newtownstewart Presbyterian Church, for 26 years and was an Elder for 31 years",
-        "statement": "William James Baxter served as Clerk of Kirk Session at Newtownstewart Presbyterian Church for 26 years and was an Elder there for 31 years."
+        "quote": "He served as Clerk of Kirk Session, Newtownstewart Presbyterian Church, for 26 years",
+        "statement": "William James Baxter served as Clerk of Kirk Session at Newtownstewart Presbyterian Church for 26 years."
       },
       {
-        "as_at": "2013-01-01",
+        "as_at": "2026-10-15",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "William James Baxter",
+            "role": "Elder"
+          }
+        ],
+        "quote": "was an Elder for 31 years",
+        "statement": "William James Baxter was an Elder for 31 years."
+      },
+      {
+        "as_at": "2026-10-15",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "William James Baxter",
+            "role": "Sheriff"
+          },
+          {
+            "kind": "place",
+            "name": "County Tyrone",
+            "role": "county"
+          }
+        ],
+        "quote": "Mr Baxter has served as Sheriff for County Tyrone in 2013",
+        "statement": "William James Baxter served as Sheriff for County Tyrone in 2013."
+      },
+      {
+        "as_at": "2026-10-15",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "William James Baxter",
+            "role": "President"
+          },
+          {
+            "kind": "organisation",
+            "name": "Royal British Legion",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Newtownstewart",
+            "role": ""
+          }
+        ],
+        "quote": "is President of the Royal British Legion in Newtownstewart",
+        "statement": "William James Baxter is President of the Royal British Legion in Newtownstewart."
+      },
+      {
+        "as_at": "2026-10-15",
         "entities": [
           {
             "kind": "person",
             "name": "William James Baxter",
             "role": ""
-          },
-          {
-            "kind": "place",
-            "name": "County Tyrone",
-            "role": ""
           }
         ],
-        "quote": "Mr Baxter has served as Sheriff for County Tyrone in 2013",
-        "statement": "William James Baxter served as Sheriff for County Tyrone in 2013."
+        "quote": "He was awarded the RUC Service Medal",
+        "statement": "William James Baxter was awarded the RUC Service Medal, along with other medals including the Queen’s Police Medal."
       },
       {
         "as_at": "2026-10-15",
@@ -166,11 +207,28 @@
           {
             "kind": "place",
             "name": "County Tyrone",
-            "role": ""
+            "role": "county"
           }
         ],
         "quote": "Mr Baxter has served as Deputy Lieutenant of County Tyrone for 14 years",
         "statement": "William James Baxter has served as Deputy Lieutenant of County Tyrone for 14 years."
+      },
+      {
+        "as_at": "2026-10-15",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "William James Baxter",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "County Tyrone",
+            "role": "county"
+          }
+        ],
+        "quote": "He lives in County Tyrone with his wife, Pearl, and has two adult children and four grand-children.",
+        "statement": "William James Baxter lives in County Tyrone with his wife, Pearl, and has two adult children and four grandchildren."
       }
     ]
   }

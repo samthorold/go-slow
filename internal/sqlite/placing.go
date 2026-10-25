@@ -21,7 +21,8 @@ const factEntities = `(SELECT json_group_array(entities.name ORDER BY entities.n
 // FactsToPlace are the Facts not yet placed, by Item, in the order the
 // Items were published.
 func (s *Store) FactsToPlace(ctx context.Context) ([]editor.ToPlace, error) {
-	out, err := s.factsByItem(ctx, `NOT EXISTS (SELECT 1 FROM fact_placings p WHERE p.fact_id = facts.id)`)
+	out, err := s.factsByItem(ctx, `NOT EXISTS (SELECT 1 FROM fact_placings p WHERE p.fact_id = facts.id)
+		AND `+notFailed("placing"))
 	if err != nil {
 		return nil, fmt.Errorf("facts to place: %w", err)
 	}

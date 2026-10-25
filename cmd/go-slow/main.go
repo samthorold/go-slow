@@ -42,7 +42,10 @@ func main() {
 	// Logs are an event stream: JSON lines, unbuffered, to stdout.
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	if len(os.Args) > 1 {
-		if err := admin(log, os.Args[1:]); err != nil {
+		ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, os.Interrupt)
+		err := admin(ctx, log, os.Args[1:], os.LookupEnv, os.Stdin)
+		stop()
+		if err != nil {
 			log.Error("go-slow admin command failed", "command", os.Args[1], "error", err)
 			os.Exit(1)
 		}
@@ -52,6 +55,12 @@ func main() {
 		log.Error("go-slow stopped", "error", err)
 		os.Exit(1)
 	}
+}
+
+// batchActs are the acts run in batches, in the order their work is
+// submitted.
+func batchActs(ed *editor.Editor) []editor.BatchAct {
+	return []editor.BatchAct{ed.Reading(), ed.Placing(), ed.Connecting()}
 }
 
 func run(log *slog.Logger) error {
@@ -105,7 +114,7 @@ func run(log *slog.Logger) error {
 	batches := editor.NewBatches(editor.BatchDeps{
 		Store:   store,
 		Batcher: models,
-		Acts:    []editor.BatchAct{ed.Reading(), ed.Placing(), ed.Connecting()},
+		Acts:    batchActs(ed),
 		Log:     log,
 	})
 	collector := collect.New(collect.Deps{

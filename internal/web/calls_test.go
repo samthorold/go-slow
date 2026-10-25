@@ -133,6 +133,61 @@ func TestAConnectionLinksToTheConnectingCallThatMadeIt(t *testing.T) {
 	}
 }
 
+func TestTheBriefingLinksToTheCallThatWroteIt(t *testing.T) {
+	store := openStore(t)
+	speechStory(t, store)
+	writeBriefing(t, store, saturday, spoke)
+	app, _ := newAppWithLog(t, saturday, store)
+
+	res := get(t, app, callLink(t, get(t, app, "/briefings/2026-10-24").body, `id="how-written"`))
+
+	if res.status != 200 {
+		t.Fatalf("status %d", res.status)
+	}
+	for _, want := range []string{"briefing", "applied", "The Prime Minister spoke in Motherwell.", `href="/briefings/2026-10-24"`} {
+		if !strings.Contains(res.body, want) {
+			t.Errorf("the call's page lacks %q:\n%s", want, res.body)
+		}
+	}
+}
+
+func TestADayWhoseBriefingFailedLinksToEachFailedAttempt(t *testing.T) {
+	store := openStore(t)
+	speechStory(t, store)
+	untraced := `{"stories": [{"story": "S1", "statements": [{"text": "Scotland is the true north.", "developments": []}]}]}`
+	writeBriefing(t, store, saturday, untraced)
+	writeBriefing(t, store, saturday.Add(editor.RetryBriefing), untraced)
+	app, _ := newAppWithLog(t, saturday.Add(time.Hour), store)
+
+	page := get(t, app, "/briefings/2026-10-24").body
+	i := strings.Index(page, `id="failed-attempts"`)
+	if i < 0 {
+		t.Fatalf("no failed attempts listed:\n%s", page)
+	}
+	links := regexp.MustCompile(`href="(/calls/\d+)"`).FindAllStringSubmatch(page[i:], -1)
+	if len(links) != 2 {
+		t.Fatalf("%d links to failed attempts, want 2:\n%s", len(links), page[i:])
+	}
+	for _, l := range links {
+		if res := get(t, app, l[1]); res.status != 200 || !strings.Contains(res.body, "refused") ||
+			!strings.Contains(res.body, "untraced statement") {
+			t.Errorf("%s: status %d:\n%s", l[1], res.status, res.body)
+		}
+	}
+}
+
+func TestABriefingWrittenEmptySaysItWasWrittenWithoutAModelCall(t *testing.T) {
+	store := openStore(t)
+	writeBriefing(t, store, saturday, spoke)
+	app, _ := newAppWithLog(t, saturday, store)
+
+	page := get(t, app, "/briefings/2026-10-24").body
+
+	if !strings.Contains(page, "written without a model call") || strings.Contains(page, `href="/calls/`) {
+		t.Errorf("the empty Briefing does not say it made no call:\n%s", page)
+	}
+}
+
 // failThrice fails the speech's reading three times, each attempt kept with
 // its call.
 func failThrice(t *testing.T, store *sqlite.Store) {

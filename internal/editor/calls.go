@@ -122,11 +122,19 @@ func (c Call) ended(o Outcome, why error) Call {
 func (e *Editor) callNow(ctx context.Context, m Model, key string, req Request, precedents []int64,
 	now time.Time, check func(Response) error,
 ) (Call, error) {
-	call := newCall(req.Act, key, "", modelOf(e.ModelFor, req.Act), req, precedents, now)
+	return callModel(ctx, m, modelOf(e.ModelFor, req.Act), key, req.Act, req, precedents, now, check)
+}
+
+// callModel is callNow on the model named model, a failed call's error
+// prefixed with what.
+func callModel(ctx context.Context, m Model, model, key, what string, req Request, precedents []int64,
+	now time.Time, check func(Response) error,
+) (Call, error) {
+	call := newCall(req.Act, key, "", model, req, precedents, now)
 	res, err := m.Complete(ctx, req)
 	call = call.answered(res)
 	if err != nil {
-		err = fmt.Errorf("%s: %w", req.Act, err)
+		err = fmt.Errorf("%s: %w", what, err)
 		return call.ended(Failed, err), err
 	}
 	if err := check(res); err != nil {

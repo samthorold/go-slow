@@ -129,6 +129,22 @@ func TestABatchIsSubmittedWithEachRequestsIdentifierAndTheActsCall(t *testing.T)
 	}
 }
 
+func TestABatchResultKeepsTheModelTheAPIReportsNotTheOneAskedFor(t *testing.T) {
+	moved := message("end_turn", `{"facts": []}`)
+	moved["model"] = "claude-haiku-5-5-moved"
+	model, _ := batchAPI(t, "ended",
+		map[string]any{"custom_id": "reading-1", "result": map[string]any{"type": "succeeded", "message": moved}})
+
+	poll, err := model.Poll(t.Context(), "msgbatch_1")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(poll.Results) != 1 || poll.Results[0].Response.Model != "claude-haiku-5-5-moved" {
+		t.Errorf("results = %+v, want the model reported", poll.Results)
+	}
+}
+
 func TestABatchStillProcessingHasNoResults(t *testing.T) {
 	model, _ := batchAPI(t, "in_progress")
 

@@ -19,6 +19,14 @@
 <p>Writing the Briefing failed at {{.At}}; it is tried again shortly.</p>
 <pre hx-disable>{{.Reason}}</pre>
 {{- end}}
+{{- if .FailedAttempts}}
+<p id="failed-attempts">Each attempt to write it:</p>
+<ol>
+{{- range .FailedAttempts}}
+  <li><a href="{{.Page}}">{{.At}}</a>: {{.Outcome}}</li>
+{{- end}}
+</ol>
+{{- end}}
 {{- else if .Emptied}}
 <p>Your Feedback took every Story out of this Briefing. Something did move on; this is the Feedback that took it out, which you can undo:</p>
 {{template "kept" .TakenOut}}
@@ -42,6 +50,11 @@
   {{- end}}
   {{- template "missedDevelopment" .MissedDevelopment}}
 </section>
+{{- end}}
+{{- if .WrittenBy}}
+<p id="how-written"><small><a href="{{.WrittenBy}}">How it was written</a></small></p>
+{{- else if .WithoutCall}}
+<p id="how-written"><small>With nothing to tell, it was written without a model call.</small></p>
 {{- end}}
 {{- if .Exists}}
 {{template "missedStory" .MissedStory}}

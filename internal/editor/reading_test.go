@@ -2,8 +2,10 @@ package editor_test
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"slices"
 	"strings"
 	"testing"
@@ -109,6 +111,35 @@ func TestAnEntityNamedWithTwoRolesKeepsTheFirstGiven(t *testing.T) {
 
 	if r.Entities[0].Name != "Andy Burnham" || r.Entities[0].Role != "Leader of the Labour Party" {
 		t.Errorf("Entities = %+v, want Andy Burnham with the role the Fact gives", r.Entities)
+	}
+}
+
+func TestOnlyAPersonKeepsTheRoleReadingGivesIt(t *testing.T) {
+	output := `{
+  "facts": [
+    {"statement": "Andy Burnham gave a speech at the Labour conference in Motherwell.", "as_at": "2026-10-16",
+     "quote": "to be here in Motherwell", "entities": [
+       {"name": "Andy Burnham", "kind": "person", "role": "Prime Minister of the United Kingdom"},
+       {"name": "Labour Party", "kind": "organisation", "role": "host"},
+       {"name": "Motherwell", "kind": "place", "role": "venue"},
+       {"name": "Labour conference", "kind": "occasion", "role": "setting"}]}
+  ],
+  "claims": []
+}`
+
+	r, err := editor.Read(t.Context(), &fakeModel{output: output}, speech)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := []editor.Entity{
+		{Name: "Andy Burnham", Kind: "person", Role: "Prime Minister of the United Kingdom"},
+		{Name: "Labour Party", Kind: "organisation"},
+		{Name: "Motherwell", Kind: "place"},
+		{Name: "Labour conference", Kind: "occasion"},
+	}
+	if !slices.Equal(r.Entities, want) {
+		t.Errorf("Entities = %+v, want %+v", r.Entities, want)
 	}
 }
 
@@ -227,6 +258,43 @@ func TestAReadingShownPrecedentsIsToldOfThemAfterTheSameInstructions(t *testing.
 	}
 	if !strings.Contains(with.sent[0].Input, `"feedback"`) {
 		t.Errorf("the precedent is not in the input:\n%s", with.sent[0].Input)
+	}
+}
+
+// involvesDefinition is what it means for a Fact or Claim to involve an
+// Entity, in connecting's four roles (CONTEXT.md, Entity), worded without
+// "role": next to the Entity's role field, that word had the model fill the
+// field for every Entity, not only a person's office.
+const involvesDefinition = ` A Fact or Claim involves an Entity it says did it, was affected by it or is what it is about, is where it happened, or is the occasion it happened at. A name that only says who or where something else is ("Zelenskyy of Ukraine" says who Zelenskyy is) is not involved, and nor is who made a Claim, unless the Claim says one of those things of them.`
+
+// readingInstructionsBeforeTheDefinition is the sha256 of reading's
+// instructions as they were before the definition was added.
+const readingInstructionsBeforeTheDefinition = "80e8b9f0e3e11c691d6006e5b973bef4d5657f778206545b73ac9e4ebb770385"
+
+func TestReadingIsToldWhatAFactInvolvesOnceInTheEntitiesParagraph(t *testing.T) {
+	model := &fakeModel{output: goodReading}
+	if _, err := editor.Read(t.Context(), model, speech); err != nil {
+		t.Fatal(err)
+	}
+	instructions := model.sent[0].Instructions
+
+	var stated []string
+	for line := range strings.SplitSeq(instructions, "\n") {
+		if strings.Contains(line, "is not involved") {
+			stated = append(stated, line)
+		}
+	}
+	if strings.Contains(involvesDefinition, "role") {
+		t.Error("the definition says role, which the model takes for the Entity's role field")
+	}
+	if len(stated) != 1 || !strings.HasPrefix(stated[0], "- Entities:") ||
+		!strings.Contains(stated[0], "it involves, including one the Item names only by an office or title (\"the Prime Minister\"), each with its name, kind and role."+involvesDefinition) {
+		t.Errorf("the definition is not stated once, in the Entities paragraph after what it involves: %q", stated)
+	}
+	// Nothing else in the instructions changed.
+	before := strings.Replace(instructions, involvesDefinition, "", 1)
+	if got := fmt.Sprintf("%x", sha256.Sum256([]byte(before))); got != readingInstructionsBeforeTheDefinition {
+		t.Errorf("the instructions changed beyond the definition: sha256 %s without it", got)
 	}
 }
 

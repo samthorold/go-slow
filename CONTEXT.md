@@ -30,7 +30,7 @@ An ongoing subject followed across days, made of the **Items** about it. An **It
 _Avoid_: Running story, developing story, thread
 
 **Entity**:
-A thing in the world that can be referred to again: a person, organisation, place, or named occasion (the Budget, the 2024 general election). Some come from Wikidata, others are made by the editorial work.
+A thing in the world that can be referred to again: a person, organisation, place, or named occasion (the Budget, the 2024 general election). Some come from Wikidata, others are made by the editorial work. A **Fact** or **Claim** *involves* an **Entity** when the **Entity** has a role in it: who did it, to whom or what or who it is about, where, or at what occasion. A name that only says who or where something else is ("Zelenskyy of Ukraine") is not involved, and nor is who made a **Claim** unless it gives them a role.
 _Avoid_: Event (something that happened is a **Fact**)
 
 ### Editorial work

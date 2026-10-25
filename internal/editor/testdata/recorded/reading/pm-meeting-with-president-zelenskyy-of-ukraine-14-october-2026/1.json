@@ -1,11 +1,11 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "2f548d066e4130ec0c9b000a8c6a9d0c2796b624a28b88932ba6a529b0ed66c1",
-  "recorded_at": "2026-10-25T14:54:49.774029Z",
+  "request_hash": "2207d96e0abe17eea84556f79bfab20a06d8ce4749d9b8477b186b9481ae853a",
+  "recorded_at": "2026-10-25T21:03:22.444754Z",
   "usage": {
-    "input_tokens": 1877,
-    "output_tokens": 4079
+    "input_tokens": 1993,
+    "output_tokens": 3096
   },
   "output": {
     "claims": [
@@ -13,7 +13,7 @@
         "entities": [
           {
             "kind": "person",
-            "name": "the Prime Minister",
+            "name": "Prime Minister",
             "role": "Prime Minister of the United Kingdom"
           },
           {
@@ -24,10 +24,32 @@
           {
             "kind": "place",
             "name": "Russia",
-            "role": ""
+            "role": "state whose attacks were criticised"
           }
         ],
-        "made_by": "The Prime Minister and President Volodymyr Zelenskyy",
+        "made_by": "Prime Minister and Volodymyr Zelenskyy",
+        "quote": "Russia’s blatant indiscriminate attacks on civilians and energy infrastructure",
+        "statement": "Russia's attacks on civilians and energy infrastructure were blatant and indiscriminate."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Russia",
+            "role": "state the leaders said had no interest in peace"
+          },
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "person",
+            "name": "Volodymyr Zelenskyy",
+            "role": "President of Ukraine"
+          }
+        ],
+        "made_by": "Prime Minister and Volodymyr Zelenskyy",
         "quote": "It was clear that Russia had no interest in peace",
         "statement": "Russia had no interest in peace."
       },
@@ -35,62 +57,52 @@
         "entities": [
           {
             "kind": "person",
-            "name": "the Prime Minister",
-            "role": "Prime Minister of the United Kingdom"
-          },
-          {
-            "kind": "person",
-            "name": "Volodymyr Zelenskyy",
-            "role": "President of Ukraine"
-          },
-          {
-            "kind": "place",
-            "name": "Russia",
-            "role": ""
-          }
-        ],
-        "made_by": "The Prime Minister and President Volodymyr Zelenskyy",
-        "quote": "Russia’s blatant indiscriminate attacks on civilians and energy infrastructure",
-        "statement": "Russia has carried out blatant indiscriminate attacks on civilians and energy infrastructure."
-      },
-      {
-        "entities": [
-          {
-            "kind": "person",
-            "name": "the Prime Minister",
+            "name": "Prime Minister",
             "role": "Prime Minister of the United Kingdom"
           },
           {
             "kind": "place",
             "name": "UK",
-            "role": ""
+            "role": "country providing the military support"
           },
           {
             "kind": "place",
             "name": "Ukraine",
-            "role": ""
+            "role": "recipient of the military support"
           }
         ],
-        "made_by": "the Prime Minister",
+        "made_by": "Prime Minister",
         "quote": "The UK would continue to develop innovative military solutions for use on the battlefield in Ukraine",
-        "statement": "The UK would continue to develop innovative military solutions for use on the battlefield in Ukraine, including retrofitting British capability onto equipment gifted from other partners."
+        "statement": "The UK would continue to develop innovative military solutions for use on the battlefield in Ukraine."
       },
       {
         "entities": [
           {
             "kind": "person",
-            "name": "the Prime Minister",
+            "name": "Prime Minister",
             "role": "Prime Minister of the United Kingdom"
           },
           {
             "kind": "place",
             "name": "UK",
-            "role": ""
+            "role": "country providing the diplomatic efforts"
           }
         ],
-        "made_by": "the Prime Minister",
+        "made_by": "Prime Minister",
         "quote": "The UK would also continue its diplomatic efforts to support international supplies of defensive equipment too",
         "statement": "The UK would continue its diplomatic efforts to support international supplies of defensive equipment."
+      },
+      {
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister and Volodymyr Zelenskyy",
+            "role": "leaders"
+          }
+        ],
+        "made_by": "Prime Minister and Volodymyr Zelenskyy",
+        "quote": "Both looked forward to speaking again soon.",
+        "statement": "Both leaders looked forward to speaking again soon."
       }
     ],
     "facts": [
@@ -99,7 +111,7 @@
         "entities": [
           {
             "kind": "person",
-            "name": "the Prime Minister",
+            "name": "Prime Minister",
             "role": "Prime Minister of the United Kingdom"
           },
           {
@@ -110,18 +122,18 @@
           {
             "kind": "place",
             "name": "Downing Street",
-            "role": ""
+            "role": "venue of the meeting"
           }
         ],
-        "quote": "The Prime Minister welcomed President Volodymyr Zelenskyy of Ukraine to Downing Street this afternoon.",
-        "statement": "The Prime Minister welcomed President Volodymyr Zelenskyy of Ukraine to Downing Street on 2026-10-14."
+        "quote": "welcomed President Volodymyr Zelenskyy of Ukraine to Downing Street this afternoon",
+        "statement": "The Prime Minister welcomed President Volodymyr Zelenskyy of Ukraine to Downing Street on 14 October 2026."
       },
       {
         "as_at": "2026-10-14",
         "entities": [
           {
             "kind": "person",
-            "name": "the Prime Minister",
+            "name": "Prime Minister",
             "role": "Prime Minister of the United Kingdom"
           },
           {
@@ -130,27 +142,15 @@
             "role": "President of Ukraine"
           }
         ],
-        "quote": "reflecting on their call on Saturday",
-        "statement": "The Prime Minister and President Volodymyr Zelenskyy had a call on Saturday before 2026-10-14."
+        "quote": "The leaders began by reflecting on their call on Saturday",
+        "statement": "The leaders had a call on the Saturday before the meeting."
       },
       {
         "as_at": "2026-10-14",
         "entities": [
           {
             "kind": "person",
-            "name": "President Trump",
-            "role": ""
-          }
-        ],
-        "quote": "since President Trump called for an energy ceasefire",
-        "statement": "President Trump called for an energy ceasefire."
-      },
-      {
-        "as_at": "2026-10-14",
-        "entities": [
-          {
-            "kind": "person",
-            "name": "the Prime Minister",
+            "name": "Prime Minister",
             "role": "Prime Minister of the United Kingdom"
           },
           {
@@ -161,33 +161,38 @@
           {
             "kind": "place",
             "name": "UK",
-            "role": ""
+            "role": "country whose military support was set out"
+          }
+        ],
+        "quote": "the Prime Minister set out the UK’s latest package of Lightweight Multirole Missiles",
+        "statement": "The Prime Minister set out the UK's latest package of Lightweight Multirole Missiles."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "person",
+            "name": "Volodymyr Zelenskyy",
+            "role": "President of Ukraine"
+          },
+          {
+            "kind": "place",
+            "name": "UK",
+            "role": "country that could accelerate defensive support"
           },
           {
             "kind": "place",
             "name": "Ukraine",
-            "role": ""
+            "role": "recipient of defensive support"
           }
         ],
         "quote": "the leaders discussed how the UK could accelerate defensive support to Ukraine ahead of the winter",
         "statement": "The leaders discussed how the UK could accelerate defensive support to Ukraine ahead of the winter."
-      },
-      {
-        "as_at": "2026-10-14",
-        "entities": [
-          {
-            "kind": "person",
-            "name": "the Prime Minister",
-            "role": "Prime Minister of the United Kingdom"
-          },
-          {
-            "kind": "place",
-            "name": "UK",
-            "role": ""
-          }
-        ],
-        "quote": "the Prime Minister set out the UK’s latest package of Lightweight Multirole Missiles",
-        "statement": "The Prime Minister set out the UK’s latest package of Lightweight Multirole Missiles."
       }
     ]
   }

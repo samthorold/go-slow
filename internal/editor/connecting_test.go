@@ -3,6 +3,7 @@ package editor_test
 import (
 	"encoding/json"
 	"errors"
+	"slices"
 	"strings"
 	"testing"
 
@@ -60,20 +61,47 @@ func TestTheConnectingSchemaOffersOnlyTheFactsShownTheirEntitiesAndTheRoles(t *t
 	}
 }
 
+func TestARoleGivenToAnEntityOfTheItemsReadingThatTheFactDidNotListIsKept(t *testing.T) {
+	// The speech's reading gave Scotland in its Claim; its Fact did not list it.
+	tc := editor.ToConnect{Item: speech, Facts: toPlace.Facts, Entities: []string{"Andy Burnham", "Motherwell", "Scotland"}}
+	output := `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "actor"}, {"entity": "Motherwell", "role": "place"},
+	  {"entity": "Scotland", "role": "affected"}]}], "causes": []}`
+
+	c, err := editor.Connect(t.Context(), &fakeModel{output: output}, tc, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if want := (editor.Role{FactID: 11, Entity: "Scotland", Role: "affected"}); !slices.Contains(c.Roles, want) {
+		t.Errorf("Roles = %+v, want %+v kept", c.Roles, want)
+	}
+}
+
+func TestARoleGivenToANameTheItemsReadingNeverGaveIsRefusedNamingTheFactAndTheName(t *testing.T) {
+	tc := editor.ToConnect{Item: speech, Facts: toPlace.Facts, Entities: []string{"Andy Burnham", "Motherwell", "Scotland"}}
+	output := `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "actor"}, {"entity": "Motherwell", "role": "place"},
+	  {"entity": "Edinburgh", "role": "place"}]}], "causes": []}`
+
+	_, err := editor.Connect(t.Context(), &fakeModel{output: output}, tc, nil)
+	if !errors.Is(err, editor.ErrFailedChecks) || !strings.Contains(err.Error(), `F1`) || !strings.Contains(err.Error(), `"Edinburgh"`) {
+		t.Errorf("err = %v, want ErrFailedChecks naming F1 and Edinburgh", err)
+	}
+}
+
 func TestAConnectingThatFailsTheChecksIsRejected(t *testing.T) {
 	const roles = `[{"entity": "Andy Burnham", "role": "actor"}, {"entity": "Motherwell", "role": "place"}]`
 	for name, output := range map[string]string{
-		"not the schema":              `{"facts": "none"}`,
-		"a Fact left unconnected":     `{"facts": [], "causes": []}`,
-		"a Fact connected twice":      `{"facts": [{"fact": "F1", "roles": ` + roles + `}, {"fact": "F1", "roles": ` + roles + `}], "causes": []}`,
-		"a Fact not given":            `{"facts": [{"fact": "F2", "roles": []}], "causes": []}`,
-		"an Entity given no role":     `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "actor"}]}], "causes": []}`,
-		"an Entity given two roles":   `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "actor"}, {"entity": "Andy Burnham", "role": "affected"}, {"entity": "Motherwell", "role": "place"}]}], "causes": []}`,
-		"an Entity not the Fact's":    `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "actor"}, {"entity": "Motherwell", "role": "place"}, {"entity": "Scotland", "role": "place"}]}], "causes": []}`,
-		"a role not known":            `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "hero"}, {"entity": "Motherwell", "role": "place"}]}], "causes": []}`,
-		"a cause of itself":           `{"facts": [{"fact": "F1", "roles": ` + roles + `}], "causes": [{"cause": "F1", "effect": "F1"}]}`,
-		"a cause between other Facts": `{"facts": [{"fact": "F1", "roles": ` + roles + `}], "causes": [{"cause": "C1", "effect": "C2"}]}`,
-		"a cause to a Fact not shown": `{"facts": [{"fact": "F1", "roles": ` + roles + `}], "causes": [{"cause": "C3", "effect": "F1"}]}`,
+		"not the schema":                `{"facts": "none"}`,
+		"a Fact left unconnected":       `{"facts": [], "causes": []}`,
+		"a Fact connected twice":        `{"facts": [{"fact": "F1", "roles": ` + roles + `}, {"fact": "F1", "roles": ` + roles + `}], "causes": []}`,
+		"a Fact not given":              `{"facts": [{"fact": "F2", "roles": []}], "causes": []}`,
+		"an Entity given no role":       `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "actor"}]}], "causes": []}`,
+		"an Entity given two roles":     `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "actor"}, {"entity": "Andy Burnham", "role": "affected"}, {"entity": "Motherwell", "role": "place"}]}], "causes": []}`,
+		"a name the reading never gave": `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "actor"}, {"entity": "Motherwell", "role": "place"}, {"entity": "Scotland", "role": "place"}]}], "causes": []}`,
+		"a role not known":              `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "hero"}, {"entity": "Motherwell", "role": "place"}]}], "causes": []}`,
+		"a cause of itself":             `{"facts": [{"fact": "F1", "roles": ` + roles + `}], "causes": [{"cause": "F1", "effect": "F1"}]}`,
+		"a cause between other Facts":   `{"facts": [{"fact": "F1", "roles": ` + roles + `}], "causes": [{"cause": "C1", "effect": "C2"}]}`,
+		"a cause to a Fact not shown":   `{"facts": [{"fact": "F1", "roles": ` + roles + `}], "causes": [{"cause": "C3", "effect": "F1"}]}`,
 	} {
 		t.Run(name, func(t *testing.T) {
 			visit := editor.Fact{ID: 8, SourceID: speech.SourceID, EntryID: "visit", AsAt: oct16,

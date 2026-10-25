@@ -1,6 +1,7 @@
 package sqlite
 
 import (
+	"cmp"
 	"context"
 	"database/sql"
 	"encoding/json"
@@ -54,12 +55,13 @@ func (s *Store) SaveReading(ctx context.Context, r editor.Reading, readAt time.T
 	defer func() { _ = tx.Rollback() }()
 	ids := map[string]int64{}
 	for _, e := range r.Entities {
-		var id int64
-		err := tx.QueryRowContext(ctx, `
-			INSERT INTO entities (name, kind) VALUES (?, ?)
-			ON CONFLICT (name) DO UPDATE SET name = excluded.name
-			RETURNING id`, e.Name, e.Kind).Scan(&id)
+		id, err := saveEntity(ctx, tx, e)
 		if err != nil {
+			return fmt.Errorf("save entity %q: %w", e.Name, err)
+		}
+		if _, err := tx.ExecContext(ctx,
+			`INSERT INTO entity_names (entity_id, name) VALUES (?, ?) ON CONFLICT DO NOTHING`,
+			id, e.Name); err != nil {
 			return fmt.Errorf("save entity %q: %w", e.Name, err)
 		}
 		ids[e.Name] = id
@@ -104,12 +106,169 @@ func (s *Store) SaveReading(ctx context.Context, r editor.Reading, readAt time.T
 			return err
 		}
 	}
+	lookups := map[*editor.Lookup]int64{}
+	for _, f := range r.ReferenceFacts {
+		var exists bool
+		if err := tx.QueryRowContext(ctx,
+			`SELECT EXISTS (SELECT 1 FROM reference_facts WHERE statement = ? AND as_at = ?)`,
+			f.Statement, f.AsAt.Format(time.DateOnly)).Scan(&exists); err != nil {
+			return fmt.Errorf("save reference fact: %w", err)
+		}
+		if exists || f.Lookup == nil {
+			continue
+		}
+		lookupID, ok := lookups[f.Lookup]
+		if !ok {
+			l := f.Lookup
+			if err := tx.QueryRowContext(ctx, `
+				INSERT INTO reference_lookups (reference, item_id, revision, looked_up_at, licence)
+				VALUES (?, ?, ?, ?, ?) RETURNING id`,
+				l.Reference, l.ItemID, l.Revision, formatTime(l.At), l.Licence).Scan(&lookupID); err != nil {
+				return fmt.Errorf("save lookup: %w", err)
+			}
+			lookups[f.Lookup] = lookupID
+		}
+		var id int64
+		if err := tx.QueryRowContext(ctx, `
+			INSERT INTO reference_facts (lookup_id, statement, as_at, quote) VALUES (?, ?, ?, ?) RETURNING id`,
+			lookupID, f.Statement, f.AsAt.Format(time.DateOnly), f.Quote).Scan(&id); err != nil {
+			return fmt.Errorf("save reference fact: %w", err)
+		}
+		if err := link("reference_fact_entities", "fact_id", id, f.Entities); err != nil {
+			return err
+		}
+	}
 	if _, err := tx.ExecContext(ctx, `
 		INSERT INTO item_reads (source_id, entry_id, read_at, model) VALUES (?, ?, ?, ?)`,
 		r.SourceID, r.EntryID, formatTime(readAt), r.Model); err != nil {
 		return fmt.Errorf("mark %s read: %w", r.EntryID, err)
 	}
 	return tx.Commit()
+}
+
+// saveEntity is the id of the Entity e names, made if the Record has none.
+//
+// An Entity the Editor made (no Wikidata item) is one per name. A Wikidata
+// item is one Entity whatever the Items call it. When a Wikidata item first
+// appears and the Editor already made an Entity by the same name, or by the
+// item's label, the two are merged: the Editor's becomes the item, and
+// keeps its name among the names it is called by, so what was tied to it
+// before still resolves.
+func saveEntity(ctx context.Context, tx *sql.Tx, e editor.Entity) (int64, error) {
+	var id int64
+	if e.WikidataID == "" {
+		err := tx.QueryRowContext(ctx, `
+			INSERT INTO entities (name, kind) VALUES (?, ?)
+			ON CONFLICT (name) DO UPDATE SET name = excluded.name
+			RETURNING id`, e.Name, e.Kind).Scan(&id)
+		return id, err
+	}
+	err := tx.QueryRowContext(ctx, `SELECT id FROM entities WHERE wikidata_id = ?`, e.WikidataID).Scan(&id)
+	if err == nil {
+		return id, nil
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		return 0, err
+	}
+	label := cmp.Or(e.Label, e.Name)
+	// The Editor's own, by the name the Item gives or by the item's label.
+	err = tx.QueryRowContext(ctx, `
+		SELECT id FROM entities
+		WHERE wikidata_id IS NULL AND kind = ? AND name IN (?, ?)
+		ORDER BY name = ? DESC LIMIT 1`, e.Kind, e.Name, label, e.Name).Scan(&id)
+	switch {
+	case err == nil:
+		if _, err := tx.ExecContext(ctx, `UPDATE entities SET wikidata_id = ? WHERE id = ?`, e.WikidataID, id); err != nil {
+			return 0, err
+		}
+		// It takes the item's label as its name, unless another Entity has it.
+		if _, err := tx.ExecContext(ctx, `
+			UPDATE entities SET name = ? WHERE id = ? AND NOT EXISTS (SELECT 1 FROM entities WHERE name = ?)`,
+			label, id, label); err != nil {
+			return 0, err
+		}
+	case errors.Is(err, sql.ErrNoRows):
+		// A label another Entity has is told apart by the item's id.
+		err = tx.QueryRowContext(ctx, `
+			INSERT INTO entities (name, kind, wikidata_id)
+			VALUES (CASE WHEN EXISTS (SELECT 1 FROM entities WHERE name = ?1) THEN ?1 || ' (' || ?3 || ')' ELSE ?1 END, ?2, ?3)
+			RETURNING id`, label, e.Kind, e.WikidataID).Scan(&id)
+		if err != nil {
+			return 0, err
+		}
+	default:
+		return 0, err
+	}
+	_, err = tx.ExecContext(ctx,
+		`INSERT INTO entity_names (entity_id, name) VALUES (?, ?) ON CONFLICT DO NOTHING`, id, label)
+	return id, err
+}
+
+// Entity is the Entity the Record calls name, by its own name or any name
+// an Item has called it by, reporting whether there is one.
+func (s *Store) Entity(ctx context.Context, name string) (editor.KnownEntity, bool, error) {
+	var e editor.KnownEntity
+	var id int64
+	var aliases string
+	err := s.db.QueryRowContext(ctx, `
+		SELECT entities.id, entities.name, entities.kind, coalesce(entities.wikidata_id, ''),
+			(SELECT json_group_array(n.name ORDER BY n.name) FROM entity_names n WHERE n.entity_id = entities.id)
+		FROM entities
+		WHERE entities.name = ?1 OR EXISTS (SELECT 1 FROM entity_names n WHERE n.entity_id = entities.id AND n.name = ?1)
+		ORDER BY entities.name = ?1 DESC, entities.id LIMIT 1`, name,
+	).Scan(&id, &e.Name, &e.Kind, &e.WikidataID, &aliases)
+	if errors.Is(err, sql.ErrNoRows) {
+		return e, false, nil
+	}
+	if err != nil {
+		return e, false, fmt.Errorf("entity %q: %w", name, err)
+	}
+	if err := json.Unmarshal([]byte(aliases), &e.Aliases); err != nil {
+		return e, false, fmt.Errorf("entity %q: names: %w", name, err)
+	}
+	if e.Facts, err = s.referenceFacts(ctx, id); err != nil {
+		return e, false, err
+	}
+	return e, true, nil
+}
+
+// referenceFacts are the Facts drawn from Reference sources about the
+// Entity id, each with the lookup it came from.
+func (s *Store) referenceFacts(ctx context.Context, id int64) ([]editor.Fact, error) {
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT f.statement, f.as_at, f.quote, l.reference, l.item_id, l.revision, l.looked_up_at, l.licence,
+			(SELECT json_group_array(entities.name ORDER BY entities.name)
+				FROM reference_fact_entities fe JOIN entities ON entities.id = fe.entity_id
+				WHERE fe.fact_id = f.id)
+		FROM reference_facts f JOIN reference_lookups l ON l.id = f.lookup_id
+		WHERE EXISTS (SELECT 1 FROM reference_fact_entities fe WHERE fe.fact_id = f.id AND fe.entity_id = ?)
+		ORDER BY f.as_at, f.id`, id)
+	if err != nil {
+		return nil, fmt.Errorf("reference facts: %w", err)
+	}
+	defer func() { _ = rows.Close() }()
+	var out []editor.Fact
+	for rows.Next() {
+		var f editor.Fact
+		var l editor.Lookup
+		var asAt, at, ents string
+		if err := rows.Scan(&f.Statement, &asAt, &f.Quote, &l.Reference, &l.ItemID, &l.Revision, &at, &l.Licence, &ents); err != nil {
+			return nil, fmt.Errorf("reference facts: %w", err)
+		}
+		if f.AsAt, err = time.Parse(time.DateOnly, asAt); err != nil {
+			return nil, fmt.Errorf("reference facts: as at: %w", err)
+		}
+		if err := json.Unmarshal([]byte(ents), &f.Entities); err != nil {
+			return nil, fmt.Errorf("reference facts: entities: %w", err)
+		}
+		l.At = parseTime(at)
+		f.Lookup = &l
+		out = append(out, f)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("reference facts: %w", err)
+	}
+	return out, nil
 }
 
 // ReadItem is one Item with what reading drew from it, reporting whether

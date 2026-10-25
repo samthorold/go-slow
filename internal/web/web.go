@@ -35,6 +35,7 @@ type Deps struct {
 	Stories   Stories
 	Feedback  Feedback
 	Kept      Kept
+	Register  Register
 	// BriefingAt is the time of day the Briefing is due (7h is 07:00): a
 	// day with none by then is flagged.
 	BriefingAt time.Duration
@@ -91,6 +92,7 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("GET /feedback", a.feedback)
 	mux.HandleFunc("GET /items", a.items)
 	mux.HandleFunc("GET /items/{source}/{entry}", a.item)
+	mux.HandleFunc("GET /register", a.register)
 	mux.HandleFunc("GET /stories", a.stories)
 	mux.HandleFunc("GET /stories/{id}", a.story)
 	mux.HandleFunc("POST /stories/{id}/feedback", a.storyFeedback)

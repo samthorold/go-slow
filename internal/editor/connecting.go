@@ -16,6 +16,21 @@ import (
 type ToConnect struct {
 	Item  Item
 	Facts []Fact
+	// Entities are the names of the Entities the Item's reading gave, in any
+	// of its Facts or Claims. A role given to one of them in a Fact that did
+	// not list it is kept, and the Fact then involves it; a role given to any
+	// other name is refused. It is not shown to the model, so the request is
+	// the Facts' alone.
+	Entities []string
+}
+
+// involvable reports whether name is an Entity of the Item's reading: one
+// that tc's Entities name or one of its Facts lists.
+func (tc ToConnect) involvable(name string) bool {
+	if slices.Contains(tc.Entities, name) {
+		return true
+	}
+	return slices.ContainsFunc(tc.Facts, func(f Fact) bool { return slices.Contains(f.Entities, name) })
 }
 
 // Connecting is the result of connecting an Item's Facts.
@@ -25,7 +40,9 @@ type Connecting struct {
 	// Facts are the ids of every Fact connected, including those given no
 	// cause.
 	Facts []int64
-	// Roles are the roles each Fact's Entities have in it.
+	// Roles are the roles each Fact's Entities have in it. A role may go to
+	// an Entity of the Item's reading the Fact did not list, which the Fact
+	// then involves.
 	Roles []Role
 	// Causes are the cause Connections made, each between two Facts.
 	Causes []Cause
@@ -173,8 +190,8 @@ func checkConnecting(tc ToConnect, others []Fact, res Response) (Connecting, err
 		fact := tc.Facts[i]
 		given := map[string]bool{}
 		for _, r := range f.Roles {
-			if !slices.Contains(fact.Entities, r.Entity) {
-				return Connecting{}, failedConnecting(it, "%s gives a role to %q, which it does not involve", f.Fact, r.Entity)
+			if !tc.involvable(r.Entity) {
+				return Connecting{}, failedConnecting(it, "%s gives a role to %q, which the Item's reading never gave", f.Fact, r.Entity)
 			}
 			if !slices.Contains(roles, r.Role) {
 				return Connecting{}, failedConnecting(it, "%s gives %q the role %q, which is no role", f.Fact, r.Entity, r.Role)

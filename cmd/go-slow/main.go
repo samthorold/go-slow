@@ -67,10 +67,20 @@ func run(log *slog.Logger) error {
 	// The Topics and the lazy-reading check: plain code, no model adapter.
 	topics := interest.New(store)
 	// The Editor, each act on the model the config names for it.
-	ed := editor.New(editor.Deps{
+	// One adapter serves every act, sending each act's requests to its model.
+	models := claude.New(claude.Options{
+		APIKey:    string(cfg.AnthropicAPIKey),
+		Model:     cfg.ReadingModel,
+		ActModels: map[string]string{"reading": cfg.ReadingModel, "placing": cfg.PlacingModel},
+	})
+	ed := editor.New(editor.Deps{Store: store, Model: models, PlacingModel: models, Log: log})
+	// The daily acts run in batches: submitted after a Collection run, and
+	// their results applied on later runs as they arrive. One batch carries
+	// every act's requests.
+	batches := editor.NewBatches(editor.BatchDeps{
 		Store:   store,
-		Model:   claude.New(claude.Options{APIKey: string(cfg.AnthropicAPIKey), Model: cfg.ReadingModel}),
-		Placing: claude.New(claude.Options{APIKey: string(cfg.AnthropicAPIKey), Model: cfg.PlacingModel}),
+		Batcher: models,
+		Acts:    []editor.BatchAct{ed.Reading(), ed.Placing()},
 		Log:     log,
 	})
 	collector := collect.New(collect.Deps{
@@ -83,8 +93,7 @@ func run(log *slog.Logger) error {
 		}),
 		Store: store,
 		Check: topics,
-		Read:  ed,
-		Place: ed,
+		Read:  batches,
 		Log:   log,
 	})
 	// The timetable runs inside the app process, stopping with it.

@@ -28,14 +28,27 @@ type Options struct {
 	APIKey string
 	// Model is the Claude model the act runs on, such as claude-haiku-5-5.
 	Model string
+	// ActModels names, by act, a model other than Model for that act's
+	// requests, so one batch can carry every act's requests, each on its
+	// own act's model.
+	ActModels map[string]string
 	// BaseURL replaces Anthropic's API, for tests; empty is the real one.
 	BaseURL string
 }
 
 // Model is one Claude model behind the Editor's model port.
 type Model struct {
-	client anthropic.Client
-	model  string
+	client    anthropic.Client
+	model     string
+	actModels map[string]string
+}
+
+// modelFor is the model an act's requests run on.
+func (m *Model) modelFor(act string) string {
+	if am, ok := m.actModels[act]; ok {
+		return am
+	}
+	return m.model
 }
 
 // New builds the adapter. It takes nothing from the environment: the key
@@ -49,15 +62,29 @@ func New(o Options) *Model {
 	if o.BaseURL != "" {
 		opts = append(opts, option.WithBaseURL(o.BaseURL))
 	}
-	return &Model{client: anthropic.NewClient(opts...), model: o.Model}
+	return &Model{client: anthropic.NewClient(opts...), model: o.Model, actModels: o.ActModels}
 }
 
 // Complete runs one act's call: its instructions as the system prompt, its
 // input as the user's turn, and its schema as the required output format.
 // A refusal or an answer cut off at its length is an error, never output.
 func (m *Model) Complete(ctx context.Context, r editor.Request) (editor.Response, error) {
-	msg, err := m.client.Messages.New(ctx, anthropic.MessageNewParams{
-		Model:     anthropic.Model(m.model),
+	msg, err := m.client.Messages.New(ctx, m.params(r))
+	if err != nil {
+		return editor.Response{}, fmt.Errorf("%s on %s: %w", r.Act, m.modelFor(r.Act), err)
+	}
+	res, err := answer(msg)
+	if err != nil {
+		return editor.Response{}, fmt.Errorf("%s on %s: %w", r.Act, m.modelFor(r.Act), err)
+	}
+	return res, nil
+}
+
+// params are an act's call as a message: its instructions as the system
+// prompt, its input as the user's turn, its schema as the output format.
+func (m *Model) params(r editor.Request) anthropic.MessageNewParams {
+	return anthropic.MessageNewParams{
+		Model:     anthropic.Model(m.modelFor(r.Act)),
 		MaxTokens: maxTokens,
 		System:    []anthropic.TextBlockParam{{Text: r.Instructions}},
 		Messages: []anthropic.MessageParam{
@@ -66,15 +93,17 @@ func (m *Model) Complete(ctx context.Context, r editor.Request) (editor.Response
 		OutputConfig: anthropic.OutputConfigParam{
 			Format: anthropic.JSONOutputFormatParam{Schema: r.Schema},
 		},
-	})
-	if err != nil {
-		return editor.Response{}, fmt.Errorf("%s on %s: %w", r.Act, m.model, err)
 	}
+}
+
+// answer is a message as the Editor's port gives it: its text output, or
+// an error for a refusal or an answer cut off at its length.
+func answer(msg *anthropic.Message) (editor.Response, error) {
 	switch msg.StopReason {
 	case anthropic.StopReasonRefusal:
-		return editor.Response{}, fmt.Errorf("%s on %s: %w (%s)", r.Act, m.model, editor.ErrRefused, msg.StopDetails.Category)
+		return editor.Response{}, fmt.Errorf("%w (%s)", editor.ErrRefused, msg.StopDetails.Category)
 	case anthropic.StopReasonMaxTokens:
-		return editor.Response{}, fmt.Errorf("%s on %s: %w", r.Act, m.model, editor.ErrTruncated)
+		return editor.Response{}, editor.ErrTruncated
 	}
 	var text strings.Builder
 	for _, block := range msg.Content {

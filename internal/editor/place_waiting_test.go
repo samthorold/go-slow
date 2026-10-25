@@ -19,10 +19,10 @@ import (
 func placer(store *sqlite.Store, placing *fakeModel) (*editor.Editor, *bytes.Buffer) {
 	var logs bytes.Buffer
 	return editor.New(editor.Deps{
-		Store:   store,
-		Model:   &fakeModel{output: goodReading},
-		Placing: placing,
-		Log:     slog.New(slog.NewTextHandler(&logs, nil)),
+		Store:        store,
+		Model:        &fakeModel{output: goodReading},
+		PlacingModel: placing,
+		Log:          slog.New(slog.NewTextHandler(&logs, nil)),
 	}), &logs
 }
 

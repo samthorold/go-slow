@@ -147,18 +147,11 @@ type Deps struct {
 	// Check runs after every run, over the Items not yet checked.
 	Check Checker
 	// Read, if set, runs after the check: the Editor reads the Items
-	// awaiting reading (system design: The acts run as Items arrive).
+	// awaiting reading (system design: The acts run as Items arrive), at
+	// once or by submitting them in a batch and applying the results of
+	// earlier ones (The daily acts run in batches).
 	Read Reader
-	// Place, if set, runs after reading: the Editor places the Facts
-	// awaiting placing, so a Fact read this run is placed this run.
-	Place Placer
-	Log   *slog.Logger
-}
-
-// Placer is the Editor's placing, run over the Facts awaiting it. A placing
-// that fails leaves its Facts awaiting placing, for the next run.
-type Placer interface {
-	PlaceWaiting(ctx context.Context, now time.Time) error
+	Log  *slog.Logger
 }
 
 // Reader is the Editor's reading, run over the Items awaiting it. A reading
@@ -217,11 +210,6 @@ func (c *Collector) Run(ctx context.Context, now time.Time) {
 	if c.Read != nil {
 		if err := c.Read.ReadWaiting(ctx, now); err != nil {
 			c.Log.ErrorContext(ctx, "reading failed", "error", err)
-		}
-	}
-	if c.Place != nil {
-		if err := c.Place.PlaceWaiting(ctx, now); err != nil {
-			c.Log.ErrorContext(ctx, "placing failed", "error", err)
 		}
 	}
 }

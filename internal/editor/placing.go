@@ -113,16 +113,27 @@ type placingOutput struct {
 // stories are the candidates of any of the Facts. A result that fails the
 // act's checks is ErrFailedChecks, and none of it is returned.
 func Place(ctx context.Context, m Model, tp ToPlace, stories []Story) (Placing, error) {
-	it := tp.Item
-	res, err := m.Complete(ctx, Request{
+	res, err := m.Complete(ctx, placingRequest(tp, stories))
+	if err != nil {
+		return Placing{}, fmt.Errorf("placing %s: %w", tp.Item.EntryID, err)
+	}
+	return checkPlacing(tp, stories, res)
+}
+
+// placingRequest is the placing act's call on a model for an Item's Facts.
+func placingRequest(tp ToPlace, stories []Story) Request {
+	return Request{
 		Act:          "placing",
 		Instructions: placingInstructions,
 		Input:        placingInput(tp, stories),
 		Schema:       placingSchema,
-	})
-	if err != nil {
-		return Placing{}, fmt.Errorf("placing %s: %w", it.EntryID, err)
 	}
+}
+
+// checkPlacing decodes the model's answer on an Item's Facts and runs the
+// act's checks over it. A result that fails them is ErrFailedChecks.
+func checkPlacing(tp ToPlace, stories []Story, res Response) (Placing, error) {
+	it := tp.Item
 	var out placingOutput
 	dec := json.NewDecoder(bytes.NewReader(res.Output))
 	dec.DisallowUnknownFields()
@@ -195,6 +206,67 @@ func Place(ctx context.Context, m Model, tp ToPlace, stories []Story) (Placing, 
 		}
 	}
 	return p, nil
+}
+
+// Placing is the placing act as it runs in batches: the Items whose Facts
+// await placing, each placed into the Record when its result passes the
+// checks. An Item's Facts are placed only once every earlier Item awaiting
+// placing that shares an Entity with them has been placed, since placing
+// that Item may start or move on a Story they would be weighed against.
+// Until then they wait for a later batch, so a batch gives the same Stories
+// as placing one Item at a time in the order they were published; Items
+// that share no Entity go in one batch together.
+func (e *Editor) Placing() BatchAct {
+	return BatchAct{
+		Name: "placing",
+		Waiting: func(ctx context.Context) ([]Job, error) {
+			waiting, err := e.Store.FactsToPlace(ctx)
+			if err != nil {
+				return nil, err
+			}
+			var jobs []Job
+			earlier := map[string]bool{}
+			for _, tp := range waiting {
+				names := entityNames(tp)
+				blocked := slices.ContainsFunc(names, func(n string) bool { return earlier[n] })
+				for _, n := range names {
+					earlier[n] = true
+				}
+				if blocked {
+					continue
+				}
+				stories, err := e.Store.StoriesSharing(ctx, names)
+				if err != nil {
+					return nil, err
+				}
+				jobs = append(jobs, Job{
+					Key:     tp.Item.SourceID + "\n" + tp.Item.EntryID,
+					Request: placingRequest(tp, stories),
+					Apply: func(ctx context.Context, res Response, now time.Time) error {
+						p, err := checkPlacing(tp, stories, res)
+						if err != nil {
+							return err
+						}
+						return e.Store.SavePlacing(ctx, p, now)
+					},
+				})
+			}
+			return jobs, nil
+		},
+	}
+}
+
+// entityNames are the names of every Entity an Item's Facts involve.
+func entityNames(tp ToPlace) []string {
+	var out []string
+	for _, f := range tp.Facts {
+		for _, n := range f.Entities {
+			if !slices.Contains(out, n) {
+				out = append(out, n)
+			}
+		}
+	}
+	return out
 }
 
 // factIndex is the index of the Fact the model calls ref (F1 is the first),

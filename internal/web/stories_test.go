@@ -14,7 +14,7 @@ import (
 // placeWaiting places the Facts awaiting placing with output.
 func placeWaiting(t *testing.T, store *sqlite.Store, output string) {
 	t.Helper()
-	ed := editor.New(editor.Deps{Store: store, Placing: fakeModel{output}, Log: slog.New(slog.DiscardHandler)})
+	ed := editor.New(editor.Deps{Store: store, PlacingModel: fakeModel{output}, Log: slog.New(slog.DiscardHandler)})
 	if err := ed.PlaceWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}

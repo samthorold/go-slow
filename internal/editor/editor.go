@@ -30,9 +30,9 @@ type Deps struct {
 	Store Store
 	// Model is the model reading runs on, chosen by configuration.
 	Model Model
-	// Placing is the model placing runs on, chosen by configuration.
-	Placing Model
-	Log     *slog.Logger
+	// PlacingModel is the model placing runs on, chosen by configuration.
+	PlacingModel Model
+	Log          *slog.Logger
 }
 
 // Editor does the editorial work over the Record.
@@ -79,15 +79,11 @@ func (e *Editor) PlaceWaiting(ctx context.Context, now time.Time) error {
 		return err
 	}
 	for _, tp := range waiting {
-		var names []string
-		for _, f := range tp.Facts {
-			names = append(names, f.Entities...)
-		}
-		stories, err := e.Store.StoriesSharing(ctx, names)
+		stories, err := e.Store.StoriesSharing(ctx, entityNames(tp))
 		if err != nil {
 			return err
 		}
-		p, err := Place(ctx, e.Placing, tp, stories)
+		p, err := Place(ctx, e.PlacingModel, tp, stories)
 		if err != nil {
 			e.Log.ErrorContext(ctx, "placing failed", "source", tp.Item.SourceID, "entry", tp.Item.EntryID, "error", err)
 			continue

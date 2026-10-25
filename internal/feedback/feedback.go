@@ -108,6 +108,16 @@ type Kept struct {
 	// Assessment is the Assessment's statement, and ReadDay the Sunday of
 	// the read it, or the read the Feedback is about, belongs to.
 	Assessment, ReadDay string
+	// Calls are the kept model calls behind what it is about: a Fact's
+	// reading call, a Development's placing call, a Connection's
+	// connecting call, or the placing calls of a Story's Developments.
+	Calls []int64
+	// Conversation is the kept conversation behind an Assessment or a
+	// Sunday read, or zero.
+	Conversation int64
+	// ByOwner is whether what it is about was made by the Owner, through
+	// missed, rather than by an act: no call is behind it.
+	ByOwner bool
 }
 
 // Draft is Feedback as the Owner's form sent it, not yet validated.

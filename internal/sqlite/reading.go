@@ -287,8 +287,7 @@ func (s *Store) ReadItem(ctx context.Context, sourceID, entryID string) (editor.
 			(SELECT json_group_array(topics.name ORDER BY topics.name)
 				FROM item_topics JOIN topics ON topics.id = item_topics.topic_id
 				WHERE item_topics.source_id = items.source_id AND item_topics.entry_id = items.entry_id),
-			coalesce((SELECT max(c.id) FROM model_calls c
-				WHERE c.act = 'reading' AND c.work_key = `+itemWorkKey+` AND c.outcome = 'applied'), 0)
+			`+readingCall(itemWorkKey)+`
 		FROM items JOIN sources ON sources.id = items.source_id
 			LEFT JOIN item_reads USING (source_id, entry_id)
 		WHERE items.source_id = ? AND items.entry_id = ?`, sourceID, entryID,

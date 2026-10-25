@@ -46,6 +46,32 @@ type keptRow struct {
 	// Undone is when the Owner undid it; UndoPath, for a piece standing, is
 	// where its undo goes from this page.
 	Undone, UndoPath string
+	// Behind is the kept calls behind what it is about, and ByOwner
+	// whether the Owner made it, so no call is behind it.
+	Behind  []behindLink
+	ByOwner bool
+}
+
+// behindLink is a link to a kept call or conversation behind what a piece
+// of Feedback is about.
+type behindLink struct{ Path, Label string }
+
+// behind is the links to the kept calls behind what k is about.
+func behind(k feedback.Kept) []behindLink {
+	label := map[feedback.Level]string{
+		feedback.Fact: "reading call", feedback.Development: "placing call",
+		feedback.Story: "placing call", feedback.Connection: "connecting call",
+	}[k.Level]
+	var out []behindLink
+	for _, id := range k.Calls {
+		if id != 0 {
+			out = append(out, behindLink{Path: callPath(id), Label: "the " + label})
+		}
+	}
+	if k.Conversation != 0 {
+		out = append(out, behindLink{Path: conversationPath(k.Conversation, 0), Label: "the read's conversation"})
+	}
+	return out
 }
 
 // undonePath is where the undo of the piece id goes from the page at page
@@ -78,6 +104,7 @@ func (a *app) keptRow(k feedback.Kept, page string) keptRow {
 	} else {
 		row.UndoPath = undonePath(page, k.ID)
 	}
+	row.Behind, row.ByOwner = behind(k), k.ByOwner
 	switch k.Level {
 	case feedback.Story:
 		row.About = k.Story

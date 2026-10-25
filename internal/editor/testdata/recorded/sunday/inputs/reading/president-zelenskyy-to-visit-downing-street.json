@@ -1,0 +1,268 @@
+{
+  "act": "reading",
+  "model": "claude-haiku-5-5",
+  "recorded_at": "2026-10-25T00:07:54.184018Z",
+  "usage": {
+    "input_tokens": 2577,
+    "output_tokens": 5348
+  },
+  "output": {
+    "claims": [
+      {
+        "entities": [
+          {
+            "name": "Andy Burnham",
+            "kind": "person",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "name": "United Kingdom",
+            "kind": "place",
+            "role": ""
+          },
+          {
+            "name": "Ukraine",
+            "kind": "place",
+            "role": ""
+          }
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "Our rock-solid support to Ukraine is vital for keeping us safe here in the UK",
+        "statement": "UK support for Ukraine is vital for keeping the UK safe."
+      },
+      {
+        "entities": [
+          {
+            "name": "Andy Burnham",
+            "kind": "person",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "name": "Ukraine",
+            "kind": "place",
+            "role": ""
+          }
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "we are with you for as long as it takes",
+        "statement": "The UK is with Ukraine for as long as it takes."
+      },
+      {
+        "entities": [
+          {
+            "name": "Andy Burnham",
+            "kind": "person",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "name": "Russia",
+            "kind": "place",
+            "role": ""
+          }
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "Russia’s aggression cannot be allowed to succeed on our continent.",
+        "statement": "Russia's aggression cannot be allowed to succeed in Europe."
+      },
+      {
+        "entities": [
+          {
+            "name": "John Healey",
+            "kind": "person",
+            "role": "Chancellor of the Exchequer of the United Kingdom"
+          },
+          {
+            "name": "Russia",
+            "kind": "place",
+            "role": ""
+          }
+        ],
+        "made_by": "John Healey",
+        "quote": "I urge partners to back the ban on Russian LNG",
+        "statement": "Partners should back the ban on Russian LNG to curtail Russia's war funding."
+      },
+      {
+        "entities": [
+          {
+            "name": "John Healey",
+            "kind": "person",
+            "role": "Chancellor of the Exchequer of the United Kingdom"
+          },
+          {
+            "name": "Ukraine",
+            "kind": "place",
+            "role": ""
+          }
+        ],
+        "made_by": "John Healey",
+        "quote": "our commitment to the Ukrainian people is unshakeable",
+        "statement": "The UK's commitment to the Ukrainian people is unshakeable."
+      }
+    ],
+    "facts": [
+      {
+        "as_at": "2026-10-13",
+        "entities": [
+          {
+            "name": "Volodymyr Zelenskyy",
+            "kind": "person",
+            "role": "President of Ukraine"
+          },
+          {
+            "name": "United Kingdom",
+            "kind": "place",
+            "role": ""
+          }
+        ],
+        "quote": "President Zelenskyy will arrive in the UK this morning",
+        "statement": "President Volodymyr Zelenskyy was due to arrive in the UK on the morning of 2026-10-13."
+      },
+      {
+        "as_at": "2026-10-13",
+        "entities": [
+          {
+            "name": "Andy Burnham",
+            "kind": "person",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "name": "Volodymyr Zelenskyy",
+            "kind": "person",
+            "role": "President of Ukraine"
+          },
+          {
+            "name": "Downing Street",
+            "kind": "place",
+            "role": ""
+          }
+        ],
+        "quote": "Prime Minister to host President Volodymyr Zelenskyy at Downing Street today",
+        "statement": "Prime Minister Andy Burnham was hosting President Volodymyr Zelenskyy at Downing Street on 2026-10-13."
+      },
+      {
+        "as_at": "2026-10-13",
+        "entities": [
+          {
+            "name": "Andy Burnham",
+            "kind": "person",
+            "role": "Prime Minister of the United Kingdom"
+          }
+        ],
+        "quote": "The Prime Minister has also asked Ministers to draw up further sanctions, military aid, and fiscal packages to provide urgent support in the coming weeks.",
+        "statement": "The Prime Minister has asked Ministers to draw up further sanctions, military aid and fiscal packages."
+      },
+      {
+        "as_at": "2026-10-13",
+        "entities": [
+          {
+            "name": "United Kingdom",
+            "kind": "place",
+            "role": ""
+          },
+          {
+            "name": "Ukraine",
+            "kind": "place",
+            "role": ""
+          }
+        ],
+        "quote": "including delivering £45 million of surface-to-air missiles deliveries",
+        "statement": "The UK is delivering £45 million of surface-to-air missiles to Ukraine."
+      },
+      {
+        "as_at": "2026-10-13",
+        "entities": [
+          {
+            "name": "United Kingdom",
+            "kind": "place",
+            "role": ""
+          },
+          {
+            "name": "Ukraine",
+            "kind": "place",
+            "role": ""
+          }
+        ],
+        "quote": "The UK has already committed £1.6 billion to deliver more than 5000 LMMs to Ukraine over the next four years",
+        "statement": "The UK has committed £1.6 billion to deliver more than 5000 Lightweight Multirole Missiles to Ukraine over four years."
+      },
+      {
+        "as_at": "2026-10-12",
+        "entities": [
+          {
+            "name": "Foreign Secretary",
+            "kind": "person",
+            "role": "Foreign Secretary of the United Kingdom"
+          },
+          {
+            "name": "Warsaw Security Forum",
+            "kind": "occasion",
+            "role": ""
+          }
+        ],
+        "quote": "the Foreign Secretary did the same with partners at the Warsaw Security Forum yesterday",
+        "statement": "The Foreign Secretary urged partners at the Warsaw Security Forum to implement an equivalent ban on Russian LNG."
+      },
+      {
+        "as_at": "2026-10-13",
+        "entities": [
+          {
+            "name": "John Healey",
+            "kind": "person",
+            "role": "Chancellor of the Exchequer of the United Kingdom"
+          },
+          {
+            "name": "IMF",
+            "kind": "organisation",
+            "role": ""
+          },
+          {
+            "name": "Bangkok",
+            "kind": "place",
+            "role": ""
+          }
+        ],
+        "quote": "Chancellor John Healey will use his meetings at the IMF in Bangkok",
+        "statement": "Chancellor John Healey has meetings at the IMF in Bangkok."
+      },
+      {
+        "as_at": "2026-10-13",
+        "entities": [
+          {
+            "name": "Russia",
+            "kind": "place",
+            "role": ""
+          },
+          {
+            "name": "Kyiv",
+            "kind": "place",
+            "role": ""
+          },
+          {
+            "name": "Ukraine",
+            "kind": "place",
+            "role": ""
+          }
+        ],
+        "quote": "As Russia continues its bombardment of Ukraine’s capital Kyiv and energy infrastructure",
+        "statement": "Russia is continuing its bombardment of Kyiv and Ukraine's energy infrastructure."
+      },
+      {
+        "as_at": "2026-10-13",
+        "entities": [
+          {
+            "name": "United Kingdom",
+            "kind": "place",
+            "role": ""
+          },
+          {
+            "name": "Russia",
+            "kind": "place",
+            "role": ""
+          }
+        ],
+        "quote": "standing by plans to fully implement a maritime services ban on Russian liquefied natural gas (LNG) exports",
+        "statement": "The UK is standing by plans to fully implement a maritime services ban on Russian LNG exports."
+      }
+    ]
+  }
+}

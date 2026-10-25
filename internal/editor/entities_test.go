@@ -113,9 +113,8 @@ func TestAnEntityWithNoWikidataMatchIsTheEditorsAndALaterMatchMergesIt(t *testin
 // readingNaming is a reading of the speech whose one Fact involves a
 // person, named and given a role as the Item does.
 func readingNaming(name, role string) string {
-	return `{"entities": [{"name": "` + name + `", "kind": "person", "role": "` + role + `"}],
-	  "facts": [{"statement": "The Prime Minister gave a speech in Motherwell.", "as_at": "2026-10-16",
-	    "quote": "to be here in Motherwell", "entities": ["` + name + `"]}],
+	return `{"facts": [{"statement": "The Prime Minister gave a speech in Motherwell.", "as_at": "2026-10-16",
+	    "quote": "to be here in Motherwell", "entities": [{"name": "` + name + `", "kind": "person", "role": "` + role + `"}]}],
 	  "claims": []}`
 }
 

@@ -114,14 +114,21 @@ const testContact = "go-slow-tests@example.org"
 // Topics, and the agent writes the Sunday read over it, the day after,
 // querying the Record and Wikidata. The whole conversation is kept under
 // testdata/recorded/sunday, with Wikidata's answers to its lookups, and
-// replayed with no network call. Re-recording runs the agent on the real
+// replayed with no network call. The readings, placings and connectings it
+// rests on are its own copies, under testdata/recorded/sunday/inputs, as
+// they were when it was recorded: its turns cite what those showed, so
+// re-recording an earlier act leaves it valid. (The readings there were
+// recorded with a separate list of Entities, and are rewritten with each
+// Fact's and Claim's Entities inline, as the act gives them now.) Re-recording runs the agent on the real
 // model, which costs a few dollars on Claude Opus 5.5:
 //
 //	go test -count=1 ./internal/editor -run TestRecordedSundayRead -record
 //
 // with GOSLOW_ANTHROPIC_API_KEY and SUNDAY_READ_MODEL set in the
-// environment. It rests on the recorded connectings, so re-record it after
-// them, or after the act's instructions, tools or checks change.
+// environment. Before re-recording it, copy the current recordings of
+// reading, placing and connecting (testdata/recorded/{reading,placing,
+// connecting}) over its inputs. Re-record it after the act's instructions,
+// tools or checks change, or to bring it onto the earlier acts' recordings.
 func TestRecordedSundayRead(t *testing.T) {
 	ctx := t.Context()
 	dir := filepath.Join("testdata", "recorded", "sunday")
@@ -166,7 +173,7 @@ func TestRecordedSundayRead(t *testing.T) {
 		Now: time.Now, Sleep: polite.Sleep,
 	})
 
-	store := connectedFixtures(t)
+	store := connectedFixtures(t, filepath.Join(dir, "inputs"))
 	var logs bytes.Buffer
 	ed := editor.New(editor.Deps{Store: store, SundayReads: store, SundayReadModel: model, Wikidata: wd,
 		Log: slog.New(slog.NewTextHandler(&logs, nil))})

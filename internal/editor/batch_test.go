@@ -76,7 +76,7 @@ var ferries = collect.Item{
 	Published: saturday, Attribution: collect.OGL, CollectedAt: saturday,
 }
 
-const ferriesReading = `{"entities": [], "claims": [], "facts": [{"statement": "Ferries will run more often.",
+const ferriesReading = `{"claims": [], "facts": [{"statement": "Ferries will run more often.",
   "as_at": "2026-10-24", "quote": "Ferries to Scotland's islands will run more often", "entities": []}]}`
 
 // withFerries adds the ferries Item to the Record, awaiting reading.

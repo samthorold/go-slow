@@ -53,11 +53,11 @@ func readSpeech(t *testing.T, store *sqlite.Store, output string) {
 }
 
 const reading = `{
-  "entities": [{"name": "Andy Burnham", "kind": "person"}, {"name": "Motherwell", "kind": "place"}],
   "facts": [{"statement": "Andy Burnham spoke in Motherwell.", "as_at": "2026-10-22",
-             "quote": "good to be here in Motherwell", "entities": ["Andy Burnham", "Motherwell"]}],
+             "quote": "good to be here in Motherwell", "entities": [
+               {"name": "Andy Burnham", "kind": "person", "role": ""}, {"name": "Motherwell", "kind": "place", "role": ""}]}],
   "claims": [{"statement": "Scotland is the true north.", "made_by": "Andy Burnham",
-              "quote": "the true north", "entities": ["Andy Burnham"]}]
+              "quote": "the true north", "entities": [{"name": "Andy Burnham", "kind": "person", "role": ""}]}]
 }`
 
 // itemPage follows the Items page's link to the Item's own page.

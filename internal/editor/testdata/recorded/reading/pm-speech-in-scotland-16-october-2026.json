@@ -1,377 +1,305 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T00:06:53.325696Z",
+  "recorded_at": "2026-10-25T10:16:57.216874Z",
   "usage": {
-    "input_tokens": 10634,
-    "output_tokens": 7309
+    "input_tokens": 10801,
+    "output_tokens": 8181
   },
   "output": {
     "claims": [
       {
         "entities": [
-          "Andy Burnham",
-          "Motherwell"
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "Glasgow",
+            "role": ""
+          }
         ],
-        "made_by": "Andy Burnham",
-        "quote": "I do want good growth in every postcode here and the rest of the UK.",
-        "statement": "Burnham wants good growth in every postcode in the UK."
+        "made_by": "Prime Minister",
+        "quote": "When I say I want good growth in every postcode, that means every single postcode in Scotland as well.",
+        "statement": "The Prime Minister wants good growth in every postcode in Scotland."
       },
       {
         "entities": [
-          "Andy Burnham",
-          "EU-UK Summit"
+          {
+            "kind": "place",
+            "name": "Edinburgh",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Dundee",
+            "role": ""
+          }
         ],
-        "made_by": "Andy Burnham",
-        "quote": "It’s also why I am working on a new deal for food and farming at the EU-UK Summit on the 20th of November.",
-        "statement": "Burnham is working on a new deal for food and farming to be taken to the EU-UK Summit on 20 November."
+        "made_by": "Prime Minister",
+        "quote": "If you go to Edinburgh today, you’ll see around one in twenty shops lying empty.",
+        "statement": "Around one in twenty shops in Edinburgh are empty, against around one in five in Dundee."
       },
       {
         "entities": [
-          "Andy Burnham",
-          "Scotland"
+          {
+            "kind": "place",
+            "name": "Scotland",
+            "role": ""
+          }
         ],
-        "made_by": "Andy Burnham",
-        "quote": "a defence sector that already supports 12,000 jobs here in Scotland",
-        "statement": "The defence sector supports 12,000 jobs in Scotland."
-      },
-      {
-        "entities": [
-          "Andy Burnham",
-          "Edinburgh"
-        ],
-        "made_by": "Andy Burnham",
-        "quote": "you’ll see around one in twenty shops lying empty.",
-        "statement": "In Edinburgh around one in twenty shops is lying empty."
-      },
-      {
-        "entities": [
-          "Andy Burnham",
-          "Dundee"
-        ],
-        "made_by": "Andy Burnham",
-        "quote": "it’s more likely one in five.",
-        "statement": "In Dundee it is more likely that one in five shops is empty."
-      },
-      {
-        "entities": [
-          "Andy Burnham",
-          "Scotland"
-        ],
-        "made_by": "Andy Burnham",
+        "made_by": "Prime Minister",
         "quote": "around one in six young people here are not in education, employment or training.",
         "statement": "Around one in six young people in Scotland are not in education, employment or training."
       },
       {
         "entities": [
-          "Andy Burnham",
-          "East Renfrewshire",
-          "Glasgow"
+          {
+            "kind": "place",
+            "name": "East Renfrewshire",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Glasgow",
+            "role": ""
+          }
         ],
-        "made_by": "Andy Burnham",
+        "made_by": "Prime Minister",
         "quote": "A man in East Renfrewshire can live, as I understand, on average seven years longer than a man in Glasgow",
         "statement": "A man in East Renfrewshire can on average live seven years longer than a man in Glasgow."
       },
       {
         "entities": [
-          "Andy Burnham",
-          "National Economic Council"
+          {
+            "kind": "organisation",
+            "name": "Chemify",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Glasgow",
+            "role": ""
+          }
         ],
-        "made_by": "Andy Burnham",
-        "quote": "in a couple of weeks, the National Economic Council will meet with the First Ministers of Scotland and Wales",
-        "statement": "The National Economic Council will meet with the First Ministers of Scotland and Wales and the Northern Ireland leaders in a couple of weeks."
+        "made_by": "Prime Minister",
+        "quote": "has seen companies like Chemify turn groundbreaking research into real manufacturing jobs in Glasgow.",
+        "statement": "Chemify has turned groundbreaking research into real manufacturing jobs in Glasgow."
       },
       {
         "entities": [
-          "Andy Burnham"
+          {
+            "kind": "place",
+            "name": "United Kingdom",
+            "role": ""
+          }
         ],
-        "made_by": "Andy Burnham",
-        "quote": "An offer of DWP devolution.",
-        "statement": "Burnham is offering Scotland devolution of DWP employment support."
-      },
-      {
-        "entities": [
-          "Andy Burnham"
-        ],
-        "made_by": "Andy Burnham",
+        "made_by": "Prime Minister",
         "quote": "It’s why we’re putting a billion pounds into research and innovation across the UK in the coming years.",
         "statement": "The UK government is putting a billion pounds into research and innovation across the UK in the coming years."
       },
       {
         "entities": [
-          "Andy Burnham",
-          "Easterhouse"
+          {
+            "kind": "occasion",
+            "name": "EU-UK Summit",
+            "role": ""
+          }
         ],
-        "made_by": "Andy Burnham",
-        "quote": "And it worked.",
-        "statement": "The Easterhouse approach of community-led, person-centred support worked."
+        "made_by": "Prime Minister",
+        "quote": "It’s also why I am working on a new deal for food and farming at the EU-UK Summit on the 20th of November.",
+        "statement": "The Prime Minister is working on a new deal for food and farming to be taken to the EU-UK Summit on 20 November."
       },
       {
         "entities": [
-          "Andy Burnham"
+          {
+            "kind": "organisation",
+            "name": "National Economic Council",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Scotland",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Wales",
+            "role": ""
+          }
         ],
-        "made_by": "Andy Burnham",
-        "quote": "I won’t have a country where we get comfortable with the idea of kids in their 20s just being there on benefits.",
-        "statement": "Burnham will not accept a country where young people in their 20s are left on benefits."
-      }
-    ],
-    "entities": [
-      {
-        "kind": "person",
-        "name": "Andy Burnham",
-        "role": "Prime Minister of the United Kingdom"
+        "made_by": "Prime Minister",
+        "quote": "in a couple of weeks, the National Economic Council will meet with the First Ministers of Scotland and Wales",
+        "statement": "The National Economic Council will meet with the First Ministers of Scotland and Wales in a couple of weeks."
       },
       {
-        "kind": "person",
-        "name": "Douglas",
-        "role": ""
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "Alexander Dennis",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Falkirk",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Greater Manchester",
+            "role": ""
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "So I was determined that the buses on the roads of Greater Manchester today were built by Alexander Dennis in Falkirk.",
+        "statement": "Greater Manchester buses are built by Alexander Dennis in Falkirk, a choice the Prime Minister made as Mayor."
       },
       {
-        "kind": "person",
-        "name": "John Swinney",
-        "role": ""
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "DWP",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Scotland",
+            "role": ""
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "An offer of DWP devolution.",
+        "statement": "The Prime Minister offers Scotland devolution of DWP employment support."
       },
       {
-        "kind": "person",
-        "name": "Pamela",
-        "role": "local MP"
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Scotland",
+            "role": ""
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "Scotland, the most devolved nation in the UK, is itself one of the most centralised nations in Europe.",
+        "statement": "Scotland, the most devolved nation in the UK, is one of the most centralised nations in Europe."
       },
       {
-        "kind": "person",
-        "name": "Alan Milburn",
-        "role": "leads the review on youth employment support"
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Douglas",
+            "role": ""
+          },
+          {
+            "kind": "person",
+            "name": "John Swinney",
+            "role": ""
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "credit to Douglas and John Swinney for working together on that",
+        "statement": "Douglas and John Swinney deserve credit for working together on the defence technical colleges."
       },
       {
-        "kind": "person",
-        "name": "Darren McGarvey",
-        "role": "author of Poverty Safari"
-      },
-      {
-        "kind": "place",
-        "name": "Motherwell",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Easterhouse",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Ravenscraig",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Leigh",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Grangemouth",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Falkirk",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Edinburgh",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Dundee",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Glasgow",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "East Renfrewshire",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Scotland",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Greater Manchester",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
-        "name": "Scottish Government",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
-        "name": "UK Government",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
-        "name": "FARE-Scotland",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
-        "name": "Scottish Violence Reduction Unit",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
-        "name": "Greater Manchester Violence Reduction Unit",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
-        "name": "Alexander Dennis",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
-        "name": "Chemify",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
-        "name": "National Economic Council",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
-        "name": "Scottish Parliament",
-        "role": ""
-      },
-      {
-        "kind": "occasion",
-        "name": "Commonwealth Games",
-        "role": ""
-      },
-      {
-        "kind": "occasion",
-        "name": "EU-UK Summit",
-        "role": ""
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Scotland",
+            "role": ""
+          }
+        ],
+        "made_by": "Prime Minister",
+        "quote": "And if we don’t move now, Scotland could lose out.",
+        "statement": "Scotland could lose out if the government does not move now."
       }
     ],
     "facts": [
       {
-        "as_at": "2026-10-16",
-        "entities": [
-          "Andy Burnham",
-          "Motherwell"
-        ],
-        "quote": "to be here in Motherwell",
-        "statement": "Burnham delivered a speech in Motherwell."
-      },
-      {
         "as_at": "2023-08-01",
         "entities": [
-          "Andy Burnham",
-          "FARE-Scotland",
-          "Easterhouse",
-          "Greater Manchester Violence Reduction Unit"
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "organisation",
+            "name": "FARE-Scotland",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Bannatyne House",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Easterhouse",
+            "role": ""
+          },
+          {
+            "kind": "organisation",
+            "name": "Scottish Violence Reduction Unit",
+            "role": ""
+          }
         ],
-        "quote": "I visited FARE-Scotland at Bannatyne House in Easterhouse with the Greater Manchester Violence Reduction Unit.",
-        "statement": "Burnham visited FARE-Scotland at Bannatyne House in Easterhouse with the Greater Manchester Violence Reduction Unit in August 2023."
-      },
-      {
-        "as_at": "2026-10-16",
-        "entities": [
-          "Andy Burnham",
-          "Commonwealth Games"
-        ],
-        "quote": "I was in Scotland for the Opening Ceremony of the Commonwealth Games in the summer",
-        "statement": "Burnham attended the Opening Ceremony of the Commonwealth Games in Scotland in the summer."
+        "quote": "In August 2023, with the help of the ground-breaking Scottish Violence Reduction Unit, I visited FARE-Scotland at Bannatyne House in Easterhouse",
+        "statement": "In August 2023 the Prime Minister visited FARE-Scotland at Bannatyne House in Easterhouse with the help of the Scottish Violence Reduction Unit."
       },
       {
         "as_at": "2017-01-01",
         "entities": [
-          "Andy Burnham",
-          "Greater Manchester"
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "Westminster",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Greater Manchester",
+            "role": ""
+          }
         ],
         "quote": "I left Westminster in 2017 to become the first Mayor of Greater Manchester",
-        "statement": "Burnham left Westminster in 2017 to become the first Mayor of Greater Manchester."
-      },
-      {
-        "as_at": "2026-07-01",
-        "entities": [
-          "Andy Burnham"
-        ],
-        "quote": "When I walked into Downing Street in July",
-        "statement": "Burnham entered Downing Street as Prime Minister in July 2026."
+        "statement": "In 2017 the Prime Minister left Westminster to become the first Mayor of Greater Manchester."
       },
       {
         "as_at": "2026-10-16",
         "entities": [
-          "Andy Burnham"
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "Motherwell",
+            "role": ""
+          }
         ],
-        "quote": "You know I’ve created Number 10 North?",
-        "statement": "Burnham has created Number 10 North."
+        "quote": "to be here in Motherwell",
+        "statement": "The Prime Minister is visiting Motherwell on 16 October 2026."
       },
       {
         "as_at": "2026-10-16",
         "entities": [
-          "Scottish Government",
-          "UK Government",
-          "Scotland"
-        ],
-        "quote": "the Scottish government has this week agreed to match the UK government’s £10 million to create two defence technical excellence colleges",
-        "statement": "The Scottish Government agreed this week to match the UK Government's £10 million to create two defence technical excellence colleges, one in the east and one in the west of Scotland."
-      },
-      {
-        "as_at": "2026-10-16",
-        "entities": [
-          "Andy Burnham",
-          "Scottish Government",
-          "Grangemouth"
-        ],
-        "quote": "we’re working with the Scottish government to help secure new investment and new opportunities for the Grangemouth site",
-        "statement": "The UK government is working with the Scottish Government to help secure new investment and opportunities for the Grangemouth site."
-      },
-      {
-        "as_at": "2026-10-16",
-        "entities": [
-          "Andy Burnham",
-          "Greater Manchester"
-        ],
-        "quote": "I used it to pioneer what we called the Live Well model in Greater Manchester.",
-        "statement": "Burnham used lessons from Easterhouse to pioneer the Live Well model in Greater Manchester."
-      },
-      {
-        "as_at": "2026-10-16",
-        "entities": [
-          "Andy Burnham",
-          "Greater Manchester",
-          "Alexander Dennis",
-          "Falkirk"
-        ],
-        "quote": "the buses on the roads of Greater Manchester today were built by Alexander Dennis in Falkirk",
-        "statement": "Buses used in Greater Manchester are built by Alexander Dennis in Falkirk, after Burnham put buses back under public control and chose Scottish manufacture."
-      },
-      {
-        "as_at": "2026-10-16",
-        "entities": [
-          "Andy Burnham",
-          "Leigh"
-        ],
-        "quote": "I was the MP there for sixteen years from the early 2000s",
-        "statement": "Burnham was MP for Leigh for sixteen years from the early 2000s."
-      },
-      {
-        "as_at": "2026-10-16",
-        "entities": [
-          "Andy Burnham",
-          "Pamela",
-          "Motherwell"
+          {
+            "kind": "person",
+            "name": "Pamela",
+            "role": "local MP"
+          },
+          {
+            "kind": "place",
+            "name": "Motherwell",
+            "role": ""
+          }
         ],
         "quote": "it’s important to talk to Pamela today as the local MP",
         "statement": "Pamela is the local MP for Motherwell."
@@ -379,37 +307,77 @@
       {
         "as_at": "2026-10-16",
         "entities": [
-          "Alan Milburn"
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "Leigh",
+            "role": ""
+          }
         ],
-        "quote": "The review led by Alan Milburn is challenging us to look at this very differently.",
-        "statement": "A review led by Alan Milburn is examining youth employment support."
+        "quote": "I was the MP there for sixteen years from the early 2000s",
+        "statement": "The Prime Minister was MP for Leigh for sixteen years from the early 2000s."
       },
       {
         "as_at": "2026-10-16",
         "entities": [
-          "Scottish Government"
+          {
+            "kind": "organisation",
+            "name": "Scottish Government",
+            "role": ""
+          },
+          {
+            "kind": "organisation",
+            "name": "UK Government",
+            "role": ""
+          }
         ],
-        "quote": "the Scottish government has also announced a long-term programme for local government reform.",
+        "quote": "the Scottish government has this week agreed to match the UK government’s £10 million",
+        "statement": "The Scottish Government has agreed to match the UK Government’s £10 million to create two defence technical excellence colleges."
+      },
+      {
+        "as_at": "2026-10-16",
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "Scottish Government",
+            "role": ""
+          }
+        ],
+        "quote": "the Scottish government has also announced a long-term programme for local government reform",
         "statement": "The Scottish Government has announced a long-term programme for local government reform."
       },
       {
         "as_at": "2026-10-16",
         "entities": [
-          "Andy Burnham",
-          "Scottish Parliament"
+          {
+            "kind": "person",
+            "name": "Alan Milburn",
+            "role": "leader of the review"
+          }
         ],
-        "quote": "Twenty-seven years on, you led the way on devolution here in Scotland with the creation of the Scottish Parliament.",
-        "statement": "The Scottish Parliament was created in Scotland as part of devolution."
+        "quote": "The review led by Alan Milburn",
+        "statement": "Alan Milburn leads a review on employment support for young people."
       },
       {
         "as_at": "2026-10-16",
         "entities": [
-          "Andy Burnham",
-          "Chemify",
-          "Glasgow"
+          {
+            "kind": "person",
+            "name": "Prime Minister",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "place",
+            "name": "Greater Manchester",
+            "role": ""
+          }
         ],
-        "quote": "companies like Chemify turn groundbreaking research into real manufacturing jobs in Glasgow",
-        "statement": "Chemify has turned research into manufacturing jobs in Glasgow."
+        "quote": "I used it to pioneer what we called the Live Well model in Greater Manchester.",
+        "statement": "The Prime Minister used lessons from Easterhouse to pioneer the Live Well model in Greater Manchester."
       }
     ]
   }

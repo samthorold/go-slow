@@ -1,34 +1,16 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T01:11:11.440852Z",
+  "recorded_at": "2026-10-25T10:21:24.173436Z",
   "usage": {
-    "input_tokens": 3017,
-    "output_tokens": 1411
+    "input_tokens": 2308,
+    "output_tokens": 1430
   },
   "output": {
-    "causes": [
-      {
-        "cause": "F1",
-        "effect": "F2"
-      }
-    ],
+    "causes": [],
     "facts": [
       {
         "fact": "F1",
-        "roles": [
-          {
-            "entity": "United Kingdom",
-            "role": "place"
-          },
-          {
-            "entity": "Volodymyr Zelenskyy",
-            "role": "actor"
-          }
-        ]
-      },
-      {
-        "fact": "F2",
         "roles": [
           {
             "entity": "Andy Burnham",
@@ -45,11 +27,28 @@
         ]
       },
       {
+        "fact": "F2",
+        "roles": [
+          {
+            "entity": "UK",
+            "role": "place"
+          },
+          {
+            "entity": "Volodymyr Zelenskyy",
+            "role": "actor"
+          }
+        ]
+      },
+      {
         "fact": "F3",
         "roles": [
           {
-            "entity": "Andy Burnham",
+            "entity": "UK",
             "role": "actor"
+          },
+          {
+            "entity": "Ukraine",
+            "role": "affected"
           }
         ]
       },
@@ -57,7 +56,7 @@
         "fact": "F4",
         "roles": [
           {
-            "entity": "United Kingdom",
+            "entity": "UK",
             "role": "actor"
           },
           {
@@ -70,12 +69,16 @@
         "fact": "F5",
         "roles": [
           {
-            "entity": "United Kingdom",
+            "entity": "John Healey",
             "role": "actor"
           },
           {
-            "entity": "Ukraine",
-            "role": "affected"
+            "entity": "Bangkok",
+            "role": "place"
+          },
+          {
+            "entity": "IMF",
+            "role": "occasion"
           }
         ]
       },
@@ -96,16 +99,12 @@
         "fact": "F7",
         "roles": [
           {
-            "entity": "John Healey",
+            "entity": "Andy Burnham",
             "role": "actor"
           },
           {
-            "entity": "IMF",
-            "role": "occasion"
-          },
-          {
-            "entity": "Bangkok",
-            "role": "place"
+            "entity": "UK",
+            "role": "affected"
           }
         ]
       },
@@ -122,19 +121,6 @@
           },
           {
             "entity": "Ukraine",
-            "role": "affected"
-          }
-        ]
-      },
-      {
-        "fact": "F9",
-        "roles": [
-          {
-            "entity": "United Kingdom",
-            "role": "actor"
-          },
-          {
-            "entity": "Russia",
             "role": "affected"
           }
         ]

@@ -1,10 +1,10 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T01:11:19.139486Z",
+  "recorded_at": "2026-10-25T10:21:35.95036Z",
   "usage": {
-    "input_tokens": 1733,
-    "output_tokens": 347
+    "input_tokens": 2109,
+    "output_tokens": 1056
   },
   "output": {
     "causes": [],
@@ -12,10 +12,6 @@
       {
         "fact": "F1",
         "roles": [
-          {
-            "entity": "Becketwell",
-            "role": "place"
-          },
           {
             "entity": "Derby",
             "role": "place"
@@ -30,48 +26,13 @@
         "fact": "F2",
         "roles": [
           {
-            "entity": "Becketwell",
-            "role": "place"
-          },
-          {
-            "entity": "Derby",
-            "role": "place"
+            "entity": "Great British Railways",
+            "role": "actor"
           }
         ]
       },
       {
         "fact": "F3",
-        "roles": [
-          {
-            "entity": "Derby",
-            "role": "place"
-          },
-          {
-            "entity": "Great British Railways",
-            "role": "affected"
-          }
-        ]
-      },
-      {
-        "fact": "F4",
-        "roles": [
-          {
-            "entity": "Derby",
-            "role": "affected"
-          }
-        ]
-      },
-      {
-        "fact": "F5",
-        "roles": [
-          {
-            "entity": "Derby",
-            "role": "place"
-          }
-        ]
-      },
-      {
-        "fact": "F6",
         "roles": [
           {
             "entity": "Great British Railways",
@@ -80,7 +41,25 @@
         ]
       },
       {
-        "fact": "F7",
+        "fact": "F4",
+        "roles": [
+          {
+            "entity": "Great British Railways",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F5",
+        "roles": [
+          {
+            "entity": "Great British Railways",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F6",
         "roles": [
           {
             "entity": "Alstom",
@@ -93,8 +72,44 @@
         ]
       },
       {
-        "fact": "F8",
+        "fact": "F7",
         "roles": []
+      },
+      {
+        "fact": "F8",
+        "roles": [
+          {
+            "entity": "Andy Burnham",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F9",
+        "roles": [
+          {
+            "entity": "Heidi Alexander",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F10",
+        "roles": [
+          {
+            "entity": "Pat McFadden",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F11",
+        "roles": [
+          {
+            "entity": "Claire Ward",
+            "role": "actor"
+          }
+        ]
       }
     ]
   }

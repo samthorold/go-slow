@@ -1,0 +1,74 @@
+{
+  "act": "connecting",
+  "model": "claude-haiku-5-5",
+  "recorded_at": "2026-10-25T01:11:16.335124Z",
+  "usage": {
+    "input_tokens": 1657,
+    "output_tokens": 989
+  },
+  "output": {
+    "causes": [],
+    "facts": [
+      {
+        "fact": "F1",
+        "roles": [
+          {
+            "entity": "Downing Street",
+            "role": "place"
+          },
+          {
+            "entity": "Prime Minister",
+            "role": "actor"
+          },
+          {
+            "entity": "Volodymyr Zelenskyy",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F2",
+        "roles": [
+          {
+            "entity": "Prime Minister",
+            "role": "actor"
+          },
+          {
+            "entity": "Volodymyr Zelenskyy",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F3",
+        "roles": [
+          {
+            "entity": "Prime Minister",
+            "role": "actor"
+          },
+          {
+            "entity": "UK",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F4",
+        "roles": [
+          {
+            "entity": "Prime Minister",
+            "role": "actor"
+          },
+          {
+            "entity": "UK",
+            "role": "affected"
+          },
+          {
+            "entity": "Volodymyr Zelenskyy",
+            "role": "actor"
+          }
+        ]
+      }
+    ]
+  }
+}

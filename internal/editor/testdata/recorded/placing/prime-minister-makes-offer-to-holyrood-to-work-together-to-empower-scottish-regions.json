@@ -1,10 +1,10 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T01:10:34.532159Z",
+  "recorded_at": "2026-10-25T10:18:57.485472Z",
   "usage": {
-    "input_tokens": 2378,
-    "output_tokens": 548
+    "input_tokens": 2319,
+    "output_tokens": 472
   },
   "output": {
     "facts": [
@@ -13,13 +13,13 @@
         "fact": "F1"
       },
       {
-        "developments_in": [],
-        "fact": "F2"
-      },
-      {
         "developments_in": [
           "N1"
         ],
+        "fact": "F2"
+      },
+      {
+        "developments_in": [],
         "fact": "F3"
       },
       {
@@ -36,7 +36,7 @@
     "new_stories": [
       {
         "ref": "N1",
-        "title": "Regional empowerment across Scotland under the UK Government"
+        "title": "Devolution and regional empowerment in Scotland"
       }
     ]
   }

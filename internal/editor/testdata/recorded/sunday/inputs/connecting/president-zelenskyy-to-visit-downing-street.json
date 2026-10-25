@@ -1,0 +1,144 @@
+{
+  "act": "connecting",
+  "model": "claude-haiku-5-5",
+  "recorded_at": "2026-10-25T01:11:11.440852Z",
+  "usage": {
+    "input_tokens": 3017,
+    "output_tokens": 1411
+  },
+  "output": {
+    "causes": [
+      {
+        "cause": "F1",
+        "effect": "F2"
+      }
+    ],
+    "facts": [
+      {
+        "fact": "F1",
+        "roles": [
+          {
+            "entity": "United Kingdom",
+            "role": "place"
+          },
+          {
+            "entity": "Volodymyr Zelenskyy",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F2",
+        "roles": [
+          {
+            "entity": "Andy Burnham",
+            "role": "actor"
+          },
+          {
+            "entity": "Downing Street",
+            "role": "place"
+          },
+          {
+            "entity": "Volodymyr Zelenskyy",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F3",
+        "roles": [
+          {
+            "entity": "Andy Burnham",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F4",
+        "roles": [
+          {
+            "entity": "United Kingdom",
+            "role": "actor"
+          },
+          {
+            "entity": "Ukraine",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F5",
+        "roles": [
+          {
+            "entity": "United Kingdom",
+            "role": "actor"
+          },
+          {
+            "entity": "Ukraine",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F6",
+        "roles": [
+          {
+            "entity": "Foreign Secretary",
+            "role": "actor"
+          },
+          {
+            "entity": "Warsaw Security Forum",
+            "role": "occasion"
+          }
+        ]
+      },
+      {
+        "fact": "F7",
+        "roles": [
+          {
+            "entity": "John Healey",
+            "role": "actor"
+          },
+          {
+            "entity": "IMF",
+            "role": "occasion"
+          },
+          {
+            "entity": "Bangkok",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F8",
+        "roles": [
+          {
+            "entity": "Russia",
+            "role": "actor"
+          },
+          {
+            "entity": "Kyiv",
+            "role": "place"
+          },
+          {
+            "entity": "Ukraine",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F9",
+        "roles": [
+          {
+            "entity": "United Kingdom",
+            "role": "actor"
+          },
+          {
+            "entity": "Russia",
+            "role": "affected"
+          }
+        ]
+      }
+    ]
+  }
+}

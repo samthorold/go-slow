@@ -1,16 +1,20 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T01:11:32.089464Z",
+  "recorded_at": "2026-10-25T10:21:46.30712Z",
   "usage": {
-    "input_tokens": 2547,
-    "output_tokens": 1155
+    "input_tokens": 1927,
+    "output_tokens": 409
   },
   "output": {
     "causes": [
       {
-        "cause": "F4",
-        "effect": "F5"
+        "cause": "F3",
+        "effect": "F2"
+      },
+      {
+        "cause": "F5",
+        "effect": "F4"
       }
     ],
     "facts": [
@@ -35,7 +39,11 @@
             "role": "actor"
           },
           {
-            "entity": "First Minister",
+            "entity": "Scotland's First Minister",
+            "role": "affected"
+          },
+          {
+            "entity": "Scottish Government",
             "role": "affected"
           }
         ]
@@ -45,6 +53,23 @@
         "roles": [
           {
             "entity": "Andy Burnham",
+            "role": "actor"
+          },
+          {
+            "entity": "Scotland's First Minister",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F4",
+        "roles": [
+          {
+            "entity": "Andy Burnham",
+            "role": "actor"
+          },
+          {
+            "entity": "UK Government",
             "role": "actor"
           },
           {
@@ -58,23 +83,6 @@
           {
             "entity": "Scottish Government",
             "role": "affected"
-          },
-          {
-            "entity": "UK Government",
-            "role": "actor"
-          }
-        ]
-      },
-      {
-        "fact": "F4",
-        "roles": [
-          {
-            "entity": "Andy Burnham",
-            "role": "actor"
-          },
-          {
-            "entity": "Scottish Government",
-            "role": "affected"
           }
         ]
       },
@@ -82,8 +90,12 @@
         "fact": "F5",
         "roles": [
           {
-            "entity": "Douglas Alexander",
-            "role": "actor"
+            "entity": "Scotland",
+            "role": "affected"
+          },
+          {
+            "entity": "Scottish Government",
+            "role": "affected"
           }
         ]
       }

@@ -27,6 +27,7 @@ import (
 	"github.com/samthorold/go-slow/internal/server"
 	"github.com/samthorold/go-slow/internal/sqlite"
 	"github.com/samthorold/go-slow/internal/web"
+	"github.com/samthorold/go-slow/internal/wikidata"
 )
 
 // shutdownGrace is how long in-flight requests get to finish after SIGTERM;
@@ -68,7 +69,16 @@ func run(log *slog.Logger) error {
 	topics := interest.New(store)
 	// The Editor, reading Items on the model the config names.
 	reading := claude.New(claude.Options{APIKey: string(cfg.AnthropicAPIKey), Model: cfg.ReadingModel})
-	ed := editor.New(editor.Deps{Store: store, Model: reading, Log: log})
+	// Reading looks Entities up in Wikidata first, politely, as go-slow.
+	wd := wikidata.New(wikidata.Options{
+		HTTP:      &http.Client{Timeout: fetchTimeout},
+		Endpoint:  wikidata.Endpoint,
+		UserAgent: polite.UserAgent(cfg.CollectionContact),
+		Gap:       wikidata.Gap,
+		Now:       time.Now,
+		Sleep:     polite.Sleep,
+	})
+	ed := editor.New(editor.Deps{Store: store, Model: reading, Wikidata: wd, Log: log})
 	// The daily acts run in batches: submitted after a Collection run, and
 	// their results applied on later runs as they arrive.
 	batches := editor.NewBatches(editor.BatchDeps{

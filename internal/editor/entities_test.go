@@ -2,6 +2,8 @@ package editor_test
 
 import (
 	"context"
+	"encoding/json"
+	"net/http/httptest"
 	"slices"
 	"testing"
 	"time"
@@ -9,7 +11,10 @@ import (
 	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/interest"
+	"github.com/samthorold/go-slow/internal/polite"
 	"github.com/samthorold/go-slow/internal/sqlite"
+	"github.com/samthorold/go-slow/internal/wikidata"
+	"github.com/samthorold/go-slow/internal/wikidata/wikidatatest"
 )
 
 // fakeWikidata stands in for Wikidata behind the port: it answers from what
@@ -207,6 +212,68 @@ func TestAPositionWikidataSaysAPersonHoldsIsAFactTracedToTheLookup(t *testing.T)
 	}
 	if e, _, _ := store.Entity(t.Context(), "Andy Burnham"); len(e.Facts) != 1 {
 		t.Errorf("Facts after a second reading = %+v", e.Facts)
+	}
+}
+
+// modelInTurn answers each request with the next of its outputs.
+type modelInTurn struct{ outputs []string }
+
+func (m *modelInTurn) Complete(context.Context, editor.Request) (editor.Response, error) {
+	out := m.outputs[0]
+	m.outputs = m.outputs[1:]
+	return editor.Response{Output: json.RawMessage(out), Model: "fake"}, nil
+}
+
+// recordedWikidata is Wikidata answering from the responses recorded in
+// the Wikidata adapter's testdata, faked at HTTP.
+func recordedWikidata(t *testing.T) editor.Wikidata {
+	t.Helper()
+	srv := httptest.NewServer(wikidatatest.Handler("../wikidata/testdata"))
+	t.Cleanup(srv.Close)
+	return wikidata.New(wikidata.Options{
+		HTTP: srv.Client(), Endpoint: srv.URL, UserAgent: "go-slow-test",
+		Now: time.Now, Sleep: polite.Sleep,
+	})
+}
+
+func TestThreeItemsNamingThePrimeMinisterThreeWaysNameOneEntity(t *testing.T) {
+	store := record(t)
+	pm := "Prime Minister of the United Kingdom"
+	model := &modelInTurn{outputs: []string{
+		readingNaming("Andy Burnham", ""),
+		readingNaming("the Prime Minister", pm),
+		readingNaming("Burnham", pm),
+	}}
+	ed, logs := newEditor(store, model, recordedWikidata(t))
+	collectAnother(t, store, "visit", speech.Published.AddDate(0, 0, 1))
+	collectAnother(t, store, "again", speech.Published.AddDate(0, 0, 2))
+
+	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, name := range []string{"Andy Burnham", "the Prime Minister", "Burnham"} {
+		e, found, err := store.Entity(t.Context(), name)
+		if err != nil || !found {
+			t.Fatalf("Entity %q: %v %v\n%s", name, found, err, logs)
+		}
+		if e.WikidataID != "Q269909" || e.Name != "Andy Burnham" {
+			t.Errorf("%q is %+v, want Andy Burnham, Q269909", name, e)
+		}
+	}
+	e, _, _ := store.Entity(t.Context(), "Burnham")
+	for _, alias := range []string{"Andy Burnham", "the Prime Minister", "Burnham"} {
+		if !slices.Contains(e.Aliases, alias) {
+			t.Errorf("Andy Burnham's names %v lack %q", e.Aliases, alias)
+		}
+	}
+	// What Wikidata holds of his offices, as at the Items' dates.
+	var took []string
+	for _, f := range e.Facts {
+		took = append(took, f.Statement)
+	}
+	if !slices.Contains(took, "Andy Burnham took office as Prime Minister of the United Kingdom on 20 July 2026.") {
+		t.Errorf("Facts from Wikidata = %v", took)
 	}
 }
 

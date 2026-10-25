@@ -34,7 +34,7 @@ func (s *Store) factsByItem(ctx context.Context, where string, args ...any) ([]e
 		SELECT facts.id, facts.source_id, facts.entry_id, facts.statement, facts.as_at, facts.quote,
 			`+factEntities+`, items.title, items.link, items.published
 		FROM facts JOIN items USING (source_id, entry_id)
-		WHERE `+where+`
+		WHERE facts.withdrawn_by IS NULL AND (`+where+`)
 		ORDER BY items.published, items.collected_at, facts.source_id, facts.entry_id, facts.id`, args...)
 	if err != nil {
 		return nil, err
@@ -82,7 +82,7 @@ func (s *Store) StoriesSharing(ctx context.Context, entities []string) ([]editor
 	}
 	out := make([]editor.Story, 0, len(ids))
 	for _, id := range ids {
-		st, _, err := s.Story(ctx, id)
+		st, _, err := s.story(ctx, id, false)
 		if err != nil {
 			return nil, err
 		}
@@ -103,7 +103,7 @@ func (s *Store) storiesSharing(ctx context.Context, entities []string) ([]int64,
 		FROM developments
 			JOIN fact_entities ON fact_entities.fact_id = developments.fact_id
 			JOIN entities ON entities.id = fact_entities.entity_id
-		WHERE entities.name IN (SELECT value FROM json_each(?))
+		WHERE entities.name IN (SELECT value FROM json_each(?)) AND developments.withdrawn_by IS NULL
 		ORDER BY developments.story_id`, string(names))
 	if err != nil {
 		return nil, err
@@ -121,10 +121,17 @@ func (s *Store) storiesSharing(ctx context.Context, entities []string) ([]int64,
 }
 
 // Story is one Story with its Timeline, reporting whether it is in the
-// Record.
+// Record. What Feedback withdrew is on the Timeline, marked.
 func (s *Store) Story(ctx context.Context, id int64) (editor.Story, bool, error) {
+	return s.story(ctx, id, true)
+}
+
+// story is one Story, with what Feedback withdrew if withdrawn is set, and
+// otherwise without it, as the acts see the Story.
+func (s *Store) story(ctx context.Context, id int64, withdrawn bool) (editor.Story, bool, error) {
 	st := editor.Story{ID: id}
-	err := s.db.QueryRowContext(ctx, `SELECT title FROM stories WHERE id = ?`, id).Scan(&st.Title)
+	err := s.db.QueryRowContext(ctx, `SELECT title, unwanted_by IS NOT NULL, missed_by IS NOT NULL FROM stories WHERE id = ?`,
+		id).Scan(&st.Title, &st.Unwanted, &st.Missed)
 	if errors.Is(err, sql.ErrNoRows) {
 		return st, false, nil
 	}
@@ -134,11 +141,11 @@ func (s *Store) Story(ctx context.Context, id int64) (editor.Story, bool, error)
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT facts.id, facts.source_id, facts.entry_id, facts.statement, facts.as_at, facts.quote,
 			`+factEntities+`, items.title,
-			developments.withdrawn_by IS NOT NULL, developments.unwanted_by IS NOT NULL
+			developments.withdrawn_by IS NOT NULL, developments.unwanted_by IS NOT NULL, developments.missed_by IS NOT NULL
 		FROM developments JOIN facts ON facts.id = developments.fact_id
 			JOIN items USING (source_id, entry_id)
-		WHERE developments.story_id = ?
-		ORDER BY facts.as_at, items.published, facts.id`, id)
+		WHERE developments.story_id = ? AND (? OR developments.withdrawn_by IS NULL)
+		ORDER BY facts.as_at, items.published, facts.id`, id, withdrawn)
 	if err != nil {
 		return st, false, fmt.Errorf("story %d: %w", id, err)
 	}
@@ -147,7 +154,7 @@ func (s *Store) Story(ctx context.Context, id int64) (editor.Story, bool, error)
 		var d editor.Development
 		var asAt, ents string
 		if err := rows.Scan(&d.ID, &d.SourceID, &d.EntryID, &d.Statement, &asAt, &d.Quote, &ents, &d.ItemTitle,
-			&d.Withdrawn, &d.Unwanted); err != nil {
+			&d.Withdrawn, &d.Unwanted, &d.Missed); err != nil {
 			return st, false, fmt.Errorf("story %d: %w", id, err)
 		}
 		if err := scanFact(&d.Fact, asAt, ents); err != nil {
@@ -166,6 +173,9 @@ func (s *Store) Story(ctx context.Context, id int64) (editor.Story, bool, error)
 	slices.Sort(st.Entities)
 	if st.Causes, err = s.storyCauses(ctx, id); err != nil {
 		return st, false, fmt.Errorf("story %d: %w", id, err)
+	}
+	if !withdrawn {
+		st.Causes = slices.DeleteFunc(st.Causes, func(c editor.CauseConnection) bool { return c.Withdrawn })
 	}
 	return st, true, nil
 }

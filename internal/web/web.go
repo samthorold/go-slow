@@ -33,6 +33,8 @@ type Deps struct {
 	Readings  Readings
 	Topics    Topics
 	Stories   Stories
+	Feedback  Feedback
+	Kept      Kept
 	// BriefingAt is the time of day the Briefing is due (7h is 07:00): a
 	// day with none by then is flagged.
 	BriefingAt time.Duration
@@ -69,9 +71,12 @@ var (
 	storyTmpl   = page("story.html")
 )
 
+// feedbackTmpl is the Feedback page: every piece, as given.
+var feedbackTmpl = page("feedback_list.html")
+
 // page parses a page template together with the layout it fills.
 func page(name string) *template.Template {
-	return template.Must(template.ParseFS(templateFS, "templates/layout.html", "templates/"+name))
+	return template.Must(template.ParseFS(templateFS, "templates/layout.html", "templates/feedback.html", "templates/"+name))
 }
 
 // New builds the app from its dependencies.
@@ -82,10 +87,13 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("GET /{$}", a.todaysBriefing)
 	mux.HandleFunc("GET /briefings", a.briefings)
 	mux.HandleFunc("GET /briefings/{day}", a.pastBriefing)
+	mux.HandleFunc("POST /briefings/{day}/feedback", a.briefingFeedback)
+	mux.HandleFunc("GET /feedback", a.feedback)
 	mux.HandleFunc("GET /items", a.items)
 	mux.HandleFunc("GET /items/{source}/{entry}", a.item)
 	mux.HandleFunc("GET /stories", a.stories)
 	mux.HandleFunc("GET /stories/{id}", a.story)
+	mux.HandleFunc("POST /stories/{id}/feedback", a.storyFeedback)
 	mux.HandleFunc("GET /topics", a.topics)
 	mux.HandleFunc("POST /topics", a.addTopic)
 	mux.HandleFunc("PUT /topics/{id}", a.setDepth)

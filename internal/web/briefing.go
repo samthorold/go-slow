@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/samthorold/go-slow/internal/editor"
+	"github.com/samthorold/go-slow/internal/feedback"
 )
 
 // Briefings answers the queries the Briefing pages need.
@@ -102,30 +103,19 @@ type briefingPage struct {
 	MissedStory missedStoryForm
 }
 
-// missedStoryForm is the form for a Story the Owner says was missed: its
-// title, and which of the Facts on the page it gathers.
-type missedStoryForm struct {
-	Title  string
-	Facts  []factOption
-	Errors feedback.Errors
-}
-
-type factOption struct {
-	ID        int64
-	Statement string
-	Checked   bool
-}
-
 type failureRow struct {
 	At     string
 	Reason string
 }
 
 type briefedStoryRow struct {
-	ID         int64
-	Title      string
-	Path       string
-	Statements []statementRow
+	ID    int64
+	Gives []giveButton
+	// MissedDevelopment is the form for a Development the Story missed.
+	MissedDevelopment missedDevelopmentForm
+	Title             string
+	Path              string
+	Statements        []statementRow
 }
 
 // statementRow is one statement, with what it cites: each Development, on
@@ -136,7 +126,7 @@ type statementRow struct {
 }
 
 type citationRow struct {
-	StoryID, FactID int64
+	Gives           []giveButton
 	AsAt            string
 	Statement       string
 	DevelopmentPath string
@@ -187,14 +177,21 @@ func (a *app) briefingWith(w http.ResponseWriter, r *http.Request, day time.Time
 		}
 	}
 	for _, bs := range b.Stories {
-		row := briefedStoryRow{ID: bs.Story.ID, Title: bs.Story.Title, Path: storyPath(bs.Story.ID)}
+		row := briefedStoryRow{
+			ID: bs.Story.ID, Title: bs.Story.Title, Path: storyPath(bs.Story.ID),
+			Gives: storyGives(p.FeedbackPath, bs.Story.ID),
+		}
+		if row.MissedDevelopment, err = a.missedDevelopment(r, p.FeedbackPath, bs.Story.ID, d, errs); err != nil {
+			a.serverError(w, r, err)
+			return
+		}
 		for _, st := range bs.Statements {
 			sr := statementRow{Text: st.Text}
 			for _, d := range st.Developments {
 				item := itemPath(d.SourceID, d.EntryID)
 				sr.Cites = append(sr.Cites, citationRow{
-					StoryID: bs.Story.ID, FactID: d.ID,
-					AsAt: factDate(d.Fact), Statement: d.Statement,
+					Gives: developmentGives(p.FeedbackPath, bs.Story.ID, d.ID),
+					AsAt:  factDate(d.Fact), Statement: d.Statement,
 					DevelopmentPath: storyPath(bs.Story.ID) + "#" + developmentAnchor(d.ID),
 					FactPath:        item + "#" + factAnchor(d.ID),
 					ItemTitle:       d.ItemTitle, ItemPath: item,
@@ -204,7 +201,14 @@ func (a *app) briefingWith(w http.ResponseWriter, r *http.Request, day time.Time
 		}
 		p.Stories = append(p.Stories, row)
 	}
-	_ = d
-	_ = errs
+	var facts []editor.Development
+	for _, bs := range b.Stories {
+		for _, st := range bs.Statements {
+			facts = append(facts, st.Developments...)
+		}
+	}
+	if exists {
+		p.MissedStory = missedStory(p.FeedbackPath, facts, d, errs)
+	}
 	a.renderStatus(w, r, status, briefingTmpl, p)
 }

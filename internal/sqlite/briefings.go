@@ -32,7 +32,7 @@ func (s *Store) ToBrief(ctx context.Context, after, upTo time.Time) ([]editor.To
 	}
 	out := make([]editor.ToBrief, 0, len(ids))
 	for _, id := range ids {
-		st, _, err := s.Story(ctx, id)
+		st, _, err := s.story(ctx, id, false)
 		if err != nil {
 			return nil, err
 		}
@@ -69,6 +69,10 @@ func (s *Store) selected(ctx context.Context, after, upTo time.Time) ([]int64, m
 			JOIN item_topics ON item_topics.source_id = facts.source_id AND item_topics.entry_id = facts.entry_id
 			JOIN topics ON topics.id = item_topics.topic_id
 		WHERE fact_placings.placed_at > ? AND fact_placings.placed_at <= ?
+			-- Feedback keeps out what it withdrew, and what the Owner
+			-- does not want in the Briefing.
+			AND developments.withdrawn_by IS NULL AND developments.unwanted_by IS NULL
+			AND NOT EXISTS (SELECT 1 FROM stories WHERE stories.id = developments.story_id AND stories.unwanted_by IS NOT NULL)
 		GROUP BY developments.story_id, developments.fact_id
 		ORDER BY developments.story_id`, formatTime(after), formatTime(upTo))
 	if err != nil {

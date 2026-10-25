@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/samthorold/go-slow/internal/editor"
+	"github.com/samthorold/go-slow/internal/feedback"
 )
 
 // Stories answers the queries the Stories pages need.
@@ -18,6 +19,9 @@ type Stories interface {
 	// ConnectedStories are the Stories connected to the Story id, derived
 	// from what they share.
 	ConnectedStories(ctx context.Context, id int64) ([]editor.StoryConnection, error)
+	// FactsToAdd are the Facts the Owner may say the Story id missed, as
+	// Developments.
+	FactsToAdd(ctx context.Context, id int64) ([]editor.Fact, error)
 }
 
 // storiesPage is the view model for the Stories page.
@@ -35,10 +39,19 @@ type storyRow struct {
 // storyPage is the view model for a Story's page: its Timeline, the cause
 // Connections to and from its Developments, and the Stories connected to it.
 type storyPage struct {
-	Title     string
-	Timeline  []developmentRow
-	Causes    []causeRow
-	Connected []connectedRow
+	// FeedbackPath is where Feedback given on the page goes.
+	FeedbackPath string
+	Title        string
+	// Unwanted and Missed are what Feedback has said of the Story.
+	Unwanted, Missed bool
+	Gives            []giveButton
+	// MissedStory is the form for a missed Story gathering this one's
+	// Developments.
+	MissedStory       missedStoryForm
+	MissedDevelopment missedDevelopmentForm
+	Timeline          []developmentRow
+	Causes            []causeRow
+	Connected         []connectedRow
 }
 
 // developmentRow is one Development on a Timeline, tracing to its Fact and
@@ -52,11 +65,17 @@ type developmentRow struct {
 	Quote     string
 	ItemTitle string
 	ItemPath  string
+	// Withdrawn and Unwanted are what Feedback has marked it.
+	Withdrawn, Unwanted, Missed bool
+	// Gives is the Feedback the Owner can give on it here.
+	Gives []giveButton
 }
 
 // causeRow is a cause Connection, each Fact tracing to its Item.
 type causeRow struct {
 	Cause, Effect developmentRow
+	Withdrawn     bool
+	Gives         []giveButton
 }
 
 // connectedRow is a Story connected to this one, with the shared Facts that
@@ -79,6 +98,7 @@ func developmentView(d editor.Development) developmentRow {
 		Anchor: developmentAnchor(d.ID),
 		AsAt:   factDate(d.Fact), Statement: d.Statement, Quote: d.Quote,
 		ItemTitle: d.ItemTitle, ItemPath: itemPath(d.SourceID, d.EntryID),
+		Withdrawn: d.Withdrawn, Unwanted: d.Unwanted, Missed: d.Missed,
 	}
 }
 
@@ -110,6 +130,12 @@ func (a *app) story(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
+	a.storyWith(w, r, id, http.StatusOK, feedback.Draft{}, nil)
+}
+
+// storyWith renders a Story's page with the Feedback last entered on it and
+// why it failed, if it did.
+func (a *app) storyWith(w http.ResponseWriter, r *http.Request, id int64, status int, d feedback.Draft, errs feedback.Errors) {
 	s, found, err := a.Stories.Story(r.Context(), id)
 	if err != nil {
 		a.serverError(w, r, err)
@@ -124,12 +150,34 @@ func (a *app) story(w http.ResponseWriter, r *http.Request) {
 		a.serverError(w, r, err)
 		return
 	}
-	p := storyPage{Title: s.Title}
+	p := storyPage{Title: s.Title, FeedbackPath: storyPath(id) + "/feedback", Unwanted: s.Unwanted, Missed: s.Missed}
+	p.Gives = storyGives(p.FeedbackPath, id)
+	if s.Unwanted {
+		p.Gives = p.Gives[1:]
+	}
 	for _, d := range s.Timeline {
-		p.Timeline = append(p.Timeline, developmentView(d))
+		row := developmentView(d)
+		if !d.Withdrawn {
+			row.Gives = developmentGives(p.FeedbackPath, id, d.ID)
+			if d.Unwanted {
+				row.Gives = row.Gives[1:]
+			}
+		}
+		p.Timeline = append(p.Timeline, row)
 	}
 	for _, c := range s.Causes {
-		p.Causes = append(p.Causes, causeRow{Cause: developmentView(c.Cause), Effect: developmentView(c.Effect)})
+		p.Causes = append(p.Causes, causeRow{
+			Cause: developmentView(c.Cause), Effect: developmentView(c.Effect),
+			Withdrawn: c.Withdrawn,
+		})
+		if !c.Withdrawn {
+			p.Causes[len(p.Causes)-1].Gives = connectionGives(p.FeedbackPath, c.Cause.ID, c.Effect.ID)
+		}
+	}
+	p.MissedStory = missedStory(p.FeedbackPath, s.Timeline, d, errs)
+	if p.MissedDevelopment, err = a.missedDevelopment(r, p.FeedbackPath, id, d, errs); err != nil {
+		a.serverError(w, r, err)
+		return
 	}
 	for _, c := range connected {
 		row := connectedRow{Path: storyPath(c.ID), Title: c.Title}
@@ -143,5 +191,5 @@ func (a *app) story(w http.ResponseWriter, r *http.Request) {
 		}
 		p.Connected = append(p.Connected, row)
 	}
-	a.render(w, r, storyTmpl, p)
+	a.renderStatus(w, r, status, storyTmpl, p)
 }

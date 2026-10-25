@@ -28,3 +28,7 @@ ALTER TABLE developments ADD COLUMN withdrawn_by INTEGER REFERENCES feedback (id
 
 -- A Fact the Owner said was wrong.
 ALTER TABLE facts ADD COLUMN withdrawn_by INTEGER REFERENCES feedback (id);
+
+-- A Connection the Owner said was wrong, or withdrawn with a wrong Fact it
+-- connects.
+ALTER TABLE fact_connections ADD COLUMN withdrawn_by INTEGER REFERENCES feedback (id);

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/feedback"
 	"github.com/samthorold/go-slow/internal/interest"
 )
@@ -67,6 +68,12 @@ func (s *Store) About(ctx context.Context, f feedback.Feedback) (feedback.About,
 			return a, fmt.Errorf("about feedback: %w", err)
 		}
 		facts = []int64{f.FactID}
+	case f.Level == feedback.Connection:
+		if a.Found, err = exists(`SELECT 1 FROM fact_connections WHERE from_fact_id = ? AND to_fact_id = ?`,
+			f.FactID, f.ToFactID); err != nil {
+			return a, fmt.Errorf("about feedback: %w", err)
+		}
+		facts = []int64{f.FactID, f.ToFactID}
 	}
 	ids, err := json.Marshal(facts)
 	if err != nil {
@@ -76,6 +83,70 @@ func (s *Store) About(ctx context.Context, f feedback.Feedback) (feedback.About,
 		return a, fmt.Errorf("about feedback: %w", err)
 	}
 	return a, nil
+}
+
+// KeptFeedback is every piece of Feedback, as given, newest first.
+func (s *Store) KeptFeedback(ctx context.Context) ([]feedback.Kept, error) {
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT feedback.id, kind, level, coalesce(story_id, 0), coalesce(fact_id, 0), coalesce(to_fact_id, 0),
+			feedback.title, fact_ids, day, depth, given_at,
+			coalesce(stories.title, ''), coalesce(f.statement, ''), coalesce(g.statement, '')
+		FROM feedback
+			LEFT JOIN stories ON stories.id = feedback.story_id
+			LEFT JOIN facts f ON f.id = feedback.fact_id
+			LEFT JOIN facts g ON g.id = feedback.to_fact_id
+		ORDER BY given_at DESC, feedback.id DESC`)
+	if err != nil {
+		return nil, fmt.Errorf("kept feedback: %w", err)
+	}
+	defer func() { _ = rows.Close() }()
+	var out []feedback.Kept
+	for rows.Next() {
+		var k feedback.Kept
+		var kind, level, facts, at string
+		if err := rows.Scan(&k.ID, &kind, &level, &k.StoryID, &k.FactID, &k.ToFactID, &k.Title, &facts, &k.Day,
+			&k.Depth, &at, &k.Story, &k.Fact, &k.ToFact); err != nil {
+			return nil, fmt.Errorf("kept feedback: %w", err)
+		}
+		k.Kind, k.Level, k.GivenAt = feedback.Kind(kind), feedback.Level(level), parseTime(at)
+		if err := json.Unmarshal([]byte(facts), &k.FactIDs); err != nil {
+			return nil, fmt.Errorf("kept feedback: %w", err)
+		}
+		out = append(out, k)
+	}
+	return out, rows.Err()
+}
+
+// FactsToAdd are the Facts the Owner may say a Story missed: those that
+// share an Entity with its Developments and are not yet one in it, newest
+// first. Withdrawn Facts are never offered.
+func (s *Store) FactsToAdd(ctx context.Context, storyID int64) ([]editor.Fact, error) {
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT DISTINCT facts.id, facts.source_id, facts.entry_id, facts.statement, facts.as_at, facts.quote, `+factEntities+`
+		FROM developments mine
+			JOIN fact_entities ours ON ours.fact_id = mine.fact_id
+			JOIN fact_entities theirs ON theirs.entity_id = ours.entity_id
+			JOIN facts ON facts.id = theirs.fact_id
+		WHERE mine.story_id = ?1 AND mine.withdrawn_by IS NULL AND facts.withdrawn_by IS NULL
+			AND NOT EXISTS (SELECT 1 FROM developments d WHERE d.story_id = ?1 AND d.fact_id = facts.id)
+		ORDER BY facts.as_at DESC, facts.id DESC`, storyID)
+	if err != nil {
+		return nil, fmt.Errorf("facts to add: %w", err)
+	}
+	defer func() { _ = rows.Close() }()
+	var out []editor.Fact
+	for rows.Next() {
+		var f editor.Fact
+		var asAt, ents string
+		if err := rows.Scan(&f.ID, &f.SourceID, &f.EntryID, &f.Statement, &asAt, &f.Quote, &ents); err != nil {
+			return nil, fmt.Errorf("facts to add: %w", err)
+		}
+		if err := scanFact(&f, asAt, ents); err != nil {
+			return nil, fmt.Errorf("facts to add: %w", err)
+		}
+		out = append(out, f)
+	}
+	return out, rows.Err()
 }
 
 // depthOf is the closest Depth of the Topics that tie the Items of the
@@ -156,6 +227,16 @@ func apply(ctx context.Context, tx *sql.Tx, by int64, f feedback.Feedback, e fee
 			return err
 		}
 		if err := exec(`UPDATE developments SET withdrawn_by = coalesce(withdrawn_by, ?) WHERE fact_id = ?`, by, e.WithdrawFact); err != nil {
+			return err
+		}
+		if err := exec(`UPDATE fact_connections SET withdrawn_by = coalesce(withdrawn_by, ?)
+			WHERE from_fact_id = ?2 OR to_fact_id = ?2`, by, e.WithdrawFact); err != nil {
+			return err
+		}
+	}
+	if c := e.WithdrawConnection; c != nil {
+		if err := exec(`UPDATE fact_connections SET withdrawn_by = coalesce(withdrawn_by, ?)
+			WHERE from_fact_id = ? AND to_fact_id = ?`, by, c.A, c.B); err != nil {
 			return err
 		}
 	}

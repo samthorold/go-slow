@@ -74,7 +74,7 @@ func (s *Store) FactsNear(ctx context.Context, facts []editor.Fact, limit int) (
 		)
 		SELECT facts.id, facts.source_id, facts.entry_id, facts.statement, facts.as_at, facts.quote, `+factEntities+`
 		FROM facts
-		WHERE facts.id IN near AND facts.id NOT IN mine
+		WHERE facts.id IN near AND facts.id NOT IN mine AND facts.withdrawn_by IS NULL
 		ORDER BY abs(julianday(facts.as_at) - julianday(?2)), facts.id DESC
 		LIMIT ?3`, string(mine), latest.Format(time.DateOnly), limit)
 	if err != nil {
@@ -165,7 +165,7 @@ func (s *Store) ConnectedStories(ctx context.Context, id int64) ([]editor.StoryC
 			JOIN developments other ON other.fact_id = mine.fact_id AND other.story_id != mine.story_id
 			JOIN stories ON stories.id = other.story_id
 			JOIN facts f ON f.id = mine.fact_id JOIN items i ON i.source_id = f.source_id AND i.entry_id = f.entry_id
-		WHERE mine.story_id = ?
+		WHERE mine.story_id = ? AND mine.withdrawn_by IS NULL AND other.withdrawn_by IS NULL
 		ORDER BY other.story_id, f.as_at, f.id`, id)
 	if err != nil {
 		return nil, fmt.Errorf("connected stories: %w", err)
@@ -201,7 +201,7 @@ func (s *Store) ConnectedStories(ctx context.Context, id int64) ([]editor.StoryC
 			JOIN entities ON entities.id = here.entity_id
 			JOIN facts f ON f.id = here.fact_id JOIN items i ON i.source_id = f.source_id AND i.entry_id = f.entry_id
 			JOIN facts g ON g.id = there.fact_id JOIN items j ON j.source_id = g.source_id AND j.entry_id = g.entry_id
-		WHERE mine.story_id = ?
+		WHERE mine.story_id = ? AND mine.withdrawn_by IS NULL AND other.withdrawn_by IS NULL
 		ORDER BY other.story_id, entities.name, here.role, f.as_at DESC, g.as_at DESC, f.id DESC, g.id DESC`, id)
 	if err != nil {
 		return nil, fmt.Errorf("connected stories: %w", err)
@@ -258,7 +258,7 @@ func (s *Store) Causes(ctx context.Context) ([]editor.CauseConnection, error) {
 
 func (s *Store) causes(ctx context.Context, where string, args ...any) ([]editor.CauseConnection, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT `+traced("f", "i")+`, `+traced("g", "j")+`
+		SELECT `+traced("f", "i")+`, `+traced("g", "j")+`, c.withdrawn_by IS NOT NULL
 		FROM fact_connections c
 			JOIN facts f ON f.id = c.from_fact_id JOIN items i ON i.source_id = f.source_id AND i.entry_id = f.entry_id
 			JOIN facts g ON g.id = c.to_fact_id JOIN items j ON j.source_id = g.source_id AND j.entry_id = g.entry_id
@@ -275,6 +275,7 @@ func (s *Store) causes(ctx context.Context, where string, args ...any) ([]editor
 		if err := rows.Scan(
 			&c.Cause.ID, &c.Cause.SourceID, &c.Cause.EntryID, &c.Cause.Statement, &asAt, &c.Cause.Quote, &ents, &c.Cause.ItemTitle,
 			&c.Effect.ID, &c.Effect.SourceID, &c.Effect.EntryID, &c.Effect.Statement, &asAt2, &c.Effect.Quote, &ents2, &c.Effect.ItemTitle,
+			&c.Withdrawn,
 		); err != nil {
 			return nil, fmt.Errorf("causes: %w", err)
 		}

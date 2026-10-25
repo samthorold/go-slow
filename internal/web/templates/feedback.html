@@ -1,0 +1,65 @@
+{{/* give is one piece of Feedback the Owner can give with a button. It
+     re-renders the whole page, since Feedback can change several regions
+     of it (a withdrawn Fact takes statements and Connections with it). */}}
+{{define "give"}}<form class="feedback" hx-post="{{.Path}}" hx-target="body" hx-swap="innerHTML"
+  {{- with .Confirm}} hx-confirm="{{.}}"{{end}}>
+  <input type="hidden" name="kind" value="{{.Kind}}"><input type="hidden" name="level" value="{{.Level}}">
+  {{- with .Story}}<input type="hidden" name="story" value="{{.}}">{{end}}
+  {{- with .Fact}}<input type="hidden" name="fact" value="{{.}}">{{end}}
+  {{- with .ToFact}}<input type="hidden" name="to_fact" value="{{.}}">{{end}}
+  <button>{{.Label}}</button>
+</form>{{end}}
+
+{{define "gives"}}{{range .}}{{template "give" .}}{{end}}{{end}}
+
+{{/* missedDevelopment is the form for a Development the Owner says a Story
+     missed, chosen from the Facts that share an Entity with it. */}}
+{{define "missedDevelopment"}}
+{{- if or .Facts .Error}}
+<details{{if .Error}} open{{end}}>
+  <summary>Is a Development missing?</summary>
+  <form hx-post="{{.Path}}" hx-target="body" hx-swap="innerHTML">
+    <input type="hidden" name="kind" value="missed"><input type="hidden" name="level" value="development"><input type="hidden" name="story" value="{{.Story}}">
+    {{- if .Facts}}
+    <label>The Fact that moved it on
+      <select name="fact">
+      {{- range .Facts}}
+        <option value="{{.ID}}">{{.Statement}}</option>
+      {{- end}}
+      </select>
+    </label>
+    <button>Add the missed Development</button>
+    {{- end}}
+    {{- with .Error}} <span role="alert">{{.}}</span>{{end}}
+  </form>
+</details>
+{{- end}}
+{{end}}
+
+{{/* missedStory is the form for a Story the Owner says was missed: a
+     title, and the Facts on the page it gathers. A failed one comes back
+     422, open, with what was entered and why it failed. The Facts were drawn
+     from collected text and the title typed by the Owner: inert. */}}
+{{define "missedStory"}}
+<details{{if .Errors}} open{{end}}>
+  <summary>Is a Story missing?</summary>
+  <form hx-post="{{.Path}}" hx-target="body" hx-swap="innerHTML">
+    <input type="hidden" name="kind" value="missed"><input type="hidden" name="level" value="story">
+    {{- with index .Errors ""}}<p role="alert">{{.}}</p>{{end}}
+    <p>
+      <label>Title <input name="title" value="{{.Title}}" required></label>
+      {{- with index .Errors "title"}} <span role="alert">{{.}}</span>{{end}}
+    </p>
+    {{- if .Facts}}
+    <fieldset>
+      <legend>The Facts it gathers, as its Developments</legend>
+      {{- range .Facts}}
+      <label><input type="checkbox" name="facts" value="{{.ID}}"{{if .Checked}} checked{{end}}> <span hx-disable>{{.Statement}}</span></label>
+      {{- end}}
+      {{- with index .Errors "facts"}} <span role="alert">{{.}}</span>{{end}}
+    </fieldset>
+    {{- end}}
+    <button>Start the missed Story</button>
+  </form>
+</details>
+{{end}}

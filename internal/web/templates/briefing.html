@@ -4,7 +4,7 @@
 {{/* The statements are the Editor's words, and the Stories and Facts they
      cite were drawn from collected text: inert, with hx-disable on the
      elements holding them, so the boosted links still work. */}}
-<p><a href="/briefings">Briefings</a></p>
+<p><a href="/briefings">Briefings</a> · <a href="/feedback">Feedback</a></p>
 <h1>Briefing</h1>
 <p>{{.Date}}</p>
 {{- if not .Exists}}
@@ -22,16 +22,22 @@
 {{- range .Stories}}
 <section>
   <h2><a href="{{.Path}}"><span hx-disable>{{.Title}}</span></a></h2>
+  {{- template "gives" .Gives}}
   {{- range .Statements}}
   <p hx-disable>{{.Text}}</p>
   <ul>
     {{- range .Cites}}
     <li><small><a href="{{.DevelopmentPath}}">Development</a> of <time>{{.AsAt}}</time>:
       <a href="{{.FactPath}}"><span hx-disable>{{.Statement}}</span></a>,
-      from <a href="{{.ItemPath}}"><span hx-disable>{{.ItemTitle}}</span></a></small></li>
+      from <a href="{{.ItemPath}}"><span hx-disable>{{.ItemTitle}}</span></a></small>
+      {{- template "gives" .Gives}}</li>
     {{- end}}
   </ul>
   {{- end}}
+  {{- template "missedDevelopment" .MissedDevelopment}}
 </section>
+{{- end}}
+{{- if .Exists}}
+{{template "missedStory" .MissedStory}}
 {{- end}}
 {{end}}

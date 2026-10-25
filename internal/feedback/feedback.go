@@ -80,6 +80,14 @@ type Feedback struct {
 	GivenAt time.Time
 }
 
+// Kept is a piece of Feedback as the Record keeps it, with what it is about
+// named as it stands in the Record: the Story's title, and each Fact's
+// statement.
+type Kept struct {
+	Feedback
+	Story, Fact, ToFact string
+}
+
 // Draft is Feedback as the Owner's form sent it, not yet validated.
 type Draft struct {
 	Kind, Level string

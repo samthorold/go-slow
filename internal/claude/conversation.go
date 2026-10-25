@@ -43,7 +43,7 @@ const turnEffort = anthropic.BetaOutputConfigEffortHigh
 // Thinking is adaptive (Claude Opus 5.5 can't turn it off); a refusal is
 // retried server-side on the model Anthropic recommends for its category;
 // the conversation's prefix is cached. A refusal or a turn cut off at its
-// length is an error, never output.
+// length is an error, never output, returned with the turn that came back.
 func (m *Model) Turn(ctx context.Context, r editor.ConversationRequest) (editor.Turn, error) {
 	model := m.ModelFor(r.Act)
 	params, err := turnParams(model, r)
@@ -56,7 +56,7 @@ func (m *Model) Turn(ctx context.Context, r editor.ConversationRequest) (editor.
 	}
 	t, err := turnOf(msg)
 	if err != nil {
-		return editor.Turn{}, fmt.Errorf("%s on %s: %w", r.Act, model, err)
+		return t, fmt.Errorf("%s on %s: %w", r.Act, model, err)
 	}
 	return t, nil
 }
@@ -113,22 +113,25 @@ func turnParams(model string, r editor.ConversationRequest) (anthropic.BetaMessa
 }
 
 // turnOf is a message as the Editor's conversation port gives it: its text,
-// its tool calls, and the message itself to be passed back unchanged.
+// its tool calls, and the message itself to be passed back unchanged. A
+// refusal or a cut-off turn is an error, returned with what came back, so
+// the act can keep it.
 func turnOf(msg *anthropic.BetaMessage) (editor.Turn, error) {
-	switch msg.StopReason {
-	case anthropic.BetaStopReasonRefusal:
-		return editor.Turn{}, fmt.Errorf("%w (%s)", editor.ErrRefused, msg.StopDetails.Category)
-	case anthropic.BetaStopReasonMaxTokens:
-		return editor.Turn{}, editor.ErrTruncated
-	}
 	t := editor.Turn{
-		Raw:   json.RawMessage(msg.RawJSON()),
-		Model: string(msg.Model),
+		Raw:        json.RawMessage(msg.RawJSON()),
+		Model:      string(msg.Model),
+		StopReason: string(msg.StopReason),
 		Usage: editor.Usage{
 			InputTokens:     msg.Usage.InputTokens + msg.Usage.CacheCreationInputTokens,
 			OutputTokens:    msg.Usage.OutputTokens,
 			CacheReadTokens: msg.Usage.CacheReadInputTokens,
 		},
+	}
+	switch msg.StopReason {
+	case anthropic.BetaStopReasonRefusal:
+		return t, fmt.Errorf("%w (%s)", editor.ErrRefused, msg.StopDetails.Category)
+	case anthropic.BetaStopReasonMaxTokens:
+		return t, editor.ErrTruncated
 	}
 	var text strings.Builder
 	for _, block := range msg.Content {

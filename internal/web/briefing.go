@@ -117,6 +117,9 @@ type briefingPage struct {
 type failureRow struct {
 	At     string
 	Reason string
+	// Conversation is the page of the failed attempt's conversation, if it
+	// had one.
+	Conversation string
 }
 
 type briefedStoryRow struct {

@@ -1,0 +1,57 @@
+{{define "title"}}A {{.Act}} conversation{{end}}
+
+{{define "content"}}
+{{/* What a model was sent and what it answered are inert, like collected
+     text: hx-disable on the elements holding them. */}}
+<p>{{if .ReadPath}}<a href="{{.ReadPath}}">The Sunday read for {{.Day}}</a>{{else}}<span hx-disable>{{.Day}}</span>{{end}}</p>
+<h1>A {{.Act}} conversation</h1>
+<p>Ended {{.At}}: <strong>{{.Outcome}}</strong>{{if .Why}}: <span hx-disable>{{.Why}}</span>{{end}}</p>
+<p>Asked of {{if .Model}}<code hx-disable>{{.Model}}</code>{{else}}a model not recorded{{end}}.
+  {{.Tokens.Total}} tokens over {{len .Turns}} {{if eq (len .Turns) 1}}turn{{else}}turns{{end}}:
+  {{.Tokens.Input}} input, {{.Tokens.Output}} output{{if .Tokens.CacheRead}}, {{.Tokens.CacheRead}} read from the cache{{end}}.</p>
+
+<section aria-labelledby="instructions">
+  <h2 id="instructions">Sent on every turn</h2>
+  <h3>Instructions</h3>
+  <pre hx-disable>{{.Instructions}}</pre>
+  <h3>Tools</h3>
+  <pre hx-disable>{{.Tools}}</pre>
+</section>
+
+{{- range .Turns}}
+<section id="{{.Anchor}}" aria-labelledby="{{.Anchor}}-heading">
+  <h2 id="{{.Anchor}}-heading">Turn {{.N}}</h2>
+  <p>{{.At}}: <strong>{{.Outcome}}</strong>. Request hash <code>{{.Hash}}</code>.</p>
+  {{- if .Why}}
+  <pre hx-disable>{{.Why}}</pre>
+  {{- end}}
+  <h3>Sent</h3>
+  {{- range .Sent}}
+  {{- if .CallID}}
+  <p>The result of call <code hx-disable>{{.CallID}}</code>{{if .IsError}}, an error{{end}}:</p>
+  {{- end}}
+  <pre hx-disable>{{.Text}}</pre>
+  {{- end}}
+  <h3>Answered</h3>
+  {{- if .Answered}}
+  <p>By <code hx-disable>{{.ReportedModel}}</code>{{with .StopReason}}, stopping for <code hx-disable>{{.}}</code>{{end}}.
+    {{.Tokens.Total}} tokens: {{.Tokens.Input}} input, {{.Tokens.Output}} output{{if .Tokens.CacheRead}}, {{.Tokens.CacheRead}} read from the cache{{end}}.</p>
+  {{- with .Text}}
+  <pre hx-disable>{{.}}</pre>
+  {{- end}}
+  {{- range .Calls}}
+  <p>Called <code hx-disable>{{.Name}}</code> (<code hx-disable>{{.ID}}</code>):</p>
+  <pre hx-disable>{{.Input}}</pre>
+  {{- end}}
+  {{- if .Raw}}
+  <details>
+    <summary>As the provider returned it</summary>
+    <pre hx-disable>{{.Raw}}</pre>
+  </details>
+  {{- end}}
+  {{- else}}
+  <p>No response came.</p>
+  {{- end}}
+</section>
+{{- end}}
+{{end}}

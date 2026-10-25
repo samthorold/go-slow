@@ -106,6 +106,7 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("PUT /sunday-reads/{day}/feedback/{feedback}/undone", a.undoOnSundayRead)
 	mux.HandleFunc("GET /assessments/{id}", a.assessment)
 	mux.HandleFunc("GET /calls/{id}", a.call)
+	mux.HandleFunc("GET /conversations/{id}", a.conversation)
 	mux.HandleFunc("GET /feedback", a.feedback)
 	mux.HandleFunc("PUT /feedback/{feedback}/undone", a.undoOnFeedbackPage)
 	mux.HandleFunc("GET /items", a.items)

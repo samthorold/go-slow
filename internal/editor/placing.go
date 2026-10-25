@@ -71,6 +71,9 @@ type CauseConnection struct {
 	// Withdrawn is set once Feedback said it, or a Fact it connects, was
 	// wrong.
 	Withdrawn bool
+	// Call is the kept connecting call that made it; zero if none was
+	// kept.
+	Call int64
 }
 
 // Development is a Fact that moves a Story on, with the title of the Item it
@@ -83,6 +86,9 @@ type Development struct {
 	// see a withdrawn Development; the Record keeps it, marked. Missed is
 	// set when the Owner added it, saying it was missed.
 	Withdrawn, Unwanted, Missed bool
+	// PlacingCall is the kept placing call that made it a Development;
+	// zero if none was kept, or if the Owner added it.
+	PlacingCall int64
 }
 
 // Placing is the result of placing an Item's Facts.
@@ -322,8 +328,9 @@ func (e *Editor) Placing() BatchAct {
 					return nil, err
 				}
 				jobs = append(jobs, Job{
-					Key:     tp.Item.SourceID + "\n" + tp.Item.EntryID,
-					Request: placingRequest(tp, stories),
+					Key:        itemKey(tp.Item),
+					Request:    placingRequest(tp, stories),
+					Precedents: feedbackIDs(tp.Precedents),
 					Apply: func(ctx context.Context, res Response, now time.Time) error {
 						p, err := checkPlacing(tp, stories, res)
 						if err != nil {

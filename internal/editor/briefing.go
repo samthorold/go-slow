@@ -216,21 +216,15 @@ func writeBriefing(ctx context.Context, m Model, modelFor func(string) string, d
 		Input:        briefingInput(day, stories, refs),
 		Schema:       briefingSchema(refs),
 	}
-	call := newCall(req.Act, b.Day, "", modelOf(modelFor, req.Act), req, nil, day)
-	res, err := m.Complete(ctx, req)
-	call = call.answered(res)
+	call, err := callModel(ctx, m, modelOf(modelFor, req.Act), b.Day, "writing the Briefing for "+b.Day, req, nil, day,
+		func(res Response) (err error) {
+			b.Model, b.Usage = res.Model, res.Usage
+			b, err = checkBriefing(b, stories, refs, res)
+			return err
+		})
 	if err != nil {
-		err = fmt.Errorf("writing the Briefing for %s: %w", b.Day, err)
-		call = call.ended(Failed, err)
 		return Briefing{}, &call, err
 	}
-	b.Model, b.Usage = res.Model, res.Usage
-	b, err = checkBriefing(b, stories, refs, res)
-	if err != nil {
-		call = call.ended(Refused, err)
-		return Briefing{}, &call, err
-	}
-	call = call.ended(Applied, nil)
 	return b, &call, nil
 }
 

@@ -119,9 +119,9 @@ func (s *Store) SaveConnecting(ctx context.Context, c editor.Connecting, connect
 	}
 	for _, cs := range c.Causes {
 		if _, err := tx.ExecContext(ctx, `
-			INSERT INTO fact_connections (from_fact_id, to_fact_id, kind, made_at, model)
-			VALUES (?, ?, 'cause', ?, ?) ON CONFLICT DO NOTHING`,
-			cs.CauseID, cs.EffectID, formatTime(connectedAt), c.Model); err != nil {
+			INSERT INTO fact_connections (from_fact_id, to_fact_id, kind, made_at, model, made_on)
+			VALUES (?, ?, 'cause', ?, ?, ?) ON CONFLICT DO NOTHING`,
+			cs.CauseID, cs.EffectID, formatTime(connectedAt), c.Model, c.SourceID+"\n"+c.EntryID); err != nil {
 			return fmt.Errorf("cause from fact %d to %d: %w", cs.CauseID, cs.EffectID, err)
 		}
 	}
@@ -259,7 +259,7 @@ func (s *Store) Causes(ctx context.Context) ([]editor.CauseConnection, error) {
 
 func (s *Store) causes(ctx context.Context, where string, args ...any) ([]editor.CauseConnection, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT `+traced("f", "i")+`, `+traced("g", "j")+`, c.withdrawn_by IS NOT NULL
+		SELECT `+traced("f", "i")+`, `+traced("g", "j")+`, c.withdrawn_by IS NOT NULL, `+connectingCall("c")+`
 		FROM fact_connections c
 			JOIN facts f ON f.id = c.from_fact_id JOIN items i ON i.source_id = f.source_id AND i.entry_id = f.entry_id
 			JOIN facts g ON g.id = c.to_fact_id JOIN items j ON j.source_id = g.source_id AND j.entry_id = g.entry_id
@@ -276,7 +276,7 @@ func (s *Store) causes(ctx context.Context, where string, args ...any) ([]editor
 		if err := rows.Scan(
 			&c.Cause.ID, &c.Cause.SourceID, &c.Cause.EntryID, &c.Cause.Statement, &asAt, &c.Cause.Quote, &ents, &c.Cause.ItemTitle,
 			&c.Effect.ID, &c.Effect.SourceID, &c.Effect.EntryID, &c.Effect.Statement, &asAt2, &c.Effect.Quote, &ents2, &c.Effect.ItemTitle,
-			&c.Withdrawn,
+			&c.Withdrawn, &c.Call,
 		); err != nil {
 			return nil, fmt.Errorf("causes: %w", err)
 		}

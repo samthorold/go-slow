@@ -43,7 +43,7 @@ func main() {
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	if len(os.Args) > 1 {
 		ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, os.Interrupt)
-		err := admin(ctx, log, os.Args[1:], os.LookupEnv, os.Stdin)
+		err := admin(ctx, log, os.Args[1:], os.LookupEnv, os.Stdin, &http.Client{Timeout: fetchTimeout})
 		stop()
 		if err != nil {
 			log.Error("go-slow admin command failed", "command", os.Args[1], "error", err)

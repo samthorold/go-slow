@@ -10,7 +10,9 @@ A slow-news briefing: a Go web app, hypermedia-driven with htmx, storing the Rec
 
 @~/.claude/commons/guides/web-apps.md
 
-There is no Go Guide yet; the Go tooling below is this repo's own until there is one.
+@~/.claude/commons/guides/model-calls.md
+
+There is no Go Guide yet; the Go tooling below is this repo's own until there is one. The Model calls Guide covers the Editor's acts; the system design's *The Editor* section is how go-slow applies it.
 
 ## Where things are
 

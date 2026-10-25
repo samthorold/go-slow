@@ -54,7 +54,7 @@ _Avoid_: Analysis (the format of the **Sunday read**), finding, judgement
 A **Story**'s **Developments** in order.
 
 **Connection**:
-An editorial tie between a **Fact** and another **Fact** (such as cause), an **Entity** (who did it, to whom, where) or an **Assessment** (supporting or undercutting it). **Stories** are connected through the **Facts** and **Entities** they share.
+An editorial tie between a **Fact** and another **Fact** (such as cause), an **Entity** in its role (who did it, to whom, where, at what occasion) or an **Assessment** (supporting or undercutting it). **Stories** are connected through the **Facts** and **Entities** they share.
 _Avoid_: Link, relation
 
 ### Output

@@ -72,7 +72,7 @@ func run(log *slog.Logger) error {
 	models := claude.New(claude.Options{
 		APIKey:    string(cfg.AnthropicAPIKey),
 		Model:     cfg.ReadingModel,
-		ActModels: map[string]string{"reading": cfg.ReadingModel, "placing": cfg.PlacingModel},
+		ActModels: map[string]string{"reading": cfg.ReadingModel, "placing": cfg.PlacingModel, "connecting": cfg.ConnectingModel},
 	})
 	// Reading looks Entities up in Wikidata first, politely, as go-slow.
 	wd := wikidata.New(wikidata.Options{
@@ -83,14 +83,14 @@ func run(log *slog.Logger) error {
 		Now:       time.Now,
 		Sleep:     polite.Sleep,
 	})
-	ed := editor.New(editor.Deps{Store: store, Model: models, PlacingModel: models, Wikidata: wd, Log: log})
+	ed := editor.New(editor.Deps{Store: store, Model: models, PlacingModel: models, ConnectingModel: models, Wikidata: wd, Log: log})
 	// The daily acts run in batches: submitted after a Collection run, and
 	// their results applied on later runs as they arrive. One batch carries
 	// every act's requests.
 	batches := editor.NewBatches(editor.BatchDeps{
 		Store:   store,
 		Batcher: models,
-		Acts:    []editor.BatchAct{ed.Reading(), ed.Placing()},
+		Acts:    []editor.BatchAct{ed.Reading(), ed.Placing(), ed.Connecting()},
 		Log:     log,
 	})
 	collector := collect.New(collect.Deps{

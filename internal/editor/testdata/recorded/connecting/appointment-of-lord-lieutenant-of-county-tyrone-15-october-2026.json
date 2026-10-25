@@ -1,0 +1,178 @@
+{
+  "act": "connecting",
+  "model": "claude-haiku-5-5",
+  "recorded_at": "2026-10-25T00:37:02.541816Z",
+  "usage": {
+    "input_tokens": 2264,
+    "output_tokens": 1901
+  },
+  "output": {
+    "causes": [],
+    "facts": [
+      {
+        "fact": "F1",
+        "roles": [
+          {
+            "entity": "The King",
+            "role": "actor"
+          },
+          {
+            "entity": "William James Baxter",
+            "role": "affected"
+          },
+          {
+            "entity": "County Tyrone",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F2",
+        "roles": [
+          {
+            "entity": "Sir Robert William Lowry Scott",
+            "role": "actor"
+          },
+          {
+            "entity": "William James Baxter",
+            "role": "affected"
+          },
+          {
+            "entity": "County Tyrone",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F3",
+        "roles": [
+          {
+            "entity": "William James Baxter",
+            "role": "actor"
+          },
+          {
+            "entity": "RUC/PSNI",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F4",
+        "roles": [
+          {
+            "entity": "William James Baxter",
+            "role": "actor"
+          },
+          {
+            "entity": "Omagh",
+            "role": "place"
+          },
+          {
+            "entity": "Omagh bombing",
+            "role": "occasion"
+          }
+        ]
+      },
+      {
+        "fact": "F5",
+        "roles": [
+          {
+            "entity": "William James Baxter",
+            "role": "actor"
+          },
+          {
+            "entity": "Omagh Police District Voluntary Welfare Support Group",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F6",
+        "roles": [
+          {
+            "entity": "William James Baxter",
+            "role": "actor"
+          },
+          {
+            "entity": "Newtownstewart Presbyterian Church",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F7",
+        "roles": [
+          {
+            "entity": "William James Baxter",
+            "role": "actor"
+          },
+          {
+            "entity": "Newtownstewart Presbyterian Church",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F8",
+        "roles": [
+          {
+            "entity": "William James Baxter",
+            "role": "actor"
+          },
+          {
+            "entity": "County Tyrone",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F9",
+        "roles": [
+          {
+            "entity": "William James Baxter",
+            "role": "actor"
+          },
+          {
+            "entity": "Royal British Legion",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F10",
+        "roles": [
+          {
+            "entity": "William James Baxter",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F11",
+        "roles": [
+          {
+            "entity": "William James Baxter",
+            "role": "actor"
+          },
+          {
+            "entity": "County Tyrone",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F12",
+        "roles": [
+          {
+            "entity": "William James Baxter",
+            "role": "actor"
+          },
+          {
+            "entity": "County Tyrone",
+            "role": "place"
+          }
+        ]
+      }
+    ]
+  }
+}

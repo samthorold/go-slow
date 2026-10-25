@@ -29,6 +29,9 @@ type Config struct {
 	// PlacingModel is the Claude model the Editor places Facts with
 	// (PLACING_MODEL, such as claude-haiku-5-5).
 	PlacingModel string
+	// ConnectingModel is the Claude model the Editor connects Facts with
+	// (CONNECTING_MODEL, such as claude-haiku-5-5).
+	ConnectingModel string
 	// AnthropicAPIKey is the key for Anthropic's API (GOSLOW_ANTHROPIC_API_KEY).
 	AnthropicAPIKey Secret
 }
@@ -55,7 +58,7 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 	}
 	port, dbPath := get("PORT"), get("DATABASE_PATH")
 	contact, interval := get("COLLECTION_CONTACT"), get("COLLECTION_INTERVAL")
-	model, placing := get("READING_MODEL"), get("PLACING_MODEL")
+	model, placing, connecting := get("READING_MODEL"), get("PLACING_MODEL"), get("CONNECTING_MODEL")
 	key := get("GOSLOW_ANTHROPIC_API_KEY")
 	if len(missing) > 0 {
 		return Config{}, fmt.Errorf("missing environment variables: %s", strings.Join(missing, ", "))
@@ -71,7 +74,7 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 	}
 	// Only the Claude adapter exists yet (open-weight models come through
 	// OpenRouter later), so any other model would fail on every call.
-	for _, v := range [][2]string{{"READING_MODEL", model}, {"PLACING_MODEL", placing}} {
+	for _, v := range [][2]string{{"READING_MODEL", model}, {"PLACING_MODEL", placing}, {"CONNECTING_MODEL", connecting}} {
 		if !strings.HasPrefix(v[1], "claude-") {
 			return Config{}, errors.New(v[0] + " must be a Claude model such as claude-haiku-5-5, got " + strconv.Quote(v[1]))
 		}
@@ -83,6 +86,7 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 		CollectionInterval: every,
 		ReadingModel:       model,
 		PlacingModel:       placing,
+		ConnectingModel:    connecting,
 		AnthropicAPIKey:    Secret(key),
 	}, nil
 }

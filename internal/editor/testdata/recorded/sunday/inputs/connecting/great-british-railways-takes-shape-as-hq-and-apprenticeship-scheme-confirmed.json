@@ -1,46 +1,17 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T01:11:19.139486Z",
+  "request_hash": "b882d4738ac4d7447c68944a51cdb3bc136e80173a09bbcc7b5829a9e7a774b0",
+  "recorded_at": "2026-10-26T00:28:50.783199Z",
   "usage": {
-    "input_tokens": 1733,
-    "output_tokens": 347
+    "input_tokens": 1842,
+    "output_tokens": 923
   },
   "output": {
     "causes": [],
     "facts": [
       {
         "fact": "F1",
-        "roles": [
-          {
-            "entity": "Becketwell",
-            "role": "place"
-          },
-          {
-            "entity": "Derby",
-            "role": "place"
-          },
-          {
-            "entity": "Great British Railways",
-            "role": "actor"
-          }
-        ]
-      },
-      {
-        "fact": "F2",
-        "roles": [
-          {
-            "entity": "Becketwell",
-            "role": "place"
-          },
-          {
-            "entity": "Derby",
-            "role": "place"
-          }
-        ]
-      },
-      {
-        "fact": "F3",
         "roles": [
           {
             "entity": "Derby",
@@ -53,10 +24,32 @@
         ]
       },
       {
+        "fact": "F2",
+        "roles": [
+          {
+            "entity": "Great British Railways",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F3",
+        "roles": [
+          {
+            "entity": "Becketwell",
+            "role": "affected"
+          },
+          {
+            "entity": "Derby",
+            "role": "place"
+          }
+        ]
+      },
+      {
         "fact": "F4",
         "roles": [
           {
-            "entity": "Derby",
+            "entity": "Great British Railways",
             "role": "affected"
           }
         ]
@@ -72,19 +65,14 @@
       },
       {
         "fact": "F6",
-        "roles": [
-          {
-            "entity": "Great British Railways",
-            "role": "actor"
-          }
-        ]
+        "roles": []
       },
       {
         "fact": "F7",
         "roles": [
           {
             "entity": "Alstom",
-            "role": "actor"
+            "role": "affected"
           },
           {
             "entity": "Derby",
@@ -95,6 +83,23 @@
       {
         "fact": "F8",
         "roles": []
+      },
+      {
+        "fact": "F9",
+        "roles": [
+          {
+            "entity": "Department for Transport",
+            "role": "actor"
+          },
+          {
+            "entity": "Derby City Council",
+            "role": "actor"
+          },
+          {
+            "entity": "East Midlands Combined Authority",
+            "role": "actor"
+          }
+        ]
       }
     ]
   }

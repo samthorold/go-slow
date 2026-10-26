@@ -1,10 +1,11 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T01:10:34.532159Z",
+  "request_hash": "df49445e35b795e4cbf5c0ce0baaeb1b0d20e4d7d494f0c88b2303a03b92734d",
+  "recorded_at": "2026-10-25T23:43:39.209965Z",
   "usage": {
-    "input_tokens": 2378,
-    "output_tokens": 548
+    "input_tokens": 2198,
+    "output_tokens": 465
   },
   "output": {
     "facts": [
@@ -17,9 +18,7 @@
         "fact": "F2"
       },
       {
-        "developments_in": [
-          "N1"
-        ],
+        "developments_in": [],
         "fact": "F3"
       },
       {
@@ -27,16 +26,12 @@
           "N1"
         ],
         "fact": "F4"
-      },
-      {
-        "developments_in": [],
-        "fact": "F5"
       }
     ],
     "new_stories": [
       {
         "ref": "N1",
-        "title": "Regional empowerment across Scotland under the UK Government"
+        "title": "UK and Scottish Government working relations on devolved powers"
       }
     ]
   }

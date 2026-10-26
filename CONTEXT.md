@@ -30,8 +30,20 @@ An ongoing subject followed across days, made of the **Items** about it. An **It
 _Avoid_: Running story, developing story, thread
 
 **Entity**:
-A thing in the world that can be referred to again: a person, organisation, place, or named occasion (the Budget, the 2024 general election). Some come from Wikidata, others are made by the editorial work. A **Fact** or **Claim** *involves* an **Entity** when the **Entity** has a role in it: who did it, to whom or what or who it is about, where, or at what occasion. A name that only says who or where something else is ("Zelenskyy of Ukraine") is not involved, and nor is who made a **Claim** unless it gives them a role.
+A thing in the world that can be referred to again: a person, organisation, place, or named occasion (the Budget, the 2024 general election), with an identity of its own, whatever any **Item** says of it. Some come from Wikidata, others are made by the editorial work.
 _Avoid_: Event (something that happened is a **Fact**)
+
+**Mention**:
+An **Item** *mentions* an **Entity** when it names it, by name or by office ("Burnham", "the Prime Minister"). A mention says only that the **Item** refers to the **Entity**, not what part the **Entity** plays in anything.
+_Avoid_: Tag, reference
+
+**Involves**:
+A **Fact** or **Claim** *involves* an **Entity** when the **Entity** has a **Role** in it. A name that only says who or where something else is ("Zelenskyy of Ukraine", "the GBR headquarters site") is not involved, and nor is who made a **Claim** unless it gives them a **Role**. An **Entity** a **Fact** involves is one its **Item** mentions.
+_Avoid_: Connection (a **Connection** ties a **Fact** to another **Fact** or to an **Assessment**, never to an **Entity**)
+
+**Role**:
+The part an **Entity** plays in a **Fact** it involves, one of four: *actor* (who or what did it), *undergoer* (what or whom it was done to, or what the **Fact** says something of: the site, in "the Becketwell site is brownfield"), *place* (where) and *occasion* (the named occasion it happened at or belongs to).
+_Avoid_: Affected, target, subject (an undergoer need not be harmed, opposed or the topic of the **Item**)
 
 ### Editorial work
 
@@ -54,7 +66,7 @@ _Avoid_: Analysis (the format of the **Sunday read**), finding, judgement
 A **Story**'s **Developments** in order.
 
 **Connection**:
-An editorial tie between a **Fact** and another **Fact** (such as cause), an **Entity** in its role (who did it, to whom, where, at what occasion) or an **Assessment** (supporting or undercutting it). **Stories** are connected through the **Facts** and **Entities** they share.
+An editorial tie between a **Fact** and another **Fact** (such as cause) or an **Assessment** (supporting or undercutting it). **Stories** are connected through the **Facts** they share and the **Entities** their **Facts** involve in the same roles.
 _Avoid_: Link, relation
 
 ### Output

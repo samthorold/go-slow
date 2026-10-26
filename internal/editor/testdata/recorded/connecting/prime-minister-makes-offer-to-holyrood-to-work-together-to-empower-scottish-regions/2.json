@@ -1,11 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "3fc91700b54e4d8be73bcffbc27926a7ffa658efdbcd951365c458cc0a271c88",
-  "recorded_at": "2026-10-25T15:13:11.645039Z",
+  "request_hash": "915ff081faa016e918a387008accc53fded18afc97b0197a1be80531f4cd48a0",
+  "recorded_at": "2026-10-26T00:29:44.131882Z",
   "usage": {
-    "input_tokens": 1927,
-    "output_tokens": 1293
+    "input_tokens": 1636,
+    "output_tokens": 747
   },
   "output": {
     "causes": [],
@@ -29,14 +29,6 @@
           {
             "entity": "Andy Burnham",
             "role": "actor"
-          },
-          {
-            "entity": "Scotland's First Minister",
-            "role": "affected"
-          },
-          {
-            "entity": "Scottish Government",
-            "role": "affected"
           }
         ]
       },
@@ -44,12 +36,8 @@
         "fact": "F3",
         "roles": [
           {
-            "entity": "Andy Burnham",
+            "entity": "Douglas Alexander",
             "role": "actor"
-          },
-          {
-            "entity": "Scotland's First Minister",
-            "role": "affected"
           }
         ]
       },
@@ -62,28 +50,11 @@
           },
           {
             "entity": "No10 North",
-            "role": "actor"
+            "role": "place"
           },
           {
             "entity": "Scotland Office",
-            "role": "actor"
-          },
-          {
-            "entity": "Scottish Government",
-            "role": "affected"
-          },
-          {
-            "entity": "UK Government",
-            "role": "actor"
-          }
-        ]
-      },
-      {
-        "fact": "F5",
-        "roles": [
-          {
-            "entity": "Scotland",
-            "role": "affected"
+            "role": "place"
           },
           {
             "entity": "Scottish Government",

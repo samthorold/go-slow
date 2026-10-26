@@ -1,19 +1,14 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "c4c6033ee2251705582a417c441a5170807d0e442aa694a6e909cc5db3af49f4",
-  "recorded_at": "2026-10-25T15:10:52.807951Z",
+  "request_hash": "4bb8d3ba0c8403822c94fe544d5ee6604d57eca2410cea376aa90c19913d1df5",
+  "recorded_at": "2026-10-26T00:27:59.89204Z",
   "usage": {
-    "input_tokens": 2308,
-    "output_tokens": 1428
+    "input_tokens": 2080,
+    "output_tokens": 872
   },
   "output": {
-    "causes": [
-      {
-        "cause": "F2",
-        "effect": "F1"
-      }
-    ],
+    "causes": [],
     "facts": [
       {
         "fact": "F1",
@@ -36,11 +31,7 @@
         "fact": "F2",
         "roles": [
           {
-            "entity": "UK",
-            "role": "place"
-          },
-          {
-            "entity": "Volodymyr Zelenskyy",
+            "entity": "Andy Burnham",
             "role": "actor"
           }
         ]
@@ -48,10 +39,6 @@
       {
         "fact": "F3",
         "roles": [
-          {
-            "entity": "UK",
-            "role": "actor"
-          },
           {
             "entity": "Ukraine",
             "role": "affected"
@@ -62,10 +49,6 @@
         "fact": "F4",
         "roles": [
           {
-            "entity": "UK",
-            "role": "actor"
-          },
-          {
             "entity": "Ukraine",
             "role": "affected"
           }
@@ -73,23 +56,6 @@
       },
       {
         "fact": "F5",
-        "roles": [
-          {
-            "entity": "John Healey",
-            "role": "actor"
-          },
-          {
-            "entity": "Bangkok",
-            "role": "place"
-          },
-          {
-            "entity": "IMF",
-            "role": "occasion"
-          }
-        ]
-      },
-      {
-        "fact": "F6",
         "roles": [
           {
             "entity": "Foreign Secretary",
@@ -102,20 +68,20 @@
         ]
       },
       {
-        "fact": "F7",
+        "fact": "F6",
         "roles": [
           {
-            "entity": "Andy Burnham",
+            "entity": "John Healey",
             "role": "actor"
           },
           {
-            "entity": "UK",
-            "role": "place"
+            "entity": "IMF meetings in Bangkok",
+            "role": "occasion"
           }
         ]
       },
       {
-        "fact": "F8",
+        "fact": "F7",
         "roles": [
           {
             "entity": "Russia",

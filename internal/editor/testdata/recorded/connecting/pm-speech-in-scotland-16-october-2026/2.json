@@ -1,41 +1,32 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "cb855c5d7b82de8ee378c32139f20a7703833e50302de551b7460e0b7c267fb0",
-  "recorded_at": "2026-10-25T15:13:44.127405Z",
+  "request_hash": "ec2c38c0669a19405121041606b9449a8a9792f92909ae37974cfa58cc9cf60f",
+  "recorded_at": "2026-10-26T00:30:05.79612Z",
   "usage": {
-    "input_tokens": 3631,
-    "output_tokens": 1338
+    "input_tokens": 3335,
+    "output_tokens": 1049
   },
   "output": {
-    "causes": [
-      {
-        "cause": "F1",
-        "effect": "F9"
-      }
-    ],
+    "causes": [],
     "facts": [
       {
         "fact": "F1",
         "roles": [
           {
-            "entity": "Prime Minister",
-            "role": "actor"
+            "entity": "Easterhouse",
+            "role": "place"
           },
           {
             "entity": "FARE-Scotland",
             "role": "affected"
           },
           {
-            "entity": "Bannatyne House",
-            "role": "place"
+            "entity": "Greater Manchester Violence Reduction Unit",
+            "role": "actor"
           },
           {
-            "entity": "Easterhouse",
-            "role": "place"
-          },
-          {
-            "entity": "Scottish Violence Reduction Unit",
+            "entity": "Prime Minister",
             "role": "actor"
           }
         ]
@@ -44,16 +35,12 @@
         "fact": "F2",
         "roles": [
           {
+            "entity": "Motherwell",
+            "role": "place"
+          },
+          {
             "entity": "Prime Minister",
             "role": "actor"
-          },
-          {
-            "entity": "Westminster",
-            "role": "place"
-          },
-          {
-            "entity": "Greater Manchester",
-            "role": "place"
           }
         ]
       },
@@ -61,12 +48,12 @@
         "fact": "F3",
         "roles": [
           {
-            "entity": "Prime Minister",
-            "role": "actor"
+            "entity": "Commonwealth Games",
+            "role": "occasion"
           },
           {
-            "entity": "Motherwell",
-            "role": "place"
+            "entity": "Prime Minister",
+            "role": "actor"
           }
         ]
       },
@@ -74,12 +61,12 @@
         "fact": "F4",
         "roles": [
           {
-            "entity": "Pamela",
-            "role": "affected"
+            "entity": "Downing Street",
+            "role": "place"
           },
           {
-            "entity": "Motherwell",
-            "role": "place"
+            "entity": "Prime Minister",
+            "role": "actor"
           }
         ]
       },
@@ -87,12 +74,12 @@
         "fact": "F5",
         "roles": [
           {
-            "entity": "Prime Minister",
-            "role": "affected"
+            "entity": "Scottish government",
+            "role": "actor"
           },
           {
-            "entity": "Leigh",
-            "role": "place"
+            "entity": "UK government",
+            "role": "affected"
           }
         ]
       },
@@ -100,43 +87,16 @@
         "fact": "F6",
         "roles": [
           {
-            "entity": "Scottish Government",
+            "entity": "Alexander Dennis",
             "role": "actor"
           },
           {
-            "entity": "UK Government",
-            "role": "actor"
-          }
-        ]
-      },
-      {
-        "fact": "F7",
-        "roles": [
-          {
-            "entity": "Scottish Government",
-            "role": "actor"
-          }
-        ]
-      },
-      {
-        "fact": "F8",
-        "roles": [
-          {
-            "entity": "Alan Milburn",
-            "role": "actor"
-          }
-        ]
-      },
-      {
-        "fact": "F9",
-        "roles": [
+            "entity": "Falkirk",
+            "role": "place"
+          },
           {
             "entity": "Prime Minister",
             "role": "actor"
-          },
-          {
-            "entity": "Greater Manchester",
-            "role": "place"
           }
         ]
       }

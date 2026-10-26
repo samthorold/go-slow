@@ -1,14 +1,19 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "87b7bd1334f7230facf2ef66a8be4d2a88c1c4bc265a73589804273d53e52bef",
-  "recorded_at": "2026-10-25T15:09:02.605149Z",
+  "request_hash": "dd3e776392e808ac721f10e8d9be7522aef40e5f07c963340c604432283ee621",
+  "recorded_at": "2026-10-26T00:26:55.505321Z",
   "usage": {
-    "input_tokens": 1372,
-    "output_tokens": 510
+    "input_tokens": 1193,
+    "output_tokens": 297
   },
   "output": {
-    "causes": [],
+    "causes": [
+      {
+        "cause": "F2",
+        "effect": "F1"
+      }
+    ],
     "facts": [
       {
         "fact": "F1",
@@ -16,14 +21,6 @@
           {
             "entity": "UK government spokesperson",
             "role": "actor"
-          },
-          {
-            "entity": "US",
-            "role": "affected"
-          },
-          {
-            "entity": "Russia",
-            "role": "affected"
           }
         ]
       },
@@ -31,41 +28,11 @@
         "fact": "F2",
         "roles": [
           {
-            "entity": "UK",
+            "entity": "Russia",
             "role": "actor"
           },
           {
-            "entity": "US",
-            "role": "actor"
-          },
-          {
-            "entity": "Ukraine",
-            "role": "affected"
-          }
-        ]
-      },
-      {
-        "fact": "F3",
-        "roles": [
-          {
-            "entity": "UK",
-            "role": "actor"
-          },
-          {
-            "entity": "US",
-            "role": "affected"
-          },
-          {
-            "entity": "Ukraine",
-            "role": "affected"
-          }
-        ]
-      },
-      {
-        "fact": "F4",
-        "roles": [
-          {
-            "entity": "UK Government",
+            "entity": "United States",
             "role": "actor"
           }
         ]

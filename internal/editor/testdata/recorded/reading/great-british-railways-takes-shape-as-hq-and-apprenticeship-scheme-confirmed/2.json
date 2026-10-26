@@ -1,28 +1,28 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "f05c2c19bc973f7ad69ca95a87c7ff52f93225e7185fdb81256f3e6e73f321aa",
-  "recorded_at": "2026-10-26T13:47:51.804582Z",
+  "request_hash": "26d843da298bac324d78a0c6f2377a7a4550ca754fa253254bc8e31708e10a2a",
+  "recorded_at": "2026-10-26T16:47:55.432274Z",
   "usage": {
-    "input_tokens": 3199,
-    "output_tokens": 3979
+    "input_tokens": 3347,
+    "output_tokens": 3904
   },
   "output": {
     "claims": [
       {
         "made_by": "Andy Burnham",
-        "quote": "For too long, people have put up with a railway that often lets them down.",
-        "statement": "The railway has for too long let people down."
-      },
-      {
-        "made_by": "Heidi Alexander",
-        "quote": "Great British Railways will bring the railway together around one mission - better services for passengers",
-        "statement": "Great British Railways will bring the railway together around one mission of better services for passengers."
+        "quote": "Today is another big step forward.",
+        "statement": "Today's announcement is another big step forward."
       },
       {
         "made_by": "Claire Ward",
-        "quote": "Derby has a proud place in Britain’s railway industry",
-        "statement": "Derby has a proud place in Britain's railway industry."
+        "quote": "This is fantastic news for Derby.",
+        "statement": "The HQ announcement is fantastic news for Derby."
+      },
+      {
+        "made_by": "Claire Ward",
+        "quote": "I’m particularly pleased about the 600 apprenticeship places.",
+        "statement": "The 600 apprenticeship places are a particularly welcome part of the announcement."
       },
       {
         "made_by": "Pat McFadden",
@@ -31,35 +31,40 @@
       },
       {
         "made_by": "UK Government",
-        "quote": "is expected to begin in early 2027 and be completed by spring 2029",
-        "statement": "Construction of the Becketwell headquarters is expected to begin in early 2027 and be completed by spring 2029."
+        "quote": "new development to bring estimated £151 million boost to region and hundreds of rail jobs to the city",
+        "statement": "The new HQ is estimated to bring a £151 million boost to the region's economy and hundreds of rail jobs to Derby."
       },
       {
         "made_by": "UK Government",
-        "quote": "an estimated £151 million boost to the region’s economy",
-        "statement": "The new HQ is estimated to give the region's economy a £151 million boost."
+        "quote": "Construction of the brand-new development in at Becketwell, a brownfield site in the heart of Derby city centre, is expected to begin in early 2027 and be completed by spring 2029.",
+        "statement": "Construction of the Becketwell HQ is expected to begin in early 2027 and be completed by spring 2029."
       },
       {
         "made_by": "UK Government",
-        "quote": "Up to 600 apprentices between 16 and 21 years old will enrol over the next 4 years",
-        "statement": "Up to 600 apprentices aged 16 to 21 will enrol over the next four years on the rail foundation apprenticeship."
+        "quote": "with the first starters based in Derby helping to cement the city’s role as Europe’s largest rail hub",
+        "statement": "Derby is Europe's largest rail hub."
       },
       {
         "made_by": "UK Government",
-        "quote": "The site will accommodate up to 450 GBR staff",
-        "statement": "The Becketwell headquarters site will accommodate up to 450 GBR staff."
+        "quote": "at a time when less than 7% of the railway’s workforce is under 25",
+        "statement": "Less than 7% of the railway's workforce is under 25."
       }
     ],
     "facts": [
       {
         "as_at": "2026-10-15",
         "quote": "the site of Great British Railways’ (GBR) headquarters is unveiled today (15 October 2026) in Derby",
-        "statement": "The site of Great British Railways headquarters was unveiled in Derby on 15 October 2026."
+        "statement": "The site of the Great British Railways headquarters has been unveiled in Derby."
       },
       {
         "as_at": "2026-10-14",
-        "quote": "Becketwell, a brownfield site in the heart of Derby city centre",
-        "statement": "Becketwell is a brownfield site in the heart of Derby city centre."
+        "quote": "Up to 600 apprentices between 16 and 21 years old will enrol over the next 4 years on the rail foundation apprenticeship",
+        "statement": "Up to 600 apprentices aged 16 to 21 are to enrol over the next 4 years on the rail foundation apprenticeship."
+      },
+      {
+        "as_at": "2026-10-14",
+        "quote": "The site will accommodate up to 450 GBR staff",
+        "statement": "The site is planned to accommodate up to 450 GBR staff."
       },
       {
         "as_at": "2026-10-14",
@@ -68,18 +73,18 @@
       },
       {
         "as_at": "2026-10-14",
-        "quote": "76,000 extra seats a week introduced across the network",
-        "statement": "76,000 extra seats a week have been introduced across the network."
+        "quote": "The announcement builds on the recent £1 billion investment in a new fleet of trains for the north set to be built at Alstom’s Derby site",
+        "statement": "A recent £1 billion investment in a new fleet of trains for the north has been made."
       },
       {
         "as_at": "2026-10-14",
-        "quote": "the recent £1 billion investment in a new fleet of trains for the north set to be built at Alstom’s Derby site",
-        "statement": "There has been a recent £1 billion investment in a new fleet of trains for the north, set to be built at Alstom's Derby site."
+        "quote": "I’m delighted Becketwell will become GBR’s new home",
+        "statement": "Transport Secretary Heidi Alexander said Becketwell will become GBR's new home."
       },
       {
         "as_at": "2026-10-14",
-        "quote": "less than 7% of the railway’s workforce is under 25",
-        "statement": "Less than 7% of the railway's workforce is under 25."
+        "quote": "Work and Pensions Secretary Pat McFadden said:",
+        "statement": "Pat McFadden, Work and Pensions Secretary, made a statement on the foundation apprenticeship."
       }
     ],
     "mentions": [
@@ -96,7 +101,7 @@
       {
         "kind": "place",
         "name": "Becketwell",
-        "role": "brownfield site in Derby city centre chosen for the GBR headquarters"
+        "role": ""
       },
       {
         "kind": "person",
@@ -139,9 +144,14 @@
         "role": ""
       },
       {
-        "kind": "organisation",
-        "name": "UK Government",
-        "role": "publisher of the announcement"
+        "kind": "place",
+        "name": "East Midlands",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "Britain",
+        "role": ""
       }
     ]
   }

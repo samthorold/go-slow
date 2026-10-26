@@ -1,11 +1,11 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "51eb57ad8f34086e5a573485ddd2443a3f5147a649c401e0d12cc3e87ca88f02",
-  "recorded_at": "2026-10-26T13:57:05.941585Z",
+  "request_hash": "dd2904cd3b28b6a34b301dcd70bb438d85316aaf76f283986c49791a273fa624",
+  "recorded_at": "2026-10-26T21:41:11.904347Z",
   "usage": {
-    "input_tokens": 2103,
-    "output_tokens": 3511
+    "input_tokens": 2251,
+    "output_tokens": 3465
   },
   "output": {
     "claims": [
@@ -16,18 +16,23 @@
       },
       {
         "made_by": "Andy Burnham",
-        "quote": "the next stage of devolution should place more decision-making in the hands of Scotland’s regions and cities to drive reindustrialisation",
-        "statement": "The next stage of devolution should place more decision-making in the hands of Scotland’s regions and cities to drive reindustrialisation."
-      },
-      {
-        "made_by": "Andy Burnham",
         "quote": "Through No10 North, we are rewiring the state",
         "statement": "The UK Government is rewiring the state through No10 North."
       },
       {
         "made_by": "Andy Burnham",
         "quote": "With us working together, there is no limit to what we can achieve for the Scottish people.",
-        "statement": "Working together, the UK and Scottish Governments can achieve no limit to what they achieve for the Scottish people."
+        "statement": "Working together, the UK and Scottish governments can achieve anything for the Scottish people."
+      },
+      {
+        "made_by": "Andy Burnham",
+        "quote": "the next stage of devolution should place more decision-making in the hands of Scotland’s regions and cities to drive reindustrialisation",
+        "statement": "The next stage of devolution should place more decision-making in the hands of Scotland's regions and cities to drive reindustrialisation."
+      },
+      {
+        "made_by": "Douglas Alexander",
+        "quote": "Devolution has done a great deal, but power was never supposed to stop at the doors of the Scottish Parliament.",
+        "statement": "Devolution has done a great deal, but power was never supposed to stop at the doors of the Scottish Parliament."
       },
       {
         "made_by": "Douglas Alexander",
@@ -36,13 +41,13 @@
       },
       {
         "made_by": "Douglas Alexander",
-        "quote": "The Prime Minister’s offer to the Scottish Government is a genuine one, and the Scotland Office is ready to roll up its sleeves alongside them to make it happen.",
-        "statement": "The Prime Minister’s offer to the Scottish Government is genuine, and the Scotland Office is ready to work alongside the Scottish Government to make it happen."
+        "quote": "The Prime Minister’s offer to the Scottish Government is a genuine one",
+        "statement": "The Prime Minister's offer to the Scottish Government is genuine."
       },
       {
         "made_by": "Douglas Alexander",
         "quote": "Two governments, one goal - good jobs and real opportunity in every corner of Scotland.",
-        "statement": "The UK and Scottish Governments share one goal: good jobs and real opportunity in every corner of Scotland."
+        "statement": "The two governments share one goal: good jobs and real opportunity in every corner of Scotland."
       }
     ],
     "facts": [
@@ -53,18 +58,28 @@
       },
       {
         "as_at": "2026-10-15",
-        "quote": "During my first week in office, I told the First Minister that I wanted to work with him to spread opportunities to communities across Scotland’s regions and cities.",
-        "statement": "Andy Burnham told the First Minister in his first week in office that he wanted to work with him to spread opportunities across Scotland’s regions and cities."
+        "quote": "During my first week in office, I told the First Minister that I wanted to work with him",
+        "statement": "Andy Burnham told the First Minister in his first week in office that he wanted to work with him."
       },
       {
         "as_at": "2026-10-15",
-        "quote": "This is me making an offer to the Scottish Government.",
-        "statement": "Andy Burnham made an offer to the Scottish Government to work together on regional empowerment."
+        "quote": "In a speech today, the Prime Minister will invite Scotland’s First Minister to work with him",
+        "statement": "The Prime Minister intends to invite Scotland's First Minister to work with him in a speech on 2026-10-15."
       },
       {
         "as_at": "2026-10-15",
-        "quote": "despite significant devolution from Westminster over the last 27 years",
-        "statement": "There has been significant devolution from Westminster to Holyrood over the last 27 years."
+        "quote": "he will call on the Scottish Government to work with the UK Government through No10 North and the Scotland Office",
+        "statement": "The Prime Minister intends to call on the Scottish Government to work with the UK Government through No10 North and the Scotland Office."
+      },
+      {
+        "as_at": "2026-10-15",
+        "quote": "The Scottish Secretary, Douglas Alexander said:",
+        "statement": "Douglas Alexander, the Scottish Secretary, made a statement on 2026-10-15."
+      },
+      {
+        "as_at": "2026-10-15",
+        "quote": "the Scotland Office is ready to roll up its sleeves alongside them to make it happen",
+        "statement": "The Scotland Office has said it is ready to work alongside the Scottish Government to make the offer happen."
       }
     ],
     "mentions": [
@@ -109,18 +124,8 @@
         "role": ""
       },
       {
-        "kind": "organisation",
+        "kind": "place",
         "name": "Westminster",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Holyrood",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Scotland",
         "role": ""
       },
       {
@@ -145,17 +150,17 @@
       },
       {
         "kind": "place",
-        "name": "London",
-        "role": ""
-      },
-      {
-        "kind": "place",
         "name": "Edinburgh",
         "role": ""
       },
       {
         "kind": "place",
-        "name": "Europe",
+        "name": "London",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "Scotland",
         "role": ""
       }
     ]

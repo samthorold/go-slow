@@ -356,12 +356,45 @@ func TestReadingIsToldAProjectedEffectIsNeverAFact(t *testing.T) {
 	instructions := model.sent[0].Instructions
 
 	for _, want := range []string{
-		"what something will do, cause or be worth (an estimate, a forecast, a projected effect) can't be established yet, so it is never a Fact",
+		"(an estimate, a forecast, a projected effect) can't be established yet, so it is never a Fact",
 		"as a Claim, made by whoever the Item attributes it to, or, if it attributes it to no one, by the Item's publisher",
 	} {
 		if !strings.Contains(instructions, want) {
 			t.Errorf("reading's instructions do not say %q:\n%s", want, instructions)
 		}
+	}
+}
+
+// An arrangement and a declared intention can be corroborated as at the
+// Item's date, so each is a Fact, worded as what it is, never as the act
+// it arranges or intends (system design: An arrangement is a Fact; A
+// declared intention is a Fact, as an intention). A promise is a declared
+// intention, so it is no longer listed among Claims.
+func TestReadingIsToldAnArrangementAndADeclaredIntentionAreFacts(t *testing.T) {
+	model := &fakeModel{output: goodReading}
+	if _, err := editor.Read(t.Context(), model, speech); err != nil {
+		t.Fatal(err)
+	}
+	instructions := model.sent[0].Instructions
+
+	for _, want := range []string{
+		"That something has been arranged is a Fact, worded as the arrangement as at its date",
+		"never as the event it arranges",
+		"That someone has declared what they will do is a Fact, whoever declares it and however the Item reports it (said, confirmed, assured), worded as their intention",
+		"never as the act done",
+		"what something will do, cause or be worth beyond what anyone intends (an estimate, a forecast, a projected effect) can't be established yet, so it is never a Fact",
+	} {
+		if !strings.Contains(instructions, want) {
+			t.Errorf("reading's instructions do not say %q:\n%s", want, instructions)
+		}
+	}
+	if _, claims, _ := strings.Cut(instructions, "- Claims:"); strings.Contains(strings.SplitN(claims, "\n", 2)[0], "promises") {
+		t.Errorf("reading's instructions list promises among Claims:\n%s", instructions)
+	}
+	// The standard is how a Fact is drawn, not a list of words: "is set to
+	// be built" words a present arrangement, which is a Fact.
+	if strings.Contains(instructions, "never worded with") {
+		t.Errorf("reading's instructions ban words from Facts:\n%s", instructions)
 	}
 }
 

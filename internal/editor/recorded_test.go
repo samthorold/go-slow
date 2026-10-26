@@ -158,6 +158,9 @@ func readingVerdicts(t *testing.T, root, path string) []error {
 	name := strings.TrimSuffix(filepath.Base(path), ".json")
 	it, body := fixture(t, path)
 	text := normal(stripTags(it.Title + " " + it.Summary + " " + body))
+	if name == commonsStatement {
+		commonsCasesPresent(t, text)
+	}
 	return sampled(t, filepath.Join(root, "reading"), name, dailyRule, readingCommand, func(m *sampleModel) sampleResult {
 		var r editor.Reading
 		passed, err := runSample(m, func(model editor.Model) (bool, error) {
@@ -200,8 +203,95 @@ func readingVerdicts(t *testing.T, root, path string) []error {
 		if name == "pm-speech-in-scotland-16-october-2026" {
 			speechFacts(p, r, normal(stripTags(body)))
 		}
+		if name == commonsStatement {
+			commonsStatementFacts(p, r)
+		}
 		return sampleResult{passed: true, held: p}
 	})
+}
+
+// commonsStatement is the Prime Minister's statement to the House of
+// Commons, which carries an arrangement (the UK-EU summit), a declared
+// intention (further sanctions on Iran) and an estimate (what the UK-EU
+// deals will add to the economy).
+const commonsStatement = "pm-statement-to-the-house-of-commons-12-october-2026"
+
+// commonsCasesPresent fails unless the statement's text carries each case
+// its properties rest on, so a changed fixture can't leave them testing
+// nothing.
+func commonsCasesPresent(t *testing.T, text string) {
+	t.Helper()
+	for _, c := range []string{
+		"i can confirm to the house today that it will take place in brussels on the 20th november",
+		"we will bring further sanctions to restrict the capacity of iran and the irgc to do us harm",
+		"these deals will add the equivalent of over 10 billion pounds per year to the uk economy by 2040",
+	} {
+		if !strings.Contains(text, normal(c)) {
+			t.Fatalf("the statement no longer carries the case %q", c)
+		}
+	}
+}
+
+var (
+	// summitDate is the summit's date as a statement gives it: in words
+	// ("20 November", "20th November", "November 20") or as a date
+	// (2026-11-20).
+	summitDate   = regexp.MustCompile(`(?i)\b(20(th)? november|november 20(th)?|2026-11-20)\b`)
+	takesPlace   = regexp.MustCompile(`(?i)\bwill take place\b`)
+	tenBillion   = regexp.MustCompile(`(?i)\b10\s*(billion|bn)\b`)
+	sanctionWord = regexp.MustCompile(`(?i)\bsanction`)
+	iranOrIRGC   = regexp.MustCompile(`(?i)\b(iran|irgc)\b`)
+)
+
+func TestTheSummitsDateIsMatchedInWordsOrAsADate(t *testing.T) {
+	for s, want := range map[string]bool{
+		"The UK-EU summit is scheduled for 20 November in Brussels":    true,
+		"The UK-EU summit is scheduled for Brussels on 20th November":  true,
+		"The UK-EU summit is scheduled for Brussels on November 20":    true,
+		"The UK-EU summit is scheduled for Brussels on 2026-11-20":     true,
+		"The UK-EU summit is scheduled for Brussels on 2026-11-21":     false,
+		"The UK-EU summit is scheduled for Brussels on 120 November":   false,
+		"The UK-EU summit is scheduled for Brussels in late November.": false,
+	} {
+		if got := summitDate.MatchString(s); got != want {
+			t.Errorf("summitDate matches %q: %v, want %v", s, got, want)
+		}
+	}
+}
+
+// commonsStatementFacts asserts the statement's arrangement and declared
+// intention are drawn as Facts, as what they are, and its estimate as a
+// Claim (system design: An arrangement is a Fact; A declared intention is
+// a Fact, as an intention).
+func commonsStatementFacts(p properties, r editor.Reading) {
+	summit := func(s string) bool { return strings.Contains(strings.ToLower(s), "summit") }
+	p.holds("a Fact states the UK-EU summit's arrangement", slices.ContainsFunc(r.Facts, func(f editor.Fact) bool {
+		s := f.Statement
+		return summit(s) && strings.Contains(strings.ToLower(s), "brussels") && summitDate.MatchString(s) && !takesPlace.MatchString(s)
+	}), "none does: %s", factStatements(r))
+	event := p.property("no Fact says the UK-EU summit will take place")
+	for _, f := range r.Facts {
+		if summit(f.Statement) && takesPlace.MatchString(f.Statement) {
+			event("Fact %q", f.Statement)
+		}
+	}
+	// Which statements are drawn is not this property's: the intention,
+	// when drawn, is classified as a Fact.
+	intention := p.property("the further-sanctions intention on Iran, when drawn, is a Fact, never a Claim")
+	for _, c := range r.Claims {
+		if sanctionWord.MatchString(c.Statement) && iranOrIRGC.MatchString(c.Statement) {
+			intention("Claim %q", c.Statement)
+		}
+	}
+	estimate := p.property("the £10 billion estimate is a Claim, not a Fact")
+	for _, f := range r.Facts {
+		if tenBillion.MatchString(f.Statement) {
+			estimate("Fact %q", f.Statement)
+		}
+	}
+	if !slices.ContainsFunc(r.Claims, func(c editor.Claim) bool { return tenBillion.MatchString(c.Statement) }) {
+		estimate("no Claim states it")
+	}
 }
 
 // speechFacts asserts a speech's Facts come from its primary text: the
@@ -218,6 +308,15 @@ func speechFacts(p properties, r editor.Reading, body string) {
 	}
 	p.holds("a Fact places the speech in Motherwell", strings.Contains(strings.ToLower(joinFacts(r)), "motherwell"),
 		"none does: %s", joinFacts(r))
+}
+
+// factStatements is a reading's Facts, one statement a line.
+func factStatements(r editor.Reading) string {
+	var b strings.Builder
+	for _, f := range r.Facts {
+		b.WriteString(f.Statement + "\n")
+	}
+	return b.String()
 }
 
 func joinFacts(r editor.Reading) string {

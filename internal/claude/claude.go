@@ -16,9 +16,15 @@ import (
 	"github.com/samthorold/go-slow/internal/editor"
 )
 
-// maxTokens bounds one answer. An act's output is a bounded extraction, far
-// below this; one cut off at it is reported, not used.
-const maxTokens = 16000
+// maxTokens bounds one answer, the model's thinking included: Claude Haiku
+// 5.5 thinks unless told not to (adaptive thinking, its default), and the
+// thinking counts against this bound as the output does. Reading a long
+// Item thinks about as much as it writes, and a limit sized for the output
+// alone cut readings off (issue #90). The thinking is left as the model's
+// default, since it is part of how each act was recorded. An answer cut off
+// at the bound is reported, not used. Twice the most a reading has used, and
+// a quarter of the model's own ceiling, so a call stays well inside timeout.
+const maxTokens = 32000
 
 // timeout bounds one call, retries included.
 const timeout = 5 * time.Minute

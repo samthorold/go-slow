@@ -119,7 +119,7 @@ func TestABatchIsSubmittedWithEachRequestsIdentifierAndTheActsCall(t *testing.T)
 		t.Fatalf("requests = %v", (*created)["requests"])
 	}
 	first, _ := json.Marshal(reqs[0])
-	want := `{"custom_id":"reading-1","params":{"max_tokens":16000,` +
+	want := `{"custom_id":"reading-1","params":{"max_tokens":32000,` +
 		`"messages":[{"content":[{"text":"Title: PM speech in Scotland","type":"text"}],"role":"user"}],` +
 		`"model":"claude-haiku-5-5",` +
 		`"output_config":{"format":{"schema":{"additionalProperties":false,"type":"object"},"type":"json_schema"}},` +

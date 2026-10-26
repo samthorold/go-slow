@@ -1,10 +1,11 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T01:10:11.554904Z",
+  "request_hash": "976e2225f0ffec40244d0a4ee86255b5733a7c5fe0e43dd70ff5a776c2811149",
+  "recorded_at": "2026-10-25T23:41:12.980209Z",
   "usage": {
-    "input_tokens": 3541,
-    "output_tokens": 1705
+    "input_tokens": 3894,
+    "output_tokens": 2076
   },
   "output": {
     "facts": [
@@ -28,32 +29,28 @@
       },
       {
         "developments_in": [
-          "N2"
+          "S1"
         ],
         "fact": "F5"
+      },
+      {
+        "developments_in": [],
+        "fact": "F6"
       },
       {
         "developments_in": [
           "N3"
         ],
-        "fact": "F6"
-      },
-      {
-        "developments_in": [
-          "N4"
-        ],
         "fact": "F7"
       },
       {
         "developments_in": [
-          "N4"
+          "N3"
         ],
         "fact": "F8"
       },
       {
-        "developments_in": [
-          "N5"
-        ],
+        "developments_in": [],
         "fact": "F9"
       },
       {
@@ -61,7 +58,9 @@
         "fact": "F10"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N2"
+        ],
         "fact": "F11"
       },
       {
@@ -73,44 +72,40 @@
         "fact": "F13"
       },
       {
-        "developments_in": [
-          "N6"
-        ],
+        "developments_in": [],
         "fact": "F14"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N4"
+        ],
         "fact": "F15"
       },
       {
         "developments_in": [],
         "fact": "F16"
+      },
+      {
+        "developments_in": [],
+        "fact": "F17"
       }
     ],
     "new_stories": [
       {
         "ref": "N1",
-        "title": "Energy ceasefire in the war in Ukraine"
-      },
-      {
-        "ref": "N2",
-        "title": "UK support for Ukraine"
-      },
-      {
-        "ref": "N3",
         "title": "UK sanctions on Russia"
       },
       {
+        "ref": "N2",
+        "title": "UK military deployments to the Middle East"
+      },
+      {
+        "ref": "N3",
+        "title": "UK response to hybrid threats"
+      },
+      {
         "ref": "N4",
-        "title": "UK military deployment to Saudi Arabia"
-      },
-      {
-        "ref": "N5",
-        "title": "UK–Germany cooperation on hybrid threats"
-      },
-      {
-        "ref": "N6",
-        "title": "UK information defence capability"
+        "title": "UK–EU summit"
       }
     ]
   }

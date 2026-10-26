@@ -2,6 +2,8 @@ package editor_test
 
 import (
 	"context"
+	"encoding/json"
+	"log/slog"
 	"slices"
 	"strings"
 	"testing"
@@ -124,7 +126,7 @@ func (s *scripted) Turn(context.Context, editor.ConversationRequest) (editor.Tur
 func recordedConversation(t *testing.T, model string) conversationRecording {
 	t.Helper()
 	var rec conversationRecording
-	r := conversationRecorder{&scripted{[]editor.Turn{firstTurn, {Text: "Done.", Model: model}}}, &rec, model}
+	r := conversationRecorder{&scripted{[]editor.Turn{firstTurn, {Text: "Done.", Model: model}}}, &rec, model, ""}
 	for _, req := range []editor.ConversationRequest{opening, second} {
 		if _, err := r.Turn(t.Context(), req); err != nil {
 			t.Fatal(err)
@@ -133,19 +135,49 @@ func recordedConversation(t *testing.T, model string) conversationRecording {
 	return rec
 }
 
-// Each recorded turn keeps the hash of its request in the form a replay
-// rebuilds it: the model's earlier turns as the act reads them, since the
-// provider's own form of them is not kept.
+// Each recorded turn keeps the hash of its request as sent, the model's
+// earlier turns in the provider's own form included, and keeps that form, so
+// a replay sends the same request again.
 func TestARecordedConversationKeepsEachTurnsRequestHash(t *testing.T) {
 	rec := recordedConversation(t, "claude-opus-5-5")
-	replayed := second
-	replayed.Messages = slices.Clone(second.Messages)
-	neutral := firstTurn
-	neutral.Raw = nil
-	replayed.Messages[1] = editor.Message{Assistant: &neutral}
-	for i, req := range []editor.ConversationRequest{opening, replayed} {
+	for i, req := range []editor.ConversationRequest{opening, second} {
 		if want := editor.ConversationRequestHash(req, "claude-opus-5-5"); rec.Turns[i].RequestHash != want {
 			t.Errorf("turn %d: request hash = %q, want %q", i+1, rec.Turns[i].RequestHash, want)
+		}
+	}
+	if string(rec.Turns[0].Raw) != string(firstTurn.Raw) {
+		t.Errorf("the first turn kept %s, want its provider form %s", rec.Turns[0].Raw, firstTurn.Raw)
+	}
+}
+
+// A recorded turn's hash means what a kept turn's does: a Sunday read
+// written through the recorder, on a fake conversation, keeps in the Record
+// the very hashes the recording keeps, turn by turn.
+func TestARecordedTurnsHashIsTheHashAKeptTurnCarries(t *testing.T) {
+	store := record(t)
+	readAndPlace(t, store, &fakeModel{output: startsAStory})
+	looking := calls("story", `{"story": "S1"}`)
+	looking.Raw = json.RawMessage(`{"role":"assistant","content":[{"type":"thinking","thinking":"","signature":"sig"}]}`)
+	submitting := submits(citesTheSpeech)
+	submitting.Raw = json.RawMessage(`{"role":"assistant","content":[{"type":"tool_use","id":"call-1"}]}`)
+	var rec conversationRecording
+	agent := conversationRecorder{&fakeAgent{turns: []editor.Turn{looking, submitting}}, &rec, "claude-opus-5-5", ""}
+	ed := editor.New(editor.Deps{Store: store, SundayReads: store, SundayReadModel: agent, Wikidata: &fakeWikidata{},
+		ModelFor: func(string) string { return "claude-opus-5-5" }, Log: slog.New(slog.DiscardHandler)})
+	if err := ed.SundayRead(t.Context(), sundayMorning); err != nil {
+		t.Fatal(err)
+	}
+	r, found, err := store.SundayRead(t.Context(), "2026-10-25")
+	if err != nil || !found {
+		t.Fatalf("no read written: %v %v", found, err)
+	}
+	c, _, err := store.Conversation(t.Context(), r.ConversationID)
+	if err != nil || len(c.Turns) != 2 || len(rec.Turns) != 2 {
+		t.Fatalf("kept %d turns, recorded %d: %v", len(c.Turns), len(rec.Turns), err)
+	}
+	for i := range c.Turns {
+		if rec.Turns[i].RequestHash != c.Turns[i].RequestHash {
+			t.Errorf("turn %d: recorded hash %s, kept hash %s", i+1, rec.Turns[i].RequestHash, c.Turns[i].RequestHash)
 		}
 	}
 }
@@ -205,21 +237,16 @@ func TestAConversationReplayFailsAsStaleWhenATurnsRequestHasChanged(t *testing.T
 	}
 }
 
-// A conversation recorded before turns kept their request's hash is
-// replayed, but not as a check of today's request: the replay says so.
-func TestAConversationReplayWithNoHashesSaysSo(t *testing.T) {
+// A conversation recorded before turns kept their request's hash can't show
+// it answers today's requests: it is stale, like any other recording.
+func TestAConversationReplayWithNoHashesFailsAsStale(t *testing.T) {
 	rec := recordedConversation(t, "claude-opus-5-5")
 	for i := range rec.Turns {
 		rec.Turns[i].RequestHash = ""
 	}
-	if reported, err := replayConversation(t, rec, "claude-opus-5-5", opening, second); err != nil || len(reported) != 0 {
-		t.Errorf("replay = %v (reported %v); want it replayed", err, reported)
-	}
-	if !unhashed(rec) {
-		t.Error("a conversation with no hashes is not reported unhashed")
-	}
-	if unhashed(recordedConversation(t, "claude-opus-5-5")) {
-		t.Error("a conversation with hashes is reported unhashed")
+	reported, err := replayConversation(t, rec, "claude-opus-5-5", opening, second)
+	if err == nil || !strings.Contains(err.Error(), "stale: re-record with") || len(reported) != 1 {
+		t.Errorf("replay = %v (reported %v); want it stale", err, reported)
 	}
 }
 

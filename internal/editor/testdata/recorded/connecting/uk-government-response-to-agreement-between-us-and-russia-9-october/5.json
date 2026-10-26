@@ -1,11 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "dd3e776392e808ac721f10e8d9be7522aef40e5f07c963340c604432283ee621",
-  "recorded_at": "2026-10-26T00:26:59.677439Z",
+  "request_hash": "5114a2e3725e8cda57ac869167bcd92db2f5a8606a7a46841e55f248bb7c3208",
+  "recorded_at": "2026-10-26T12:18:00.866586Z",
   "usage": {
-    "input_tokens": 1193,
-    "output_tokens": 266
+    "input_tokens": 1363,
+    "output_tokens": 494
   },
   "output": {
     "causes": [
@@ -28,11 +28,11 @@
         "fact": "F2",
         "roles": [
           {
-            "entity": "Russia",
+            "entity": "United States",
             "role": "actor"
           },
           {
-            "entity": "United States",
+            "entity": "Russia",
             "role": "actor"
           }
         ]

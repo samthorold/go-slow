@@ -1,11 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "9dc15bd6b48e397938eb3019a7d5df9d9883a73200928a4577853b9b710d1afc",
-  "recorded_at": "2026-10-26T00:29:16.926643Z",
+  "request_hash": "c53b625f2af1a96e52cf613c49ac72de5d575c0ee505a76e38391dc7e9825e7f",
+  "recorded_at": "2026-10-26T12:21:00.453595Z",
   "usage": {
-    "input_tokens": 1911,
-    "output_tokens": 1311
+    "input_tokens": 2000,
+    "output_tokens": 1869
   },
   "output": {
     "causes": [],
@@ -19,11 +19,7 @@
           },
           {
             "entity": "William James Baxter",
-            "role": "affected"
-          },
-          {
-            "entity": "County Tyrone",
-            "role": "place"
+            "role": "undergoer"
           }
         ]
       },
@@ -33,10 +29,6 @@
           {
             "entity": "Sir Robert William Lowry Scott",
             "role": "actor"
-          },
-          {
-            "entity": "County Tyrone",
-            "role": "place"
           }
         ]
       },
@@ -58,7 +50,7 @@
         "roles": [
           {
             "entity": "William James Baxter",
-            "role": "actor"
+            "role": "undergoer"
           },
           {
             "entity": "Omagh",
@@ -79,7 +71,7 @@
           },
           {
             "entity": "Omagh Police District Voluntary Welfare Support Group",
-            "role": "affected"
+            "role": "undergoer"
           }
         ]
       },
@@ -102,10 +94,6 @@
           {
             "entity": "William James Baxter",
             "role": "actor"
-          },
-          {
-            "entity": "County Tyrone",
-            "role": "place"
           }
         ]
       },
@@ -114,11 +102,7 @@
         "roles": [
           {
             "entity": "William James Baxter",
-            "role": "actor"
-          },
-          {
-            "entity": "County Tyrone",
-            "role": "place"
+            "role": "undergoer"
           }
         ]
       }

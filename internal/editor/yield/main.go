@@ -38,15 +38,21 @@ func run(args []string, w io.Writer) error {
 	if len(args) != 2 {
 		return errors.New("usage: yield <before> <after>")
 	}
-	before, err := load(args[0])
+	before, beforeOut, err := load(args[0])
 	if err != nil {
 		return err
 	}
-	after, err := load(args[1])
+	after, afterOut, err := load(args[1])
 	if err != nil {
 		return err
 	}
-	return report(w, before, after)
+	var b strings.Builder
+	report(&b, before, after)
+	if err := reportAgreement(&b, beforeOut, afterOut); err != nil {
+		return err
+	}
+	_, err = io.WriteString(w, b.String())
+	return err
 }
 
 // recording is the little of a kept response the report needs.
@@ -167,8 +173,8 @@ func fixtureOf(rel string) string {
 	return rel
 }
 
-func load(dir string) (counts, error) {
-	c := counts{}
+func load(dir string) (counts, outputs, error) {
+	c, o := counts{}, outputs{}
 	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -211,14 +217,17 @@ func load(dir string) (counts, error) {
 			}
 			f := fixtureOf(strings.TrimSuffix(filepath.ToSlash(rel), ".json"))
 			c[a.name][f] = append(c[a.name][f], n)
+			if o[a.name] == nil {
+				o[a.name] = map[string][]json.RawMessage{}
+			}
+			o[a.name][f] = append(o[a.name][f], rec.Output)
 		}
 		return nil
 	})
-	return c, err
+	return c, o, err
 }
 
-func report(w io.Writer, before, after counts) error {
-	var b strings.Builder
+func report(b *strings.Builder, before, after counts) {
 	for _, a := range acts {
 		fixtures := map[string]bool{}
 		for f := range before[a.name] {
@@ -235,7 +244,7 @@ func report(w io.Writer, before, after counts) error {
 			continue
 		}
 		sort.Strings(names)
-		fmt.Fprintf(&b, "### %s\n\n| Fixture | %s |\n|%s\n", a.name, strings.Join(a.columns, " | "), strings.Repeat("---|", len(a.columns)+1))
+		fmt.Fprintf(b, "### %s\n\n| Fixture | %s |\n|%s\n", a.name, strings.Join(a.columns, " | "), strings.Repeat("---|", len(a.columns)+1))
 		totalBefore, totalAfter := make([]span, len(a.columns)), make([]span, len(a.columns))
 		for _, f := range names {
 			was, inBefore := before[a.name][f]
@@ -257,16 +266,14 @@ func report(w io.Writer, before, after counts) error {
 					totalAfter[i] = totalAfter[i].add(spanOf(now, i))
 				}
 			}
-			fmt.Fprintf(&b, "| %s | %s |\n", label, strings.Join(cells, " | "))
+			fmt.Fprintf(b, "| %s | %s |\n", label, strings.Join(cells, " | "))
 		}
 		cells := make([]string, len(a.columns))
 		for i := range a.columns {
 			cells[i] = totalBefore[i].String() + " → " + totalAfter[i].String()
 		}
-		fmt.Fprintf(&b, "| **Total** | %s |\n\n", strings.Join(cells, " | "))
+		fmt.Fprintf(b, "| **Total** | %s |\n\n", strings.Join(cells, " | "))
 	}
-	_, err := io.WriteString(w, b.String())
-	return err
 }
 
 // span is the least and most a fixture's samples drew in a column.

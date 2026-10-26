@@ -41,20 +41,20 @@ func (s *Store) toConnect(ctx context.Context, where string, args ...any) ([]edi
 	}
 	out := make([]editor.ToConnect, 0, len(byItem))
 	for _, tp := range byItem {
-		ents, err := s.readingEntities(ctx, tp.Item.SourceID, tp.Item.EntryID)
+		ms, err := s.mentions(ctx, tp.Item.SourceID, tp.Item.EntryID)
 		if err != nil {
 			return nil, err
 		}
-		out = append(out, editor.ToConnect{Item: tp.Item, Facts: tp.Facts, Entities: ents})
+		out = append(out, editor.ToConnect{Item: tp.Item, Facts: tp.Facts, Mentions: ms})
 	}
 	return out, nil
 }
 
-// readingEntities are the names of the Entities the reading of an Item gave,
-// in any of its Facts or Claims, by name.
-func (s *Store) readingEntities(ctx context.Context, sourceID, entryID string) ([]string, error) {
+// mentions are the Entities an Item mentions: those its reading gave, in any
+// of its Facts or Claims, by name.
+func (s *Store) mentions(ctx context.Context, sourceID, entryID string) ([]editor.Mention, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT entities.name FROM entities WHERE entities.id IN (
+		SELECT entities.name, entities.kind FROM entities WHERE entities.id IN (
 			SELECT fe.entity_id FROM fact_entities fe JOIN facts f ON f.id = fe.fact_id
 			WHERE f.source_id = ?1 AND f.entry_id = ?2
 			UNION
@@ -65,13 +65,13 @@ func (s *Store) readingEntities(ctx context.Context, sourceID, entryID string) (
 		return nil, fmt.Errorf("entities of the reading of %s: %w", entryID, err)
 	}
 	defer func() { _ = rows.Close() }()
-	var out []string
+	var out []editor.Mention
 	for rows.Next() {
-		var name string
-		if err := rows.Scan(&name); err != nil {
+		var m editor.Mention
+		if err := rows.Scan(&m.Name, &m.Kind); err != nil {
 			return nil, fmt.Errorf("entities of the reading of %s: %w", entryID, err)
 		}
-		out = append(out, name)
+		out = append(out, m)
 	}
 	return out, rows.Err()
 }
@@ -130,8 +130,8 @@ func (s *Store) FactsNear(ctx context.Context, facts []editor.Fact, limit int) (
 	return out, nil
 }
 
-// SaveConnecting gives each Entity its role in its Fact (making the Fact
-// involve it, if its reading did not list it there), keeps the cause
+// SaveConnecting gives each Entity a Fact involves its role in it (an
+// Entity given no role is not involved, whatever reading listed), keeps the cause
 // Connections, and marks every Fact connected, all at once. A Connection
 // already kept is kept once.
 func (s *Store) SaveConnecting(ctx context.Context, c editor.Connecting, connectedAt time.Time) error {
@@ -140,6 +140,14 @@ func (s *Store) SaveConnecting(ctx context.Context, c editor.Connecting, connect
 		return err
 	}
 	defer func() { _ = tx.Rollback() }()
+	// Connecting decides which Entities each Fact involves, so connecting a
+	// Fact again replaces what it decided before. The Entities stay tied to
+	// the Fact, which its Item mentions; only their roles go.
+	for _, f := range c.Facts {
+		if _, err := tx.ExecContext(ctx, `UPDATE fact_entities SET role = NULL WHERE fact_id = ?`, f); err != nil {
+			return fmt.Errorf("roles in fact %d: %w", f, err)
+		}
+	}
 	for _, r := range c.Roles {
 		// An Entity of the Item's reading the Fact did not list is involved
 		// in it from now on, in its role.
@@ -168,6 +176,29 @@ func (s *Store) SaveConnecting(ctx context.Context, c editor.Connecting, connect
 		}
 	}
 	return tx.Commit()
+}
+
+// Involvements are the Entities each Fact of an Item involves, each in its
+// role, by Fact and then Entity: what connecting decided of them.
+func (s *Store) Involvements(ctx context.Context, sourceID, entryID string) ([]editor.Role, error) {
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT fe.fact_id, entities.name, fe.role
+		FROM fact_entities fe JOIN facts f ON f.id = fe.fact_id JOIN entities ON entities.id = fe.entity_id
+		WHERE f.source_id = ? AND f.entry_id = ? AND fe.role IS NOT NULL
+		ORDER BY fe.fact_id, entities.name`, sourceID, entryID)
+	if err != nil {
+		return nil, fmt.Errorf("involvements of %s: %w", entryID, err)
+	}
+	defer func() { _ = rows.Close() }()
+	var out []editor.Role
+	for rows.Next() {
+		var r editor.Role
+		if err := rows.Scan(&r.FactID, &r.Entity, &r.Role); err != nil {
+			return nil, fmt.Errorf("involvements of %s: %w", entryID, err)
+		}
+		out = append(out, r)
+	}
+	return out, rows.Err()
 }
 
 // traced selects a Fact, with the title of its Item, from the facts table

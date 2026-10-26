@@ -1,11 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "6ec51344f754138f4818768957a36f720c0943237be1bddf4ea33aa6c40f1b8a",
-  "recorded_at": "2026-10-26T00:28:35.154601Z",
+  "request_hash": "555a9cf2f2ab2dd7009e851fadbcc7fec1ded36eb963dd2dddd4ebe63776e4c1",
+  "recorded_at": "2026-10-26T12:20:06.052058Z",
   "usage": {
-    "input_tokens": 3038,
-    "output_tokens": 1146
+    "input_tokens": 2757,
+    "output_tokens": 1436
   },
   "output": {
     "causes": [],
@@ -14,16 +14,16 @@
         "fact": "F1",
         "roles": [
           {
-            "entity": "Downing Street",
-            "role": "place"
-          },
-          {
             "entity": "Prime Minister",
             "role": "actor"
           },
           {
             "entity": "Volodymyr Zelenskyy",
-            "role": "affected"
+            "role": "undergoer"
+          },
+          {
+            "entity": "Downing Street",
+            "role": "place"
           }
         ]
       },
@@ -31,12 +31,8 @@
         "fact": "F2",
         "roles": [
           {
-            "entity": "Prime Minister",
+            "entity": "Prime Minister and Volodymyr Zelenskyy",
             "role": "actor"
-          },
-          {
-            "entity": "Volodymyr Zelenskyy",
-            "role": "affected"
           }
         ]
       },
@@ -46,14 +42,6 @@
           {
             "entity": "Prime Minister",
             "role": "actor"
-          },
-          {
-            "entity": "UK",
-            "role": "actor"
-          },
-          {
-            "entity": "Volodymyr Zelenskyy",
-            "role": "affected"
           }
         ]
       },
@@ -61,7 +49,7 @@
         "fact": "F4",
         "roles": [
           {
-            "entity": "Prime Minister",
+            "entity": "Prime Minister and Volodymyr Zelenskyy",
             "role": "actor"
           },
           {
@@ -70,11 +58,7 @@
           },
           {
             "entity": "Ukraine",
-            "role": "affected"
-          },
-          {
-            "entity": "Volodymyr Zelenskyy",
-            "role": "actor"
+            "role": "undergoer"
           }
         ]
       }

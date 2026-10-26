@@ -68,8 +68,8 @@ func TestTwoStoriesWhoseFactsInvolveAnEntityInTheSameRoleAreConnectedOnEachSide(
 
 func TestAnEntityInADifferentRoleDoesNotConnectTwoStories(t *testing.T) {
 	store := twoStories(t, inANewStory)
-	affected := `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "affected"}, {"entity": "Edinburgh", "role": "place"}]}], "causes": []}`
-	ed, _ := connector(store, &inTurn{outputs: []string{speechRoles, affected}})
+	undergoer := `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "undergoer"}, {"entity": "Edinburgh", "role": "place"}]}], "causes": []}`
+	ed, _ := connector(store, &inTurn{outputs: []string{speechRoles, undergoer}})
 	if err := ed.ConnectWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}

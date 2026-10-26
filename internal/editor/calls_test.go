@@ -102,7 +102,7 @@ func TestAReadingRefusedByItsChecksInABatchIsKeptWithItsReason(t *testing.T) {
 	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
-	bad := `{"facts": [{"statement": "x", "as_at": "2026-10-22", "quote": "not in the Item", "entities": []}], "claims": []}`
+	bad := `{"facts": [{"statement": "x", "as_at": "2026-10-22", "quote": "not in the Item"}], "claims": [], "mentions": []}`
 	batcher.end(1, func(editor.BatchRequest) editor.BatchResult {
 		return editor.BatchResult{Response: answered(bad)}
 	})

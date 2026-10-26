@@ -1,156 +1,142 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "f3adf8372d5b518c99289b165eb19e3a7bf265c5a6906f29d3d9cf43a5630edb",
-  "recorded_at": "2026-10-25T21:55:39.723175Z",
+  "request_hash": "cc7842f903d1302918bb2ec4b1a14df5d2dd219c42294acd95242a6661a0029b",
+  "recorded_at": "2026-10-26T13:47:24.900121Z",
   "usage": {
-    "input_tokens": 3732,
-    "output_tokens": 3632
+    "input_tokens": 3525,
+    "output_tokens": 3464
   },
   "output": {
     "claims": [
       {
-        "entities": [
-          {
-            "kind": "person",
-            "name": "Andy Burnham",
-            "role": "Prime Minister of the United Kingdom"
-          },
-          {
-            "kind": "organisation",
-            "name": "Great British Railways",
-            "role": "publicly owned railway whose home will be in Derby"
-          },
-          {
-            "kind": "place",
-            "name": "Derby",
-            "role": "city that will be the home of Great British Railways"
-          }
-        ],
-        "made_by": "Andy Burnham",
-        "quote": "Great British Railways will have its home in Derby",
-        "statement": "Great British Railways will have its home in Derby, a city that has railways in its DNA."
+        "made_by": "Andy Burnham, Prime Minister",
+        "quote": "For too long, people have put up with a railway that often lets them down.",
+        "statement": "The railway has for too long let people down."
       },
       {
-        "entities": [
-          {
-            "kind": "person",
-            "name": "Heidi Alexander",
-            "role": "Transport Secretary"
-          },
-          {
-            "kind": "organisation",
-            "name": "Great British Railways",
-            "role": "railway body bringing the railway together around one mission"
-          }
-        ],
-        "made_by": "Heidi Alexander",
+        "made_by": "Heidi Alexander, Transport Secretary",
         "quote": "Great British Railways will bring the railway together around one mission - better services for passengers",
-        "statement": "Great British Railways will bring the railway together around one mission, better services for passengers."
+        "statement": "Great British Railways will bring the railway together around one mission of better services for passengers."
       },
       {
-        "entities": [
-          {
-            "kind": "person",
-            "name": "Pat McFadden",
-            "role": "Work and Pensions Secretary"
-          }
-        ],
-        "made_by": "Pat McFadden",
+        "made_by": "Pat McFadden, Work and Pensions Secretary",
         "quote": "This forms part of our £2.5 billion youth employment support package which is creating up to 500,000 opportunities for young people to earn or learn",
         "statement": "The £2.5 billion youth employment support package is creating up to 500,000 opportunities for young people to earn or learn."
       },
       {
-        "entities": [
-          {
-            "kind": "person",
-            "name": "Claire Ward",
-            "role": "Mayor of the East Midlands"
-          },
-          {
-            "kind": "organisation",
-            "name": "Great British Railways",
-            "role": "railway body to be based in Derby"
-          },
-          {
-            "kind": "place",
-            "name": "Derby",
-            "role": "city where Great British Railways will be based"
-          }
-        ],
-        "made_by": "Claire Ward",
-        "quote": "I’m delighted that Great British Railways will be based here, bringing hundreds of jobs into the city",
-        "statement": "Great British Railways will be based in Derby, bringing hundreds of jobs into the city."
+        "made_by": "Claire Ward, Mayor of the East Midlands",
+        "quote": "This is fantastic news for Derby.",
+        "statement": "The announcement that Great British Railways will be based in Derby is fantastic news for Derby."
+      },
+      {
+        "made_by": "UK Government (publisher of this Item)",
+        "quote": "an estimated £151 million boost to the region’s economy",
+        "statement": "The new HQ will give an estimated £151 million boost to the region's economy."
+      },
+      {
+        "made_by": "UK Government (publisher of this Item)",
+        "quote": "Construction of the brand-new development in at Becketwell, a brownfield site in the heart of Derby city centre, is expected to begin in early 2027 and be completed by spring 2029.",
+        "statement": "Construction of the Becketwell HQ is expected to begin in early 2027 and be completed by spring 2029."
+      },
+      {
+        "made_by": "UK Government (publisher of this Item)",
+        "quote": "The site will accommodate up to 450 GBR staff",
+        "statement": "The Derby HQ site will accommodate up to 450 Great British Railways staff."
+      },
+      {
+        "made_by": "UK Government (publisher of this Item)",
+        "quote": "cement the city’s role as Europe’s largest rail hub",
+        "statement": "Derby's rail apprenticeship start will help cement the city's role as Europe's largest rail hub."
       }
     ],
     "facts": [
       {
         "as_at": "2026-10-15",
-        "entities": [
-          {
-            "kind": "organisation",
-            "name": "Great British Railways",
-            "role": "railway body whose headquarters site was unveiled"
-          },
-          {
-            "kind": "place",
-            "name": "Derby",
-            "role": "city where the headquarters site was unveiled"
-          }
-        ],
-        "quote": "the site of Great British Railways’ (GBR) headquarters is unveiled today (15 October 2026) in Derby",
+        "quote": "is unveiled today (15 October 2026) in Derby",
         "statement": "The site of Great British Railways' headquarters was unveiled in Derby on 15 October 2026."
       },
       {
         "as_at": "2026-10-14",
-        "entities": [
-          {
-            "kind": "place",
-            "name": "Becketwell",
-            "role": "brownfield site chosen for the Great British Railways headquarters"
-          },
-          {
-            "kind": "place",
-            "name": "Derby",
-            "role": "city in whose centre Becketwell lies"
-          }
-        ],
         "quote": "Becketwell, a brownfield site in the heart of Derby city centre",
         "statement": "Becketwell is a brownfield site in the heart of Derby city centre."
       },
       {
         "as_at": "2026-10-14",
-        "entities": [
-          {
-            "kind": "organisation",
-            "name": "Great British Railways",
-            "role": "railway body whose headquarters staff will be based at the site"
-          },
-          {
-            "kind": "place",
-            "name": "Becketwell",
-            "role": "site of the headquarters"
-          }
-        ],
-        "quote": "The site will accommodate up to 450 GBR staff",
-        "statement": "The Becketwell site will accommodate up to 450 Great British Railways staff."
+        "quote": "fares frozen for the first time in 30 years",
+        "statement": "Rail fares have been frozen for the first time in 30 years."
       },
       {
         "as_at": "2026-10-14",
-        "entities": [
-          {
-            "kind": "organisation",
-            "name": "Alstom",
-            "role": "manufacturer building a new fleet of trains for the north"
-          },
-          {
-            "kind": "place",
-            "name": "Derby",
-            "role": "city where Alstom's site is"
-          }
-        ],
-        "quote": "the recent £1 billion investment in a new fleet of trains for the north set to be built at Alstom’s Derby site",
-        "statement": "A £1 billion investment in a new fleet of trains for the north is set to be built at Alstom's Derby site."
+        "quote": "76,000 extra seats a week introduced across the network",
+        "statement": "76,000 extra seats a week have been introduced across the rail network."
+      },
+      {
+        "as_at": "2026-10-14",
+        "quote": "the recent £1 billion investment in a new fleet of trains for the north",
+        "statement": "There has been a recent £1 billion investment in a new fleet of trains for the north."
+      },
+      {
+        "as_at": "2026-10-14",
+        "quote": "less than 7% of the railway’s workforce is under 25",
+        "statement": "Less than 7% of the railway's workforce is under 25."
+      }
+    ],
+    "mentions": [
+      {
+        "kind": "person",
+        "name": "Andy Burnham",
+        "role": "Prime Minister"
+      },
+      {
+        "kind": "person",
+        "name": "Heidi Alexander",
+        "role": "Transport Secretary"
+      },
+      {
+        "kind": "person",
+        "name": "Pat McFadden",
+        "role": "Work and Pensions Secretary"
+      },
+      {
+        "kind": "person",
+        "name": "Claire Ward",
+        "role": "Mayor of the East Midlands"
+      },
+      {
+        "kind": "organisation",
+        "name": "Great British Railways",
+        "role": "publicly owned railway body whose headquarters is being sited in Derby"
+      },
+      {
+        "kind": "place",
+        "name": "Derby",
+        "role": "city where the Great British Railways headquarters is being built"
+      },
+      {
+        "kind": "place",
+        "name": "Becketwell",
+        "role": "brownfield site in Derby city centre chosen for the headquarters"
+      },
+      {
+        "kind": "organisation",
+        "name": "Department for Transport",
+        "role": "partner in delivering public transport links and walking routes at the Derby site"
+      },
+      {
+        "kind": "organisation",
+        "name": "Derby City Council",
+        "role": "partner in delivering public transport links and walking routes at the Derby site"
+      },
+      {
+        "kind": "organisation",
+        "name": "East Midlands Combined Authority",
+        "role": "partner in delivering public transport links and walking routes at the Derby site"
+      },
+      {
+        "kind": "organisation",
+        "name": "Alstom",
+        "role": "manufacturer whose Derby site will build the new fleet of trains for the north"
       }
     ]
   }

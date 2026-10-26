@@ -2,10 +2,8 @@ package editor_test
 
 import (
 	"context"
-	"crypto/sha256"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"slices"
 	"strings"
 	"testing"
@@ -43,6 +41,24 @@ var speech = editor.Item{
 const goodReading = `{
   "facts": [
     {"statement": "Andy Burnham gave a speech in Motherwell.", "as_at": "2026-10-16",
+     "quote": "to be here in Motherwell"}
+  ],
+  "claims": [
+    {"statement": "Scotland will get £2 billion.", "made_by": "Andy Burnham",
+     "quote": "Scotland will get £2 billion."}
+  ],
+  "mentions": [
+    {"name": "Andy Burnham", "kind": "person", "role": "Prime Minister of the United Kingdom"},
+    {"name": "Motherwell", "kind": "place", "role": ""},
+    {"name": "Scotland", "kind": "place", "role": ""}
+  ]
+}`
+
+// legacyReading is goodReading in reading's earlier schema, which gave the
+// Entities each Fact and Claim involved, inline, and no mentions.
+const legacyReading = `{
+  "facts": [
+    {"statement": "Andy Burnham gave a speech in Motherwell.", "as_at": "2026-10-16",
      "quote": "to be here in Motherwell", "entities": [
        {"name": "Andy Burnham", "kind": "person", "role": ""},
        {"name": "Motherwell", "kind": "place", "role": ""}]}
@@ -55,7 +71,40 @@ const goodReading = `{
   ]
 }`
 
-func TestReadingGathersTheEntitiesItsFactsAndClaimsInvolveOncePerName(t *testing.T) {
+func TestReadingAsksForTheItemsMentionsOnceAndNoEntitiesPerStatement(t *testing.T) {
+	model := &fakeModel{output: goodReading}
+	if _, err := editor.Read(t.Context(), model, speech); err != nil {
+		t.Fatal(err)
+	}
+	req := model.sent[0]
+
+	props := req.Schema["properties"].(map[string]any)
+	mentions, ok := props["mentions"].(map[string]any)
+	if !ok || mentions["type"] != "array" {
+		t.Fatalf("the schema asks for no mentions: %+v", props)
+	}
+	item := mentions["items"].(map[string]any)["properties"].(map[string]any)
+	for _, f := range []string{"name", "kind", "role"} {
+		if _, ok := item[f]; !ok {
+			t.Errorf("a mention has no %s: %+v", f, item)
+		}
+	}
+	if !slices.Contains(req.Schema["required"].([]string), "mentions") {
+		t.Errorf("mentions are not required: %v", req.Schema["required"])
+	}
+	for _, statements := range []string{"facts", "claims"} {
+		fields := props[statements].(map[string]any)["items"].(map[string]any)["properties"].(map[string]any)
+		if _, ok := fields["entities"]; ok {
+			t.Errorf("each of the %s still lists its Entities: %+v", statements, fields)
+		}
+	}
+	// Involvement is connecting's judgement: reading no longer defines it.
+	if strings.Contains(req.Instructions, "involve") {
+		t.Errorf("reading's instructions still say what a statement involves:\n%s", req.Instructions)
+	}
+}
+
+func TestReadingGivesTheItemsMentionsOnceAndTiesEachFactToThemAll(t *testing.T) {
 	r, err := editor.Read(t.Context(), &fakeModel{output: goodReading}, speech)
 	if err != nil {
 		t.Fatal(err)
@@ -69,11 +118,37 @@ func TestReadingGathersTheEntitiesItsFactsAndClaimsInvolveOncePerName(t *testing
 	if !slices.Equal(r.Entities, want) {
 		t.Errorf("Entities = %+v, want %+v", r.Entities, want)
 	}
+	// What finds work still reads a Fact's Entities: each is tied to every
+	// Entity its Item mentions. A Claim is tied to none.
+	if got := r.Facts[0].Entities; !slices.Equal(got, []string{"Andy Burnham", "Motherwell", "Scotland"}) {
+		t.Errorf("the Fact is tied to %v, want the Item's mentions", got)
+	}
+	if got := r.Claims[0].Entities; len(got) != 0 {
+		t.Errorf("the Claim is tied to %v, want none", got)
+	}
+}
+
+func TestAReadingInTheEarlierSchemaGivesItsListsAsTheItemsMentions(t *testing.T) {
+	r, err := editor.Read(t.Context(), &fakeModel{output: legacyReading}, speech)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := []editor.Entity{
+		{Name: "Andy Burnham", Kind: "person", Role: "Prime Minister of the United Kingdom"},
+		{Name: "Motherwell", Kind: "place"},
+		{Name: "Scotland", Kind: "place"},
+	}
+	if !slices.Equal(r.Entities, want) {
+		t.Errorf("Entities = %+v, want %+v", r.Entities, want)
+	}
+	// Each statement keeps its own list, so a replay of an earlier reading
+	// gives the acts downstream the Record it gave them before.
 	if got := r.Facts[0].Entities; !slices.Equal(got, []string{"Andy Burnham", "Motherwell"}) {
-		t.Errorf("the Fact involves %v", got)
+		t.Errorf("the Fact is tied to %v", got)
 	}
 	if got := r.Claims[0].Entities; !slices.Equal(got, []string{"Andy Burnham", "Scotland"}) {
-		t.Errorf("the Claim involves %v", got)
+		t.Errorf("the Claim is tied to %v", got)
 	}
 }
 
@@ -101,8 +176,9 @@ func TestReadingAnItemDrawsFactsThatCarryTheItemAndADate(t *testing.T) {
 }
 
 func TestAnEntityNamedWithTwoRolesKeepsTheFirstGiven(t *testing.T) {
-	output := strings.Replace(goodReading, `{"name": "Andy Burnham", "kind": "person", "role": ""}`,
-		`{"name": "Andy Burnham", "kind": "person", "role": "Leader of the Labour Party"}`, 1)
+	output := strings.Replace(goodReading, `"mentions": [`,
+		`"mentions": [{"name": "Andy Burnham", "kind": "person", "role": ""},
+		{"name": "Andy Burnham", "kind": "person", "role": "Leader of the Labour Party"},`, 1)
 
 	r, err := editor.Read(t.Context(), &fakeModel{output: output}, speech)
 	if err != nil {
@@ -110,7 +186,10 @@ func TestAnEntityNamedWithTwoRolesKeepsTheFirstGiven(t *testing.T) {
 	}
 
 	if r.Entities[0].Name != "Andy Burnham" || r.Entities[0].Role != "Leader of the Labour Party" {
-		t.Errorf("Entities = %+v, want Andy Burnham with the role the Fact gives", r.Entities)
+		t.Errorf("Entities = %+v, want Andy Burnham with the first role given", r.Entities)
+	}
+	if len(r.Entities) != 3 {
+		t.Errorf("Entities = %+v, want Andy Burnham once", r.Entities)
 	}
 }
 
@@ -118,13 +197,14 @@ func TestOnlyAPersonKeepsTheRoleReadingGivesIt(t *testing.T) {
 	output := `{
   "facts": [
     {"statement": "Andy Burnham gave a speech at the Labour conference in Motherwell.", "as_at": "2026-10-16",
-     "quote": "to be here in Motherwell", "entities": [
-       {"name": "Andy Burnham", "kind": "person", "role": "Prime Minister of the United Kingdom"},
-       {"name": "Labour Party", "kind": "organisation", "role": "host"},
-       {"name": "Motherwell", "kind": "place", "role": "venue"},
-       {"name": "Labour conference", "kind": "occasion", "role": "setting"}]}
+     "quote": "to be here in Motherwell"}
   ],
-  "claims": []
+  "claims": [],
+  "mentions": [
+    {"name": "Andy Burnham", "kind": "person", "role": "Prime Minister of the United Kingdom"},
+    {"name": "Labour Party", "kind": "organisation", "role": "host"},
+    {"name": "Motherwell", "kind": "place", "role": "venue"},
+    {"name": "Labour conference", "kind": "occasion", "role": "setting"}]
 }`
 
 	r, err := editor.Read(t.Context(), &fakeModel{output: output}, speech)
@@ -161,8 +241,12 @@ func TestAReadingThatFailsTheChecksIsRejected(t *testing.T) {
 		"output with an unknown field": strings.Replace(goodReading, `"claims"`, `"opinions"`, 1),
 		"a Fact with no date":          strings.Replace(goodReading, `"as_at": "2026-10-16"`, `"as_at": "last week"`, 1),
 		"a Fact with no statement":     strings.Replace(goodReading, `"statement": "Andy Burnham gave a speech in Motherwell."`, `"statement": ""`, 1),
-		"one name given two kinds": strings.Replace(goodReading, `{"name": "Andy Burnham", "kind": "person", "role": "Prime Minister of the United Kingdom"}`,
+		"one name given two kinds": strings.Replace(goodReading, `"mentions": [`,
+			`"mentions": [{"name": "Motherwell", "kind": "organisation", "role": ""},`, 1),
+		"one name given two kinds, in the earlier schema": strings.Replace(legacyReading, `{"name": "Andy Burnham", "kind": "person", "role": "Prime Minister of the United Kingdom"}`,
 			`{"name": "Andy Burnham", "kind": "organisation", "role": ""}`, 1),
+		"a Fact with Entities of its own beside the mentions": strings.Replace(goodReading, `"quote": "to be here in Motherwell"`,
+			`"quote": "to be here in Motherwell", "entities": []`, 1),
 		"an Entity of no known kind": strings.Replace(goodReading, `"kind": "place"`, `"kind": "vibe"`, 1),
 		"an Entity with no name":     strings.Replace(goodReading, `"name": "Motherwell"`, `"name": " "`, 1),
 		// Everything traces: a Fact rests on the Item's own words.
@@ -261,40 +345,23 @@ func TestAReadingShownPrecedentsIsToldOfThemAfterTheSameInstructions(t *testing.
 	}
 }
 
-// involvesDefinition is what it means for a Fact or Claim to involve an
-// Entity, in connecting's four roles (CONTEXT.md, Entity), worded without
-// "role": next to the Entity's role field, that word had the model fill the
-// field for every Entity, not only a person's office.
-const involvesDefinition = ` A Fact or Claim involves an Entity it says did it, was affected by it or is what it is about, is where it happened, or is the occasion it happened at. A name that only says who or where something else is ("Zelenskyy of Ukraine" says who Zelenskyy is) is not involved, and nor is who made a Claim, unless the Claim says one of those things of them.`
-
-// readingInstructionsBeforeTheDefinition is the sha256 of reading's
-// instructions as they were before the definition was added.
-const readingInstructionsBeforeTheDefinition = "80e8b9f0e3e11c691d6006e5b973bef4d5657f778206545b73ac9e4ebb770385"
-
-func TestReadingIsToldWhatAFactInvolvesOnceInTheEntitiesParagraph(t *testing.T) {
+// A Fact is held true as at a date, and no one can corroborate what
+// something will do, cause or be worth: reading is told such a statement is
+// never a Fact, but a Claim, attributed.
+func TestReadingIsToldAProjectedEffectIsNeverAFact(t *testing.T) {
 	model := &fakeModel{output: goodReading}
 	if _, err := editor.Read(t.Context(), model, speech); err != nil {
 		t.Fatal(err)
 	}
 	instructions := model.sent[0].Instructions
 
-	var stated []string
-	for line := range strings.SplitSeq(instructions, "\n") {
-		if strings.Contains(line, "is not involved") {
-			stated = append(stated, line)
+	for _, want := range []string{
+		"what something will do, cause or be worth (an estimate, a forecast, a projected effect) can't be established yet, so it is never a Fact",
+		"as a Claim, made by whoever the Item attributes it to, or, if it attributes it to no one, by the Item's publisher",
+	} {
+		if !strings.Contains(instructions, want) {
+			t.Errorf("reading's instructions do not say %q:\n%s", want, instructions)
 		}
-	}
-	if strings.Contains(involvesDefinition, "role") {
-		t.Error("the definition says role, which the model takes for the Entity's role field")
-	}
-	if len(stated) != 1 || !strings.HasPrefix(stated[0], "- Entities:") ||
-		!strings.Contains(stated[0], "it involves, including one the Item names only by an office or title (\"the Prime Minister\"), each with its name, kind and role."+involvesDefinition) {
-		t.Errorf("the definition is not stated once, in the Entities paragraph after what it involves: %q", stated)
-	}
-	// Nothing else in the instructions changed.
-	before := strings.Replace(instructions, involvesDefinition, "", 1)
-	if got := fmt.Sprintf("%x", sha256.Sum256([]byte(before))); got != readingInstructionsBeforeTheDefinition {
-		t.Errorf("the instructions changed beyond the definition: sha256 %s without it", got)
 	}
 }
 

@@ -94,8 +94,9 @@ func TestTheEditorReadsTheItemsAwaitingReadingIntoTheRecord(t *testing.T) {
 		!f.AsAt.Equal(time.Date(2026, time.October, 16, 0, 0, 0, 0, time.UTC)) {
 		t.Errorf("the Fact does not carry its Item and date: %+v", f)
 	}
-	if len(got.Facts[0].Entities) != 2 {
-		t.Errorf("the Fact's Entities = %v", got.Facts[0].Entities)
+	// The Fact is tied to every Entity the Item mentions.
+	if len(got.Facts[0].Entities) != 3 {
+		t.Errorf("the Fact's Entities = %v, want the Item's three mentions", got.Facts[0].Entities)
 	}
 	if len(got.Claims) != 1 || got.Claims[0].MadeBy != "Andy Burnham" {
 		t.Errorf("Claims = %+v", got.Claims)
@@ -141,7 +142,7 @@ func TestTakingUpATopicTiesOnlyItemsNotYetRead(t *testing.T) {
 
 func TestAReadingThatFailsWritesNothingAndTheItemStaysAwaitingReading(t *testing.T) {
 	for name, model := range map[string]*fakeModel{
-		"failing the checks": {output: `{"facts": [], "claims": [{"statement": "x", "made_by": "", "quote": "x", "entities": []}]}`},
+		"failing the checks": {output: `{"facts": [], "claims": [{"statement": "x", "made_by": "", "quote": "x"}], "mentions": []}`},
 		"a failed call":      {err: errors.New("overloaded")},
 	} {
 		t.Run(name, func(t *testing.T) {

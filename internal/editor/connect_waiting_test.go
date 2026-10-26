@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
@@ -73,6 +74,44 @@ func TestConnectingIsShownEveryEntityTheItemsReadingGaveWithItsKind(t *testing.T
 		if !strings.Contains(in, m) {
 			t.Errorf("the speech's connecting is not shown %q:\n%s", m, in)
 		}
+	}
+}
+
+// The Record keeps what an Item mentions as its reading gives it, apart from
+// what its Facts and Claims are tied to: connecting is shown an Entity the
+// reading gave though no statement is tied to it.
+func TestConnectingIsShownTheItemsMentionsAsTheRecordKeepsThem(t *testing.T) {
+	store := record(t)
+	readAndPlace(t, store, &fakeModel{output: startsAStory})
+	if _, err := store.AddItems(t.Context(), []collect.Item{glasgowItem}); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.SaveReading(t.Context(), editor.Reading{
+		SourceID: glasgowItem.SourceID, EntryID: glasgowItem.EntryID, Model: "fake",
+		Entities: []editor.Entity{{Name: "Glasgow", Kind: "place"}, {Name: "Clyde", Kind: "place"}},
+		Facts: []editor.Fact{{Statement: "Glasgow will get new funding.", AsAt: oct16,
+			Quote: "will get new funding", Entities: []string{"Glasgow"}}},
+	}, saturday); err != nil {
+		t.Fatal(err)
+	}
+	ed, _ := placer(store, &fakeModel{output: startsAStory})
+	if err := ed.PlaceWaiting(t.Context(), saturday); err != nil {
+		t.Fatal(err)
+	}
+	tc, err := store.FactsToConnect(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var glasgow []editor.Mention
+	for _, c := range tc {
+		if c.Item.EntryID == glasgowItem.EntryID {
+			glasgow = c.Mentions
+		}
+	}
+	want := []editor.Mention{{Name: "Clyde", Kind: "place"}, {Name: "Glasgow", Kind: "place"}}
+	if !slices.Equal(glasgow, want) {
+		t.Errorf("connecting is shown the Glasgow Item's mentions as %+v, want %+v", glasgow, want)
 	}
 }
 

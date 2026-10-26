@@ -319,16 +319,10 @@ func sampleNumber(path string) int {
 	return k
 }
 
-// frozenRecord is a Record holding the fixture Items, tied to the
-// briefingTopics, with the recordings of reading, placing and connecting
+// frozenRecordAt is a Record kept at path holding the fixture Items, tied to
+// the briefingTopics, with the recordings of reading, placing and connecting
 // under dir replayed into it: an act's frozen copies, for the acts that rest
 // on all three.
-func frozenRecord(t *testing.T, dir string) *sqlite.Store {
-	t.Helper()
-	return frozenRecordAt(t, filepath.Join(t.TempDir(), "go-slow.db"), dir)
-}
-
-// frozenRecordAt is frozenRecord, kept at path.
 func frozenRecordAt(t *testing.T, path, dir string) *sqlite.Store {
 	t.Helper()
 	store, topics := newRecordAt(t, path, briefingTopics)

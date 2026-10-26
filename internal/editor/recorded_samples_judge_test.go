@@ -352,8 +352,8 @@ func chainedFixtureCarriedOn(t *testing.T, source string) {
 	}
 }
 
-// The Sunday read's rule is declared, though its samples are not drawn yet:
-// three samples, supported at three, refuted at one or none.
+// The Sunday read's rule: three samples, supported at three, refuted at one
+// or none.
 func TestTheSundayReadsRule(t *testing.T) {
 	for held, want := range []verdict{refuted, refuted, undecided, supported} {
 		if got := sundayReadRule.of(held); got != want {

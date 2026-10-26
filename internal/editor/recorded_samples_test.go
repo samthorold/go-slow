@@ -120,8 +120,8 @@ var (
 	// dailyRule is reading's (with its precedent), placing's (with its
 	// precedent), connecting's and the Briefing's.
 	dailyRule = rule{samples: 5, supportedAt: 5, refutedAtMost: 3}
-	// sundayReadRule is the Sunday read's, declared in the design; its
-	// samples are not drawn yet, and it keeps its single recording.
+	// sundayReadRule is the Sunday read's, at dollars a sample: each sample
+	// a whole conversation, with its tries (recorded_sunday_test.go).
 	sundayReadRule = rule{samples: 3, supportedAt: 3, refutedAtMost: 1}
 )
 

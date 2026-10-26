@@ -1,11 +1,11 @@
 {
   "act": "briefing",
   "model": "claude-haiku-5-5",
-  "request_hash": "bb15d8ece7889ecd7e7d4b9765d488bf3cd24d5d51387506cbf5e7956ba69296",
-  "recorded_at": "2026-10-25T15:09:13.783744Z",
+  "request_hash": "08052c7508e8c2d7dc586754e376890c20e56979a338e19091fbf732608eb24f",
+  "recorded_at": "2026-10-26T00:30:54.218905Z",
   "usage": {
-    "input_tokens": 3144,
-    "output_tokens": 1891
+    "input_tokens": 3083,
+    "output_tokens": 1929
   },
   "output": {
     "stories": [
@@ -16,7 +16,7 @@
               "D1",
               "D2"
             ],
-            "text": "President Trump announced a reciprocal energy ceasefire between Russia and Ukraine. President Zelenskyy assured the Prime Minister that Ukraine would immediately implement it once a start date is confirmed."
+            "text": "An agreement between the US and Russia was reached on 9 October. On 11 October, President Trump announced a reciprocal energy ceasefire."
           }
         ],
         "story": "S1"
@@ -27,7 +27,7 @@
             "developments": [
               "D3"
             ],
-            "text": "The UK has announced a new sanctions package covering over 90% of Russia's oil producing capacity."
+            "text": "The UK announced a new sanctions package, so that over 90% of Russia's oil producing capacity is now covered by UK sanctions."
           }
         ],
         "story": "S2"
@@ -36,10 +36,26 @@
         "statements": [
           {
             "developments": [
-              "D9",
+              "D8"
+            ],
+            "text": "The Prime Minister has asked Ministers to draw up further sanctions, military aid and fiscal packages to provide urgent support in the coming weeks."
+          },
+          {
+            "developments": [
+              "D9"
+            ],
+            "text": "The UK is delivering £45 million of surface-to-air missiles to Ukraine."
+          }
+        ],
+        "story": "S6"
+      },
+      {
+        "statements": [
+          {
+            "developments": [
               "D10"
             ],
-            "text": "The UK is delivering £45 million of surface-to-air missiles to Ukraine. The UK has also committed £1.6 billion to deliver more than 5000 Lightweight Multirole Missiles to Ukraine over the next four years."
+            "text": "The Prime Minister set out the UK's latest package of Lightweight Multirole Missiles for Ukraine."
           }
         ],
         "story": "S7"
@@ -50,7 +66,7 @@
             "developments": [
               "D4"
             ],
-            "text": "The Prime Minister and Chancellor Merz agreed a new partnership to tackle hybrid threats in Berlin."
+            "text": "Britain decided to send air defence and a Voyager aircraft to Saudi Arabia to provide air-to-air refuelling support."
           }
         ],
         "story": "S3"
@@ -59,10 +75,15 @@
         "statements": [
           {
             "developments": [
-              "D5",
+              "D5"
+            ],
+            "text": "In Berlin, the Prime Minister and Chancellor Merz agreed a new partnership to tackle hybrid threats."
+          },
+          {
+            "developments": [
               "D6"
             ],
-            "text": "The Prime Minister confirmed in his speech to the United Nations General Assembly the commitment to establish a National Centre for Information Defence, which the Foreign Affairs Select Committee has recommended."
+            "text": "In his UN General Assembly speech, the Prime Minister confirmed a commitment to establish a National Centre for Information Defence."
           }
         ],
         "story": "S4"
@@ -82,21 +103,22 @@
         "statements": [
           {
             "developments": [
-              "D8"
+              "D11"
             ],
-            "text": "The Prime Minister confirmed in New York that AI will be centre stage in the UK's G20 presidency."
-          }
-        ],
-        "story": "S6"
-      },
-      {
-        "statements": [
+            "text": "The government confirmed the Derby headquarters decision, a milestone in its plan for a publicly owned railway."
+          },
           {
             "developments": [
-              "D11",
+              "D14",
               "D12"
             ],
-            "text": "The Derby site will accommodate up to 450 Great British Railways staff. The site of the Great British Railways headquarters was unveiled in Derby on 15 October 2026."
+            "text": "The site of Great British Railways' headquarters was unveiled in Derby on 15 October 2026 and will accommodate up to 450 GBR staff."
+          },
+          {
+            "developments": [
+              "D13"
+            ],
+            "text": "Better public transport links and walking routes for the headquarters site are being delivered in partnership with the Department for Transport, Derby City Council and the East Midlands Combined Authority."
           }
         ],
         "story": "S8"
@@ -105,9 +127,9 @@
         "statements": [
           {
             "developments": [
-              "D13"
+              "D15"
             ],
-            "text": "Up to 600 apprentices aged 16 to 21 will enrol over the next 4 years on the rail foundation apprenticeship."
+            "text": "Up to 600 apprentices aged 16 to 21 will enrol over the next 4 years on the rail foundation apprenticeship, with the first starters based in Derby."
           }
         ],
         "story": "S9"
@@ -116,9 +138,9 @@
         "statements": [
           {
             "developments": [
-              "D14"
+              "D16"
             ],
-            "text": "Fares have been frozen for the first time in 30 years."
+            "text": "Fares have been frozen for the first time in 30 years as rail services have moved into public ownership."
           }
         ],
         "story": "S10"
@@ -127,34 +149,12 @@
         "statements": [
           {
             "developments": [
-              "D15"
-            ],
-            "text": "76,000 extra seats a week have been introduced across the network."
-          }
-        ],
-        "story": "S11"
-      },
-      {
-        "statements": [
-          {
-            "developments": [
-              "D16"
+              "D17"
             ],
             "text": "A £1 billion investment in a new fleet of trains for the north is set to be built at Alstom's Derby site."
           }
         ],
-        "story": "S12"
-      },
-      {
-        "statements": [
-          {
-            "developments": [
-              "D19"
-            ],
-            "text": "The Scottish Government has announced a long-term programme for local government reform."
-          }
-        ],
-        "story": "S14"
+        "story": "S11"
       }
     ]
   }

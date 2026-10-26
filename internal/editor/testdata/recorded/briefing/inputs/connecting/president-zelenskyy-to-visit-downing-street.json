@@ -1,10 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T10:21:24.173436Z",
+  "request_hash": "4bb8d3ba0c8403822c94fe544d5ee6604d57eca2410cea376aa90c19913d1df5",
+  "recorded_at": "2026-10-26T00:27:51.184721Z",
   "usage": {
-    "input_tokens": 2308,
-    "output_tokens": 1430
+    "input_tokens": 2080,
+    "output_tokens": 1050
   },
   "output": {
     "causes": [],
@@ -30,11 +31,7 @@
         "fact": "F2",
         "roles": [
           {
-            "entity": "UK",
-            "role": "place"
-          },
-          {
-            "entity": "Volodymyr Zelenskyy",
+            "entity": "Andy Burnham",
             "role": "actor"
           }
         ]
@@ -42,10 +39,6 @@
       {
         "fact": "F3",
         "roles": [
-          {
-            "entity": "UK",
-            "role": "actor"
-          },
           {
             "entity": "Ukraine",
             "role": "affected"
@@ -56,10 +49,6 @@
         "fact": "F4",
         "roles": [
           {
-            "entity": "UK",
-            "role": "actor"
-          },
-          {
             "entity": "Ukraine",
             "role": "affected"
           }
@@ -67,23 +56,6 @@
       },
       {
         "fact": "F5",
-        "roles": [
-          {
-            "entity": "John Healey",
-            "role": "actor"
-          },
-          {
-            "entity": "Bangkok",
-            "role": "place"
-          },
-          {
-            "entity": "IMF",
-            "role": "occasion"
-          }
-        ]
-      },
-      {
-        "fact": "F6",
         "roles": [
           {
             "entity": "Foreign Secretary",
@@ -96,20 +68,20 @@
         ]
       },
       {
-        "fact": "F7",
+        "fact": "F6",
         "roles": [
           {
-            "entity": "Andy Burnham",
+            "entity": "John Healey",
             "role": "actor"
           },
           {
-            "entity": "UK",
-            "role": "affected"
+            "entity": "IMF meetings in Bangkok",
+            "role": "occasion"
           }
         ]
       },
       {
-        "fact": "F8",
+        "fact": "F7",
         "roles": [
           {
             "entity": "Russia",

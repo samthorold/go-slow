@@ -1,10 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T10:21:35.95036Z",
+  "request_hash": "b882d4738ac4d7447c68944a51cdb3bc136e80173a09bbcc7b5829a9e7a774b0",
+  "recorded_at": "2026-10-26T00:28:50.783199Z",
   "usage": {
-    "input_tokens": 2109,
-    "output_tokens": 1056
+    "input_tokens": 1842,
+    "output_tokens": 923
   },
   "output": {
     "causes": [],
@@ -18,7 +19,7 @@
           },
           {
             "entity": "Great British Railways",
-            "role": "actor"
+            "role": "affected"
           }
         ]
       },
@@ -27,7 +28,7 @@
         "roles": [
           {
             "entity": "Great British Railways",
-            "role": "actor"
+            "role": "affected"
           }
         ]
       },
@@ -35,35 +36,8 @@
         "fact": "F3",
         "roles": [
           {
-            "entity": "Great British Railways",
-            "role": "actor"
-          }
-        ]
-      },
-      {
-        "fact": "F4",
-        "roles": [
-          {
-            "entity": "Great British Railways",
-            "role": "actor"
-          }
-        ]
-      },
-      {
-        "fact": "F5",
-        "roles": [
-          {
-            "entity": "Great British Railways",
-            "role": "actor"
-          }
-        ]
-      },
-      {
-        "fact": "F6",
-        "roles": [
-          {
-            "entity": "Alstom",
-            "role": "actor"
+            "entity": "Becketwell",
+            "role": "affected"
           },
           {
             "entity": "Derby",
@@ -72,41 +46,57 @@
         ]
       },
       {
-        "fact": "F7",
+        "fact": "F4",
+        "roles": [
+          {
+            "entity": "Great British Railways",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F5",
+        "roles": [
+          {
+            "entity": "Derby",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F6",
         "roles": []
       },
       {
-        "fact": "F8",
+        "fact": "F7",
         "roles": [
           {
-            "entity": "Andy Burnham",
-            "role": "actor"
+            "entity": "Alstom",
+            "role": "affected"
+          },
+          {
+            "entity": "Derby",
+            "role": "place"
           }
         ]
+      },
+      {
+        "fact": "F8",
+        "roles": []
       },
       {
         "fact": "F9",
         "roles": [
           {
-            "entity": "Heidi Alexander",
+            "entity": "Department for Transport",
             "role": "actor"
-          }
-        ]
-      },
-      {
-        "fact": "F10",
-        "roles": [
+          },
           {
-            "entity": "Pat McFadden",
+            "entity": "Derby City Council",
             "role": "actor"
-          }
-        ]
-      },
-      {
-        "fact": "F11",
-        "roles": [
+          },
           {
-            "entity": "Claire Ward",
+            "entity": "East Midlands Combined Authority",
             "role": "actor"
           }
         ]

@@ -1,60 +1,60 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "dbafc549b8688360bf4d1dca8f92a90f5573002bb220e4386da9ee1ba589232e",
-  "recorded_at": "2026-10-26T21:39:57.915405Z",
+  "request_hash": "1c18e7042327739a6d1338412101627d51550b7c93eaa8b1da636f0b9cf82e7a",
+  "recorded_at": "2026-10-26T22:47:44.191374Z",
   "usage": {
-    "input_tokens": 2758,
-    "output_tokens": 4684
+    "input_tokens": 2808,
+    "output_tokens": 4267
   },
   "output": {
     "claims": [
       {
         "made_by": "Andy Burnham",
         "quote": "Our rock-solid support to Ukraine is vital for keeping us safe here in the UK",
-        "statement": "UK support to Ukraine is vital for keeping the UK safe."
+        "statement": "UK support for Ukraine is vital for keeping the UK safe."
       },
       {
         "made_by": "Andy Burnham",
-        "quote": "we will go further and faster in our support to back your courageous fight for peace in Europe",
-        "statement": "The UK will go further and faster in its support for Ukraine."
+        "quote": "we are with you for as long as it takes",
+        "statement": "The UK will stand with Ukraine for as long as it takes."
       },
       {
         "made_by": "Andy Burnham",
         "quote": "Russia’s aggression cannot be allowed to succeed on our continent.",
-        "statement": "Russia's aggression cannot be allowed to succeed in Europe."
+        "statement": "Russia's aggression must not be allowed to succeed in Europe."
+      },
+      {
+        "made_by": "John Healey",
+        "quote": "our commitment to the Ukrainian people is unshakeable",
+        "statement": "The UK's commitment to the Ukrainian people is unshakeable."
       },
       {
         "made_by": "John Healey",
         "quote": "to curtail the war chest funding Putin so desperately wants",
-        "statement": "A ban on Russian LNG would curtail the funds Putin uses for the war."
+        "statement": "A ban on Russian LNG would curtail the funding Putin relies on for the war."
       },
       {
         "made_by": "UK Government",
         "quote": "have proven extremely effective against jet-powered drones",
-        "statement": "Lightweight Multirole Missiles have proven extremely effective against jet-powered drones."
+        "statement": "British Lightweight Multirole Missiles have proven extremely effective against jet-powered drones."
       },
       {
         "made_by": "UK Government",
         "quote": "making them harder to detect and destroy before they hit targets",
-        "statement": "Jet-powered drones are harder to detect and destroy before they hit targets than propeller-driven Shaheds."
+        "statement": "Jet-powered drones are faster and fly higher than propeller-driven Shaheds, making them harder to detect and destroy before they hit targets."
       }
     ],
     "facts": [
       {
         "as_at": "2026-10-13",
         "quote": "Prime Minister to host President Volodymyr Zelenskyy at Downing Street today",
-        "statement": "The Prime Minister is hosting President Volodymyr Zelenskyy at Downing Street on 2026-10-13."
+        "statement": "The Prime Minister Andy Burnham is set to host President Volodymyr Zelenskyy at Downing Street on 2026-10-13."
       },
       {
         "as_at": "2026-10-13",
-        "quote": "delivering £45 million of surface-to-air missiles deliveries",
-        "statement": "The UK is delivering £45 million of surface-to-air missiles to Ukraine."
-      },
-      {
-        "as_at": "2026-10-13",
-        "quote": "The UK has already committed £1.6 billion to deliver more than 5000 LMMs to Ukraine over the next four years",
-        "statement": "The UK has committed £1.6 billion to deliver more than 5000 Lightweight Multirole Missiles to Ukraine over the next four years."
+        "quote": "President Zelenskyy will arrive in the UK this morning",
+        "statement": "President Zelenskyy is due to arrive in the UK on the morning of 2026-10-13."
       },
       {
         "as_at": "2026-10-13",
@@ -63,23 +63,33 @@
       },
       {
         "as_at": "2026-10-13",
-        "quote": "Chancellor John Healey will use his meetings at the IMF in Bangkok to urge partners",
-        "statement": "The Chancellor intends to use his meetings at the IMF in Bangkok to urge partners to implement an equivalent ban on Russian LNG."
+        "quote": "The UK has already committed £1.6 billion to deliver more than 5000 LMMs to Ukraine over the next four years",
+        "statement": "The UK has committed £1.6 billion to deliver more than 5000 LMMs to Ukraine over the next four years."
       },
       {
-        "as_at": "2026-10-12",
-        "quote": "the Foreign Secretary did the same with partners at the Warsaw Security Forum yesterday",
-        "statement": "The Foreign Secretary urged partners at the Warsaw Security Forum to implement a ban on Russian LNG."
+        "as_at": "2026-10-13",
+        "quote": "will accelerate £10 million of the £45m package of missiles announced today",
+        "statement": "The UK announced a £45m package of missiles on 2026-10-13, and intends to accelerate £10 million of it to meet Ukraine's most urgent winter requirements."
       },
       {
         "as_at": "2026-10-13",
         "quote": "The UK will accelerate deliveries of British Lightweight Multirole Missiles (LMMs)",
-        "statement": "The UK intends to accelerate deliveries of Lightweight Multirole Missiles to Ukraine."
+        "statement": "The UK intends to accelerate deliveries of British Lightweight Multirole Missiles to Ukraine."
       },
       {
         "as_at": "2026-10-13",
         "quote": "standing by plans to fully implement a maritime services ban on Russian liquefied natural gas (LNG) exports",
         "statement": "The UK is standing by plans to fully implement a maritime services ban on Russian LNG exports."
+      },
+      {
+        "as_at": "2026-10-13",
+        "quote": "Chancellor John Healey will use his meetings at the IMF in Bangkok to urge partners",
+        "statement": "Chancellor John Healey intends to use his meetings at the IMF in Bangkok to urge partners to fully implement an equivalent ban on Russian LNG."
+      },
+      {
+        "as_at": "2026-10-12",
+        "quote": "the Foreign Secretary did the same with partners at the Warsaw Security Forum yesterday [TUE]",
+        "statement": "The Foreign Secretary urged partners to implement the Russian LNG ban at the Warsaw Security Forum on 2026-10-12."
       }
     ],
     "mentions": [
@@ -106,57 +116,52 @@
       {
         "kind": "person",
         "name": "Putin",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Downing Street",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "United Kingdom",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Ukraine",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Russia",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Kyiv",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "United States",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Bangkok",
-        "role": ""
+        "role": "President of Russia"
       },
       {
         "kind": "organisation",
-        "name": "International Monetary Fund",
-        "role": ""
+        "name": "IMF",
+        "role": "International Monetary Fund"
       },
       {
         "kind": "occasion",
         "name": "Warsaw Security Forum",
-        "role": ""
+        "role": "Security forum in Warsaw"
       },
       {
-        "kind": "occasion",
-        "name": "IMF meetings",
-        "role": ""
+        "kind": "place",
+        "name": "Downing Street",
+        "role": "Prime Minister's residence and office in London"
+      },
+      {
+        "kind": "place",
+        "name": "Bangkok",
+        "role": "Host city of the IMF meetings"
+      },
+      {
+        "kind": "place",
+        "name": "United Kingdom",
+        "role": "Country"
+      },
+      {
+        "kind": "place",
+        "name": "Ukraine",
+        "role": "Country"
+      },
+      {
+        "kind": "place",
+        "name": "Russia",
+        "role": "Country"
+      },
+      {
+        "kind": "place",
+        "name": "Kyiv",
+        "role": "Capital of Ukraine"
+      },
+      {
+        "kind": "place",
+        "name": "United States",
+        "role": "Country"
       }
     ]
   }

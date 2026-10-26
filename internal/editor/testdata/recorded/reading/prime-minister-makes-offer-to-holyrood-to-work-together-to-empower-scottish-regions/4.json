@@ -1,85 +1,95 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "dd2904cd3b28b6a34b301dcd70bb438d85316aaf76f283986c49791a273fa624",
-  "recorded_at": "2026-10-26T21:40:59.090082Z",
+  "request_hash": "a535f688998081b1cc7923f40589fc00f5aca48974701b48c55138d35bf6c3e3",
+  "recorded_at": "2026-10-26T22:48:46.777806Z",
   "usage": {
-    "input_tokens": 2251,
-    "output_tokens": 4404
+    "input_tokens": 2301,
+    "output_tokens": 3495
   },
   "output": {
     "claims": [
       {
-        "made_by": "Andy Burnham, Prime Minister of the United Kingdom",
+        "made_by": "Andy Burnham",
         "quote": "the Scottish Government is one of the most centralised devolved administrations in Europe",
         "statement": "The Scottish Government is one of the most centralised devolved administrations in Europe."
       },
       {
-        "made_by": "Andy Burnham, Prime Minister of the United Kingdom",
+        "made_by": "Andy Burnham",
         "quote": "with Holyrood not giving people who know their areas best enough of a say",
         "statement": "Holyrood does not give people who know their areas best enough of a say."
       },
       {
-        "made_by": "Andy Burnham, Prime Minister of the United Kingdom",
-        "quote": "the next stage of devolution should place more decision-making in the hands of Scotland’s regions and cities",
-        "statement": "The next stage of devolution should place more decision-making in the hands of Scotland's regions and cities to drive reindustrialisation."
+        "made_by": "Andy Burnham",
+        "quote": "despite significant devolution from Westminster over the last 27 years",
+        "statement": "Despite significant devolution from Westminster over the last 27 years, Holyrood does not give enough say to local people."
       },
       {
-        "made_by": "Andy Burnham, Prime Minister of the United Kingdom",
+        "made_by": "Andy Burnham",
+        "quote": "the next stage of devolution should place more decision-making in the hands of Scotland’s regions and cities to drive reindustrialisation",
+        "statement": "The next stage of devolution should place more decision-making in Scotland’s regions and cities to drive reindustrialisation."
+      },
+      {
+        "made_by": "Andy Burnham",
         "quote": "Through No10 North, we are rewiring the state",
         "statement": "Through No10 North, the UK Government is rewiring the state."
       },
       {
-        "made_by": "Andy Burnham, Prime Minister of the United Kingdom",
-        "quote": "there is no limit to what we can achieve for the Scottish people",
-        "statement": "With the UK Government and the Scottish Government working together, there is no limit to what can be achieved for the Scottish people."
+        "made_by": "Andy Burnham",
+        "quote": "With us working together, there is no limit to what we can achieve for the Scottish people.",
+        "statement": "With the UK and Scottish Governments working together, there is no limit to what they can achieve for the Scottish people."
       },
       {
-        "made_by": "Douglas Alexander, Scottish Secretary",
+        "made_by": "Douglas Alexander",
         "quote": "power was never supposed to stop at the doors of the Scottish Parliament",
         "statement": "Power was never supposed to stop at the doors of the Scottish Parliament."
       },
       {
-        "made_by": "Douglas Alexander, Scottish Secretary",
-        "quote": "know what their communities need better than any minister",
-        "statement": "People in North Lanarkshire, Fife and the Highlands know what their communities need better than any minister."
+        "made_by": "Douglas Alexander",
+        "quote": "People in North Lanarkshire, in Fife or in the Highlands know what their communities need better than any minister, whether they sit in London or Edinburgh.",
+        "statement": "People in North Lanarkshire, Fife and the Highlands know what their communities need better than any minister, whether in London or Edinburgh."
       },
       {
-        "made_by": "Douglas Alexander, Scottish Secretary",
-        "quote": "good jobs and real opportunity in every corner of Scotland",
-        "statement": "The aim of the two governments is good jobs and real opportunity in every corner of Scotland."
+        "made_by": "Douglas Alexander",
+        "quote": "The Prime Minister’s offer to the Scottish Government is a genuine one",
+        "statement": "The Prime Minister’s offer to the Scottish Government is a genuine one."
+      },
+      {
+        "made_by": "Douglas Alexander",
+        "quote": "Two governments, one goal - good jobs and real opportunity in every corner of Scotland.",
+        "statement": "The two governments share one goal: good jobs and real opportunity in every corner of Scotland."
       }
     ],
     "facts": [
       {
         "as_at": "2026-10-15",
-        "quote": "after speaking with young people today in Lanarkshire",
-        "statement": "The Prime Minister spoke with young people in Lanarkshire."
-      },
-      {
-        "as_at": "2026-10-15",
-        "quote": "I told the First Minister that I wanted to work with him",
-        "statement": "The Prime Minister told the First Minister, during his first week in office, that he wanted to work with him."
-      },
-      {
-        "as_at": "2026-10-15",
-        "quote": "Devolution has done a great deal",
-        "statement": "The Scottish Secretary, Douglas Alexander, said devolution has done a great deal."
-      },
-      {
-        "as_at": "2026-10-15",
-        "quote": "the Scotland Office is ready to roll up its sleeves alongside them",
-        "statement": "The Scotland Office has said it is ready to work alongside the Scottish Government."
-      },
-      {
-        "as_at": "2026-10-15",
         "quote": "the Prime Minister will invite Scotland’s First Minister to work with him",
-        "statement": "The Prime Minister intends to invite the First Minister of Scotland to work with him."
+        "statement": "The Prime Minister intends to invite Scotland’s First Minister to work with him on pushing more power out of Westminster and Holyrood."
+      },
+      {
+        "as_at": "2026-10-15",
+        "quote": "speaking with young people today in Lanarkshire",
+        "statement": "The Prime Minister spoke with young people in Lanarkshire on 2026-10-15."
+      },
+      {
+        "as_at": "2026-10-15",
+        "quote": "Prime Minister Andy Burnham said:",
+        "statement": "Andy Burnham, as Prime Minister, made the statement quoted in the Item."
+      },
+      {
+        "as_at": "2026-10-15",
+        "quote": "The Scottish Secretary, Douglas Alexander said:",
+        "statement": "Douglas Alexander, as Scottish Secretary, made the statement quoted in the Item."
+      },
+      {
+        "as_at": "2026-10-15",
+        "quote": "During my first week in office, I told the First Minister that I wanted to work with him",
+        "statement": "The Prime Minister told the First Minister during his first week in office that he wanted to work with him."
       },
       {
         "as_at": "2026-10-15",
         "quote": "he will call on the Scottish Government to work with the UK Government through No10 North and the Scotland Office",
-        "statement": "The Prime Minister intends to call on the Scottish Government to work with the UK Government through No10 North and the Scotland Office."
+        "statement": "The Prime Minister intends to call on the Scottish Government to work with the UK Government through No10 North and the Scotland Office to develop a new model of regional empowerment for Scotland."
       }
     ],
     "mentions": [
@@ -95,7 +105,7 @@
       },
       {
         "kind": "person",
-        "name": "First Minister",
+        "name": "Scotland’s First Minister",
         "role": "First Minister of Scotland"
       },
       {
@@ -110,16 +120,6 @@
       },
       {
         "kind": "organisation",
-        "name": "No10 North",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
-        "name": "Scotland Office",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
         "name": "Scottish Parliament",
         "role": ""
       },
@@ -129,8 +129,13 @@
         "role": ""
       },
       {
-        "kind": "place",
-        "name": "Scotland",
+        "kind": "organisation",
+        "name": "No10 North",
+        "role": ""
+      },
+      {
+        "kind": "organisation",
+        "name": "Scotland Office",
         "role": ""
       },
       {
@@ -151,6 +156,26 @@
       {
         "kind": "place",
         "name": "Highlands",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "Scotland",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "Europe",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "London",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "Edinburgh",
         "role": ""
       }
     ]

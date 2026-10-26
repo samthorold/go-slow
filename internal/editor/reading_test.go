@@ -398,6 +398,24 @@ func TestReadingIsToldAnArrangementAndADeclaredIntentionAreFacts(t *testing.T) {
 	}
 }
 
+// Drawing what was said must not replace that it was said, nor what it
+// answers (system design: A declared intention is a Fact, as an intention):
+// reading is told, inside its Facts definition, that a saying and the event
+// it responds to are Facts too.
+func TestReadingIsToldASayingAndWhatItRespondsToAreFacts(t *testing.T) {
+	model := &fakeModel{output: goodReading}
+	if _, err := editor.Read(t.Context(), model, speech); err != nil {
+		t.Fatal(err)
+	}
+	instructions := model.sent[0].Instructions
+
+	want := "When the Item reports someone saying or responding to something, the saying and the event it responds to are Facts too, beside the Facts and Claims drawn from what was said."
+	_, facts, _ := strings.Cut(instructions, "- Facts:")
+	if !strings.Contains(strings.SplitN(facts, "\n", 2)[0], want) {
+		t.Errorf("reading's Facts definition does not say %q:\n%s", want, instructions)
+	}
+}
+
 func TestThereIsNoReadingWithoutAnItem(t *testing.T) {
 	model := &fakeModel{output: goodReading}
 

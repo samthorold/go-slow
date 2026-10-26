@@ -1,11 +1,11 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "6826a552f822a6f5dd9f18c617238e1cb103b9abdabee77ed31cdd7c97d52411",
-  "recorded_at": "2026-10-26T16:46:29.723607Z",
+  "request_hash": "dbc308feb3414bf6e70983260e45659c834b1bc7164ec09f2231e86a6ed0f878",
+  "recorded_at": "2026-10-26T22:35:51.025049Z",
   "usage": {
-    "input_tokens": 2020,
-    "output_tokens": 2881
+    "input_tokens": 2070,
+    "output_tokens": 2845
   },
   "output": {
     "claims": [],
@@ -13,7 +13,7 @@
       {
         "as_at": "2026-10-15",
         "quote": "The King has been pleased to appoint Mr William James Baxter QPM DL as His Majesty’s Lord-Lieutenant of County Tyrone",
-        "statement": "The King appointed William James Baxter as Lord-Lieutenant of County Tyrone."
+        "statement": "The King appointed William James Baxter as His Majesty's Lord-Lieutenant of County Tyrone."
       },
       {
         "as_at": "2026-06-17",
@@ -23,7 +23,7 @@
       {
         "as_at": "2026-10-15",
         "quote": "Mr Baxter served in the RUC/PSNI from 1973 until his retirement in 2003 when he held the rank of Superintendent",
-        "statement": "William James Baxter served in the RUC/PSNI from 1973 until retiring in 2003 as a Superintendent."
+        "statement": "William James Baxter served in the RUC/PSNI from 1973 until his retirement in 2003, holding the rank of Superintendent."
       },
       {
         "as_at": "2026-10-15",
@@ -32,35 +32,25 @@
       },
       {
         "as_at": "2026-10-15",
-        "quote": "He has served as Chairperson of the Omagh Police District Voluntary Welfare Support Group",
-        "statement": "William James Baxter has served as Chairperson of the Omagh Police District Voluntary Welfare Support Group."
-      },
-      {
-        "as_at": "2026-10-15",
         "quote": "He served as Clerk of Kirk Session, Newtownstewart Presbyterian Church, for 26 years and was an Elder for 31 years",
-        "statement": "William James Baxter served as Clerk of Kirk Session at Newtownstewart Presbyterian Church for 26 years and was an Elder for 31 years."
+        "statement": "William James Baxter served as Clerk of Kirk Session, Newtownstewart Presbyterian Church, for 26 years and as an Elder for 31 years."
       },
       {
         "as_at": "2026-10-15",
-        "quote": "Mr Baxter has served as Sheriff for County Tyrone in 2013 and is President of the Royal British Legion in Newtownstewart",
-        "statement": "William James Baxter served as Sheriff for County Tyrone in 2013 and is President of the Royal British Legion in Newtownstewart."
+        "quote": "Mr Baxter has served as Sheriff for County Tyrone in 2013",
+        "statement": "William James Baxter served as Sheriff for County Tyrone in 2013."
       },
       {
         "as_at": "2026-10-15",
         "quote": "Mr Baxter has served as Deputy Lieutenant of County Tyrone for 14 years",
         "statement": "William James Baxter has served as Deputy Lieutenant of County Tyrone for 14 years."
-      },
-      {
-        "as_at": "2026-10-15",
-        "quote": "He lives in County Tyrone with his wife, Pearl, and has two adult children and four grand-children",
-        "statement": "William James Baxter lives in County Tyrone with his wife Pearl and has two adult children and four grandchildren."
       }
     ],
     "mentions": [
       {
         "kind": "person",
         "name": "The King",
-        "role": "King"
+        "role": ""
       },
       {
         "kind": "person",
@@ -69,53 +59,48 @@
       },
       {
         "kind": "person",
-        "name": "Sir Robert William Lowry Scott",
+        "name": "Sir Robert William Lowry Scott KCVO OBE",
         "role": "Lord-Lieutenant of County Tyrone"
-      },
-      {
-        "kind": "place",
-        "name": "County Tyrone",
-        "role": ""
       },
       {
         "kind": "organisation",
         "name": "RUC/PSNI",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Omagh",
-        "role": ""
-      },
-      {
-        "kind": "occasion",
-        "name": "Omagh bombing",
-        "role": ""
+        "role": "Police service in which William James Baxter served"
       },
       {
         "kind": "organisation",
         "name": "Omagh Police District Voluntary Welfare Support Group",
-        "role": ""
+        "role": "Group chaired by William James Baxter"
       },
       {
         "kind": "organisation",
         "name": "Newtownstewart Presbyterian Church",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Newtownstewart",
-        "role": ""
+        "role": "Church where William James Baxter served as Clerk of Kirk Session and Elder"
       },
       {
         "kind": "organisation",
         "name": "Royal British Legion",
-        "role": ""
+        "role": "Branch in Newtownstewart presided over by William James Baxter"
       },
       {
-        "kind": "person",
-        "name": "Pearl",
-        "role": "wife of William James Baxter"
+        "kind": "place",
+        "name": "County Tyrone",
+        "role": "County of the Lord-Lieutenancy"
+      },
+      {
+        "kind": "place",
+        "name": "Omagh",
+        "role": "Town of the Omagh Police District"
+      },
+      {
+        "kind": "place",
+        "name": "Newtownstewart",
+        "role": "Town of the Presbyterian church and Royal British Legion branch"
+      },
+      {
+        "kind": "occasion",
+        "name": "Omagh bombing",
+        "role": "Bombing in Omagh in 1998"
       }
     ]
   }

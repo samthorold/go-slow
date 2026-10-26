@@ -1,23 +1,23 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "fdd882b2ef3d928f41406b30088e3e1f628804d812d177e3c143bdebf8ffcf3f",
-  "recorded_at": "2026-10-26T16:49:45.206229Z",
+  "request_hash": "407934b6a583729ed85bb2613ebe488d666cc743138985126baf3cc8b02d4cf6",
+  "recorded_at": "2026-10-26T22:39:14.747507Z",
   "usage": {
-    "input_tokens": 1934,
-    "output_tokens": 2737
+    "input_tokens": 1984,
+    "output_tokens": 3060
   },
   "output": {
     "claims": [
       {
-        "made_by": "Prime Minister and President Volodymyr Zelenskyy",
-        "quote": "It was clear that Russia had no interest in peace, the leaders underlined.",
-        "statement": "Russia had no interest in peace."
+        "made_by": "The Prime Minister and President Volodymyr Zelenskyy",
+        "quote": "Russia’s blatant indiscriminate attacks on civilians and energy infrastructure",
+        "statement": "Russia's attacks on civilians and energy infrastructure are blatant and indiscriminate."
       },
       {
-        "made_by": "Prime Minister and President Volodymyr Zelenskyy",
-        "quote": "Russia’s blatant indiscriminate attacks on civilians and energy infrastructure",
-        "statement": "Russia has carried out blatant indiscriminate attacks on civilians and energy infrastructure."
+        "made_by": "The Prime Minister and President Volodymyr Zelenskyy",
+        "quote": "It was clear that Russia had no interest in peace",
+        "statement": "Russia has no interest in peace."
       }
     ],
     "facts": [
@@ -28,8 +28,8 @@
       },
       {
         "as_at": "2026-10-14",
-        "quote": "reflecting on their call on Saturday",
-        "statement": "The leaders had a call on the Saturday before the meeting."
+        "quote": "The leaders began by reflecting on their call on Saturday",
+        "statement": "The Prime Minister and President Zelenskyy had a call on the Saturday before the meeting."
       },
       {
         "as_at": "2026-10-14",
@@ -39,17 +39,17 @@
       {
         "as_at": "2026-10-14",
         "quote": "the Prime Minister set out the UK’s latest package of Lightweight Multirole Missiles",
-        "statement": "The Prime Minister set out the UK's latest package of Lightweight Multirole Missiles for Ukraine's allies."
+        "statement": "The Prime Minister set out the UK's latest package of Lightweight Multirole Missiles."
+      },
+      {
+        "as_at": "2026-10-14",
+        "quote": "The UK would continue to develop innovative military solutions for use on the battlefield in Ukraine",
+        "statement": "The UK intends to continue developing innovative military solutions for use on the battlefield in Ukraine."
       },
       {
         "as_at": "2026-10-14",
         "quote": "the leaders discussed how the UK could accelerate defensive support to Ukraine ahead of the winter",
         "statement": "The leaders discussed how the UK could accelerate defensive support to Ukraine ahead of the winter."
-      },
-      {
-        "as_at": "2026-10-14",
-        "quote": "The UK would continue to develop innovative military solutions for use on the battlefield in Ukraine",
-        "statement": "The UK intends to continue developing innovative military solutions for use on the battlefield in Ukraine, including retrofitting British capability onto equipment gifted from other partners."
       },
       {
         "as_at": "2026-10-14",
@@ -59,18 +59,18 @@
       {
         "as_at": "2026-10-14",
         "quote": "Both looked forward to speaking again soon.",
-        "statement": "The Prime Minister and President Zelenskyy look forward to speaking again soon."
+        "statement": "The Prime Minister and President Zelenskyy expressed that they looked forward to speaking again soon."
       }
     ],
     "mentions": [
       {
         "kind": "person",
-        "name": "Prime Minister",
+        "name": "The Prime Minister",
         "role": "Prime Minister of the United Kingdom"
       },
       {
         "kind": "person",
-        "name": "Volodymyr Zelenskyy",
+        "name": "President Volodymyr Zelenskyy",
         "role": "President of Ukraine"
       },
       {
@@ -81,7 +81,7 @@
       {
         "kind": "place",
         "name": "Downing Street",
-        "role": "Location of the meeting"
+        "role": "location of the meeting"
       },
       {
         "kind": "place",

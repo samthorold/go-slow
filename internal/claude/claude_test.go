@@ -86,6 +86,27 @@ func TestTheModelIsCalledWithTheActsInstructionsInputAndSchema(t *testing.T) {
 	}
 }
 
+func TestACallLeavesRoomForTheModelsThinkingBesideItsAnswer(t *testing.T) {
+	model, got := api(t, "end_turn", `{"facts": []}`)
+
+	if _, err := model.Complete(t.Context(), request); err != nil {
+		t.Fatal(err)
+	}
+
+	// Claude Haiku 5.5 thinks unless told not to, and its thinking counts
+	// against max_tokens: reading the Commons statement, 5,697 of 9,445
+	// output tokens were thinking, and readings of it reached 14,793 of the
+	// 16,000 the limit was (issue #90). The thinking is left as the model's
+	// own, so the request is the one the recordings answered.
+	body := *got
+	if body["max_tokens"] != float64(32000) {
+		t.Errorf("max_tokens = %v, want 32000", body["max_tokens"])
+	}
+	if _, ok := body["thinking"]; ok {
+		t.Errorf("thinking = %v, want the model's default", body["thinking"])
+	}
+}
+
 func TestAResponseKeepsTheModelTheAPIReportsNotTheOneAskedFor(t *testing.T) {
 	model, got := apiReporting(t, "claude-haiku-5-5-moved", "end_turn", `{"facts": []}`)
 

@@ -37,14 +37,21 @@ func TestARecordingKeepsTheHashOfTheRequestItAnswered(t *testing.T) {
 	}
 }
 
-func TestAReplayAnswersTheRequestItWasRecordedFor(t *testing.T) {
-	rec := recordedOn(t, asRecorded, "claude-haiku-5-5")
+// replayOf is a replay of rec, kept as the one attempt of sample 1 of the
+// fixture "one", hashing with model, and what it reports.
+func replayOf(t *testing.T, rec recording, model string) (*sampleModel, *[]error) {
+	t.Helper()
+	path := samplePath(t.TempDir(), "one", 1)
+	keepSample(t, path, []recording{rec})
 	var reported []error
-	m := checkedReplay{rec: rec, name: "one", model: "claude-haiku-5-5", cmd: readingCommand,
-		report: func(err error) { reported = append(reported, err) }}
+	return replayingSample(t, path, model, readingCommand, func(err error) { reported = append(reported, err) }), &reported
+}
+
+func TestAReplayAnswersTheRequestItWasRecordedFor(t *testing.T) {
+	m, reported := replayOf(t, recordedOn(t, asRecorded, "claude-haiku-5-5"), "claude-haiku-5-5")
 	res, err := m.Complete(t.Context(), asRecorded)
-	if err != nil || string(res.Output) != `{"facts": []}` || len(reported) != 0 {
-		t.Errorf("replay = %s, %v (reported %v); want the recorded output", res.Output, err, reported)
+	if err != nil || strings.Join(strings.Fields(string(res.Output)), "") != `{"facts":[]}` || len(*reported) != 0 {
+		t.Errorf("replay = %s, %v (reported %v); want the recorded output", res.Output, err, *reported)
 	}
 }
 
@@ -62,9 +69,7 @@ func TestAReplayFailsAsStaleWhenTheActsRequestHasChanged(t *testing.T) {
 		"the model changed":        {asRecorded, "claude-opus-5-5"},
 	} {
 		t.Run(name, func(t *testing.T) {
-			var reported []error
-			m := checkedReplay{rec: rec, name: "one", model: tc.model, cmd: readingCommand,
-				report: func(err error) { reported = append(reported, err) }}
+			m, reported := replayOf(t, rec, tc.model)
 			_, err := m.Complete(t.Context(), tc.req)
 			if err == nil {
 				t.Fatal("a stale recording replayed")
@@ -74,8 +79,8 @@ func TestAReplayFailsAsStaleWhenTheActsRequestHasChanged(t *testing.T) {
 					t.Errorf("error %q does not say %q", err, want)
 				}
 			}
-			if len(reported) != 1 {
-				t.Errorf("reported %v, want the staleness once", reported)
+			if len(*reported) != 1 {
+				t.Errorf("reported %v, want the staleness once", *reported)
 			}
 		})
 	}
@@ -86,7 +91,7 @@ func TestAReplayFailsAsStaleWhenTheActsRequestHasChanged(t *testing.T) {
 func TestAReplayOfARecordingWithNoHashFailsAsStale(t *testing.T) {
 	rec := recordedOn(t, asRecorded, "claude-haiku-5-5")
 	rec.RequestHash = ""
-	m := checkedReplay{rec: rec, name: "one", model: "claude-haiku-5-5", cmd: readingCommand, report: func(error) {}}
+	m, _ := replayOf(t, rec, "claude-haiku-5-5")
 	if _, err := m.Complete(context.Background(), asRecorded); err == nil || !strings.Contains(err.Error(), "stale: re-record with") {
 		t.Errorf("replay = %v; want it stale", err)
 	}

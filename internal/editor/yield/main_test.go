@@ -133,6 +133,33 @@ func TestAddedAndRemovedFixturesShowAsSuch(t *testing.T) {
 	}
 }
 
+// A fixture recorded as samples (<fixture>/<k>.json) is one row, showing the
+// range its samples drew, each by its last attempt; the total is the range
+// from every fixture's least to its most.
+func TestAFixturesSamplesShowAsTheRangeTheyDrew(t *testing.T) {
+	before, after := t.TempDir(), t.TempDir()
+	write(t, before, "connecting/x.json", `{"act": "connecting", "output": {"causes": [{}]}}`)
+	write(t, before, "connecting/y.json", `{"act": "connecting", "output": {"causes": []}}`)
+	write(t, after, "connecting/x/1.json", `{"act": "connecting", "output": {"causes": [{}, {}]},
+		"earlier_attempts": [{"act": "connecting", "output": {"causes": [{}, {}, {}, {}, {}]}}]}`)
+	write(t, after, "connecting/x/2.json", `{"act": "connecting", "output": {"causes": []}}`)
+	write(t, after, "connecting/x/3.json", `{"act": "connecting", "output": {"causes": [{}]}}`)
+	write(t, after, "connecting/y/1.json", `{"act": "connecting", "output": {"causes": [{}]}}`)
+	write(t, after, "connecting/y/2.json", `{"act": "connecting", "output": {"causes": [{}]}}`)
+
+	got := yieldOf(t, before, after)
+
+	for _, want := range []string{
+		"| connecting/x | 1 → 0–2 |",
+		"| connecting/y | 0 → 1 |",
+		"| **Total** | 1 → 1–3 |",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("the report has no line %q; it is:\n%s", want, got)
+		}
+	}
+}
+
 func TestReadingYieldShowsFactsClaimsAndEntitiesBeforeAndAfter(t *testing.T) {
 	before, after := t.TempDir(), t.TempDir()
 	write(t, before, "reading/statement.json", `{"act": "reading", "output": {

@@ -1,0 +1,52 @@
+{
+  "act": "placing",
+  "model": "claude-haiku-5-5",
+  "request_hash": "00f4f69f91f8dbac9c0e1bf18d13b4863da5fe0e44c5254b58e46e563d8b90fd",
+  "recorded_at": "2026-10-25T23:42:00.086361Z",
+  "usage": {
+    "input_tokens": 2815,
+    "output_tokens": 1109
+  },
+  "output": {
+    "facts": [
+      {
+        "developments_in": [],
+        "fact": "F1"
+      },
+      {
+        "developments_in": [
+          "N1"
+        ],
+        "fact": "F2"
+      },
+      {
+        "developments_in": [
+          "N1"
+        ],
+        "fact": "F3"
+      },
+      {
+        "developments_in": [],
+        "fact": "F4"
+      },
+      {
+        "developments_in": [],
+        "fact": "F5"
+      },
+      {
+        "developments_in": [],
+        "fact": "F6"
+      },
+      {
+        "developments_in": [],
+        "fact": "F7"
+      }
+    ],
+    "new_stories": [
+      {
+        "ref": "N1",
+        "title": "UK military and financial support for Ukraine"
+      }
+    ]
+  }
+}

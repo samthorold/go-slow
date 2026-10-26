@@ -1,0 +1,46 @@
+{
+  "act": "placing",
+  "model": "claude-haiku-5-5",
+  "request_hash": "7b4b892273fb2a25d7480c20425abbcdbcc3c648440629b2f3a549ceaf45b64f",
+  "recorded_at": "2026-10-25T23:44:07.882361Z",
+  "usage": {
+    "input_tokens": 2888,
+    "output_tokens": 484
+  },
+  "output": {
+    "facts": [
+      {
+        "developments_in": [],
+        "fact": "F1"
+      },
+      {
+        "developments_in": [],
+        "fact": "F2"
+      },
+      {
+        "developments_in": [],
+        "fact": "F3"
+      },
+      {
+        "developments_in": [],
+        "fact": "F4"
+      },
+      {
+        "developments_in": [
+          "N1"
+        ],
+        "fact": "F5"
+      },
+      {
+        "developments_in": [],
+        "fact": "F6"
+      }
+    ],
+    "new_stories": [
+      {
+        "ref": "N1",
+        "title": "UK defence technical excellence colleges"
+      }
+    ]
+  }
+}

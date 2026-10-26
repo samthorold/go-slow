@@ -1,0 +1,215 @@
+{
+  "act": "reading",
+  "model": "claude-haiku-5-5",
+  "request_hash": "f3adf8372d5b518c99289b165eb19e3a7bf265c5a6906f29d3d9cf43a5630edb",
+  "recorded_at": "2026-10-25T21:55:08.159108Z",
+  "usage": {
+    "input_tokens": 3732,
+    "output_tokens": 6240
+  },
+  "output": {
+    "claims": [
+      {
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "Great British Railways",
+            "role": "publicly owned railway body whose headquarters is in Derby"
+          },
+          {
+            "kind": "place",
+            "name": "Derby",
+            "role": "city where Great British Railways will have its home"
+          }
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "Great British Railways will have its home in Derby, a city that has railways in its DNA.",
+        "statement": "Great British Railways will have its home in Derby, a city that has railways in its DNA."
+      },
+      {
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "Great British Railways",
+            "role": "railway body to bring the railway together around one mission"
+          }
+        ],
+        "made_by": "Heidi Alexander",
+        "quote": "Great British Railways will bring the railway together around one mission - better services for passengers",
+        "statement": "Great British Railways will bring the railway together around one mission of better services for passengers."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Becketwell",
+            "role": "brownfield site in Derby city centre for the GBR headquarters"
+          },
+          {
+            "kind": "place",
+            "name": "Derby",
+            "role": "city where the headquarters development is being built"
+          }
+        ],
+        "made_by": "Government (unnamed in the Item)",
+        "quote": "is expected to begin in early 2027 and be completed by spring 2029",
+        "statement": "Construction of the headquarters development at Becketwell is expected to begin in early 2027 and be completed by spring 2029."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Derby",
+            "role": "city where the headquarters will bring jobs and investment"
+          }
+        ],
+        "made_by": "Government (unnamed in the Item)",
+        "quote": "an estimated £151 million boost to the region’s economy",
+        "statement": "The new GBR headquarters will bring an estimated £151 million boost to the region’s economy."
+      },
+      {
+        "entities": [],
+        "made_by": "Government (unnamed in the Item)",
+        "quote": "with fares frozen for the first time in 30 years",
+        "statement": "Bringing operators’ services into public ownership is already delivering benefits, with fares frozen for the first time in 30 years."
+      },
+      {
+        "entities": [],
+        "made_by": "Pat McFadden",
+        "quote": "This forms part of our £2.5 billion youth employment support package which is creating up to 500,000 opportunities for young people to earn or learn",
+        "statement": "The foundation apprenticeship forms part of a £2.5 billion youth employment support package creating up to 500,000 opportunities for young people to earn or learn."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Derby",
+            "role": "city where Great British Railways will be based"
+          }
+        ],
+        "made_by": "Claire Ward",
+        "quote": "bringing hundreds of jobs into the city",
+        "statement": "Great British Railways being based in Derby will bring hundreds of jobs into the city."
+      },
+      {
+        "entities": [],
+        "made_by": "Government (unnamed in the Item)",
+        "quote": "less than 7% of the railway’s workforce is under 25",
+        "statement": "Less than 7% of the railway’s workforce is under 25."
+      }
+    ],
+    "facts": [
+      {
+        "as_at": "2026-10-15",
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "Great British Railways",
+            "role": "publicly owned railway body whose headquarters site is unveiled"
+          },
+          {
+            "kind": "place",
+            "name": "Derby",
+            "role": "city where the GBR headquarters site is located"
+          }
+        ],
+        "quote": "the site of Great British Railways’ (GBR) headquarters is unveiled today (15 October 2026) in Derby",
+        "statement": "The site of Great British Railways’ headquarters was unveiled in Derby on 15 October 2026."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Becketwell",
+            "role": "brownfield site in Derby city centre chosen for the GBR headquarters"
+          },
+          {
+            "kind": "place",
+            "name": "Derby",
+            "role": "city where the Becketwell site is located"
+          }
+        ],
+        "quote": "a brownfield site in the heart of Derby city centre",
+        "statement": "The Great British Railways headquarters is to be built at Becketwell, a brownfield site in the heart of Derby city centre."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Andy Burnham",
+            "role": "Prime Minister of the United Kingdom"
+          }
+        ],
+        "quote": "Prime Minister Andy Burnham said:",
+        "statement": "Andy Burnham, Prime Minister, made a statement on the railway and the Derby headquarters."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Pat McFadden",
+            "role": "Work and Pensions Secretary"
+          }
+        ],
+        "quote": "Work and Pensions Secretary Pat McFadden said:",
+        "statement": "Pat McFadden, Work and Pensions Secretary, made a statement on rail apprenticeships."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Claire Ward",
+            "role": "Mayor of the East Midlands"
+          }
+        ],
+        "quote": "Mayor of the East Midlands, Claire Ward, said:",
+        "statement": "Claire Ward, Mayor of the East Midlands, made a statement welcoming the headquarters in Derby."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Heidi Alexander",
+            "role": "Transport Secretary"
+          }
+        ],
+        "quote": "Transport Secretary Heidi Alexander said:",
+        "statement": "Heidi Alexander, Transport Secretary, made a statement on the Derby headquarters and apprenticeships."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "organisation",
+            "name": "Alstom",
+            "role": "train manufacturer with a site in Derby"
+          },
+          {
+            "kind": "place",
+            "name": "Derby",
+            "role": "city where the trains are to be built"
+          }
+        ],
+        "quote": "new fleet of trains for the north set to be built at Alstom’s Derby site",
+        "statement": "A new fleet of trains for the north is set to be built at Alstom’s Derby site."
+      },
+      {
+        "as_at": "2026-10-14",
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Derby",
+            "role": "city where the first apprentices will be based"
+          }
+        ],
+        "quote": "Up to 600 apprentices between 16 and 21 years old will enrol over the next 4 years on the rail foundation apprenticeship",
+        "statement": "Up to 600 apprentices aged 16 to 21 will enrol over the next 4 years on the rail foundation apprenticeship, with the first starters based in Derby."
+      }
+    ]
+  }
+}

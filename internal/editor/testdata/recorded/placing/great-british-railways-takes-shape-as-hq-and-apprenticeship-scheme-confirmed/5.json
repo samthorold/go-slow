@@ -1,0 +1,76 @@
+{
+  "act": "placing",
+  "model": "claude-haiku-5-5",
+  "request_hash": "320c2deb230fd4329a44773b6849311f0cafc6c73f440b91384bc8a58963836c",
+  "recorded_at": "2026-10-25T23:43:17.805704Z",
+  "usage": {
+    "input_tokens": 2729,
+    "output_tokens": 1099
+  },
+  "output": {
+    "facts": [
+      {
+        "developments_in": [
+          "N1"
+        ],
+        "fact": "F1"
+      },
+      {
+        "developments_in": [
+          "N1"
+        ],
+        "fact": "F2"
+      },
+      {
+        "developments_in": [],
+        "fact": "F3"
+      },
+      {
+        "developments_in": [
+          "N1"
+        ],
+        "fact": "F4"
+      },
+      {
+        "developments_in": [
+          "N2"
+        ],
+        "fact": "F5"
+      },
+      {
+        "developments_in": [
+          "N3"
+        ],
+        "fact": "F6"
+      },
+      {
+        "developments_in": [],
+        "fact": "F7"
+      },
+      {
+        "developments_in": [],
+        "fact": "F8"
+      },
+      {
+        "developments_in": [
+          "N1"
+        ],
+        "fact": "F9"
+      }
+    ],
+    "new_stories": [
+      {
+        "ref": "N1",
+        "title": "Great British Railways headquarters"
+      },
+      {
+        "ref": "N2",
+        "title": "Rail foundation apprenticeship scheme"
+      },
+      {
+        "ref": "N3",
+        "title": "Rail fares under public ownership"
+      }
+    ]
+  }
+}

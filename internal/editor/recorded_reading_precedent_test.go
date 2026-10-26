@@ -2,16 +2,12 @@ package editor_test
 
 import (
 	"bytes"
-	"errors"
-	"io/fs"
 	"log/slog"
-	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/samthorold/go-slow/internal/claude"
 	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/interest"
@@ -26,17 +22,34 @@ import (
 // Owner said was wrong (a Claim taken for a Fact) while following a Topic on
 // the economy. The Great British Railways announcement, tied to the same
 // Topic and carrying its own estimate (a £151 million boost to the region's
-// economy), is then read by the real model, shown that precedent.
-// Re-recording costs one call:
+// economy), is then read by the real model, shown that precedent. It is
+// sampled five times, each over a fresh Record, and kept under
+// testdata/recorded/precedent/reading-<the announcement>/. Recording costs
+// five calls, and more for attempts the checks refuse:
 //
 //	go test -count=1 ./internal/editor -run TestRecordedReadingPrecedent -record
 //
 // with GOSLOW_ANTHROPIC_API_KEY and READING_MODEL set in the environment.
-func TestRecordedReadingPrecedent(t *testing.T) { recordedReadingPrecedent(t, recordedDir) }
+func TestRecordedReadingPrecedent(t *testing.T) {
+	t.Parallel()
+	recordedReadingPrecedent(t, ownDirectory(t, "precedent"))
+}
 
 // recordedReadingPrecedent replays (or records) reading with a precedent
 // from the recordings under root.
 func recordedReadingPrecedent(t *testing.T, root string) {
+	name := "great-british-railways-takes-shape-as-hq-and-apprenticeship-scheme-confirmed"
+	for _, err := range sampled(t, filepath.Join(root, "precedent"), "reading-"+name, dailyRule, readingPrecedentCommand, func(m *sampleModel) sampleResult {
+		return readingPrecedentSample(t, name, m)
+	}) {
+		t.Error(err)
+	}
+}
+
+// readingPrecedentSample is one sample of reading the announcement name
+// shown the precedent, on m, over a fresh Record.
+func readingPrecedentSample(t *testing.T, name string, m *sampleModel) sampleResult {
+	t.Helper()
 	ctx := t.Context()
 	store, err := sqlite.Open(ctx, filepath.Join(t.TempDir(), "go-slow.db"))
 	if err != nil {
@@ -93,38 +106,21 @@ func recordedReadingPrecedent(t *testing.T, root string) {
 	}
 
 	// The announcement to read.
-	name := "great-british-railways-takes-shape-as-hq-and-apprenticeship-scheme-confirmed"
 	it, _ := fixture(t, filepath.Join("testdata", "govuk", name+".json"))
 	addItem(it)
 
-	path := filepath.Join(root, "precedent", "reading-"+name+".json")
-	var model editor.Model
-	var rec recording
-	if *rerecordFlag {
-		key, m := os.Getenv("GOSLOW_ANTHROPIC_API_KEY"), os.Getenv("READING_MODEL")
-		if key == "" || m == "" {
-			t.Fatal("recording needs GOSLOW_ANTHROPIC_API_KEY and READING_MODEL")
-		}
-		model = recorder{claude.New(claude.Options{APIKey: key, Model: m}), &rec, m}
-	} else {
-		if _, err := os.Stat(path); errors.Is(err, fs.ErrNotExist) {
-			t.Skipf("%s has not been recorded yet; record it with: %s", name, readingPrecedentCommand)
-		}
-		rec = kept(t, path)
-		model = ownReplay(t, rec, "reading-"+name, readingPrecedentCommand)
-	}
-	var logs bytes.Buffer
-	ed := editor.New(editor.Deps{Store: store, Model: model, Wikidata: &fakeWikidata{},
-		Log: slog.New(slog.NewTextHandler(&logs, nil))})
-	if err := ed.ReadWaiting(ctx, saturday); err != nil {
+	passed, err := runSample(m, func(model editor.Model) (bool, error) {
+		var logs bytes.Buffer
+		ed := editor.New(editor.Deps{Store: store, Model: model, Wikidata: &fakeWikidata{},
+			Log: slog.New(slog.NewTextHandler(&logs, nil))})
+		err := ed.ReadWaiting(ctx, saturday)
+		return !strings.Contains(logs.String(), "reading failed"), err
+	})
+	if err != nil {
 		t.Fatal(err)
 	}
-	if *rerecordFlag && rec.Output != nil {
-		keep(t, path, rec)
-	}
-	t.Logf("recorded reading usage with the precedent: %d input, %d output tokens", rec.Usage.InputTokens, rec.Usage.OutputTokens)
-	if strings.Contains(logs.String(), "reading failed") {
-		t.Fatalf("the recorded reading fails the act's checks:\n%s", logs.String())
+	if !passed {
+		return sampleResult{}
 	}
 
 	shown, err := store.PrecedentsShown(ctx, "reading", it.SourceID, it.EntryID)
@@ -136,13 +132,16 @@ func recordedReadingPrecedent(t *testing.T, root string) {
 	}
 	// An estimate like the forecast the Owner said was wrong is not drawn
 	// as a Fact.
+	p := properties{}
+	estimate := p.property("an estimate like the forecast said to be wrong is not drawn as a Fact")
 	got, _, err := store.ReadItem(ctx, it.SourceID, it.EntryID)
 	if err != nil {
 		t.Fatal(err)
 	}
 	for _, f := range got.Facts {
 		if strings.Contains(f.Statement, "151") || strings.Contains(f.Quote, "151") {
-			t.Errorf("the estimated boost is drawn as a Fact: %q", f.Statement)
+			estimate("the estimated boost is drawn as a Fact: %q", f.Statement)
 		}
 	}
+	return sampleResult{passed: true, held: p}
 }

@@ -1,0 +1,102 @@
+{
+  "act": "connecting",
+  "model": "claude-haiku-5-5",
+  "request_hash": "4bb8d3ba0c8403822c94fe544d5ee6604d57eca2410cea376aa90c19913d1df5",
+  "recorded_at": "2026-10-26T00:27:56.058667Z",
+  "usage": {
+    "input_tokens": 2080,
+    "output_tokens": 1091
+  },
+  "output": {
+    "causes": [],
+    "facts": [
+      {
+        "fact": "F1",
+        "roles": [
+          {
+            "entity": "Andy Burnham",
+            "role": "actor"
+          },
+          {
+            "entity": "Downing Street",
+            "role": "place"
+          },
+          {
+            "entity": "Volodymyr Zelenskyy",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F2",
+        "roles": [
+          {
+            "entity": "Andy Burnham",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F3",
+        "roles": [
+          {
+            "entity": "Ukraine",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F4",
+        "roles": [
+          {
+            "entity": "Ukraine",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F5",
+        "roles": [
+          {
+            "entity": "Foreign Secretary",
+            "role": "actor"
+          },
+          {
+            "entity": "Warsaw Security Forum",
+            "role": "occasion"
+          }
+        ]
+      },
+      {
+        "fact": "F6",
+        "roles": [
+          {
+            "entity": "John Healey",
+            "role": "actor"
+          },
+          {
+            "entity": "IMF meetings in Bangkok",
+            "role": "occasion"
+          }
+        ]
+      },
+      {
+        "fact": "F7",
+        "roles": [
+          {
+            "entity": "Russia",
+            "role": "actor"
+          },
+          {
+            "entity": "Kyiv",
+            "role": "place"
+          },
+          {
+            "entity": "Ukraine",
+            "role": "affected"
+          }
+        ]
+      }
+    ]
+  }
+}

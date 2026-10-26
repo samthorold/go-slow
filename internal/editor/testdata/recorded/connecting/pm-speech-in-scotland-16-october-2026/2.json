@@ -1,0 +1,105 @@
+{
+  "act": "connecting",
+  "model": "claude-haiku-5-5",
+  "request_hash": "ec2c38c0669a19405121041606b9449a8a9792f92909ae37974cfa58cc9cf60f",
+  "recorded_at": "2026-10-26T00:30:05.79612Z",
+  "usage": {
+    "input_tokens": 3335,
+    "output_tokens": 1049
+  },
+  "output": {
+    "causes": [],
+    "facts": [
+      {
+        "fact": "F1",
+        "roles": [
+          {
+            "entity": "Easterhouse",
+            "role": "place"
+          },
+          {
+            "entity": "FARE-Scotland",
+            "role": "affected"
+          },
+          {
+            "entity": "Greater Manchester Violence Reduction Unit",
+            "role": "actor"
+          },
+          {
+            "entity": "Prime Minister",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F2",
+        "roles": [
+          {
+            "entity": "Motherwell",
+            "role": "place"
+          },
+          {
+            "entity": "Prime Minister",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F3",
+        "roles": [
+          {
+            "entity": "Commonwealth Games",
+            "role": "occasion"
+          },
+          {
+            "entity": "Prime Minister",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F4",
+        "roles": [
+          {
+            "entity": "Downing Street",
+            "role": "place"
+          },
+          {
+            "entity": "Prime Minister",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F5",
+        "roles": [
+          {
+            "entity": "Scottish government",
+            "role": "actor"
+          },
+          {
+            "entity": "UK government",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F6",
+        "roles": [
+          {
+            "entity": "Alexander Dennis",
+            "role": "actor"
+          },
+          {
+            "entity": "Falkirk",
+            "role": "place"
+          },
+          {
+            "entity": "Prime Minister",
+            "role": "actor"
+          }
+        ]
+      }
+    ]
+  }
+}

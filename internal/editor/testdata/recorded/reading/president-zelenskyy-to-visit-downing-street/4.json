@@ -1,0 +1,188 @@
+{
+  "act": "reading",
+  "model": "claude-haiku-5-5",
+  "request_hash": "c38b9b420e4e30cdfe544820ed9f9f50840cce686a7e9438e776ab8d7a0d6ea2",
+  "recorded_at": "2026-10-25T22:02:43.84308Z",
+  "usage": {
+    "input_tokens": 2817,
+    "output_tokens": 4063
+  },
+  "output": {
+    "claims": [
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Ukraine",
+            "role": ""
+          }
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "we are with you for as long as it takes",
+        "statement": "The UK is with Ukraine for as long as it takes."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Russia",
+            "role": ""
+          }
+        ],
+        "made_by": "Andy Burnham",
+        "quote": "Russia’s aggression cannot be allowed to succeed on our continent.",
+        "statement": "Russia's aggression cannot be allowed to succeed on the European continent."
+      },
+      {
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Russia",
+            "role": ""
+          }
+        ],
+        "made_by": "John Healey",
+        "quote": "I urge partners to back the ban on Russian LNG, like we have done in the UK",
+        "statement": "Partners should back a ban on Russian LNG, as the UK has done."
+      }
+    ],
+    "facts": [
+      {
+        "as_at": "2026-10-13",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Andy Burnham",
+            "role": "Prime Minister of the United Kingdom"
+          },
+          {
+            "kind": "person",
+            "name": "Volodymyr Zelenskyy",
+            "role": "President of Ukraine"
+          },
+          {
+            "kind": "place",
+            "name": "Downing Street",
+            "role": ""
+          }
+        ],
+        "quote": "Prime Minister to host President Volodymyr Zelenskyy at Downing Street today",
+        "statement": "The Prime Minister is to host President Volodymyr Zelenskyy at Downing Street on 2026-10-13."
+      },
+      {
+        "as_at": "2026-10-13",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Volodymyr Zelenskyy",
+            "role": "President of Ukraine"
+          },
+          {
+            "kind": "place",
+            "name": "United Kingdom",
+            "role": ""
+          }
+        ],
+        "quote": "President Zelenskyy will arrive in the UK this morning",
+        "statement": "President Zelenskyy is arriving in the United Kingdom on the morning of 2026-10-13."
+      },
+      {
+        "as_at": "2026-10-13",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Andy Burnham",
+            "role": "Prime Minister of the United Kingdom"
+          }
+        ],
+        "quote": "The Prime Minister has also asked Ministers to draw up further sanctions, military aid, and fiscal packages to provide urgent support in the coming weeks.",
+        "statement": "The Prime Minister has asked Ministers to draw up further sanctions, military aid and fiscal packages to provide urgent support in the coming weeks."
+      },
+      {
+        "as_at": "2026-10-13",
+        "entities": [
+          {
+            "kind": "place",
+            "name": "United Kingdom",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Ukraine",
+            "role": ""
+          }
+        ],
+        "quote": "The UK has already committed £1.6 billion to deliver more than 5000 LMMs to Ukraine over the next four years",
+        "statement": "The UK has already committed £1.6 billion to deliver more than 5000 Lightweight Multirole Missiles to Ukraine over the next four years."
+      },
+      {
+        "as_at": "2026-10-13",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "John Healey",
+            "role": "Chancellor of the Exchequer of the United Kingdom"
+          },
+          {
+            "kind": "occasion",
+            "name": "IMF meetings",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Bangkok",
+            "role": ""
+          }
+        ],
+        "quote": "Chancellor John Healey will use his meetings at the IMF in Bangkok to urge partners",
+        "statement": "Chancellor John Healey will use his meetings at the IMF in Bangkok to urge partners to fully implement a ban on Russian LNG."
+      },
+      {
+        "as_at": "2026-10-12",
+        "entities": [
+          {
+            "kind": "person",
+            "name": "Foreign Secretary",
+            "role": "Foreign Secretary of the United Kingdom"
+          },
+          {
+            "kind": "occasion",
+            "name": "Warsaw Security Forum",
+            "role": ""
+          }
+        ],
+        "quote": "the Foreign Secretary did the same with partners at the Warsaw Security Forum yesterday",
+        "statement": "The Foreign Secretary urged partners to implement a ban on Russian LNG at the Warsaw Security Forum on 2026-10-12."
+      },
+      {
+        "as_at": "2026-10-13",
+        "entities": [
+          {
+            "kind": "place",
+            "name": "United Kingdom",
+            "role": ""
+          }
+        ],
+        "quote": "The UK will accelerate deliveries of British Lightweight Multirole Missiles (LMMs)",
+        "statement": "The UK will accelerate deliveries of British Lightweight Multirole Missiles."
+      },
+      {
+        "as_at": "2026-10-13",
+        "entities": [
+          {
+            "kind": "place",
+            "name": "Russia",
+            "role": ""
+          },
+          {
+            "kind": "place",
+            "name": "Kyiv",
+            "role": ""
+          }
+        ],
+        "quote": "As Russia continues its bombardment of Ukraine’s capital Kyiv and energy infrastructure",
+        "statement": "Russia continues its bombardment of Kyiv and Ukraine's energy infrastructure."
+      }
+    ]
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "act": "placing",
+  "model": "claude-haiku-5-5",
+  "request_hash": "df49445e35b795e4cbf5c0ce0baaeb1b0d20e4d7d494f0c88b2303a03b92734d",
+  "recorded_at": "2026-10-25T23:43:42.792403Z",
+  "usage": {
+    "input_tokens": 2198,
+    "output_tokens": 437
+  },
+  "output": {
+    "facts": [
+      {
+        "developments_in": [],
+        "fact": "F1"
+      },
+      {
+        "developments_in": [],
+        "fact": "F2"
+      },
+      {
+        "developments_in": [],
+        "fact": "F3"
+      },
+      {
+        "developments_in": [
+          "N1"
+        ],
+        "fact": "F4"
+      }
+    ],
+    "new_stories": [
+      {
+        "ref": "N1",
+        "title": "UK and Scottish Government cooperation on devolved powers for Scotland's regions"
+      }
+    ]
+  }
+}

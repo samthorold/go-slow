@@ -2,16 +2,13 @@ package editor_test
 
 import (
 	"bytes"
-	"errors"
-	"io/fs"
 	"log/slog"
-	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/samthorold/go-slow/internal/claude"
 	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/interest"
@@ -26,8 +23,10 @@ import (
 // unwanted while following a Topic on Ukraine. The government's response to
 // the US-Russia agreement, a reaction tied to the same Topic and sharing the
 // Entity Ukraine, is then placed by the real model, shown that precedent at
-// the Depth the Owner still follows the Topic at. Re-recording costs one
-// call:
+// the Depth the Owner still follows the Topic at. It is sampled five times,
+// each over a fresh Record, and kept under testdata/recorded/precedent/<the
+// reaction>/. Recording costs five calls, and more for attempts the checks
+// refuse:
 //
 //	go test -count=1 ./internal/editor -run TestRecordedPlacingPrecedent -record
 //
@@ -36,11 +35,26 @@ import (
 // (testdata/recorded/precedent/inputs/reading), so re-recording reading
 // leaves it valid; a refresh copies the current one over it, then
 // re-records this.
-func TestRecordedPlacingPrecedent(t *testing.T) { recordedPlacingPrecedent(t, recordedDir) }
+func TestRecordedPlacingPrecedent(t *testing.T) {
+	t.Parallel()
+	recordedPlacingPrecedent(t, ownDirectory(t, "precedent"))
+}
 
 // recordedPlacingPrecedent replays (or records) placing with a precedent
 // from the recordings under root.
 func recordedPlacingPrecedent(t *testing.T, root string) {
+	name := "uk-government-response-to-agreement-between-us-and-russia-9-october"
+	for _, err := range sampled(t, filepath.Join(root, "precedent"), name, dailyRule, placingPrecedentCommand, func(m *sampleModel) sampleResult {
+		return placingPrecedentSample(t, root, name, m)
+	}) {
+		t.Error(err)
+	}
+}
+
+// placingPrecedentSample is one sample of placing the reaction name with the
+// precedent, on m, over a fresh Record.
+func placingPrecedentSample(t *testing.T, root, name string, m *sampleModel) sampleResult {
+	t.Helper()
 	ctx := t.Context()
 	store, err := sqlite.Open(ctx, filepath.Join(t.TempDir(), "go-slow.db"))
 	if err != nil {
@@ -100,13 +114,23 @@ func recordedPlacingPrecedent(t *testing.T, root string) {
 	}
 
 	// The reaction to place, read as recorded.
-	name := "uk-government-response-to-agreement-between-us-and-russia-9-october"
 	it, _ := fixture(t, filepath.Join("testdata", "govuk", name+".json"))
 	addItem(it)
 	reading, err := editor.Read(ctx, replay{kept(t, filepath.Join(inputsOf(root, "precedent", "reading"), name+".json"))}, it)
 	if err != nil {
 		t.Fatalf("the recorded reading fails its checks: %v", err)
 	}
+	// The reaction's own Fact: the UK government's response to the
+	// agreement. The reading may draw other Facts, such as the agreement
+	// itself, which may start a Story of its own; the property below rests on
+	// this one, so it must be there.
+	i := slices.IndexFunc(reading.Facts, func(f editor.Fact) bool {
+		return strings.Contains(strings.ToLower(f.Statement), "respon")
+	})
+	if i < 0 {
+		t.Fatalf("the reading draws no Fact of the government's response, so placing is not tested on the reaction: %s", joinFacts(reading))
+	}
+	response := reading.Facts[i].Statement
 	if err := store.SaveReading(ctx, reading, saturday); err != nil {
 		t.Fatal(err)
 	}
@@ -115,33 +139,17 @@ func recordedPlacingPrecedent(t *testing.T, root string) {
 		t.Fatalf("awaiting placing: %+v %v; want the reaction, followed at following", waiting, err)
 	}
 
-	path := filepath.Join(root, "precedent", name+".json")
-	var model editor.Model
-	var rec recording
-	if *rerecordFlag {
-		key, m := os.Getenv("GOSLOW_ANTHROPIC_API_KEY"), os.Getenv("PLACING_MODEL")
-		if key == "" || m == "" {
-			t.Fatal("recording needs GOSLOW_ANTHROPIC_API_KEY and PLACING_MODEL")
-		}
-		model = recorder{claude.New(claude.Options{APIKey: key, Model: m}), &rec, m}
-	} else {
-		if _, err := os.Stat(path); errors.Is(err, fs.ErrNotExist) {
-			t.Skipf("%s has not been recorded yet; record it with: %s", name, placingPrecedentCommand)
-		}
-		rec = kept(t, path)
-		model = ownReplay(t, rec, name, placingPrecedentCommand)
-	}
-	var logs bytes.Buffer
-	ed := editor.New(editor.Deps{Store: store, PlacingModel: model, Log: slog.New(slog.NewTextHandler(&logs, nil))})
-	if err := ed.PlaceWaiting(ctx, saturday); err != nil {
+	passed, err := runSample(m, func(model editor.Model) (bool, error) {
+		var logs bytes.Buffer
+		ed := editor.New(editor.Deps{Store: store, PlacingModel: model, Log: slog.New(slog.NewTextHandler(&logs, nil))})
+		err := ed.PlaceWaiting(ctx, saturday)
+		return !strings.Contains(logs.String(), "placing failed"), err
+	})
+	if err != nil {
 		t.Fatal(err)
 	}
-	if *rerecordFlag && rec.Output != nil {
-		keep(t, path, rec)
-	}
-	t.Logf("recorded placing usage with the precedent: %d input, %d output tokens", rec.Usage.InputTokens, rec.Usage.OutputTokens)
-	if strings.Contains(logs.String(), "placing failed") {
-		t.Fatalf("the recorded placing fails the act's checks:\n%s", logs.String())
+	if !passed {
+		return sampleResult{}
 	}
 
 	shown, err := store.PrecedentsShown(ctx, "placing", it.SourceID, it.EntryID)
@@ -153,20 +161,36 @@ func recordedPlacingPrecedent(t *testing.T, root string) {
 	}
 	// A reaction like one marked unwanted at the Owner's Depth is not made a
 	// Development.
+	p := properties{}
+	notMade := p.property("a reaction like one marked unwanted is not made a Development")
 	s, _, err := store.Story(ctx, story)
 	if err != nil {
 		t.Fatal(err)
 	}
 	for _, d := range s.Timeline {
 		if d.EntryID == it.EntryID {
-			t.Errorf("the reaction's Fact %q is a Development in %q", d.Statement, s.Title)
+			notMade("the reaction's Fact %q is a Development in %q", d.Statement, s.Title)
 		}
 	}
+	// No Story placing starts holds the reaction's Fact.
+	started := p.property("no Story placing starts holds the reaction's Fact")
 	stories, err := store.ListStories(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(stories) != 1 {
-		t.Errorf("placing started a Story for the reaction: %+v", stories)
+	for _, l := range stories {
+		if l.ID == story {
+			continue
+		}
+		s, _, err := store.Story(ctx, l.ID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, d := range s.Timeline {
+			if d.EntryID == it.EntryID && d.Statement == response {
+				started("placing started %q for the reaction's Fact %q", s.Title, response)
+			}
+		}
 	}
+	return sampleResult{passed: true, held: p}
 }

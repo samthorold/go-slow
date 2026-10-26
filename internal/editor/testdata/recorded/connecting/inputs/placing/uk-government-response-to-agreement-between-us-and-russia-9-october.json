@@ -1,10 +1,11 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T10:18:20.056759Z",
+  "request_hash": "47eacc51e7245026e487a53d1b08cdb0bb309d822bb99059e881da1687db8bcb",
+  "recorded_at": "2026-10-25T23:40:55.415827Z",
   "usage": {
-    "input_tokens": 2025,
-    "output_tokens": 235
+    "input_tokens": 1771,
+    "output_tokens": 212
   },
   "output": {
     "facts": [
@@ -13,18 +14,17 @@
         "fact": "F1"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N1"
+        ],
         "fact": "F2"
-      },
-      {
-        "developments_in": [],
-        "fact": "F3"
-      },
-      {
-        "developments_in": [],
-        "fact": "F4"
       }
     ],
-    "new_stories": []
+    "new_stories": [
+      {
+        "ref": "N1",
+        "title": "US–Russia relations"
+      }
+    ]
   }
 }

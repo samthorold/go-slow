@@ -1,0 +1,106 @@
+{
+  "act": "connecting",
+  "model": "claude-haiku-5-5",
+  "request_hash": "b882d4738ac4d7447c68944a51cdb3bc136e80173a09bbcc7b5829a9e7a774b0",
+  "recorded_at": "2026-10-26T00:29:10.443533Z",
+  "usage": {
+    "input_tokens": 1842,
+    "output_tokens": 887
+  },
+  "output": {
+    "causes": [],
+    "facts": [
+      {
+        "fact": "F1",
+        "roles": [
+          {
+            "entity": "Derby",
+            "role": "place"
+          },
+          {
+            "entity": "Great British Railways",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F2",
+        "roles": [
+          {
+            "entity": "Great British Railways",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F3",
+        "roles": [
+          {
+            "entity": "Becketwell",
+            "role": "affected"
+          },
+          {
+            "entity": "Derby",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F4",
+        "roles": [
+          {
+            "entity": "Great British Railways",
+            "role": "affected"
+          }
+        ]
+      },
+      {
+        "fact": "F5",
+        "roles": [
+          {
+            "entity": "Derby",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F6",
+        "roles": []
+      },
+      {
+        "fact": "F7",
+        "roles": [
+          {
+            "entity": "Alstom",
+            "role": "affected"
+          },
+          {
+            "entity": "Derby",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F8",
+        "roles": []
+      },
+      {
+        "fact": "F9",
+        "roles": [
+          {
+            "entity": "Department for Transport",
+            "role": "actor"
+          },
+          {
+            "entity": "Derby City Council",
+            "role": "actor"
+          },
+          {
+            "entity": "East Midlands Combined Authority",
+            "role": "actor"
+          }
+        ]
+      }
+    ]
+  }
+}

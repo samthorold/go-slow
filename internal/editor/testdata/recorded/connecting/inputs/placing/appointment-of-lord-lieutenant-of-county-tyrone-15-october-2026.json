@@ -1,10 +1,11 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "recorded_at": "2026-10-25T10:18:52.721592Z",
+  "request_hash": "4230f864cc00660d858a4845867ad147a2f18b91023c877eddb8bf4ddd4533f0",
+  "recorded_at": "2026-10-25T23:43:21.567069Z",
   "usage": {
-    "input_tokens": 3278,
-    "output_tokens": 772
+    "input_tokens": 2774,
+    "output_tokens": 606
   },
   "output": {
     "facts": [
@@ -15,7 +16,9 @@
         "fact": "F1"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N1"
+        ],
         "fact": "F2"
       },
       {
@@ -41,26 +44,6 @@
       {
         "developments_in": [],
         "fact": "F8"
-      },
-      {
-        "developments_in": [],
-        "fact": "F9"
-      },
-      {
-        "developments_in": [],
-        "fact": "F10"
-      },
-      {
-        "developments_in": [],
-        "fact": "F11"
-      },
-      {
-        "developments_in": [],
-        "fact": "F12"
-      },
-      {
-        "developments_in": [],
-        "fact": "F13"
       }
     ],
     "new_stories": [

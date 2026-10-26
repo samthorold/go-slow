@@ -1,0 +1,67 @@
+{
+  "act": "connecting",
+  "model": "claude-haiku-5-5",
+  "request_hash": "915ff081faa016e918a387008accc53fded18afc97b0197a1be80531f4cd48a0",
+  "recorded_at": "2026-10-26T00:29:40.131005Z",
+  "usage": {
+    "input_tokens": 1636,
+    "output_tokens": 667
+  },
+  "output": {
+    "causes": [],
+    "facts": [
+      {
+        "fact": "F1",
+        "roles": [
+          {
+            "entity": "Andy Burnham",
+            "role": "actor"
+          },
+          {
+            "entity": "Lanarkshire",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F2",
+        "roles": [
+          {
+            "entity": "Andy Burnham",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F3",
+        "roles": [
+          {
+            "entity": "Douglas Alexander",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F4",
+        "roles": [
+          {
+            "entity": "Andy Burnham",
+            "role": "actor"
+          },
+          {
+            "entity": "No10 North",
+            "role": "actor"
+          },
+          {
+            "entity": "Scotland Office",
+            "role": "actor"
+          },
+          {
+            "entity": "Scottish Government",
+            "role": "affected"
+          }
+        ]
+      }
+    ]
+  }
+}

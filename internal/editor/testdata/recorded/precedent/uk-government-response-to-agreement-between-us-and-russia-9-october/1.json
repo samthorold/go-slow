@@ -1,0 +1,30 @@
+{
+  "act": "placing",
+  "model": "claude-haiku-5-5",
+  "request_hash": "35e347238becb8dda9cd4a2c3a32aa4eb9e9d6d07f910f51afeadb37ad0fc3fd",
+  "recorded_at": "2026-10-25T22:05:10.174598Z",
+  "usage": {
+    "input_tokens": 1864,
+    "output_tokens": 351
+  },
+  "output": {
+    "facts": [
+      {
+        "developments_in": [],
+        "fact": "F1"
+      },
+      {
+        "developments_in": [
+          "N1"
+        ],
+        "fact": "F2"
+      }
+    ],
+    "new_stories": [
+      {
+        "ref": "N1",
+        "title": "US–Russia relations and agreements"
+      }
+    ]
+  }
+}

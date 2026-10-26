@@ -27,6 +27,7 @@ import (
 // fixture. A change to an earlier act's output that a later act can't take
 // fails here at once, with no recording made.
 func TestEachActsCurrentRecordingsAreTakenByTheActsDownstream(t *testing.T) {
+	t.Parallel()
 	for _, act := range []string{"reading", "placing", "connecting"} {
 		t.Run(act, func(t *testing.T) {
 			if err := feedDownstream(t, recordedDir, act); err != nil {
@@ -45,8 +46,13 @@ func TestTheCompatibilityCheckFailsOnAReadingPlacingCannotTake(t *testing.T) {
 		t.Fatal(err)
 	}
 	name := "appointment-of-lord-lieutenant-of-county-tyrone-15-october-2026"
-	path := filepath.Join(root, "reading", name+".json")
-	rec := kept(t, path)
+	path := samplePath(filepath.Join(root, "reading"), name, 1)
+	sample, err := sampleAt(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	attempts := sample.attempts()
+	rec := attempts[len(attempts)-1]
 	var out struct {
 		Facts  []map[string]any `json:"facts"`
 		Claims []map[string]any `json:"claims"`
@@ -68,7 +74,8 @@ func TestTheCompatibilityCheckFailsOnAReadingPlacingCannotTake(t *testing.T) {
 		t.Fatal(err)
 	}
 	rec.Output = b
-	keep(t, path, rec)
+	attempts[len(attempts)-1] = rec
+	keepSample(t, path, attempts)
 
 	err = feedDownstream(t, root, "reading")
 	if err == nil || !strings.Contains(err.Error(), "placing was never asked") {
@@ -91,7 +98,8 @@ var (
 	}
 )
 
-// feedDownstream replays act's current recordings under root, over its own
+// feedDownstream replays act's current recordings under root (each
+// fixture's first sample, as a refresh would copy it), over its own
 // frozen inputs there, and runs every act downstream of it on a fake model.
 // It is an error if a downstream act is never asked about a fixture, or an
 // answer fails its checks.
@@ -100,7 +108,7 @@ func feedDownstream(t *testing.T, root, act string) error {
 	ctx := t.Context()
 	store, topics := newRecord(t, briefingTopics)
 	fixtures := fixtureItems(t)
-	models := map[string]actModel{act: replayed(filepath.Join(root, act))}
+	models := map[string]actModel{act: firstSamples(filepath.Join(root, act))}
 	for _, up := range upstream[act] {
 		models[up] = replayed(inputsOf(root, act, up))
 	}

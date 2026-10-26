@@ -1,0 +1,42 @@
+{
+  "act": "connecting",
+  "model": "claude-haiku-5-5",
+  "request_hash": "dd3e776392e808ac721f10e8d9be7522aef40e5f07c963340c604432283ee621",
+  "recorded_at": "2026-10-26T00:26:59.677439Z",
+  "usage": {
+    "input_tokens": 1193,
+    "output_tokens": 266
+  },
+  "output": {
+    "causes": [
+      {
+        "cause": "F2",
+        "effect": "F1"
+      }
+    ],
+    "facts": [
+      {
+        "fact": "F1",
+        "roles": [
+          {
+            "entity": "UK government spokesperson",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F2",
+        "roles": [
+          {
+            "entity": "Russia",
+            "role": "actor"
+          },
+          {
+            "entity": "United States",
+            "role": "actor"
+          }
+        ]
+      }
+    ]
+  }
+}

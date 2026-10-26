@@ -13,6 +13,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -160,7 +161,13 @@ func (rt recordingTransport) RoundTrip(r *http.Request) (*http.Response, error) 
 	if err := os.MkdirAll(rt.dir, 0o750); err != nil {
 		rt.t.Error(err)
 	}
-	if err := os.WriteFile(filepath.Join(rt.dir, wikidatatest.Name(r)), b, 0o600); err != nil {
+	// Kept ending in a newline, as the repository's hooks keep every file;
+	// the answer read back parses the same.
+	kept := b
+	if !bytes.HasSuffix(kept, []byte("\n")) {
+		kept = append(slices.Clone(b), '\n')
+	}
+	if err := os.WriteFile(filepath.Join(rt.dir, wikidatatest.Name(r)), kept, 0o600); err != nil {
 		rt.t.Error(err)
 	}
 	res.Body = io.NopCloser(bytes.NewReader(b))

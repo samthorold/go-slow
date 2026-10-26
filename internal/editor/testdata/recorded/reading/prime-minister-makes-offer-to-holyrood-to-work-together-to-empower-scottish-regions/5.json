@@ -1,11 +1,11 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "dd2904cd3b28b6a34b301dcd70bb438d85316aaf76f283986c49791a273fa624",
-  "recorded_at": "2026-10-26T21:41:11.904347Z",
+  "request_hash": "a535f688998081b1cc7923f40589fc00f5aca48974701b48c55138d35bf6c3e3",
+  "recorded_at": "2026-10-26T22:49:01.959809Z",
   "usage": {
-    "input_tokens": 2251,
-    "output_tokens": 3465
+    "input_tokens": 2301,
+    "output_tokens": 4009
   },
   "output": {
     "claims": [
@@ -16,13 +16,8 @@
       },
       {
         "made_by": "Andy Burnham",
-        "quote": "Through No10 North, we are rewiring the state",
-        "statement": "The UK Government is rewiring the state through No10 North."
-      },
-      {
-        "made_by": "Andy Burnham",
-        "quote": "With us working together, there is no limit to what we can achieve for the Scottish people.",
-        "statement": "Working together, the UK and Scottish governments can achieve anything for the Scottish people."
+        "quote": "with Holyrood not giving people who know their areas best enough of a say",
+        "statement": "Holyrood does not give people who know their areas best enough of a say."
       },
       {
         "made_by": "Andy Burnham",
@@ -30,9 +25,29 @@
         "statement": "The next stage of devolution should place more decision-making in the hands of Scotland's regions and cities to drive reindustrialisation."
       },
       {
+        "made_by": "Andy Burnham",
+        "quote": "ensuring communities with their own strengths, identity and ambitions can seize new economic opportunities and unlock their potential",
+        "statement": "A new model of regional empowerment for Scotland would ensure communities can seize new economic opportunities and unlock their potential."
+      },
+      {
+        "made_by": "Andy Burnham",
+        "quote": "Through No10 North, we are rewiring the state",
+        "statement": "Through No10 North, the government is rewiring the state."
+      },
+      {
+        "made_by": "Andy Burnham",
+        "quote": "With us working together, there is no limit to what we can achieve for the Scottish people.",
+        "statement": "Working together, there is no limit to what the UK and Scottish governments can achieve for the Scottish people."
+      },
+      {
         "made_by": "Douglas Alexander",
-        "quote": "Devolution has done a great deal, but power was never supposed to stop at the doors of the Scottish Parliament.",
-        "statement": "Devolution has done a great deal, but power was never supposed to stop at the doors of the Scottish Parliament."
+        "quote": "Devolution has done a great deal",
+        "statement": "Devolution has done a great deal."
+      },
+      {
+        "made_by": "Douglas Alexander",
+        "quote": "power was never supposed to stop at the doors of the Scottish Parliament",
+        "statement": "Power was never supposed to stop at the doors of the Scottish Parliament."
       },
       {
         "made_by": "Douglas Alexander",
@@ -42,7 +57,7 @@
       {
         "made_by": "Douglas Alexander",
         "quote": "The Prime Minister’s offer to the Scottish Government is a genuine one",
-        "statement": "The Prime Minister's offer to the Scottish Government is genuine."
+        "statement": "The Prime Minister's offer to the Scottish Government is a genuine one."
       },
       {
         "made_by": "Douglas Alexander",
@@ -53,33 +68,43 @@
     "facts": [
       {
         "as_at": "2026-10-15",
-        "quote": "Delivering his remarks after speaking with young people today in Lanarkshire",
+        "quote": "the Prime Minister will invite Scotland’s First Minister to work with him",
+        "statement": "The Prime Minister intends to invite Scotland's First Minister to work with him."
+      },
+      {
+        "as_at": "2026-10-15",
+        "quote": "after speaking with young people today in Lanarkshire",
         "statement": "Andy Burnham spoke with young people in Lanarkshire on 2026-10-15."
       },
       {
         "as_at": "2026-10-15",
-        "quote": "During my first week in office, I told the First Minister that I wanted to work with him",
-        "statement": "Andy Burnham told the First Minister in his first week in office that he wanted to work with him."
-      },
-      {
-        "as_at": "2026-10-15",
-        "quote": "In a speech today, the Prime Minister will invite Scotland’s First Minister to work with him",
-        "statement": "The Prime Minister intends to invite Scotland's First Minister to work with him in a speech on 2026-10-15."
-      },
-      {
-        "as_at": "2026-10-15",
         "quote": "he will call on the Scottish Government to work with the UK Government through No10 North and the Scotland Office",
-        "statement": "The Prime Minister intends to call on the Scottish Government to work with the UK Government through No10 North and the Scotland Office."
+        "statement": "The Prime Minister intends to call on the Scottish Government to work with the UK Government through No10 North and the Scotland Office to develop a new model of regional empowerment."
+      },
+      {
+        "as_at": "2026-10-15",
+        "quote": "During my first week in office, I told the First Minister that I wanted to work with him",
+        "statement": "Andy Burnham told the First Minister during his first week in office that he wanted to work with him."
+      },
+      {
+        "as_at": "2026-10-15",
+        "quote": "This is me making an offer to the Scottish Government.",
+        "statement": "Andy Burnham made an offer to the Scottish Government."
+      },
+      {
+        "as_at": "2026-10-15",
+        "quote": "Prime Minister Andy Burnham said:",
+        "statement": "Prime Minister Andy Burnham made remarks on 2026-10-15."
       },
       {
         "as_at": "2026-10-15",
         "quote": "The Scottish Secretary, Douglas Alexander said:",
-        "statement": "Douglas Alexander, the Scottish Secretary, made a statement on 2026-10-15."
+        "statement": "Scottish Secretary Douglas Alexander made remarks on 2026-10-15."
       },
       {
         "as_at": "2026-10-15",
         "quote": "the Scotland Office is ready to roll up its sleeves alongside them to make it happen",
-        "statement": "The Scotland Office has said it is ready to work alongside the Scottish Government to make the offer happen."
+        "statement": "The Scotland Office is ready to work alongside the Scottish Government to make the offer happen."
       }
     ],
     "mentions": [
@@ -90,13 +115,13 @@
       },
       {
         "kind": "person",
-        "name": "Scotland’s First Minister",
-        "role": "First Minister of Scotland"
+        "name": "Douglas Alexander",
+        "role": "Scottish Secretary"
       },
       {
         "kind": "person",
-        "name": "Douglas Alexander",
-        "role": "Scottish Secretary"
+        "name": "Scotland's First Minister",
+        "role": "First Minister of Scotland"
       },
       {
         "kind": "organisation",
@@ -110,12 +135,12 @@
       },
       {
         "kind": "organisation",
-        "name": "No10 North",
+        "name": "Scotland Office",
         "role": ""
       },
       {
         "kind": "organisation",
-        "name": "Scotland Office",
+        "name": "No10 North",
         "role": ""
       },
       {
@@ -124,8 +149,13 @@
         "role": ""
       },
       {
-        "kind": "place",
+        "kind": "organisation",
         "name": "Westminster",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "Scotland",
         "role": ""
       },
       {
@@ -150,17 +180,12 @@
       },
       {
         "kind": "place",
-        "name": "Edinburgh",
-        "role": ""
-      },
-      {
-        "kind": "place",
         "name": "London",
         "role": ""
       },
       {
         "kind": "place",
-        "name": "Scotland",
+        "name": "Edinburgh",
         "role": ""
       }
     ]

@@ -1,11 +1,11 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "6826a552f822a6f5dd9f18c617238e1cb103b9abdabee77ed31cdd7c97d52411",
-  "recorded_at": "2026-10-26T16:47:18.978707Z",
+  "request_hash": "dbc308feb3414bf6e70983260e45659c834b1bc7164ec09f2231e86a6ed0f878",
+  "recorded_at": "2026-10-26T22:36:35.293715Z",
   "usage": {
-    "input_tokens": 2020,
-    "output_tokens": 3164
+    "input_tokens": 2070,
+    "output_tokens": 3600
   },
   "output": {
     "claims": [],
@@ -13,12 +13,12 @@
       {
         "as_at": "2026-10-15",
         "quote": "The King has been pleased to appoint Mr William James Baxter QPM DL as His Majesty’s Lord-Lieutenant of County Tyrone",
-        "statement": "The King has appointed William James Baxter as Lord-Lieutenant of County Tyrone."
+        "statement": "The King appointed William James Baxter as Lord-Lieutenant of County Tyrone."
       },
       {
         "as_at": "2026-06-17",
         "quote": "following his retirement on 17th June 2026",
-        "statement": "Sir Robert William Lowry Scott retired as Lord-Lieutenant of County Tyrone on 17 June 2026."
+        "statement": "Sir Robert William Lowry Scott retired on 17 June 2026."
       },
       {
         "as_at": "2026-10-15",
@@ -29,6 +29,11 @@
         "as_at": "2026-10-15",
         "quote": "was District Commander in Omagh from 1997",
         "statement": "William James Baxter was District Commander in Omagh from 1997."
+      },
+      {
+        "as_at": "2026-10-15",
+        "quote": "including the day of the Omagh bombing in 1998",
+        "statement": "William James Baxter was District Commander in Omagh on the day of the Omagh bombing in 1998."
       },
       {
         "as_at": "2026-10-15",
@@ -57,21 +62,21 @@
       },
       {
         "as_at": "2026-10-15",
+        "quote": "He was awarded the RUC Service Medal",
+        "statement": "William James Baxter was awarded the RUC Service Medal."
+      },
+      {
+        "as_at": "2026-10-15",
         "quote": "Mr Baxter has served as Deputy Lieutenant of County Tyrone for 14 years",
         "statement": "William James Baxter has served as Deputy Lieutenant of County Tyrone for 14 years."
+      },
+      {
+        "as_at": "2026-10-15",
+        "quote": "He lives in County Tyrone with his wife, Pearl",
+        "statement": "William James Baxter lives in County Tyrone with his wife, Pearl."
       }
     ],
     "mentions": [
-      {
-        "kind": "person",
-        "name": "William James Baxter",
-        "role": "Lord-Lieutenant of County Tyrone"
-      },
-      {
-        "kind": "person",
-        "name": "Sir Robert William Lowry Scott",
-        "role": "former Lord-Lieutenant of County Tyrone"
-      },
       {
         "kind": "person",
         "name": "The King",
@@ -79,48 +84,63 @@
       },
       {
         "kind": "person",
-        "name": "Pearl",
+        "name": "William James Baxter",
+        "role": "Lord-Lieutenant of County Tyrone"
+      },
+      {
+        "kind": "person",
+        "name": "Robert William Lowry Scott",
+        "role": "Lord-Lieutenant of County Tyrone"
+      },
+      {
+        "kind": "person",
+        "name": "Pearl Baxter",
         "role": "wife of William James Baxter"
-      },
-      {
-        "kind": "organisation",
-        "name": "RUC/PSNI",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
-        "name": "Omagh Police District Voluntary Welfare Support Group",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
-        "name": "Newtownstewart Presbyterian Church",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
-        "name": "Royal British Legion",
-        "role": ""
       },
       {
         "kind": "place",
         "name": "County Tyrone",
-        "role": ""
+        "role": "county"
       },
       {
         "kind": "place",
         "name": "Omagh",
-        "role": ""
+        "role": "town with a police district"
       },
       {
         "kind": "place",
         "name": "Newtownstewart",
-        "role": ""
+        "role": "town"
+      },
+      {
+        "kind": "organisation",
+        "name": "RUC",
+        "role": "police force"
+      },
+      {
+        "kind": "organisation",
+        "name": "PSNI",
+        "role": "police force"
+      },
+      {
+        "kind": "organisation",
+        "name": "Omagh Police District Voluntary Welfare Support Group",
+        "role": "voluntary welfare support group"
+      },
+      {
+        "kind": "organisation",
+        "name": "Newtownstewart Presbyterian Church",
+        "role": "church"
+      },
+      {
+        "kind": "organisation",
+        "name": "Royal British Legion",
+        "role": "branch in Newtownstewart"
       },
       {
         "kind": "occasion",
         "name": "Omagh bombing",
-        "role": ""
+        "role": "bombing in 1998"
       }
     ]
   }

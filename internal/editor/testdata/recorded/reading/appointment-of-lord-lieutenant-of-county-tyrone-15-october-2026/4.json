@@ -1,11 +1,11 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "6826a552f822a6f5dd9f18c617238e1cb103b9abdabee77ed31cdd7c97d52411",
-  "recorded_at": "2026-10-26T16:47:06.996005Z",
+  "request_hash": "dbc308feb3414bf6e70983260e45659c834b1bc7164ec09f2231e86a6ed0f878",
+  "recorded_at": "2026-10-26T22:36:21.889325Z",
   "usage": {
-    "input_tokens": 2020,
-    "output_tokens": 4017
+    "input_tokens": 2070,
+    "output_tokens": 2133
   },
   "output": {
     "claims": [],
@@ -16,14 +16,9 @@
         "statement": "The King appointed William James Baxter as Lord-Lieutenant of County Tyrone."
       },
       {
-        "as_at": "2026-10-15",
-        "quote": "to succeed Sir Robert William Lowry Scott KCVO OBE following his retirement on 17th June 2026",
-        "statement": "Sir Robert William Lowry Scott was succeeded as Lord-Lieutenant of County Tyrone by William James Baxter."
-      },
-      {
         "as_at": "2026-06-17",
         "quote": "following his retirement on 17th June 2026",
-        "statement": "Sir Robert William Lowry Scott retired on 17 June 2026."
+        "statement": "Sir Robert William Lowry Scott retired from the office of Lord-Lieutenant of County Tyrone on 17 June 2026."
       },
       {
         "as_at": "2026-10-15",
@@ -32,33 +27,8 @@
       },
       {
         "as_at": "2026-10-15",
-        "quote": "when he held the rank of Superintendent",
-        "statement": "William James Baxter held the rank of Superintendent in the RUC/PSNI."
-      },
-      {
-        "as_at": "2026-10-15",
         "quote": "was District Commander in Omagh from 1997",
         "statement": "William James Baxter was District Commander in Omagh from 1997."
-      },
-      {
-        "as_at": "2026-10-15",
-        "quote": "including the day of the Omagh bombing in 1998",
-        "statement": "William James Baxter was District Commander in Omagh on the day of the Omagh bombing in 1998."
-      },
-      {
-        "as_at": "2026-10-15",
-        "quote": "He has served as Chairperson of the Omagh Police District Voluntary Welfare Support Group",
-        "statement": "William James Baxter has served as Chairperson of the Omagh Police District Voluntary Welfare Support Group."
-      },
-      {
-        "as_at": "2026-10-15",
-        "quote": "He served as Clerk of Kirk Session, Newtownstewart Presbyterian Church, for 26 years",
-        "statement": "William James Baxter served as Clerk of Kirk Session, Newtownstewart Presbyterian Church, for 26 years."
-      },
-      {
-        "as_at": "2026-10-15",
-        "quote": "was an Elder for 31 years",
-        "statement": "William James Baxter was an Elder for 31 years."
       },
       {
         "as_at": "2026-10-15",
@@ -67,30 +37,15 @@
       },
       {
         "as_at": "2026-10-15",
-        "quote": "is President of the Royal British Legion in Newtownstewart",
-        "statement": "William James Baxter is President of the Royal British Legion in Newtownstewart."
-      },
-      {
-        "as_at": "2026-10-15",
-        "quote": "He was awarded the RUC Service Medal, Long Service and Good Conduct Medal, The Queen’s Golden Jubilee Medal and The Queen’s Police Medal",
-        "statement": "William James Baxter was awarded the RUC Service Medal, the Long Service and Good Conduct Medal, the Queen’s Golden Jubilee Medal and the Queen’s Police Medal."
-      },
-      {
-        "as_at": "2026-10-15",
         "quote": "Mr Baxter has served as Deputy Lieutenant of County Tyrone for 14 years",
         "statement": "William James Baxter has served as Deputy Lieutenant of County Tyrone for 14 years."
-      },
-      {
-        "as_at": "2026-10-15",
-        "quote": "He lives in County Tyrone with his wife, Pearl",
-        "statement": "William James Baxter lives in County Tyrone with his wife, Pearl."
       }
     ],
     "mentions": [
       {
         "kind": "person",
         "name": "The King",
-        "role": "Sovereign"
+        "role": "King"
       },
       {
         "kind": "person",
@@ -99,53 +54,53 @@
       },
       {
         "kind": "person",
-        "name": "Sir Robert William Lowry Scott",
+        "name": "Robert William Lowry Scott",
         "role": "Lord-Lieutenant of County Tyrone"
       },
       {
         "kind": "person",
-        "name": "Pearl",
-        "role": "Wife of William James Baxter"
-      },
-      {
-        "kind": "organisation",
-        "name": "RUC/PSNI",
-        "role": "Police service in which William James Baxter served"
-      },
-      {
-        "kind": "organisation",
-        "name": "Omagh Police District Voluntary Welfare Support Group",
-        "role": "Group chaired by William James Baxter"
-      },
-      {
-        "kind": "organisation",
-        "name": "Newtownstewart Presbyterian Church",
-        "role": "Church where William James Baxter served as Clerk of Kirk Session and Elder"
-      },
-      {
-        "kind": "organisation",
-        "name": "Royal British Legion in Newtownstewart",
-        "role": "Branch of which William James Baxter is President"
+        "name": "Pearl Baxter",
+        "role": "wife of William James Baxter"
       },
       {
         "kind": "place",
         "name": "County Tyrone",
-        "role": "County of appointment"
+        "role": ""
       },
       {
         "kind": "place",
         "name": "Omagh",
-        "role": "Town of the Omagh Police District"
+        "role": ""
       },
       {
         "kind": "place",
         "name": "Newtownstewart",
-        "role": "Town of the Royal British Legion branch and Newtownstewart Presbyterian Church"
+        "role": ""
+      },
+      {
+        "kind": "organisation",
+        "name": "RUC/PSNI",
+        "role": ""
+      },
+      {
+        "kind": "organisation",
+        "name": "Omagh Police District Voluntary Welfare Support Group",
+        "role": ""
+      },
+      {
+        "kind": "organisation",
+        "name": "Newtownstewart Presbyterian Church",
+        "role": ""
+      },
+      {
+        "kind": "organisation",
+        "name": "Royal British Legion",
+        "role": ""
       },
       {
         "kind": "occasion",
         "name": "Omagh bombing",
-        "role": "Bombing in Omagh in 1998"
+        "role": ""
       }
     ]
   }

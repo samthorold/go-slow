@@ -1,28 +1,28 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "2cebda890552902b86751968dca1e00647230c02fd39f31cbe1bb6b494c7755a",
-  "recorded_at": "2026-10-26T16:51:24.089526Z",
+  "request_hash": "a08c629f62edd5fc9ecd9e820eea7038c0710a6fed3551b485b2ad9cdf5e48ba",
+  "recorded_at": "2026-10-26T22:41:08.112125Z",
   "usage": {
-    "input_tokens": 10858,
-    "output_tokens": 7279
+    "input_tokens": 10908,
+    "output_tokens": 9413
   },
   "output": {
     "claims": [
       {
         "made_by": "Prime Minister",
-        "quote": "Scotland, the most devolved nation in the UK, is itself one of the most centralised nations in Europe.",
-        "statement": "Scotland is one of the most centralised nations in Europe."
+        "quote": "Instead, we’ve ended up with the situation where Scotland, the most devolved nation in the UK, is itself one of the most centralised nations in Europe.",
+        "statement": "Scotland, the most devolved nation in the UK, is itself one of the most centralised nations in Europe."
+      },
+      {
+        "made_by": "Prime Minister",
+        "quote": "around one in six young people here are not in education, employment or training",
+        "statement": "Around one in six young people in Scotland are not in education, employment or training."
       },
       {
         "made_by": "Prime Minister",
         "quote": "If you go to Edinburgh today, you’ll see around one in twenty shops lying empty.",
-        "statement": "Around one in twenty shops in Edinburgh are lying empty."
-      },
-      {
-        "made_by": "Prime Minister",
-        "quote": "But if you go to Dundee, it’s more likely one in five.",
-        "statement": "Around one in five shops in Dundee are lying empty."
+        "statement": "Around one in twenty shops in Edinburgh are lying empty, against about one in five in Dundee."
       },
       {
         "made_by": "Prime Minister",
@@ -31,125 +31,40 @@
       },
       {
         "made_by": "Prime Minister",
-        "quote": "around one in six young people here are not in education, employment or training.",
-        "statement": "Around one in six young people in Scotland are not in education, employment or training."
-      },
-      {
-        "made_by": "Prime Minister",
         "quote": "a defence sector that already supports 12,000 jobs here in Scotland",
         "statement": "The defence sector already supports 12,000 jobs in Scotland."
       },
       {
         "made_by": "Prime Minister",
-        "quote": "Because I know how much these industries matter to people.",
-        "statement": "Shipbuilding and energy industries matter greatly to people in Scotland."
+        "quote": "has seen companies like Chemify turn groundbreaking research into real manufacturing jobs in Glasgow",
+        "statement": "An approach putting local businesses, universities and councils in the driving seat has turned Chemify's research into real manufacturing jobs in Glasgow."
       },
       {
         "made_by": "Prime Minister",
-        "quote": "Because I am long in my political career now, and I know enough now to know that tribal politics and point-scoring in the end doesn’t get you anywhere",
-        "statement": "Tribal politics and point-scoring do not get anywhere in the end."
-      },
-      {
-        "made_by": "Prime Minister",
-        "quote": "it would have hugely beneficial impacts on the food industry and farming here in Scotland.",
+        "quote": "it would have hugely beneficial impacts on the food industry and farming here in Scotland",
         "statement": "A new deal for food and farming would have hugely beneficial impacts on the food industry and farming in Scotland."
       },
       {
         "made_by": "Prime Minister",
-        "quote": "And if we don’t move now, Scotland could lose out.",
-        "statement": "Scotland could lose out if the Scottish government and UK government do not move now."
+        "quote": "if we don’t move now, Scotland could lose out",
+        "statement": "Scotland could lose out if the move to devolve power is not made now."
       },
       {
         "made_by": "Prime Minister",
-        "quote": "so powerfully described by Darren McGarvey in his book Poverty Safari",
-        "statement": "Darren McGarvey powerfully described the patronising approach of public services in Poverty Safari."
+        "quote": "we began to achieve more for people than we could have imagined before through Live Well",
+        "statement": "The Live Well model in Greater Manchester achieved more for people than could have been imagined before."
       },
       {
         "made_by": "Prime Minister",
-        "quote": "I want to push economic power out into the regions of Scotland.",
-        "statement": "The Prime Minister wants to push economic power out into the regions of Scotland."
+        "quote": "public transport in Scotland is way better in the capital of Scotland than it is in any other city or town in Scotland",
+        "statement": "Public transport in Scotland is far better in Edinburgh than in any other Scottish city or town."
       }
     ],
     "facts": [
       {
         "as_at": "2026-10-16",
-        "quote": "You know I’ve created Number 10 North?",
-        "statement": "The Prime Minister has created Number 10 North."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "I was in Scotland for the Opening Ceremony of the Commonwealth Games in the summer",
-        "statement": "The Prime Minister attended the Opening Ceremony of the Commonwealth Games in Glasgow in the summer."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "I left Westminster in 2017 to become the first Mayor of Greater Manchester",
-        "statement": "The Prime Minister left Westminster in 2017 to become the first Mayor of Greater Manchester."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "in my ten years as the mayor",
-        "statement": "The Prime Minister served ten years as Mayor of Greater Manchester."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "When I walked into Downing Street in July",
-        "statement": "The Prime Minister walked into Downing Street in July."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "In August 2023, with the help of the ground-breaking Scottish Violence Reduction Unit, I visited FARE-Scotland at Bannatyne House in Easterhouse",
-        "statement": "In August 2023 the Prime Minister visited FARE-Scotland at Bannatyne House in Easterhouse with the Greater Manchester Violence Reduction Unit."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "I used it to pioneer what we called the Live Well model in Greater Manchester.",
-        "statement": "The Prime Minister used the Easterhouse learning to pioneer the Live Well model in Greater Manchester."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "I put buses back under public control",
-        "statement": "The Prime Minister put Greater Manchester buses back under public control when he was Mayor."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "the buses on the roads of Greater Manchester today were built by Alexander Dennis in Falkirk",
-        "statement": "Greater Manchester buses are built by Alexander Dennis in Falkirk."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "the Scottish government has this week agreed to match the UK government’s £10 million to create two defence technical excellence colleges",
-        "statement": "The Scottish government has agreed to match the UK government's £10 million to create two defence technical excellence colleges."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "at the EU-UK Summit on the 20th of November",
-        "statement": "The EU-UK Summit is scheduled for 20 November."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "in a couple of weeks, the National Economic Council will meet with the First Ministers of Scotland and Wales",
-        "statement": "The National Economic Council is scheduled to meet with the First Ministers of Scotland and Wales and the Northern Ireland First Minister and Deputy First Minister in a couple of weeks."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "I want to offer Scotland a model of localised employment support",
-        "statement": "The Prime Minister intends to offer Scotland a model of localised employment support, meaning DWP devolution."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "The review led by Alan Milburn",
-        "statement": "A review is led by Alan Milburn."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "I know the Scottish government has also announced a long-term programme for local government reform.",
-        "statement": "The Scottish government has announced a long-term programme for local government reform."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "this college, I think I’m right in saying, is on the very site where Ravenscraig once stood",
-        "statement": "The college in Motherwell is on the site where Ravenscraig once stood."
+        "quote": "to be here in Motherwell",
+        "statement": "The Prime Minister spoke at a college in Motherwell, Scotland."
       },
       {
         "as_at": "2026-10-16",
@@ -158,13 +73,78 @@
       },
       {
         "as_at": "2026-10-16",
-        "quote": "companies like Chemify turn groundbreaking research into real manufacturing jobs in Glasgow",
-        "statement": "Chemify has turned groundbreaking research into manufacturing jobs in Glasgow."
+        "quote": "I left Westminster in 2017 to become the first Mayor of Greater Manchester",
+        "statement": "The Prime Minister left Westminster in 2017 to become the first Mayor of Greater Manchester."
+      },
+      {
+        "as_at": "2026-10-16",
+        "quote": "In August 2023, with the help of the ground-breaking Scottish Violence Reduction Unit, I visited FARE-Scotland at Bannatyne House in Easterhouse",
+        "statement": "In August 2023 the Prime Minister visited FARE-Scotland at Bannatyne House in Easterhouse with the Greater Manchester Violence Reduction Unit."
+      },
+      {
+        "as_at": "2026-10-16",
+        "quote": "I was in Scotland for the Opening Ceremony of the Commonwealth Games in the summer",
+        "statement": "The Prime Minister was in Scotland for the Opening Ceremony of the Commonwealth Games in the summer."
+      },
+      {
+        "as_at": "2026-10-16",
+        "quote": "When I walked into Downing Street in July",
+        "statement": "The Prime Minister entered Downing Street as Prime Minister in July."
+      },
+      {
+        "as_at": "2026-10-16",
+        "quote": "I used it to pioneer what we called the Live Well model in Greater Manchester",
+        "statement": "The Prime Minister used lessons from Easterhouse to pioneer the Live Well model in Greater Manchester."
+      },
+      {
+        "as_at": "2026-10-16",
+        "quote": "I put buses back under public control",
+        "statement": "As Mayor of Greater Manchester the Prime Minister put buses back under public control and chose to have them built by Alexander Dennis in Falkirk."
+      },
+      {
+        "as_at": "2026-10-16",
+        "quote": "the Scottish government has this week agreed to match the UK government’s £10 million to create two defence technical excellence colleges",
+        "statement": "The Scottish government has agreed to match the UK government's £10 million to create two defence technical excellence colleges."
+      },
+      {
+        "as_at": "2026-10-16",
+        "quote": "So there will be one in the east and one in the west.",
+        "statement": "The two defence technical excellence colleges are to be sited one in the east and one in the west of Scotland."
+      },
+      {
+        "as_at": "2026-10-16",
+        "quote": "EU-UK Summit on the 20th of November",
+        "statement": "The EU-UK Summit is scheduled for 20 November, where the Prime Minister is working on a new deal for food and farming."
+      },
+      {
+        "as_at": "2026-10-16",
+        "quote": "in a couple of weeks, the National Economic Council will meet with the First Ministers of Scotland and Wales",
+        "statement": "The National Economic Council is scheduled to meet with the First Ministers of Scotland and Wales in a couple of weeks."
+      },
+      {
+        "as_at": "2026-10-16",
+        "quote": "So today I want to make a serious and genuine offer to the Scottish Government.",
+        "statement": "The Prime Minister made an offer to the Scottish Government to design a new model of regional economic empowerment."
+      },
+      {
+        "as_at": "2026-10-16",
+        "quote": "An offer of DWP devolution.",
+        "statement": "The Prime Minister made an offer of DWP devolution to Scotland."
+      },
+      {
+        "as_at": "2026-10-16",
+        "quote": "The review led by Alan Milburn is challenging us to look at this very differently.",
+        "statement": "A review led by Alan Milburn is examining how to support young people differently."
       },
       {
         "as_at": "2026-10-16",
         "quote": "talk to Pamela today as the local MP",
         "statement": "Pamela is the local MP for Motherwell."
+      },
+      {
+        "as_at": "2026-10-16",
+        "quote": "one of the first things I did as Prime Minister was start shifting that power out of Westminster",
+        "statement": "One of the first things the Prime Minister did was start shifting power out of Westminster."
       }
     ],
     "mentions": [
@@ -190,8 +170,13 @@
       },
       {
         "kind": "person",
+        "name": "Euan",
+        "role": ""
+      },
+      {
+        "kind": "person",
         "name": "Alan Milburn",
-        "role": "leads review on employment support for young people"
+        "role": "leads the review on young people's opportunities"
       },
       {
         "kind": "person",
@@ -199,144 +184,164 @@
         "role": "author of Poverty Safari"
       },
       {
-        "kind": "place",
-        "name": "Motherwell",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Scotland",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Greater Manchester",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Easterhouse",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Bannatyne House",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Glasgow",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Edinburgh",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Dundee",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Aberdeen",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Inverclyde",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "East Renfrewshire",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Ravenscraig",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Leigh",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Falkirk",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Grangemouth",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Highlands and Islands",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Lanarkshire",
-        "role": ""
-      },
-      {
         "kind": "organisation",
         "name": "FARE-Scotland",
-        "role": ""
+        "role": "organisation visited in Easterhouse in August 2023"
       },
       {
         "kind": "organisation",
         "name": "Scottish Violence Reduction Unit",
-        "role": ""
+        "role": "organisation that helped the 2023 visit"
       },
       {
         "kind": "organisation",
         "name": "Greater Manchester Violence Reduction Unit",
-        "role": ""
+        "role": "organisation that visited FARE-Scotland in 2023"
       },
       {
         "kind": "organisation",
-        "name": "Alexander Dennis",
-        "role": ""
+        "name": "Scottish government",
+        "role": "devolved government of Scotland"
       },
       {
         "kind": "organisation",
-        "name": "Chemify",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
-        "name": "Scottish Government",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
-        "name": "UK Government",
-        "role": ""
+        "name": "UK government",
+        "role": "government of the United Kingdom"
       },
       {
         "kind": "organisation",
         "name": "Scottish Parliament",
-        "role": ""
+        "role": "Holyrood parliament"
       },
       {
         "kind": "organisation",
         "name": "National Economic Council",
-        "role": ""
+        "role": "council meeting with First Ministers"
       },
       {
-        "kind": "occasion",
-        "name": "EU-UK Summit",
-        "role": ""
+        "kind": "organisation",
+        "name": "Department for Work and Pensions",
+        "role": "department whose employment support could be devolved"
+      },
+      {
+        "kind": "organisation",
+        "name": "Alexander Dennis",
+        "role": "bus manufacturer in Falkirk"
+      },
+      {
+        "kind": "organisation",
+        "name": "Chemify",
+        "role": "company turning research into manufacturing jobs in Glasgow"
+      },
+      {
+        "kind": "organisation",
+        "name": "European Union",
+        "role": "EU partners in the food and farming deal"
       },
       {
         "kind": "occasion",
         "name": "Commonwealth Games",
-        "role": ""
+        "role": "Games whose Opening Ceremony was held in Glasgow in summer"
+      },
+      {
+        "kind": "occasion",
+        "name": "EU-UK Summit",
+        "role": "summit on 20 November where a food and farming deal is sought"
+      },
+      {
+        "kind": "place",
+        "name": "Motherwell",
+        "role": "town where the speech was given"
+      },
+      {
+        "kind": "place",
+        "name": "Scotland",
+        "role": "nation addressed in the speech"
+      },
+      {
+        "kind": "place",
+        "name": "Greater Manchester",
+        "role": "combined authority the Prime Minister led as first Mayor"
+      },
+      {
+        "kind": "place",
+        "name": "Leigh",
+        "role": "former mining town the Prime Minister represented as MP"
+      },
+      {
+        "kind": "place",
+        "name": "Westminster",
+        "role": "seat of the UK Parliament"
+      },
+      {
+        "kind": "place",
+        "name": "Downing Street",
+        "role": "London street of the Prime Minister's residence"
+      },
+      {
+        "kind": "place",
+        "name": "Easterhouse",
+        "role": "Glasgow estate visited in August 2023"
+      },
+      {
+        "kind": "place",
+        "name": "Bannatyne House",
+        "role": "building in Easterhouse where FARE-Scotland is based"
+      },
+      {
+        "kind": "place",
+        "name": "Glasgow",
+        "role": "city hosting the Commonwealth Games"
+      },
+      {
+        "kind": "place",
+        "name": "Edinburgh",
+        "role": "capital of Scotland"
+      },
+      {
+        "kind": "place",
+        "name": "Dundee",
+        "role": "city in Scotland"
+      },
+      {
+        "kind": "place",
+        "name": "Aberdeen",
+        "role": "city in Scotland"
+      },
+      {
+        "kind": "place",
+        "name": "Inverclyde",
+        "role": "area in Scotland with shrinking working population"
+      },
+      {
+        "kind": "place",
+        "name": "Falkirk",
+        "role": "town where Alexander Dennis builds buses"
+      },
+      {
+        "kind": "place",
+        "name": "Grangemouth",
+        "role": "industrial site in Scotland"
+      },
+      {
+        "kind": "place",
+        "name": "Ravenscraig",
+        "role": "former steelworks site near Motherwell"
+      },
+      {
+        "kind": "place",
+        "name": "Highlands and Islands",
+        "role": "region building a space industry"
+      },
+      {
+        "kind": "place",
+        "name": "East Renfrewshire",
+        "role": "council area with higher male life expectancy"
+      },
+      {
+        "kind": "place",
+        "name": "Lanarkshire",
+        "role": "area in Scotland"
       }
     ]
   }

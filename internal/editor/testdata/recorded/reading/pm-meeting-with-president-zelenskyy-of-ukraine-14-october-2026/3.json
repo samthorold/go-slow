@@ -1,50 +1,60 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "fdd882b2ef3d928f41406b30088e3e1f628804d812d177e3c143bdebf8ffcf3f",
-  "recorded_at": "2026-10-26T16:49:22.740901Z",
+  "request_hash": "407934b6a583729ed85bb2613ebe488d666cc743138985126baf3cc8b02d4cf6",
+  "recorded_at": "2026-10-26T22:38:51.646259Z",
   "usage": {
-    "input_tokens": 1934,
-    "output_tokens": 2825
+    "input_tokens": 1984,
+    "output_tokens": 2755
   },
   "output": {
     "claims": [
       {
         "made_by": "the leaders",
-        "quote": "Russia’s blatant indiscriminate attacks on civilians and energy infrastructure",
-        "statement": "Russia has carried out blatant indiscriminate attacks on civilians and energy infrastructure since President Trump called for an energy ceasefire."
-      },
-      {
-        "made_by": "the leaders",
         "quote": "It was clear that Russia had no interest in peace, the leaders underlined.",
         "statement": "Russia had no interest in peace."
+      },
+      {
+        "made_by": "the Item's publisher (the leaders' readout)",
+        "quote": "Russia’s blatant indiscriminate attacks on civilians and energy infrastructure",
+        "statement": "Russia's attacks on civilians and energy infrastructure are blatant and indiscriminate."
       }
     ],
     "facts": [
       {
         "as_at": "2026-10-14",
         "quote": "The Prime Minister welcomed President Volodymyr Zelenskyy of Ukraine to Downing Street this afternoon.",
-        "statement": "The Prime Minister welcomed President Volodymyr Zelenskyy of Ukraine to Downing Street on 2026-10-14."
+        "statement": "The Prime Minister welcomed President Volodymyr Zelenskyy of Ukraine to Downing Street."
       },
       {
         "as_at": "2026-10-14",
-        "quote": "reflecting on their call on Saturday",
-        "statement": "The leaders had a call on Saturday before this meeting."
+        "quote": "The leaders began by reflecting on their call on Saturday",
+        "statement": "The leaders had a call on the Saturday before the meeting."
       },
       {
         "as_at": "2026-10-14",
-        "quote": "the Prime Minister set out the UK’s latest package of Lightweight Multirole Missiles",
-        "statement": "The Prime Minister set out the UK’s latest package of Lightweight Multirole Missiles."
+        "quote": "Russia’s blatant indiscriminate attacks on civilians and energy infrastructure since President Trump called for an energy ceasefire.",
+        "statement": "Russia has carried out attacks on civilians and energy infrastructure since President Trump called for an energy ceasefire."
       },
       {
         "as_at": "2026-10-14",
-        "quote": "the leaders discussed how the UK could accelerate defensive support to Ukraine ahead of the winter",
-        "statement": "The leaders discussed how the UK could accelerate defensive support to Ukraine ahead of the winter."
+        "quote": "particularly in response to Russia’s barrage of jet-powered drones",
+        "statement": "Russia has launched a barrage of jet-powered drones."
+      },
+      {
+        "as_at": "2026-10-14",
+        "quote": "the Prime Minister set out the UK’s latest package of Lightweight Multirole Missiles.",
+        "statement": "The Prime Minister set out the UK's latest package of Lightweight Multirole Missiles."
       },
       {
         "as_at": "2026-10-14",
         "quote": "The UK would continue to develop innovative military solutions for use on the battlefield in Ukraine",
-        "statement": "The UK intends to continue developing innovative military solutions for use on the battlefield in Ukraine."
+        "statement": "The UK intends to continue developing innovative military solutions for use on the battlefield in Ukraine, including retrofitting British capability onto equipment gifted from other partners."
+      },
+      {
+        "as_at": "2026-10-14",
+        "quote": "the leaders discussed how the UK could accelerate defensive support to Ukraine ahead of the winter.",
+        "statement": "The leaders discussed how the UK could accelerate defensive support to Ukraine ahead of the winter."
       },
       {
         "as_at": "2026-10-14",
@@ -54,15 +64,10 @@
       {
         "as_at": "2026-10-14",
         "quote": "Both looked forward to speaking again soon.",
-        "statement": "The leaders look forward to speaking again soon."
+        "statement": "The two leaders look forward to speaking again soon."
       }
     ],
     "mentions": [
-      {
-        "kind": "person",
-        "name": "Prime Minister",
-        "role": "Prime Minister of the United Kingdom"
-      },
       {
         "kind": "person",
         "name": "Volodymyr Zelenskyy",
@@ -70,13 +75,13 @@
       },
       {
         "kind": "person",
-        "name": "President Trump",
-        "role": ""
+        "name": "the Prime Minister",
+        "role": "Prime Minister of the United Kingdom"
       },
       {
-        "kind": "place",
-        "name": "Downing Street",
-        "role": ""
+        "kind": "person",
+        "name": "President Trump",
+        "role": "President"
       },
       {
         "kind": "place",
@@ -90,7 +95,12 @@
       },
       {
         "kind": "place",
-        "name": "United Kingdom",
+        "name": "UK",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "Downing Street",
         "role": ""
       }
     ]

@@ -1,11 +1,11 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "dbafc549b8688360bf4d1dca8f92a90f5573002bb220e4386da9ee1ba589232e",
-  "recorded_at": "2026-10-26T21:39:40.548969Z",
+  "request_hash": "1c18e7042327739a6d1338412101627d51550b7c93eaa8b1da636f0b9cf82e7a",
+  "recorded_at": "2026-10-26T22:47:28.269227Z",
   "usage": {
-    "input_tokens": 2758,
-    "output_tokens": 4366
+    "input_tokens": 2808,
+    "output_tokens": 4494
   },
   "output": {
     "claims": [
@@ -16,28 +16,8 @@
       },
       {
         "made_by": "Andy Burnham",
-        "quote": "we are with you for as long as it takes",
-        "statement": "The UK is with Ukraine for as long as it takes."
-      },
-      {
-        "made_by": "Andy Burnham",
         "quote": "Russia’s aggression cannot be allowed to succeed on our continent.",
-        "statement": "Russia's aggression cannot be allowed to succeed in Europe."
-      },
-      {
-        "made_by": "John Healey",
-        "quote": "our commitment to the Ukrainian people is unshakeable",
-        "statement": "The UK's commitment to the Ukrainian people is unshakeable."
-      },
-      {
-        "made_by": "John Healey",
-        "quote": "to curtail the war chest funding Putin so desperately wants",
-        "statement": "Backing the ban on Russian LNG would curtail the funds financing Putin's war."
-      },
-      {
-        "made_by": "John Healey",
-        "quote": "the Chancellor will argue that this must be met by European resolve and unity",
-        "statement": "Russia's bombardment must be met by European resolve and unity."
+        "statement": "Russia's aggression cannot be allowed to succeed on the European continent."
       },
       {
         "made_by": "UK Government",
@@ -47,24 +27,44 @@
       {
         "made_by": "UK Government",
         "quote": "The drones are faster and can fly far higher than propeller-driven Shaheds, making them harder to detect and destroy before they hit targets.",
-        "statement": "The jet-powered drones are faster and fly higher than propeller-driven Shaheds, making them harder to detect and destroy."
+        "statement": "The jet-powered drones are faster and fly higher than propeller-driven Shaheds, making them harder to detect and destroy before they hit targets."
+      },
+      {
+        "made_by": "John Healey",
+        "quote": "to curtail the war chest funding Putin so desperately wants",
+        "statement": "Urging partners to back the ban on Russian LNG will curtail the war chest funding Putin."
+      },
+      {
+        "made_by": "John Healey",
+        "quote": "Conflict in the Middle East and in Europe is hitting people across the world.",
+        "statement": "Conflict in the Middle East and in Europe is hitting people across the world."
       }
     ],
     "facts": [
       {
         "as_at": "2026-10-13",
-        "quote": "Prime Minister to host President Volodymyr Zelenskyy at Downing Street today",
-        "statement": "The Prime Minister is to host President Volodymyr Zelenskyy at Downing Street on 2026-10-13."
+        "quote": "to host President Volodymyr Zelenskyy at Downing Street today",
+        "statement": "The Prime Minister is hosting President Volodymyr Zelenskyy at Downing Street on 2026-10-13."
       },
       {
         "as_at": "2026-10-13",
         "quote": "President Zelenskyy will arrive in the UK this morning",
-        "statement": "President Zelenskyy is due to arrive in the UK on the morning of 2026-10-13."
+        "statement": "President Zelenskyy is due to arrive in the UK on 2026-10-13."
       },
       {
         "as_at": "2026-10-13",
-        "quote": "the Prime Minister has also asked Ministers to draw up further sanctions, military aid, and fiscal packages",
+        "quote": "The Prime Minister has also asked Ministers to draw up further sanctions, military aid, and fiscal packages to provide urgent support in the coming weeks.",
         "statement": "The Prime Minister has asked Ministers to draw up further sanctions, military aid and fiscal packages."
+      },
+      {
+        "as_at": "2026-10-13",
+        "quote": "The UK has already committed £1.6 billion to deliver more than 5000 LMMs to Ukraine over the next four years",
+        "statement": "The UK has committed £1.6 billion to deliver more than 5000 British Lightweight Multirole Missiles to Ukraine over the next four years."
+      },
+      {
+        "as_at": "2026-10-13",
+        "quote": "the £45m package of missiles announced today",
+        "statement": "The UK has announced a £45 million package of missiles for Ukraine."
       },
       {
         "as_at": "2026-10-13",
@@ -73,33 +73,28 @@
       },
       {
         "as_at": "2026-10-13",
-        "quote": "The UK has already committed £1.6 billion to deliver more than 5000 LMMs to Ukraine over the next four years",
-        "statement": "The UK has already committed £1.6 billion to deliver more than 5000 Lightweight Multirole Missiles to Ukraine over the next four years."
-      },
-      {
-        "as_at": "2026-10-13",
-        "quote": "including delivering £45 million of surface-to-air missiles deliveries",
-        "statement": "The UK is delivering £45 million of surface-to-air missiles to Ukraine."
+        "quote": "will accelerate £10 million of the £45m package of missiles announced today to meet Ukraine’s most urgent winter requirements",
+        "statement": "The UK intends to accelerate £10 million of the £45 million missile package to meet Ukraine's most urgent winter requirements."
       },
       {
         "as_at": "2026-10-13",
         "quote": "standing by plans to fully implement a maritime services ban on Russian liquefied natural gas (LNG) exports",
-        "statement": "The UK is standing by plans to fully implement a maritime services ban on Russian LNG exports."
+        "statement": "The UK intends to fully implement a maritime services ban on Russian LNG exports."
       },
       {
         "as_at": "2026-10-13",
-        "quote": "will accelerate £10 million of the £45m package of missiles announced today",
-        "statement": "The UK intends to accelerate £10 million of the £45 million missiles package."
-      },
-      {
-        "as_at": "2026-10-13",
-        "quote": "Chancellor John Healey will use his meetings at the IMF in Bangkok to urge partners",
-        "statement": "Chancellor John Healey is due to hold meetings at the IMF in Bangkok and urge partners to fully implement an equivalent ban on Russian LNG."
+        "quote": "Chancellor John Healey will use his meetings at the IMF in Bangkok",
+        "statement": "Chancellor John Healey is attending IMF meetings in Bangkok."
       },
       {
         "as_at": "2026-10-12",
-        "quote": "the Foreign Secretary did the same with partners at the Warsaw Security Forum yesterday",
-        "statement": "The Foreign Secretary urged partners to implement a ban on Russian LNG at the Warsaw Security Forum on 2026-10-12."
+        "quote": "the Foreign Secretary did the same with partners at the Warsaw Security Forum yesterday [TUE]",
+        "statement": "The Foreign Secretary urged partners to fully implement a ban on Russian LNG at the Warsaw Security Forum on 2026-10-12."
+      },
+      {
+        "as_at": "2026-10-13",
+        "quote": "As Russia continues its bombardment of Ukraine’s capital Kyiv and energy infrastructure",
+        "statement": "Russia is continuing its bombardment of Kyiv and Ukraine's energy infrastructure."
       },
       {
         "as_at": "2026-10-13",
@@ -109,7 +104,7 @@
       {
         "as_at": "2026-10-13",
         "quote": "Chancellor of the Exchequer John Healey said:",
-        "statement": "Chancellor of the Exchequer John Healey made a statement on Russian LNG and Ukraine."
+        "statement": "Chancellor of the Exchequer John Healey made a statement urging partners to back the ban on Russian LNG."
       }
     ],
     "mentions": [
@@ -130,17 +125,22 @@
       },
       {
         "kind": "person",
-        "name": "Putin",
+        "name": "Foreign Secretary",
         "role": ""
       },
       {
         "kind": "person",
-        "name": "Foreign Secretary",
-        "role": "Foreign Secretary of the United Kingdom"
+        "name": "Putin",
+        "role": ""
       },
       {
         "kind": "place",
-        "name": "UK",
+        "name": "Downing Street",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "United Kingdom",
         "role": ""
       },
       {
@@ -155,22 +155,17 @@
       },
       {
         "kind": "place",
-        "name": "Downing Street",
-        "role": ""
-      },
-      {
-        "kind": "place",
         "name": "Kyiv",
         "role": ""
       },
       {
         "kind": "place",
-        "name": "Bangkok",
+        "name": "United States",
         "role": ""
       },
       {
         "kind": "place",
-        "name": "United States",
+        "name": "Bangkok",
         "role": ""
       },
       {

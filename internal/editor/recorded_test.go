@@ -161,6 +161,9 @@ func readingVerdicts(t *testing.T, root, path string) []error {
 	if name == commonsStatement {
 		commonsCasesPresent(t, text)
 	}
+	if name == reactionFixture {
+		reactionCasesPresent(t, text)
+	}
 	return sampled(t, filepath.Join(root, "reading"), name, dailyRule, readingCommand, func(m *sampleModel) sampleResult {
 		var r editor.Reading
 		passed, err := runSample(m, func(model editor.Model) (bool, error) {
@@ -205,6 +208,9 @@ func readingVerdicts(t *testing.T, root, path string) []error {
 		}
 		if name == commonsStatement {
 			commonsStatementFacts(p, r)
+		}
+		if name == reactionFixture {
+			reactionFacts(p, r)
 		}
 		return sampleResult{passed: true, held: p}
 	})
@@ -291,6 +297,63 @@ func commonsStatementFacts(p properties, r editor.Reading) {
 	}
 	if !slices.ContainsFunc(r.Claims, func(c editor.Claim) bool { return tenBillion.MatchString(c.Statement) }) {
 		estimate("no Claim states it")
+	}
+}
+
+// reactionCasesPresent fails unless the reaction's text carries the event
+// it responds to (the agreement between the US and Russia) and the saying
+// (a government spokesperson's), so a changed fixture can't leave its
+// properties testing nothing.
+func reactionCasesPresent(t *testing.T, text string) {
+	t.Helper()
+	for _, c := range []string{
+		"response to agreement between us and russia",
+		"a uk government spokesperson said",
+	} {
+		if !strings.Contains(text, normal(c)) {
+			t.Fatalf("the reaction no longer carries the case %q", c)
+		}
+	}
+}
+
+var (
+	agreementWord = regexp.MustCompile(`(?i)\bagree`)
+	russiaWord    = regexp.MustCompile(`(?i)\brussia`)
+	// usWord is the United States, never the pronoun "us".
+	usWord       = regexp.MustCompile(`\b(US|USA|U\.S\.)\b|(?i:\bunited states\b|\bamerica)`)
+	respondsWord = regexp.MustCompile(`(?i)\b(respon|statement)`)
+	speakerWord  = regexp.MustCompile(`(?i)\b(government|spokesperson)\b`)
+)
+
+// reactionFacts asserts the reaction's saying and the event it responds
+// to are drawn as Facts, beside what was said (system design: A declared
+// intention is a Fact, as an intention).
+func reactionFacts(p properties, r editor.Reading) {
+	p.holds("a Fact states the agreement between the US and Russia", slices.ContainsFunc(r.Facts, func(f editor.Fact) bool {
+		s := f.Statement
+		return agreementWord.MatchString(s) && russiaWord.MatchString(s) && usWord.MatchString(s)
+	}), "none does: %s", factStatements(r))
+	p.holds("a Fact states the government's response", slices.ContainsFunc(r.Facts, func(f editor.Fact) bool {
+		return respondsWord.MatchString(f.Statement) && speakerWord.MatchString(f.Statement)
+	}), "none does: %s", factStatements(r))
+}
+
+func TestTheReactionsCasesAreMatchedOnTheEventAndTheSaying(t *testing.T) {
+	for s, want := range map[string][2]bool{
+		"An agreement between the US and Russia was reached on 9 October.":                    {true, false},
+		"The United States and Russia agreed a deal.":                                         {true, false},
+		"A UK government spokesperson responded to the agreement between the US and Russia.":  {true, true},
+		"The UK Government made a statement on the US-Russia agreement.":                      {true, true},
+		"The UK fully supports US-led efforts to secure a just and lasting peace in Ukraine.": {false, false},
+		"The UK government intends to maintain pressure on Russia through sanctions.":         {false, false},
+		"The UK government continues to monitor developments closely.":                        {false, false},
+		"Russia agreed to talks that would do us harm.":                                       {false, false},
+	} {
+		agreement := agreementWord.MatchString(s) && russiaWord.MatchString(s) && usWord.MatchString(s)
+		response := respondsWord.MatchString(s) && speakerWord.MatchString(s)
+		if got := [2]bool{agreement, response}; got != want {
+			t.Errorf("%q: (agreement, response) = %v, want %v", s, got, want)
+		}
 	}
 }
 

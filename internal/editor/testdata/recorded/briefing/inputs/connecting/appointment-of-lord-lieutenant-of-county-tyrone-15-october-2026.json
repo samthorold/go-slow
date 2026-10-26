@@ -1,11 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "9dc15bd6b48e397938eb3019a7d5df9d9883a73200928a4577853b9b710d1afc",
-  "recorded_at": "2026-10-26T00:29:16.926643Z",
+  "request_hash": "c1d7266270b48f2c4ceabe204b41cc7333ce39a9092fb18082a00b2bac5a9729",
+  "recorded_at": "2026-10-26T23:49:13.487134Z",
   "usage": {
-    "input_tokens": 1911,
-    "output_tokens": 1311
+    "input_tokens": 2015,
+    "output_tokens": 1355
   },
   "output": {
     "causes": [],
@@ -31,7 +31,7 @@
         "fact": "F2",
         "roles": [
           {
-            "entity": "Sir Robert William Lowry Scott",
+            "entity": "Sir Robert William Lowry Scott KCVO OBE",
             "role": "actor"
           },
           {
@@ -78,26 +78,13 @@
             "role": "actor"
           },
           {
-            "entity": "Omagh Police District Voluntary Welfare Support Group",
-            "role": "undergoer"
-          }
-        ]
-      },
-      {
-        "fact": "F6",
-        "roles": [
-          {
-            "entity": "William James Baxter",
-            "role": "actor"
-          },
-          {
             "entity": "Newtownstewart Presbyterian Church",
             "role": "place"
           }
         ]
       },
       {
-        "fact": "F7",
+        "fact": "F6",
         "roles": [
           {
             "entity": "William James Baxter",
@@ -110,7 +97,7 @@
         ]
       },
       {
-        "fact": "F8",
+        "fact": "F7",
         "roles": [
           {
             "entity": "William James Baxter",

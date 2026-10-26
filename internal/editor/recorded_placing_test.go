@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/samthorold/go-slow/internal/sqlite"
@@ -86,22 +87,28 @@ func placingVerdicts(t *testing.T, root string) []error {
 			if f.name != reactionFixture {
 				return
 			}
-			// A reaction is not a Development: the government's response to
-			// the US-Russia agreement is a reaction as a whole, so none of its
-			// Facts moves a Story on.
+			// The reaction's own Fact is not a Development: the government's
+			// response to the US-Russia agreement moves no Story on. Its
+			// reading may draw other Facts, such as the agreement itself,
+			// which placing is right to file; the property rests on the
+			// response, so it must be there.
 			got, _, err := store.ReadItem(ctx, number10.ID, f.item.EntryID)
 			if err != nil {
 				t.Fatal(err)
 			}
-			if len(got.Facts) == 0 {
-				t.Fatal("reading drew no Facts from the reaction, so placing is not tested on one")
-			}
-			reaction := p.property("a reaction is not a Development")
+			response := ""
 			for _, fact := range got.Facts {
-				if in := developments[fact.Statement]; len(in) > 0 {
-					reaction("the reaction's Fact %q is a Development in %v", fact.Statement, in)
+				if strings.Contains(strings.ToLower(fact.Statement), "respon") {
+					response = fact.Statement
+					break
 				}
 			}
+			if response == "" {
+				t.Fatalf("the reading draws no Fact of the government's response, so placing is not tested on the reaction: %+v", got.Facts)
+			}
+			in := developments[response]
+			p.holds("the reaction's own Fact is not a Development", len(in) == 0,
+				"the reaction's Fact %q is a Development in %v", response, in)
 		})
 }
 

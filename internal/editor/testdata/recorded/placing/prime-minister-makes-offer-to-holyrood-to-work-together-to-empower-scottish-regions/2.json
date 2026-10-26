@@ -1,11 +1,11 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "request_hash": "f54e27f64ef49f03424eeb99a985dad3e9850d18efc64fdc65f65805c5bf9da5",
-  "recorded_at": "2026-10-26T14:19:37.828193Z",
+  "request_hash": "c267f83298df4652c1094f22af14df9bb64ab57dc62463d746a72f1384f0392c",
+  "recorded_at": "2026-10-26T23:40:30.777484Z",
   "usage": {
-    "input_tokens": 2681,
-    "output_tokens": 470
+    "input_tokens": 3303,
+    "output_tokens": 706
   },
   "output": {
     "facts": [
@@ -14,11 +14,15 @@
         "fact": "F1"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N1"
+        ],
         "fact": "F2"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N1"
+        ],
         "fact": "F3"
       },
       {
@@ -26,12 +30,24 @@
           "N1"
         ],
         "fact": "F4"
+      },
+      {
+        "developments_in": [],
+        "fact": "F5"
+      },
+      {
+        "developments_in": [],
+        "fact": "F6"
+      },
+      {
+        "developments_in": [],
+        "fact": "F7"
       }
     ],
     "new_stories": [
       {
         "ref": "N1",
-        "title": "UK and Scottish Government cooperation on devolution"
+        "title": "UK Government and Scottish Government working relations and devolution"
       }
     ]
   }

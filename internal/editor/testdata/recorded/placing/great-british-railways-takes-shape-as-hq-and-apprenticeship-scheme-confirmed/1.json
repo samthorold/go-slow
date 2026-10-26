@@ -1,11 +1,11 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "request_hash": "498ed3caf416f35f83587fde3fee4b111d998fce703a568abba4dbaffb8097b1",
-  "recorded_at": "2026-10-26T14:18:48.436301Z",
+  "request_hash": "9528617bd9064cb1b78ed5ff015b626d02592aa58971050d2f6e246e5ce85ac6",
+  "recorded_at": "2026-10-26T23:39:38.48945Z",
   "usage": {
-    "input_tokens": 2878,
-    "output_tokens": 954
+    "input_tokens": 3364,
+    "output_tokens": 1525
   },
   "output": {
     "facts": [
@@ -17,25 +17,25 @@
       },
       {
         "developments_in": [
-          "N1"
+          "N2"
         ],
         "fact": "F2"
       },
       {
         "developments_in": [
-          "N1"
+          "N3"
         ],
         "fact": "F3"
       },
       {
         "developments_in": [
-          "N1"
+          "N4"
         ],
         "fact": "F4"
       },
       {
         "developments_in": [
-          "N1"
+          "N5"
         ],
         "fact": "F5"
       },
@@ -46,7 +46,9 @@
         "fact": "F6"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N5"
+        ],
         "fact": "F7"
       },
       {
@@ -55,15 +57,47 @@
       },
       {
         "developments_in": [
-          "N1"
+          "N2"
         ],
         "fact": "F9"
+      },
+      {
+        "developments_in": [],
+        "fact": "F10"
+      },
+      {
+        "developments_in": [],
+        "fact": "F11"
+      },
+      {
+        "developments_in": [],
+        "fact": "F12"
+      },
+      {
+        "developments_in": [],
+        "fact": "F13"
       }
     ],
     "new_stories": [
       {
         "ref": "N1",
-        "title": "Great British Railways rollout"
+        "title": "Great British Railways headquarters and organisation"
+      },
+      {
+        "ref": "N2",
+        "title": "Rail foundation apprenticeship and youth employment"
+      },
+      {
+        "ref": "N3",
+        "title": "Rail fares policy"
+      },
+      {
+        "ref": "N4",
+        "title": "Rail network capacity and services"
+      },
+      {
+        "ref": "N5",
+        "title": "New train fleet for Great British Railways"
       }
     ]
   }

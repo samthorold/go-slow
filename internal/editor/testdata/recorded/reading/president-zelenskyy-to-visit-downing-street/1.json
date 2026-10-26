@@ -1,65 +1,80 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "ae243b1f25607e603b4e77a907154256c81c0c1a9a12d2ffe79a0dfbec71b7d5",
-  "recorded_at": "2026-10-26T13:25:12.335854Z",
+  "request_hash": "296d9bebb23ed0bac1adae910d0d76b6809084e769f90a56b3decc3d1b8d43ee",
+  "recorded_at": "2026-10-26T13:54:53.386886Z",
   "usage": {
-    "input_tokens": 2476,
-    "output_tokens": 2604
+    "input_tokens": 2610,
+    "output_tokens": 3999
   },
   "output": {
     "claims": [
       {
         "made_by": "Andy Burnham",
         "quote": "we are with you for as long as it takes",
-        "statement": "The UK is with Ukraine for as long as it takes, and will go further and faster in its support."
+        "statement": "The UK is with Ukraine for as long as it takes."
       },
       {
         "made_by": "Andy Burnham",
         "quote": "Our rock-solid support to Ukraine is vital for keeping us safe here in the UK",
-        "statement": "UK support to Ukraine is vital for keeping the UK safe."
+        "statement": "UK support for Ukraine is vital for keeping the UK safe."
       },
       {
         "made_by": "Andy Burnham",
         "quote": "Russia’s aggression cannot be allowed to succeed on our continent.",
-        "statement": "Russia's aggression cannot be allowed to succeed on the European continent."
+        "statement": "Russia's aggression cannot be allowed to succeed in Europe."
+      },
+      {
+        "made_by": "Andy Burnham",
+        "quote": "will accelerate delivery of critical air defence missiles",
+        "statement": "The UK will accelerate delivery of critical air defence missiles to Ukraine."
       },
       {
         "made_by": "John Healey",
-        "quote": "our commitment to the Ukrainian people is unshakeable",
-        "statement": "The UK's commitment to the Ukrainian people is unshakeable."
+        "quote": "I urge partners to back the ban on Russian LNG, like we have done in the UK, to curtail the war chest funding Putin so desperately wants.",
+        "statement": "Partners should back a ban on Russian LNG to curtail the funding Putin relies on for the war."
       },
       {
-        "made_by": "John Healey",
-        "quote": "I urge partners to back the ban on Russian LNG, like we have done in the UK",
-        "statement": "Partners should back a ban on Russian LNG, as the UK has done."
+        "made_by": "UK Government",
+        "quote": "have proven extremely effective against jet-powered drones",
+        "statement": "British Lightweight Multirole Missiles have proven extremely effective against jet-powered drones."
       }
     ],
     "facts": [
       {
-        "as_at": "2026-10-13",
-        "quote": "Prime Minister to host President Volodymyr Zelenskyy at Downing Street today",
-        "statement": "The Prime Minister hosts President Zelenskyy at Downing Street on 13 October 2026."
-      },
-      {
-        "as_at": "2026-10-13",
-        "quote": "Prime Minister has also asked Ministers to draw up further sanctions, military aid, and fiscal packages",
-        "statement": "The Prime Minister has asked Ministers to draw up further sanctions, military aid and fiscal packages to provide urgent support in the coming weeks."
+        "as_at": "2026-10-12",
+        "quote": "the Foreign Secretary did the same with partners at the Warsaw Security Forum yesterday",
+        "statement": "The Foreign Secretary urged partners to implement an equivalent ban on Russian LNG at the Warsaw Security Forum."
       },
       {
         "as_at": "2026-10-13",
         "quote": "The UK has already committed £1.6 billion to deliver more than 5000 LMMs to Ukraine over the next four years",
-        "statement": "The UK has committed £1.6 billion to deliver more than 5000 Lightweight Multirole Missiles to Ukraine over four years."
+        "statement": "The UK has already committed £1.6 billion to deliver more than 5000 Lightweight Multirole Missiles to Ukraine over four years."
       },
       {
         "as_at": "2026-10-13",
-        "quote": "Chancellor John Healey will use his meetings at the IMF in Bangkok to urge partners",
-        "statement": "The Chancellor will use his meetings at the IMF in Bangkok to urge partners to fully implement a ban on Russian LNG."
+        "quote": "including delivering £45 million of surface-to-air missiles deliveries",
+        "statement": "The UK is delivering £45 million of surface-to-air missiles to Ukraine."
       },
       {
-        "as_at": "2026-10-12",
-        "quote": "the Foreign Secretary did the same with partners at the Warsaw Security Forum yesterday",
-        "statement": "The Foreign Secretary urged partners at the Warsaw Security Forum to implement a ban on Russian LNG."
+        "as_at": "2026-10-13",
+        "quote": "The Prime Minister has also asked Ministers to draw up further sanctions, military aid, and fiscal packages",
+        "statement": "The Prime Minister has asked Ministers to draw up further sanctions, military aid and fiscal packages."
+      },
+      {
+        "as_at": "2026-10-13",
+        "quote": "As Russia continues its bombardment of Ukraine’s capital Kyiv and energy infrastructure",
+        "statement": "Russia is continuing its bombardment of Kyiv and Ukraine's energy infrastructure."
+      },
+      {
+        "as_at": "2026-10-13",
+        "quote": "Prime Minister Andy Burnham said:",
+        "statement": "Prime Minister Andy Burnham made a statement ahead of the leaders' meeting."
+      },
+      {
+        "as_at": "2026-10-13",
+        "quote": "Chancellor of the Exchequer John Healey said:",
+        "statement": "Chancellor of the Exchequer John Healey made a statement on Ukraine and Russian LNG."
       }
     ],
     "mentions": [
@@ -81,7 +96,7 @@
       {
         "kind": "person",
         "name": "Foreign Secretary",
-        "role": "Foreign Secretary"
+        "role": ""
       },
       {
         "kind": "person",
@@ -90,12 +105,7 @@
       },
       {
         "kind": "place",
-        "name": "Downing Street",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "United Kingdom",
+        "name": "UK",
         "role": ""
       },
       {
@@ -115,7 +125,7 @@
       },
       {
         "kind": "place",
-        "name": "United States",
+        "name": "Downing Street",
         "role": ""
       },
       {
@@ -124,13 +134,13 @@
         "role": ""
       },
       {
-        "kind": "organisation",
-        "name": "International Monetary Fund",
+        "kind": "place",
+        "name": "United States",
         "role": ""
       },
       {
-        "kind": "occasion",
-        "name": "IMF meetings",
+        "kind": "organisation",
+        "name": "IMF",
         "role": ""
       },
       {

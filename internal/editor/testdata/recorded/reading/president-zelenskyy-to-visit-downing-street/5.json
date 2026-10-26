@@ -1,36 +1,31 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "ae243b1f25607e603b4e77a907154256c81c0c1a9a12d2ffe79a0dfbec71b7d5",
-  "recorded_at": "2026-10-26T13:25:59.941132Z",
+  "request_hash": "296d9bebb23ed0bac1adae910d0d76b6809084e769f90a56b3decc3d1b8d43ee",
+  "recorded_at": "2026-10-26T13:55:51.7003Z",
   "usage": {
-    "input_tokens": 2476,
-    "output_tokens": 3251
+    "input_tokens": 2610,
+    "output_tokens": 3791
   },
   "output": {
     "claims": [
       {
-        "made_by": "Prime Minister Andy Burnham",
-        "quote": "we are with you for as long as it takes",
-        "statement": "The UK is with Ukraine for as long as it takes."
-      },
-      {
-        "made_by": "Prime Minister Andy Burnham",
+        "made_by": "Andy Burnham",
         "quote": "Our rock-solid support to Ukraine is vital for keeping us safe here in the UK",
         "statement": "UK support for Ukraine is vital for keeping the UK safe."
       },
       {
-        "made_by": "Prime Minister Andy Burnham",
-        "quote": "Russia’s aggression cannot be allowed to succeed on our continent.",
-        "statement": "Russia's aggression cannot be allowed to succeed in Europe."
+        "made_by": "Andy Burnham",
+        "quote": "we are with you for as long as it takes",
+        "statement": "The UK will stand with Ukraine for as long as it takes."
       },
       {
-        "made_by": "Chancellor of the Exchequer John Healey",
+        "made_by": "John Healey",
         "quote": "our commitment to the Ukrainian people is unshakeable",
         "statement": "The UK's commitment to the Ukrainian people is unshakeable."
       },
       {
-        "made_by": "Chancellor of the Exchequer John Healey",
+        "made_by": "John Healey",
         "quote": "I urge partners to back the ban on Russian LNG",
         "statement": "Partners should back the ban on Russian LNG."
       }
@@ -38,13 +33,8 @@
     "facts": [
       {
         "as_at": "2026-10-13",
-        "quote": "Prime Minister to host President Volodymyr Zelenskyy at Downing Street today",
-        "statement": "The Prime Minister is hosting President Zelenskyy at Downing Street on the day of publication."
-      },
-      {
-        "as_at": "2026-10-13",
-        "quote": "President Zelenskyy will arrive in the UK this morning",
-        "statement": "President Zelenskyy is arriving in the UK on the morning of publication."
+        "quote": "The UK has already committed £1.6 billion to deliver more than 5000 LMMs to Ukraine over the next four years",
+        "statement": "The UK has committed £1.6 billion to deliver more than 5000 LMMs to Ukraine over the next four years."
       },
       {
         "as_at": "2026-10-13",
@@ -52,24 +42,24 @@
         "statement": "The Prime Minister has asked Ministers to draw up further sanctions, military aid and fiscal packages."
       },
       {
+        "as_at": "2026-10-12",
+        "quote": "This comes after the Foreign Secretary did the same with partners at the Warsaw Security Forum yesterday [TUE].",
+        "statement": "The Foreign Secretary urged partners at the Warsaw Security Forum to implement an equivalent ban on Russian LNG."
+      },
+      {
         "as_at": "2026-10-13",
-        "quote": "delivering £45 million of surface-to-air missiles deliveries",
+        "quote": "standing by plans to fully implement a maritime services ban on Russian liquefied natural gas (LNG) exports",
+        "statement": "The UK is standing by plans to fully implement a maritime services ban on Russian LNG exports."
+      },
+      {
+        "as_at": "2026-10-13",
+        "quote": "including delivering £45 million of surface-to-air missiles deliveries",
         "statement": "The UK is delivering £45 million of surface-to-air missiles to Ukraine."
       },
       {
         "as_at": "2026-10-13",
-        "quote": "The UK has already committed £1.6 billion to deliver more than 5000 LMMs to Ukraine over the next four years",
-        "statement": "The UK has committed £1.6 billion to deliver more than 5,000 LMMs to Ukraine over four years."
-      },
-      {
-        "as_at": "2026-10-13",
-        "quote": "Chancellor John Healey will use his meetings at the IMF in Bangkok to urge partners to fully implement an equivalent ban on Russian LNG",
-        "statement": "Chancellor John Healey will urge partners at IMF meetings in Bangkok to fully implement an equivalent ban on Russian LNG."
-      },
-      {
-        "as_at": "2026-10-13",
-        "quote": "the Foreign Secretary did the same with partners at the Warsaw Security Forum yesterday",
-        "statement": "The Foreign Secretary urged partners at the Warsaw Security Forum to implement a ban on Russian LNG."
+        "quote": "As Russia continues its bombardment of Ukraine’s capital Kyiv and energy infrastructure",
+        "statement": "Russia continues its bombardment of Kyiv and Ukraine's energy infrastructure."
       }
     ],
     "mentions": [
@@ -91,7 +81,7 @@
       {
         "kind": "person",
         "name": "Foreign Secretary",
-        "role": "Foreign Secretary of the United Kingdom"
+        "role": "Foreign Secretary"
       },
       {
         "kind": "person",
@@ -135,7 +125,7 @@
       },
       {
         "kind": "organisation",
-        "name": "IMF",
+        "name": "International Monetary Fund",
         "role": ""
       },
       {

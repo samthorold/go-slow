@@ -1,16 +1,16 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "03dceaf7335af853a1ed02981fe81bad7b70cf3a7592af6153dc3d2f2df27750",
-  "recorded_at": "2026-10-26T13:17:54.311399Z",
+  "request_hash": "a183d634854e4619c2416063347eb371d1e47d5c271e883fe1d5b38dbd65fbc2",
+  "recorded_at": "2026-10-26T13:49:30.165648Z",
   "usage": {
-    "input_tokens": 1652,
-    "output_tokens": 2148
+    "input_tokens": 1786,
+    "output_tokens": 2674
   },
   "output": {
     "claims": [
       {
-        "made_by": "Volodymyr Zelenskyy and the Prime Minister",
+        "made_by": "The Prime Minister and President Volodymyr Zelenskyy",
         "quote": "It was clear that Russia had no interest in peace, the leaders underlined.",
         "statement": "Russia had no interest in peace."
       },
@@ -23,18 +23,13 @@
         "made_by": "Prime Minister",
         "quote": "The UK would also continue its diplomatic efforts to support international supplies of defensive equipment too",
         "statement": "The UK would continue its diplomatic efforts to support international supplies of defensive equipment."
-      },
-      {
-        "made_by": "Volodymyr Zelenskyy and the Prime Minister",
-        "quote": "Both looked forward to speaking again soon.",
-        "statement": "The two leaders looked forward to speaking again soon."
       }
     ],
     "facts": [
       {
         "as_at": "2026-10-14",
         "quote": "The Prime Minister welcomed President Volodymyr Zelenskyy of Ukraine to Downing Street this afternoon.",
-        "statement": "The Prime Minister welcomed President Volodymyr Zelenskyy of Ukraine to Downing Street."
+        "statement": "The Prime Minister welcomed President Volodymyr Zelenskyy of Ukraine to Downing Street on 14 October 2026."
       },
       {
         "as_at": "2026-10-14",
@@ -43,12 +38,17 @@
       },
       {
         "as_at": "2026-10-14",
+        "quote": "Russia’s blatant indiscriminate attacks on civilians and energy infrastructure since President Trump called for an energy ceasefire",
+        "statement": "Russia has carried out attacks on civilians and energy infrastructure since President Trump called for an energy ceasefire."
+      },
+      {
+        "as_at": "2026-10-14",
         "quote": "the Prime Minister set out the UK’s latest package of Lightweight Multirole Missiles",
         "statement": "The Prime Minister set out the UK's latest package of Lightweight Multirole Missiles."
       },
       {
         "as_at": "2026-10-14",
-        "quote": "the leaders discussed how the UK could accelerate defensive support to Ukraine ahead of the winter.",
+        "quote": "the leaders discussed how the UK could accelerate defensive support to Ukraine ahead of the winter",
         "statement": "The leaders discussed how the UK could accelerate defensive support to Ukraine ahead of the winter."
       }
     ],
@@ -65,7 +65,7 @@
       },
       {
         "kind": "person",
-        "name": "Donald Trump",
+        "name": "President Trump",
         "role": "President"
       },
       {

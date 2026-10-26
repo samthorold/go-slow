@@ -345,6 +345,26 @@ func TestAReadingShownPrecedentsIsToldOfThemAfterTheSameInstructions(t *testing.
 	}
 }
 
+// A Fact is held true as at a date, and no one can corroborate what
+// something will do, cause or be worth: reading is told such a statement is
+// never a Fact, but a Claim, attributed.
+func TestReadingIsToldAProjectedEffectIsNeverAFact(t *testing.T) {
+	model := &fakeModel{output: goodReading}
+	if _, err := editor.Read(t.Context(), model, speech); err != nil {
+		t.Fatal(err)
+	}
+	instructions := model.sent[0].Instructions
+
+	for _, want := range []string{
+		"what something will do, cause or be worth (an estimate, a forecast, a projected effect) can't be established yet, so it is never a Fact",
+		"as a Claim, made by whoever the Item attributes it to, or, if it attributes it to no one, by the Item's publisher",
+	} {
+		if !strings.Contains(instructions, want) {
+			t.Errorf("reading's instructions do not say %q:\n%s", want, instructions)
+		}
+	}
+}
+
 func TestThereIsNoReadingWithoutAnItem(t *testing.T) {
 	model := &fakeModel{output: goodReading}
 

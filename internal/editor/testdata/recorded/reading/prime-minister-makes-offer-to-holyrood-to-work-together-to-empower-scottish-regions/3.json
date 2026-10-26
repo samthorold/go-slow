@@ -1,65 +1,75 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "de76b015c57d2bf52d9752a519cc53346c341d2df7052758cb231ec09240cfb9",
-  "recorded_at": "2026-10-26T13:26:36.3119Z",
+  "request_hash": "51eb57ad8f34086e5a573485ddd2443a3f5147a649c401e0d12cc3e87ca88f02",
+  "recorded_at": "2026-10-26T13:56:34.16002Z",
   "usage": {
-    "input_tokens": 1969,
-    "output_tokens": 3079
+    "input_tokens": 2103,
+    "output_tokens": 2892
   },
   "output": {
     "claims": [
       {
-        "made_by": "Andy Burnham",
+        "made_by": "Andy Burnham, Prime Minister of the United Kingdom",
         "quote": "the Scottish Government is one of the most centralised devolved administrations in Europe",
         "statement": "The Scottish Government is one of the most centralised devolved administrations in Europe."
       },
       {
-        "made_by": "Andy Burnham",
-        "quote": "despite significant devolution from Westminster over the last 27 years",
-        "statement": "Holyrood does not give people who know their areas best enough of a say despite significant devolution from Westminster over the last 27 years."
+        "made_by": "Andy Burnham, Prime Minister of the United Kingdom",
+        "quote": "the next stage of devolution should place more decision-making in the hands of Scotland’s regions and cities to drive reindustrialisation",
+        "statement": "The next stage of devolution should place more decision-making in the hands of Scotland's regions and cities to drive reindustrialisation."
       },
       {
-        "made_by": "Andy Burnham",
+        "made_by": "Andy Burnham, Prime Minister of the United Kingdom",
         "quote": "Through No10 North, we are rewiring the state",
         "statement": "Through No10 North, the UK Government is rewiring the state."
       },
       {
-        "made_by": "Andy Burnham",
+        "made_by": "Andy Burnham, Prime Minister of the United Kingdom",
         "quote": "With us working together, there is no limit to what we can achieve for the Scottish people.",
-        "statement": "Working together, there is no limit to what the UK and Scottish governments can achieve for the Scottish people."
+        "statement": "Working together, the UK Government and the Scottish Government can achieve without limit for the Scottish people."
       },
       {
-        "made_by": "Douglas Alexander",
+        "made_by": "Douglas Alexander, Scottish Secretary",
         "quote": "People in North Lanarkshire, in Fife or in the Highlands know what their communities need better than any minister, whether they sit in London or Edinburgh.",
         "statement": "People in North Lanarkshire, Fife and the Highlands know what their communities need better than any minister, whether in London or Edinburgh."
       },
       {
-        "made_by": "Douglas Alexander",
+        "made_by": "Douglas Alexander, Scottish Secretary",
         "quote": "The Prime Minister’s offer to the Scottish Government is a genuine one",
         "statement": "The Prime Minister's offer to the Scottish Government is genuine."
       },
       {
-        "made_by": "Douglas Alexander",
+        "made_by": "Douglas Alexander, Scottish Secretary",
         "quote": "Two governments, one goal - good jobs and real opportunity in every corner of Scotland.",
-        "statement": "The two governments share one goal of good jobs and real opportunity in every corner of Scotland."
+        "statement": "The UK and Scottish governments share one goal: good jobs and real opportunity in every corner of Scotland."
       }
     ],
     "facts": [
       {
         "as_at": "2026-10-15",
-        "quote": "after speaking with young people today in Lanarkshire",
-        "statement": "Andy Burnham spoke with young people in Lanarkshire on 2026-10-15."
+        "quote": "Delivering his remarks after speaking with young people today in Lanarkshire",
+        "statement": "Andy Burnham spoke with young people in Lanarkshire on the day of the speech."
       },
       {
         "as_at": "2026-10-15",
-        "quote": "I told the First Minister that I wanted to work with him",
+        "quote": "During my first week in office, I told the First Minister that I wanted to work with him",
         "statement": "Andy Burnham told the First Minister in his first week in office that he wanted to work with him."
       },
       {
         "as_at": "2026-10-15",
         "quote": "This is me making an offer to the Scottish Government.",
-        "statement": "Andy Burnham made an offer to the Scottish Government to work together on regional empowerment."
+        "statement": "Andy Burnham made an offer to the Scottish Government."
+      },
+      {
+        "as_at": "2026-10-15",
+        "quote": "Prime Minister Andy Burnham said:",
+        "statement": "Andy Burnham, the Prime Minister, made remarks on the offer to the Scottish Government."
+      },
+      {
+        "as_at": "2026-10-15",
+        "quote": "The Scottish Secretary, Douglas Alexander said:",
+        "statement": "Douglas Alexander, the Scottish Secretary, made remarks on devolution and the offer to the Scottish Government."
       }
     ],
     "mentions": [
@@ -75,42 +85,42 @@
       },
       {
         "kind": "person",
-        "name": "First Minister",
+        "name": "First Minister of Scotland",
         "role": "First Minister of Scotland"
       },
       {
         "kind": "organisation",
         "name": "Scottish Government",
-        "role": "Government of Scotland"
+        "role": ""
       },
       {
         "kind": "organisation",
         "name": "UK Government",
-        "role": "Government of the United Kingdom"
+        "role": ""
       },
       {
         "kind": "organisation",
         "name": "No10 North",
-        "role": "UK Government regional initiative"
+        "role": ""
       },
       {
         "kind": "organisation",
         "name": "Scotland Office",
-        "role": "UK Government department for Scotland"
+        "role": ""
       },
       {
         "kind": "organisation",
         "name": "Scottish Parliament",
-        "role": "Holyrood, legislature of Scotland"
-      },
-      {
-        "kind": "organisation",
-        "name": "Westminster",
-        "role": "UK Parliament"
+        "role": ""
       },
       {
         "kind": "place",
-        "name": "Scotland",
+        "name": "Holyrood",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "Westminster",
         "role": ""
       },
       {
@@ -135,7 +145,17 @@
       },
       {
         "kind": "place",
-        "name": "Europe",
+        "name": "Edinburgh",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "London",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "Scotland",
         "role": ""
       }
     ]

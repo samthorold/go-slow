@@ -21,9 +21,11 @@ type Store interface {
 	// FactsToPlace are the Facts awaiting placing, by Item, oldest Item
 	// first.
 	FactsToPlace(ctx context.Context) ([]ToPlace, error)
-	// StoriesSharing are the Stories whose Developments involve any of the
-	// named Entities.
-	StoriesSharing(ctx context.Context, entities []string) ([]Story, error)
+	// CandidateStories are at most limit Stories with a Development whose
+	// Item mentions an Entity it mentions, best first: ranked by the
+	// Entities each shares, each weighted by how few Stories it is in, then
+	// by the newest Development. Each carries what it shares as Shares.
+	CandidateStories(ctx context.Context, it Item, limit int) ([]Story, error)
 	// PlacingPrecedents are at most limit pieces of the Owner's Feedback on
 	// Developments whose Facts share an Entity with tp's Facts, or whose
 	// Items share a Topic with tp's Item: those sharing the most first, then
@@ -38,9 +40,10 @@ type Store interface {
 	// FactsPlacedSince are the Facts placed at or after since, by Item,
 	// oldest Item first.
 	FactsPlacedSince(ctx context.Context, since time.Time) ([]ToConnect, error)
-	// FactsNear are at most limit other Facts that share an Entity or a
-	// Story with any of facts, those nearest them in date first.
-	FactsNear(ctx context.Context, facts []Fact, limit int) ([]Fact, error)
+	// FactsNear are at most limit Facts other than tc's whose Items mention
+	// an Entity tc's Item mentions, or that are Developments in a Story with
+	// one of tc's Facts, those nearest them in date first.
+	FactsNear(ctx context.Context, tc ToConnect, limit int) ([]Fact, error)
 	// SaveConnecting writes a connecting to the Record, all at once, and
 	// marks its Facts connected at connectedAt.
 	SaveConnecting(ctx context.Context, c Connecting, connectedAt time.Time) error
@@ -160,7 +163,7 @@ func (e *Editor) PlaceWaiting(ctx context.Context, now time.Time) error {
 		if err != nil {
 			return err
 		}
-		stories, err := e.Store.StoriesSharing(ctx, entityNames(tp))
+		stories, err := e.Store.CandidateStories(ctx, tp.Item, candidatesShown)
 		if err != nil {
 			return err
 		}
@@ -223,7 +226,7 @@ func (e *Editor) Reconnect(ctx context.Context, now time.Time) error {
 // connectEach connects each Item's Facts in turn, in real time.
 func (e *Editor) connectEach(ctx context.Context, waiting []ToConnect, now time.Time) error {
 	for _, tc := range waiting {
-		others, err := e.Store.FactsNear(ctx, tc.Facts, factsShown)
+		others, err := e.Store.FactsNear(ctx, tc, factsShown)
 		if err != nil {
 			return err
 		}

@@ -1,11 +1,11 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "request_hash": "976e2225f0ffec40244d0a4ee86255b5733a7c5fe0e43dd70ff5a776c2811149",
-  "recorded_at": "2026-10-25T23:41:30.389459Z",
+  "request_hash": "17d75348c46f0a4e16d1a5fb2bdd0b74db2deb9f036ad8a80812559ed8236d8f",
+  "recorded_at": "2026-10-26T14:17:33.655252Z",
   "usage": {
-    "input_tokens": 3894,
-    "output_tokens": 1942
+    "input_tokens": 3341,
+    "output_tokens": 2092
   },
   "output": {
     "facts": [
@@ -23,7 +23,7 @@
       },
       {
         "developments_in": [
-          "N1"
+          "N4"
         ],
         "fact": "F4"
       },
@@ -39,18 +39,20 @@
       },
       {
         "developments_in": [
-          "N3"
+          "N1"
         ],
         "fact": "F7"
       },
       {
         "developments_in": [
-          "N3"
+          "N2"
         ],
         "fact": "F8"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N1"
+        ],
         "fact": "F9"
       },
       {
@@ -59,7 +61,7 @@
       },
       {
         "developments_in": [
-          "N2"
+          "N3"
         ],
         "fact": "F11"
       },
@@ -77,7 +79,7 @@
       },
       {
         "developments_in": [
-          "N4"
+          "N5"
         ],
         "fact": "F15"
       },
@@ -93,19 +95,23 @@
     "new_stories": [
       {
         "ref": "N1",
-        "title": "UK sanctions on Russia's oil sector"
+        "title": "UK-Germany defence and security partnership"
       },
       {
         "ref": "N2",
-        "title": "UK military support for Saudi Arabia"
+        "title": "UK information defence"
       },
       {
         "ref": "N3",
-        "title": "UK defence against hybrid threats"
+        "title": "UK military deployments in the Middle East"
       },
       {
         "ref": "N4",
-        "title": "UK–EU summit arrangements"
+        "title": "UK sanctions on Russia"
+      },
+      {
+        "ref": "N5",
+        "title": "UK-EU summit"
       }
     ]
   }

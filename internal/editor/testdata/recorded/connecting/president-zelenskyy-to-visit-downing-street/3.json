@@ -1,11 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "e83c236092fd508bbd89bf508a6eb548bea94eb1130de3d39b67a4579d3dc469",
-  "recorded_at": "2026-10-26T12:19:16.997722Z",
+  "request_hash": "a609a6c21f6764128d5bcdacccd6b15d87c90f45dd716be0219096fcd7c3094f",
+  "recorded_at": "2026-10-26T14:18:27.151546Z",
   "usage": {
-    "input_tokens": 2223,
-    "output_tokens": 1431
+    "input_tokens": 3106,
+    "output_tokens": 1499
   },
   "output": {
     "causes": [],
@@ -64,6 +64,10 @@
           {
             "entity": "Warsaw Security Forum",
             "role": "occasion"
+          },
+          {
+            "entity": "Russia",
+            "role": "undergoer"
           }
         ]
       },
@@ -77,6 +81,10 @@
           {
             "entity": "IMF meetings in Bangkok",
             "role": "occasion"
+          },
+          {
+            "entity": "Russia",
+            "role": "undergoer"
           }
         ]
       },
@@ -90,10 +98,6 @@
           {
             "entity": "Kyiv",
             "role": "place"
-          },
-          {
-            "entity": "Ukraine",
-            "role": "undergoer"
           }
         ]
       }

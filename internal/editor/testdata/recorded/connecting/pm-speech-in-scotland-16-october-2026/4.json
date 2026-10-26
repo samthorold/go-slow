@@ -1,11 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "321aa321a1e0c3846ae601b898712cc6ca18397be71910f0611229ebd60b9f3c",
-  "recorded_at": "2026-10-26T12:22:21.188808Z",
+  "request_hash": "8a3ddc981324052a801381fabf803f6d9fde863cd2069864e9dbbe37462d713a",
+  "recorded_at": "2026-10-26T14:20:48.563475Z",
   "usage": {
-    "input_tokens": 3148,
-    "output_tokens": 1514
+    "input_tokens": 3777,
+    "output_tokens": 1152
   },
   "output": {
     "causes": [],
@@ -18,16 +18,16 @@
             "role": "actor"
           },
           {
-            "entity": "Greater Manchester Violence Reduction Unit",
-            "role": "actor"
-          },
-          {
             "entity": "FARE-Scotland",
             "role": "undergoer"
           },
           {
             "entity": "Easterhouse",
             "role": "place"
+          },
+          {
+            "entity": "Greater Manchester Violence Reduction Unit",
+            "role": "actor"
           }
         ]
       },
@@ -80,10 +80,6 @@
           {
             "entity": "Scottish government",
             "role": "actor"
-          },
-          {
-            "entity": "UK government",
-            "role": "undergoer"
           }
         ]
       },
@@ -95,12 +91,12 @@
             "role": "actor"
           },
           {
-            "entity": "Prime Minister",
-            "role": "actor"
-          },
-          {
             "entity": "Falkirk",
             "role": "place"
+          },
+          {
+            "entity": "Prime Minister",
+            "role": "actor"
           }
         ]
       }

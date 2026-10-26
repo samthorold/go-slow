@@ -1,11 +1,11 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "request_hash": "7b4b892273fb2a25d7480c20425abbcdbcc3c648440629b2f3a549ceaf45b64f",
-  "recorded_at": "2026-10-25T23:44:01.939866Z",
+  "request_hash": "37cf807292235e3860165c31c7c1ac820b23ea5fc41be3f486ac332bbb9292c3",
+  "recorded_at": "2026-10-26T14:20:03.005822Z",
   "usage": {
-    "input_tokens": 2888,
-    "output_tokens": 126
+    "input_tokens": 3136,
+    "output_tokens": 870
   },
   "output": {
     "facts": [
@@ -26,14 +26,27 @@
         "fact": "F4"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N1"
+        ],
         "fact": "F5"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N2"
+        ],
         "fact": "F6"
       }
     ],
-    "new_stories": []
+    "new_stories": [
+      {
+        "ref": "N1",
+        "title": "Defence technical education and skills in Scotland"
+      },
+      {
+        "ref": "N2",
+        "title": "Greater Manchester bus fleet procurement"
+      }
+    ]
   }
 }

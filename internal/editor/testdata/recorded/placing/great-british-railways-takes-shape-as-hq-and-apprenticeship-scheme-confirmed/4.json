@@ -1,11 +1,11 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "request_hash": "320c2deb230fd4329a44773b6849311f0cafc6c73f440b91384bc8a58963836c",
-  "recorded_at": "2026-10-25T23:43:12.172333Z",
+  "request_hash": "498ed3caf416f35f83587fde3fee4b111d998fce703a568abba4dbaffb8097b1",
+  "recorded_at": "2026-10-26T14:19:05.812783Z",
   "usage": {
-    "input_tokens": 2729,
-    "output_tokens": 1087
+    "input_tokens": 2878,
+    "output_tokens": 1074
   },
   "output": {
     "facts": [
@@ -44,9 +44,7 @@
         "fact": "F6"
       },
       {
-        "developments_in": [
-          "N4"
-        ],
+        "developments_in": [],
         "fact": "F7"
       },
       {
@@ -67,15 +65,11 @@
       },
       {
         "ref": "N2",
-        "title": "Rail foundation apprenticeship scheme"
+        "title": "Great British Railways rail apprenticeships"
       },
       {
         "ref": "N3",
         "title": "Rail fares under public ownership"
-      },
-      {
-        "ref": "N4",
-        "title": "New rolling stock fleet for the north"
       }
     ]
   }

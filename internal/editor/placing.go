@@ -18,6 +18,9 @@ import (
 type ToPlace struct {
 	Item  Item
 	Facts []Fact
+	// Mentions are the Entities the Item mentions, as its reading gave
+	// them, which decide what it is weighed against.
+	Mentions []Mention
 	// Depth is the closest Depth of the Topics tying the Item now; zero if
 	// none does.
 	Depth interest.Depth
@@ -27,12 +30,15 @@ type ToPlace struct {
 }
 
 // Story is an ongoing subject, made of its Developments. Entities are the
-// names of every Entity its Developments involve, which decide the Facts it
-// is a candidate for.
+// names of every Entity its Developments involve.
 type Story struct {
 	ID       int64
 	Title    string
 	Entities []string
+	// Shares, on a Story given as a candidate for placing, are the names of
+	// the Entities its Items mention that the Item being placed mentions
+	// too: why it is a candidate.
+	Shares []string
 	// Timeline is the Story's Developments in order.
 	Timeline []Development
 	// Unwanted is set once the Owner said it should not be in the
@@ -127,7 +133,7 @@ const placingInstructions = `You are the Editor of a private slow-news briefing.
 
 A Story is an ongoing subject followed across days: a negotiation, a policy's passage, a crisis, a campaign, an investigation. Its Timeline is its Developments in order. A Development is a Fact that moves a Story on: something was decided, announced, agreed, done or changed that someone following the Story would need to know.
 
-Each Fact lists its candidate Stories: the Stories that share an Entity with it, shown with their latest Developments. Decide which candidates each Fact moves on. You may place a Fact only in its own candidates, or in a new Story you start. A Fact can be a Development in several Stories, in one, or in none.
+The candidate Stories are the Stories whose Items mention an Entity this Item mentions, the same for every Fact, each shown with the Entities it shares with this Item and its latest Developments. Decide which candidates each Fact moves on. You may place a Fact only in a candidate, or in a new Story you start. A Fact can be a Development in several Stories, in one, or in none.
 
 Not every Fact is a Development. Place a Fact in no Story, and start none for it, when it is:
 - a reaction: someone welcoming, praising, criticising, condemning or commenting on something, or making a statement about it. What is reacted to may be a Development; the reaction is not.
@@ -150,14 +156,12 @@ Answer with every Fact exactly once, by its ref (F1, F2 and so on), giving in de
 // only answer in refs the checks accept.
 func placingSchema(tp ToPlace, stories []Story) map[string]any {
 	var facts, newRefs, storyRefs []string
-	for i, f := range tp.Facts {
+	for i := range tp.Facts {
 		facts = append(facts, "F"+strconv.Itoa(i+1))
 		newRefs = append(newRefs, "N"+strconv.Itoa(i+1))
-		for _, s := range candidates(f, stories) {
-			if ref := "S" + strconv.FormatInt(s.ID, 10); !slices.Contains(storyRefs, ref) {
-				storyRefs = append(storyRefs, ref)
-			}
-		}
+	}
+	for _, s := range stories {
+		storyRefs = append(storyRefs, "S"+strconv.FormatInt(s.ID, 10))
 	}
 	enum := func(values []string) map[string]any { return map[string]any{"type": "string", "enum": values} }
 	return map[string]any{
@@ -189,10 +193,11 @@ type placingOutput struct {
 }
 
 // Place is the act of placing an Item's Facts: each is weighed against the
-// Stories that share its Entities, and becomes a Development in each it
-// moves on, or in none; a Fact that fits no candidate can start a new Story.
-// stories are the candidates of any of the Facts. A result that fails the
-// act's checks is ErrFailedChecks, and none of it is returned.
+// Item's candidate Stories, and becomes a Development in each it moves on,
+// or in none; a Fact that fits no candidate can start a new Story. stories
+// are the Item's candidates, the same for every Fact, as the Store gives
+// them (Store.CandidateStories). A result that fails the act's checks is
+// ErrFailedChecks, and none of it is returned.
 func Place(ctx context.Context, m Model, tp ToPlace, stories []Story) (Placing, error) {
 	res, err := m.Complete(ctx, placingRequest(tp, stories))
 	if err != nil {
@@ -251,7 +256,6 @@ func checkPlacing(tp ToPlace, stories []Story, res Response) (Placing, error) {
 		}
 		placed[i] = true
 		fact := tp.Facts[i]
-		cands := candidates(fact, stories)
 		p.Facts = append(p.Facts, fact.ID)
 		var inNew []int
 		inExisting := false
@@ -263,9 +267,9 @@ func checkPlacing(tp ToPlace, stories []Story, res Response) (Placing, error) {
 				}
 				continue
 			}
-			s, ok := storyRef(ref, cands)
+			s, ok := storyRef(ref, stories)
 			if !ok {
-				return Placing{}, failedPlacing(it, "%s placed in %s, which is not one of its candidates", f.Fact, ref)
+				return Placing{}, failedPlacing(it, "%s placed in %s, which is not one of the Item's candidates", f.Fact, ref)
 			}
 			pl := Placement{FactID: fact.ID, StoryID: s.ID}
 			if !slices.Contains(p.Developments, pl) {
@@ -295,11 +299,11 @@ func checkPlacing(tp ToPlace, stories []Story, res Response) (Placing, error) {
 // Placing is the placing act as it runs in batches: the Items whose Facts
 // await placing, each placed into the Record when its result passes the
 // checks. An Item's Facts are placed only once every earlier Item awaiting
-// placing that shares an Entity with them has been placed, since placing
-// that Item may start or move on a Story they would be weighed against.
-// Until then they wait for a later batch, so a batch gives the same Stories
-// as placing one Item at a time in the order they were published; Items
-// that share no Entity go in one batch together.
+// placing that mentions an Entity it mentions has been placed, since placing
+// that Item may start or move on a Story it would be weighed against. Until
+// then it waits for a later batch, so a batch gives the same Stories as
+// placing one Item at a time in the order they were published; Items that
+// mention no Entity in common go in one batch together.
 func (e *Editor) Placing() BatchAct {
 	return BatchAct{
 		Name: "placing",
@@ -311,10 +315,9 @@ func (e *Editor) Placing() BatchAct {
 			var jobs []Job
 			earlier := map[string]bool{}
 			for _, tp := range waiting {
-				names := entityNames(tp)
-				blocked := slices.ContainsFunc(names, func(n string) bool { return earlier[n] })
-				for _, n := range names {
-					earlier[n] = true
+				blocked := slices.ContainsFunc(tp.Mentions, func(m Mention) bool { return earlier[m.Name] })
+				for _, m := range tp.Mentions {
+					earlier[m.Name] = true
 				}
 				if blocked {
 					continue
@@ -323,7 +326,7 @@ func (e *Editor) Placing() BatchAct {
 				if err != nil {
 					return nil, err
 				}
-				stories, err := e.Store.StoriesSharing(ctx, names)
+				stories, err := e.Store.CandidateStories(ctx, tp.Item, candidatesShown)
 				if err != nil {
 					return nil, err
 				}
@@ -357,18 +360,10 @@ func (e *Editor) withPrecedents(ctx context.Context, tp ToPlace) (ToPlace, error
 	return tp, nil
 }
 
-// entityNames are the names of every Entity an Item's Facts involve.
-func entityNames(tp ToPlace) []string {
-	var out []string
-	for _, f := range tp.Facts {
-		for _, n := range f.Entities {
-			if !slices.Contains(out, n) {
-				out = append(out, n)
-			}
-		}
-	}
-	return out
-}
+// candidatesShown is the most candidate Stories placing is shown for an
+// Item: without a cap an Entity in nearly everything would make every Story
+// a candidate, and the call's cost grow with the Record.
+const candidatesShown = 20
 
 // factIndex is the index of the Fact the model calls ref (F1 is the first),
 // or -1.
@@ -390,28 +385,13 @@ func storyRef(ref string, stories []Story) (Story, bool) {
 	return Story{}, false
 }
 
-// candidates are the Stories a Fact is weighed against: those whose
-// Developments involve any of its Entities (system design: Placing weighs a
-// Fact against the Stories that share its Entities).
-func candidates(f Fact, stories []Story) []Story {
-	var out []Story
-	for _, s := range stories {
-		for _, e := range f.Entities {
-			if slices.Contains(s.Entities, e) {
-				out = append(out, s)
-				break
-			}
-		}
-	}
-	return out
-}
-
 func failedPlacing(it Item, format string, args ...any) error {
 	return fmt.Errorf("placing %s: %w: %s", it.EntryID, ErrFailedChecks, fmt.Sprintf(format, args...))
 }
 
-// placingInput is the Item's Facts and their candidate Stories as the model
-// is shown them.
+// placingInput is the Item's Facts and its candidate Stories as the model is
+// shown them: the candidates once, since every Fact has the same ones, each
+// with the Entities it shares with the Item.
 func placingInput(tp ToPlace, stories []Story) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "Item: %s\n", tp.Item.Title)
@@ -419,33 +399,22 @@ func placingInput(tp ToPlace, stories []Story) string {
 		fmt.Fprintf(&b, "Published: %s\n", tp.Item.Published.UTC().Format(time.DateOnly))
 	}
 	b.WriteString("\nFacts to place:\n")
-	var shown []Story
 	for i, f := range tp.Facts {
 		fmt.Fprintf(&b, "\nF%d (as at %s): %s\n", i+1, f.AsAt.Format(time.DateOnly), f.Statement)
 		if f.Quote != "" {
 			fmt.Fprintf(&b, "  Quote: %q\n", f.Quote)
 		}
-		if len(f.Entities) > 0 {
-			fmt.Fprintf(&b, "  Entities: %s\n", strings.Join(f.Entities, "; "))
-		}
-		var refs []string
-		for _, s := range candidates(f, stories) {
-			refs = append(refs, "S"+strconv.FormatInt(s.ID, 10))
-			if !slices.ContainsFunc(shown, func(x Story) bool { return x.ID == s.ID }) {
-				shown = append(shown, s)
-			}
-		}
-		if len(refs) == 0 {
-			b.WriteString("  Candidate Stories: none\n")
-		} else {
-			fmt.Fprintf(&b, "  Candidate Stories: %s\n", strings.Join(refs, ", "))
-		}
 	}
-	if len(shown) > 0 {
-		b.WriteString("\nCandidate Stories:\n")
+	if len(stories) == 0 {
+		b.WriteString("\nCandidate Stories: none\n")
+	} else {
+		b.WriteString("\nCandidate Stories, for every Fact:\n")
 	}
-	for _, s := range shown {
+	for _, s := range stories {
 		fmt.Fprintf(&b, "\nS%d: %s\n", s.ID, s.Title)
+		if len(s.Shares) > 0 {
+			fmt.Fprintf(&b, "  Shares: %s\n", strings.Join(s.Shares, "; "))
+		}
 		tl := s.Timeline
 		if len(tl) > timelineShown {
 			fmt.Fprintf(&b, "  (%d earlier Developments not shown)\n", len(tl)-timelineShown)

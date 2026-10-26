@@ -1,17 +1,35 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "8a3ddc981324052a801381fabf803f6d9fde863cd2069864e9dbbe37462d713a",
-  "recorded_at": "2026-10-26T14:20:54.63207Z",
+  "request_hash": "cf346264cece40ae4d804987ee8008d2027b506fe63c2d1f1f4fac58b6326b86",
+  "recorded_at": "2026-10-26T23:51:45.959536Z",
   "usage": {
-    "input_tokens": 3777,
-    "output_tokens": 1267
+    "input_tokens": 4962,
+    "output_tokens": 3670
   },
   "output": {
-    "causes": [],
+    "causes": [
+      {
+        "cause": "F2",
+        "effect": "F5"
+      }
+    ],
     "facts": [
       {
         "fact": "F1",
+        "roles": [
+          {
+            "entity": "Prime Minister",
+            "role": "actor"
+          },
+          {
+            "entity": "Motherwell",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F2",
         "roles": [
           {
             "entity": "Prime Minister",
@@ -26,20 +44,11 @@
             "role": "undergoer"
           },
           {
-            "entity": "Easterhouse",
+            "entity": "Bannatyne House",
             "role": "place"
-          }
-        ]
-      },
-      {
-        "fact": "F2",
-        "roles": [
-          {
-            "entity": "Prime Minister",
-            "role": "actor"
           },
           {
-            "entity": "Motherwell",
+            "entity": "Easterhouse",
             "role": "place"
           }
         ]
@@ -52,11 +61,11 @@
             "role": "actor"
           },
           {
-            "entity": "Commonwealth Games",
-            "role": "occasion"
+            "entity": "Westminster",
+            "role": "place"
           },
           {
-            "entity": "Scotland",
+            "entity": "Greater Manchester",
             "role": "place"
           }
         ]
@@ -78,7 +87,24 @@
         "fact": "F5",
         "roles": [
           {
-            "entity": "Scottish government",
+            "entity": "Prime Minister",
+            "role": "actor"
+          },
+          {
+            "entity": "Easterhouse",
+            "role": "place"
+          },
+          {
+            "entity": "Greater Manchester",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F6",
+        "roles": [
+          {
+            "entity": "Scottish Government",
             "role": "actor"
           },
           {
@@ -88,21 +114,118 @@
         ]
       },
       {
-        "fact": "F6",
+        "fact": "F7",
         "roles": [
           {
-            "entity": "Alexander Dennis",
-            "role": "actor"
-          },
-          {
-            "entity": "Falkirk",
-            "role": "place"
-          },
-          {
-            "entity": "Prime Minister",
+            "entity": "National Economic Council",
             "role": "actor"
           }
         ]
+      },
+      {
+        "fact": "F8",
+        "roles": [
+          {
+            "entity": "EU-UK Summit",
+            "role": "undergoer"
+          }
+        ]
+      },
+      {
+        "fact": "F9",
+        "roles": [
+          {
+            "entity": "Prime Minister",
+            "role": "actor"
+          },
+          {
+            "entity": "EU-UK Summit",
+            "role": "occasion"
+          }
+        ]
+      },
+      {
+        "fact": "F10",
+        "roles": [
+          {
+            "entity": "Prime Minister",
+            "role": "actor"
+          },
+          {
+            "entity": "Scotland",
+            "role": "undergoer"
+          },
+          {
+            "entity": "DWP",
+            "role": "undergoer"
+          }
+        ]
+      },
+      {
+        "fact": "F11",
+        "roles": [
+          {
+            "entity": "UK government",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F12",
+        "roles": [
+          {
+            "entity": "UK government",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F13",
+        "roles": [
+          {
+            "entity": "Prime Minister",
+            "role": "actor"
+          },
+          {
+            "entity": "Greater Manchester",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F14",
+        "roles": [
+          {
+            "entity": "Alan Milburn",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F15",
+        "roles": [
+          {
+            "entity": "Scottish Government",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F16",
+        "roles": [
+          {
+            "entity": "Prime Minister",
+            "role": "actor"
+          },
+          {
+            "entity": "Scottish Government",
+            "role": "undergoer"
+          }
+        ]
+      },
+      {
+        "fact": "F17",
+        "roles": []
       }
     ]
   }

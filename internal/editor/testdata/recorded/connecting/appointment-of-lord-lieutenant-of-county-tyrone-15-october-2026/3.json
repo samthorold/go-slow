@@ -1,11 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "c53b625f2af1a96e52cf613c49ac72de5d575c0ee505a76e38391dc7e9825e7f",
-  "recorded_at": "2026-10-26T12:21:12.227256Z",
+  "request_hash": "c1d7266270b48f2c4ceabe204b41cc7333ce39a9092fb18082a00b2bac5a9729",
+  "recorded_at": "2026-10-26T23:49:25.978055Z",
   "usage": {
-    "input_tokens": 2000,
-    "output_tokens": 1273
+    "input_tokens": 2015,
+    "output_tokens": 1556
   },
   "output": {
     "causes": [],
@@ -20,10 +20,6 @@
           {
             "entity": "William James Baxter",
             "role": "undergoer"
-          },
-          {
-            "entity": "County Tyrone",
-            "role": "place"
           }
         ]
       },
@@ -31,12 +27,8 @@
         "fact": "F2",
         "roles": [
           {
-            "entity": "Sir Robert William Lowry Scott",
+            "entity": "Sir Robert William Lowry Scott KCVO OBE",
             "role": "actor"
-          },
-          {
-            "entity": "County Tyrone",
-            "role": "place"
           }
         ]
       },
@@ -45,7 +37,7 @@
         "roles": [
           {
             "entity": "William James Baxter",
-            "role": "actor"
+            "role": "undergoer"
           },
           {
             "entity": "RUC/PSNI",
@@ -58,7 +50,7 @@
         "roles": [
           {
             "entity": "William James Baxter",
-            "role": "actor"
+            "role": "undergoer"
           },
           {
             "entity": "Omagh",
@@ -75,20 +67,7 @@
         "roles": [
           {
             "entity": "William James Baxter",
-            "role": "actor"
-          },
-          {
-            "entity": "Omagh Police District Voluntary Welfare Support Group",
             "role": "undergoer"
-          }
-        ]
-      },
-      {
-        "fact": "F6",
-        "roles": [
-          {
-            "entity": "William James Baxter",
-            "role": "actor"
           },
           {
             "entity": "Newtownstewart Presbyterian Church",
@@ -97,28 +76,20 @@
         ]
       },
       {
-        "fact": "F7",
+        "fact": "F6",
         "roles": [
           {
             "entity": "William James Baxter",
-            "role": "actor"
-          },
-          {
-            "entity": "County Tyrone",
-            "role": "place"
+            "role": "undergoer"
           }
         ]
       },
       {
-        "fact": "F8",
+        "fact": "F7",
         "roles": [
           {
             "entity": "William James Baxter",
-            "role": "actor"
-          },
-          {
-            "entity": "County Tyrone",
-            "role": "place"
+            "role": "undergoer"
           }
         ]
       }

@@ -1,25 +1,20 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "5114a2e3725e8cda57ac869167bcd92db2f5a8606a7a46841e55f248bb7c3208",
-  "recorded_at": "2026-10-26T12:18:00.866586Z",
+  "request_hash": "771f2fbeb4b8526065ca783e26d2f1b4727ca9d2657ec0caf2cacee5f8d16dfe",
+  "recorded_at": "2026-10-26T23:45:46.211717Z",
   "usage": {
-    "input_tokens": 1363,
-    "output_tokens": 494
+    "input_tokens": 1763,
+    "output_tokens": 1584
   },
   "output": {
-    "causes": [
-      {
-        "cause": "F2",
-        "effect": "F1"
-      }
-    ],
+    "causes": [],
     "facts": [
       {
         "fact": "F1",
         "roles": [
           {
-            "entity": "UK government spokesperson",
+            "entity": "UK Government",
             "role": "actor"
           }
         ]
@@ -28,11 +23,93 @@
         "fact": "F2",
         "roles": [
           {
-            "entity": "United States",
+            "entity": "UK government spokesperson",
+            "role": "actor"
+          },
+          {
+            "entity": "UK Government",
+            "role": "undergoer"
+          }
+        ]
+      },
+      {
+        "fact": "F3",
+        "roles": [
+          {
+            "entity": "UK Government",
+            "role": "actor"
+          },
+          {
+            "entity": "Ukraine",
+            "role": "undergoer"
+          }
+        ]
+      },
+      {
+        "fact": "F4",
+        "roles": [
+          {
+            "entity": "UK Government",
             "role": "actor"
           },
           {
             "entity": "Russia",
+            "role": "undergoer"
+          }
+        ]
+      },
+      {
+        "fact": "F5",
+        "roles": [
+          {
+            "entity": "UK Government",
+            "role": "actor"
+          },
+          {
+            "entity": "Ukraine",
+            "role": "undergoer"
+          }
+        ]
+      },
+      {
+        "fact": "F6",
+        "roles": [
+          {
+            "entity": "UK Government",
+            "role": "actor"
+          },
+          {
+            "entity": "US",
+            "role": "actor"
+          },
+          {
+            "entity": "Ukraine",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F7",
+        "roles": [
+          {
+            "entity": "UK Government",
+            "role": "actor"
+          },
+          {
+            "entity": "US",
+            "role": "undergoer"
+          },
+          {
+            "entity": "Ukraine",
+            "role": "undergoer"
+          }
+        ]
+      },
+      {
+        "fact": "F8",
+        "roles": [
+          {
+            "entity": "UK Government",
             "role": "actor"
           }
         ]

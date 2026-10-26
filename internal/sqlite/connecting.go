@@ -41,11 +41,7 @@ func (s *Store) toConnect(ctx context.Context, where string, args ...any) ([]edi
 	}
 	out := make([]editor.ToConnect, 0, len(byItem))
 	for _, tp := range byItem {
-		ms, err := s.mentions(ctx, tp.Item.SourceID, tp.Item.EntryID)
-		if err != nil {
-			return nil, err
-		}
-		out = append(out, editor.ToConnect{Item: tp.Item, Facts: tp.Facts, Mentions: ms})
+		out = append(out, editor.ToConnect{Item: tp.Item, Facts: tp.Facts, Mentions: tp.Mentions})
 	}
 	return out, nil
 }
@@ -73,13 +69,13 @@ func (s *Store) mentions(ctx context.Context, sourceID, entryID string) ([]edito
 	return out, rows.Err()
 }
 
-// FactsNear are at most limit other Facts that share an Entity with any of
-// facts, or are Developments in a Story with one, those nearest the latest of
-// facts in date first.
-func (s *Store) FactsNear(ctx context.Context, facts []editor.Fact, limit int) ([]editor.Fact, error) {
+// FactsNear are at most limit Facts other than tc's whose Items mention an
+// Entity tc's Item mentions, or that are Developments in a Story with one of
+// tc's Facts, those nearest the latest of tc's Facts in date first.
+func (s *Store) FactsNear(ctx context.Context, tc editor.ToConnect, limit int) ([]editor.Fact, error) {
 	var ids []int64
 	var latest time.Time
-	for _, f := range facts {
+	for _, f := range tc.Facts {
 		ids = append(ids, f.ID)
 		if f.AsAt.After(latest) {
 			latest = f.AsAt
@@ -92,9 +88,10 @@ func (s *Store) FactsNear(ctx context.Context, facts []editor.Fact, limit int) (
 	rows, err := s.db.QueryContext(ctx, `
 		WITH mine(id) AS (SELECT value FROM json_each(?1)),
 		near(id) AS (
-			SELECT theirs.fact_id FROM fact_entities ours
-				JOIN fact_entities theirs ON theirs.entity_id = ours.entity_id
-			WHERE ours.fact_id IN mine
+			SELECT facts.id FROM item_mentions ours
+				JOIN item_mentions theirs ON theirs.entity_id = ours.entity_id
+				JOIN facts ON facts.source_id = theirs.source_id AND facts.entry_id = theirs.entry_id
+			WHERE ours.source_id = ?4 AND ours.entry_id = ?5
 			UNION
 			SELECT theirs.fact_id FROM developments ours
 				JOIN developments theirs ON theirs.story_id = ours.story_id
@@ -104,7 +101,7 @@ func (s *Store) FactsNear(ctx context.Context, facts []editor.Fact, limit int) (
 		FROM facts
 		WHERE facts.id IN near AND facts.id NOT IN mine AND facts.withdrawn_by IS NULL
 		ORDER BY abs(julianday(facts.as_at) - julianday(?2)), facts.id DESC
-		LIMIT ?3`, string(mine), latest.Format(time.DateOnly), limit)
+		LIMIT ?3`, string(mine), latest.Format(time.DateOnly), limit, tc.Item.SourceID, tc.Item.EntryID)
 	if err != nil {
 		return nil, fmt.Errorf("facts near: %w", err)
 	}

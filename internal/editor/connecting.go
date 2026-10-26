@@ -257,7 +257,7 @@ func (e *Editor) Connecting() BatchAct {
 			}
 			jobs := make([]Job, 0, len(waiting))
 			for _, tc := range waiting {
-				others, err := e.Store.FactsNear(ctx, tc.Facts, factsShown)
+				others, err := e.Store.FactsNear(ctx, tc, factsShown)
 				if err != nil {
 					return nil, err
 				}

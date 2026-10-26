@@ -1,11 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "33483c5cfe21abb40606cc51bad04c862b6b9df3b2ae7a1bb114d299fb5f2af2",
-  "recorded_at": "2026-10-26T12:20:51.341829Z",
+  "request_hash": "c6c0ff1a59d8c00e3de0d53d2a56a917a92d2ba21c7206a8900b60aee3d0046d",
+  "recorded_at": "2026-10-26T14:19:56.773083Z",
   "usage": {
-    "input_tokens": 1991,
-    "output_tokens": 1839
+    "input_tokens": 2497,
+    "output_tokens": 1652
   },
   "output": {
     "causes": [],
@@ -21,7 +21,12 @@
       },
       {
         "fact": "F2",
-        "roles": []
+        "roles": [
+          {
+            "entity": "Derby",
+            "role": "place"
+          }
+        ]
       },
       {
         "fact": "F3",
@@ -38,7 +43,12 @@
       },
       {
         "fact": "F4",
-        "roles": []
+        "roles": [
+          {
+            "entity": "Becketwell",
+            "role": "undergoer"
+          }
+        ]
       },
       {
         "fact": "F5",
@@ -84,6 +94,10 @@
           {
             "entity": "East Midlands Combined Authority",
             "role": "actor"
+          },
+          {
+            "entity": "Becketwell",
+            "role": "undergoer"
           }
         ]
       }

@@ -1,11 +1,11 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "request_hash": "320c2deb230fd4329a44773b6849311f0cafc6c73f440b91384bc8a58963836c",
-  "recorded_at": "2026-10-25T23:43:17.805704Z",
+  "request_hash": "498ed3caf416f35f83587fde3fee4b111d998fce703a568abba4dbaffb8097b1",
+  "recorded_at": "2026-10-26T14:19:11.919189Z",
   "usage": {
-    "input_tokens": 2729,
-    "output_tokens": 1099
+    "input_tokens": 2878,
+    "output_tokens": 1209
   },
   "output": {
     "facts": [
@@ -22,14 +22,14 @@
         "fact": "F2"
       },
       {
-        "developments_in": [],
-        "fact": "F3"
-      },
-      {
         "developments_in": [
           "N1"
         ],
         "fact": "F4"
+      },
+      {
+        "developments_in": [],
+        "fact": "F3"
       },
       {
         "developments_in": [
@@ -44,7 +44,9 @@
         "fact": "F6"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N4"
+        ],
         "fact": "F7"
       },
       {
@@ -61,15 +63,19 @@
     "new_stories": [
       {
         "ref": "N1",
-        "title": "Great British Railways headquarters"
+        "title": "Great British Railways headquarters in Derby"
       },
       {
         "ref": "N2",
-        "title": "Rail foundation apprenticeship scheme"
+        "title": "Great British Railways apprenticeships and workforce"
       },
       {
         "ref": "N3",
-        "title": "Rail fares under public ownership"
+        "title": "Great British Railways publicly owned railway"
+      },
+      {
+        "ref": "N4",
+        "title": "Rail fleet investment for the north"
       }
     ]
   }

@@ -47,7 +47,7 @@ func TestPlacingRunsInBatchesAndAFactWaitsForTheStoriesAnEarlierItemMayStart(t *
 		t.Fatal(err)
 	}
 	readTyroneNotice(t, store)
-	readLater(t, store)
+	readLaterMentioning(t, store)
 	batcher := &fakeBatcher{}
 	b := placingBatches(store, batcher)
 
@@ -55,8 +55,9 @@ func TestPlacingRunsInBatchesAndAFactWaitsForTheStoriesAnEarlierItemMayStart(t *
 		t.Fatal(err)
 	}
 
-	// The readout shares Andy Burnham with the speech, so it waits until the
-	// speech is placed; the Tyrone notice shares nothing, so it goes too.
+	// The readout mentions Andy Burnham, as the speech does, so it waits
+	// until the speech is placed; the Tyrone notice mentions nothing the
+	// speech does, so it goes too.
 	if len(batcher.submitted) != 1 || len(batcher.submitted[0]) != 2 {
 		t.Fatalf("submitted %d batches, first %v; want one of the speech and the Tyrone notice", len(batcher.submitted), batcher.submitted)
 	}
@@ -80,7 +81,7 @@ func TestPlacingRunsInBatchesAndAFactWaitsForTheStoriesAnEarlierItemMayStart(t *
 		t.Fatalf("submitted %v, want a second batch placing the readout", batcher.submitted)
 	}
 	in := batcher.submitted[1][0].Request.Input
-	if !strings.Contains(in, laterItem.Title) || !strings.Contains(in, "Candidate Stories: S") {
+	if !strings.Contains(in, laterItem.Title) || !strings.Contains(in, "Candidate Stories, for every Fact:\n\nS") {
 		t.Errorf("the readout is not weighed against the Story the speech started:\n%s", in)
 	}
 }

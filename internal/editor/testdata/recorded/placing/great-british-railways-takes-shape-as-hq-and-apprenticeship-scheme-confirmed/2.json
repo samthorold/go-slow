@@ -1,17 +1,17 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "request_hash": "320c2deb230fd4329a44773b6849311f0cafc6c73f440b91384bc8a58963836c",
-  "recorded_at": "2026-10-25T23:43:00.911344Z",
+  "request_hash": "498ed3caf416f35f83587fde3fee4b111d998fce703a568abba4dbaffb8097b1",
+  "recorded_at": "2026-10-26T14:18:54.130975Z",
   "usage": {
-    "input_tokens": 2729,
-    "output_tokens": 1073
+    "input_tokens": 2878,
+    "output_tokens": 1053
   },
   "output": {
     "facts": [
       {
         "developments_in": [
-          "N1"
+          "N2"
         ],
         "fact": "F1"
       },
@@ -33,13 +33,13 @@
       },
       {
         "developments_in": [
-          "N2"
+          "N3"
         ],
         "fact": "F5"
       },
       {
         "developments_in": [
-          "N3"
+          "N2"
         ],
         "fact": "F6"
       },
@@ -65,11 +65,11 @@
       },
       {
         "ref": "N2",
-        "title": "Rail foundation apprenticeship scheme"
+        "title": "Great British Railways public ownership and fares"
       },
       {
         "ref": "N3",
-        "title": "Rail fares under public ownership"
+        "title": "Rail apprenticeships and workforce"
       }
     ]
   }

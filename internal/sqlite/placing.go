@@ -1,11 +1,13 @@
 package sqlite
 
 import (
+	"cmp"
 	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"slices"
 	"time"
 
@@ -63,7 +65,16 @@ func (s *Store) factsByItem(ctx context.Context, where string, args ...any) ([]e
 		}
 		out[len(out)-1].Facts = append(out[len(out)-1].Facts, f)
 	}
-	return out, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	_ = rows.Close()
+	for i, tp := range out {
+		if out[i].Mentions, err = s.mentions(ctx, tp.Item.SourceID, tp.Item.EntryID); err != nil {
+			return nil, err
+		}
+	}
+	return out, nil
 }
 
 func scanFact(f *editor.Fact, asAt, ents string) error {
@@ -78,51 +89,123 @@ func scanFact(f *editor.Fact, asAt, ents string) error {
 	return nil
 }
 
-// StoriesSharing are the Stories whose Developments involve any of the
-// named Entities, with their Timelines.
-func (s *Store) StoriesSharing(ctx context.Context, entities []string) ([]editor.Story, error) {
-	ids, err := s.storiesSharing(ctx, entities)
+// CandidateStories are the Stories placing weighs an Item's Facts against,
+// with their Timelines, best first: at most limit of the Stories with a
+// Development whose Item mentions an Entity it mentions (system design:
+// Placing weighs a Fact against the Stories its Item's Entities are in).
+// Each is ranked by the Entities it shares with the Item, each weighted by
+// how few Stories it is in, and by its newest Development where they tie.
+// Each carries the names of the Entities it shares, as Shares.
+func (s *Store) CandidateStories(ctx context.Context, it editor.Item, limit int) ([]editor.Story, error) {
+	shared, err := s.sharedMentions(ctx, it)
 	if err != nil {
-		return nil, fmt.Errorf("stories sharing: %w", err)
+		return nil, fmt.Errorf("candidate stories: %w", err)
 	}
-	out := make([]editor.Story, 0, len(ids))
-	for _, id := range ids {
-		st, _, err := s.story(ctx, id, false)
+	ranked := rankCandidates(shared)
+	if len(ranked) > limit {
+		ranked = ranked[:limit]
+	}
+	out := make([]editor.Story, 0, len(ranked))
+	for _, c := range ranked {
+		st, _, err := s.story(ctx, c.story, false)
 		if err != nil {
 			return nil, err
 		}
+		st.Shares = c.shares
 		out = append(out, st)
 	}
 	return out, nil
 }
 
-// storiesSharing are the ids of the Stories whose Developments involve any
-// of the named Entities.
-func (s *Store) storiesSharing(ctx context.Context, entities []string) ([]int64, error) {
-	names, err := json.Marshal(entities)
-	if err != nil {
-		return nil, err
-	}
+// sharedMention is an Entity an Item mentions that a Story's Items mention
+// too, with what ranking it needs: how many Stories mention it, how many
+// Stories there are, and the date of the Story's newest Development.
+type sharedMention struct {
+	story   int64
+	entity  string
+	in      int
+	stories int
+	latest  string
+}
+
+// sharedMentions are the Entities it mentions that Stories' Items mention
+// too, one row per Story and Entity. Only live Developments count, as the
+// acts see a Story.
+func (s *Store) sharedMentions(ctx context.Context, it editor.Item) ([]sharedMention, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT DISTINCT developments.story_id
-		FROM developments
-			JOIN fact_entities ON fact_entities.fact_id = developments.fact_id
-			JOIN entities ON entities.id = fact_entities.entity_id
-		WHERE entities.name IN (SELECT value FROM json_each(?)) AND developments.withdrawn_by IS NULL
-		ORDER BY developments.story_id`, string(names))
+		WITH live AS (
+			SELECT developments.story_id, facts.source_id, facts.entry_id, facts.as_at
+			FROM developments JOIN facts ON facts.id = developments.fact_id
+			WHERE developments.withdrawn_by IS NULL AND facts.withdrawn_by IS NULL AND NOT `+addedByUndone+`
+		),
+		latest AS (SELECT story_id, max(as_at) AS as_at FROM live GROUP BY story_id),
+		mentioned AS (
+			SELECT DISTINCT live.story_id, m.entity_id
+			FROM live JOIN item_mentions m ON m.source_id = live.source_id AND m.entry_id = live.entry_id
+		),
+		shared AS (
+			SELECT mentioned.story_id, mentioned.entity_id FROM mentioned
+			WHERE mentioned.entity_id IN (SELECT entity_id FROM item_mentions WHERE source_id = ? AND entry_id = ?)
+		)
+		SELECT shared.story_id, entities.name,
+			(SELECT count(*) FROM mentioned m WHERE m.entity_id = shared.entity_id),
+			(SELECT count(*) FROM latest),
+			latest.as_at
+		FROM shared JOIN entities ON entities.id = shared.entity_id
+			JOIN latest ON latest.story_id = shared.story_id
+		ORDER BY shared.story_id, entities.name`, it.SourceID, it.EntryID)
 	if err != nil {
 		return nil, err
 	}
 	defer func() { _ = rows.Close() }()
-	var ids []int64
+	var out []sharedMention
 	for rows.Next() {
-		var id int64
-		if err := rows.Scan(&id); err != nil {
+		var m sharedMention
+		if err := rows.Scan(&m.story, &m.entity, &m.in, &m.stories, &m.latest); err != nil {
 			return nil, err
 		}
-		ids = append(ids, id)
+		out = append(out, m)
 	}
-	return ids, rows.Err()
+	return out, rows.Err()
+}
+
+// candidate is a Story ranked as a candidate: its score, the date of its
+// newest Development and the Entities it shares.
+type candidate struct {
+	story  int64
+	score  float64
+	latest string
+	shares []string
+}
+
+// rankCandidates ranks the Stories the shared mentions are in, best first:
+// by the sum of each shared Entity's weight, an inverse document frequency
+// over Stories, log(1 + N/n) for an Entity n of the N Stories mention, so
+// an Entity in nearly every Story still counts a little; ties go to the
+// Story with the newest Development, then the newest Story.
+func rankCandidates(shared []sharedMention) []candidate {
+	var out []candidate
+	at := map[int64]int{}
+	for _, m := range shared {
+		n, ok := at[m.story]
+		if !ok {
+			n = len(out)
+			at[m.story] = n
+			out = append(out, candidate{story: m.story, latest: m.latest})
+		}
+		out[n].score += math.Log1p(float64(m.stories) / float64(m.in))
+		out[n].shares = append(out[n].shares, m.entity)
+	}
+	slices.SortStableFunc(out, func(a, b candidate) int {
+		if c := cmp.Compare(b.score, a.score); c != 0 {
+			return c
+		}
+		if c := cmp.Compare(b.latest, a.latest); c != 0 {
+			return c
+		}
+		return cmp.Compare(b.story, a.story)
+	})
+	return out
 }
 
 // Story is one Story with its Timeline, reporting whether it is in the

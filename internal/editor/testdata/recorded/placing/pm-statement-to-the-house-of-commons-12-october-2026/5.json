@@ -1,11 +1,11 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "request_hash": "976e2225f0ffec40244d0a4ee86255b5733a7c5fe0e43dd70ff5a776c2811149",
-  "recorded_at": "2026-10-25T23:41:47.372949Z",
+  "request_hash": "17d75348c46f0a4e16d1a5fb2bdd0b74db2deb9f036ad8a80812559ed8236d8f",
+  "recorded_at": "2026-10-26T14:17:51.341961Z",
   "usage": {
-    "input_tokens": 3894,
-    "output_tokens": 1696
+    "input_tokens": 3341,
+    "output_tokens": 1957
   },
   "output": {
     "facts": [
@@ -39,13 +39,13 @@
       },
       {
         "developments_in": [
-          "N4"
+          "N2"
         ],
         "fact": "F7"
       },
       {
         "developments_in": [
-          "N4"
+          "N3"
         ],
         "fact": "F8"
       },
@@ -59,7 +59,7 @@
       },
       {
         "developments_in": [
-          "N3"
+          "N4"
         ],
         "fact": "F11"
       },
@@ -77,7 +77,7 @@
       },
       {
         "developments_in": [
-          "N2"
+          "N5"
         ],
         "fact": "F15"
       },
@@ -97,15 +97,19 @@
       },
       {
         "ref": "N2",
-        "title": "UK-EU summit"
+        "title": "UK-Germany defence and security cooperation"
       },
       {
         "ref": "N3",
-        "title": "UK military deployments to the Middle East"
+        "title": "UK information defence capability"
       },
       {
         "ref": "N4",
-        "title": "UK defence against hybrid threats and information warfare"
+        "title": "UK military deployments in the Middle East"
+      },
+      {
+        "ref": "N5",
+        "title": "UK-EU summit"
       }
     ]
   }

@@ -1,11 +1,11 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "request_hash": "976e2225f0ffec40244d0a4ee86255b5733a7c5fe0e43dd70ff5a776c2811149",
-  "recorded_at": "2026-10-25T23:41:12.980209Z",
+  "request_hash": "17d75348c46f0a4e16d1a5fb2bdd0b74db2deb9f036ad8a80812559ed8236d8f",
+  "recorded_at": "2026-10-26T14:17:15.378967Z",
   "usage": {
-    "input_tokens": 3894,
-    "output_tokens": 2076
+    "input_tokens": 3341,
+    "output_tokens": 2305
   },
   "output": {
     "facts": [
@@ -50,7 +50,9 @@
         "fact": "F8"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N4"
+        ],
         "fact": "F9"
       },
       {
@@ -77,7 +79,7 @@
       },
       {
         "developments_in": [
-          "N4"
+          "N5"
         ],
         "fact": "F15"
       },
@@ -97,15 +99,19 @@
       },
       {
         "ref": "N2",
-        "title": "UK military deployments to the Middle East"
+        "title": "UK military deployments in the Middle East"
       },
       {
         "ref": "N3",
-        "title": "UK response to hybrid threats"
+        "title": "Hybrid threats and information defence"
       },
       {
         "ref": "N4",
-        "title": "UK–EU summit"
+        "title": "UK-German defence cooperation"
+      },
+      {
+        "ref": "N5",
+        "title": "UK-EU summit"
       }
     ]
   }

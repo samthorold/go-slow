@@ -33,25 +33,42 @@ var (
 	tyrone      = editor.Story{ID: 5, Title: "Lieutenancy of County Tyrone", Entities: []string{"County Tyrone"}}
 )
 
-func TestAFactIsWeighedOnlyAgainstStoriesThatShareAnEntity(t *testing.T) {
-	model := &fakeModel{output: `{"new_stories": [], "facts": [{"fact": "F1", "developments_in": ["S3"]}]}`}
+func TestEveryFactOfAnItemIsWeighedAgainstTheItemsCandidatesGivenOnce(t *testing.T) {
+	two := toPlace
+	two.Facts = append(slices.Clone(toPlace.Facts), editor.Fact{ID: 12, SourceID: speech.SourceID, EntryID: speech.EntryID,
+		AsAt: oct16, Statement: "The steelworks will stay open."})
+	sharing := scotland
+	sharing.Shares = []string{"Andy Burnham"}
+	steel := lanarkshire
+	steel.Shares = []string{"Motherwell"}
+	model := &fakeModel{output: `{"new_stories": [], "facts": [{"fact": "F1", "developments_in": ["S3"]},
+		{"fact": "F2", "developments_in": ["S4"]}]}`}
 
-	if _, err := editor.Place(t.Context(), model, toPlace, []editor.Story{scotland, tyrone}); err != nil {
+	p, err := editor.Place(t.Context(), model, two, []editor.Story{sharing, steel})
+	if err != nil {
 		t.Fatal(err)
+	}
+	if want := []editor.Placement{{FactID: 11, StoryID: 3}, {FactID: 12, StoryID: 4}}; !slices.Equal(p.Developments, want) {
+		t.Errorf("Developments = %+v, want %+v: a Fact may be placed in any of its Item's candidates", p.Developments, want)
 	}
 
 	in := model.sent[0].Input
-	if !strings.Contains(in, scotland.Title) || !strings.Contains(in, "Andy Burnham made an offer to the Scottish Government.") {
-		t.Errorf("the model is not shown the candidate Story and its Timeline:\n%s", in)
+	for _, s := range []string{scotland.Title, steel.Title, "Andy Burnham made an offer to the Scottish Government."} {
+		if strings.Count(in, s) != 1 {
+			t.Errorf("the model is shown %q %d times, want once:\n%s", s, strings.Count(in, s), in)
+		}
 	}
-	if strings.Contains(in, tyrone.Title) {
-		t.Errorf("the model is shown a Story that shares no Entity with the Fact:\n%s", in)
+	if !strings.Contains(in, "Shares: Andy Burnham\n") || !strings.Contains(in, "Shares: Motherwell\n") {
+		t.Errorf("the model is not shown what each candidate shares with the Item:\n%s", in)
+	}
+	if strings.Contains(in, "Entities:") {
+		t.Errorf("the model is shown Entities per Fact, which no longer decide its candidates:\n%s", in)
 	}
 
 	// A Development in a Story that is not a candidate is refused.
-	model.output = `{"new_stories": [], "facts": [{"fact": "F1", "developments_in": ["S5"]}]}`
-	if _, err := editor.Place(t.Context(), model, toPlace, []editor.Story{scotland, tyrone}); !errors.Is(err, editor.ErrFailedChecks) {
-		t.Errorf("err = %v, want ErrFailedChecks for a Development in a Story sharing no Entity", err)
+	model.output = `{"new_stories": [], "facts": [{"fact": "F1", "developments_in": ["S5"]}, {"fact": "F2", "developments_in": []}]}`
+	if _, err := editor.Place(t.Context(), model, two, []editor.Story{sharing, steel}); !errors.Is(err, editor.ErrFailedChecks) {
+		t.Errorf("err = %v, want ErrFailedChecks for a Development in a Story that is not a candidate", err)
 	}
 }
 
@@ -110,7 +127,7 @@ func TestAPlacingThatFailsTheChecksIsRejected(t *testing.T) {
 	}
 }
 
-func TestTheSchemaOffersOnlyTheFactsToPlaceAndTheirCandidates(t *testing.T) {
+func TestTheSchemaOffersOnlyTheFactsToPlaceAndTheItemsCandidates(t *testing.T) {
 	// A model answering a Fact by its statement rather than its ref fails
 	// the checks; the schema rules it out instead.
 	model := &fakeModel{output: `{"new_stories": [], "facts": [{"fact": "F1", "developments_in": []}]}`}
@@ -128,8 +145,8 @@ func TestTheSchemaOffersOnlyTheFactsToPlaceAndTheirCandidates(t *testing.T) {
 	if got := item(facts, "fact", "enum"); !slices.Equal(got.([]string), []string{"F1"}) {
 		t.Errorf("fact refs = %v, want [F1]", got)
 	}
-	if got := item(facts, "developments_in", "items", "enum"); !slices.Equal(got.([]string), []string{"S3", "N1"}) {
-		t.Errorf("Story refs = %v, want the candidate S3 and one new Story per Fact", got)
+	if got := item(facts, "developments_in", "items", "enum"); !slices.Equal(got.([]string), []string{"S3", "S5", "N1"}) {
+		t.Errorf("Story refs = %v, want the candidates S3 and S5 and one new Story per Fact", got)
 	}
 }
 

@@ -1,11 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "ef706fdd98370a56f825ab097da9d39ee9810052dfd1365846405cf108626f1b",
-  "recorded_at": "2026-10-26T12:18:14.326333Z",
+  "request_hash": "2f68de0d2b82b3db05ffd5ceeb9e9b4fc4d8bf9e063a7164eaa52ba2ed4e9dd8",
+  "recorded_at": "2026-10-26T14:17:15.904627Z",
   "usage": {
-    "input_tokens": 3029,
-    "output_tokens": 3233
+    "input_tokens": 3084,
+    "output_tokens": 2914
   },
   "output": {
     "causes": [],
@@ -35,12 +35,12 @@
             "role": "undergoer"
           },
           {
-            "entity": "Ukraine",
-            "role": "undergoer"
-          },
-          {
             "entity": "New York",
             "role": "place"
+          },
+          {
+            "entity": "Ukraine",
+            "role": "undergoer"
           }
         ]
       },
@@ -250,7 +250,7 @@
           },
           {
             "entity": "G20 presidency",
-            "role": "occasion"
+            "role": "undergoer"
           }
         ]
       },

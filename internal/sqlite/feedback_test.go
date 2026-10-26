@@ -15,6 +15,9 @@ import (
 
 var saturday = time.Date(2026, time.October, 24, 7, 30, 0, 0, time.UTC)
 
+// speechItem is the Item threeFacts keeps, which mentions Andy Burnham.
+var speechItem = editor.Item{SourceID: "number-10", EntryID: "speech"}
+
 // threeFacts keeps an Item tied to a Topic with three Facts about Andy
 // Burnham: the first two placed together in a new Story, the third not yet
 // placed.
@@ -67,14 +70,14 @@ func TestTheActsNeverSeeAWithdrawnFact(t *testing.T) {
 	wrong(t, store, "3")
 	ctx := t.Context()
 
-	stories, err := store.StoriesSharing(ctx, []string{"Andy Burnham"})
+	stories, err := store.CandidateStories(ctx, speechItem, 20)
 	if err != nil || len(stories) != 1 || len(stories[0].Timeline) != 1 || stories[0].Timeline[0].ID != 2 {
 		t.Errorf("placing's candidates hold a withdrawn Development: %+v %v", stories, err)
 	}
 	if toPlace, err := store.FactsToPlace(ctx); err != nil || len(toPlace) != 0 {
 		t.Errorf("a withdrawn Fact awaits placing: %+v %v", toPlace, err)
 	}
-	near, err := store.FactsNear(ctx, []editor.Fact{{ID: 2, AsAt: saturday}}, 10)
+	near, err := store.FactsNear(ctx, editor.ToConnect{Item: speechItem, Facts: []editor.Fact{{ID: 2, AsAt: saturday}}}, 10)
 	if err != nil || len(near) != 0 {
 		t.Errorf("connecting is shown a withdrawn Fact: %+v %v", near, err)
 	}
@@ -170,7 +173,7 @@ func timeline(t *testing.T, store *sqlite.Store, story int64) (page, acts []int6
 	for _, d := range st.Timeline {
 		page = append(page, d.ID)
 	}
-	seen, err := store.StoriesSharing(t.Context(), []string{"Andy Burnham"})
+	seen, err := store.CandidateStories(t.Context(), speechItem, 20)
 	if err != nil {
 		t.Fatal(err)
 	}

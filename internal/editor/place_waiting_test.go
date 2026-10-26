@@ -69,7 +69,7 @@ func TestPlacingAFactThatStartsAStoryPutsItOnTheStorysTimeline(t *testing.T) {
 	}
 }
 
-// laterItem is a readout, published after the speech, that involves Andy
+// laterItem is a readout, published after the speech, that mentions Andy
 // Burnham too.
 var laterItem = collect.Item{
 	SourceID: number10.ID, EntryID: "readout", Title: "PM meeting with the First Minister",
@@ -77,7 +77,22 @@ var laterItem = collect.Item{
 	Published: speech.Published.Add(24 * time.Hour), Attribution: collect.OGL, CollectedAt: saturday,
 }
 
+// readLater reads the readout, its Fact tied to Andy Burnham and Edinburgh.
 func readLater(t *testing.T, store *sqlite.Store) {
+	t.Helper()
+	readLaterTied(t, store, "Andy Burnham", "Edinburgh")
+}
+
+// readLaterMentioning reads the readout with its Fact tied to no Entity, so
+// what it is weighed against, and waits for, can only be what it mentions.
+func readLaterMentioning(t *testing.T, store *sqlite.Store) {
+	t.Helper()
+	readLaterTied(t, store)
+}
+
+// readLaterTied reads the readout, which mentions Andy Burnham and
+// Edinburgh, its Fact tied to the Entities named.
+func readLaterTied(t *testing.T, store *sqlite.Store, ties ...string) {
 	t.Helper()
 	if _, err := store.AddItems(t.Context(), []collect.Item{laterItem}); err != nil {
 		t.Fatal(err)
@@ -87,7 +102,7 @@ func readLater(t *testing.T, store *sqlite.Store) {
 		Entities: []editor.Entity{{Name: "Andy Burnham", Kind: "person"}, {Name: "Edinburgh", Kind: "place"}},
 		Facts: []editor.Fact{{Statement: "Andy Burnham met the First Minister in Edinburgh.",
 			AsAt: time.Date(2026, time.October, 17, 0, 0, 0, 0, time.UTC), Quote: "met the First Minister in Edinburgh",
-			Entities: []string{"Andy Burnham", "Edinburgh"}}},
+			Entities: ties}},
 	}, saturday); err != nil {
 		t.Fatal(err)
 	}
@@ -101,7 +116,7 @@ func TestALaterFactMeetsTheStoryAnEarlierOneStarted(t *testing.T) {
 		t.Fatalf("Stories: %v %v", stories, err)
 	}
 	id := stories[0].ID
-	readLater(t, store)
+	readLaterMentioning(t, store)
 	ref := "S" + strconv.FormatInt(id, 10)
 	placing := &fakeModel{output: `{"new_stories": [], "facts": [{"fact": "F1", "developments_in": ["` + ref + `"]}]}`}
 	ed, _ := placer(store, placing)
@@ -113,7 +128,7 @@ func TestALaterFactMeetsTheStoryAnEarlierOneStarted(t *testing.T) {
 	if len(placing.sent) != 1 {
 		t.Fatalf("placing called %d times, want once: only the readout's Fact awaits placing", len(placing.sent))
 	}
-	if in := placing.sent[0].Input; !strings.Contains(in, "Andy Burnham in Scotland") || !strings.Contains(in, "Candidate Stories: "+ref) {
+	if in := placing.sent[0].Input; !strings.Contains(in, "Andy Burnham in Scotland") || !strings.Contains(in, "\n"+ref+": Andy Burnham in Scotland\n  Shares: Andy Burnham\n") {
 		t.Errorf("the readout's Fact is not weighed against the Story the speech started:\n%s", in)
 	}
 	s, _, err := store.Story(t.Context(), id)

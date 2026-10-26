@@ -1,11 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "4bb8d3ba0c8403822c94fe544d5ee6604d57eca2410cea376aa90c19913d1df5",
-  "recorded_at": "2026-10-26T00:28:10.025186Z",
+  "request_hash": "e83c236092fd508bbd89bf508a6eb548bea94eb1130de3d39b67a4579d3dc469",
+  "recorded_at": "2026-10-26T12:19:30.649646Z",
   "usage": {
-    "input_tokens": 2080,
-    "output_tokens": 1082
+    "input_tokens": 2223,
+    "output_tokens": 1614
   },
   "output": {
     "causes": [],
@@ -19,7 +19,7 @@
           },
           {
             "entity": "Volodymyr Zelenskyy",
-            "role": "affected"
+            "role": "undergoer"
           },
           {
             "entity": "Downing Street",
@@ -41,7 +41,7 @@
         "roles": [
           {
             "entity": "Ukraine",
-            "role": "affected"
+            "role": "undergoer"
           }
         ]
       },
@@ -50,7 +50,7 @@
         "roles": [
           {
             "entity": "Ukraine",
-            "role": "affected"
+            "role": "undergoer"
           }
         ]
       },
@@ -88,12 +88,8 @@
             "role": "actor"
           },
           {
-            "entity": "Ukraine",
-            "role": "affected"
-          },
-          {
             "entity": "Kyiv",
-            "role": "place"
+            "role": "undergoer"
           }
         ]
       }

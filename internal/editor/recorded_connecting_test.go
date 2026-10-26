@@ -2,6 +2,7 @@ package editor_test
 
 import (
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/samthorold/go-slow/internal/editor"
@@ -31,6 +32,41 @@ func TestRecordedConnectings(t *testing.T) {
 	recordedConnectings(t, ownDirectory(t, "connecting"))
 }
 
+// zelenskyyMeeting is the fixture whose Fact welcomes "President Volodymyr
+// Zelenskyy of Ukraine": Ukraine there only says who Zelenskyy is.
+const zelenskyyMeeting = "pm-meeting-with-president-zelenskyy-of-ukraine-14-october-2026"
+
+// notOfUkraine is the property declared before connecting first decided
+// involvement (#101): the Fact welcoming President Zelenskyy of Ukraine does
+// not involve Ukraine. The Fact must be there, or the property tests nothing.
+func notOfUkraine(t *testing.T, store *sqlite.Store, f namedItem, p properties) {
+	t.Helper()
+	ctx := t.Context()
+	it, found, err := store.ReadItem(ctx, f.item.SourceID, f.item.EntryID)
+	if err != nil || !found {
+		t.Fatalf("%s is not read: %v %v", f.name, found, err)
+	}
+	var welcome int64
+	for _, fact := range it.Facts {
+		if strings.Contains(fact.Statement, "welcomed President Volodymyr Zelenskyy of Ukraine") {
+			welcome = fact.ID
+		}
+	}
+	if welcome == 0 {
+		t.Fatalf("%s: no Fact welcomes President Volodymyr Zelenskyy of Ukraine, so the property tests nothing: %+v", f.name, it.Facts)
+	}
+	involved, err := store.Involvements(ctx, f.item.SourceID, f.item.EntryID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ofUkraine := p.property(`the Fact welcoming "President Volodymyr Zelenskyy of Ukraine" does not involve Ukraine`)
+	for _, r := range involved {
+		if r.FactID == welcome && r.Entity == "Ukraine" {
+			ofUkraine("the welcome involves Ukraine, as %s", r.Role)
+		}
+	}
+}
+
 // recordedConnectings replays (or records) connecting from the recordings
 // under root.
 func recordedConnectings(t *testing.T, root string) {
@@ -50,8 +86,11 @@ func connectingVerdicts(t *testing.T, root string) []error {
 				connecting: connecting,
 			}
 		},
-		func(t *testing.T, store *sqlite.Store, _ namedItem, p properties) {
+		func(t *testing.T, store *sqlite.Store, f namedItem, p properties) {
 			ctx := t.Context()
+			if f.name == zelenskyyMeeting {
+				notOfUkraine(t, store, f, p)
+			}
 			// Every cause Connection traces to Items through its Facts.
 			traces := p.property("every cause traces to Items through its Facts")
 			causes, err := store.Causes(ctx)

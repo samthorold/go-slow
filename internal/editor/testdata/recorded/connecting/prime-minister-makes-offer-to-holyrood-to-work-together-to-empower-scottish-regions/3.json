@@ -1,11 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "915ff081faa016e918a387008accc53fded18afc97b0197a1be80531f4cd48a0",
-  "recorded_at": "2026-10-26T00:29:48.214955Z",
+  "request_hash": "d002c9a695d345f3d61eea03cb9af1f2c7a51b4a843b1fe423a08aa66dad33e4",
+  "recorded_at": "2026-10-26T12:21:44.894301Z",
   "usage": {
-    "input_tokens": 1636,
-    "output_tokens": 752
+    "input_tokens": 1820,
+    "output_tokens": 864
   },
   "output": {
     "causes": [],
@@ -49,16 +49,8 @@
             "role": "actor"
           },
           {
-            "entity": "No10 North",
-            "role": "place"
-          },
-          {
-            "entity": "Scotland Office",
-            "role": "place"
-          },
-          {
             "entity": "Scottish Government",
-            "role": "affected"
+            "role": "undergoer"
           }
         ]
       }

@@ -16,21 +16,22 @@ import (
 type ToConnect struct {
 	Item  Item
 	Facts []Fact
-	// Entities are the names of the Entities the Item's reading gave, in any
-	// of its Facts or Claims. A role given to one of them in a Fact that did
-	// not list it is kept, and the Fact then involves it; a role given to any
-	// other name is refused. It is not shown to the model, so the request is
-	// the Facts' alone.
-	Entities []string
+	// Mentions are the Entities the Item mentions: every Entity its reading
+	// gave, in any of its Facts or Claims, each once. Connecting chooses from
+	// them the Entities each Fact involves; a role given to any other name is
+	// refused.
+	Mentions []Mention
 }
 
-// involvable reports whether name is an Entity of the Item's reading: one
-// that tc's Entities name or one of its Facts lists.
-func (tc ToConnect) involvable(name string) bool {
-	if slices.Contains(tc.Entities, name) {
-		return true
-	}
-	return slices.ContainsFunc(tc.Facts, func(f Fact) bool { return slices.Contains(f.Entities, name) })
+// Mention is an Entity an Item mentions, by its name and kind.
+type Mention struct {
+	Name string
+	Kind string
+}
+
+// mentioned reports whether name is an Entity the Item mentions.
+func (tc ToConnect) mentioned(name string) bool {
+	return slices.ContainsFunc(tc.Mentions, func(m Mention) bool { return m.Name == name })
 }
 
 // Connecting is the result of connecting an Item's Facts.
@@ -70,17 +71,17 @@ type Cause struct {
 const factsShown = 30
 
 // The roles an Entity can have in a Fact.
-var roles = []string{"actor", "affected", "place", "occasion"}
+var roles = []string{"actor", "undergoer", "place", "occasion"}
 
 // connectingInstructions are the connecting act's own instructions.
 const connectingInstructions = `You are the Editor of a private slow-news briefing. You are connecting the Facts drawn from one Item.
 
-For each Fact to connect (F1, F2 and so on), give every Entity it involves its role in the Fact:
-- actor: who did it: who decided, announced, said, made, met, visited or acted.
-- affected: to whom or what it was done, or who or what it is about: who was appointed, met, funded, investigated or affected.
+For each Fact to connect (F1, F2 and so on), give the Entities it involves, choosing from the Entities the Item mentions, each with its role in the Fact. A Fact involves an Entity when the Entity has one of four roles in it:
+- actor: who or what did it.
+- undergoer: what or whom it was done to, or what the Fact says something of (the site, in "the Becketwell site is brownfield").
 - place: where it happened.
 - occasion: the named occasion it happened at or belongs to (a summit, a Budget, an election).
-Give each Entity of a Fact exactly one role, the one that fits best.
+A name that only says who or where something else is does not involve its Entity: in "Zelenskyy of Ukraine" Ukraine says who Zelenskyy is, and in "the GBR headquarters site" Great British Railways says whose site it is. Give each Entity a Fact involves exactly one role, the one that fits best. A Fact may involve none of the Entities the Item mentions; give it no roles then.
 
 Then give the cause Connections: where one Fact caused another, or was what led to it (the investigation caused the resignations; the offer led to the agreement). Each cause is a pair of refs, cause first. At least one of the pair must be a Fact to connect; the other may be another Fact to connect or one of the other Facts (C1, C2 and so on). Make a cause only where the Facts make it plain that one led to the other, not where two Facts merely share a subject, an Entity or a day. Most Facts have no cause among those shown; give none for them.`
 
@@ -90,12 +91,12 @@ Then give the cause Connections: where one Fact caused another, or was what led 
 // answer in refs the checks accept.
 func connectingSchema(tc ToConnect, others []Fact) map[string]any {
 	var facts, all, names []string
-	for i, f := range tc.Facts {
+	for i := range tc.Facts {
 		facts = append(facts, "F"+strconv.Itoa(i+1))
-		for _, n := range f.Entities {
-			if !slices.Contains(names, n) {
-				names = append(names, n)
-			}
+	}
+	for _, m := range tc.Mentions {
+		if !slices.Contains(names, m.Name) {
+			names = append(names, m.Name)
 		}
 	}
 	all = append(all, facts...)
@@ -105,7 +106,8 @@ func connectingSchema(tc ToConnect, others []Fact) map[string]any {
 	enum := func(values []string) map[string]any { return map[string]any{"type": "string", "enum": values} }
 	entity := enum(names)
 	if len(names) == 0 {
-		// An enum may not be empty; a Fact with no Entities gives no roles.
+		// An enum may not be empty; an Item that mentions no Entity gives no
+		// roles.
 		entity = str()
 	}
 	return map[string]any{
@@ -190,7 +192,7 @@ func checkConnecting(tc ToConnect, others []Fact, res Response) (Connecting, err
 		fact := tc.Facts[i]
 		given := map[string]bool{}
 		for _, r := range f.Roles {
-			if !tc.involvable(r.Entity) {
+			if !tc.mentioned(r.Entity) {
 				return Connecting{}, failedConnecting(it, "%s gives a role to %q, which the Item's reading never gave", f.Fact, r.Entity)
 			}
 			if !slices.Contains(roles, r.Role) {
@@ -201,11 +203,6 @@ func checkConnecting(tc ToConnect, others []Fact, res Response) (Connecting, err
 			}
 			given[r.Entity] = true
 			c.Roles = append(c.Roles, Role{FactID: fact.ID, Entity: r.Entity, Role: r.Role})
-		}
-		for _, e := range fact.Entities {
-			if !given[e] {
-				return Connecting{}, failedConnecting(it, "%s gives %q no role", f.Fact, e)
-			}
 		}
 	}
 	for i, ok := range connected {
@@ -293,6 +290,13 @@ func connectingInput(tc ToConnect, others []Fact) string {
 	if !tc.Item.Published.IsZero() {
 		fmt.Fprintf(&b, "Published: %s\n", tc.Item.Published.UTC().Format(time.DateOnly))
 	}
+	b.WriteString("\nEntities the Item mentions:\n")
+	if len(tc.Mentions) == 0 {
+		b.WriteString("none\n")
+	}
+	for _, m := range tc.Mentions {
+		fmt.Fprintf(&b, "- %s (%s)\n", m.Name, m.Kind)
+	}
 	b.WriteString("\nFacts to connect:\n")
 	for i, f := range tc.Facts {
 		writeFact(&b, "F"+strconv.Itoa(i+1), f)
@@ -308,9 +312,9 @@ func connectingInput(tc ToConnect, others []Fact) string {
 	return b.String()
 }
 
+// writeFact writes a Fact as connecting is shown it: its statement and date,
+// without the Entities reading listed for it, since which Entities a Fact
+// involves is connecting's to decide.
 func writeFact(b *strings.Builder, ref string, f Fact) {
 	fmt.Fprintf(b, "\n%s (as at %s): %s\n", ref, f.AsAt.Format(time.DateOnly), f.Statement)
-	if len(f.Entities) > 0 {
-		fmt.Fprintf(b, "  Entities: %s\n", strings.Join(f.Entities, "; "))
-	}
 }

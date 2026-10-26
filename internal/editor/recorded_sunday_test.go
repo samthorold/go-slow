@@ -350,13 +350,16 @@ func keptConversation(path string) (conversationRecording, bool) {
 }
 
 // replayedWikidata is Wikidata answering from the answers kept under dir.
+// A replay has no one to be polite to, so it never waits: a kept answer that
+// asked the client to back off (a maxlag error, whose Retry-After header is
+// not kept) would otherwise wait the default backoff in real time.
 func replayedWikidata(t *testing.T, dir string) editor.Wikidata {
 	t.Helper()
 	srv := httptest.NewServer(wikidatatest.Handler(filepath.Join(dir, "wikidata")))
 	t.Cleanup(srv.Close)
 	return wikidata.New(wikidata.Options{
 		HTTP: &http.Client{Timeout: 30 * time.Second}, Endpoint: srv.URL, UserAgent: polite.UserAgent(testContact),
-		Now: time.Now, Sleep: polite.Sleep,
+		Now: time.Now, Sleep: func(ctx context.Context, _ time.Duration) error { return ctx.Err() },
 	})
 }
 

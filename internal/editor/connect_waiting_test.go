@@ -54,6 +54,28 @@ const speechRoles = `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnha
 const readoutCausedBySpeech = `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "actor"}, {"entity": "Edinburgh", "role": "place"}]}],
   "causes": [{"cause": "C1", "effect": "F1"}]}`
 
+func TestConnectingIsShownEveryEntityTheItemsReadingGaveWithItsKind(t *testing.T) {
+	// The speech's Fact listed Andy Burnham and Motherwell; its Claim gave
+	// Scotland.
+	store, _ := speechAndReadout(t)
+	model := &inTurn{outputs: []string{speechRoles, readoutCausedBySpeech}}
+	ed, logs := connector(store, model)
+
+	if err := ed.ConnectWaiting(t.Context(), saturday); err != nil {
+		t.Fatal(err)
+	}
+
+	if len(model.sent) == 0 {
+		t.Fatalf("connecting was not called:\n%s", logs)
+	}
+	in := model.sent[0].Input
+	for _, m := range []string{"Andy Burnham (person)", "Motherwell (place)", "Scotland (place)"} {
+		if !strings.Contains(in, m) {
+			t.Errorf("the speech's connecting is not shown %q:\n%s", m, in)
+		}
+	}
+}
+
 func TestACauseBetweenTwoFactsIsKeptAndTracesToTheItemsThatSupportIt(t *testing.T) {
 	store, id := speechAndReadout(t)
 	model := &inTurn{outputs: []string{speechRoles, readoutCausedBySpeech}}
@@ -173,6 +195,33 @@ func TestConnectingRunsAgainOverTheDaysFactsBeforeTheBriefing(t *testing.T) {
 	}
 	if len(s.Causes) != 1 || s.Causes[0].Effect.EntryID != laterItem.EntryID {
 		t.Errorf("Causes = %+v, want the one the re-run made", s.Causes)
+	}
+}
+
+// Connecting again decides afresh which Entities each Fact involves: an
+// Entity the earlier connecting gave a role and the later one does not is no
+// longer involved.
+func TestConnectingAgainDecidesAfreshWhichEntitiesAFactInvolves(t *testing.T) {
+	store, _ := speechAndReadout(t)
+	model := &inTurn{outputs: []string{speechRoles, readoutCausedBySpeech}}
+	ed, _ := connector(store, model)
+	if err := ed.ConnectWaiting(t.Context(), saturday); err != nil {
+		t.Fatal(err)
+	}
+
+	// Both Items were placed in the day before; the readout's Fact now
+	// involves Andy Burnham alone.
+	model.outputs = []string{speechRoles, `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "undergoer"}]}], "causes": []}`}
+	if err := ed.Reconnect(t.Context(), saturday.Add(time.Hour)); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := store.Involvements(t.Context(), laterItem.SourceID, laterItem.EntryID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 1 || got[0].Entity != "Andy Burnham" || got[0].Role != "undergoer" {
+		t.Errorf("the readout's Fact involves %+v, want Andy Burnham alone, as undergoer", got)
 	}
 }
 

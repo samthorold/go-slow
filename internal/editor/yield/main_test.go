@@ -186,3 +186,73 @@ func TestReadingYieldShowsFactsClaimsAndEntitiesBeforeAndAfter(t *testing.T) {
 		}
 	}
 }
+
+// Agreement is how alike a fixture's samples are in what each Fact involves:
+// for each Fact, the Jaccard index of two samples' sets, averaged over every
+// pair of samples and every Fact. Connecting's samples share their Facts
+// (F1, F2...), and its sets are of Entity and Role.
+func TestConnectingsAgreementIsTheMeanPairwiseJaccardOfEachFactsEntitiesAndRoles(t *testing.T) {
+	before, after := t.TempDir(), t.TempDir()
+	write(t, after, "connecting/x/1.json", `{"act": "connecting", "output": {"causes": [], "facts": [
+		{"fact": "F1", "roles": [{"entity": "Ann", "role": "actor"}, {"entity": "Kyiv", "role": "place"}]},
+		{"fact": "F2", "roles": []}]}}`)
+	write(t, after, "connecting/x/2.json", `{"act": "connecting", "output": {"causes": [], "facts": [
+		{"fact": "F1", "roles": [{"entity": "Ann", "role": "actor"}, {"entity": "Kyiv", "role": "undergoer"}]},
+		{"fact": "F2", "roles": []}]}}`)
+
+	got := yieldOf(t, before, after)
+
+	// F1: {Ann actor} shared of 3 = 1/3; F2: both none = 1. Mean 0.67.
+	// By Entity alone, F1 agrees fully: 1.00.
+	for _, want := range []string{
+		"### agreement",
+		"| Fixture | Reading (Entities) | Connecting (Entities and Roles) | Connecting (Entities) |",
+		"| x | – → – | – → 0.67 | – → 1.00 |",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("the report has no line %q; it is:\n%s", want, got)
+		}
+	}
+}
+
+// The agreement's last row is each column's mean over the fixtures that have
+// one.
+func TestTheAgreementsMeanIsOverTheFixturesThatHaveOne(t *testing.T) {
+	before, after := t.TempDir(), t.TempDir()
+	for _, f := range []string{"x", "y"} {
+		write(t, after, "connecting/"+f+"/1.json", `{"act": "connecting", "output": {"causes": [], "facts": [
+			{"fact": "F1", "roles": [{"entity": "Ann", "role": "actor"}]}]}}`)
+	}
+	write(t, after, "connecting/x/2.json", `{"act": "connecting", "output": {"causes": [], "facts": [
+		{"fact": "F1", "roles": [{"entity": "Ann", "role": "actor"}]}]}}`)
+	write(t, after, "connecting/y/2.json", `{"act": "connecting", "output": {"causes": [], "facts": [
+		{"fact": "F1", "roles": [{"entity": "Bob", "role": "actor"}]}]}}`)
+
+	got := yieldOf(t, before, after)
+
+	if want := "| **Mean** | – → – | – → 0.50 | – → 0.50 |"; !strings.Contains(got, want) {
+		t.Errorf("the report has no line %q; it is:\n%s", want, got)
+	}
+}
+
+// Reading's samples draw their own Facts, so a Fact of one sample is paired
+// with the most alike statement of the other (by the words they share, at
+// least half), and their Entities compared; a Fact with no such pair is
+// left out.
+func TestReadingsAgreementPairsEachFactWithTheMostAlikeStatementOfTheOtherSample(t *testing.T) {
+	before, after := t.TempDir(), t.TempDir()
+	write(t, after, "reading/x/1.json", `{"act": "reading", "output": {"claims": [], "facts": [
+		{"statement": "Ann visited Kyiv on Monday.", "entities": [{"kind": "person", "name": "Ann"}, {"kind": "place", "name": "Kyiv"}]},
+		{"statement": "Bob resigned.", "entities": [{"kind": "person", "name": "Bob"}]}]}}`)
+	write(t, after, "reading/x/2.json", `{"act": "reading", "output": {"claims": [], "facts": [
+		{"statement": "Ann visited Kyiv.", "entities": [{"kind": "person", "name": "Ann"}]},
+		{"statement": "The weather was poor.", "entities": []}]}}`)
+	write(t, after, "connecting/x/1.json", `{"act": "connecting", "output": {"causes": [], "facts": []}}`)
+
+	got := yieldOf(t, before, after)
+
+	// Only the visits pair: {Ann, Kyiv} against {Ann}, 0.50.
+	if want := "| x | – → 0.50 | – → – | – → – |"; !strings.Contains(got, want) {
+		t.Errorf("the report has no line %q; it is:\n%s", want, got)
+	}
+}

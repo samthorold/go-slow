@@ -1,11 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "b882d4738ac4d7447c68944a51cdb3bc136e80173a09bbcc7b5829a9e7a774b0",
-  "recorded_at": "2026-10-26T00:28:50.783199Z",
+  "request_hash": "33483c5cfe21abb40606cc51bad04c862b6b9df3b2ae7a1bb114d299fb5f2af2",
+  "recorded_at": "2026-10-26T12:20:20.446329Z",
   "usage": {
-    "input_tokens": 1842,
-    "output_tokens": 923
+    "input_tokens": 1991,
+    "output_tokens": 1455
   },
   "output": {
     "causes": [],
@@ -16,28 +16,19 @@
           {
             "entity": "Derby",
             "role": "place"
-          },
-          {
-            "entity": "Great British Railways",
-            "role": "affected"
           }
         ]
       },
       {
         "fact": "F2",
-        "roles": [
-          {
-            "entity": "Great British Railways",
-            "role": "affected"
-          }
-        ]
+        "roles": []
       },
       {
         "fact": "F3",
         "roles": [
           {
             "entity": "Becketwell",
-            "role": "affected"
+            "role": "undergoer"
           },
           {
             "entity": "Derby",
@@ -47,12 +38,7 @@
       },
       {
         "fact": "F4",
-        "roles": [
-          {
-            "entity": "Great British Railways",
-            "role": "affected"
-          }
-        ]
+        "roles": []
       },
       {
         "fact": "F5",
@@ -70,10 +56,6 @@
       {
         "fact": "F7",
         "roles": [
-          {
-            "entity": "Alstom",
-            "role": "affected"
-          },
           {
             "entity": "Derby",
             "role": "place"

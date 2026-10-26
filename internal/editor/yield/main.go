@@ -22,6 +22,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -86,7 +87,7 @@ type act struct {
 }
 
 var acts = []act{
-	{"reading", []string{"Facts", "Claims", "Entities"}, countReading},
+	{"reading", []string{"Facts", "Claims", "Entities", "Projection-worded Facts"}, countReading},
 	{"placing", []string{"Developments", "New Stories"}, countPlacing},
 	{"connecting", []string{"Connections"}, countConnecting},
 	{"briefing", []string{"Statements", "Stories"}, countBriefing},
@@ -172,7 +173,32 @@ func countReading(out json.RawMessage) ([]int, error) {
 	if err := json.Unmarshal(out, &r); err != nil {
 		return nil, err
 	}
-	return []int{len(r.Facts), len(r.Claims), len(r.mentions())}, nil
+	worded := 0
+	for _, f := range r.Facts {
+		if wordedAsFutureAct(f.Statement) {
+			worded++
+		}
+	}
+	return []int{len(r.Facts), len(r.Claims), len(r.mentions()), worded}, nil
+}
+
+// futureAct is a statement worded as a future act, each word with the one
+// after it. A Fact worded so is counted, not judged: "is set to be built"
+// words a present arrangement, which is a Fact.
+var futureAct = regexp.MustCompile(`(?i)\b(will|would|set to|expected to|is to)\b(\s+\pL+)?`)
+
+// wordedAsFutureAct is whether a statement is worded as a future act. Will
+// is the auxiliary, never the noun ("the islanders' will to remain"), which
+// is followed by to or of where the auxiliary is followed by a verb.
+func wordedAsFutureAct(s string) bool {
+	for _, m := range futureAct.FindAllStringSubmatch(s, -1) {
+		next := strings.ToLower(strings.TrimSpace(m[2]))
+		if strings.EqualFold(m[1], "will") && (next == "to" || next == "of") {
+			continue
+		}
+		return true
+	}
+	return false
 }
 
 // counts is, per act, each fixture's counts, one per sample: a fixture

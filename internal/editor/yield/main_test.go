@@ -196,13 +196,50 @@ func TestReadingYieldShowsFactsClaimsAndEntitiesBeforeAndAfter(t *testing.T) {
 	got := yieldOf(t, before, after)
 
 	for _, want := range []string{
-		"| Fixture | Facts | Claims | Entities |",
-		"| reading/statement | 2 → 1 | 1 → 0 | 3 → 1 |",
-		"| **Total** | 2 → 1 | 1 → 0 | 3 → 1 |",
+		"| Fixture | Facts | Claims | Entities | Projection-worded Facts |",
+		"| reading/statement | 2 → 1 | 1 → 0 | 3 → 1 | 0 → 0 |",
+		"| **Total** | 2 → 1 | 1 → 0 | 3 → 1 | 0 → 0 |",
 	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("the report has no line %q; it is:\n%s", want, got)
 		}
+	}
+}
+
+// A Fact worded as a future act (will, would, set to, expected to, is to)
+// is counted, to see a re-recording's shift; it is reported, never judged.
+// Will is the auxiliary only: the noun ("the islanders' will to remain") is
+// followed by to or of, where the auxiliary is followed by a verb.
+func TestReadingYieldCountsFactsWordedAsAFutureAct(t *testing.T) {
+	before, after := t.TempDir(), t.TempDir()
+	write(t, before, "reading/statement.json", `{"act": "reading", "output": {
+		"facts": [
+			{"statement": "The summit will take place in Brussels"},
+			{"statement": "Ukraine would implement the ceasefire"},
+			{"statement": "A fleet of trains is set to be built at Derby"},
+			{"statement": "Construction is expected to begin in 2027"},
+			{"statement": "The headquarters is to be built at Becketwell"},
+			{"statement": "The PM raised the islanders' will to remain British"},
+			{"statement": "The clear and declared will of the islanders"},
+			{"statement": "The purpose is torn up; Willingness and Wills"}
+		],
+		"claims": [{"statement": "The deals will add 10 billion pounds"}],
+		"mentions": []
+	}}`)
+	write(t, after, "reading/statement.json", `{"act": "reading", "output": {
+		"facts": [
+			{"statement": "The summit is scheduled for Brussels on 20 November"},
+			{"statement": "The UK intends to bring further sanctions"},
+			{"statement": "The islanders' will to remain British will be respected"}
+		],
+		"claims": [],
+		"mentions": []
+	}}`)
+
+	got := yieldOf(t, before, after)
+
+	if want := "| reading/statement | 8 → 3 | 1 → 0 | 0 → 0 | 5 → 1 |"; !strings.Contains(got, want) {
+		t.Errorf("the report has no line %q; it is:\n%s", want, got)
 	}
 }
 

@@ -1,55 +1,55 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "296d9bebb23ed0bac1adae910d0d76b6809084e769f90a56b3decc3d1b8d43ee",
-  "recorded_at": "2026-10-26T13:54:53.386886Z",
+  "request_hash": "dbafc549b8688360bf4d1dca8f92a90f5573002bb220e4386da9ee1ba589232e",
+  "recorded_at": "2026-10-26T16:56:33.274801Z",
   "usage": {
-    "input_tokens": 2610,
-    "output_tokens": 3999
+    "input_tokens": 2758,
+    "output_tokens": 4059
   },
   "output": {
     "claims": [
       {
-        "made_by": "Andy Burnham",
+        "made_by": "Andy Burnham, Prime Minister of the United Kingdom",
+        "quote": "Our rock-solid support to Ukraine is vital for keeping us safe here in the UK and ensuring those on the frontlines have the equipment they need to push back Russia.",
+        "statement": "UK support to Ukraine is vital for keeping the UK safe and for helping frontline forces push back Russia."
+      },
+      {
+        "made_by": "Andy Burnham, Prime Minister of the United Kingdom",
         "quote": "we are with you for as long as it takes",
         "statement": "The UK is with Ukraine for as long as it takes."
       },
       {
-        "made_by": "Andy Burnham",
-        "quote": "Our rock-solid support to Ukraine is vital for keeping us safe here in the UK",
-        "statement": "UK support for Ukraine is vital for keeping the UK safe."
-      },
-      {
-        "made_by": "Andy Burnham",
+        "made_by": "Andy Burnham, Prime Minister of the United Kingdom",
         "quote": "Russia’s aggression cannot be allowed to succeed on our continent.",
-        "statement": "Russia's aggression cannot be allowed to succeed in Europe."
+        "statement": "Russia's aggression cannot be allowed to succeed on the European continent."
       },
       {
-        "made_by": "Andy Burnham",
-        "quote": "will accelerate delivery of critical air defence missiles",
-        "statement": "The UK will accelerate delivery of critical air defence missiles to Ukraine."
+        "made_by": "John Healey, Chancellor of the Exchequer",
+        "quote": "I urge partners to back the ban on Russian LNG",
+        "statement": "Partners should back the ban on Russian LNG, as the UK has done, to curtail the war chest funding Putin."
       },
       {
-        "made_by": "John Healey",
-        "quote": "I urge partners to back the ban on Russian LNG, like we have done in the UK, to curtail the war chest funding Putin so desperately wants.",
-        "statement": "Partners should back a ban on Russian LNG to curtail the funding Putin relies on for the war."
-      },
-      {
-        "made_by": "UK Government",
-        "quote": "have proven extremely effective against jet-powered drones",
-        "statement": "British Lightweight Multirole Missiles have proven extremely effective against jet-powered drones."
+        "made_by": "John Healey, Chancellor of the Exchequer",
+        "quote": "the Chancellor will argue that this must be met by European resolve and unity",
+        "statement": "Russia's bombardment of Ukraine must be met by European resolve and unity."
       }
     ],
     "facts": [
       {
-        "as_at": "2026-10-12",
-        "quote": "the Foreign Secretary did the same with partners at the Warsaw Security Forum yesterday",
-        "statement": "The Foreign Secretary urged partners to implement an equivalent ban on Russian LNG at the Warsaw Security Forum."
+        "as_at": "2026-10-13",
+        "quote": "Prime Minister to host President Volodymyr Zelenskyy at Downing Street today",
+        "statement": "The Prime Minister is set to host President Zelenskyy at Downing Street on 2026-10-13."
+      },
+      {
+        "as_at": "2026-10-13",
+        "quote": "The Prime Minister has also asked Ministers to draw up further sanctions, military aid, and fiscal packages to provide urgent support in the coming weeks.",
+        "statement": "The Prime Minister has asked Ministers to draw up further sanctions, military aid and fiscal packages to provide urgent support in the coming weeks."
       },
       {
         "as_at": "2026-10-13",
         "quote": "The UK has already committed £1.6 billion to deliver more than 5000 LMMs to Ukraine over the next four years",
-        "statement": "The UK has already committed £1.6 billion to deliver more than 5000 Lightweight Multirole Missiles to Ukraine over four years."
+        "statement": "The UK has committed £1.6 billion to deliver more than 5000 Lightweight Multirole Missiles to Ukraine over the next four years."
       },
       {
         "as_at": "2026-10-13",
@@ -58,23 +58,28 @@
       },
       {
         "as_at": "2026-10-13",
-        "quote": "The Prime Minister has also asked Ministers to draw up further sanctions, military aid, and fiscal packages",
-        "statement": "The Prime Minister has asked Ministers to draw up further sanctions, military aid and fiscal packages."
+        "quote": "standing by plans to fully implement a maritime services ban on Russian liquefied natural gas (LNG) exports",
+        "statement": "The UK intends to stand by its plans to fully implement a maritime services ban on Russian LNG exports."
+      },
+      {
+        "as_at": "2026-10-13",
+        "quote": "The UK will accelerate deliveries of British Lightweight Multirole Missiles (LMMs)",
+        "statement": "The UK intends to accelerate deliveries of Lightweight Multirole Missiles to Ukraine."
+      },
+      {
+        "as_at": "2026-10-13",
+        "quote": "Chancellor John Healey will use his meetings at the IMF in Bangkok to urge partners to fully implement an equivalent ban on Russian LNG",
+        "statement": "The Chancellor intends to use his meetings at the IMF in Bangkok to urge partners to fully implement an equivalent ban on Russian LNG."
+      },
+      {
+        "as_at": "2026-10-12",
+        "quote": "the Foreign Secretary did the same with partners at the Warsaw Security Forum yesterday [TUE]",
+        "statement": "The Foreign Secretary urged partners at the Warsaw Security Forum to implement a ban on Russian LNG."
       },
       {
         "as_at": "2026-10-13",
         "quote": "As Russia continues its bombardment of Ukraine’s capital Kyiv and energy infrastructure",
-        "statement": "Russia is continuing its bombardment of Kyiv and Ukraine's energy infrastructure."
-      },
-      {
-        "as_at": "2026-10-13",
-        "quote": "Prime Minister Andy Burnham said:",
-        "statement": "Prime Minister Andy Burnham made a statement ahead of the leaders' meeting."
-      },
-      {
-        "as_at": "2026-10-13",
-        "quote": "Chancellor of the Exchequer John Healey said:",
-        "statement": "Chancellor of the Exchequer John Healey made a statement on Ukraine and Russian LNG."
+        "statement": "Russia is continuing its bombardment of Ukraine's capital Kyiv and energy infrastructure."
       }
     ],
     "mentions": [
@@ -96,7 +101,7 @@
       {
         "kind": "person",
         "name": "Foreign Secretary",
-        "role": ""
+        "role": "Foreign Secretary"
       },
       {
         "kind": "person",
@@ -135,7 +140,7 @@
       },
       {
         "kind": "place",
-        "name": "United States",
+        "name": "US",
         "role": ""
       },
       {

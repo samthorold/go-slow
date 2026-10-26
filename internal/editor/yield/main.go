@@ -139,24 +139,40 @@ func countBriefing(out json.RawMessage) ([]int, error) {
 	return []int{statements, len(r.Stories)}, nil
 }
 
-func countReading(out json.RawMessage) ([]int, error) {
-	type statement struct {
-		Entities []entity `json:"entities"`
-	}
-	var r struct {
-		Facts  []statement `json:"facts"`
-		Claims []statement `json:"claims"`
-	}
-	if err := json.Unmarshal(out, &r); err != nil {
-		return nil, err
-	}
+// readingOutput is the little of a reading the report needs. A reading
+// gives the Item's mentions once; one in the earlier schema gave Entities
+// with each Fact and Claim, which together are what its Item mentions.
+type readingOutput struct {
+	Facts    []readStatement `json:"facts"`
+	Claims   []readStatement `json:"claims"`
+	Mentions []entity        `json:"mentions"`
+}
+
+type readStatement struct {
+	Statement string   `json:"statement"`
+	Entities  []entity `json:"entities"`
+}
+
+// mentions are the distinct Entities the reading's Item mentions.
+func (r readingOutput) mentions() map[entity]bool {
 	distinct := map[entity]bool{}
-	for _, s := range append(append([]statement{}, r.Facts...), r.Claims...) {
+	for _, e := range r.Mentions {
+		distinct[e] = true
+	}
+	for _, s := range append(append([]readStatement{}, r.Facts...), r.Claims...) {
 		for _, e := range s.Entities {
 			distinct[e] = true
 		}
 	}
-	return []int{len(r.Facts), len(r.Claims), len(distinct)}, nil
+	return distinct
+}
+
+func countReading(out json.RawMessage) ([]int, error) {
+	var r readingOutput
+	if err := json.Unmarshal(out, &r); err != nil {
+		return nil, err
+	}
+	return []int{len(r.Facts), len(r.Claims), len(r.mentions())}, nil
 }
 
 // counts is, per act, each fixture's counts, one per sample: a fixture

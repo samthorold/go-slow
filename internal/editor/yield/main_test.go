@@ -45,6 +45,25 @@ func TestEntitiesNamedAsPlainStringsAreCountedToo(t *testing.T) {
 	}
 }
 
+// A reading that gives the Item's mentions once counts them as its distinct
+// Entities, as an earlier reading counts those its lists name.
+func TestAReadingsMentionsAreCountedAsItsEntities(t *testing.T) {
+	before, after := t.TempDir(), t.TempDir()
+	write(t, before, "reading/statement.json", `{"act": "reading", "output": {
+		"facts": [{"entities": [{"kind": "person", "name": "Ann"}]}], "claims": [{"entities": [{"kind": "person", "name": "Ann"}]}]
+	}}`)
+	write(t, after, "reading/statement.json", `{"act": "reading", "output": {
+		"facts": [{"statement": "a"}], "claims": [],
+		"mentions": [{"kind": "person", "name": "Ann"}, {"kind": "place", "name": "Kyiv"}]
+	}}`)
+
+	got := yieldOf(t, before, after)
+
+	if want := "| reading/statement | 1 → 1 | 1 → 0 | 1 → 2 |"; !strings.Contains(got, want) {
+		t.Errorf("the report has no line %q; it is:\n%s", want, got)
+	}
+}
+
 func TestEachLaterActIsCountedByWhatItDraws(t *testing.T) {
 	before, after := t.TempDir(), t.TempDir()
 	write(t, before, "placing/statement.json", `{"act": "placing", "output": {
@@ -206,8 +225,8 @@ func TestConnectingsAgreementIsTheMeanPairwiseJaccardOfEachFactsEntitiesAndRoles
 	// By Entity alone, F1 agrees fully: 1.00.
 	for _, want := range []string{
 		"### agreement",
-		"| Fixture | Reading (Entities) | Connecting (Entities and Roles) | Connecting (Entities) |",
-		"| x | – → – | – → 0.67 | – → 1.00 |",
+		"| Fixture | Reading (Entities) | Reading (mentions) | Connecting (Entities and Roles) | Connecting (Entities) |",
+		"| x | – → – | – → – | – → 0.67 | – → 1.00 |",
 	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("the report has no line %q; it is:\n%s", want, got)
@@ -230,7 +249,7 @@ func TestTheAgreementsMeanIsOverTheFixturesThatHaveOne(t *testing.T) {
 
 	got := yieldOf(t, before, after)
 
-	if want := "| **Mean** | – → – | – → 0.50 | – → 0.50 |"; !strings.Contains(got, want) {
+	if want := "| **Mean** | – → – | – → – | – → 0.50 | – → 0.50 |"; !strings.Contains(got, want) {
 		t.Errorf("the report has no line %q; it is:\n%s", want, got)
 	}
 }
@@ -251,8 +270,39 @@ func TestReadingsAgreementPairsEachFactWithTheMostAlikeStatementOfTheOtherSample
 
 	got := yieldOf(t, before, after)
 
-	// Only the visits pair: {Ann, Kyiv} against {Ann}, 0.50.
-	if want := "| x | – → 0.50 | – → – | – → – |"; !strings.Contains(got, want) {
+	// Only the visits pair: {Ann, Kyiv} against {Ann}, 0.50. The samples'
+	// mentions, {Ann, Kyiv, Bob} against {Ann}, agree at 0.33.
+	if want := "| x | – → 0.50 | – → 0.33 | – → – | – → – |"; !strings.Contains(got, want) {
 		t.Errorf("the report has no line %q; it is:\n%s", want, got)
+	}
+}
+
+// Reading's agreement on mentions is the Jaccard index of two samples' sets
+// of the names their Item mentions, averaged over every pair of samples: an
+// earlier sample's mentions are the names its lists give. A reading that
+// gives the mentions once has no per-Fact lists to agree on.
+func TestReadingsAgreementOnMentionsComparesEachPairOfSamplesNames(t *testing.T) {
+	before, after := t.TempDir(), t.TempDir()
+	write(t, before, "reading/x/1.json", `{"act": "reading", "output": {"claims": [{"statement": "c", "entities": [{"kind": "place", "name": "Kyiv"}]}], "facts": [
+		{"statement": "Ann visited Kyiv.", "entities": [{"kind": "person", "name": "Ann"}]}]}}`)
+	write(t, before, "reading/x/2.json", `{"act": "reading", "output": {"claims": [], "facts": [
+		{"statement": "Ann visited Kyiv.", "entities": [{"kind": "person", "name": "Ann"}, {"kind": "place", "name": "Kyiv"}]}]}}`)
+	write(t, after, "reading/x/1.json", `{"act": "reading", "output": {"claims": [], "facts": [{"statement": "Ann visited Kyiv."}],
+		"mentions": [{"kind": "person", "name": "Ann"}, {"kind": "place", "name": "Kyiv"}]}}`)
+	write(t, after, "reading/x/2.json", `{"act": "reading", "output": {"claims": [], "facts": [{"statement": "Ann visited Kyiv."}],
+		"mentions": [{"kind": "person", "name": "Ann"}]}}`)
+	write(t, after, "connecting/x/1.json", `{"act": "connecting", "output": {"causes": [], "facts": []}}`)
+
+	got := yieldOf(t, before, after)
+
+	// Before: the lists' Fact pair {Ann} against {Ann, Kyiv}, 0.50; the
+	// mentions agree, {Ann, Kyiv} both. After: no lists; mentions 0.50.
+	for _, want := range []string{
+		"| Fixture | Reading (Entities) | Reading (mentions) | Connecting (Entities and Roles) | Connecting (Entities) |",
+		"| x | 0.50 → – | 1.00 → 0.50 | – → – | – → – |",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("the report has no line %q; it is:\n%s", want, got)
+		}
 	}
 }

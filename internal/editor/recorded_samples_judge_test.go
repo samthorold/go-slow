@@ -156,7 +156,7 @@ type refusedThenRead struct{ calls int }
 func (m *refusedThenRead) Complete(context.Context, editor.Request) (editor.Response, error) {
 	m.calls++
 	if m.calls == 1 {
-		return editor.Response{Output: json.RawMessage(`{"facts": [{"statement": "Made up.", "as_at": "2026-10-16", "quote": "not in the Item", "entities": []}], "claims": [], "entities": []}`), Model: "fake"}, nil
+		return editor.Response{Output: json.RawMessage(`{"facts": [{"statement": "Made up.", "as_at": "2026-10-16", "quote": "not in the Item"}], "claims": [], "mentions": []}`), Model: "fake"}, nil
 	}
 	return editor.Response{Output: json.RawMessage(goodReading), Model: "fake"}, nil
 }
@@ -202,7 +202,7 @@ func TestASampleIsRecordedAttemptByAttempt(t *testing.T) {
 // A sample refused on every attempt fails, after MaxAttempts.
 func TestASampleRefusedOnEveryAttemptFails(t *testing.T) {
 	path := samplePath(t.TempDir(), "the-speech", 1)
-	live := &fakeModel{output: `{"facts": [{"statement": "Made up.", "as_at": "2026-10-16", "quote": "not in the Item", "entities": []}], "claims": [], "entities": []}`}
+	live := &fakeModel{output: `{"facts": [{"statement": "Made up.", "as_at": "2026-10-16", "quote": "not in the Item"}], "claims": [], "mentions": []}`}
 	m := recordingSample(t, path, live, "claude-haiku-5-5", readingCommand)
 	if readSample(t, m) {
 		t.Fatal("a refused sample passed")
@@ -274,7 +274,7 @@ func TestTheRecordedReadingsAreJudgedOnTheirSamples(t *testing.T) {
 		for k := 1; k <= 5; k++ {
 			live := &fakeModel{output: string(good)}
 			if k > tc.passing {
-				live.output = `{"facts": [{"statement": "Made up.", "as_at": "2026-10-16", "quote": "not in the Item", "entities": []}], "claims": []}`
+				live.output = `{"facts": [{"statement": "Made up.", "as_at": "2026-10-16", "quote": "not in the Item"}], "claims": [], "mentions": []}`
 			}
 			m := recordingSample(t, samplePath(filepath.Join(root, "reading"), name, k), live, model, readingCommand)
 			if _, err := runSample(m, func(model editor.Model) (bool, error) {

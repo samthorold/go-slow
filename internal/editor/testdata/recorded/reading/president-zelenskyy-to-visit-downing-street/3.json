@@ -1,288 +1,162 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "c38b9b420e4e30cdfe544820ed9f9f50840cce686a7e9438e776ab8d7a0d6ea2",
-  "recorded_at": "2026-10-25T22:02:28.905711Z",
+  "request_hash": "ae243b1f25607e603b4e77a907154256c81c0c1a9a12d2ffe79a0dfbec71b7d5",
+  "recorded_at": "2026-10-26T13:25:35.525765Z",
   "usage": {
-    "input_tokens": 2817,
-    "output_tokens": 5047
+    "input_tokens": 2476,
+    "output_tokens": 3406
   },
   "output": {
     "claims": [
       {
-        "entities": [
-          {
-            "kind": "person",
-            "name": "Andy Burnham",
-            "role": "Prime Minister of the United Kingdom"
-          },
-          {
-            "kind": "place",
-            "name": "UK",
-            "role": ""
-          },
-          {
-            "kind": "place",
-            "name": "Ukraine",
-            "role": ""
-          },
-          {
-            "kind": "place",
-            "name": "Russia",
-            "role": ""
-          }
-        ],
         "made_by": "Andy Burnham",
-        "quote": "Our rock-solid support to Ukraine is vital for keeping us safe here in the UK and ensuring those on the frontlines have the equipment they need to push back Russia.",
-        "statement": "UK support for Ukraine is vital for keeping the UK safe and for helping those on the frontlines push back Russia."
+        "quote": "Our rock-solid support to Ukraine is vital for keeping us safe here in the UK",
+        "statement": "UK support for Ukraine is vital for keeping the UK safe."
       },
       {
-        "entities": [
-          {
-            "kind": "person",
-            "name": "Andy Burnham",
-            "role": "Prime Minister of the United Kingdom"
-          },
-          {
-            "kind": "place",
-            "name": "Ukraine",
-            "role": ""
-          }
-        ],
         "made_by": "Andy Burnham",
         "quote": "we are with you for as long as it takes",
         "statement": "The UK is with Ukraine for as long as it takes."
       },
       {
-        "entities": [
-          {
-            "kind": "person",
-            "name": "Andy Burnham",
-            "role": "Prime Minister of the United Kingdom"
-          },
-          {
-            "kind": "place",
-            "name": "Russia",
-            "role": ""
-          }
-        ],
         "made_by": "Andy Burnham",
         "quote": "Russia’s aggression cannot be allowed to succeed on our continent.",
         "statement": "Russia's aggression cannot be allowed to succeed in Europe."
       },
       {
-        "entities": [
-          {
-            "kind": "person",
-            "name": "John Healey",
-            "role": "Chancellor of the Exchequer"
-          },
-          {
-            "kind": "place",
-            "name": "Ukraine",
-            "role": ""
-          }
-        ],
+        "made_by": "John Healey",
+        "quote": "I urge partners to back the ban on Russian LNG, like we have done in the UK",
+        "statement": "Partners should back a ban on Russian LNG as the UK has done."
+      },
+      {
         "made_by": "John Healey",
         "quote": "our commitment to the Ukrainian people is unshakeable",
         "statement": "The UK's commitment to the Ukrainian people is unshakeable."
       },
       {
-        "entities": [
-          {
-            "kind": "person",
-            "name": "John Healey",
-            "role": "Chancellor of the Exchequer"
-          },
-          {
-            "kind": "place",
-            "name": "Russia",
-            "role": ""
-          },
-          {
-            "kind": "place",
-            "name": "UK",
-            "role": ""
-          }
-        ],
-        "made_by": "John Healey",
-        "quote": "I urge partners to back the ban on Russian LNG, like we have done in the UK",
-        "statement": "Partners should back the ban on Russian LNG, as the UK has done, to curtail the funding Putin needs for war."
+        "made_by": "Chancellor of the Exchequer John Healey",
+        "quote": "the Chancellor will argue that this must be met by European resolve and unity",
+        "statement": "Russia's bombardment must be met by European resolve and unity."
       }
     ],
     "facts": [
       {
         "as_at": "2026-10-13",
-        "entities": [
-          {
-            "kind": "person",
-            "name": "Andy Burnham",
-            "role": "Prime Minister of the United Kingdom"
-          },
-          {
-            "kind": "person",
-            "name": "Volodymyr Zelenskyy",
-            "role": "President of Ukraine"
-          },
-          {
-            "kind": "place",
-            "name": "Downing Street",
-            "role": ""
-          }
-        ],
         "quote": "Prime Minister to host President Volodymyr Zelenskyy at Downing Street today",
-        "statement": "The Prime Minister is to host President Volodymyr Zelenskyy at Downing Street on 2026-10-13."
+        "statement": "The Prime Minister is hosting President Volodymyr Zelenskyy at Downing Street on the day of publication."
       },
       {
         "as_at": "2026-10-13",
-        "entities": [
-          {
-            "kind": "person",
-            "name": "Volodymyr Zelenskyy",
-            "role": "President of Ukraine"
-          },
-          {
-            "kind": "place",
-            "name": "UK",
-            "role": ""
-          }
-        ],
-        "quote": "President Zelenskyy will arrive in the UK this morning",
-        "statement": "President Zelenskyy will arrive in the UK on the morning of 2026-10-13."
-      },
-      {
-        "as_at": "2026-10-13",
-        "entities": [
-          {
-            "kind": "person",
-            "name": "Andy Burnham",
-            "role": "Prime Minister of the United Kingdom"
-          },
-          {
-            "kind": "place",
-            "name": "UK",
-            "role": ""
-          },
-          {
-            "kind": "place",
-            "name": "Ukraine",
-            "role": ""
-          }
-        ],
-        "quote": "The Prime Minister has also asked Ministers to draw up further sanctions, military aid, and fiscal packages to provide urgent support in the coming weeks.",
-        "statement": "The Prime Minister has asked Ministers to draw up further sanctions, military aid and fiscal packages for Ukraine."
-      },
-      {
-        "as_at": "2026-10-13",
-        "entities": [
-          {
-            "kind": "place",
-            "name": "UK",
-            "role": ""
-          },
-          {
-            "kind": "place",
-            "name": "Ukraine",
-            "role": ""
-          }
-        ],
-        "quote": "delivering £45 million of surface-to-air missiles deliveries",
+        "quote": "including delivering £45 million of surface-to-air missiles deliveries",
         "statement": "The UK is delivering £45 million of surface-to-air missiles to Ukraine."
       },
       {
         "as_at": "2026-10-13",
-        "entities": [
-          {
-            "kind": "place",
-            "name": "UK",
-            "role": ""
-          },
-          {
-            "kind": "place",
-            "name": "Ukraine",
-            "role": ""
-          }
-        ],
         "quote": "The UK has already committed £1.6 billion to deliver more than 5000 LMMs to Ukraine over the next four years",
-        "statement": "The UK has committed £1.6 billion to deliver more than 5000 British Lightweight Multirole Missiles to Ukraine over four years."
+        "statement": "The UK has committed £1.6 billion to deliver more than 5,000 Lightweight Multirole Missiles to Ukraine over four years."
       },
       {
         "as_at": "2026-10-13",
-        "entities": [
-          {
-            "kind": "place",
-            "name": "UK",
-            "role": ""
-          },
-          {
-            "kind": "place",
-            "name": "Russia",
-            "role": ""
-          }
-        ],
-        "quote": "standing by plans to fully implement a maritime services ban on Russian liquefied natural gas (LNG) exports",
-        "statement": "The UK is standing by plans to fully implement a maritime services ban on Russian LNG exports."
+        "quote": "The Prime Minister has also asked Ministers to draw up further sanctions, military aid, and fiscal packages",
+        "statement": "The Prime Minister has asked Ministers to draw up further sanctions, military aid and fiscal packages."
       },
       {
         "as_at": "2026-10-13",
-        "entities": [
-          {
-            "kind": "person",
-            "name": "John Healey",
-            "role": "Chancellor of the Exchequer"
-          },
-          {
-            "kind": "organisation",
-            "name": "IMF",
-            "role": ""
-          },
-          {
-            "kind": "place",
-            "name": "Bangkok",
-            "role": ""
-          }
-        ],
-        "quote": "Chancellor John Healey will use his meetings at the IMF in Bangkok",
-        "statement": "Chancellor John Healey will hold meetings at the IMF in Bangkok to urge partners to fully implement a ban on Russian LNG."
+        "quote": "will accelerate £10 million of the £45m package of missiles announced today",
+        "statement": "The UK will accelerate £10 million of the £45 million missile package."
       },
       {
         "as_at": "2026-10-12",
-        "entities": [
-          {
-            "kind": "person",
-            "name": "Foreign Secretary",
-            "role": "Foreign Secretary"
-          },
-          {
-            "kind": "occasion",
-            "name": "Warsaw Security Forum",
-            "role": ""
-          }
-        ],
-        "quote": "the Foreign Secretary did the same with partners at the Warsaw Security Forum yesterday",
-        "statement": "The Foreign Secretary urged partners to implement a ban on Russian LNG at the Warsaw Security Forum on 2026-10-12."
+        "quote": "the Foreign Secretary did the same with partners at the Warsaw Security Forum yesterday [TUE]",
+        "statement": "The Foreign Secretary urged partners at the Warsaw Security Forum to implement an equivalent ban on Russian LNG."
       },
       {
         "as_at": "2026-10-13",
-        "entities": [
-          {
-            "kind": "place",
-            "name": "Russia",
-            "role": ""
-          },
-          {
-            "kind": "place",
-            "name": "Kyiv",
-            "role": ""
-          },
-          {
-            "kind": "place",
-            "name": "Ukraine",
-            "role": ""
-          }
-        ],
+        "quote": "Chancellor John Healey will use his meetings at the IMF in Bangkok",
+        "statement": "Chancellor John Healey is holding meetings at the IMF in Bangkok."
+      },
+      {
+        "as_at": "2026-10-13",
         "quote": "As Russia continues its bombardment of Ukraine’s capital Kyiv and energy infrastructure",
-        "statement": "Russia continues its bombardment of Ukraine's capital Kyiv and energy infrastructure."
+        "statement": "Russia is continuing its bombardment of Kyiv and Ukraine's energy infrastructure."
+      }
+    ],
+    "mentions": [
+      {
+        "kind": "person",
+        "name": "Andy Burnham",
+        "role": "Prime Minister of the United Kingdom"
+      },
+      {
+        "kind": "person",
+        "name": "Volodymyr Zelenskyy",
+        "role": "President of Ukraine"
+      },
+      {
+        "kind": "person",
+        "name": "John Healey",
+        "role": "Chancellor of the Exchequer of the United Kingdom"
+      },
+      {
+        "kind": "person",
+        "name": "Foreign Secretary",
+        "role": "Foreign Secretary of the United Kingdom"
+      },
+      {
+        "kind": "person",
+        "name": "Putin",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "United Kingdom",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "Ukraine",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "Russia",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "Downing Street",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "Kyiv",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "Bangkok",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "United States",
+        "role": ""
+      },
+      {
+        "kind": "organisation",
+        "name": "International Monetary Fund",
+        "role": ""
+      },
+      {
+        "kind": "occasion",
+        "name": "Warsaw Security Forum",
+        "role": ""
+      },
+      {
+        "kind": "occasion",
+        "name": "IMF meetings",
+        "role": ""
       }
     ]
   }

@@ -13,11 +13,15 @@ import (
 // sets agree), averaged over every pair of samples and every Fact they
 // share. It is reported for connecting, whose samples share their Facts
 // (F1, F2...), by Entity and Role and by Entity alone, and for the same
-// fixtures' readings, whose per-Fact lists name Entities with no Role.
+// fixtures' readings, whose per-Fact lists name Entities with no Role, in
+// readings recorded before reading gave the Item's mentions once.
 // Reading's samples draw their own Facts, so each Fact of one sample is
 // paired with the statement of the other sharing the most of its words, at
 // least half of them (Jaccard over lower-case words), one to one; a Fact with
 // no such pair is left out, since its list has nothing to agree with.
+// Reading's samples are also compared on what their Item mentions: the
+// Jaccard index of two samples' sets of names, over every pair of samples
+// (for an earlier reading, the names its lists give).
 
 // outputs are, per act and fixture, each sample's output, by its last
 // attempt.
@@ -127,15 +131,15 @@ func words(s string) set {
 	return out
 }
 
-func readFacts(out json.RawMessage) ([]readFact, error) {
-	var r struct {
-		Facts []struct {
-			Statement string   `json:"statement"`
-			Entities  []entity `json:"entities"`
-		} `json:"facts"`
-	}
+// readFacts are a reading's Facts with their lists, and whether it gives
+// lists: one that gives the Item's mentions once gives none.
+func readFacts(out json.RawMessage) ([]readFact, bool, error) {
+	var r readingOutput
 	if err := json.Unmarshal(out, &r); err != nil {
-		return nil, err
+		return nil, false, err
+	}
+	if r.Mentions != nil {
+		return nil, false, nil
 	}
 	var fs []readFact
 	for _, f := range r.Facts {
@@ -145,7 +149,7 @@ func readFacts(out json.RawMessage) ([]readFact, error) {
 		}
 		fs = append(fs, readFact{words(f.Statement), es})
 	}
-	return fs, nil
+	return fs, true, nil
 }
 
 // pairedAgreements are the Jaccard indexes of the Entities of a's and b's
@@ -180,11 +184,13 @@ func pairedAgreements(a, b []readFact) []float64 {
 func readingAgreement(samples []json.RawMessage) (float64, bool, error) {
 	var all [][]readFact
 	for _, s := range samples {
-		fs, err := readFacts(s)
+		fs, lists, err := readFacts(s)
 		if err != nil {
 			return 0, false, err
 		}
-		all = append(all, fs)
+		if lists {
+			all = append(all, fs)
+		}
 	}
 	var xs []float64
 	for i := range all {
@@ -196,16 +202,43 @@ func readingAgreement(samples []json.RawMessage) (float64, bool, error) {
 	return m, ok, nil
 }
 
-// agreements are a fixture's three agreements on one side: reading's,
-// connecting's by Entity and Role, and connecting's by Entity. A column is
-// missing (nil) where there are fewer than two samples to compare.
-type agreements [3][]float64
+// mentionsAgreement is the agreement of reading's samples on the names
+// their Item mentions.
+func mentionsAgreement(samples []json.RawMessage) (float64, bool, error) {
+	var all []set
+	for _, s := range samples {
+		var r readingOutput
+		if err := json.Unmarshal(s, &r); err != nil {
+			return 0, false, err
+		}
+		names := set{}
+		for e := range r.mentions() {
+			names[e.Name] = true
+		}
+		all = append(all, names)
+	}
+	var xs []float64
+	for i := range all {
+		for j := i + 1; j < len(all); j++ {
+			xs = append(xs, jaccard(all[i], all[j]))
+		}
+	}
+	m, ok := mean(xs)
+	return m, ok, nil
+}
+
+// agreements are a fixture's four agreements on one side: reading's per-Fact
+// lists, reading's mentions, connecting's by Entity and Role, and
+// connecting's by Entity. A column is missing (nil) where there are fewer
+// than two samples to compare.
+type agreements [4][]float64
 
 func agreementsOf(o outputs, fixture string) (agreements, error) {
 	var a agreements
 	conn := o["connecting"]["connecting/"+fixture]
 	for i, f := range []func() (float64, bool, error){
 		func() (float64, bool, error) { return readingAgreement(o["reading"]["reading/"+fixture]) },
+		func() (float64, bool, error) { return mentionsAgreement(o["reading"]["reading/"+fixture]) },
 		func() (float64, bool, error) { return connectingAgreement(conn, true) },
 		func() (float64, bool, error) { return connectingAgreement(conn, false) },
 	} {
@@ -253,10 +286,13 @@ func reportAgreement(b *strings.Builder, before, after outputs) error {
 		names = append(names, f)
 	}
 	sort.Strings(names)
-	b.WriteString("### agreement\n\n| Fixture | Reading (Entities) | Connecting (Entities and Roles) | Connecting (Entities) |\n|---|---|---|---|\n")
+	b.WriteString("### agreement\n\n| Fixture | Reading (Entities) | Reading (mentions) | Connecting (Entities and Roles) | Connecting (Entities) |\n|---|---|---|---|---|\n")
 	row := func(label string, was, now agreements) {
-		fmt.Fprintf(b, "| %s | %s → %s | %s → %s | %s → %s |\n", label,
-			was.cell(0), now.cell(0), was.cell(1), now.cell(1), was.cell(2), now.cell(2))
+		fmt.Fprintf(b, "| %s |", label)
+		for i := range was {
+			fmt.Fprintf(b, " %s → %s |", was.cell(i), now.cell(i))
+		}
+		b.WriteString("\n")
 	}
 	var allBefore, allAfter agreements
 	for _, f := range names {

@@ -189,7 +189,7 @@ func TestAFactQuotingOnlyAPrecedentDoesNotTraceToTheItem(t *testing.T) {
 	// The quote is in the precedent the reading is shown, not in the speech.
 	model := &fakeModel{output: `{"claims": [],
 		"facts": [{"statement": "Glasgow will get new funding.", "as_at": "2026-10-16",
-			"quote": "will get new funding", "entities": [{"name": "Glasgow", "kind": "place", "role": ""}]}]}`}
+			"quote": "will get new funding"}], "mentions": [{"name": "Glasgow", "kind": "place", "role": ""}]}`}
 	ed, logs := newEditor(store, model, &fakeWikidata{})
 
 	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {

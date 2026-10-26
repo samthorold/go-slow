@@ -46,8 +46,9 @@ func (s *Store) ItemsToRead(ctx context.Context) ([]editor.Item, error) {
 	return out, nil
 }
 
-// SaveReading writes a reading's Entities, Facts and Claims and marks its
-// Item read, all at once. An Entity already in the Record by name is reused.
+// SaveReading writes a reading's Entities, as what its Item mentions, its
+// Facts and Claims, each tied to the Entities it lists, and marks its Item
+// read, all at once. An Entity already in the Record by name is reused.
 func (s *Store) SaveReading(ctx context.Context, r editor.Reading, readAt time.Time) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -64,6 +65,11 @@ func (s *Store) SaveReading(ctx context.Context, r editor.Reading, readAt time.T
 			`INSERT INTO entity_names (entity_id, name) VALUES (?, ?) ON CONFLICT DO NOTHING`,
 			id, e.Name); err != nil {
 			return fmt.Errorf("save entity %q: %w", e.Name, err)
+		}
+		if _, err := tx.ExecContext(ctx, `
+			INSERT INTO item_mentions (source_id, entry_id, entity_id) VALUES (?, ?, ?) ON CONFLICT DO NOTHING`,
+			r.SourceID, r.EntryID, id); err != nil {
+			return fmt.Errorf("mention of %q: %w", e.Name, err)
 		}
 		ids[e.Name] = id
 	}

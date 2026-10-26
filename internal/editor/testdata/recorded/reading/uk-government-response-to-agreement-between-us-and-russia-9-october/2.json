@@ -1,158 +1,97 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "5692283b1b4c605892874bc0886c72958a5157747ca77cd4bd9693bc714232f2",
-  "recorded_at": "2026-10-25T22:04:13.222125Z",
+  "request_hash": "f6239bbc80ba4ad539fc6acb0522ccf5ffb1f19014936a07c5b7d06fc7838b53",
+  "recorded_at": "2026-10-26T13:27:17.744131Z",
   "usage": {
-    "input_tokens": 1993,
-    "output_tokens": 2916
+    "input_tokens": 1652,
+    "output_tokens": 2240
   },
   "output": {
     "claims": [
       {
-        "entities": [
-          {
-            "kind": "organisation",
-            "name": "UK government",
-            "role": "provider of military and financial support to Ukraine and sanctions imposer"
-          },
-          {
-            "kind": "place",
-            "name": "Ukraine",
-            "role": "recipient of military and financial support"
-          },
-          {
-            "kind": "place",
-            "name": "Russia",
-            "role": "subject of pressure and sanctions"
-          }
-        ],
-        "made_by": "A UK government spokesperson",
-        "quote": "We will continue working closely with international partners to ensure Ukraine has the military and financial support it needs to defend itself",
+        "made_by": "UK government spokesperson",
+        "quote": "We will continue working closely with international partners to ensure Ukraine has the military and financial support it needs to defend itself.",
         "statement": "The UK will continue working closely with international partners to ensure Ukraine has the military and financial support it needs to defend itself."
       },
       {
-        "entities": [
-          {
-            "kind": "organisation",
-            "name": "UK government",
-            "role": "imposer of sanctions on Russia"
-          },
-          {
-            "kind": "place",
-            "name": "Russia",
-            "role": "target of sanctions"
-          }
-        ],
-        "made_by": "A UK government spokesperson",
+        "made_by": "UK government spokesperson",
         "quote": "We will also maintain pressure on Russia through the toughest sanctions regime ever imposed by the UK",
         "statement": "The UK will maintain pressure on Russia through the toughest sanctions regime ever imposed by the UK."
       },
       {
-        "entities": [
-          {
-            "kind": "place",
-            "name": "Russia",
-            "role": "party that repeatedly rejected ceasefires and continued attacks"
-          },
-          {
-            "kind": "place",
-            "name": "Ukraine",
-            "role": "party whose civilians and energy infrastructure were attacked"
-          }
-        ],
-        "made_by": "A UK government spokesperson",
-        "quote": "Russia has repeatedly rejected full and partial ceasefires while continuing attacks on Ukrainian civilians and energy",
-        "statement": "Russia has repeatedly rejected full and partial ceasefires while continuing attacks on Ukrainian civilians and energy."
-      },
-      {
-        "entities": [
-          {
-            "kind": "place",
-            "name": "Ukraine",
-            "role": "party said to be serious about peace"
-          }
-        ],
-        "made_by": "A UK government spokesperson",
+        "made_by": "UK government spokesperson",
         "quote": "Ukraine has repeatedly demonstrated it is serious about peace",
         "statement": "Ukraine has repeatedly demonstrated it is serious about peace."
       },
       {
-        "entities": [
-          {
-            "kind": "place",
-            "name": "Russia",
-            "role": "party that could end the war"
-          }
-        ],
-        "made_by": "A UK government spokesperson",
-        "quote": "Russia could end this war today",
+        "made_by": "UK government spokesperson",
+        "quote": "Russia has repeatedly rejected full and partial ceasefires while continuing attacks on Ukrainian civilians and energy.",
+        "statement": "Russia has repeatedly rejected full and partial ceasefires while continuing attacks on Ukrainian civilians and energy."
+      },
+      {
+        "made_by": "UK government spokesperson",
+        "quote": "Russia could end this war today.",
         "statement": "Russia could end the war today."
       },
       {
-        "entities": [
-          {
-            "kind": "organisation",
-            "name": "UK government",
-            "role": "supporter of US-led efforts"
-          },
-          {
-            "kind": "place",
-            "name": "United States",
-            "role": "leader of efforts to secure peace in Ukraine"
-          },
-          {
-            "kind": "place",
-            "name": "Ukraine",
-            "role": "country where a just and lasting peace is sought"
-          }
-        ],
-        "made_by": "A UK government spokesperson",
-        "quote": "The UK fully supports US-led efforts to secure a just and lasting peace in Ukraine and remains in close contact with the US, Ukraine and other allies",
-        "statement": "The UK fully supports US-led efforts to secure a just and lasting peace in Ukraine and remains in close contact with the US, Ukraine and other allies."
-      },
-      {
-        "entities": [
-          {
-            "kind": "organisation",
-            "name": "UK government",
-            "role": "monitor of developments and worker with partners on energy markets"
-          }
-        ],
-        "made_by": "A UK government spokesperson",
-        "quote": "The Government continues to monitor developments closely and work with international partners to support stable energy markets and secure energy supplies",
-        "statement": "The Government continues to monitor developments closely and work with international partners to support stable energy markets and secure energy supplies."
+        "made_by": "UK government spokesperson",
+        "quote": "We remain committed to supporting Ukraine for as long as it takes",
+        "statement": "The UK remains committed to supporting Ukraine for as long as it takes."
       }
     ],
     "facts": [
       {
         "as_at": "2026-10-10",
-        "entities": [
-          {
-            "kind": "person",
-            "name": "UK government spokesperson",
-            "role": "spokesperson for the UK government who made the statement"
-          }
-        ],
-        "quote": "A UK government spokesperson said",
-        "statement": "A UK government spokesperson made a statement responding to an agreement between the US and Russia."
+        "quote": "A UK government spokesperson said:",
+        "statement": "A UK government spokesperson made a statement responding to the agreement between the US and Russia."
       },
       {
-        "as_at": "2026-10-09",
-        "entities": [
-          {
-            "kind": "place",
-            "name": "United States",
-            "role": "party to the agreement"
-          },
-          {
-            "kind": "place",
-            "name": "Russia",
-            "role": "party to the agreement"
-          }
-        ],
-        "quote": "agreement between US and Russia: 9 October",
-        "statement": "An agreement between the US and Russia was reached on 9 October."
+        "as_at": "2026-10-10",
+        "quote": "remains in close contact with the US, Ukraine and other allies",
+        "statement": "The UK remains in close contact with the US, Ukraine and other allies."
+      },
+      {
+        "as_at": "2026-10-10",
+        "quote": "The Government continues to monitor developments closely",
+        "statement": "The UK Government continues to monitor developments closely."
+      }
+    ],
+    "mentions": [
+      {
+        "kind": "organisation",
+        "name": "UK Government",
+        "role": "Government of the United Kingdom"
+      },
+      {
+        "kind": "person",
+        "name": "UK government spokesperson",
+        "role": "Spokesperson for the UK Government"
+      },
+      {
+        "kind": "person",
+        "name": "Putin",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "Ukraine",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "Russia",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "US",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "UK",
+        "role": ""
       }
     ]
   }

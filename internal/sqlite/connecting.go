@@ -50,16 +50,13 @@ func (s *Store) toConnect(ctx context.Context, where string, args ...any) ([]edi
 	return out, nil
 }
 
-// mentions are the Entities an Item mentions: those its reading gave, in any
-// of its Facts or Claims, by name.
+// mentions are the Entities an Item mentions, as its reading gave them, by
+// name.
 func (s *Store) mentions(ctx context.Context, sourceID, entryID string) ([]editor.Mention, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT entities.name, entities.kind FROM entities WHERE entities.id IN (
-			SELECT fe.entity_id FROM fact_entities fe JOIN facts f ON f.id = fe.fact_id
-			WHERE f.source_id = ?1 AND f.entry_id = ?2
-			UNION
-			SELECT ce.entity_id FROM claim_entities ce JOIN claims c ON c.id = ce.claim_id
-			WHERE c.source_id = ?1 AND c.entry_id = ?2)
+		SELECT entities.name, entities.kind
+		FROM item_mentions m JOIN entities ON entities.id = m.entity_id
+		WHERE m.source_id = ? AND m.entry_id = ?
 		ORDER BY entities.name`, sourceID, entryID)
 	if err != nil {
 		return nil, fmt.Errorf("entities of the reading of %s: %w", entryID, err)

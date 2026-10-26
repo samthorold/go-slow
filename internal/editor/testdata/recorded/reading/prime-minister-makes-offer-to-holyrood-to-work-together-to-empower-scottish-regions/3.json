@@ -1,165 +1,142 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "02270ea501378dbf93ed795368f8ba410c8be42b7f69fa2455861a62660d97c5",
-  "recorded_at": "2026-10-25T22:03:28.551019Z",
+  "request_hash": "de76b015c57d2bf52d9752a519cc53346c341d2df7052758cb231ec09240cfb9",
+  "recorded_at": "2026-10-26T13:26:36.3119Z",
   "usage": {
-    "input_tokens": 2310,
-    "output_tokens": 4062
+    "input_tokens": 1969,
+    "output_tokens": 3079
   },
   "output": {
     "claims": [
       {
-        "entities": [
-          {
-            "kind": "organisation",
-            "name": "Scottish Government",
-            "role": "devolved administration of Scotland"
-          }
-        ],
         "made_by": "Andy Burnham",
         "quote": "the Scottish Government is one of the most centralised devolved administrations in Europe",
         "statement": "The Scottish Government is one of the most centralised devolved administrations in Europe."
       },
       {
-        "entities": [
-          {
-            "kind": "organisation",
-            "name": "Scottish Parliament",
-            "role": "Holyrood, the legislature of Scotland"
-          }
-        ],
         "made_by": "Andy Burnham",
-        "quote": "with Holyrood not giving people who know their areas best enough of a say",
-        "statement": "Holyrood is not giving people who know their areas best enough of a say."
+        "quote": "despite significant devolution from Westminster over the last 27 years",
+        "statement": "Holyrood does not give people who know their areas best enough of a say despite significant devolution from Westminster over the last 27 years."
       },
       {
-        "entities": [
-          {
-            "kind": "person",
-            "name": "First Minister of Scotland",
-            "role": "First Minister of Scotland"
-          },
-          {
-            "kind": "person",
-            "name": "Andy Burnham",
-            "role": "Prime Minister of the United Kingdom"
-          }
-        ],
         "made_by": "Andy Burnham",
-        "quote": "During my first week in office, I told the First Minister that I wanted to work with him",
-        "statement": "In his first week in office, Andy Burnham told the First Minister that he wanted to work with him."
+        "quote": "Through No10 North, we are rewiring the state",
+        "statement": "Through No10 North, the UK Government is rewiring the state."
       },
       {
-        "entities": [
-          {
-            "kind": "person",
-            "name": "Andy Burnham",
-            "role": "Prime Minister of the United Kingdom"
-          }
-        ],
         "made_by": "Andy Burnham",
-        "quote": "there is no limit to what we can achieve for the Scottish people",
-        "statement": "There is no limit to what can be achieved for the Scottish people if the governments work together."
+        "quote": "With us working together, there is no limit to what we can achieve for the Scottish people.",
+        "statement": "Working together, there is no limit to what the UK and Scottish governments can achieve for the Scottish people."
       },
       {
-        "entities": [
-          {
-            "kind": "person",
-            "name": "Andy Burnham",
-            "role": "Prime Minister of the United Kingdom"
-          }
-        ],
-        "made_by": "Andy Burnham",
-        "quote": "the next stage of devolution should place more decision-making in the hands of Scotland’s regions and cities to drive reindustrialisation",
-        "statement": "The next stage of devolution should place more decision-making in the hands of Scotland's regions and cities to drive reindustrialisation."
+        "made_by": "Douglas Alexander",
+        "quote": "People in North Lanarkshire, in Fife or in the Highlands know what their communities need better than any minister, whether they sit in London or Edinburgh.",
+        "statement": "People in North Lanarkshire, Fife and the Highlands know what their communities need better than any minister, whether in London or Edinburgh."
       },
       {
-        "entities": [
-          {
-            "kind": "person",
-            "name": "Andy Burnham",
-            "role": "Prime Minister of the United Kingdom"
-          },
-          {
-            "kind": "organisation",
-            "name": "Scottish Government",
-            "role": "devolved administration of Scotland"
-          }
-        ],
         "made_by": "Douglas Alexander",
         "quote": "The Prime Minister’s offer to the Scottish Government is a genuine one",
-        "statement": "The Prime Minister's offer to the Scottish Government is a genuine one."
+        "statement": "The Prime Minister's offer to the Scottish Government is genuine."
       },
       {
-        "entities": [
-          {
-            "kind": "organisation",
-            "name": "Scottish Parliament",
-            "role": "Holyrood, the legislature of Scotland"
-          }
-        ],
         "made_by": "Douglas Alexander",
-        "quote": "power was never supposed to stop at the doors of the Scottish Parliament",
-        "statement": "Power was never supposed to stop at the doors of the Scottish Parliament."
+        "quote": "Two governments, one goal - good jobs and real opportunity in every corner of Scotland.",
+        "statement": "The two governments share one goal of good jobs and real opportunity in every corner of Scotland."
       }
     ],
     "facts": [
       {
         "as_at": "2026-10-15",
-        "entities": [
-          {
-            "kind": "person",
-            "name": "Andy Burnham",
-            "role": "Prime Minister of the United Kingdom"
-          },
-          {
-            "kind": "place",
-            "name": "Lanarkshire",
-            "role": "place where the Prime Minister spoke with young people"
-          }
-        ],
         "quote": "after speaking with young people today in Lanarkshire",
-        "statement": "The Prime Minister spoke with young people in Lanarkshire."
+        "statement": "Andy Burnham spoke with young people in Lanarkshire on 2026-10-15."
       },
       {
         "as_at": "2026-10-15",
-        "entities": [
-          {
-            "kind": "person",
-            "name": "Douglas Alexander",
-            "role": "Scottish Secretary"
-          }
-        ],
-        "quote": "The Scottish Secretary, Douglas Alexander said:",
-        "statement": "Douglas Alexander, the Scottish Secretary, made a statement on the Prime Minister's offer to the Scottish Government."
+        "quote": "I told the First Minister that I wanted to work with him",
+        "statement": "Andy Burnham told the First Minister in his first week in office that he wanted to work with him."
       },
       {
         "as_at": "2026-10-15",
-        "entities": [
-          {
-            "kind": "person",
-            "name": "Andy Burnham",
-            "role": "Prime Minister of the United Kingdom"
-          },
-          {
-            "kind": "organisation",
-            "name": "Scottish Government",
-            "role": "devolved administration of Scotland"
-          },
-          {
-            "kind": "organisation",
-            "name": "No10 North",
-            "role": "UK Government body through which the offer is made"
-          },
-          {
-            "kind": "organisation",
-            "name": "Scotland Office",
-            "role": "UK Government office working with the Scottish Government"
-          }
-        ],
-        "quote": "he will call on the Scottish Government to work with the UK Government through No10 North and the Scotland Office",
-        "statement": "The Prime Minister will call on the Scottish Government to work with the UK Government through No10 North and the Scotland Office to develop a new model of regional empowerment for Scotland."
+        "quote": "This is me making an offer to the Scottish Government.",
+        "statement": "Andy Burnham made an offer to the Scottish Government to work together on regional empowerment."
+      }
+    ],
+    "mentions": [
+      {
+        "kind": "person",
+        "name": "Andy Burnham",
+        "role": "Prime Minister of the United Kingdom"
+      },
+      {
+        "kind": "person",
+        "name": "Douglas Alexander",
+        "role": "Scottish Secretary"
+      },
+      {
+        "kind": "person",
+        "name": "First Minister",
+        "role": "First Minister of Scotland"
+      },
+      {
+        "kind": "organisation",
+        "name": "Scottish Government",
+        "role": "Government of Scotland"
+      },
+      {
+        "kind": "organisation",
+        "name": "UK Government",
+        "role": "Government of the United Kingdom"
+      },
+      {
+        "kind": "organisation",
+        "name": "No10 North",
+        "role": "UK Government regional initiative"
+      },
+      {
+        "kind": "organisation",
+        "name": "Scotland Office",
+        "role": "UK Government department for Scotland"
+      },
+      {
+        "kind": "organisation",
+        "name": "Scottish Parliament",
+        "role": "Holyrood, legislature of Scotland"
+      },
+      {
+        "kind": "organisation",
+        "name": "Westminster",
+        "role": "UK Parliament"
+      },
+      {
+        "kind": "place",
+        "name": "Scotland",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "Lanarkshire",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "North Lanarkshire",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "Fife",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "Highlands",
+        "role": ""
+      },
+      {
+        "kind": "place",
+        "name": "Europe",
+        "role": ""
       }
     ]
   }

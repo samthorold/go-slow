@@ -68,6 +68,70 @@ func TestTheRolesKeptAsAffectedAreRenamedUndergoer(t *testing.T) {
 	}
 }
 
+// What earlier readings tied to each Fact and Claim is kept as what their
+// Item mentions, each Entity once, and the ties stay as they were.
+func TestEarlierReadingsListsAreKeptAsTheirItemsMentions(t *testing.T) {
+	ctx := t.Context()
+	db, err := sql.Open("sqlite", "file:"+filepath.Join(t.TempDir(), "go-slow.db")+"?_pragma=foreign_keys(1)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = db.Close() })
+	db.SetMaxOpenConns(1)
+	if err := migrateTo(ctx, db, 20); err != nil {
+		t.Fatal(err)
+	}
+	for _, q := range []string{
+		`INSERT INTO sources (id, name, feed_url, usual_gap_seconds, added_at) VALUES ('s', 'S', 'https://example.org', 86400, '2026-10-16T00:00:00Z')`,
+		`INSERT INTO items (source_id, entry_id, title, link, summary, content, published, updated, raw, attribution, collected_at)
+			VALUES ('s', 'e', 't', 'l', '', '', '', '', '', '', '2026-10-16T00:00:00Z'),
+			('s', 'other', 't', 'l', '', '', '', '', '', '', '2026-10-16T00:00:00Z')`,
+		`INSERT INTO entities (name, kind) VALUES ('Andy Burnham', 'person'), ('Motherwell', 'place'), ('Scotland', 'place'), ('Glasgow', 'place')`,
+		`INSERT INTO facts (source_id, entry_id, statement, as_at, quote) VALUES
+			('s', 'e', 'Andy Burnham spoke in Motherwell.', '2026-10-16', 'q'),
+			('s', 'e', 'Andy Burnham spoke again.', '2026-10-16', 'q'),
+			('s', 'other', 'Glasgow got funding.', '2026-10-16', 'q')`,
+		`INSERT INTO fact_entities (fact_id, entity_id, role) VALUES (1, 1, 'actor'), (1, 2, NULL), (2, 1, NULL), (3, 4, NULL)`,
+		`INSERT INTO claims (source_id, entry_id, statement, made_by, quote) VALUES ('s', 'e', 'Scotland will get money.', 'Andy Burnham', 'q')`,
+		`INSERT INTO claim_entities (claim_id, entity_id) VALUES (1, 1), (1, 3)`,
+	} {
+		if _, err := db.ExecContext(ctx, q); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := migrateTo(ctx, db, -1); err != nil {
+		t.Fatal(err)
+	}
+
+	rows, err := db.QueryContext(ctx, `SELECT entry_id || ':' || entity_id FROM item_mentions ORDER BY entry_id, entity_id`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = rows.Close() }()
+	var got []string
+	for rows.Next() {
+		var m string
+		if err := rows.Scan(&m); err != nil {
+			t.Fatal(err)
+		}
+		got = append(got, m)
+	}
+	if err := rows.Err(); err != nil {
+		t.Fatal(err)
+	}
+	if want := []string{"e:1", "e:2", "e:3", "other:4"}; !slices.Equal(got, want) {
+		t.Errorf("mentions kept = %v, want %v", got, want)
+	}
+	var ties int
+	if err := db.QueryRowContext(ctx, `SELECT (SELECT count(*) FROM fact_entities) + (SELECT count(*) FROM claim_entities)`).Scan(&ties); err != nil || ties != 6 {
+		t.Errorf("ties kept = %d, want the 6 there were: %v", ties, err)
+	}
+	if broken, err := brokenForeignKeys(ctx, db); err != nil || broken {
+		t.Errorf("a mention names an Item or Entity that is gone: %v %v", broken, err)
+	}
+}
+
 // Rebuilding the feedback table, to give Feedback levels for the Sunday read,
 // keeps the Feedback already given and every mark on the Record that names
 // it.

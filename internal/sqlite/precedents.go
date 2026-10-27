@@ -3,7 +3,6 @@ package sqlite
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -11,31 +10,30 @@ import (
 )
 
 // PlacingPrecedents are at most limit pieces of the Owner's Feedback on
-// Developments whose Facts share an Entity with tp's Facts, or whose Items
-// share a Topic with tp's Item: those sharing the most Entities and Topics
-// first, then the newest. Feedback on a withdrawn Fact is never one: the
-// acts never see what was withdrawn. Nor is Feedback the Owner undid.
+// Developments whose Facts' Items mention an Entity tp's Item mentions, or
+// share a Topic with it: those sharing the most Entities and Topics first,
+// then the newest. They rest on mentions, as candidate Stories do, since an
+// unplaced Fact involves no Entity until connecting runs, after placing.
+// Feedback on a withdrawn Fact is never one: the acts never see what was
+// withdrawn. Nor is Feedback the Owner undid.
 func (s *Store) PlacingPrecedents(ctx context.Context, tp editor.ToPlace, limit int) ([]editor.Precedent, error) {
-	names, err := json.Marshal(entityNamesOf(tp))
-	if err != nil {
-		return nil, err
-	}
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT id, kind, depth, given_at, story, statement FROM (
 			SELECT feedback.id, feedback.kind, feedback.depth, feedback.given_at,
 				coalesce(stories.title, '') AS story, facts.statement,
-				(SELECT count(*) FROM fact_entities JOIN entities ON entities.id = fact_entities.entity_id
-					WHERE fact_entities.fact_id = facts.id AND entities.name IN (SELECT value FROM json_each(?1)))
+				(SELECT count(*) FROM item_mentions theirs JOIN item_mentions mine ON mine.entity_id = theirs.entity_id
+					WHERE theirs.source_id = facts.source_id AND theirs.entry_id = facts.entry_id
+						AND mine.source_id = ?1 AND mine.entry_id = ?2)
 				+ (SELECT count(*) FROM item_topics theirs JOIN item_topics mine ON mine.topic_id = theirs.topic_id
 					WHERE theirs.source_id = facts.source_id AND theirs.entry_id = facts.entry_id
-						AND mine.source_id = ?2 AND mine.entry_id = ?3) AS shared
+						AND mine.source_id = ?1 AND mine.entry_id = ?2) AS shared
 			FROM feedback
 				JOIN facts ON facts.id = feedback.fact_id
 				LEFT JOIN stories ON stories.id = feedback.story_id
 			WHERE feedback.level = 'development' AND feedback.undone_at IS NULL AND facts.withdrawn_by IS NULL)
 		WHERE shared > 0
 		ORDER BY shared DESC, given_at DESC, id DESC
-		LIMIT ?4`, string(names), tp.Item.SourceID, tp.Item.EntryID, limit)
+		LIMIT ?3`, tp.Item.SourceID, tp.Item.EntryID, limit)
 	if err != nil {
 		return nil, fmt.Errorf("placing precedents: %w", err)
 	}
@@ -122,13 +120,4 @@ func (s *Store) PrecedentsShown(ctx context.Context, act, sourceID, entryID stri
 		out = append(out, id)
 	}
 	return out, rows.Err()
-}
-
-// entityNamesOf are the names of every Entity tp's Facts involve.
-func entityNamesOf(tp editor.ToPlace) []string {
-	out := []string{}
-	for _, f := range tp.Facts {
-		out = append(out, f.Entities...)
-	}
-	return out
 }

@@ -163,7 +163,7 @@ func TestABatchCallKeepsTheRequestAsSentNotAsTheWorkStandsWhenItEnds(t *testing.
 	// More Feedback after the request went: had the request been built
 	// again when the batch ended, it would show two precedents.
 	wrongAt(t, store, readTied(t, store, ferries, editor.Fact{Statement: "Ferries run.", AsAt: oct16,
-		Quote: "will run more often", Entities: []string{"Arran"}}), saturday)
+		Quote: "will run more often"}, "Arran"), saturday)
 	batcher.end(1, func(editor.BatchRequest) editor.BatchResult {
 		return editor.BatchResult{Response: answered(goodReading)}
 	})

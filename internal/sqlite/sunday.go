@@ -324,11 +324,11 @@ func (s *Store) FactsAbout(ctx context.Context, entity string, before time.Time,
 	var out []editor.RecordFact
 	for rows.Next() {
 		var d editor.Development
-		var asAt, ents string
-		if err := rows.Scan(&d.ID, &d.SourceID, &d.EntryID, &d.Statement, &asAt, &d.Quote, &ents, &d.ItemTitle); err != nil {
+		var asAt string
+		if err := rows.Scan(&d.ID, &d.SourceID, &d.EntryID, &d.Statement, &asAt, &d.Quote, &d.ItemTitle); err != nil {
 			return nil, fmt.Errorf("facts about %q: %w", entity, err)
 		}
-		if err := scanFact(&d.Fact, asAt, ents); err != nil {
+		if err := scanFact(&d.Fact, asAt); err != nil {
 			return nil, fmt.Errorf("facts about %q: %w", entity, err)
 		}
 		out = append(out, editor.RecordFact{Fact: d})
@@ -469,13 +469,13 @@ func (s *Store) ids(ctx context.Context, query string, args ...any) ([]int64, er
 // involves, in their roles.
 func (s *Store) tracedFact(ctx context.Context, id int64) (editor.Development, error) {
 	var d editor.Development
-	var asAt, ents string
+	var asAt string
 	if err := s.db.QueryRowContext(ctx, `SELECT `+traced("f", "i")+`
 		FROM facts f JOIN items i ON i.source_id = f.source_id AND i.entry_id = f.entry_id
-		WHERE f.id = ?`, id).Scan(&d.ID, &d.SourceID, &d.EntryID, &d.Statement, &asAt, &d.Quote, &ents, &d.ItemTitle); err != nil {
+		WHERE f.id = ?`, id).Scan(&d.ID, &d.SourceID, &d.EntryID, &d.Statement, &asAt, &d.Quote, &d.ItemTitle); err != nil {
 		return d, fmt.Errorf("fact %d: %w", id, err)
 	}
-	if err := scanFact(&d.Fact, asAt, ents); err != nil {
+	if err := scanFact(&d.Fact, asAt); err != nil {
 		return d, err
 	}
 	return d, s.withInvolves(ctx, &d.Fact)

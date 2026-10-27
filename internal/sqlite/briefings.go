@@ -252,7 +252,7 @@ func (s *Store) Briefing(ctx context.Context, day string) (editor.Briefing, bool
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT briefing_stories.story_id, stories.title, briefing_statements.id, briefing_statements.text,
 			facts.id, facts.source_id, facts.entry_id, facts.statement, facts.as_at, facts.quote,
-			`+factEntities+`, items.title
+			items.title
 		FROM briefing_stories
 			JOIN stories ON stories.id = briefing_stories.story_id
 			JOIN briefing_statements USING (day, story_id)
@@ -274,13 +274,13 @@ func (s *Store) Briefing(ctx context.Context, day string) (editor.Briefing, bool
 	var lastStatement int64
 	for rows.Next() {
 		var storyID, statementID int64
-		var title, text, asAt, ents string
+		var title, text, asAt string
 		var d editor.Development
 		if err := rows.Scan(&storyID, &title, &statementID, &text,
-			&d.ID, &d.SourceID, &d.EntryID, &d.Statement, &asAt, &d.Quote, &ents, &d.ItemTitle); err != nil {
+			&d.ID, &d.SourceID, &d.EntryID, &d.Statement, &asAt, &d.Quote, &d.ItemTitle); err != nil {
 			return b, false, fmt.Errorf("briefing %s: %w", day, err)
 		}
-		if err := scanFact(&d.Fact, asAt, ents); err != nil {
+		if err := scanFact(&d.Fact, asAt); err != nil {
 			return b, false, fmt.Errorf("briefing %s: %w", day, err)
 		}
 		if n := len(b.Stories); n == 0 || b.Stories[n-1].Story.ID != storyID {
@@ -306,7 +306,7 @@ func (s *Store) Briefing(ctx context.Context, day string) (editor.Briefing, bool
 func (s *Store) BriefingCitations(ctx context.Context, day string) ([]editor.BriefingCitation, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT d.story_id, stories.title, facts.id, facts.source_id, facts.entry_id, facts.statement,
-			facts.as_at, facts.quote, `+factEntities+`, items.title, d.missed_by IS NOT NULL,
+			facts.as_at, facts.quote, items.title, d.missed_by IS NOT NULL,
 			CASE WHEN d.missed_by IS NULL THEN `+placingCall("facts")+` ELSE 0 END,
 			`+readingCall(factWorkKey("facts"))+`
 		FROM briefing_stories
@@ -326,13 +326,13 @@ func (s *Store) BriefingCitations(ctx context.Context, day string) ([]editor.Bri
 	seen := map[[2]int64]bool{}
 	for rows.Next() {
 		var c editor.BriefingCitation
-		var asAt, ents string
+		var asAt string
 		d := &c.Development
 		if err := rows.Scan(&c.StoryID, &c.StoryTitle, &d.ID, &d.SourceID, &d.EntryID, &d.Statement,
-			&asAt, &d.Quote, &ents, &d.ItemTitle, &d.Missed, &d.PlacingCall, &c.ReadingCall); err != nil {
+			&asAt, &d.Quote, &d.ItemTitle, &d.Missed, &d.PlacingCall, &c.ReadingCall); err != nil {
 			return nil, fmt.Errorf("briefing citations %s: %w", day, err)
 		}
-		if err := scanFact(&d.Fact, asAt, ents); err != nil {
+		if err := scanFact(&d.Fact, asAt); err != nil {
 			return nil, fmt.Errorf("briefing citations %s: %w", day, err)
 		}
 		if k := [2]int64{c.StoryID, d.ID}; !seen[k] {

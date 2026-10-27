@@ -196,7 +196,7 @@ func (s *Store) kept(ctx context.Context, where string, args ...any) ([]feedback
 // Facts are never offered.
 func (s *Store) FactsToAdd(ctx context.Context, storyID int64) ([]editor.Fact, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT DISTINCT facts.id, facts.source_id, facts.entry_id, facts.statement, facts.as_at, facts.quote, `+factEntities+`
+		SELECT DISTINCT facts.id, facts.source_id, facts.entry_id, facts.statement, facts.as_at, facts.quote
 		FROM developments mine
 			JOIN facts minefacts ON minefacts.id = mine.fact_id
 			JOIN item_mentions ours ON ours.source_id = minefacts.source_id AND ours.entry_id = minefacts.entry_id
@@ -212,11 +212,11 @@ func (s *Store) FactsToAdd(ctx context.Context, storyID int64) ([]editor.Fact, e
 	var out []editor.Fact
 	for rows.Next() {
 		var f editor.Fact
-		var asAt, ents string
-		if err := rows.Scan(&f.ID, &f.SourceID, &f.EntryID, &f.Statement, &asAt, &f.Quote, &ents); err != nil {
+		var asAt string
+		if err := rows.Scan(&f.ID, &f.SourceID, &f.EntryID, &f.Statement, &asAt, &f.Quote); err != nil {
 			return nil, fmt.Errorf("facts to add: %w", err)
 		}
-		if err := scanFact(&f, asAt, ents); err != nil {
+		if err := scanFact(&f, asAt); err != nil {
 			return nil, fmt.Errorf("facts to add: %w", err)
 		}
 		out = append(out, f)

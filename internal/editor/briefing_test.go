@@ -14,11 +14,11 @@ import (
 // them.
 var (
 	offerFact = editor.Fact{ID: 7, SourceID: speech.SourceID, EntryID: "offer", AsAt: oct16,
-		Statement: "Andy Burnham made an offer to the Scottish Government.", Entities: []string{"Andy Burnham"}}
+		Statement: "Andy Burnham made an offer to the Scottish Government."}
 	speechFact = editor.Fact{ID: 11, SourceID: speech.SourceID, EntryID: speech.EntryID, AsAt: oct16,
-		Statement: "Andy Burnham gave a speech in Motherwell.", Entities: []string{"Andy Burnham", "Motherwell"}}
+		Statement: "Andy Burnham gave a speech in Motherwell."}
 	steelFact = editor.Fact{ID: 12, SourceID: speech.SourceID, EntryID: speech.EntryID, AsAt: oct16,
-		Statement: "The steelworks in Motherwell will stay open.", Entities: []string{"Motherwell"}}
+		Statement: "The steelworks in Motherwell will stay open."}
 
 	scotlandToday = editor.ToBrief{
 		Story:  editor.Story{ID: 3, Title: "The Prime Minister's offer to Scotland"},

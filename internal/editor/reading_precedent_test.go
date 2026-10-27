@@ -19,13 +19,12 @@ import (
 func readGlasgow(t *testing.T, store *sqlite.Store) int64 {
 	t.Helper()
 	return readTied(t, store, glasgowItem, editor.Fact{Statement: "Glasgow will get new funding.", AsAt: oct16,
-		Quote: "will get new funding", Entities: []string{"Glasgow"}})
+		Quote: "will get new funding"}, "Glasgow")
 }
 
 // readTied adds it, runs the lazy-reading check over it, reads it with the
-// one Fact f, its Item mentioning the places f's Entities name, and returns
-// f's id.
-func readTied(t *testing.T, store *sqlite.Store, it collect.Item, f editor.Fact) int64 {
+// one Fact f, its Item mentioning the places named, and returns f's id.
+func readTied(t *testing.T, store *sqlite.Store, it collect.Item, f editor.Fact, places ...string) int64 {
 	t.Helper()
 	if _, err := store.AddItems(t.Context(), []collect.Item{it}); err != nil {
 		t.Fatal(err)
@@ -34,7 +33,7 @@ func readTied(t *testing.T, store *sqlite.Store, it collect.Item, f editor.Fact)
 		t.Fatal(err)
 	}
 	var ents []editor.Entity
-	for _, n := range f.Entities {
+	for _, n := range places {
 		ents = append(ents, editor.Entity{Name: n, Kind: "place"})
 	}
 	if err := store.SaveReading(t.Context(), editor.Reading{
@@ -115,7 +114,7 @@ func TestReadingIsShownNoFeedbackOnFactsFromItemsSharingNoTopicNorFeedbackOtherT
 		Link: "https://www.gov.uk/tyrone", Content: "<p>A Lord-Lieutenant of County Tyrone was appointed.</p>",
 		Published: saturday, Attribution: collect.OGL, CollectedAt: saturday,
 	}, editor.Fact{Statement: "A Lord-Lieutenant of County Tyrone was appointed.", AsAt: oct16,
-		Quote: "was appointed", Entities: []string{"County Tyrone"}})
+		Quote: "was appointed"}, "County Tyrone")
 	wrongAt(t, store, tyrone, saturday)
 	// The Glasgow Fact shares the speech's Topic, but was new to the Owner,
 	// not wrong.
@@ -152,7 +151,7 @@ func TestReadingIsShownAtMostEightPrecedentsThoseSharingTheMostTopicsThenTheNewe
 		Link: "https://www.gov.uk/steel", Content: "<p>The Motherwell steelworks will reopen.</p>",
 		Published: saturday, Attribution: collect.OGL, CollectedAt: saturday,
 	}, editor.Fact{Statement: "The Motherwell steelworks will reopen.", AsAt: oct16,
-		Quote: "will reopen", Entities: []string{"Motherwell"}})
+		Quote: "will reopen"}, "Motherwell")
 	oldest := wrongAt(t, store, both, saturday)
 	var scotland []int64
 	for i := range 8 {
@@ -162,7 +161,7 @@ func TestReadingIsShownAtMostEightPrecedentsThoseSharingTheMostTopicsThenTheNewe
 			Link: "https://www.gov.uk/" + id, Content: "<p>Scotland will get funding.</p>",
 			Published: saturday, Attribution: collect.OGL, CollectedAt: saturday,
 		}, editor.Fact{Statement: "Scotland will get funding " + strconv.Itoa(i) + ".", AsAt: oct16,
-			Quote: "will get funding", Entities: []string{"Scotland"}})
+			Quote: "will get funding"}, "Scotland")
 		scotland = append(scotland, wrongAt(t, store, fact, saturday.Add(time.Duration(i+1)*time.Minute)).ID)
 	}
 	ed, _ := newEditor(store, &fakeModel{output: goodReading}, &fakeWikidata{})

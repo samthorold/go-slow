@@ -18,8 +18,7 @@ var toPlace = editor.ToPlace{
 	Item: speech,
 	Facts: []editor.Fact{
 		{ID: 11, SourceID: speech.SourceID, EntryID: speech.EntryID, AsAt: oct16,
-			Statement: "Andy Burnham gave a speech in Motherwell.", Quote: "to be here in Motherwell",
-			Entities: []string{"Andy Burnham", "Motherwell"}},
+			Statement: "Andy Burnham gave a speech in Motherwell.", Quote: "to be here in Motherwell"},
 	},
 }
 
@@ -28,7 +27,7 @@ var (
 	scotland = editor.Story{ID: 3, Title: "The Prime Minister's offer to Scotland",
 		Entities: []string{"Andy Burnham", "Scottish Government"},
 		Timeline: []editor.Development{{ItemTitle: "Offer to Holyrood", Fact: editor.Fact{ID: 7, AsAt: oct16.AddDate(0, 0, -1),
-			Statement: "Andy Burnham made an offer to the Scottish Government.", Entities: []string{"Andy Burnham", "Scottish Government"}}}}}
+			Statement: "Andy Burnham made an offer to the Scottish Government."}}}}
 	lanarkshire = editor.Story{ID: 4, Title: "Steel in Motherwell", Entities: []string{"Motherwell"}}
 	tyrone      = editor.Story{ID: 5, Title: "Lieutenancy of County Tyrone", Entities: []string{"County Tyrone"}}
 )
@@ -98,7 +97,7 @@ func TestAFactCanBeADevelopmentInSeveralStoriesOrInNone(t *testing.T) {
 func TestAPlacingThatFailsTheChecksIsRejected(t *testing.T) {
 	two := toPlace
 	two.Facts = append(slices.Clone(toPlace.Facts), editor.Fact{ID: 12, SourceID: speech.SourceID, EntryID: speech.EntryID,
-		AsAt: oct16, Statement: "Scotland will get £2 billion.", Entities: []string{"Scotland"}})
+		AsAt: oct16, Statement: "Scotland will get £2 billion."})
 	for name, output := range map[string]string{
 		"output that is not JSON": `{"facts": [`,
 		"a Fact left unplaced":    `{"new_stories": [], "facts": [{"fact": "F1", "developments_in": []}]}`,

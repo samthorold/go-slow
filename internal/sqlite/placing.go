@@ -4,7 +4,6 @@ import (
 	"cmp"
 	"context"
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -14,18 +13,6 @@ import (
 	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/interest"
 )
-
-// factEntities is a subquery giving a Fact's Entities, the Entities its
-// Item mentions, as a JSON array.
-var factEntities = itemMentionsOf("facts")
-
-// itemMentionsOf is a subquery giving the names of the Entities the Item of
-// the Fact in the facts table aliased as f mentions, as a JSON array.
-func itemMentionsOf(f string) string {
-	return `(SELECT json_group_array(entities.name ORDER BY entities.name)
-	FROM item_mentions m JOIN entities ON entities.id = m.entity_id
-	WHERE m.source_id = ` + f + `.source_id AND m.entry_id = ` + f + `.entry_id)`
-}
 
 // FactsToPlace are the Facts not yet placed, by Item, in the order the
 // Items were published.
@@ -43,7 +30,7 @@ func (s *Store) FactsToPlace(ctx context.Context) ([]editor.ToPlace, error) {
 func (s *Store) factsByItem(ctx context.Context, where string, args ...any) ([]editor.ToPlace, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT facts.id, facts.source_id, facts.entry_id, facts.statement, facts.as_at, facts.quote,
-			`+factEntities+`, items.title, items.link, items.published,
+			items.title, items.link, items.published,
 			(SELECT coalesce(max(topics.depth), 0) FROM item_topics JOIN topics ON topics.id = item_topics.topic_id
 				WHERE item_topics.source_id = items.source_id AND item_topics.entry_id = items.entry_id)
 		FROM facts JOIN items USING (source_id, entry_id)
@@ -57,13 +44,13 @@ func (s *Store) factsByItem(ctx context.Context, where string, args ...any) ([]e
 	for rows.Next() {
 		var f editor.Fact
 		var it editor.Item
-		var asAt, ents, published string
+		var asAt, published string
 		var depth interest.Depth
-		if err := rows.Scan(&f.ID, &f.SourceID, &f.EntryID, &f.Statement, &asAt, &f.Quote, &ents,
+		if err := rows.Scan(&f.ID, &f.SourceID, &f.EntryID, &f.Statement, &asAt, &f.Quote,
 			&it.Title, &it.Link, &published, &depth); err != nil {
 			return nil, err
 		}
-		if err := scanFact(&f, asAt, ents); err != nil {
+		if err := scanFact(&f, asAt); err != nil {
 			return nil, err
 		}
 		if n := len(out); n == 0 || out[n-1].Item.SourceID != f.SourceID || out[n-1].Item.EntryID != f.EntryID {
@@ -84,15 +71,15 @@ func (s *Store) factsByItem(ctx context.Context, where string, args ...any) ([]e
 	return out, nil
 }
 
-func scanFact(f *editor.Fact, asAt, ents string) error {
+// scanFact sets f's date from asAt. A Fact drawn from an Item carries no
+// Entities: those are its Item's mentions, which the acts and pages that
+// need them read from the Item.
+func scanFact(f *editor.Fact, asAt string) error {
 	t, err := time.Parse(time.DateOnly, asAt)
 	if err != nil {
 		return fmt.Errorf("as at: %w", err)
 	}
 	f.AsAt = t
-	if err := json.Unmarshal([]byte(ents), &f.Entities); err != nil {
-		return fmt.Errorf("entities: %w", err)
-	}
 	return nil
 }
 
@@ -270,7 +257,7 @@ func (s *Store) story(ctx context.Context, id int64, withdrawn bool) (editor.Sto
 	}
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT facts.id, facts.source_id, facts.entry_id, facts.statement, facts.as_at, facts.quote,
-			`+factEntities+`, items.title,
+			items.title,
 			developments.withdrawn_by IS NOT NULL, developments.unwanted_by IS NOT NULL, developments.missed_by IS NOT NULL,
 			CASE WHEN developments.missed_by IS NULL THEN `+placingCall("facts")+` ELSE 0 END
 		FROM developments JOIN facts ON facts.id = developments.fact_id
@@ -283,12 +270,12 @@ func (s *Store) story(ctx context.Context, id int64, withdrawn bool) (editor.Sto
 	defer func() { _ = rows.Close() }()
 	for rows.Next() {
 		var d editor.Development
-		var asAt, ents string
-		if err := rows.Scan(&d.ID, &d.SourceID, &d.EntryID, &d.Statement, &asAt, &d.Quote, &ents, &d.ItemTitle,
+		var asAt string
+		if err := rows.Scan(&d.ID, &d.SourceID, &d.EntryID, &d.Statement, &asAt, &d.Quote, &d.ItemTitle,
 			&d.Withdrawn, &d.Unwanted, &d.Missed, &d.PlacingCall); err != nil {
 			return st, false, fmt.Errorf("story %d: %w", id, err)
 		}
-		if err := scanFact(&d.Fact, asAt, ents); err != nil {
+		if err := scanFact(&d.Fact, asAt); err != nil {
 			return st, false, fmt.Errorf("story %d: %w", id, err)
 		}
 		st.Timeline = append(st.Timeline, d)

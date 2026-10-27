@@ -336,7 +336,7 @@ func (s *Store) itemMentions(ctx context.Context, sourceID, entryID string) ([]e
 
 func (s *Store) facts(ctx context.Context, sourceID, entryID string) ([]editor.Fact, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT facts.id, facts.statement, facts.as_at, facts.quote, `+factEntities+`
+		SELECT facts.id, facts.statement, facts.as_at, facts.quote
 		FROM facts WHERE source_id = ? AND entry_id = ? ORDER BY id`, sourceID, entryID)
 	if err != nil {
 		return nil, fmt.Errorf("facts of %s: %w", entryID, err)
@@ -345,15 +345,12 @@ func (s *Store) facts(ctx context.Context, sourceID, entryID string) ([]editor.F
 	var out []editor.Fact
 	for rows.Next() {
 		f := editor.Fact{SourceID: sourceID, EntryID: entryID}
-		var asAt, ents string
-		if err := rows.Scan(&f.ID, &f.Statement, &asAt, &f.Quote, &ents); err != nil {
+		var asAt string
+		if err := rows.Scan(&f.ID, &f.Statement, &asAt, &f.Quote); err != nil {
 			return nil, fmt.Errorf("facts of %s: %w", entryID, err)
 		}
 		if f.AsAt, err = time.Parse(time.DateOnly, asAt); err != nil {
 			return nil, fmt.Errorf("facts of %s: as at: %w", entryID, err)
-		}
-		if err := json.Unmarshal([]byte(ents), &f.Entities); err != nil {
-			return nil, fmt.Errorf("facts of %s: entities: %w", entryID, err)
 		}
 		out = append(out, f)
 	}

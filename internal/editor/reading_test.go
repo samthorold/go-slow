@@ -280,6 +280,25 @@ func TestAStatementSharingAStemWithItsQuoteButNotAWordPasses(t *testing.T) {
 	}
 }
 
+func TestAStatementWhoseOnlySharedWordIsAnInitialismPasses(t *testing.T) {
+	item := walkedIntoDowning
+	item.Content = "<p>I took a clear message to the UN. The United Nations General Assembly heard it.</p>"
+	for name, fact := range map[string]string{
+		// The Commons statement's sample 5, from #119's recordings.
+		"the quote's initialism": `"statement": "The Prime Minister spoke to the United Nations General Assembly in New York.",
+			"quote": "I took a clear message to the UN"`,
+		"the statement's initialism": `"statement": "The PM addressed the UN.",
+			"quote": "The United Nations General Assembly heard it"`,
+	} {
+		t.Run(name, func(t *testing.T) {
+			output := `{"claims": [], "mentions": [], "facts": [{"as_at": "2026-10-12", ` + fact + `}]}`
+			if _, err := editor.Read(t.Context(), &fakeModel{output: output}, item); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
 func TestAFactsQuoteMatchesTheItemWhateverItsPunctuationAndMarkup(t *testing.T) {
 	// The Item has a curly apostrophe and a paragraph break; the quote, a
 	// straight one and a space.

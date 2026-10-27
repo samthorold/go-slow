@@ -3,8 +3,10 @@ package editor
 import (
 	"html"
 	"regexp"
+	"slices"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 )
 
 var (
@@ -40,22 +42,59 @@ func words(s string) string {
 
 // sharesContentWord says whether a statement and its quote share a content
 // word: lowercased, stopwords dropped, compared by a crude suffix stem so
-// "walked" matches "walks". A statement sharing none says nothing its quote
-// says, however genuine the quote; one sharing any passes, so an honest
-// paraphrase does.
+// "walked" matches "walks". A word in one also counts as shared when it is
+// the initials of consecutive words in the other ("UN" and "United
+// Nations"), since abbreviating is part of paraphrasing. A statement sharing
+// none says nothing its quote says, however genuine the quote; one sharing
+// any passes, so an honest paraphrase does.
 func sharesContentWord(statement, quote string) bool {
+	s, q := strings.Fields(words(statement)), strings.Fields(words(quote))
 	in := map[string]bool{}
-	for _, w := range strings.Fields(words(quote)) {
+	for _, w := range q {
 		if !stopwords[w] {
 			in[stem(w)] = true
 		}
 	}
-	for _, w := range strings.Fields(words(statement)) {
+	for _, w := range s {
 		if !stopwords[w] && in[stem(w)] {
 			return true
 		}
 	}
+	return abbreviates(s, q) || abbreviates(q, s)
+}
+
+// abbreviates says whether a content word of a is the initials of
+// consecutive words of b: of its content words, or of its words stopwords
+// included ("DfE" for "Department for Education").
+func abbreviates(a, b []string) bool {
+	content := slices.DeleteFunc(slices.Clone(b), func(w string) bool { return stopwords[w] })
+	runs := initialisms(content)
+	for k := range initialisms(b) {
+		runs[k] = true
+	}
+	for _, w := range a {
+		if !stopwords[w] && runs[w] {
+			return true
+		}
+	}
 	return false
+}
+
+// initialisms are the initials of every run of two to eight consecutive
+// words.
+func initialisms(ws []string) map[string]bool {
+	m := map[string]bool{}
+	for i := range ws {
+		var b strings.Builder
+		for n, w := range ws[i:min(i+8, len(ws))] {
+			r, _ := utf8.DecodeRuneInString(w)
+			b.WriteRune(r)
+			if n >= 1 {
+				m[b.String()] = true
+			}
+		}
+	}
+	return m
 }
 
 // stem is a word cut to a crude stem: one inflectional suffix, then a

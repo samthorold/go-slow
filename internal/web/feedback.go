@@ -249,7 +249,8 @@ func missedStory(path string, facts []editor.Development, d feedback.Draft, errs
 }
 
 // missedDevelopmentForm is the form for a Development the Owner says a
-// Story missed: one of the Facts that share an Entity with it.
+// Story missed: one of the Facts whose Items mention an Entity its Items
+// mention.
 type missedDevelopmentForm struct {
 	Path  string
 	Story int64

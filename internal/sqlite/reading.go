@@ -47,8 +47,9 @@ func (s *Store) ItemsToRead(ctx context.Context) ([]editor.Item, error) {
 }
 
 // SaveReading writes a reading's Entities, as what its Item mentions, its
-// Facts and Claims, each tied to the Entities it lists, and marks its Item
-// read, all at once. An Entity already in the Record by name is reused.
+// Facts and Claims, tied to no Entity (which a Fact involves is
+// connecting's), and marks its Item read, all at once. An Entity already in
+// the Record by name is reused.
 func (s *Store) SaveReading(ctx context.Context, r editor.Reading, readAt time.Time) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -84,33 +85,17 @@ func (s *Store) SaveReading(ctx context.Context, r editor.Reading, readAt time.T
 		return nil
 	}
 	for _, f := range r.Facts {
-		res, err := tx.ExecContext(ctx, `
+		if _, err := tx.ExecContext(ctx, `
 			INSERT INTO facts (source_id, entry_id, statement, as_at, quote) VALUES (?, ?, ?, ?, ?)`,
-			r.SourceID, r.EntryID, f.Statement, f.AsAt.Format(time.DateOnly), f.Quote)
-		if err != nil {
+			r.SourceID, r.EntryID, f.Statement, f.AsAt.Format(time.DateOnly), f.Quote); err != nil {
 			return fmt.Errorf("save fact: %w", err)
-		}
-		id, err := res.LastInsertId()
-		if err != nil {
-			return err
-		}
-		if err := link("fact_entities", "fact_id", id, f.Entities); err != nil {
-			return err
 		}
 	}
 	for _, c := range r.Claims {
-		res, err := tx.ExecContext(ctx, `
+		if _, err := tx.ExecContext(ctx, `
 			INSERT INTO claims (source_id, entry_id, statement, made_by, quote) VALUES (?, ?, ?, ?, ?)`,
-			r.SourceID, r.EntryID, c.Statement, c.MadeBy, c.Quote)
-		if err != nil {
+			r.SourceID, r.EntryID, c.Statement, c.MadeBy, c.Quote); err != nil {
 			return fmt.Errorf("save claim: %w", err)
-		}
-		id, err := res.LastInsertId()
-		if err != nil {
-			return err
-		}
-		if err := link("claim_entities", "claim_id", id, c.Entities); err != nil {
-			return err
 		}
 	}
 	lookups := map[*editor.Lookup]int64{}
@@ -351,10 +336,7 @@ func (s *Store) itemMentions(ctx context.Context, sourceID, entryID string) ([]e
 
 func (s *Store) facts(ctx context.Context, sourceID, entryID string) ([]editor.Fact, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT facts.id, facts.statement, facts.as_at, facts.quote,
-			(SELECT json_group_array(entities.name ORDER BY entities.name)
-				FROM fact_entities JOIN entities ON entities.id = fact_entities.entity_id
-				WHERE fact_entities.fact_id = facts.id)
+		SELECT facts.id, facts.statement, facts.as_at, facts.quote, `+factEntities+`
 		FROM facts WHERE source_id = ? AND entry_id = ? ORDER BY id`, sourceID, entryID)
 	if err != nil {
 		return nil, fmt.Errorf("facts of %s: %w", entryID, err)
@@ -383,10 +365,7 @@ func (s *Store) facts(ctx context.Context, sourceID, entryID string) ([]editor.F
 
 func (s *Store) claims(ctx context.Context, sourceID, entryID string) ([]editor.Claim, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT claims.statement, claims.made_by, claims.quote,
-			(SELECT json_group_array(entities.name ORDER BY entities.name)
-				FROM claim_entities JOIN entities ON entities.id = claim_entities.entity_id
-				WHERE claim_entities.claim_id = claims.id)
+		SELECT claims.statement, claims.made_by, claims.quote
 		FROM claims WHERE source_id = ? AND entry_id = ? ORDER BY id`, sourceID, entryID)
 	if err != nil {
 		return nil, fmt.Errorf("claims of %s: %w", entryID, err)
@@ -395,12 +374,8 @@ func (s *Store) claims(ctx context.Context, sourceID, entryID string) ([]editor.
 	var out []editor.Claim
 	for rows.Next() {
 		c := editor.Claim{SourceID: sourceID, EntryID: entryID}
-		var ents string
-		if err := rows.Scan(&c.Statement, &c.MadeBy, &c.Quote, &ents); err != nil {
+		if err := rows.Scan(&c.Statement, &c.MadeBy, &c.Quote); err != nil {
 			return nil, fmt.Errorf("claims of %s: %w", entryID, err)
-		}
-		if err := json.Unmarshal([]byte(ents), &c.Entities); err != nil {
-			return nil, fmt.Errorf("claims of %s: entities: %w", entryID, err)
 		}
 		out = append(out, c)
 	}

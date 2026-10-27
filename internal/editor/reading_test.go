@@ -104,7 +104,7 @@ func TestReadingAsksForTheItemsMentionsOnceAndNoEntitiesPerStatement(t *testing.
 	}
 }
 
-func TestReadingGivesTheItemsMentionsOnceAndTiesEachFactToThemAll(t *testing.T) {
+func TestReadingGivesTheItemsMentionsOnceAndTiesNoEntityToItsFacts(t *testing.T) {
 	r, err := editor.Read(t.Context(), &fakeModel{output: goodReading}, speech)
 	if err != nil {
 		t.Fatal(err)
@@ -118,37 +118,16 @@ func TestReadingGivesTheItemsMentionsOnceAndTiesEachFactToThemAll(t *testing.T) 
 	if !slices.Equal(r.Entities, want) {
 		t.Errorf("Entities = %+v, want %+v", r.Entities, want)
 	}
-	// What finds work still reads a Fact's Entities: each is tied to every
-	// Entity its Item mentions. A Claim is tied to none.
-	if got := r.Facts[0].Entities; !slices.Equal(got, []string{"Andy Burnham", "Motherwell", "Scotland"}) {
-		t.Errorf("the Fact is tied to %v, want the Item's mentions", got)
-	}
-	if got := r.Claims[0].Entities; len(got) != 0 {
-		t.Errorf("the Claim is tied to %v, want none", got)
+	// Which Entities a Fact involves is connecting's: reading ties none.
+	if got := r.Facts[0].Entities; len(got) != 0 {
+		t.Errorf("the Fact is tied to %v, want none", got)
 	}
 }
 
-func TestAReadingInTheEarlierSchemaGivesItsListsAsTheItemsMentions(t *testing.T) {
-	r, err := editor.Read(t.Context(), &fakeModel{output: legacyReading}, speech)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	want := []editor.Entity{
-		{Name: "Andy Burnham", Kind: "person", Role: "Prime Minister of the United Kingdom"},
-		{Name: "Motherwell", Kind: "place"},
-		{Name: "Scotland", Kind: "place"},
-	}
-	if !slices.Equal(r.Entities, want) {
-		t.Errorf("Entities = %+v, want %+v", r.Entities, want)
-	}
-	// Each statement keeps its own list, so a replay of an earlier reading
-	// gives the acts downstream the Record it gave them before.
-	if got := r.Facts[0].Entities; !slices.Equal(got, []string{"Andy Burnham", "Motherwell"}) {
-		t.Errorf("the Fact is tied to %v", got)
-	}
-	if got := r.Claims[0].Entities; !slices.Equal(got, []string{"Andy Burnham", "Scotland"}) {
-		t.Errorf("the Claim is tied to %v", got)
+func TestAReadingInTheEarlierSchemaIsRefused(t *testing.T) {
+	_, err := editor.Read(t.Context(), &fakeModel{output: legacyReading}, speech)
+	if !errors.Is(err, editor.ErrFailedChecks) {
+		t.Errorf("err = %v, want ErrFailedChecks", err)
 	}
 }
 
@@ -243,8 +222,7 @@ func TestAReadingThatFailsTheChecksIsRejected(t *testing.T) {
 		"a Fact with no statement":     strings.Replace(goodReading, `"statement": "Andy Burnham gave a speech in Motherwell."`, `"statement": ""`, 1),
 		"one name given two kinds": strings.Replace(goodReading, `"mentions": [`,
 			`"mentions": [{"name": "Motherwell", "kind": "organisation", "role": ""},`, 1),
-		"one name given two kinds, in the earlier schema": strings.Replace(legacyReading, `{"name": "Andy Burnham", "kind": "person", "role": "Prime Minister of the United Kingdom"}`,
-			`{"name": "Andy Burnham", "kind": "organisation", "role": ""}`, 1),
+		"a reading that gives no mentions": `{"facts": [], "claims": []}`,
 		"a Fact with Entities of its own beside the mentions": strings.Replace(goodReading, `"quote": "to be here in Motherwell"`,
 			`"quote": "to be here in Motherwell", "entities": []`, 1),
 		"an Entity of no known kind": strings.Replace(goodReading, `"kind": "place"`, `"kind": "vibe"`, 1),
@@ -287,7 +265,7 @@ func TestAnItemWithNoTextIsReadFromItsSummary(t *testing.T) {
 	noText := speech
 	noText.Content = ""
 	model := &fakeModel{output: `{"claims": [], "facts": [{"statement": "Andy Burnham gave a speech in Scotland.",
-		"as_at": "2026-10-16", "quote": "delivered a speech in Scotland today", "entities": []}]}`}
+		"as_at": "2026-10-16", "quote": "delivered a speech in Scotland today"}], "mentions": []}`}
 
 	r, err := editor.Read(t.Context(), model, noText)
 	if err != nil {

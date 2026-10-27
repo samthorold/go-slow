@@ -100,13 +100,13 @@ func TestAnEntityWithNoWikidataMatchIsTheEditorsAndALaterMatchMergesIt(t *testin
 	if !slices.Contains(e.Aliases, "Motherwell") {
 		t.Errorf("the Editor's name is not kept as an alias: %v", e.Aliases)
 	}
-	// What the earlier Item tied to the Editor's Entity is tied to the item.
+	// What the earlier Item mentioned as the Editor's Entity is the item.
 	got, _, err := store.ReadItem(t.Context(), speech.SourceID, speech.EntryID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !slices.Contains(got.Facts[0].Entities, "Motherwell, Lanarkshire") {
-		t.Errorf("the earlier Fact involves %v, want the merged Entity", got.Facts[0].Entities)
+	if !slices.ContainsFunc(got.Mentions, func(e editor.Entity) bool { return e.Name == "Motherwell, Lanarkshire" }) {
+		t.Errorf("the earlier Item mentions %v, want the merged Entity", got.Mentions)
 	}
 }
 
@@ -156,8 +156,8 @@ func TestAPersonNamedByTheirOfficeIsWhoeverHeldItOnTheItemsDate(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if len(got.Facts) != 1 || !slices.Equal(got.Facts[0].Entities, []string{tc.want}) {
-				t.Errorf("the Prime Minister on %s is %+v, want %s", tc.published.Format(time.DateOnly), got.Facts, tc.want)
+			if len(got.Mentions) != 1 || got.Mentions[0].Name != tc.want {
+				t.Errorf("the Prime Minister on %s is %+v, want %s", tc.published.Format(time.DateOnly), got.Mentions, tc.want)
 			}
 		})
 	}

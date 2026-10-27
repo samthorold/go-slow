@@ -124,10 +124,11 @@ func (s *Store) FactsNear(ctx context.Context, tc editor.ToConnect, limit int) (
 	return out, nil
 }
 
-// SaveConnecting gives each Entity a Fact involves its role in it (an
-// Entity given no role is not involved, whatever reading listed), keeps the cause
-// Connections, and marks every Fact connected, all at once. A Connection
-// already kept is kept once.
+// SaveConnecting gives each Entity a Fact involves its role in it, the one
+// tie between a Fact and an Entity (an Entity given no role is not
+// involved, though its Item mentions it), keeps the cause Connections, and
+// marks every Fact connected, all at once. A Connection already kept is
+// kept once.
 func (s *Store) SaveConnecting(ctx context.Context, c editor.Connecting, connectedAt time.Time) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -135,16 +136,14 @@ func (s *Store) SaveConnecting(ctx context.Context, c editor.Connecting, connect
 	}
 	defer func() { _ = tx.Rollback() }()
 	// Connecting decides which Entities each Fact involves, so connecting a
-	// Fact again replaces what it decided before. The Entities stay tied to
-	// the Fact, which its Item mentions; only their roles go.
+	// Fact again replaces what it decided before. The Entities stay
+	// mentioned by the Fact's Item.
 	for _, f := range c.Facts {
-		if _, err := tx.ExecContext(ctx, `UPDATE fact_entities SET role = NULL WHERE fact_id = ?`, f); err != nil {
+		if _, err := tx.ExecContext(ctx, `DELETE FROM fact_entities WHERE fact_id = ?`, f); err != nil {
 			return fmt.Errorf("roles in fact %d: %w", f, err)
 		}
 	}
 	for _, r := range c.Roles {
-		// An Entity of the Item's reading the Fact did not list is involved
-		// in it from now on, in its role.
 		if _, err := tx.ExecContext(ctx, `
 			INSERT INTO fact_entities (fact_id, entity_id, role)
 			SELECT ?, id, ? FROM entities WHERE name = ?
@@ -195,13 +194,11 @@ func (s *Store) Involvements(ctx context.Context, sourceID, entryID string) ([]e
 	return out, rows.Err()
 }
 
-// traced selects a Fact, with the title of its Item, from the facts table
-// aliased as f joined to items as i.
+// traced selects a Fact, with the Entities its Item mentions and the title
+// of its Item, from the facts table aliased as f joined to items as i.
 func traced(f, i string) string {
 	return f + `.id, ` + f + `.source_id, ` + f + `.entry_id, ` + f + `.statement, ` + f + `.as_at, ` + f + `.quote,
-	(SELECT json_group_array(entities.name ORDER BY entities.name)
-		FROM fact_entities JOIN entities ON entities.id = fact_entities.entity_id
-		WHERE fact_entities.fact_id = ` + f + `.id), ` + i + `.title`
+	` + itemMentionsOf(f) + `, ` + i + `.title`
 }
 
 // ConnectedStories are the Stories connected to the Story id, derived from

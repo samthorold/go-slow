@@ -36,7 +36,7 @@ func TestTheRolesKeptAsAffectedAreRenamedUndergoer(t *testing.T) {
 		}
 	}
 
-	if err := migrateTo(ctx, db, -1); err != nil {
+	if err := migrateTo(ctx, db, 20); err != nil {
 		t.Fatal(err)
 	}
 
@@ -100,7 +100,7 @@ func TestEarlierReadingsListsAreKeptAsTheirItemsMentions(t *testing.T) {
 		}
 	}
 
-	if err := migrateTo(ctx, db, -1); err != nil {
+	if err := migrateTo(ctx, db, 21); err != nil {
 		t.Fatal(err)
 	}
 
@@ -129,6 +129,82 @@ func TestEarlierReadingsListsAreKeptAsTheirItemsMentions(t *testing.T) {
 	}
 	if broken, err := brokenForeignKeys(ctx, db); err != nil || broken {
 		t.Errorf("a mention names an Item or Entity that is gone: %v %v", broken, err)
+	}
+}
+
+// A Fact is tied to an Entity only by a Role connecting gives it: the ties
+// earlier readings made with no Role go, the roles connecting gave stay, and
+// what each Item mentions is unchanged.
+func TestTheTiesReadingMadeWithNoRoleAreRemovedAndTheMentionsKept(t *testing.T) {
+	ctx := t.Context()
+	db, err := sql.Open("sqlite", "file:"+filepath.Join(t.TempDir(), "go-slow.db")+"?_pragma=foreign_keys(1)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = db.Close() })
+	db.SetMaxOpenConns(1)
+	if err := migrateTo(ctx, db, 21); err != nil {
+		t.Fatal(err)
+	}
+	for _, q := range []string{
+		`INSERT INTO sources (id, name, feed_url, usual_gap_seconds, added_at) VALUES ('s', 'S', 'https://example.org', 86400, '2026-10-16T00:00:00Z')`,
+		`INSERT INTO items (source_id, entry_id, title, link, summary, content, published, updated, raw, attribution, collected_at)
+			VALUES ('s', 'e', 't', 'l', '', '', '', '', '', '', '2026-10-16T00:00:00Z')`,
+		`INSERT INTO entities (name, kind) VALUES ('Andy Burnham', 'person'), ('Motherwell', 'place'), ('Scotland', 'place')`,
+		`INSERT INTO item_mentions (source_id, entry_id, entity_id) VALUES ('s', 'e', 1), ('s', 'e', 2), ('s', 'e', 3)`,
+		`INSERT INTO facts (source_id, entry_id, statement, as_at, quote) VALUES
+			('s', 'e', 'Andy Burnham spoke in Motherwell.', '2026-10-16', 'q'),
+			('s', 'e', 'Andy Burnham spoke again.', '2026-10-16', 'q')`,
+		`INSERT INTO fact_entities (fact_id, entity_id, role) VALUES
+			(1, 1, 'actor'), (1, 2, 'place'), (1, 3, NULL), (2, 1, NULL), (2, 2, NULL), (2, 3, NULL)`,
+		`INSERT INTO claims (source_id, entry_id, statement, made_by, quote) VALUES ('s', 'e', 'Scotland will get money.', 'Andy Burnham', 'q')`,
+		`INSERT INTO claim_entities (claim_id, entity_id) VALUES (1, 1), (1, 3)`,
+	} {
+		if _, err := db.ExecContext(ctx, q); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := migrateTo(ctx, db, -1); err != nil {
+		t.Fatal(err)
+	}
+
+	strs := func(q string) []string {
+		t.Helper()
+		rows, err := db.QueryContext(ctx, q)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer func() { _ = rows.Close() }()
+		var out []string
+		for rows.Next() {
+			var s string
+			if err := rows.Scan(&s); err != nil {
+				t.Fatal(err)
+			}
+			out = append(out, s)
+		}
+		if err := rows.Err(); err != nil {
+			t.Fatal(err)
+		}
+		return out
+	}
+	if got, want := strs(`SELECT fact_id || ':' || entity_id || ':' || role FROM fact_entities ORDER BY fact_id, entity_id`),
+		[]string{"1:1:actor", "1:2:place"}; !slices.Equal(got, want) {
+		t.Errorf("ties kept = %v, want only the roles %v", got, want)
+	}
+	if got, want := strs(`SELECT entry_id || ':' || entity_id FROM item_mentions ORDER BY entry_id, entity_id`),
+		[]string{"e:1", "e:2", "e:3"}; !slices.Equal(got, want) {
+		t.Errorf("mentions = %v, want them unchanged, %v", got, want)
+	}
+	if got := strs(`SELECT name FROM sqlite_master WHERE name = 'claim_entities'`); len(got) != 0 {
+		t.Errorf("Claims are still tied to Entities: %v", got)
+	}
+	if broken, err := brokenForeignKeys(ctx, db); err != nil || broken {
+		t.Errorf("a role names a Fact or Entity that is gone: %v %v", broken, err)
+	}
+	if _, err := db.ExecContext(ctx, `INSERT INTO fact_entities (fact_id, entity_id, role) VALUES (2, 1, NULL)`); err == nil {
+		t.Error("the Record still keeps a tie with no role")
 	}
 }
 

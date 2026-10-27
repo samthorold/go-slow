@@ -53,10 +53,10 @@ type Fact struct {
 	AsAt      time.Time
 	// Quote is the Item's own words the Fact rests on.
 	Quote string
-	// Entities are the names of the Entities the Record ties it to: every
-	// Entity its Item mentions, or, from a reading in the earlier schema,
-	// the list that reading gave with it. Which of them it involves, in a
-	// Role, is connecting's.
+	// Entities are names: for a Fact from a Reference source, the Entity it
+	// was looked up for; for one drawn from an Item, the Entities its Item
+	// mentions, as the Record gives them where a Fact is shown (a reading
+	// gives none). Which of them it involves, in a Role, is connecting's.
 	Entities []string
 	// Involves are the Entities it involves, each in the Role connecting
 	// gave it, by name: set where a page shows them, never shown an act.
@@ -72,9 +72,6 @@ type Claim struct {
 	// MadeBy is who made the Claim.
 	MadeBy string
 	Quote  string
-	// Entities are the names a reading in the earlier schema gave with it;
-	// none otherwise.
-	Entities []string
 }
 
 // Reading is the result of reading an Item: its Facts and Claims, and the
@@ -179,23 +176,19 @@ type namedEntity struct {
 	Role string `json:"role"`
 }
 
-// output is the reading act's output as the model gives it. Entities, on a
-// Fact or Claim, are reading's earlier schema, which gave the Entities each
-// one involved and no mentions: it is still taken, from a batch submitted
-// before the schema changed and from the frozen copies of earlier readings
-// the acts downstream replay, and its lists are the Item's mentions.
+// output is the reading act's output as the model gives it. An answer with
+// Entities on a Fact or Claim, or with no mentions (reading's earlier
+// schema), does not match it.
 type output struct {
 	Facts []struct {
-		Statement string        `json:"statement"`
-		AsAt      string        `json:"as_at"`
-		Quote     string        `json:"quote"`
-		Entities  []namedEntity `json:"entities"`
+		Statement string `json:"statement"`
+		AsAt      string `json:"as_at"`
+		Quote     string `json:"quote"`
 	} `json:"facts"`
 	Claims []struct {
-		Statement string        `json:"statement"`
-		MadeBy    string        `json:"made_by"`
-		Quote     string        `json:"quote"`
-		Entities  []namedEntity `json:"entities"`
+		Statement string `json:"statement"`
+		MadeBy    string `json:"made_by"`
+		Quote     string `json:"quote"`
 	} `json:"claims"`
 	Mentions *[]namedEntity `json:"mentions"`
 }
@@ -246,64 +239,39 @@ func checkReading(it Item, precedents []Precedent, res Response) (Reading, error
 	if err := dec.Decode(&out); err != nil {
 		return Reading{}, failed(it, "output does not match the schema: %v", err)
 	}
+	if out.Mentions == nil {
+		return Reading{}, failed(it, "output does not match the schema: no mentions")
+	}
 	r := Reading{SourceID: it.SourceID, EntryID: it.EntryID, Model: res.Model, Usage: res.Usage,
 		Precedents: feedbackIDs(precedents)}
 	// The Reading's Entities are the Item's mentions, once per name, in the
-	// order they are first named: as the model gives them, or, from an
-	// answer in the earlier schema, gathered from its Facts and Claims.
+	// order they are first named. No Fact is tied to any of them: which a
+	// Fact involves, in a Role, is connecting's.
 	named := map[string]int{}
-	mention := func(ents []namedEntity) ([]string, error) {
-		var out []string
-		for _, e := range ents {
-			name, role := strings.TrimSpace(e.Name), strings.TrimSpace(e.Role)
-			if name == "" || !slices.Contains(entityKinds, e.Kind) {
-				return nil, failed(it, "an Entity with no name or kind: %+v", e)
-			}
-			if e.Kind != "person" {
-				// Only a person has a role, an office to find them by among
-				// its holders. The model fills the field for other kinds
-				// whenever anything near it describes what an Entity does, so
-				// any other kind's role is dropped here, whatever it writes.
-				role = ""
-			}
-			i, ok := named[name]
-			switch {
-			case !ok:
-				named[name] = len(r.Entities)
-				r.Entities = append(r.Entities, Entity{Name: name, Kind: e.Kind, Role: role})
-			case r.Entities[i].Kind != e.Kind:
-				// One name is one Entity, so it has one kind.
-				return nil, failed(it, "an Entity given two kinds: %q is %s and %s", name, r.Entities[i].Kind, e.Kind)
-			case r.Entities[i].Role == "":
-				// The first role given is kept: a later one fills it only if
-				// none was given.
-				r.Entities[i].Role = role
-			}
-			if !slices.Contains(out, name) {
-				out = append(out, name)
-			}
+	for _, e := range *out.Mentions {
+		name, role := strings.TrimSpace(e.Name), strings.TrimSpace(e.Role)
+		if name == "" || !slices.Contains(entityKinds, e.Kind) {
+			return Reading{}, failed(it, "an Entity with no name or kind: %+v", e)
 		}
-		return out, nil
-	}
-	// Every Fact of a reading that gives the Item's mentions is tied to all
-	// of them, the Entities its Item mentions, until what finds work reads
-	// the Item's mentions itself; an earlier reading's Facts keep their own
-	// lists.
-	var mentioned []string
-	if out.Mentions != nil {
-		for _, f := range out.Facts {
-			if f.Entities != nil {
-				return Reading{}, failed(it, "a Fact with Entities of its own beside the Item's mentions: %q", f.Statement)
-			}
+		if e.Kind != "person" {
+			// Only a person has a role, an office to find them by among its
+			// holders. The model fills the field for other kinds whenever
+			// anything near it describes what an Entity does, so any other
+			// kind's role is dropped here, whatever it writes.
+			role = ""
 		}
-		for _, c := range out.Claims {
-			if c.Entities != nil {
-				return Reading{}, failed(it, "a Claim with Entities of its own beside the Item's mentions: %q", c.Statement)
-			}
-		}
-		var err error
-		if mentioned, err = mention(*out.Mentions); err != nil {
-			return Reading{}, err
+		i, ok := named[name]
+		switch {
+		case !ok:
+			named[name] = len(r.Entities)
+			r.Entities = append(r.Entities, Entity{Name: name, Kind: e.Kind, Role: role})
+		case r.Entities[i].Kind != e.Kind:
+			// One name is one Entity, so it has one kind.
+			return Reading{}, failed(it, "an Entity given two kinds: %q is %s and %s", name, r.Entities[i].Kind, e.Kind)
+		case r.Entities[i].Role == "":
+			// The first role given is kept: a later one fills it only if none
+			// was given.
+			r.Entities[i].Role = role
 		}
 	}
 	text := words(input(it))
@@ -320,16 +288,9 @@ func checkReading(it Item, precedents []Precedent, res Response) (Reading, error
 		if q := words(f.Quote); q == "  " || !strings.Contains(text, q) {
 			return Reading{}, failed(it, "a Fact whose quote is not in the Item: %q", f.Quote)
 		}
-		ents, err := mention(f.Entities)
-		if err != nil {
-			return Reading{}, err
-		}
-		if out.Mentions != nil {
-			ents = slices.Clone(mentioned)
-		}
 		r.Facts = append(r.Facts, Fact{
 			SourceID: it.SourceID, EntryID: it.EntryID,
-			Statement: strings.TrimSpace(f.Statement), AsAt: asAt, Quote: f.Quote, Entities: ents,
+			Statement: strings.TrimSpace(f.Statement), AsAt: asAt, Quote: f.Quote,
 		})
 	}
 	for _, c := range out.Claims {
@@ -339,14 +300,10 @@ func checkReading(it Item, precedents []Precedent, res Response) (Reading, error
 		if strings.TrimSpace(c.Statement) == "" {
 			return Reading{}, failed(it, "a Claim with no statement")
 		}
-		ents, err := mention(c.Entities)
-		if err != nil {
-			return Reading{}, err
-		}
 		r.Claims = append(r.Claims, Claim{
 			SourceID: it.SourceID, EntryID: it.EntryID,
 			Statement: strings.TrimSpace(c.Statement), MadeBy: strings.TrimSpace(c.MadeBy),
-			Quote: c.Quote, Entities: ents,
+			Quote: c.Quote,
 		})
 	}
 	return r, nil

@@ -144,7 +144,7 @@ func TestPlacingIsShownAtMostEightPrecedentsTheMostRelevantThenTheNewest(t *test
 		Entities: []editor.Entity{{Name: "Andy Burnham", Kind: "person"}, {Name: "Motherwell", Kind: "place"},
 			{Name: "County Tyrone", Kind: "place"}},
 		Facts: []editor.Fact{{Statement: "Andy Burnham visited Motherwell and County Tyrone.", AsAt: oct16,
-			Quote: "visits", Entities: []string{"Andy Burnham", "Motherwell", "County Tyrone"}}},
+			Quote: "visits"}},
 	}, saturday); err != nil {
 		t.Fatal(err)
 	}
@@ -251,7 +251,7 @@ func TestPlacingIsShownPastFeedbackOnDevelopmentsSharingItsTopicsAndTheDepthItIs
 		SourceID: glasgowItem.SourceID, EntryID: glasgowItem.EntryID, Model: "fake",
 		Entities: []editor.Entity{{Name: "Glasgow", Kind: "place"}},
 		Facts: []editor.Fact{{Statement: "Glasgow will get new funding.", AsAt: oct16,
-			Quote: "will get new funding", Entities: []string{"Glasgow"}}},
+			Quote: "will get new funding"}},
 	}, saturday); err != nil {
 		t.Fatal(err)
 	}

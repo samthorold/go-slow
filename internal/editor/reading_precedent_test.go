@@ -23,7 +23,8 @@ func readGlasgow(t *testing.T, store *sqlite.Store) int64 {
 }
 
 // readTied adds it, runs the lazy-reading check over it, reads it with the
-// one Fact f, and returns f's id.
+// one Fact f, its Item mentioning the places f's Entities name, and returns
+// f's id.
 func readTied(t *testing.T, store *sqlite.Store, it collect.Item, f editor.Fact) int64 {
 	t.Helper()
 	if _, err := store.AddItems(t.Context(), []collect.Item{it}); err != nil {

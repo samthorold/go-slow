@@ -77,22 +77,9 @@ var laterItem = collect.Item{
 	Published: speech.Published.Add(24 * time.Hour), Attribution: collect.OGL, CollectedAt: saturday,
 }
 
-// readLater reads the readout, its Fact tied to Andy Burnham and Edinburgh.
+// readLater reads the readout, which mentions Andy Burnham and Edinburgh,
+// into one Fact.
 func readLater(t *testing.T, store *sqlite.Store) {
-	t.Helper()
-	readLaterTied(t, store, "Andy Burnham", "Edinburgh")
-}
-
-// readLaterMentioning reads the readout with its Fact tied to no Entity, so
-// what it is weighed against, and waits for, can only be what it mentions.
-func readLaterMentioning(t *testing.T, store *sqlite.Store) {
-	t.Helper()
-	readLaterTied(t, store)
-}
-
-// readLaterTied reads the readout, which mentions Andy Burnham and
-// Edinburgh, its Fact tied to the Entities named.
-func readLaterTied(t *testing.T, store *sqlite.Store, ties ...string) {
 	t.Helper()
 	if _, err := store.AddItems(t.Context(), []collect.Item{laterItem}); err != nil {
 		t.Fatal(err)
@@ -101,8 +88,7 @@ func readLaterTied(t *testing.T, store *sqlite.Store, ties ...string) {
 		SourceID: laterItem.SourceID, EntryID: laterItem.EntryID, Model: "fake",
 		Entities: []editor.Entity{{Name: "Andy Burnham", Kind: "person"}, {Name: "Edinburgh", Kind: "place"}},
 		Facts: []editor.Fact{{Statement: "Andy Burnham met the First Minister in Edinburgh.",
-			AsAt: time.Date(2026, time.October, 17, 0, 0, 0, 0, time.UTC), Quote: "met the First Minister in Edinburgh",
-			Entities: ties}},
+			AsAt: time.Date(2026, time.October, 17, 0, 0, 0, 0, time.UTC), Quote: "met the First Minister in Edinburgh"}},
 	}, saturday); err != nil {
 		t.Fatal(err)
 	}
@@ -116,7 +102,7 @@ func TestALaterFactMeetsTheStoryAnEarlierOneStarted(t *testing.T) {
 		t.Fatalf("Stories: %v %v", stories, err)
 	}
 	id := stories[0].ID
-	readLaterMentioning(t, store)
+	readLater(t, store)
 	ref := "S" + strconv.FormatInt(id, 10)
 	placing := &fakeModel{output: `{"new_stories": [], "facts": [{"fact": "F1", "developments_in": ["` + ref + `"]}]}`}
 	ed, _ := placer(store, placing)

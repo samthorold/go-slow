@@ -359,7 +359,7 @@ func connectedStories(t *testing.T, store *sqlite.Store) {
 		SourceID: offer.SourceID, EntryID: offer.EntryID, Model: "fake",
 		Entities: []editor.Entity{{Name: "Andy Burnham", Kind: "person"}},
 		Facts: []editor.Fact{{Statement: "Andy Burnham made an offer to Holyrood.",
-			AsAt: time.Date(2026, time.October, 21, 0, 0, 0, 0, time.UTC), Quote: "offer", Entities: []string{"Andy Burnham"}}},
+			AsAt: time.Date(2026, time.October, 21, 0, 0, 0, 0, time.UTC), Quote: "offer"}},
 	}, saturday); err != nil {
 		t.Fatal(err)
 	}

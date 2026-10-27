@@ -54,8 +54,9 @@ func TestTheCompatibilityCheckFailsOnAReadingPlacingCannotTake(t *testing.T) {
 	attempts := sample.attempts()
 	rec := attempts[len(attempts)-1]
 	var out struct {
-		Facts  []map[string]any `json:"facts"`
-		Claims []map[string]any `json:"claims"`
+		Facts    []map[string]any `json:"facts"`
+		Claims   []map[string]any `json:"claims"`
+		Mentions json.RawMessage  `json:"mentions"`
 	}
 	if err := json.Unmarshal(rec.Output, &out); err != nil {
 		t.Fatal(err)

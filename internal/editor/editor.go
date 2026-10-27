@@ -310,6 +310,9 @@ type ReadItem struct {
 	ReadingCall int64
 	// Topics are the names of the Topics the check tied the Item to.
 	Topics []string
+	// Mentions are the Entities the Item mentions, each once, by name.
+	Mentions []Entity
+	// Facts carry the Entities each involves (Fact.Involves).
 	Facts  []Fact
 	Claims []Claim
 }

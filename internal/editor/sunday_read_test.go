@@ -164,6 +164,8 @@ func TestTheAgentsToolsQueryTheRecordBackThroughTime(t *testing.T) {
 	store := record(t)
 	readAndPlace(t, store, &fakeModel{output: startsAStory})
 	withAnEarlierCall(t, store)
+	connect(t, store, speech.EntryID, 1, editor.Role{Entity: "Andy Burnham", Role: "actor"})
+	connect(t, store, "call", 2, editor.Role{Entity: "Andy Burnham", Role: "actor"})
 	agent := &fakeAgent{turns: []editor.Turn{
 		calls("story", `{"story": "S1"}`, "facts_about", `{"entity": "Andy Burnham", "before": "2026-10-16"}`),
 		submits(`{"statements": [{"text": "Before Motherwell, the Prime Minister called Finland.", "cites": ["S1:F2", "F2"]}]}`),
@@ -204,6 +206,59 @@ func TestTheAgentsToolsQueryTheRecordBackThroughTime(t *testing.T) {
 	if cites := r.Statements[0].Cites; len(cites) != 2 || cites[0].Kind != editor.CitesDevelopment ||
 		cites[1].Kind != editor.CitesFact || cites[1].Fact.Statement != "Andy Burnham spoke to the President of Finland." {
 		t.Errorf("cites = %+v", cites)
+	}
+}
+
+// connect gives each Entity named in roles its role in the Fact id, as
+// connecting would: the Entities the Fact involves.
+func connect(t *testing.T, store *sqlite.Store, entryID string, id int64, roles ...editor.Role) {
+	t.Helper()
+	for i := range roles {
+		roles[i].FactID = id
+	}
+	if err := store.SaveConnecting(t.Context(), editor.Connecting{
+		SourceID: number10.ID, EntryID: entryID, Facts: []int64{id}, Roles: roles, Model: "fake",
+	}, saturday); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestFactsAboutAnEntityAreTheFactsInvolvingItInARoleNotThoseMentioningIt(t *testing.T) {
+	store := record(t)
+	readAndPlace(t, store, &fakeModel{output: startsAStory})
+	withAnEarlierCall(t, store)
+	// The speech's Item mentions Motherwell, but connecting gave it no role
+	// in the speech: the speech involves Andy Burnham alone.
+	connect(t, store, speech.EntryID, 1, editor.Role{Entity: "Andy Burnham", Role: "actor"})
+	// And the call, mentioning both, involves Finland alone.
+	connect(t, store, "call", 2, editor.Role{Entity: "Finland", Role: "undergoer"})
+	agent := &fakeAgent{turns: []editor.Turn{
+		calls("facts_about", `{"entity": "Motherwell", "before": ""}`, "facts_about", `{"entity": "Andy Burnham", "before": ""}`,
+			"facts_about", `{"entity": "Finland", "before": ""}`),
+		submits(citesTheSpeech),
+	}}
+	ed, logs := reader(store, agent)
+
+	if err := ed.SundayRead(t.Context(), sundayMorning); err != nil {
+		t.Fatalf("%v\n%s", err, logs)
+	}
+
+	msgs := agent.sent[1].Messages
+	res := msgs[len(msgs)-1].Results
+	if len(res) != 3 {
+		t.Fatalf("results = %+v, want one per call", res)
+	}
+	if !strings.Contains(res[0].Content, "no Facts involving") {
+		t.Errorf("Facts about an Entity only mentioned include one:\n%s", res[0].Content)
+	}
+	if !strings.Contains(res[1].Content, "Andy Burnham gave a speech in Motherwell.") {
+		t.Errorf("Facts about Andy Burnham lack the speech, which involves him:\n%s", res[1].Content)
+	}
+	if strings.Contains(res[1].Content, "Andy Burnham spoke to the President of Finland.") {
+		t.Errorf("Facts about Andy Burnham include the call, which only mentions him:\n%s", res[1].Content)
+	}
+	if !strings.Contains(res[2].Content, "Andy Burnham spoke to the President of Finland.") {
+		t.Errorf("Facts about Finland lack the call, which involves it:\n%s", res[2].Content)
 	}
 }
 
@@ -259,6 +314,7 @@ func TestTheAgentIsNeverShownWhatFeedbackWithdrew(t *testing.T) {
 	store := record(t)
 	readAndPlace(t, store, &fakeModel{output: startsAStory})
 	withAnEarlierCall(t, store)
+	connect(t, store, "call", 2, editor.Role{Entity: "Andy Burnham", Role: "actor"})
 	if _, errs, err := feedback.New(store).Give(t.Context(), feedback.Draft{Kind: "wrong", Level: "fact", Fact: "2"}, saturday); err != nil || errs != nil {
 		t.Fatalf("give Feedback: %v %v", errs, err)
 	}

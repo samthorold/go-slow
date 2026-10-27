@@ -393,7 +393,9 @@ func (r *sundayRun) showDevelopment(s Story, d Development) string {
 	return fmt.Sprintf("%s (as at %s, from %q): %s%s", ref, d.AsAt.Format(time.DateOnly), d.ItemTitle, d.Statement, entitiesText(d.Fact))
 }
 
-// entitiesText is the Entities a Fact involves, by the names the tools take.
+// entitiesText is the Entities the Record ties a Fact to (its Item's
+// mentions), by the names the tools take. facts_about finds a Fact by one
+// of them only when the Fact involves it in a role.
 func entitiesText(f Fact) string {
 	if len(f.Entities) == 0 {
 		return ""

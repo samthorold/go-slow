@@ -68,6 +68,8 @@ type developmentRow struct {
 	Quote     string
 	ItemTitle string
 	ItemPath  string
+	// Involves are the Entities its Fact involves, each in its role.
+	Involves []involvedRow
 	// Withdrawn and Unwanted are what Feedback has marked it.
 	Withdrawn, Unwanted, Missed bool
 	// Call is the page of the placing call that made it a Development, if
@@ -102,11 +104,26 @@ type sharedEntityRow struct {
 	Here, There  developmentRow
 }
 
+// involvedRow is an Entity a Fact involves, in its role.
+type involvedRow struct {
+	Entity, Role string
+}
+
+// involvedView is the Entities f involves, in their roles.
+func involvedView(f editor.Fact) []involvedRow {
+	var out []involvedRow
+	for _, r := range f.Involves {
+		out = append(out, involvedRow{Entity: r.Entity, Role: r.Role})
+	}
+	return out
+}
+
 func developmentView(d editor.Development) developmentRow {
 	return developmentRow{
 		Anchor: developmentAnchor(d.ID),
 		AsAt:   factDate(d.Fact), Statement: d.Statement, Quote: d.Quote,
 		ItemTitle: d.ItemTitle, ItemPath: itemPath(d.SourceID, d.EntryID),
+		Involves:  involvedView(d.Fact),
 		Withdrawn: d.Withdrawn, Unwanted: d.Unwanted, Missed: d.Missed,
 	}
 }

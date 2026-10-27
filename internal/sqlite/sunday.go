@@ -299,7 +299,10 @@ func (s *Store) readStatements(ctx context.Context, readID int64) ([]editor.Read
 
 // FactsAbout are at most limit Facts involving the Entity called entity, by
 // its name or any it is called by, as at a date before before (any date if
-// zero), the latest first, each with the Stories it is a Development in.
+// zero), the latest first, each with the Stories it is a Development in. A
+// Fact involves an Entity only in a role connecting gave it; one its Item
+// merely mentions is not involved (system design: What finds work rests on
+// mentions; what links Stories rests on involvement).
 func (s *Store) FactsAbout(ctx context.Context, entity string, before time.Time, limit int) ([]editor.RecordFact, error) {
 	until := "9999-12-31"
 	if !before.IsZero() {
@@ -310,7 +313,7 @@ func (s *Store) FactsAbout(ctx context.Context, entity string, before time.Time,
 		FROM facts f JOIN items i ON i.source_id = f.source_id AND i.entry_id = f.entry_id
 		WHERE f.as_at < ?2 AND f.withdrawn_by IS NULL AND EXISTS (
 			SELECT 1 FROM fact_entities fe JOIN entities e ON e.id = fe.entity_id
-			WHERE fe.fact_id = f.id AND (e.name = ?1 COLLATE NOCASE OR EXISTS (
+			WHERE fe.fact_id = f.id AND fe.role IS NOT NULL AND (e.name = ?1 COLLATE NOCASE OR EXISTS (
 				SELECT 1 FROM entity_names n WHERE n.entity_id = e.id AND n.name = ?1 COLLATE NOCASE)))
 		ORDER BY f.as_at DESC, f.id DESC
 		LIMIT ?3`, entity, until, limit)

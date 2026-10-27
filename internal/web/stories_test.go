@@ -95,6 +95,30 @@ func TestAStorysPageShowsItsTimelineEachDevelopmentTracingToItsFactAndItem(t *te
 	}
 }
 
+func TestADevelopmentOnAStorysPageShowsTheEntitiesItsFactInvolvesInTheirRoles(t *testing.T) {
+	store := openStore(t)
+	// The speech's Item mentions Andy Burnham and Motherwell.
+	readSpeech(t, store, reading)
+	placeWaiting(t, store, `{"new_stories": [{"ref": "N1", "title": "Burnham in Motherwell"}],
+		"facts": [{"fact": "F1", "developments_in": ["N1"]}]}`)
+	// Connecting gives Andy Burnham a role in the speech, and Motherwell none.
+	connectWaiting(t, store, `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "actor"}]}], "causes": []}`)
+	app, _ := newAppWithLog(t, saturday, store)
+
+	res := get(t, app, "/stories/1")
+	at := strings.Index(res.body, `id="timeline"`)
+	if res.status != 200 || at < 0 {
+		t.Fatalf("status %d, or no Timeline:\n%s", res.status, res.body)
+	}
+	timeline := res.body[at:]
+	if !strings.Contains(timeline, "Involves <span hx-disable>Andy Burnham</span> as actor") {
+		t.Errorf("the Development does not show Andy Burnham as its actor:\n%s", timeline)
+	}
+	if strings.Contains(timeline, "<span hx-disable>Motherwell</span> as") {
+		t.Errorf("the Development shows Motherwell, which its Fact only mentions, as involved:\n%s", timeline)
+	}
+}
+
 // connectWaiting connects the Facts awaiting connecting, an Item at a time,
 // with outputs in turn.
 func connectWaiting(t *testing.T, store *sqlite.Store, outputs ...string) {

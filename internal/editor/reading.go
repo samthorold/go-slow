@@ -58,6 +58,9 @@ type Fact struct {
 	// the list that reading gave with it. Which of them it involves, in a
 	// Role, is connecting's.
 	Entities []string
+	// Involves are the Entities it involves, each in the Role connecting
+	// gave it, by name: set where a page shows them, never shown an act.
+	Involves []Role
 }
 
 // Claim is a proposition attributed to whoever made it, not corroborated.

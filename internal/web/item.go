@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/samthorold/go-slow/internal/editor"
 )
@@ -29,6 +28,7 @@ type itemPage struct {
 	ReadAt      string
 	Model       string
 	Topics      []string
+	Mentions    []mentionRow
 	Facts       []factRow
 	Claims      []claimRow
 }
@@ -40,7 +40,8 @@ type factRow struct {
 	Statement string
 	AsAt      string
 	Quote     string
-	Entities  string
+	// Involves are the Entities it involves, each in its role.
+	Involves []involvedRow
 	// Call is the page of the reading call that drew it, if one was kept.
 	Call string
 }
@@ -49,7 +50,12 @@ type claimRow struct {
 	Statement string
 	MadeBy    string
 	Quote     string
-	Entities  string
+}
+
+// mentionRow is an Entity the Item mentions, with its kind, and the link
+// to the Wikidata item it matched, if any.
+type mentionRow struct {
+	Name, Kind, Wikidata string
 }
 
 // itemPath is an Item's page: its Source and its entry id, each one path
@@ -81,6 +87,13 @@ func (a *app) item(w http.ResponseWriter, r *http.Request) {
 		Model:       it.Model,
 		Topics:      it.Topics,
 	}
+	for _, e := range it.Mentions {
+		m := mentionRow{Name: e.Name, Kind: e.Kind}
+		if e.WikidataID != "" {
+			m.Wikidata = "https://www.wikidata.org/wiki/" + url.PathEscape(e.WikidataID)
+		}
+		p.Mentions = append(p.Mentions, m)
+	}
 	for _, f := range it.Facts {
 		p.Facts = append(p.Facts, factRow{
 			Anchor:    factAnchor(f.ID),
@@ -88,14 +101,14 @@ func (a *app) item(w http.ResponseWriter, r *http.Request) {
 			// A Fact's date is a calendar date, in no time zone.
 			AsAt:     f.AsAt.Format("2 January 2006"),
 			Quote:    f.Quote,
-			Entities: strings.Join(f.Entities, ", "),
+			Involves: involvedView(f),
 			Call:     callPath(it.ReadingCall),
 		})
 	}
+	// A Claim shows no Entities: a reading gives a Claim none, and who made
+	// it is its attribution.
 	for _, c := range it.Claims {
-		p.Claims = append(p.Claims, claimRow{
-			Statement: c.Statement, MadeBy: c.MadeBy, Quote: c.Quote, Entities: strings.Join(c.Entities, ", "),
-		})
+		p.Claims = append(p.Claims, claimRow{Statement: c.Statement, MadeBy: c.MadeBy, Quote: c.Quote})
 	}
 	a.render(w, r, itemTmpl, p)
 }

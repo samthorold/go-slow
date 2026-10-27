@@ -200,6 +200,10 @@ func TestAPositionWikidataSaysAPersonHoldsIsAFactTracedToTheLookup(t *testing.T)
 	if f.Lookup == nil || *f.Lookup != want || f.SourceID != "" || f.EntryID != "" {
 		t.Errorf("the Fact traces to %+v (Item %q %q), want %+v", f.Lookup, f.SourceID, f.EntryID, want)
 	}
+	// It carries the Entity it was looked up for.
+	if !slices.Equal(f.Entities, []string{"Andy Burnham"}) {
+		t.Errorf("the Fact's Entities = %v, want the Entity it was looked up for", f.Entities)
+	}
 	if got := f.Lookup.URL(); got != "https://www.wikidata.org/w/index.php?oldid=2559101554" {
 		t.Errorf("the lookup's URL = %s", got)
 	}
@@ -211,6 +215,41 @@ func TestAPositionWikidataSaysAPersonHoldsIsAFactTracedToTheLookup(t *testing.T)
 	}
 	if e, _, _ := store.Entity(t.Context(), "Andy Burnham"); len(e.Facts) != 1 {
 		t.Errorf("Facts after a second reading = %+v", e.Facts)
+	}
+}
+
+func TestAFactDrawnFromAnItemCarriesNoEntitiesOfItsOwn(t *testing.T) {
+	store := record(t)
+	ed, _ := newEditor(store, &fakeModel{output: readingNaming("Andy Burnham", "Prime Minister of the United Kingdom")}, primeMinisters())
+	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
+		t.Fatal(err)
+	}
+
+	read, _, err := store.ReadItem(t.Context(), speech.SourceID, speech.EntryID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(read.Mentions) == 0 || len(read.Facts) == 0 {
+		t.Fatalf("the Item was read with mentions %v and Facts %+v, want both", read.Mentions, read.Facts)
+	}
+	for _, f := range read.Facts {
+		if f.Entities != nil {
+			t.Errorf("the Item's page gives Fact %q the Entities %v, want none: they are its Item's mentions", f.Statement, f.Entities)
+		}
+	}
+	toPlace, err := store.FactsToPlace(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tp := range toPlace {
+		if len(tp.Mentions) == 0 {
+			t.Errorf("placing is given Item %s with no mentions", tp.Item.EntryID)
+		}
+		for _, f := range tp.Facts {
+			if f.Entities != nil {
+				t.Errorf("placing is given Fact %q with the Entities %v, want none: they are its Item's mentions", f.Statement, f.Entities)
+			}
+		}
 	}
 }
 

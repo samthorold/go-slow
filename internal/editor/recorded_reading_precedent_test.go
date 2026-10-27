@@ -84,7 +84,6 @@ func readingPrecedentSample(t *testing.T, name string, m *sampleModel) sampleRes
 		Statement: "The UK-EU deals will add the equivalent of over £10 billion per year to the UK economy by 2040.",
 		AsAt:      time.Date(2026, time.October, 12, 0, 0, 0, 0, time.UTC),
 		Quote:     "these deals will add the equivalent of over 10 billion pounds per year to the UK economy by 2040",
-		Entities:  []string{"United Kingdom"},
 	}
 	if !strings.Contains(normal(stripTags(body)), normal(forecast.Quote)) {
 		t.Fatalf("the precedent's quote is not in the statement: %q", forecast.Quote)

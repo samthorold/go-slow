@@ -89,7 +89,6 @@ func placingPrecedentSample(t *testing.T, root, name string, m *sampleModel) sam
 		Statement: "The Prime Minister and Chancellor Friedrich Merz reaffirmed their support for Ukraine.",
 		AsAt:      time.Date(2026, time.October, 8, 0, 0, 0, 0, time.UTC),
 		Quote:     "The leaders reaffirmed their unwavering support for Ukraine",
-		Entities:  []string{"Friedrich Merz", "Ukraine"},
 	}
 	if !strings.Contains(normal(stripTags(body)), normal(reaction.Quote)) {
 		t.Fatalf("the precedent's quote is not in the readout: %q", reaction.Quote)

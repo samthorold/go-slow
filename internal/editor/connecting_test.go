@@ -39,8 +39,7 @@ func TestConnectingIsShownTheItemsMentionsOnceAndNoEntitiesListedForAFact(t *tes
 
 // offer is an earlier Fact that shares Andy Burnham with the speech's.
 var offer = editor.Fact{ID: 7, SourceID: speech.SourceID, EntryID: "offer", AsAt: oct16.AddDate(0, 0, -1),
-	Statement: "Andy Burnham made an offer to the Scottish Government.", Quote: "an offer",
-	Entities: []string{"Andy Burnham", "Scottish Government"}}
+	Statement: "Andy Burnham made an offer to the Scottish Government.", Quote: "an offer"}
 
 const connectsTheSpeech = `{
   "facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "actor"}, {"entity": "Motherwell", "role": "place"}]}],
@@ -200,7 +199,7 @@ func TestAConnectingThatFailsTheChecksIsRejected(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			visit := editor.Fact{ID: 8, SourceID: speech.SourceID, EntryID: "visit", AsAt: oct16,
-				Statement: "Andy Burnham visited Glasgow.", Entities: []string{"Andy Burnham"}}
+				Statement: "Andy Burnham visited Glasgow."}
 			_, err := editor.Connect(t.Context(), &fakeModel{output: output}, toConnect, []editor.Fact{offer, visit})
 			if !errors.Is(err, editor.ErrFailedChecks) {
 				t.Errorf("err = %v, want ErrFailedChecks", err)

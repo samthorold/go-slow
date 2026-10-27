@@ -97,7 +97,7 @@ func (s *Store) FactsNear(ctx context.Context, tc editor.ToConnect, limit int) (
 				JOIN developments theirs ON theirs.story_id = ours.story_id
 			WHERE ours.fact_id IN mine
 		)
-		SELECT facts.id, facts.source_id, facts.entry_id, facts.statement, facts.as_at, facts.quote, `+factEntities+`
+		SELECT facts.id, facts.source_id, facts.entry_id, facts.statement, facts.as_at, facts.quote
 		FROM facts
 		WHERE facts.id IN near AND facts.id NOT IN mine AND facts.withdrawn_by IS NULL
 		ORDER BY abs(julianday(facts.as_at) - julianday(?2)), facts.id DESC
@@ -109,11 +109,11 @@ func (s *Store) FactsNear(ctx context.Context, tc editor.ToConnect, limit int) (
 	var out []editor.Fact
 	for rows.Next() {
 		var f editor.Fact
-		var asAt, ents string
-		if err := rows.Scan(&f.ID, &f.SourceID, &f.EntryID, &f.Statement, &asAt, &f.Quote, &ents); err != nil {
+		var asAt string
+		if err := rows.Scan(&f.ID, &f.SourceID, &f.EntryID, &f.Statement, &asAt, &f.Quote); err != nil {
 			return nil, fmt.Errorf("facts near: %w", err)
 		}
-		if err := scanFact(&f, asAt, ents); err != nil {
+		if err := scanFact(&f, asAt); err != nil {
 			return nil, fmt.Errorf("facts near: %w", err)
 		}
 		out = append(out, f)
@@ -194,11 +194,11 @@ func (s *Store) Involvements(ctx context.Context, sourceID, entryID string) ([]e
 	return out, rows.Err()
 }
 
-// traced selects a Fact, with the Entities its Item mentions and the title
-// of its Item, from the facts table aliased as f joined to items as i.
+// traced selects a Fact, with the title of its Item, from the facts table
+// aliased as f joined to items as i.
 func traced(f, i string) string {
 	return f + `.id, ` + f + `.source_id, ` + f + `.entry_id, ` + f + `.statement, ` + f + `.as_at, ` + f + `.quote,
-	` + itemMentionsOf(f) + `, ` + i + `.title`
+	` + i + `.title`
 }
 
 // ConnectedStories are the Stories connected to the Story id, derived from
@@ -232,11 +232,11 @@ func (s *Store) ConnectedStories(ctx context.Context, id int64) ([]editor.StoryC
 		var other int64
 		var title string
 		var d editor.Development
-		var asAt, ents string
-		if err := rows.Scan(&other, &title, &d.ID, &d.SourceID, &d.EntryID, &d.Statement, &asAt, &d.Quote, &ents, &d.ItemTitle); err != nil {
+		var asAt string
+		if err := rows.Scan(&other, &title, &d.ID, &d.SourceID, &d.EntryID, &d.Statement, &asAt, &d.Quote, &d.ItemTitle); err != nil {
 			return nil, fmt.Errorf("connected stories: %w", err)
 		}
-		if err := scanFact(&d.Fact, asAt, ents); err != nil {
+		if err := scanFact(&d.Fact, asAt); err != nil {
 			return nil, fmt.Errorf("connected stories: %w", err)
 		}
 		c := story(other, title)
@@ -273,10 +273,10 @@ func (s *Store) ConnectedStories(ctx context.Context, id int64) ([]editor.StoryC
 		var other int64
 		var title string
 		var e editor.SharedEntity
-		var asAt, ents, asAt2, ents2 string
+		var asAt, asAt2 string
 		if err := rows.Scan(&other, &title, &e.Entity, &e.Role,
-			&e.Here.ID, &e.Here.SourceID, &e.Here.EntryID, &e.Here.Statement, &asAt, &e.Here.Quote, &ents, &e.Here.ItemTitle,
-			&e.There.ID, &e.There.SourceID, &e.There.EntryID, &e.There.Statement, &asAt2, &e.There.Quote, &ents2, &e.There.ItemTitle,
+			&e.Here.ID, &e.Here.SourceID, &e.Here.EntryID, &e.Here.Statement, &asAt, &e.Here.Quote, &e.Here.ItemTitle,
+			&e.There.ID, &e.There.SourceID, &e.There.EntryID, &e.There.Statement, &asAt2, &e.There.Quote, &e.There.ItemTitle,
 		); err != nil {
 			return nil, fmt.Errorf("connected stories: %w", err)
 		}
@@ -285,10 +285,10 @@ func (s *Store) ConnectedStories(ctx context.Context, id int64) ([]editor.StoryC
 		} else {
 			seen[r] = true
 		}
-		if err := scanFact(&e.Here.Fact, asAt, ents); err != nil {
+		if err := scanFact(&e.Here.Fact, asAt); err != nil {
 			return nil, fmt.Errorf("connected stories: %w", err)
 		}
-		if err := scanFact(&e.There.Fact, asAt2, ents2); err != nil {
+		if err := scanFact(&e.There.Fact, asAt2); err != nil {
 			return nil, fmt.Errorf("connected stories: %w", err)
 		}
 		c := story(other, title)
@@ -341,18 +341,18 @@ func (s *Store) causes(ctx context.Context, where string, args ...any) ([]editor
 	var out []editor.CauseConnection
 	for rows.Next() {
 		var c editor.CauseConnection
-		var asAt, ents, asAt2, ents2 string
+		var asAt, asAt2 string
 		if err := rows.Scan(
-			&c.Cause.ID, &c.Cause.SourceID, &c.Cause.EntryID, &c.Cause.Statement, &asAt, &c.Cause.Quote, &ents, &c.Cause.ItemTitle,
-			&c.Effect.ID, &c.Effect.SourceID, &c.Effect.EntryID, &c.Effect.Statement, &asAt2, &c.Effect.Quote, &ents2, &c.Effect.ItemTitle,
+			&c.Cause.ID, &c.Cause.SourceID, &c.Cause.EntryID, &c.Cause.Statement, &asAt, &c.Cause.Quote, &c.Cause.ItemTitle,
+			&c.Effect.ID, &c.Effect.SourceID, &c.Effect.EntryID, &c.Effect.Statement, &asAt2, &c.Effect.Quote, &c.Effect.ItemTitle,
 			&c.Withdrawn, &c.Call,
 		); err != nil {
 			return nil, fmt.Errorf("causes: %w", err)
 		}
-		if err := scanFact(&c.Cause.Fact, asAt, ents); err != nil {
+		if err := scanFact(&c.Cause.Fact, asAt); err != nil {
 			return nil, fmt.Errorf("causes: %w", err)
 		}
-		if err := scanFact(&c.Effect.Fact, asAt2, ents2); err != nil {
+		if err := scanFact(&c.Effect.Fact, asAt2); err != nil {
 			return nil, fmt.Errorf("causes: %w", err)
 		}
 		out = append(out, c)

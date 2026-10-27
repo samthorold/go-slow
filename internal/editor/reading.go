@@ -53,10 +53,11 @@ type Fact struct {
 	AsAt      time.Time
 	// Quote is the Item's own words the Fact rests on.
 	Quote string
-	// Entities are names: for a Fact from a Reference source, the Entity it
-	// was looked up for; for one drawn from an Item, the Entities its Item
-	// mentions, as the Record gives them where a Fact is shown (a reading
-	// gives none). Which of them it involves, in a Role, is connecting's.
+	// Entities are, for a Fact from a Reference source, the name of the
+	// Entity it was looked up for. A Fact drawn from an Item carries none:
+	// the Entities its Item mentions are the Item's (ToPlace.Mentions,
+	// ToConnect.Mentions, ReadItem.Mentions), and those it involves are in
+	// Involves.
 	Entities []string
 	// Involves are the Entities it involves, each in the Role connecting
 	// gave it, by name: set where a page or the Sunday read shows them, and

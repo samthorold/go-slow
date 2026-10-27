@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"slices"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -178,13 +179,123 @@ func TestATooManyRequestsBacksOffForRetryAfter(t *testing.T) {
 	}
 }
 
-func TestAnAPIErrorIsAnError(t *testing.T) {
-	wd, _ := client(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Retry-After", "5")
-		_, _ = w.Write([]byte(`{"error": {"code": "maxlag", "info": "Waiting for a database server: 7 seconds lagged."}}`))
+const maxlagAnswer = `{"error": {"code": "maxlag", "info": "Waiting for wdqs1012: 5.5666666666667 seconds lagged."}}`
+
+func TestALookupAnsweredMaxlagIsSentAgainAfterTheBackoff(t *testing.T) {
+	calls := 0
+	wd, c := client(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		calls++
+		if calls == 1 {
+			w.Header().Set("Retry-After", "7")
+			_, _ = w.Write([]byte(maxlagAnswer))
+			return
+		}
+		_, _ = w.Write([]byte(`{"search": [{"id": "Q1"}]}`))
 	}))
 
-	if _, err := wd.Search(t.Context(), "Nobody"); err == nil {
-		t.Error("an API error is not an error")
+	ids, err := wd.Search(t.Context(), "Parliament")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !slices.Equal(ids, []string{"Q1"}) || calls != 2 {
+		t.Errorf("Search = %v after %d requests, want [Q1] after 2", ids, calls)
+	}
+	if len(c.slept) != 1 || c.slept[0] != 7*time.Second {
+		t.Errorf("slept %v before the retry, want the 7s Retry-After asked", c.slept)
+	}
+}
+
+func TestALookupAnsweredMaxlagTwiceFailsAfterTwoRequests(t *testing.T) {
+	var seen []*http.Request
+	wd, c := client(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		seen = append(seen, r)
+		w.Header().Set("Retry-After", "5")
+		_, _ = w.Write([]byte(maxlagAnswer))
+	}))
+
+	_, err := wd.Search(t.Context(), "Parliament")
+
+	if err == nil || !strings.Contains(err.Error(), "maxlag: Waiting for wdqs1012") {
+		t.Errorf("err = %v, want the maxlag error", err)
+	}
+	if len(seen) != 2 {
+		t.Fatalf("%d requests, want 2", len(seen))
+	}
+	// The retry is as polite as the first request.
+	for _, r := range seen {
+		if r.Header.Get("User-Agent") != userAgent || r.URL.Query().Get("maxlag") == "" {
+			t.Errorf("request %s with User-Agent %q is not polite", r.URL, r.Header.Get("User-Agent"))
+		}
+	}
+	if len(c.slept) != 1 || c.slept[0] != 5*time.Second {
+		t.Errorf("slept %v, want the 5s Retry-After before the retry", c.slept)
+	}
+}
+
+func TestOtherErrorsAreNotRetried(t *testing.T) {
+	for name, answer := range map[string]func(http.ResponseWriter){
+		"another API error": func(w http.ResponseWriter) {
+			_, _ = w.Write([]byte(`{"error": {"code": "badvalue", "info": "Unrecognized value."}}`))
+		},
+		"429": func(w http.ResponseWriter) {
+			w.Header().Set("Retry-After", "120")
+			http.Error(w, "slow down", http.StatusTooManyRequests)
+		},
+		"503": func(w http.ResponseWriter) {
+			w.Header().Set("Retry-After", "30")
+			http.Error(w, "unavailable", http.StatusServiceUnavailable)
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			calls := 0
+			wd, c := client(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				calls++
+				answer(w)
+			}))
+
+			if _, err := wd.Search(t.Context(), "Nobody"); err == nil {
+				t.Error("not an error")
+			}
+			if calls != 1 || len(c.slept) != 0 {
+				t.Errorf("%d requests and slept %v, want one request and no wait", calls, c.slept)
+			}
+		})
+	}
+}
+
+func TestRequestsStayOneAtATimeThroughARetry(t *testing.T) {
+	var mu sync.Mutex
+	inFlight, most, calls := 0, 0, 0
+	wd, _ := client(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		mu.Lock()
+		inFlight++
+		most = max(most, inFlight)
+		calls++
+		first := calls == 1
+		mu.Unlock()
+		time.Sleep(10 * time.Millisecond)
+		mu.Lock()
+		inFlight--
+		mu.Unlock()
+		if first {
+			_, _ = w.Write([]byte(maxlagAnswer))
+			return
+		}
+		_, _ = w.Write([]byte(`{"search": []}`))
+	}))
+
+	var wg sync.WaitGroup
+	for range 3 {
+		wg.Go(func() {
+			if _, err := wd.Search(t.Context(), "Nobody"); err != nil {
+				t.Error(err)
+			}
+		})
+	}
+	wg.Wait()
+
+	if calls != 4 || most != 1 {
+		t.Errorf("%d requests, at most %d at once; want 4 (one retry), one at a time", calls, most)
 	}
 }

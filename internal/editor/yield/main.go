@@ -9,8 +9,10 @@
 // or an older copy of it, e.g. extracted with git archive). A fixture
 // recorded as several samples (<fixture>/<k>.json) is counted by each
 // sample's last attempt, and shown as the range its samples drew (least–most);
-// a total is the range from every fixture's least to its most. It reports,
-// it never fails on a change in yield.
+// a total is the range from every fixture's least to its most. Frozen copies
+// of upstream recordings (inputs/) are not counted; connecting's copies of
+// readings are read only for the mentions the act was shown. It reports, it
+// never fails on a change in yield.
 package main
 
 import (
@@ -83,19 +85,19 @@ func (e *entity) UnmarshalJSON(data []byte) error {
 type act struct {
 	name    string
 	columns []string
-	count   func(json.RawMessage) ([]int, error)
+	count   func(out json.RawMessage, shown set) ([]int, error)
 }
 
 var acts = []act{
 	{"reading", []string{"Facts", "Claims", "Entities", "Projection-worded Facts"}, countReading},
 	{"placing", []string{"Developments", "New Stories"}, countPlacing},
-	{"connecting", []string{"Connections"}, countConnecting},
+	{"connecting", []string{"Connections", "Mentions involved in no Fact", "Facts involving no Entity"}, countConnecting},
 	{"briefing", []string{"Statements", "Stories"}, countBriefing},
 }
 
 // countPlacing counts each Fact's Developments (one per Story it is placed
 // in) and the Stories the placing started.
-func countPlacing(out json.RawMessage) ([]int, error) {
+func countPlacing(out json.RawMessage, _ set) ([]int, error) {
 	var r struct {
 		Facts []struct {
 			DevelopmentsIn []string `json:"developments_in"`
@@ -112,19 +114,69 @@ func countPlacing(out json.RawMessage) ([]int, error) {
 	return []int{developments, len(r.NewStories)}, nil
 }
 
-// countConnecting counts the cause Connections the act made.
-func countConnecting(out json.RawMessage) ([]int, error) {
+// countConnecting counts the cause Connections the act made, and what it
+// left out: the mentions it was shown (by name) that it gave no Role in any
+// Fact, and the Facts it gave no Roles. What it leaves out is counted, never
+// judged.
+func countConnecting(out json.RawMessage, shown set) ([]int, error) {
 	var r struct {
 		Causes []json.RawMessage `json:"causes"`
+		Facts  []struct {
+			Roles []struct {
+				Entity string `json:"entity"`
+			} `json:"roles"`
+		} `json:"facts"`
 	}
 	if err := json.Unmarshal(out, &r); err != nil {
 		return nil, err
 	}
-	return []int{len(r.Causes)}, nil
+	involved := set{}
+	involvingNone := 0
+	for _, f := range r.Facts {
+		if len(f.Roles) == 0 {
+			involvingNone++
+		}
+		for _, role := range f.Roles {
+			involved[role.Entity] = true
+		}
+	}
+	inNoFact := 0
+	for name := range shown {
+		if !involved[name] {
+			inNoFact++
+		}
+	}
+	return []int{len(r.Causes), inNoFact, involvingNone}, nil
+}
+
+// shownMentions are the names a connecting fixture's Item mentions, as the
+// act was shown them: those of its frozen copy of the fixture's reading,
+// under <dir>/connecting/inputs/reading/. A fixture with no such copy (one
+// recorded before acts kept their inputs) was shown none the report can see.
+func shownMentions(dir, fixture string) (set, error) {
+	name := strings.TrimPrefix(fixture, "connecting/")
+	data, err := os.ReadFile(filepath.Join(dir, "connecting", "inputs", "reading", name+".json")) //nolint:gosec // a dev tool reading the directory it was given
+	if errors.Is(err, fs.ErrNotExist) {
+		return set{}, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var rec struct {
+		Output readingOutput `json:"output"`
+	}
+	if err := json.Unmarshal(data, &rec); err != nil {
+		return nil, fmt.Errorf("%s's frozen reading: %w", fixture, err)
+	}
+	names := set{}
+	for e := range rec.Output.mentions() {
+		names[e.Name] = true
+	}
+	return names, nil
 }
 
 // countBriefing counts the Briefing's statements and the Stories they are in.
-func countBriefing(out json.RawMessage) ([]int, error) {
+func countBriefing(out json.RawMessage, _ set) ([]int, error) {
 	var r struct {
 		Stories []struct {
 			Statements []json.RawMessage `json:"statements"`
@@ -168,7 +220,7 @@ func (r readingOutput) mentions() map[entity]bool {
 	return distinct
 }
 
-func countReading(out json.RawMessage) ([]int, error) {
+func countReading(out json.RawMessage, _ set) ([]int, error) {
 	var r readingOutput
 	if err := json.Unmarshal(out, &r); err != nil {
 		return nil, err
@@ -246,18 +298,24 @@ func load(dir string) (counts, outputs, error) {
 			if a.name != rec.Act {
 				continue
 			}
-			n, err := a.count(rec.Output)
-			if err != nil {
-				return fmt.Errorf("%s: %w", path, err)
-			}
 			rel, err := filepath.Rel(dir, path)
 			if err != nil {
 				return err
 			}
+			f := fixtureOf(strings.TrimSuffix(filepath.ToSlash(rel), ".json"))
+			var shown set
+			if a.name == "connecting" {
+				if shown, err = shownMentions(dir, f); err != nil {
+					return err
+				}
+			}
+			n, err := a.count(rec.Output, shown)
+			if err != nil {
+				return fmt.Errorf("%s: %w", path, err)
+			}
 			if c[a.name] == nil {
 				c[a.name] = map[string][][]int{}
 			}
-			f := fixtureOf(strings.TrimSuffix(filepath.ToSlash(rel), ".json"))
 			c[a.name][f] = append(c[a.name][f], n)
 			if o[a.name] == nil {
 				o[a.name] = map[string][]json.RawMessage{}

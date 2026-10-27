@@ -1,11 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "6ec51344f754138f4818768957a36f720c0943237be1bddf4ea33aa6c40f1b8a",
-  "recorded_at": "2026-10-26T00:28:18.925301Z",
+  "request_hash": "e7a7015739ade2f338e8abf6f3d6fb9542a69eb1060205006fe7e5da5a992dc6",
+  "recorded_at": "2026-10-27T10:04:03.172285Z",
   "usage": {
-    "input_tokens": 3038,
-    "output_tokens": 1039
+    "input_tokens": 3681,
+    "output_tokens": 1455
   },
   "output": {
     "causes": [],
@@ -14,16 +14,16 @@
         "fact": "F1",
         "roles": [
           {
-            "entity": "Downing Street",
-            "role": "place"
-          },
-          {
-            "entity": "Prime Minister",
+            "entity": "the Prime Minister",
             "role": "actor"
           },
           {
             "entity": "Volodymyr Zelenskyy",
             "role": "undergoer"
+          },
+          {
+            "entity": "Downing Street",
+            "role": "place"
           }
         ]
       },
@@ -31,7 +31,7 @@
         "fact": "F2",
         "roles": [
           {
-            "entity": "Prime Minister",
+            "entity": "the Prime Minister",
             "role": "actor"
           },
           {
@@ -44,16 +44,8 @@
         "fact": "F3",
         "roles": [
           {
-            "entity": "Prime Minister",
+            "entity": "the Prime Minister",
             "role": "actor"
-          },
-          {
-            "entity": "UK",
-            "role": "actor"
-          },
-          {
-            "entity": "Volodymyr Zelenskyy",
-            "role": "undergoer"
           }
         ]
       },
@@ -61,16 +53,47 @@
         "fact": "F4",
         "roles": [
           {
-            "entity": "Prime Minister",
+            "entity": "the Prime Minister",
             "role": "actor"
           },
           {
-            "entity": "UK",
+            "entity": "Ukraine",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F5",
+        "roles": [
+          {
+            "entity": "the Prime Minister",
+            "role": "actor"
+          },
+          {
+            "entity": "Volodymyr Zelenskyy",
             "role": "actor"
           },
           {
             "entity": "Ukraine",
             "role": "undergoer"
+          }
+        ]
+      },
+      {
+        "fact": "F6",
+        "roles": [
+          {
+            "entity": "the Prime Minister",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F7",
+        "roles": [
+          {
+            "entity": "the Prime Minister",
+            "role": "actor"
           },
           {
             "entity": "Volodymyr Zelenskyy",

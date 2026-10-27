@@ -103,6 +103,65 @@ func TestEachLaterActIsCountedByWhatItDraws(t *testing.T) {
 	}
 }
 
+// What connecting leaves out is counted, never judged: a Fact it gives no
+// Roles links nothing.
+func TestConnectingYieldCountsFactsInvolvingNoEntity(t *testing.T) {
+	before, after := t.TempDir(), t.TempDir()
+	write(t, before, "connecting/x.json", `{"act": "connecting", "output": {"causes": [], "facts": [
+		{"fact": "F1", "roles": [{"entity": "Ann", "role": "actor"}]},
+		{"fact": "F2", "roles": []},
+		{"fact": "F3", "roles": []}]}}`)
+	write(t, after, "connecting/x/1.json", `{"act": "connecting", "output": {"causes": [], "facts": [
+		{"fact": "F1", "roles": [{"entity": "Ann", "role": "actor"}]},
+		{"fact": "F2", "roles": []},
+		{"fact": "F3", "roles": [{"entity": "Ann", "role": "actor"}]}]}}`)
+	write(t, after, "connecting/x/2.json", `{"act": "connecting", "output": {"causes": [], "facts": [
+		{"fact": "F1", "roles": [{"entity": "Ann", "role": "actor"}]},
+		{"fact": "F2", "roles": [{"entity": "Ann", "role": "actor"}]},
+		{"fact": "F3", "roles": [{"entity": "Ann", "role": "actor"}]}]}}`)
+
+	got := yieldOf(t, before, after)
+
+	for _, want := range []string{
+		"| Fixture | Connections | Mentions involved in no Fact | Facts involving no Entity |",
+		"| connecting/x | 0 → 0 | 0 → 0 | 2 → 0–1 |",
+		"| **Total** | 0 → 0 | 0 → 0 | 2 → 0–1 |",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("the report has no line %q; it is:\n%s", want, got)
+		}
+	}
+}
+
+// A mention connecting gives no Role in any Fact is counted, never judged.
+// The mentions are those the act was shown: its frozen copy of the
+// fixture's reading, on each side.
+func TestConnectingYieldCountsMentionsInvolvedInNoFact(t *testing.T) {
+	before, after := t.TempDir(), t.TempDir()
+	write(t, before, "connecting/inputs/reading/x.json", `{"act": "reading", "output": {"facts": [], "claims": [],
+		"mentions": [{"kind": "person", "name": "Ann"}, {"kind": "place", "name": "Kyiv"}]}}`)
+	write(t, before, "connecting/x.json", `{"act": "connecting", "output": {"causes": [], "facts": [
+		{"fact": "F1", "roles": [{"entity": "Ann", "role": "actor"}, {"entity": "Kyiv", "role": "place"}]}]}}`)
+	write(t, after, "connecting/inputs/reading/x.json", `{"act": "reading", "output": {"facts": [], "claims": [],
+		"mentions": [{"kind": "person", "name": "Ann"}, {"kind": "place", "name": "Kyiv"}, {"kind": "person", "name": "John Swinney"}]}}`)
+	write(t, after, "connecting/x/1.json", `{"act": "connecting", "output": {"causes": [], "facts": [
+		{"fact": "F1", "roles": [{"entity": "Ann", "role": "actor"}]},
+		{"fact": "F2", "roles": [{"entity": "Ann", "role": "undergoer"}]}]}}`)
+	write(t, after, "connecting/x/2.json", `{"act": "connecting", "output": {"causes": [], "facts": [
+		{"fact": "F1", "roles": [{"entity": "Ann", "role": "actor"}, {"entity": "Kyiv", "role": "place"}]}]}}`)
+
+	got := yieldOf(t, before, after)
+
+	for _, want := range []string{
+		"| connecting/x | 0 → 0 | 0 → 1–2 | 0 → 0 |",
+		"| **Total** | 0 → 0 | 0 → 1–2 | 0 → 0 |",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("the report has no line %q; it is:\n%s", want, got)
+		}
+	}
+}
+
 func TestFrozenInputsAndOtherFilesAreLeftOut(t *testing.T) {
 	before, after := t.TempDir(), t.TempDir()
 	for _, dir := range []string{before, after} {

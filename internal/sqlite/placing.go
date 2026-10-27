@@ -219,16 +219,18 @@ func rankCandidates(shared []sharedMention) []candidate {
 // Record. What Feedback withdrew is on the Timeline, marked. Each
 // Development's Fact carries the Entities it involves, in their roles.
 func (s *Store) Story(ctx context.Context, id int64) (editor.Story, bool, error) {
-	st, found, err := s.story(ctx, id, true)
-	if err != nil || !found {
-		return st, found, err
-	}
-	for i := range st.Timeline {
-		if st.Timeline[i].Involves, err = s.involves(ctx, st.Timeline[i].ID); err != nil {
-			return st, false, fmt.Errorf("story %d: %w", id, err)
+	return s.story(ctx, id, true)
+}
+
+// withInvolves sets on each Fact the Entities it involves, in their roles.
+func (s *Store) withInvolves(ctx context.Context, facts ...*editor.Fact) error {
+	for _, f := range facts {
+		var err error
+		if f.Involves, err = s.involves(ctx, f.ID); err != nil {
+			return err
 		}
 	}
-	return st, true, nil
+	return nil
 }
 
 // involves are the Entities the Fact id involves, each in the role
@@ -289,15 +291,21 @@ func (s *Store) story(ctx context.Context, id int64, withdrawn bool) (editor.Sto
 		if err := scanFact(&d.Fact, asAt, ents); err != nil {
 			return st, false, fmt.Errorf("story %d: %w", id, err)
 		}
-		for _, e := range d.Entities {
-			if !slices.Contains(st.Entities, e) {
-				st.Entities = append(st.Entities, e)
-			}
-		}
 		st.Timeline = append(st.Timeline, d)
 	}
 	if err := rows.Err(); err != nil {
 		return st, false, fmt.Errorf("story %d: %w", id, err)
+	}
+	_ = rows.Close()
+	for i := range st.Timeline {
+		if err := s.withInvolves(ctx, &st.Timeline[i].Fact); err != nil {
+			return st, false, fmt.Errorf("story %d: %w", id, err)
+		}
+		for _, r := range st.Timeline[i].Involves {
+			if !slices.Contains(st.Entities, r.Entity) {
+				st.Entities = append(st.Entities, r.Entity)
+			}
+		}
 	}
 	slices.Sort(st.Entities)
 	if st.Causes, err = s.storyCauses(ctx, id); err != nil {
@@ -305,6 +313,11 @@ func (s *Store) story(ctx context.Context, id int64, withdrawn bool) (editor.Sto
 	}
 	if !withdrawn {
 		st.Causes = slices.DeleteFunc(st.Causes, func(c editor.CauseConnection) bool { return c.Withdrawn })
+	}
+	for i := range st.Causes {
+		if err := s.withInvolves(ctx, &st.Causes[i].Cause.Fact, &st.Causes[i].Effect.Fact); err != nil {
+			return st, false, fmt.Errorf("story %d: %w", id, err)
+		}
 	}
 	return st, true, nil
 }

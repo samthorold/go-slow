@@ -341,6 +341,9 @@ func (s *Store) FactsAbout(ctx context.Context, entity string, before time.Time,
 		if out[i].Stories, err = s.storiesOf(ctx, out[i].Fact.ID); err != nil {
 			return nil, fmt.Errorf("facts about %q: %w", entity, err)
 		}
+		if err := s.withInvolves(ctx, &out[i].Fact.Fact); err != nil {
+			return nil, fmt.Errorf("facts about %q: %w", entity, err)
+		}
 	}
 	return out, nil
 }
@@ -462,7 +465,8 @@ func (s *Store) ids(ctx context.Context, query string, args ...any) ([]int64, er
 	return out, rows.Err()
 }
 
-// tracedFact is a Fact with the title of its Item.
+// tracedFact is a Fact with the title of its Item and the Entities it
+// involves, in their roles.
 func (s *Store) tracedFact(ctx context.Context, id int64) (editor.Development, error) {
 	var d editor.Development
 	var asAt, ents string
@@ -471,5 +475,8 @@ func (s *Store) tracedFact(ctx context.Context, id int64) (editor.Development, e
 		WHERE f.id = ?`, id).Scan(&d.ID, &d.SourceID, &d.EntryID, &d.Statement, &asAt, &d.Quote, &ents, &d.ItemTitle); err != nil {
 		return d, fmt.Errorf("fact %d: %w", id, err)
 	}
-	return d, scanFact(&d.Fact, asAt, ents)
+	if err := scanFact(&d.Fact, asAt, ents); err != nil {
+		return d, err
+	}
+	return d, s.withInvolves(ctx, &d.Fact)
 }

@@ -297,6 +297,19 @@ func (s *Store) ConnectedStories(ctx context.Context, id int64) ([]editor.StoryC
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("connected stories: %w", err)
 	}
+	_ = rows.Close()
+	for i := range out {
+		for j := range out[i].Shared {
+			if err := s.withInvolves(ctx, &out[i].Shared[j].Fact); err != nil {
+				return nil, fmt.Errorf("connected stories: %w", err)
+			}
+		}
+		for j := range out[i].Entities {
+			if err := s.withInvolves(ctx, &out[i].Entities[j].Here.Fact, &out[i].Entities[j].There.Fact); err != nil {
+				return nil, fmt.Errorf("connected stories: %w", err)
+			}
+		}
+	}
 	return out, nil
 }
 

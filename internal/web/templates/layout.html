@@ -7,8 +7,11 @@
   {{/* htmx swaps 422, so a command that fails validation can re-render its form. */}}
   <meta name="htmx-config" content='{"responseHandling":[{"code":"204","swap":false},{"code":"[23]..","swap":true},{"code":"422","swap":true},{"code":"[45]..","swap":false,"error":true},{"code":"...","swap":true}]}'>
   <script src="/static/htmx-2.0.10.min.js"></script>
+  <script src="/static/request-errors.js"></script>
 </head>
 <body hx-boost="true">
+  {{/* A request that fails without swapping (any 4xx but 422, any 5xx, or no answer at all) says so here. */}}
+  <div id="request-errors" role="alert"></div>
   <main>
 {{template "content" .}}
   </main>

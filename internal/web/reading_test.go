@@ -54,10 +54,10 @@ func readSpeech(t *testing.T, store *sqlite.Store, output string) {
 
 const reading = `{
   "facts": [{"statement": "Andy Burnham spoke in Motherwell.", "as_at": "2026-10-22",
-             "quote": "good to be here in Motherwell", "entities": [
-               {"name": "Andy Burnham", "kind": "person", "role": ""}, {"name": "Motherwell", "kind": "place", "role": ""}]}],
+             "quote": "good to be here in Motherwell"}],
   "claims": [{"statement": "Scotland is the true north.", "made_by": "Andy Burnham",
-              "quote": "the true north", "entities": [{"name": "Andy Burnham", "kind": "person", "role": ""}]}]
+              "quote": "the true north"}],
+  "mentions": [{"name": "Andy Burnham", "kind": "person", "role": ""}, {"name": "Motherwell", "kind": "place", "role": ""}]
 }`
 
 // itemPage follows the Items page's link to the Item's own page.
@@ -96,8 +96,8 @@ func TestAnItemsPageListsItsMentionsOnceAndPerFactOnlyTheEntitiesItInvolves(t *t
 	store := openStore(t)
 	it := item("speech", "PM speech in Scotland", saturday.Add(-48*time.Hour))
 	seed(t, store, saturday.AddDate(0, 0, -7), it)
-	// A reading in the current schema ties the Fact to every mention, and
-	// the Claim to none.
+	// A reading gives the Item's mentions once, and ties no statement to
+	// them.
 	if err := store.SaveReading(t.Context(), editor.Reading{
 		SourceID: it.SourceID, EntryID: it.EntryID, Model: "fake",
 		Entities: []editor.Entity{
@@ -105,7 +105,7 @@ func TestAnItemsPageListsItsMentionsOnceAndPerFactOnlyTheEntitiesItInvolves(t *t
 			{Name: "Motherwell", Kind: "place"},
 		},
 		Facts: []editor.Fact{{Statement: "Andy Burnham spoke in Motherwell.", AsAt: time.Date(2026, time.October, 22, 0, 0, 0, 0, time.UTC),
-			Quote: "good to be here in Motherwell", Entities: []string{"Andy Burnham", "Motherwell"}}},
+			Quote: "good to be here in Motherwell"}},
 		Claims: []editor.Claim{{Statement: "Scotland is the true north.", MadeBy: "Andy Burnham", Quote: "the true north"}},
 	}, saturday); err != nil {
 		t.Fatal(err)

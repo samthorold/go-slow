@@ -30,7 +30,7 @@ type ToPlace struct {
 }
 
 // Story is an ongoing subject, made of its Developments. Entities are the
-// names of every Entity its Developments involve.
+// names of every Entity its Developments' Items mention.
 type Story struct {
 	ID       int64
 	Title    string

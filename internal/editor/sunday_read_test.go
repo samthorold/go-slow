@@ -146,7 +146,7 @@ func placeTheCall(t *testing.T, store *sqlite.Store, placedAt time.Time) {
 		Entities: []editor.Entity{{Name: "Andy Burnham", Kind: "person"}, {Name: "Finland", Kind: "place"}},
 		Facts: []editor.Fact{{
 			SourceID: number10.ID, EntryID: "call", Statement: "Andy Burnham spoke to the President of Finland.",
-			AsAt: oct16.AddDate(0, 0, -2), Quote: "PM call", Entities: []string{"Andy Burnham", "Finland"},
+			AsAt: oct16.AddDate(0, 0, -2), Quote: "PM call",
 		}},
 		Model: "fake",
 	}, placedAt); err != nil {

@@ -41,7 +41,7 @@ func threeFacts(t *testing.T) *sqlite.Store {
 		t.Fatalf("add Topic: %v %v", errs, err)
 	}
 	fact := func(s string) editor.Fact {
-		return editor.Fact{Statement: s, AsAt: saturday, Quote: s, Entities: []string{"Andy Burnham"}}
+		return editor.Fact{Statement: s, AsAt: saturday, Quote: s}
 	}
 	if err := store.SaveReading(t.Context(), editor.Reading{SourceID: src.ID, EntryID: "speech", Model: "fake",
 		Entities: []editor.Entity{{Name: "Andy Burnham", Kind: "person"}},
@@ -84,6 +84,19 @@ func TestTheActsNeverSeeAWithdrawnFact(t *testing.T) {
 	toBrief, err := store.ToBrief(ctx, saturday.AddDate(0, 0, -1), saturday)
 	if err != nil || len(toBrief) != 1 || len(toBrief[0].Today) != 1 || toBrief[0].Today[0].ID != 2 {
 		t.Errorf("the Briefing is given a withdrawn Development: %+v %v", toBrief, err)
+	}
+}
+
+// The Facts the Owner may say a Story missed are found by what their Items
+// mention, as placing finds candidates: no Fact here is connected, so none
+// involves Andy Burnham, yet the third's Item mentions him.
+func TestTheFactsToAddToAStoryAreThoseWhoseItemsMentionAnEntityItsItemsMention(t *testing.T) {
+	store := threeFacts(t)
+
+	facts, err := store.FactsToAdd(t.Context(), 1)
+
+	if err != nil || len(facts) != 1 || facts[0].ID != 3 {
+		t.Errorf("facts to add = %+v %v, want the third", facts, err)
 	}
 }
 

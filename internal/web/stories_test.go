@@ -61,7 +61,7 @@ func TestAStorysPageShowsItsTimelineEachDevelopmentTracingToItsFactAndItem(t *te
 		SourceID: earlier.SourceID, EntryID: earlier.EntryID, Model: "fake",
 		Entities: []editor.Entity{{Name: "Andy Burnham", Kind: "person"}},
 		Facts: []editor.Fact{{Statement: "Andy Burnham made an offer to Holyrood.",
-			AsAt: time.Date(2026, time.October, 21, 0, 0, 0, 0, time.UTC), Quote: "offer", Entities: []string{"Andy Burnham"}}},
+			AsAt: time.Date(2026, time.October, 21, 0, 0, 0, 0, time.UTC), Quote: "offer"}},
 	}, saturday); err != nil {
 		t.Fatal(err)
 	}
@@ -156,7 +156,7 @@ func TestAReciprocalActsTwoActorsAreKeptAndEachConnectsItsStoryOnTheStoryPage(t 
 		if err := store.SaveReading(t.Context(), editor.Reading{
 			SourceID: it.SourceID, EntryID: it.EntryID, Model: "fake", Entities: entities,
 			Facts: []editor.Fact{{Statement: statement, AsAt: time.Date(2026, time.October, 21, 0, 0, 0, 0, time.UTC),
-				Quote: "q", Entities: names}},
+				Quote: "q"}},
 		}, saturday); err != nil {
 			t.Fatal(err)
 		}
@@ -192,7 +192,7 @@ func TestAStorysPageShowsTheStoriesConnectedToItAndWhy(t *testing.T) {
 		SourceID: offer.SourceID, EntryID: offer.EntryID, Model: "fake",
 		Entities: []editor.Entity{{Name: "Andy Burnham", Kind: "person"}},
 		Facts: []editor.Fact{{Statement: "Andy Burnham made an offer to Holyrood.",
-			AsAt: time.Date(2026, time.October, 21, 0, 0, 0, 0, time.UTC), Quote: "offer", Entities: []string{"Andy Burnham"}}},
+			AsAt: time.Date(2026, time.October, 21, 0, 0, 0, 0, time.UTC), Quote: "offer"}},
 	}, saturday); err != nil {
 		t.Fatal(err)
 	}

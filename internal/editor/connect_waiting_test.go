@@ -78,8 +78,8 @@ func TestConnectingIsShownEveryEntityTheItemsReadingGaveWithItsKind(t *testing.T
 }
 
 // The Record keeps what an Item mentions as its reading gives it, apart from
-// what its Facts and Claims are tied to: connecting is shown an Entity the
-// reading gave though no statement is tied to it.
+// its Facts and Claims, which reading ties to no Entity: connecting is shown
+// every Entity the reading gave.
 func TestConnectingIsShownTheItemsMentionsAsTheRecordKeepsThem(t *testing.T) {
 	store := record(t)
 	readAndPlace(t, store, &fakeModel{output: startsAStory})
@@ -90,7 +90,7 @@ func TestConnectingIsShownTheItemsMentionsAsTheRecordKeepsThem(t *testing.T) {
 		SourceID: glasgowItem.SourceID, EntryID: glasgowItem.EntryID, Model: "fake",
 		Entities: []editor.Entity{{Name: "Glasgow", Kind: "place"}, {Name: "Clyde", Kind: "place"}},
 		Facts: []editor.Fact{{Statement: "Glasgow will get new funding.", AsAt: oct16,
-			Quote: "will get new funding", Entities: []string{"Glasgow"}}},
+			Quote: "will get new funding"}},
 	}, saturday); err != nil {
 		t.Fatal(err)
 	}
@@ -285,7 +285,9 @@ func TestARoleConnectingGivesAnEntityOfTheReadingMakesTheFactInvolveIt(t *testin
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(s.Timeline) != 1 || !slices.Equal(s.Timeline[0].Entities, []string{"Andy Burnham", "Motherwell", "Scotland"}) {
+	if len(s.Timeline) != 1 || !slices.ContainsFunc(s.Timeline[0].Involves, func(r editor.Role) bool {
+		return r.Entity == "Scotland" && r.Role == "place"
+	}) {
 		t.Errorf("the Story page's Fact involves %+v, want Scotland too", s.Timeline)
 	}
 }

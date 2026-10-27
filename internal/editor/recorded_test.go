@@ -369,8 +369,8 @@ func speechFacts(p properties, r editor.Reading, body string) {
 			primary("speech Fact %q does not come from the speech's text: %q", f.Statement, f.Quote)
 		}
 	}
-	p.holds("a Fact places the speech in Motherwell", strings.Contains(strings.ToLower(joinFacts(r)), "motherwell"),
-		"none does: %s", joinFacts(r))
+	p.holds("a Fact places the speech in Motherwell", strings.Contains(strings.ToLower(factStatements(r)), "motherwell"),
+		"none does: %s", factStatements(r))
 }
 
 // factStatements is a reading's Facts, one statement a line.
@@ -378,14 +378,6 @@ func factStatements(r editor.Reading) string {
 	var b strings.Builder
 	for _, f := range r.Facts {
 		b.WriteString(f.Statement + "\n")
-	}
-	return b.String()
-}
-
-func joinFacts(r editor.Reading) string {
-	var b strings.Builder
-	for _, f := range r.Facts {
-		b.WriteString(f.Statement + " | " + strings.Join(f.Entities, ", ") + "\n")
 	}
 	return b.String()
 }

@@ -95,12 +95,11 @@ func reciprocalActors(t *testing.T, store *sqlite.Store, f namedItem, p properti
 			continue
 		}
 		ids[fact.Statement] = fact.ID
-		// Until the acts find work by mentions alone, each Fact is tied to
-		// every Entity its Item mentions: the two must be there apart.
-		for _, name := range []string{primeMinister, zelenskyy} {
-			if !slices.Contains(fact.Entities, name) {
-				t.Fatalf("%s: %q is not mentioned on its own beside %q, so the property tests nothing: %q", f.name, name, fact.Statement, fact.Entities)
-			}
+	}
+	// The two must be mentioned apart, or the property tests nothing.
+	for _, name := range []string{primeMinister, zelenskyy} {
+		if !slices.ContainsFunc(it.Mentions, func(e editor.Entity) bool { return e.Name == name }) {
+			t.Fatalf("%s: %q is not mentioned on its own, so the property tests nothing: %+v", f.name, name, it.Mentions)
 		}
 	}
 	for _, s := range []string{theyHadACall, theyWelcomed} {

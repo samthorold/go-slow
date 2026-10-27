@@ -93,7 +93,7 @@ func TestAnInvolvementConnectingAddsConnectsStoriesByItsEntityAndRole(t *testing
 		SourceID: visit.SourceID, EntryID: visit.EntryID, Model: "fake",
 		Entities: []editor.Entity{{Name: "Scotland", Kind: "place"}},
 		Facts: []editor.Fact{{Statement: "Scotland's ferries were funded.", AsAt: oct16.AddDate(0, 0, 1),
-			Quote: "ferries were funded", Entities: []string{"Scotland"}}},
+			Quote: "ferries were funded"}},
 	}, saturday); err != nil {
 		t.Fatal(err)
 	}
@@ -148,7 +148,7 @@ func TestTwoStoriesSharingADevelopmentAreConnectedTheMomentItIsPlaced(t *testing
 		SourceID: third.SourceID, EntryID: third.EntryID, Model: "fake",
 		Entities: []editor.Entity{{Name: "Andy Burnham", Kind: "person"}},
 		Facts: []editor.Fact{{Statement: "Andy Burnham visited Glasgow.", AsAt: oct16.AddDate(0, 0, 2),
-			Quote: "visited Glasgow", Entities: []string{"Andy Burnham"}}},
+			Quote: "visited Glasgow"}},
 	}, saturday); err != nil {
 		t.Fatal(err)
 	}

@@ -128,7 +128,7 @@ func placingPrecedentSample(t *testing.T, root, name string, m *sampleModel) sam
 		return strings.Contains(strings.ToLower(f.Statement), "respon")
 	})
 	if i < 0 {
-		t.Fatalf("the reading draws no Fact of the government's response, so placing is not tested on the reaction: %s", joinFacts(reading))
+		t.Fatalf("the reading draws no Fact of the government's response, so placing is not tested on the reaction: %s", factStatements(reading))
 	}
 	response := reading.Facts[i].Statement
 	if err := store.SaveReading(ctx, reading, saturday); err != nil {

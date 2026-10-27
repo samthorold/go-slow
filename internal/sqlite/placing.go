@@ -15,10 +15,17 @@ import (
 	"github.com/samthorold/go-slow/internal/interest"
 )
 
-// factEntities is a subquery giving a Fact's Entities as a JSON array.
-const factEntities = `(SELECT json_group_array(entities.name ORDER BY entities.name)
-	FROM fact_entities JOIN entities ON entities.id = fact_entities.entity_id
-	WHERE fact_entities.fact_id = facts.id)`
+// factEntities is a subquery giving a Fact's Entities, the Entities its
+// Item mentions, as a JSON array.
+var factEntities = itemMentionsOf("facts")
+
+// itemMentionsOf is a subquery giving the names of the Entities the Item of
+// the Fact in the facts table aliased as f mentions, as a JSON array.
+func itemMentionsOf(f string) string {
+	return `(SELECT json_group_array(entities.name ORDER BY entities.name)
+	FROM item_mentions m JOIN entities ON entities.id = m.entity_id
+	WHERE m.source_id = ` + f + `.source_id AND m.entry_id = ` + f + `.entry_id)`
+}
 
 // FactsToPlace are the Facts not yet placed, by Item, in the order the
 // Items were published.

@@ -94,9 +94,10 @@ func TestTheEditorReadsTheItemsAwaitingReadingIntoTheRecord(t *testing.T) {
 		!f.AsAt.Equal(time.Date(2026, time.October, 16, 0, 0, 0, 0, time.UTC)) {
 		t.Errorf("the Fact does not carry its Item and date: %+v", f)
 	}
-	// The Fact is tied to every Entity the Item mentions.
-	if len(got.Facts[0].Entities) != 3 {
-		t.Errorf("the Fact's Entities = %v, want the Item's three mentions", got.Facts[0].Entities)
+	// The Item mentions three Entities; until connecting, its Fact involves
+	// none of them.
+	if len(got.Mentions) != 3 || len(got.Facts[0].Involves) != 0 {
+		t.Errorf("mentions = %v, the Fact involves %v; want three mentions and no involvement", got.Mentions, got.Facts[0].Involves)
 	}
 	if len(got.Claims) != 1 || got.Claims[0].MadeBy != "Andy Burnham" {
 		t.Errorf("Claims = %+v", got.Claims)

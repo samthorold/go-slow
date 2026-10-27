@@ -166,8 +166,8 @@ func TestAJointActorMadeUpFromTwoMentionsIsRefusedAsANameTheReadingNeverGave(t *
 	}
 }
 
-func TestAFactMayInvolveFewerOfTheItemsMentionsThanReadingListedForItOrNone(t *testing.T) {
-	// Reading listed Andy Burnham and Motherwell for the Fact.
+func TestAFactMayInvolveSomeOfTheItemsMentionsOrNone(t *testing.T) {
+	// The Item mentions Andy Burnham, Motherwell and Scotland.
 	for name, output := range map[string]string{
 		"fewer": `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "actor"}]}], "causes": []}`,
 		"none":  `{"facts": [{"fact": "F1", "roles": []}], "causes": []}`,

@@ -190,16 +190,18 @@ func (s *Store) kept(ctx context.Context, where string, args ...any) ([]feedback
 	return out, rows.Err()
 }
 
-// FactsToAdd are the Facts the Owner may say a Story missed: those that
-// share an Entity with its Developments and are not yet one in it, newest
-// first. Withdrawn Facts are never offered.
+// FactsToAdd are the Facts the Owner may say a Story missed: those whose
+// Items mention an Entity its Developments' Items mention, and are not yet
+// one in it, newest first, found as placing finds its candidates. Withdrawn
+// Facts are never offered.
 func (s *Store) FactsToAdd(ctx context.Context, storyID int64) ([]editor.Fact, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT DISTINCT facts.id, facts.source_id, facts.entry_id, facts.statement, facts.as_at, facts.quote, `+factEntities+`
 		FROM developments mine
-			JOIN fact_entities ours ON ours.fact_id = mine.fact_id
-			JOIN fact_entities theirs ON theirs.entity_id = ours.entity_id
-			JOIN facts ON facts.id = theirs.fact_id
+			JOIN facts minefacts ON minefacts.id = mine.fact_id
+			JOIN item_mentions ours ON ours.source_id = minefacts.source_id AND ours.entry_id = minefacts.entry_id
+			JOIN item_mentions theirs ON theirs.entity_id = ours.entity_id
+			JOIN facts ON facts.source_id = theirs.source_id AND facts.entry_id = theirs.entry_id
 		WHERE mine.story_id = ?1 AND mine.withdrawn_by IS NULL AND facts.withdrawn_by IS NULL
 			AND NOT EXISTS (SELECT 1 FROM developments d WHERE d.story_id = ?1 AND d.fact_id = facts.id)
 		ORDER BY facts.as_at DESC, facts.id DESC`, storyID)

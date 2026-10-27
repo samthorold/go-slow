@@ -34,7 +34,7 @@ func readTyroneNotice(t *testing.T, store *sqlite.Store) {
 		SourceID: tyroneNotice.SourceID, EntryID: tyroneNotice.EntryID, Model: "fake",
 		Entities: []editor.Entity{{Name: "County Tyrone", Kind: "place"}},
 		Facts: []editor.Fact{{Statement: "A Lord-Lieutenant of County Tyrone was appointed.", AsAt: oct16,
-			Quote: "Lord-Lieutenant", Entities: []string{"County Tyrone"}}},
+			Quote: "Lord-Lieutenant"}},
 	}, saturday); err != nil {
 		t.Fatal(err)
 	}
@@ -47,7 +47,7 @@ func TestPlacingRunsInBatchesAndAFactWaitsForTheStoriesAnEarlierItemMayStart(t *
 		t.Fatal(err)
 	}
 	readTyroneNotice(t, store)
-	readLaterMentioning(t, store)
+	readLater(t, store)
 	batcher := &fakeBatcher{}
 	b := placingBatches(store, batcher)
 

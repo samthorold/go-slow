@@ -309,13 +309,44 @@ func (s *Store) ReadItem(ctx context.Context, sourceID, entryID string) (editor.
 	if err := json.Unmarshal([]byte(topics), &it.Topics); err != nil {
 		return it, false, fmt.Errorf("read item %s: topics: %w", entryID, err)
 	}
+	if it.Mentions, err = s.itemMentions(ctx, sourceID, entryID); err != nil {
+		return it, false, err
+	}
 	if it.Facts, err = s.facts(ctx, sourceID, entryID); err != nil {
 		return it, false, err
+	}
+	for i := range it.Facts {
+		if it.Facts[i].Involves, err = s.involves(ctx, it.Facts[i].ID); err != nil {
+			return it, false, err
+		}
 	}
 	if it.Claims, err = s.claims(ctx, sourceID, entryID); err != nil {
 		return it, false, err
 	}
 	return it, true, nil
+}
+
+// itemMentions are the Entities an Item mentions, by name, each with its
+// kind and the Wikidata item it matched, if any.
+func (s *Store) itemMentions(ctx context.Context, sourceID, entryID string) ([]editor.Entity, error) {
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT entities.name, entities.kind, coalesce(entities.wikidata_id, '')
+		FROM item_mentions m JOIN entities ON entities.id = m.entity_id
+		WHERE m.source_id = ? AND m.entry_id = ?
+		ORDER BY entities.name`, sourceID, entryID)
+	if err != nil {
+		return nil, fmt.Errorf("mentions of %s: %w", entryID, err)
+	}
+	defer func() { _ = rows.Close() }()
+	var out []editor.Entity
+	for rows.Next() {
+		var e editor.Entity
+		if err := rows.Scan(&e.Name, &e.Kind, &e.WikidataID); err != nil {
+			return nil, fmt.Errorf("mentions of %s: %w", entryID, err)
+		}
+		out = append(out, e)
+	}
+	return out, rows.Err()
 }
 
 func (s *Store) facts(ctx context.Context, sourceID, entryID string) ([]editor.Fact, error) {

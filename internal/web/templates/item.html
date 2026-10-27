@@ -13,6 +13,18 @@
 {{- if .Read}}
 <p><small>Read {{.ReadAt}} by {{.Model}}</small></p>
 
+<section aria-labelledby="mentions">
+  <h2 id="mentions">Mentions</h2>
+  {{- if not .Mentions}}
+  <p>Reading found no Entities mentioned in this Item.</p>
+  {{- end}}
+  <ul>
+  {{- range .Mentions}}
+    <li>{{if .Wikidata}}<a href="{{.Wikidata}}" hx-boost="false"><span hx-disable>{{.Name}}</span></a>{{else}}<span hx-disable>{{.Name}}</span>{{end}} <small>({{.Kind}})</small></li>
+  {{- end}}
+  </ul>
+</section>
+
 <section aria-labelledby="facts">
   <h2 id="facts">Facts</h2>
   {{- if not .Facts}}
@@ -23,7 +35,7 @@
     <li id="{{.Anchor}}">
       <p>{{.Statement}} <small>(as at {{.AsAt}})</small></p>
       <blockquote><p>{{.Quote}}</p></blockquote>
-      {{- if .Entities}}<p><small>Involves {{.Entities}}</small></p>{{end}}
+      {{- template "involves" .Involves}}
       {{- if .Call}}<p><small><a href="{{.Call}}">How it was read</a></small></p>{{end}}
     </li>
   {{- end}}
@@ -40,7 +52,6 @@
     <li>
       <p>{{.Statement}} <small>(claimed by {{.MadeBy}})</small></p>
       <blockquote><p>{{.Quote}}</p></blockquote>
-      {{- if .Entities}}<p><small>Involves {{.Entities}}</small></p>{{end}}
     </li>
   {{- end}}
   </ul>

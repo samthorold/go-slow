@@ -209,9 +209,42 @@ func rankCandidates(shared []sharedMention) []candidate {
 }
 
 // Story is one Story with its Timeline, reporting whether it is in the
-// Record. What Feedback withdrew is on the Timeline, marked.
+// Record. What Feedback withdrew is on the Timeline, marked. Each
+// Development's Fact carries the Entities it involves, in their roles.
 func (s *Store) Story(ctx context.Context, id int64) (editor.Story, bool, error) {
-	return s.story(ctx, id, true)
+	st, found, err := s.story(ctx, id, true)
+	if err != nil || !found {
+		return st, found, err
+	}
+	for i := range st.Timeline {
+		if st.Timeline[i].Involves, err = s.involves(ctx, st.Timeline[i].ID); err != nil {
+			return st, false, fmt.Errorf("story %d: %w", id, err)
+		}
+	}
+	return st, true, nil
+}
+
+// involves are the Entities the Fact id involves, each in the role
+// connecting gave it, by name: none an Item only mentions.
+func (s *Store) involves(ctx context.Context, factID int64) ([]editor.Role, error) {
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT entities.name, fe.role
+		FROM fact_entities fe JOIN entities ON entities.id = fe.entity_id
+		WHERE fe.fact_id = ? AND fe.role IS NOT NULL
+		ORDER BY entities.name`, factID)
+	if err != nil {
+		return nil, fmt.Errorf("involvements of fact %d: %w", factID, err)
+	}
+	defer func() { _ = rows.Close() }()
+	var out []editor.Role
+	for rows.Next() {
+		r := editor.Role{FactID: factID}
+		if err := rows.Scan(&r.Entity, &r.Role); err != nil {
+			return nil, fmt.Errorf("involvements of fact %d: %w", factID, err)
+		}
+		out = append(out, r)
+	}
+	return out, rows.Err()
 }
 
 // story is one Story, with what Feedback withdrew if withdrawn is set, and

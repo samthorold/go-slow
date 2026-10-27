@@ -1,11 +1,11 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "request_hash": "4efbe2a40319c9e15d9064f2d158f36de3e8fafcdee70a86330e25493fdeab2d",
-  "recorded_at": "2026-10-25T23:42:27.425766Z",
+  "request_hash": "5f101352a3ebed648c6291a1c313087d7111e55b6083bf75f8226c38a6c2dffb",
+  "recorded_at": "2026-10-26T23:39:11.957474Z",
   "usage": {
-    "input_tokens": 2680,
-    "output_tokens": 966
+    "input_tokens": 3582,
+    "output_tokens": 657
   },
   "output": {
     "facts": [
@@ -19,55 +19,31 @@
       },
       {
         "developments_in": [
-          "N1"
+          "S2"
         ],
         "fact": "F3"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "S2"
+        ],
         "fact": "F4"
+      },
+      {
+        "developments_in": [],
+        "fact": "F5"
+      },
+      {
+        "developments_in": [
+          "S2"
+        ],
+        "fact": "F6"
+      },
+      {
+        "developments_in": [],
+        "fact": "F7"
       }
     ],
-    "new_stories": [
-      {
-        "ref": "N1",
-        "title": "UK Lightweight Multirole Missile supply to Ukraine"
-      }
-    ]
-  },
-  "earlier_attempts": [
-    {
-      "act": "placing",
-      "model": "claude-haiku-5-5",
-      "request_hash": "4efbe2a40319c9e15d9064f2d158f36de3e8fafcdee70a86330e25493fdeab2d",
-      "recorded_at": "2026-10-25T23:42:22.100546Z",
-      "usage": {
-        "input_tokens": 2680,
-        "output_tokens": 378
-      },
-      "output": {
-        "facts": [
-          {
-            "developments_in": [],
-            "fact": "F1"
-          },
-          {
-            "developments_in": [],
-            "fact": "F2"
-          },
-          {
-            "developments_in": [
-              "S6"
-            ],
-            "fact": "F3"
-          },
-          {
-            "developments_in": [],
-            "fact": "F4"
-          }
-        ],
-        "new_stories": []
-      }
-    }
-  ]
+    "new_stories": []
+  }
 }

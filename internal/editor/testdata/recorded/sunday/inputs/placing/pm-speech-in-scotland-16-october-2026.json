@@ -1,11 +1,11 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "request_hash": "7b4b892273fb2a25d7480c20425abbcdbcc3c648440629b2f3a549ceaf45b64f",
-  "recorded_at": "2026-10-25T23:43:57.538218Z",
+  "request_hash": "f00d59766fcd0331ebc59b98a50c513c0c32792a8b369d19c1e059f9c2d1e8e6",
+  "recorded_at": "2026-10-26T23:40:52.113487Z",
   "usage": {
-    "input_tokens": 2888,
-    "output_tokens": 490
+    "input_tokens": 4706,
+    "output_tokens": 1823
   },
   "output": {
     "facts": [
@@ -26,20 +26,92 @@
         "fact": "F4"
       },
       {
-        "developments_in": [
-          "N1"
-        ],
+        "developments_in": [],
         "fact": "F5"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N1"
+        ],
         "fact": "F6"
+      },
+      {
+        "developments_in": [
+          "S16"
+        ],
+        "fact": "F7"
+      },
+      {
+        "developments_in": [],
+        "fact": "F8"
+      },
+      {
+        "developments_in": [
+          "S8"
+        ],
+        "fact": "F9"
+      },
+      {
+        "developments_in": [
+          "S16"
+        ],
+        "fact": "F10"
+      },
+      {
+        "developments_in": [
+          "N2"
+        ],
+        "fact": "F11"
+      },
+      {
+        "developments_in": [
+          "N3"
+        ],
+        "fact": "F12"
+      },
+      {
+        "developments_in": [],
+        "fact": "F13"
+      },
+      {
+        "developments_in": [],
+        "fact": "F14"
+      },
+      {
+        "developments_in": [
+          "N4"
+        ],
+        "fact": "F15"
+      },
+      {
+        "developments_in": [
+          "S16"
+        ],
+        "fact": "F16"
+      },
+      {
+        "developments_in": [
+          "S16"
+        ],
+        "fact": "F17"
       }
     ],
     "new_stories": [
       {
         "ref": "N1",
-        "title": "UK defence technical education and skills colleges"
+        "title": "UK defence technical skills and training"
+      },
+      {
+        "ref": "N2",
+        "title": "UK support for Scottish shipbuilding"
+      },
+      {
+        "ref": "N3",
+        "title": "UK research and innovation funding"
+      },
+      {
+        "ref": "N4",
+        "title": "Scottish local government reform"
       }
     ]
   }

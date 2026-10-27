@@ -92,6 +92,64 @@ func TestAnItemsPageShowsItsFactsAndClaims(t *testing.T) {
 	}
 }
 
+func TestAnItemsPageListsItsMentionsOnceAndPerFactOnlyTheEntitiesItInvolves(t *testing.T) {
+	store := openStore(t)
+	it := item("speech", "PM speech in Scotland", saturday.Add(-48*time.Hour))
+	seed(t, store, saturday.AddDate(0, 0, -7), it)
+	// A reading in the current schema ties the Fact to every mention, and
+	// the Claim to none.
+	if err := store.SaveReading(t.Context(), editor.Reading{
+		SourceID: it.SourceID, EntryID: it.EntryID, Model: "fake",
+		Entities: []editor.Entity{
+			{Name: "Andy Burnham", Kind: "person", WikidataID: "Q123", Label: "Andy Burnham"},
+			{Name: "Motherwell", Kind: "place"},
+		},
+		Facts: []editor.Fact{{Statement: "Andy Burnham spoke in Motherwell.", AsAt: time.Date(2026, time.October, 22, 0, 0, 0, 0, time.UTC),
+			Quote: "good to be here in Motherwell", Entities: []string{"Andy Burnham", "Motherwell"}}},
+		Claims: []editor.Claim{{Statement: "Scotland is the true north.", MadeBy: "Andy Burnham", Quote: "the true north"}},
+	}, saturday); err != nil {
+		t.Fatal(err)
+	}
+	placeWaiting(t, store, `{"new_stories": [{"ref": "N1", "title": "Burnham in Motherwell"}],
+		"facts": [{"fact": "F1", "developments_in": ["N1"]}]}`)
+	// Connecting gives Andy Burnham a role in the Fact, and Motherwell none.
+	connectWaiting(t, store, `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "actor"}]}], "causes": []}`)
+	app, _ := newAppWithLog(t, saturday, store)
+
+	res := itemPage(t, app, "PM speech in Scotland")
+	if res.status != 200 {
+		t.Fatalf("status %d:\n%s", res.status, res.body)
+	}
+	section := func(id string) string {
+		t.Helper()
+		at := strings.Index(res.body, `id="`+id+`"`)
+		if at < 0 {
+			t.Fatalf("the Item's page has no %s:\n%s", id, res.body)
+		}
+		end := strings.Index(res.body[at:], "</section>")
+		return res.body[at : at+end]
+	}
+	mentions := section("mentions")
+	for _, want := range []string{`<a href="https://www.wikidata.org/wiki/Q123"`, "Andy Burnham", "person", "Motherwell", "place"} {
+		if !strings.Contains(mentions, want) {
+			t.Errorf("the mentions lack %q:\n%s", want, mentions)
+		}
+	}
+	if n := strings.Count(mentions, "Andy Burnham</"); n != 1 {
+		t.Errorf("Andy Burnham is listed %d times among the mentions, want once:\n%s", n, mentions)
+	}
+	facts := section("facts")
+	if !strings.Contains(facts, "Involves <span hx-disable>Andy Burnham</span> as actor") {
+		t.Errorf("the Fact does not show Andy Burnham as its actor:\n%s", facts)
+	}
+	if strings.Contains(facts, "Motherwell</span> as") || strings.Contains(facts, "Andy Burnham, Motherwell") {
+		t.Errorf("the Fact lists Motherwell, which it only mentions:\n%s", facts)
+	}
+	if claims := section("claims"); strings.Contains(claims, "Involves") {
+		t.Errorf("the Claim shows an Entity list:\n%s", claims)
+	}
+}
+
 func TestTheItemsPageSaysWhichItemsHaveBeenRead(t *testing.T) {
 	store := openStore(t)
 	readSpeech(t, store, reading)

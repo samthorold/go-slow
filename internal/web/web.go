@@ -73,7 +73,7 @@ var briefingsTmpl = page("briefings.html")
 var itemsTmpl = page("items.html")
 
 // itemTmpl is an Item's own page.
-var itemTmpl = page("item.html")
+var itemTmpl = page("item.html", "involves.html")
 
 // topicsTmpl is the Topics page.
 var topicsTmpl = page("topics.html")
@@ -81,7 +81,7 @@ var topicsTmpl = page("topics.html")
 // storiesTmpl is the Stories page, and storyTmpl a Story's own page.
 var (
 	storiesTmpl = page("stories.html")
-	storyTmpl   = page("story.html")
+	storyTmpl   = page("story.html", "involves.html")
 )
 
 // feedbackTmpl is the Feedback page: every piece, as given.

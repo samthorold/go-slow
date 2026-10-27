@@ -213,10 +213,18 @@ func (a *app) briefingWith(w http.ResponseWriter, r *http.Request, day time.Time
 		a.serverError(w, r, err)
 		return
 	}
+	var kept []feedback.Kept
+	if exists {
+		if kept, err = a.Kept.KeptFeedback(r.Context()); err != nil {
+			a.serverError(w, r, err)
+			return
+		}
+	}
+	page := briefingPath(day.Format(time.DateOnly))
 	for _, bs := range b.Stories {
 		row := briefedStoryRow{
 			ID: bs.Story.ID, Title: bs.Story.Title, Path: storyPath(bs.Story.ID),
-			Gives: storyGives(p.FeedbackPath, bs.Story.ID),
+			Gives: givenIn(storyGives(p.FeedbackPath, bs.Story.ID), kept, page),
 		}
 		if row.MissedDevelopment, err = a.missedDevelopment(r, p.FeedbackPath, bs.Story.ID, d, errs); err != nil {
 			a.serverError(w, r, err)
@@ -227,7 +235,7 @@ func (a *app) briefingWith(w http.ResponseWriter, r *http.Request, day time.Time
 			for _, d := range st.Developments {
 				item := itemPath(d.SourceID, d.EntryID)
 				sr.Cites = append(sr.Cites, citationRow{
-					Gives: developmentGives(p.FeedbackPath, bs.Story.ID, d.ID),
+					Gives: givenIn(developmentGives(p.FeedbackPath, bs.Story.ID, d.ID), kept, page),
 					AsAt:  factDate(d.Fact), Statement: d.Statement,
 					DevelopmentPath: storyPath(bs.Story.ID) + "#" + developmentAnchor(d.ID),
 					FactPath:        item + "#" + factAnchor(d.ID),
@@ -246,7 +254,7 @@ func (a *app) briefingWith(w http.ResponseWriter, r *http.Request, day time.Time
 	}
 	if exists {
 		p.MissedStory = missedStory(p.FeedbackPath, facts, d, errs)
-		if err := a.briefingFeedbackRows(r, &p, b); err != nil {
+		if err := a.briefingFeedbackRows(r, &p, b, kept); err != nil {
 			a.serverError(w, r, err)
 			return
 		}
@@ -323,13 +331,9 @@ func (a *app) briefingCalls(r *http.Request, p *briefingPage, b editor.Briefing,
 
 // briefingFeedbackRows lists, on the written Briefing, the Feedback given on
 // it, each to undo there; and, when Feedback took every Story out, says so,
-// listing the Feedback that did.
-func (a *app) briefingFeedbackRows(r *http.Request, p *briefingPage, b editor.Briefing) error {
+// listing the Feedback that did. kept is every piece of Feedback.
+func (a *app) briefingFeedbackRows(r *http.Request, p *briefingPage, b editor.Briefing, kept []feedback.Kept) error {
 	takenOut, err := a.Briefings.TakenOutBy(r.Context(), b.Day)
-	if err != nil {
-		return err
-	}
-	kept, err := a.Kept.KeptFeedback(r.Context())
 	if err != nil {
 		return err
 	}

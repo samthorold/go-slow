@@ -49,6 +49,8 @@ type Deps struct {
 	BriefingAt time.Duration
 	// Now is the clock. The day it returns, in its location, is "today".
 	Now func() time.Time
+	// Log takes one line for each request the app answers. Required: tests
+	// pass one they can read, or one that discards.
 	Log *slog.Logger
 }
 
@@ -131,7 +133,7 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("POST /topics", a.addTopic)
 	mux.HandleFunc("PUT /topics/{id}", a.setDepth)
 	mux.HandleFunc("DELETE /topics/{id}", a.removeTopic)
-	return mux
+	return a.logRequests(mux)
 }
 
 type app struct {
@@ -168,7 +170,8 @@ func (a *app) fragment(w http.ResponseWriter, r *http.Request, t *template.Templ
 	_, _ = buf.WriteTo(w)
 }
 
+// serverError answers 500 and notes err for the request's log line.
 func (a *app) serverError(w http.ResponseWriter, r *http.Request, err error) {
-	a.Log.ErrorContext(r.Context(), "request failed", "method", r.Method, "path", r.URL.Path, "error", err)
+	failed(r, err)
 	http.Error(w, "Something went wrong.", http.StatusInternalServerError)
 }

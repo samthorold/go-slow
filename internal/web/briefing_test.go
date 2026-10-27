@@ -52,7 +52,7 @@ func newAppWithLog(t *testing.T, now time.Time, store *sqlite.Store) (http.Handl
 		Calls:       store,
 		BriefingAt:  7 * time.Hour,
 		Now:         func() time.Time { return now },
-		Log:         slog.New(slog.NewTextHandler(&logs, nil)),
+		Log:         slog.New(slog.NewJSONHandler(&logs, &slog.HandlerOptions{Level: slog.LevelDebug})),
 	}), &logs
 }
 
@@ -137,7 +137,7 @@ func TestAFailingStoreIsAServerErrorAndIsLogged(t *testing.T) {
 	if res.status != http.StatusInternalServerError {
 		t.Errorf("status = %d, want 500", res.status)
 	}
-	if !strings.Contains(logs.String(), "level=ERROR") {
+	if !strings.Contains(logs.String(), `"level":"ERROR"`) {
 		t.Errorf("no error logged; logs:\n%s", logs)
 	}
 }

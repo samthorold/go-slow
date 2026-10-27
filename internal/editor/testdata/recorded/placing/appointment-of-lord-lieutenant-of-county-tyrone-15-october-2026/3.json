@@ -1,11 +1,11 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "request_hash": "7c21d0045c838ae5102f05d8901dd16d36b702dd98475ea24688be4792e2041b",
-  "recorded_at": "2026-10-26T14:19:22.505667Z",
+  "request_hash": "6b200a8592ece8ceed597de18798c39a5b9661765983928fb1e9fb46d81c3a67",
+  "recorded_at": "2026-10-26T23:40:14.724591Z",
   "usage": {
-    "input_tokens": 2523,
-    "output_tokens": 504
+    "input_tokens": 2421,
+    "output_tokens": 838
   },
   "output": {
     "facts": [
@@ -40,16 +40,12 @@
       {
         "developments_in": [],
         "fact": "F7"
-      },
-      {
-        "developments_in": [],
-        "fact": "F8"
       }
     ],
     "new_stories": [
       {
         "ref": "N1",
-        "title": "Lord-Lieutenancy of County Tyrone"
+        "title": "Lord-Lieutenant of County Tyrone"
       }
     ]
   }

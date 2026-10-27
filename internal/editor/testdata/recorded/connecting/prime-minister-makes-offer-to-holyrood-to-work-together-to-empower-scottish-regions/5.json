@@ -1,11 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "2b3edef364bab57b037be5dd50711be98ffbff47bf71ed55b25ae1746863df5e",
-  "recorded_at": "2026-10-26T14:20:22.943527Z",
+  "request_hash": "b283e098908aae2fe6c0e9f392a581b6cabfb95b8bfe4047fb81b8fa11044ac8",
+  "recorded_at": "2026-10-26T23:50:18.560846Z",
   "usage": {
-    "input_tokens": 2734,
-    "output_tokens": 1044
+    "input_tokens": 3668,
+    "output_tokens": 1858
   },
   "output": {
     "causes": [],
@@ -29,6 +29,10 @@
           {
             "entity": "Andy Burnham",
             "role": "actor"
+          },
+          {
+            "entity": "First Minister",
+            "role": "undergoer"
           }
         ]
       },
@@ -36,8 +40,12 @@
         "fact": "F3",
         "roles": [
           {
-            "entity": "Douglas Alexander",
+            "entity": "Andy Burnham",
             "role": "actor"
+          },
+          {
+            "entity": "Scottish Government",
+            "role": "undergoer"
           }
         ]
       },
@@ -51,6 +59,37 @@
           {
             "entity": "Scottish Government",
             "role": "undergoer"
+          }
+        ]
+      },
+      {
+        "fact": "F5",
+        "roles": [
+          {
+            "entity": "Andy Burnham",
+            "role": "actor"
+          },
+          {
+            "entity": "First Minister",
+            "role": "undergoer"
+          }
+        ]
+      },
+      {
+        "fact": "F6",
+        "roles": [
+          {
+            "entity": "Westminster",
+            "role": "undergoer"
+          }
+        ]
+      },
+      {
+        "fact": "F7",
+        "roles": [
+          {
+            "entity": "Douglas Alexander",
+            "role": "actor"
           }
         ]
       }

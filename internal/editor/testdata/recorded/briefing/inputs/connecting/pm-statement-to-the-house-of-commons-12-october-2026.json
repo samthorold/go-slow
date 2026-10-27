@@ -1,11 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "5676ffeeaaff4d42807d27f452ee8f2ce6bfd04be158557f7640d32d13139389",
-  "recorded_at": "2026-10-26T00:27:09.896229Z",
+  "request_hash": "4c3a7ab74209a4e88bdd2b565b0a6b8328a8b68df9706ae04c165cb6f4993878",
+  "recorded_at": "2026-10-26T23:45:59.641998Z",
   "usage": {
-    "input_tokens": 2876,
-    "output_tokens": 2413
+    "input_tokens": 3665,
+    "output_tokens": 3340
   },
   "output": {
     "causes": [],
@@ -20,6 +20,10 @@
           {
             "entity": "United Nations General Assembly",
             "role": "occasion"
+          },
+          {
+            "entity": "United Nations",
+            "role": "undergoer"
           }
         ]
       },
@@ -27,16 +31,16 @@
         "fact": "F2",
         "roles": [
           {
-            "entity": "New York",
-            "role": "place"
-          },
-          {
             "entity": "Prime Minister",
             "role": "actor"
           },
           {
             "entity": "Zelenskyy",
-            "role": "undergoer"
+            "role": "actor"
+          },
+          {
+            "entity": "New York",
+            "role": "place"
           }
         ]
       },
@@ -57,16 +61,8 @@
         "fact": "F4",
         "roles": [
           {
-            "entity": "Prime Minister",
+            "entity": "Trump",
             "role": "actor"
-          },
-          {
-            "entity": "Russia",
-            "role": "undergoer"
-          },
-          {
-            "entity": "Ukraine",
-            "role": "undergoer"
           }
         ]
       },
@@ -74,12 +70,34 @@
         "fact": "F5",
         "roles": [
           {
-            "entity": "Trump",
+            "entity": "Ukraine",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F6",
+        "roles": [
+          {
+            "entity": "Prime Minister",
             "role": "actor"
           },
           {
-            "entity": "Russia",
+            "entity": "Trump",
             "role": "undergoer"
+          },
+          {
+            "entity": "New York",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F7",
+        "roles": [
+          {
+            "entity": "United Kingdom",
+            "role": "actor"
           },
           {
             "entity": "Ukraine",
@@ -88,53 +106,15 @@
         ]
       },
       {
-        "fact": "F6",
-        "roles": [
-          {
-            "entity": "Oxfordshire",
-            "role": "place"
-          },
-          {
-            "entity": "Prime Minister",
-            "role": "actor"
-          },
-          {
-            "entity": "NATO Secretary General",
-            "role": "undergoer"
-          }
-        ]
-      },
-      {
-        "fact": "F7",
-        "roles": [
-          {
-            "entity": "Berlin",
-            "role": "place"
-          },
-          {
-            "entity": "Merz",
-            "role": "actor"
-          },
-          {
-            "entity": "Prime Minister",
-            "role": "actor"
-          }
-        ]
-      },
-      {
         "fact": "F8",
         "roles": [
           {
-            "entity": "Foreign Affairs Select Committee",
-            "role": "undergoer"
-          },
-          {
-            "entity": "Prime Minister",
+            "entity": "United Kingdom",
             "role": "actor"
           },
           {
-            "entity": "United Nations General Assembly",
-            "role": "occasion"
+            "entity": "Russia",
+            "role": "undergoer"
           }
         ]
       },
@@ -142,20 +122,16 @@
         "fact": "F9",
         "roles": [
           {
-            "entity": "Berlin",
-            "role": "place"
-          },
-          {
-            "entity": "Germany",
-            "role": "undergoer"
-          },
-          {
-            "entity": "Merz",
-            "role": "undergoer"
-          },
-          {
             "entity": "Prime Minister",
             "role": "actor"
+          },
+          {
+            "entity": "NATO Secretary General",
+            "role": "actor"
+          },
+          {
+            "entity": "Oxfordshire",
+            "role": "place"
           }
         ]
       },
@@ -163,20 +139,16 @@
         "fact": "F10",
         "roles": [
           {
-            "entity": "New York",
-            "role": "place"
-          },
-          {
             "entity": "Prime Minister",
             "role": "actor"
           },
           {
-            "entity": "Saudi Arabia",
-            "role": "undergoer"
+            "entity": "Merz",
+            "role": "actor"
           },
           {
-            "entity": "Trump",
-            "role": "undergoer"
+            "entity": "Berlin",
+            "role": "place"
           }
         ]
       },
@@ -188,8 +160,12 @@
             "role": "actor"
           },
           {
-            "entity": "Saudi Arabia",
-            "role": "undergoer"
+            "entity": "United Kingdom",
+            "role": "actor"
+          },
+          {
+            "entity": "Berlin",
+            "role": "place"
           }
         ]
       },
@@ -201,6 +177,45 @@
             "role": "actor"
           },
           {
+            "entity": "United Kingdom",
+            "role": "actor"
+          },
+          {
+            "entity": "United Nations General Assembly",
+            "role": "occasion"
+          }
+        ]
+      },
+      {
+        "fact": "F13",
+        "roles": [
+          {
+            "entity": "United Kingdom",
+            "role": "actor"
+          },
+          {
+            "entity": "Saudi Arabia",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F14",
+        "roles": []
+      },
+      {
+        "fact": "F15",
+        "roles": [
+          {
+            "entity": "King Khalid International Airport",
+            "role": "undergoer"
+          }
+        ]
+      },
+      {
+        "fact": "F16",
+        "roles": [
+          {
             "entity": "RAF Fairford",
             "role": "place"
           },
@@ -211,75 +226,75 @@
         ]
       },
       {
-        "fact": "F13",
+        "fact": "F17",
         "roles": [
           {
-            "entity": "Falkland Islands",
-            "role": "undergoer"
-          },
-          {
-            "entity": "Prime Minister",
+            "entity": "Home Secretary",
             "role": "actor"
           },
           {
-            "entity": "Trump",
+            "entity": "House of Commons",
+            "role": "undergoer"
+          },
+          {
+            "entity": "RAF Fairford",
             "role": "undergoer"
           }
         ]
       },
       {
-        "fact": "F14",
+        "fact": "F18",
         "roles": [
-          {
-            "entity": "New York",
-            "role": "place"
-          },
           {
             "entity": "Prime Minister",
             "role": "actor"
-          },
-          {
-            "entity": "UK-EU summit",
-            "role": "occasion"
           },
           {
             "entity": "Ursula von der Leyen",
-            "role": "undergoer"
+            "role": "actor"
+          },
+          {
+            "entity": "New York",
+            "role": "place"
           }
         ]
       },
       {
-        "fact": "F15",
+        "fact": "F19",
         "roles": [
+          {
+            "entity": "UK-EU summit",
+            "role": "undergoer"
+          },
           {
             "entity": "Brussels",
             "role": "place"
-          },
-          {
-            "entity": "UK-EU summit",
-            "role": "occasion"
           }
         ]
       },
       {
-        "fact": "F16",
+        "fact": "F20",
         "roles": [
           {
-            "entity": "Britain",
+            "entity": "United Kingdom",
+            "role": "actor"
+          },
+          {
+            "entity": "G20 presidency",
             "role": "undergoer"
+          }
+        ]
+      },
+      {
+        "fact": "F21",
+        "roles": [
+          {
+            "entity": "United Kingdom",
+            "role": "actor"
           },
           {
             "entity": "G20 presidency",
             "role": "occasion"
-          }
-        ]
-      },
-      {
-        "fact": "F17",
-        "roles": [
-          {
-            "entity": "new member for Holborn and St Pancras",
-            "role": "undergoer"
           }
         ]
       }

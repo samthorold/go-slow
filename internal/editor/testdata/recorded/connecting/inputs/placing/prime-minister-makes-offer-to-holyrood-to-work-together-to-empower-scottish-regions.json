@@ -1,11 +1,11 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "request_hash": "df49445e35b795e4cbf5c0ce0baaeb1b0d20e4d7d494f0c88b2303a03b92734d",
-  "recorded_at": "2026-10-25T23:43:39.209965Z",
+  "request_hash": "c267f83298df4652c1094f22af14df9bb64ab57dc62463d746a72f1384f0392c",
+  "recorded_at": "2026-10-26T23:40:26.718152Z",
   "usage": {
-    "input_tokens": 2198,
-    "output_tokens": 465
+    "input_tokens": 3303,
+    "output_tokens": 715
   },
   "output": {
     "facts": [
@@ -14,11 +14,15 @@
         "fact": "F1"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N1"
+        ],
         "fact": "F2"
       },
       {
-        "developments_in": [],
+        "developments_in": [
+          "N1"
+        ],
         "fact": "F3"
       },
       {
@@ -26,12 +30,24 @@
           "N1"
         ],
         "fact": "F4"
+      },
+      {
+        "developments_in": [],
+        "fact": "F5"
+      },
+      {
+        "developments_in": [],
+        "fact": "F6"
+      },
+      {
+        "developments_in": [],
+        "fact": "F7"
       }
     ],
     "new_stories": [
       {
         "ref": "N1",
-        "title": "UK and Scottish Government working relations on devolved powers"
+        "title": "UK Government and Scottish Government cooperation on devolution"
       }
     ]
   }

@@ -1,11 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "a609a6c21f6764128d5bcdacccd6b15d87c90f45dd716be0219096fcd7c3094f",
-  "recorded_at": "2026-10-26T14:18:40.073276Z",
+  "request_hash": "73087ee20d83efd0969b7856519963fb9c909185879a9a179bdd8ca8ac186eb8",
+  "recorded_at": "2026-10-26T23:47:48.864175Z",
   "usage": {
-    "input_tokens": 3106,
-    "output_tokens": 1479
+    "input_tokens": 3945,
+    "output_tokens": 2815
   },
   "output": {
     "causes": [],
@@ -31,8 +31,12 @@
         "fact": "F2",
         "roles": [
           {
-            "entity": "Andy Burnham",
+            "entity": "Volodymyr Zelenskyy",
             "role": "actor"
+          },
+          {
+            "entity": "United Kingdom",
+            "role": "place"
           }
         ]
       },
@@ -40,8 +44,8 @@
         "fact": "F3",
         "roles": [
           {
-            "entity": "Ukraine",
-            "role": "undergoer"
+            "entity": "Andy Burnham",
+            "role": "actor"
           }
         ]
       },
@@ -49,13 +53,56 @@
         "fact": "F4",
         "roles": [
           {
-            "entity": "Ukraine",
-            "role": "undergoer"
+            "entity": "Andy Burnham",
+            "role": "actor"
           }
         ]
       },
       {
         "fact": "F5",
+        "roles": [
+          {
+            "entity": "United Kingdom",
+            "role": "actor"
+          },
+          {
+            "entity": "Ukraine",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F6",
+        "roles": [
+          {
+            "entity": "United Kingdom",
+            "role": "actor"
+          },
+          {
+            "entity": "Ukraine",
+            "role": "place"
+          }
+        ]
+      },
+      {
+        "fact": "F7",
+        "roles": [
+          {
+            "entity": "John Healey",
+            "role": "actor"
+          },
+          {
+            "entity": "Bangkok",
+            "role": "place"
+          },
+          {
+            "entity": "International Monetary Fund",
+            "role": "occasion"
+          }
+        ]
+      },
+      {
+        "fact": "F8",
         "roles": [
           {
             "entity": "Foreign Secretary",
@@ -68,20 +115,34 @@
         ]
       },
       {
-        "fact": "F6",
+        "fact": "F9",
         "roles": [
           {
-            "entity": "John Healey",
+            "entity": "United Kingdom",
             "role": "actor"
-          },
-          {
-            "entity": "IMF meetings in Bangkok",
-            "role": "occasion"
           }
         ]
       },
       {
-        "fact": "F7",
+        "fact": "F10",
+        "roles": [
+          {
+            "entity": "United Kingdom",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F11",
+        "roles": [
+          {
+            "entity": "United Kingdom",
+            "role": "actor"
+          }
+        ]
+      },
+      {
+        "fact": "F12",
         "roles": [
           {
             "entity": "Russia",
@@ -90,6 +151,15 @@
           {
             "entity": "Kyiv",
             "role": "undergoer"
+          }
+        ]
+      },
+      {
+        "fact": "F13",
+        "roles": [
+          {
+            "entity": "John Healey",
+            "role": "actor"
           }
         ]
       }

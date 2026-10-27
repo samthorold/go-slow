@@ -1,11 +1,11 @@
 {
   "act": "placing",
   "model": "claude-haiku-5-5",
-  "request_hash": "320c2deb230fd4329a44773b6849311f0cafc6c73f440b91384bc8a58963836c",
-  "recorded_at": "2026-10-25T23:42:55.379506Z",
+  "request_hash": "9528617bd9064cb1b78ed5ff015b626d02592aa58971050d2f6e246e5ce85ac6",
+  "recorded_at": "2026-10-26T23:39:38.48945Z",
   "usage": {
-    "input_tokens": 2729,
-    "output_tokens": 1115
+    "input_tokens": 3364,
+    "output_tokens": 1525
   },
   "output": {
     "facts": [
@@ -17,35 +17,37 @@
       },
       {
         "developments_in": [
-          "N1"
-        ],
-        "fact": "F2"
-      },
-      {
-        "developments_in": [],
-        "fact": "F3"
-      },
-      {
-        "developments_in": [
-          "N1"
-        ],
-        "fact": "F4"
-      },
-      {
-        "developments_in": [
           "N2"
         ],
-        "fact": "F5"
+        "fact": "F2"
       },
       {
         "developments_in": [
           "N3"
         ],
-        "fact": "F6"
+        "fact": "F3"
       },
       {
         "developments_in": [
           "N4"
+        ],
+        "fact": "F4"
+      },
+      {
+        "developments_in": [
+          "N5"
+        ],
+        "fact": "F5"
+      },
+      {
+        "developments_in": [
+          "N1"
+        ],
+        "fact": "F6"
+      },
+      {
+        "developments_in": [
+          "N5"
         ],
         "fact": "F7"
       },
@@ -55,27 +57,47 @@
       },
       {
         "developments_in": [
-          "N1"
+          "N2"
         ],
         "fact": "F9"
+      },
+      {
+        "developments_in": [],
+        "fact": "F10"
+      },
+      {
+        "developments_in": [],
+        "fact": "F11"
+      },
+      {
+        "developments_in": [],
+        "fact": "F12"
+      },
+      {
+        "developments_in": [],
+        "fact": "F13"
       }
     ],
     "new_stories": [
       {
         "ref": "N1",
-        "title": "Great British Railways headquarters in Derby"
+        "title": "Great British Railways headquarters and organisation"
       },
       {
         "ref": "N2",
-        "title": "Rail foundation apprenticeship scheme"
+        "title": "Rail foundation apprenticeship and youth employment"
       },
       {
         "ref": "N3",
-        "title": "Rail fares under public ownership"
+        "title": "Rail fares policy"
       },
       {
         "ref": "N4",
-        "title": "New rail fleet for the north"
+        "title": "Rail network capacity and services"
+      },
+      {
+        "ref": "N5",
+        "title": "New train fleet for Great British Railways"
       }
     ]
   }

@@ -239,6 +239,47 @@ func TestAReadingThatFailsTheChecksIsRejected(t *testing.T) {
 	}
 }
 
+// walkedIntoDowning is an Item whose quote a junk statement can rest on.
+var walkedIntoDowning = editor.Item{
+	SourceID:  speech.SourceID,
+	EntryID:   speech.EntryID,
+	Title:     speech.Title,
+	Content:   "<p>I have said this since when I walked into Downing Street in July.</p>",
+	Published: speech.Published,
+}
+
+func TestAStatementSharingNoContentWordWithItsQuoteIsRefused(t *testing.T) {
+	for name, output := range map[string]string{
+		// #119's recording: a genuine quote under a statement that says nothing
+		// it says.
+		"a Claim": `{"facts": [], "claims": [{"statement": "No, placeholder removed.",
+			"made_by": "the Prime Minister", "quote": "when I walked into Downing Street in July"}], "mentions": []}`,
+		"a Fact": `{"claims": [], "facts": [{"statement": "No, placeholder removed.", "as_at": "2026-10-16",
+			"quote": "when I walked into Downing Street in July"}], "mentions": []}`,
+		// Words like "in" and "the" carry no content, so sharing them is not
+		// sharing a word.
+		"a statement sharing only stopwords": `{"facts": [], "claims": [{"statement": "It is in the past, as I have said.",
+			"made_by": "the Prime Minister", "quote": "when I walked into Downing Street in July"}], "mentions": []}`,
+	} {
+		t.Run(name, func(t *testing.T) {
+			_, err := editor.Read(t.Context(), &fakeModel{output: output}, walkedIntoDowning)
+			if !errors.Is(err, editor.ErrFailedChecks) {
+				t.Errorf("err = %v, want ErrFailedChecks", err)
+			}
+		})
+	}
+}
+
+func TestAStatementSharingAStemWithItsQuoteButNotAWordPasses(t *testing.T) {
+	// "walks" and "walked" share a stem; no other content word is shared.
+	output := `{"facts": [], "claims": [{"statement": "The Prime Minister walks to work.",
+		"made_by": "the Prime Minister", "quote": "when I walked into Downing Street in July"}], "mentions": []}`
+
+	if _, err := editor.Read(t.Context(), &fakeModel{output: output}, walkedIntoDowning); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestAFactsQuoteMatchesTheItemWhateverItsPunctuationAndMarkup(t *testing.T) {
 	// The Item has a curly apostrophe and a paragraph break; the quote, a
 	// straight one and a space.

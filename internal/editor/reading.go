@@ -289,6 +289,9 @@ func checkReading(it Item, precedents []Precedent, res Response) (Reading, error
 		if q := words(f.Quote); q == "  " || !strings.Contains(text, q) {
 			return Reading{}, failed(it, "a Fact whose quote is not in the Item: %q", f.Quote)
 		}
+		if !sharesContentWord(f.Statement, f.Quote) {
+			return Reading{}, failed(it, "a Fact that shares no word with its quote: %q, quoting %q", f.Statement, f.Quote)
+		}
 		r.Facts = append(r.Facts, Fact{
 			SourceID: it.SourceID, EntryID: it.EntryID,
 			Statement: strings.TrimSpace(f.Statement), AsAt: asAt, Quote: f.Quote,
@@ -300,6 +303,11 @@ func checkReading(it Item, precedents []Precedent, res Response) (Reading, error
 		}
 		if strings.TrimSpace(c.Statement) == "" {
 			return Reading{}, failed(it, "a Claim with no statement")
+		}
+		// A quote in the Item traces nothing if the statement says none of
+		// what it says.
+		if !sharesContentWord(c.Statement, c.Quote) {
+			return Reading{}, failed(it, "a Claim that shares no word with its quote: %q, quoting %q", c.Statement, c.Quote)
 		}
 		r.Claims = append(r.Claims, Claim{
 			SourceID: it.SourceID, EntryID: it.EntryID,

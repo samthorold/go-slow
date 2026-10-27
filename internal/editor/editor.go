@@ -27,9 +27,9 @@ type Store interface {
 	// by the newest Development. Each carries what it shares as Shares.
 	CandidateStories(ctx context.Context, it Item, limit int) ([]Story, error)
 	// PlacingPrecedents are at most limit pieces of the Owner's Feedback on
-	// Developments whose Facts share an Entity with tp's Facts, or whose
-	// Items share a Topic with tp's Item: those sharing the most first, then
-	// the newest. Feedback on a withdrawn Fact is never a precedent.
+	// Developments whose Facts' Items mention an Entity tp's Item mentions,
+	// or share a Topic with it: those sharing the most first, then the
+	// newest. Feedback on a withdrawn Fact is never a precedent.
 	PlacingPrecedents(ctx context.Context, tp ToPlace, limit int) ([]Precedent, error)
 	// SavePlacing writes a placing to the Record, all at once, and marks its
 	// Facts placed at placedAt.

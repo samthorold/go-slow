@@ -167,6 +167,47 @@ type giveButton struct {
 	Story, Fact, ToFact int64
 	Assessment, Read    int64
 	Label, Confirm      string
+	// UndoPath is set where Feedback of its kind already stands on its
+	// target: the button shows as given, beside the undo of that piece from
+	// the page, and is not offered again.
+	UndoPath string
+}
+
+// about reports whether f is Feedback of g's kind on g's target.
+func (g giveButton) about(f feedback.Feedback) bool {
+	if string(f.Kind) != g.Kind || string(f.Level) != g.Level {
+		return false
+	}
+	switch f.Level {
+	case feedback.Story:
+		return f.StoryID == g.Story
+	case feedback.Development:
+		return f.StoryID == g.Story && f.FactID == g.Fact
+	case feedback.Fact:
+		return f.FactID == g.Fact
+	case feedback.Connection:
+		return f.FactID == g.Fact && f.ToFactID == g.ToFact
+	case feedback.Assessment:
+		return f.AssessmentID == g.Assessment
+	case feedback.SundayRead:
+		return f.ReadID == g.Read
+	}
+	return false
+}
+
+// givenIn marks each of gives that Feedback standing in kept already gives,
+// with the undo of that piece from the page at page. Undone Feedback stands
+// nowhere.
+func givenIn(gives []giveButton, kept []feedback.Kept, page string) []giveButton {
+	for i, g := range gives {
+		for _, k := range kept {
+			if !k.Undone() && g.about(k.Feedback) {
+				gives[i].UndoPath = undonePath(page, k.ID)
+				break
+			}
+		}
+	}
+	return gives
 }
 
 // assessmentGives is the Feedback on an Assessment: wrong, or new to the

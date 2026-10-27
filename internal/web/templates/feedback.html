@@ -1,7 +1,11 @@
 {{/* give is one piece of Feedback the Owner can give with a button. It
      re-renders the whole page, since Feedback can change several regions
-     of it (a withdrawn Fact takes statements and Connections with it). */}}
-{{define "give"}}<form class="feedback" hx-post="{{.Path}}" hx-target="body" hx-swap="innerHTML"
+     of it (a withdrawn Fact takes statements and Connections with it).
+     Feedback of its kind already standing on its target shows as given,
+     with the undo of that piece, instead of a fresh button. */}}
+{{define "give"}}{{if .UndoPath}}<span class="feedback given">{{.Label}} ✓, given
+  <form class="feedback" hx-put="{{.UndoPath}}" hx-target="body" hx-swap="innerHTML"><button>Undo</button></form></span>
+{{- else}}<form class="feedback" hx-post="{{.Path}}" hx-target="body" hx-swap="innerHTML"
   {{- with .Confirm}} hx-confirm="{{.}}"{{end}}>
   <input type="hidden" name="kind" value="{{.Kind}}"><input type="hidden" name="level" value="{{.Level}}">
   {{- with .Story}}<input type="hidden" name="story" value="{{.}}">{{end}}
@@ -10,7 +14,7 @@
   {{- with .Assessment}}<input type="hidden" name="assessment" value="{{.}}">{{end}}
   {{- with .Read}}<input type="hidden" name="read" value="{{.}}">{{end}}
   <button>{{.Label}}</button>
-</form>{{end}}
+</form>{{end}}{{end}}
 
 {{define "gives"}}{{range .}}{{template "give" .}}{{end}}{{end}}
 

@@ -122,10 +122,16 @@ func (a *app) sundayRead(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	p := sundayReadPage{Date: day.Format("Sunday 2 January 2006"), BriefingPath: briefingPath(key), Exists: exists}
-	feedbackPath := sundayReadPath(key) + "/feedback"
+	page := sundayReadPath(key)
+	feedbackPath := page + "/feedback"
+	var kept []feedback.Kept
 	if exists {
 		a.opened(r, a.Register.OpenedSundayRead, key)
-		p.Gives = readGives(feedbackPath, read.ID)
+		if kept, err = a.Kept.KeptFeedback(r.Context()); err != nil {
+			a.serverError(w, r, err)
+			return
+		}
+		p.Gives = givenIn(readGives(feedbackPath, read.ID), kept, page)
 	}
 	if !exists {
 		fs, err := a.SundayReads.SundayReadFailures(r.Context(), key)
@@ -152,7 +158,7 @@ func (a *app) sundayRead(w http.ResponseWriter, r *http.Request) {
 		row := assessmentRow{Anchor: assessmentAnchor(as.ID), Statement: as.Statement, AsAt: as.AsAt.Format("2 January 2006"),
 			Withdrawn: as.Withdrawn, Reached: reached}
 		if !as.Withdrawn {
-			row.Gives = assessmentGives(feedbackPath, as.ID)
+			row.Gives = givenIn(assessmentGives(feedbackPath, as.ID), kept, page)
 		}
 		if as.Supersedes != 0 {
 			row.Supersedes = assessmentPath(as.Supersedes)
@@ -165,16 +171,9 @@ func (a *app) sundayRead(w http.ResponseWriter, r *http.Request) {
 	for _, s := range read.Stories {
 		p.Stories = append(p.Stories, startedStoryRow{Title: s.Title, Path: storyPath(s.ID)})
 	}
-	if exists {
-		kept, err := a.Kept.KeptFeedback(r.Context())
-		if err != nil {
-			a.serverError(w, r, err)
-			return
-		}
-		for _, k := range kept {
-			if (k.Level == feedback.SundayRead || k.Level == feedback.Assessment) && k.ReadDay == key {
-				p.Feedback = append(p.Feedback, a.keptRow(k, sundayReadPath(key)))
-			}
+	for _, k := range kept {
+		if (k.Level == feedback.SundayRead || k.Level == feedback.Assessment) && k.ReadDay == key {
+			p.Feedback = append(p.Feedback, a.keptRow(k, page))
 		}
 	}
 	a.render(w, r, sundayReadTmpl, p)

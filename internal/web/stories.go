@@ -176,19 +176,19 @@ func (a *app) storyWith(w http.ResponseWriter, r *http.Request, id int64, status
 		a.serverError(w, r, err)
 		return
 	}
-	p := storyPage{Title: s.Title, FeedbackPath: storyPath(id) + "/feedback", Unwanted: s.Unwanted, Missed: s.Missed}
-	p.Gives = storyGives(p.FeedbackPath, id)
-	if s.Unwanted {
-		p.Gives = p.Gives[1:]
+	kept, err := a.Kept.KeptFeedback(r.Context())
+	if err != nil {
+		a.serverError(w, r, err)
+		return
 	}
+	page := storyPath(id)
+	p := storyPage{Title: s.Title, FeedbackPath: page + "/feedback", Unwanted: s.Unwanted, Missed: s.Missed}
+	p.Gives = notOfferedAgain(givenIn(storyGives(p.FeedbackPath, id), kept, page), s.Unwanted)
 	for _, d := range s.Timeline {
 		row := developmentView(d)
 		row.Call = callPath(d.PlacingCall)
 		if !d.Withdrawn {
-			row.Gives = developmentGives(p.FeedbackPath, id, d.ID)
-			if d.Unwanted {
-				row.Gives = row.Gives[1:]
-			}
+			row.Gives = notOfferedAgain(givenIn(developmentGives(p.FeedbackPath, id, d.ID), kept, page), d.Unwanted)
 		}
 		p.Timeline = append(p.Timeline, row)
 	}
@@ -198,7 +198,7 @@ func (a *app) storyWith(w http.ResponseWriter, r *http.Request, id int64, status
 			Withdrawn: c.Withdrawn, Call: callPath(c.Call),
 		})
 		if !c.Withdrawn {
-			p.Causes[len(p.Causes)-1].Gives = connectionGives(p.FeedbackPath, c.Cause.ID, c.Effect.ID)
+			p.Causes[len(p.Causes)-1].Gives = givenIn(connectionGives(p.FeedbackPath, c.Cause.ID, c.Effect.ID), kept, page)
 		}
 	}
 	p.MissedStory = missedStory(p.FeedbackPath, s.Timeline, d, errs)
@@ -218,20 +218,22 @@ func (a *app) storyWith(w http.ResponseWriter, r *http.Request, id int64, status
 		}
 		p.Connected = append(p.Connected, row)
 	}
-	if p.Feedback, err = a.storyFeedbackRows(r, s); err != nil {
-		a.serverError(w, r, err)
-		return
-	}
+	p.Feedback = a.storyFeedbackRows(s, kept)
 	a.renderStatus(w, r, status, storyTmpl, p)
 }
 
-// storyFeedbackRows is the Feedback about s: on the Story or one of its
-// Developments, or on a Fact or Connection its page shows.
-func (a *app) storyFeedbackRows(r *http.Request, s editor.Story) ([]keptRow, error) {
-	kept, err := a.Kept.KeptFeedback(r.Context())
-	if err != nil {
-		return nil, err
+// notOfferedAgain is gives, less its first (Unwanted) when the target is
+// marked unwanted and that button isn't already shown as given.
+func notOfferedAgain(gives []giveButton, unwanted bool) []giveButton {
+	if unwanted && gives[0].UndoPath == "" {
+		return gives[1:]
 	}
+	return gives
+}
+
+// storyFeedbackRows is the Feedback in kept about s: on the Story or one of
+// its Developments, or on a Fact or Connection its page shows.
+func (a *app) storyFeedbackRows(s editor.Story, kept []feedback.Kept) []keptRow {
 	facts := map[int64]bool{}
 	for _, d := range s.Timeline {
 		facts[d.ID] = true
@@ -248,7 +250,7 @@ func (a *app) storyFeedbackRows(r *http.Request, s editor.Story) ([]keptRow, err
 			out = append(out, a.keptRow(k, storyPath(s.ID)))
 		}
 	}
-	return out, nil
+	return out
 }
 
 // undoOnStory is an undo from a Story's page, which it lands back on.

@@ -2,6 +2,7 @@ package editor_test
 
 import (
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -67,6 +68,76 @@ func notOfUkraine(t *testing.T, store *sqlite.Store, f namedItem, p properties) 
 	}
 }
 
+// The two Facts of the Zelenskyy meeting the reciprocal rule is read on
+// (#115): a mutual act (the two spoke) and a directed one (a welcome). The
+// meeting's other mutual Fact, "The leaders discussed…", names neither party
+// and is left out.
+const (
+	theyHadACall = "The Prime Minister and President Zelenskyy had a call on Saturday and reflected on it at the meeting."
+	theyWelcomed = "The Prime Minister welcomed President Volodymyr Zelenskyy of Ukraine to Downing Street."
+)
+
+// reciprocalActors are the properties declared before connecting gave each
+// party of a mutual act the role actor (#115): the call has both the Prime
+// Minister and Zelenskyy as actor, and the welcome has the Prime Minister as
+// its one actor. Each Fact must be there, with the two as separate mentions,
+// or the property tests nothing.
+func reciprocalActors(t *testing.T, store *sqlite.Store, f namedItem, p properties) {
+	t.Helper()
+	ctx := t.Context()
+	it, found, err := store.ReadItem(ctx, f.item.SourceID, f.item.EntryID)
+	if err != nil || !found {
+		t.Fatalf("%s is not read: %v %v", f.name, found, err)
+	}
+	ids := map[string]int64{}
+	for _, fact := range it.Facts {
+		if fact.Statement != theyHadACall && fact.Statement != theyWelcomed {
+			continue
+		}
+		ids[fact.Statement] = fact.ID
+		// Until the acts find work by mentions alone, each Fact is tied to
+		// every Entity its Item mentions: the two must be there apart.
+		for _, name := range []string{primeMinister, zelenskyy} {
+			if !slices.Contains(fact.Entities, name) {
+				t.Fatalf("%s: %q is not mentioned on its own beside %q, so the property tests nothing: %q", f.name, name, fact.Statement, fact.Entities)
+			}
+		}
+	}
+	for _, s := range []string{theyHadACall, theyWelcomed} {
+		if ids[s] == 0 {
+			t.Fatalf("%s: no Fact %q, so the property tests nothing: %+v", f.name, s, it.Facts)
+		}
+	}
+	involved, err := store.Involvements(ctx, f.item.SourceID, f.item.EntryID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	actors := func(id int64) []string {
+		var names []string
+		for _, r := range involved {
+			if r.FactID == id && r.Role == "actor" {
+				names = append(names, r.Entity)
+			}
+		}
+		slices.Sort(names)
+		return names
+	}
+	both := p.property("the call has both the Prime Minister and Zelenskyy as actor")
+	if got := actors(ids[theyHadACall]); !slices.Contains(got, primeMinister) || !slices.Contains(got, zelenskyy) {
+		both("the call's actors are %q", got)
+	}
+	one := p.property("the welcome has the Prime Minister as its one actor")
+	if got := actors(ids[theyWelcomed]); !slices.Equal(got, []string{primeMinister}) {
+		one("the welcome's actors are %q", got)
+	}
+}
+
+// The meeting's two parties, as its reading names them.
+const (
+	primeMinister = "the Prime Minister"
+	zelenskyy     = "Volodymyr Zelenskyy"
+)
+
 // recordedConnectings replays (or records) connecting from the recordings
 // under root.
 func recordedConnectings(t *testing.T, root string) {
@@ -90,6 +161,7 @@ func connectingVerdicts(t *testing.T, root string) []error {
 			ctx := t.Context()
 			if f.name == zelenskyyMeeting {
 				notOfUkraine(t, store, f, p)
+				reciprocalActors(t, store, f, p)
 			}
 			// Every cause Connection traces to Items through its Facts.
 			traces := p.property("every cause traces to Items through its Facts")

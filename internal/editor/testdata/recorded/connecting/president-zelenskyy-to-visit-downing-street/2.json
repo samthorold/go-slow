@@ -1,11 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "73087ee20d83efd0969b7856519963fb9c909185879a9a179bdd8ca8ac186eb8",
-  "recorded_at": "2026-10-26T23:47:16.031822Z",
+  "request_hash": "69f47e7f06eae75bb4d98cf13d34073f75c069d6742bab6c2b547b5b4dcd2b2a",
+  "recorded_at": "2026-10-27T10:03:22.420359Z",
   "usage": {
-    "input_tokens": 3945,
-    "output_tokens": 2785
+    "input_tokens": 4067,
+    "output_tokens": 2323
   },
   "output": {
     "causes": [],
@@ -67,7 +67,7 @@
           },
           {
             "entity": "Ukraine",
-            "role": "place"
+            "role": "undergoer"
           }
         ]
       },
@@ -80,7 +80,7 @@
           },
           {
             "entity": "Ukraine",
-            "role": "place"
+            "role": "undergoer"
           }
         ]
       },
@@ -94,10 +94,6 @@
           {
             "entity": "Bangkok",
             "role": "place"
-          },
-          {
-            "entity": "International Monetary Fund",
-            "role": "occasion"
           }
         ]
       },
@@ -107,10 +103,6 @@
           {
             "entity": "Foreign Secretary",
             "role": "actor"
-          },
-          {
-            "entity": "Russia",
-            "role": "undergoer"
           },
           {
             "entity": "Warsaw Security Forum",
@@ -124,10 +116,6 @@
           {
             "entity": "United Kingdom",
             "role": "actor"
-          },
-          {
-            "entity": "Russia",
-            "role": "undergoer"
           }
         ]
       },
@@ -168,10 +156,6 @@
           {
             "entity": "John Healey",
             "role": "actor"
-          },
-          {
-            "entity": "Russia",
-            "role": "undergoer"
           }
         ]
       }

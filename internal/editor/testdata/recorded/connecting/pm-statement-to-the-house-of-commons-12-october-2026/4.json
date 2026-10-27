@@ -1,17 +1,25 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "4c3a7ab74209a4e88bdd2b565b0a6b8328a8b68df9706ae04c165cb6f4993878",
-  "recorded_at": "2026-10-26T23:46:40.144917Z",
+  "request_hash": "8c36496c6b9d02e6841b9c8493160db283ffdf1cedebcdfc9f7ea7ff28a38e75",
+  "recorded_at": "2026-10-27T10:02:48.811691Z",
   "usage": {
-    "input_tokens": 3665,
-    "output_tokens": 3334
+    "input_tokens": 3787,
+    "output_tokens": 2828
   },
   "output": {
     "causes": [
       {
+        "cause": "F4",
+        "effect": "F5"
+      },
+      {
         "cause": "F13",
         "effect": "F14"
+      },
+      {
+        "cause": "F16",
+        "effect": "F17"
       }
     ],
     "facts": [
@@ -21,6 +29,10 @@
           {
             "entity": "Prime Minister",
             "role": "actor"
+          },
+          {
+            "entity": "United Nations",
+            "role": "undergoer"
           },
           {
             "entity": "United Nations General Assembly",
@@ -37,7 +49,7 @@
           },
           {
             "entity": "Zelenskyy",
-            "role": "undergoer"
+            "role": "actor"
           },
           {
             "entity": "New York",
@@ -54,7 +66,7 @@
           },
           {
             "entity": "Zelenskyy",
-            "role": "undergoer"
+            "role": "actor"
           }
         ]
       },
@@ -128,7 +140,7 @@
           },
           {
             "entity": "NATO Secretary General",
-            "role": "undergoer"
+            "role": "actor"
           },
           {
             "entity": "Oxfordshire",
@@ -188,18 +200,13 @@
           },
           {
             "entity": "Saudi Arabia",
-            "role": "place"
+            "role": "undergoer"
           }
         ]
       },
       {
         "fact": "F14",
-        "roles": [
-          {
-            "entity": "Saudi Arabia",
-            "role": "place"
-          }
-        ]
+        "roles": []
       },
       {
         "fact": "F15",
@@ -236,7 +243,7 @@
           },
           {
             "entity": "RAF Fairford",
-            "role": "place"
+            "role": "undergoer"
           }
         ]
       },
@@ -249,7 +256,7 @@
           },
           {
             "entity": "Ursula von der Leyen",
-            "role": "undergoer"
+            "role": "actor"
           },
           {
             "entity": "New York",
@@ -262,7 +269,7 @@
         "roles": [
           {
             "entity": "UK-EU summit",
-            "role": "undergoer"
+            "role": "occasion"
           },
           {
             "entity": "Brussels",

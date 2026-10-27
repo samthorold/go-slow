@@ -1,11 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "771f2fbeb4b8526065ca783e26d2f1b4727ca9d2657ec0caf2cacee5f8d16dfe",
-  "recorded_at": "2026-10-26T23:45:22.264128Z",
+  "request_hash": "7be848dc0791fb1af8b2065cab5c64e29545448f33e0e3c4e0f6d84689e5962e",
+  "recorded_at": "2026-10-27T10:01:39.098673Z",
   "usage": {
-    "input_tokens": 1763,
-    "output_tokens": 1481
+    "input_tokens": 1885,
+    "output_tokens": 1714
   },
   "output": {
     "causes": [],
@@ -15,6 +15,14 @@
         "roles": [
           {
             "entity": "UK Government",
+            "role": "actor"
+          },
+          {
+            "entity": "US",
+            "role": "actor"
+          },
+          {
+            "entity": "Russia",
             "role": "actor"
           }
         ]
@@ -80,7 +88,7 @@
           },
           {
             "entity": "US",
-            "role": "actor"
+            "role": "undergoer"
           },
           {
             "entity": "Ukraine",
@@ -97,11 +105,11 @@
           },
           {
             "entity": "US",
-            "role": "undergoer"
+            "role": "actor"
           },
           {
             "entity": "Ukraine",
-            "role": "undergoer"
+            "role": "actor"
           }
         ]
       },

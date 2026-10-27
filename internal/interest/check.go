@@ -2,6 +2,7 @@ package interest
 
 import (
 	"context"
+	"html"
 	"slices"
 	"strings"
 	"unicode"
@@ -19,7 +20,8 @@ type Item struct {
 
 // Ties is the lazy-reading check for one Topic: whether the Item comes from
 // one of the Topic's Sources or names one of its terms. A term matches as
-// whole words, ignoring case and punctuation, so "Farage" ties "Mr Farage's
+// whole words of the text a reader sees (markup stripped, entities decoded),
+// ignoring case and punctuation, so "Farage" ties "Mr Farage's
 // statement" but not "Farageist". It is plain code with no model in it, so it
 // can run over every Item collected.
 func (t Topic) Ties(it Item) bool {
@@ -29,7 +31,7 @@ func (t Topic) Ties(it Item) bool {
 	if len(t.Terms) == 0 {
 		return false
 	}
-	text := words(it.Title + " " + it.Summary + " " + it.Content)
+	text := words(visible(it.Title) + " " + visible(it.Summary) + " " + visible(it.Content))
 	for _, term := range t.Terms {
 		if w := words(term); w != "  " && strings.Contains(text, w) {
 			return true
@@ -86,6 +88,65 @@ func (s *Service) recheck(ctx context.Context, t Topic) error {
 		}
 	}
 	return s.store.Tie(ctx, tied)
+}
+
+// visible is the text a reader sees of s, which may be the publisher's HTML:
+// each tag, comment or declaration becomes a space (so its names, attributes
+// and link URLs are not words of the text), and entities are decoded. A '<'
+// starts a tag only where HTML's tokenizer would take it as one (before a
+// letter, '/', '!' or '?'), so plain text such as "inflation < 2%" keeps it.
+// An unclosed tag runs to the end of s, as it would in a browser.
+func visible(s string) string {
+	var b strings.Builder
+	for {
+		i := tagStart(s)
+		if i < 0 {
+			b.WriteString(s)
+			break
+		}
+		b.WriteString(s[:i])
+		b.WriteByte(' ')
+		end := tagEnd(s[i:])
+		if end < 0 {
+			break
+		}
+		s = s[i+end:]
+	}
+	return html.UnescapeString(b.String())
+}
+
+// tagStart is the index of the first '<' in s that opens markup, or -1.
+func tagStart(s string) int {
+	for i := 0; i < len(s)-1; i++ {
+		if s[i] != '<' {
+			continue
+		}
+		c := s[i+1]
+		if c == '/' || c == '!' || c == '?' || ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') {
+			return i
+		}
+	}
+	return -1
+}
+
+// tagEnd is the length of the markup at the start of s, through its closing
+// '>', skipping any '>' inside a quoted attribute value; -1 if it never
+// closes.
+func tagEnd(s string) int {
+	var quote byte
+	for i := 1; i < len(s); i++ {
+		switch c := s[i]; {
+		case quote != 0:
+			if c == quote {
+				quote = 0
+			}
+		case c == '"' || c == '\'':
+			quote = c
+		case c == '>':
+			return i + 1
+		}
+	}
+	return -1
 }
 
 // words lowercases s and turns every run of characters that are not letters

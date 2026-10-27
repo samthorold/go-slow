@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/feedback"
 	"github.com/samthorold/go-slow/internal/interest"
@@ -259,6 +260,144 @@ func TestFactsAboutAnEntityAreTheFactsInvolvingItInARoleNotThoseMentioningIt(t *
 	}
 	if !strings.Contains(res[2].Content, "Andy Burnham spoke to the President of Finland.") {
 		t.Errorf("Facts about Finland lack the call, which involves it:\n%s", res[2].Content)
+	}
+}
+
+func TestTheStoryToolShowsEachFactWithTheEntitiesItInvolvesInTheirRoles(t *testing.T) {
+	store := record(t)
+	readAndPlace(t, store, &fakeModel{output: startsAStory})
+	withAnEarlierCall(t, store)
+	// The speech mentions Andy Burnham and Motherwell but involves him
+	// alone; the call mentions Andy Burnham and Finland but involves Finland
+	// alone.
+	connect(t, store, speech.EntryID, 1, editor.Role{Entity: "Andy Burnham", Role: "actor"})
+	connect(t, store, "call", 2, editor.Role{Entity: "Finland", Role: "undergoer"})
+	agent := &fakeAgent{turns: []editor.Turn{calls("story", `{"story": "S1"}`), submits(citesTheSpeech)}}
+	ed, logs := reader(store, agent)
+
+	if err := ed.SundayRead(t.Context(), sundayMorning); err != nil {
+		t.Fatalf("%v\n%s", err, logs)
+	}
+
+	if in := agent.sent[0].Messages[0].User; !strings.Contains(in, "Andy Burnham gave a speech in Motherwell. [Andy Burnham: actor]\n") {
+		t.Errorf("the week's Development is not shown with what it involves:\n%s", in)
+	}
+	msgs := agent.sent[1].Messages
+	story := msgs[len(msgs)-1].Results[0].Content
+	for _, want := range []string{
+		"Entities: Andy Burnham; Finland\n",
+		"Andy Burnham gave a speech in Motherwell. [Andy Burnham: actor]\n",
+		"Andy Burnham spoke to the President of Finland. [Finland: undergoer]\n",
+	} {
+		if !strings.Contains(story, want) {
+			t.Errorf("the story tool does not show %q:\n%s", want, story)
+		}
+	}
+}
+
+func TestFactsAboutCausesAndAssessmentsShowEachFactWithTheEntitiesItInvolvesInTheirRoles(t *testing.T) {
+	store := record(t)
+	readAndPlace(t, store, &fakeModel{output: startsAStory})
+	ed, logs := reader(store, &fakeAgent{turns: []editor.Turn{submits(assessesTheSpeech)}})
+	if err := ed.SundayRead(t.Context(), sundayMorning); err != nil {
+		t.Fatalf("%v\n%s", err, logs)
+	}
+	nextSunday := sundayMorning.AddDate(0, 0, 7)
+	placeTheCall(t, store, nextSunday.Add(-24*time.Hour))
+	connect(t, store, speech.EntryID, 1, editor.Role{Entity: "Andy Burnham", Role: "actor"})
+	if err := store.SaveConnecting(t.Context(), editor.Connecting{
+		SourceID: number10.ID, EntryID: "call", Facts: []int64{2}, Model: "fake",
+		Roles:  []editor.Role{{FactID: 2, Entity: "Finland", Role: "undergoer"}},
+		Causes: []editor.Cause{{CauseID: 2, EffectID: 1}},
+	}, saturday); err != nil {
+		t.Fatal(err)
+	}
+	agent := &fakeAgent{turns: []editor.Turn{
+		calls("story", `{"story": "S1"}`, "facts_about", `{"entity": "Finland", "before": ""}`, "assessments", `{}`),
+		submits(citesTheSpeech),
+	}}
+	ed, logs = reader(store, agent)
+
+	if err := ed.SundayRead(t.Context(), nextSunday); err != nil {
+		t.Fatalf("%v\n%s", err, logs)
+	}
+
+	msgs := agent.sent[1].Messages
+	res := msgs[len(msgs)-1].Results
+	if len(res) != 3 {
+		t.Fatalf("results = %+v, want one per call", res)
+	}
+	speechShown := "Andy Burnham gave a speech in Motherwell. [Andy Burnham: actor]"
+	callShown := "Andy Burnham spoke to the President of Finland. [Finland: undergoer]"
+	for i, want := range []string{
+		callShown + " led to F1 (as at 2026-10-16, from \"PM speech in Scotland: 16 October 2026\"): " + speechShown + "\n",
+		callShown + "\n",
+		"rests on F1 (as at 2026-10-16, from \"PM speech in Scotland: 16 October 2026\"): " + speechShown + "\n",
+	} {
+		if !strings.Contains(res[i].Content, want) {
+			t.Errorf("result %d does not show %q:\n%s", i+1, want, res[i].Content)
+		}
+	}
+}
+
+func TestConnectedStoriesShowEachFactWithTheEntitiesItInvolvesInTheirRoles(t *testing.T) {
+	// The readout is in a Story of its own; a visit, F3, moves on both
+	// Stories, which it and Andy Burnham as actor connect.
+	store := twoStories(t, inANewStory)
+	visit := collect.Item{SourceID: number10.ID, EntryID: "visit", Title: "PM visit to Glasgow",
+		Link: "https://www.gov.uk/visit", Published: laterItem.Published.Add(time.Hour), Attribution: collect.OGL, CollectedAt: saturday}
+	if _, err := store.AddItems(t.Context(), []collect.Item{visit}); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.SaveReading(t.Context(), editor.Reading{
+		SourceID: visit.SourceID, EntryID: visit.EntryID, Model: "fake",
+		Entities: []editor.Entity{{Name: "Andy Burnham", Kind: "person"}, {Name: "Glasgow", Kind: "place"}},
+		Facts: []editor.Fact{{Statement: "Andy Burnham visited Glasgow.", AsAt: oct16.AddDate(0, 0, 2),
+			Quote: "visited Glasgow"}},
+	}, saturday); err != nil {
+		t.Fatal(err)
+	}
+	ed, logs := placer(store, &fakeModel{output: `{"new_stories": [], "facts": [{"fact": "F1", "developments_in": ["S1", "S2"]}]}`})
+	if err := ed.PlaceWaiting(t.Context(), saturday); err != nil {
+		t.Fatal(err)
+	}
+	connect(t, store, laterItem.EntryID, 2, editor.Role{Entity: "Andy Burnham", Role: "actor"}, editor.Role{Entity: "Edinburgh", Role: "place"})
+	connect(t, store, visit.EntryID, 3, editor.Role{Entity: "Andy Burnham", Role: "actor"})
+	agent := &fakeAgent{turns: []editor.Turn{calls("story", `{"story": "S1"}`), submits(citesTheSpeech)}}
+	ed, _ = reader(store, agent)
+
+	if err := ed.SundayRead(t.Context(), sundayMorning); err != nil {
+		t.Fatalf("%v\n%s", err, logs)
+	}
+
+	msgs := agent.sent[1].Messages
+	story := msgs[len(msgs)-1].Results[0].Content
+	_, connected, _ := strings.Cut(story, "Connected Stories:\n")
+	for _, want := range []string{
+		"shares S2:F3 (as at 2026-10-18, from \"PM visit to Glasgow\"): Andy Burnham visited Glasgow. [Andy Burnham: actor]\n",
+		"Andy Burnham as actor here in S1:F3 (as at 2026-10-18, from \"PM visit to Glasgow\"): Andy Burnham visited Glasgow. [Andy Burnham: actor] and there in S2:F2 ",
+		"Andy Burnham met the First Minister in Edinburgh. [Andy Burnham: actor; Edinburgh: place]\n",
+	} {
+		if !strings.Contains(connected, want) {
+			t.Errorf("the connected Stories do not show %q:\n%s\n%s", want, story, logs)
+		}
+	}
+}
+
+func TestAFactInvolvingNoEntityIsShownWithNone(t *testing.T) {
+	store := record(t)
+	readAndPlace(t, store, &fakeModel{output: startsAStory})
+	agent := &fakeAgent{turns: []editor.Turn{calls("story", `{"story": "S1"}`), submits(citesTheSpeech)}}
+	ed, logs := reader(store, agent)
+
+	if err := ed.SundayRead(t.Context(), sundayMorning); err != nil {
+		t.Fatalf("%v\n%s", err, logs)
+	}
+
+	msgs := agent.sent[1].Messages
+	story := msgs[len(msgs)-1].Results[0].Content
+	if !strings.Contains(story, "Andy Burnham gave a speech in Motherwell.\n") || strings.Contains(story, "Entities:") {
+		t.Errorf("a Story whose Facts involve no Entity is shown with some:\n%s", story)
 	}
 }
 

@@ -372,7 +372,7 @@ func beforeText(before string) string {
 func (r *sundayRun) showFact(f Development) string {
 	ref := factRefOf(f.ID)
 	r.seen[ref] = Citation{Kind: CitesFact, Fact: f}
-	return fmt.Sprintf("%s (as at %s, from %q): %s%s", ref, f.AsAt.Format(time.DateOnly), f.ItemTitle, f.Statement, entitiesText(f.Fact))
+	return fmt.Sprintf("%s (as at %s, from %q): %s%s", ref, f.AsAt.Format(time.DateOnly), f.ItemTitle, f.Statement, involvesText(f.Fact))
 }
 
 // registerDevelopment registers a Fact as a Development in its Story as
@@ -390,17 +390,22 @@ func (r *sundayRun) registerDevelopment(s Story, d Development) string {
 // registered as seen: as a Development, and as its Fact.
 func (r *sundayRun) showDevelopment(s Story, d Development) string {
 	ref := r.registerDevelopment(s, d)
-	return fmt.Sprintf("%s (as at %s, from %q): %s%s", ref, d.AsAt.Format(time.DateOnly), d.ItemTitle, d.Statement, entitiesText(d.Fact))
+	return fmt.Sprintf("%s (as at %s, from %q): %s%s", ref, d.AsAt.Format(time.DateOnly), d.ItemTitle, d.Statement, involvesText(d.Fact))
 }
 
-// entitiesText is the Entities the Record ties a Fact to (its Item's
-// mentions), by the names the tools take. facts_about finds a Fact by one
-// of them only when the Fact involves it in a role.
-func entitiesText(f Fact) string {
-	if len(f.Entities) == 0 {
+// involvesText is the Entities a Fact involves, each with its role, by the
+// names facts_about takes: none its Item only mentions, which facts_about
+// would not find it by (system design: What finds work rests on mentions;
+// what links Stories rests on involvement).
+func involvesText(f Fact) string {
+	if len(f.Involves) == 0 {
 		return ""
 	}
-	return " [" + strings.Join(f.Entities, "; ") + "]"
+	shown := make([]string, len(f.Involves))
+	for i, r := range f.Involves {
+		shown[i] = r.Entity + ": " + r.Role
+	}
+	return " [" + strings.Join(shown, "; ") + "]"
 }
 
 // parseRef is the id in a ref such as S3, with its prefix.

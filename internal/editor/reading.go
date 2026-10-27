@@ -59,7 +59,8 @@ type Fact struct {
 	// gives none). Which of them it involves, in a Role, is connecting's.
 	Entities []string
 	// Involves are the Entities it involves, each in the Role connecting
-	// gave it, by name: set where a page shows them, never shown an act.
+	// gave it, by name: set where a page or the Sunday read shows them, and
+	// shown no daily act.
 	Involves []Role
 }
 

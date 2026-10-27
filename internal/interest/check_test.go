@@ -30,6 +30,51 @@ func TestTheCheckTiesAnItemToATopicByItsTerms(t *testing.T) {
 	}
 }
 
+func TestTheCheckMatchesTheTextAReaderSeesNotTheMarkup(t *testing.T) {
+	content := `<div class="govspeak"><h3 id="background">Context</h3><p>See <a href="https://www.gov.uk/government/news/omagh-inquiry">the inquiry</a>.</p></div>`
+
+	cases := []struct {
+		name string
+		term string
+	}{
+		{"a tag name", "div"},
+		{"an attribute name", "class"},
+		{"an attribute value", "govspeak"},
+		{"an id", "background"},
+		{"a word in a link URL", "Omagh"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			topic := interest.Topic{Name: c.term, Terms: []string{c.term}}
+			if topic.Ties(interest.Item{Content: content}) {
+				t.Errorf("the term %q, only in the markup, ties the Item", c.term)
+			}
+		})
+	}
+}
+
+func TestTheCheckTiesATermInTheVisibleText(t *testing.T) {
+	cases := []struct {
+		name    string
+		term    string
+		content string
+	}{
+		{"inside a tag", "Omagh", `<p>Omagh</p>`},
+		{"across tags", "Omagh bombing", `<h3>Omagh</h3><p>bombing inquiry</p>`},
+		{"with a named entity decoded", "Marks & Spencer", `<p>Marks &amp; Spencer</p>`},
+		{"with a numeric entity decoded", "O'Neill", `<p>Michelle O&#8217;Neill</p>`},
+		{"beside a less-than sign that starts no tag", "rates", `<p>inflation < 2% and rates</p>`},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			topic := interest.Topic{Name: c.term, Terms: []string{c.term}}
+			if !topic.Ties(interest.Item{Content: c.content}) {
+				t.Errorf("the term %q does not tie %q", c.term, c.content)
+			}
+		})
+	}
+}
+
 func TestTheCheckTiesEveryItemFromATopicsSources(t *testing.T) {
 	treasury := interest.Topic{Name: "The economy", Depth: interest.Passing, Sources: []string{"govuk-hm-treasury"}}
 

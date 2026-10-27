@@ -64,7 +64,9 @@ go-slow runs on the Owner's laptop, from this repo's image and `docker-compose.y
 - **Upgrade:** `git switch main`, `git pull`, then `docker compose up --build -d`. Migrations run on start.
 - **Record commits for the register:** `git log --format='commit %H %cI' --name-only | docker compose run --rm -T app commits` (see *Commands*). Pipe the whole log each time.
 
-Never point `docker compose` at the real `RECORD_DIR` from an agent's session: the Record is the Owner's.
+**An agent starts the day's run when it notices it hasn't been done** (the Owner's standing say, 2026-10-27): if `docker compose ps` shows no app running on a day of work, the orchestrating agent runs *Start each day* (rebuilding with `--build` when `main` has moved since the image was built) and tells the Owner. That is the one way an agent touches the Record: never a sub-agent, never `docker compose run` of an admin command, a migration by hand or a copy, move or edit of `RECORD_DIR`, without the Owner's say for that act. The Record is the Owner's.
+
+`COLLECTION_CONTACT` is still the example placeholder, on the Owner's call while go-slow's volume is low (2026-10-27); a real contact goes in before it fetches much more.
 
 ## Config
 

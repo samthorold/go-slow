@@ -3,6 +3,7 @@ package editor_test
 import (
 	"encoding/json"
 	"errors"
+	"os"
 	"slices"
 	"strings"
 	"testing"
@@ -106,6 +107,62 @@ func TestARoleGivenToANameTheItemsReadingNeverGaveIsRefusedNamingTheFactAndTheNa
 	_, err := editor.Connect(t.Context(), &fakeModel{output: output}, toConnect, nil)
 	if !errors.Is(err, editor.ErrFailedChecks) || !strings.Contains(err.Error(), `F1`) || !strings.Contains(err.Error(), `"Edinburgh"`) {
 		t.Errorf("err = %v, want ErrFailedChecks naming F1 and Edinburgh", err)
+	}
+}
+
+// meeting is a reciprocal act: two parties met, each named on its own.
+var meeting = editor.ToConnect{Item: speech,
+	Facts: []editor.Fact{{ID: 21, SourceID: speech.SourceID, EntryID: speech.EntryID, AsAt: oct16,
+		Statement: "Andy Burnham and John Swinney met in Edinburgh.", Quote: "met"}},
+	Mentions: []editor.Mention{{Name: "Andy Burnham", Kind: "person"}, {Name: "John Swinney", Kind: "person"}, {Name: "Edinburgh", Kind: "place"}},
+}
+
+func TestAReciprocalActKeepsEachOfItsPartiesAsActor(t *testing.T) {
+	output := `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "actor"}, {"entity": "John Swinney", "role": "actor"},
+	  {"entity": "Edinburgh", "role": "place"}]}], "causes": []}`
+
+	c, err := editor.Connect(t.Context(), &fakeModel{output: output}, meeting, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, want := range []editor.Role{{FactID: 21, Entity: "Andy Burnham", Role: "actor"}, {FactID: 21, Entity: "John Swinney", Role: "actor"}} {
+		if !slices.Contains(c.Roles, want) {
+			t.Errorf("Roles = %+v, want %+v kept", c.Roles, want)
+		}
+	}
+}
+
+func TestConnectingsInstructionsStateTheReciprocalRuleInTheWordsOfTheRoleEntry(t *testing.T) {
+	b, err := os.ReadFile("../../CONTEXT.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	glossary := strings.ReplaceAll(string(b), "**", "")
+	from := strings.Index(glossary, "An act the Fact states as mutual")
+	to := strings.Index(glossary, "never made into a joint actor.")
+	if from < 0 || to < from {
+		t.Fatalf("the Role entry does not state the reciprocal rule:\n%s", glossary)
+	}
+	rule := strings.ReplaceAll(glossary[from:to+len("never made into a joint actor.")], "*", "")
+	model := &fakeModel{output: connectsTheSpeech}
+	if _, err := editor.Connect(t.Context(), model, toConnect, []editor.Fact{offer}); err != nil {
+		t.Fatal(err)
+	}
+
+	if !strings.Contains(model.sent[0].Instructions, rule) {
+		t.Errorf("connecting's instructions lack the Role entry's rule %q:\n%s", rule, model.sent[0].Instructions)
+	}
+}
+
+func TestAJointActorMadeUpFromTwoMentionsIsRefusedAsANameTheReadingNeverGave(t *testing.T) {
+	output := `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham and John Swinney", "role": "actor"},
+	  {"entity": "Edinburgh", "role": "place"}]}], "causes": []}`
+
+	_, err := editor.Connect(t.Context(), &fakeModel{output: output}, meeting, nil)
+	if !errors.Is(err, editor.ErrFailedChecks) || !strings.Contains(err.Error(), `"Andy Burnham and John Swinney"`) ||
+		!strings.Contains(err.Error(), "never gave") {
+		t.Errorf("err = %v, want ErrFailedChecks naming the joint name as one the reading never gave", err)
 	}
 }
 

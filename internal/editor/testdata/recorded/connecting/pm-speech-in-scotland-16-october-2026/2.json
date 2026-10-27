@@ -1,21 +1,17 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "cf346264cece40ae4d804987ee8008d2027b506fe63c2d1f1f4fac58b6326b86",
-  "recorded_at": "2026-10-26T23:50:55.991191Z",
+  "request_hash": "ebf43e59d78ce1a5e15c654b47fdac34aa9e39b129da7589f83a10bf96a02684",
+  "recorded_at": "2026-10-27T10:07:07.803521Z",
   "usage": {
-    "input_tokens": 4962,
-    "output_tokens": 5016
+    "input_tokens": 5084,
+    "output_tokens": 4626
   },
   "output": {
     "causes": [
       {
         "cause": "F2",
         "effect": "F5"
-      },
-      {
-        "cause": "F3",
-        "effect": "F13"
       }
     ],
     "facts": [
@@ -49,10 +45,6 @@
           },
           {
             "entity": "Bannatyne House",
-            "role": "place"
-          },
-          {
-            "entity": "Easterhouse",
             "role": "place"
           }
         ]
@@ -106,10 +98,6 @@
           {
             "entity": "Scottish Government",
             "role": "actor"
-          },
-          {
-            "entity": "UK government",
-            "role": "undergoer"
           }
         ]
       },
@@ -127,7 +115,7 @@
         "roles": [
           {
             "entity": "EU-UK Summit",
-            "role": "undergoer"
+            "role": "occasion"
           }
         ]
       },

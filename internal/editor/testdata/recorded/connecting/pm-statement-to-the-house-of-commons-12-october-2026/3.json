@@ -1,11 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "4c3a7ab74209a4e88bdd2b565b0a6b8328a8b68df9706ae04c165cb6f4993878",
-  "recorded_at": "2026-10-26T23:46:27.802328Z",
+  "request_hash": "8c36496c6b9d02e6841b9c8493160db283ffdf1cedebcdfc9f7ea7ff28a38e75",
+  "recorded_at": "2026-10-27T10:02:38.102569Z",
   "usage": {
-    "input_tokens": 3665,
-    "output_tokens": 4139
+    "input_tokens": 3787,
+    "output_tokens": 3142
   },
   "output": {
     "causes": [
@@ -27,12 +27,12 @@
             "role": "actor"
           },
           {
-            "entity": "United Nations General Assembly",
-            "role": "occasion"
+            "entity": "United Nations",
+            "role": "undergoer"
           },
           {
-            "entity": "United Nations",
-            "role": "place"
+            "entity": "United Nations General Assembly",
+            "role": "occasion"
           }
         ]
       },
@@ -118,6 +118,10 @@
         "fact": "F8",
         "roles": [
           {
+            "entity": "United Kingdom",
+            "role": "actor"
+          },
+          {
             "entity": "Russia",
             "role": "undergoer"
           }
@@ -165,10 +169,6 @@
             "role": "actor"
           },
           {
-            "entity": "United Kingdom",
-            "role": "actor"
-          },
-          {
             "entity": "Berlin",
             "role": "place"
           }
@@ -179,10 +179,6 @@
         "roles": [
           {
             "entity": "Prime Minister",
-            "role": "actor"
-          },
-          {
-            "entity": "United Kingdom",
             "role": "actor"
           },
           {
@@ -200,7 +196,7 @@
           },
           {
             "entity": "Saudi Arabia",
-            "role": "place"
+            "role": "undergoer"
           }
         ]
       },
@@ -244,11 +240,11 @@
           },
           {
             "entity": "House of Commons",
-            "role": "place"
+            "role": "undergoer"
           },
           {
             "entity": "RAF Fairford",
-            "role": "undergoer"
+            "role": "place"
           }
         ]
       },
@@ -274,7 +270,7 @@
         "roles": [
           {
             "entity": "UK-EU summit",
-            "role": "undergoer"
+            "role": "occasion"
           },
           {
             "entity": "Brussels",
@@ -291,7 +287,7 @@
           },
           {
             "entity": "G20 presidency",
-            "role": "undergoer"
+            "role": "occasion"
           }
         ]
       },

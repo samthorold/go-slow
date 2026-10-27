@@ -42,7 +42,7 @@ A **Fact** or **Claim** *involves* an **Entity** when the **Entity** has a **Rol
 _Avoid_: Connection (a **Connection** ties a **Fact** to another **Fact** or to an **Assessment**, never to an **Entity**)
 
 **Role**:
-The part an **Entity** plays in a **Fact** it involves, one of four: *actor* (who or what did it), *undergoer* (what or whom it was done to, or what the **Fact** says something of: the site, in "the Becketwell site is brownfield"), *place* (where) and *occasion* (the named occasion it happened at or belongs to).
+The part an **Entity** plays in a **Fact** it involves, one of four: *actor* (who or what did it), *undergoer* (what or whom it was done to, or what the **Fact** says something of: the site, in "the Becketwell site is brownfield"), *place* (where) and *occasion* (the named occasion it happened at or belongs to). An act the **Fact** states as mutual (they met, spoke, agreed together) has each party as an *actor*; an act with a direction (urged, assured, welcomed, offered) has its doer as *actor* and the one it was directed at as *undergoer*. A collective is one *actor* only where the **Item** names it as one (the G7, the signatories of a joint declaration); two **Entities** are never made into a joint actor.
 _Avoid_: Affected, target, subject (an undergoer need not be harmed, opposed or the topic of the **Item**)
 
 ### Editorial work

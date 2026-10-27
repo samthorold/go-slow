@@ -1,17 +1,21 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "4c3a7ab74209a4e88bdd2b565b0a6b8328a8b68df9706ae04c165cb6f4993878",
-  "recorded_at": "2026-10-26T23:46:53.70962Z",
+  "request_hash": "8c36496c6b9d02e6841b9c8493160db283ffdf1cedebcdfc9f7ea7ff28a38e75",
+  "recorded_at": "2026-10-27T10:03:01.576008Z",
   "usage": {
-    "input_tokens": 3665,
-    "output_tokens": 3531
+    "input_tokens": 3787,
+    "output_tokens": 3298
   },
   "output": {
     "causes": [
       {
         "cause": "F13",
         "effect": "F14"
+      },
+      {
+        "cause": "F16",
+        "effect": "F17"
       }
     ],
     "facts": [
@@ -21,6 +25,10 @@
           {
             "entity": "Prime Minister",
             "role": "actor"
+          },
+          {
+            "entity": "United Nations",
+            "role": "undergoer"
           },
           {
             "entity": "United Nations General Assembly",
@@ -37,7 +45,7 @@
           },
           {
             "entity": "Zelenskyy",
-            "role": "undergoer"
+            "role": "actor"
           },
           {
             "entity": "New York",
@@ -54,7 +62,7 @@
           },
           {
             "entity": "Zelenskyy",
-            "role": "undergoer"
+            "role": "actor"
           }
         ]
       },
@@ -85,7 +93,7 @@
           },
           {
             "entity": "Trump",
-            "role": "undergoer"
+            "role": "actor"
           },
           {
             "entity": "New York",
@@ -110,6 +118,10 @@
         "fact": "F8",
         "roles": [
           {
+            "entity": "United Kingdom",
+            "role": "actor"
+          },
+          {
             "entity": "Russia",
             "role": "undergoer"
           }
@@ -124,7 +136,7 @@
           },
           {
             "entity": "NATO Secretary General",
-            "role": "undergoer"
+            "role": "actor"
           },
           {
             "entity": "Oxfordshire",
@@ -157,10 +169,6 @@
             "role": "actor"
           },
           {
-            "entity": "United Kingdom",
-            "role": "undergoer"
-          },
-          {
             "entity": "Berlin",
             "role": "place"
           }
@@ -188,25 +196,20 @@
           },
           {
             "entity": "Saudi Arabia",
-            "role": "place"
+            "role": "undergoer"
           }
         ]
       },
       {
         "fact": "F14",
-        "roles": [
-          {
-            "entity": "Saudi Arabia",
-            "role": "place"
-          }
-        ]
+        "roles": []
       },
       {
         "fact": "F15",
         "roles": [
           {
             "entity": "King Khalid International Airport",
-            "role": "place"
+            "role": "undergoer"
           }
         ]
       },
@@ -231,12 +234,8 @@
             "role": "actor"
           },
           {
-            "entity": "RAF Fairford",
-            "role": "undergoer"
-          },
-          {
             "entity": "House of Commons",
-            "role": "place"
+            "role": "undergoer"
           }
         ]
       },
@@ -249,7 +248,7 @@
           },
           {
             "entity": "Ursula von der Leyen",
-            "role": "undergoer"
+            "role": "actor"
           },
           {
             "entity": "New York",
@@ -262,7 +261,7 @@
         "roles": [
           {
             "entity": "UK-EU summit",
-            "role": "undergoer"
+            "role": "occasion"
           },
           {
             "entity": "Brussels",

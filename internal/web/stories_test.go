@@ -115,6 +115,50 @@ func connectWaiting(t *testing.T, store *sqlite.Store, outputs ...string) {
 	}
 }
 
+func TestAReciprocalActsTwoActorsAreKeptAndEachConnectsItsStoryOnTheStoryPage(t *testing.T) {
+	store := openStore(t)
+	// connected reads, places in a Story of its own and connects an Item
+	// whose one Fact gives each of names the role actor.
+	connected := func(id, title, statement string, names ...string) {
+		t.Helper()
+		it := item(id, title, saturday.Add(-72*time.Hour))
+		seed(t, store, saturday.AddDate(0, 0, -7), it)
+		var entities []editor.Entity
+		var roles []string
+		for _, n := range names {
+			entities = append(entities, editor.Entity{Name: n, Kind: "person"})
+			roles = append(roles, `{"entity": "`+n+`", "role": "actor"}`)
+		}
+		if err := store.SaveReading(t.Context(), editor.Reading{
+			SourceID: it.SourceID, EntryID: it.EntryID, Model: "fake", Entities: entities,
+			Facts: []editor.Fact{{Statement: statement, AsAt: time.Date(2026, time.October, 21, 0, 0, 0, 0, time.UTC),
+				Quote: "q", Entities: names}},
+		}, saturday); err != nil {
+			t.Fatal(err)
+		}
+		placeWaiting(t, store, `{"new_stories": [{"ref": "N1", "title": "`+title+`"}], "facts": [{"fact": "F1", "developments_in": ["N1"]}]}`)
+		connectWaiting(t, store, `{"facts": [{"fact": "F1", "roles": [`+strings.Join(roles, ", ")+`]}], "causes": []}`)
+	}
+	// The two met: a reciprocal act, each of them its actor.
+	connected("meeting", "Burnham and Swinney meet", "Andy Burnham and John Swinney met.", "Andy Burnham", "John Swinney")
+	connected("swinney", "Swinney in Glasgow", "John Swinney spoke in Glasgow.", "John Swinney")
+	connected("burnham", "Burnham in Manchester", "Andy Burnham spoke in Manchester.", "Andy Burnham")
+	app, _ := newAppWithLog(t, saturday, store)
+
+	meeting := get(t, app, "/stories/1")
+	at := strings.Index(meeting.body, `id="connected"`)
+	if meeting.status != 200 || at < 0 {
+		t.Fatalf("status %d, or no connected Stories:\n%s", meeting.status, meeting.body)
+	}
+	section := meeting.body[at:]
+	for _, want := range []string{"<span hx-disable>John Swinney</span> as actor in both", "<span hx-disable>Andy Burnham</span> as actor in both",
+		`<a href="/stories/2">`, `<a href="/stories/3">`} {
+		if !strings.Contains(section, want) {
+			t.Errorf("the meeting's connected Stories lack %q:\n%s", want, section)
+		}
+	}
+}
+
 func TestAStorysPageShowsTheStoriesConnectedToItAndWhy(t *testing.T) {
 	store := openStore(t)
 	// An offer to Holyrood starts one Story; the speech, a later Item, another.

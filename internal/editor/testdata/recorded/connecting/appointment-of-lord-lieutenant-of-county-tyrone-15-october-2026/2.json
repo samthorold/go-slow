@@ -1,11 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "c1d7266270b48f2c4ceabe204b41cc7333ce39a9092fb18082a00b2bac5a9729",
-  "recorded_at": "2026-10-26T23:49:18.364063Z",
+  "request_hash": "f4f2244d43fa212a7065688cf4303643f20738d9e0b42ef4205630c412de1c4c",
+  "recorded_at": "2026-10-27T10:05:29.05269Z",
   "usage": {
-    "input_tokens": 2015,
-    "output_tokens": 1119
+    "input_tokens": 2137,
+    "output_tokens": 1675
   },
   "output": {
     "causes": [],
@@ -20,10 +20,6 @@
           {
             "entity": "William James Baxter",
             "role": "undergoer"
-          },
-          {
-            "entity": "County Tyrone",
-            "role": "place"
           }
         ]
       },
@@ -33,10 +29,6 @@
           {
             "entity": "Sir Robert William Lowry Scott KCVO OBE",
             "role": "actor"
-          },
-          {
-            "entity": "County Tyrone",
-            "role": "place"
           }
         ]
       },
@@ -58,7 +50,7 @@
         "roles": [
           {
             "entity": "William James Baxter",
-            "role": "actor"
+            "role": "undergoer"
           },
           {
             "entity": "Omagh",
@@ -89,10 +81,6 @@
           {
             "entity": "William James Baxter",
             "role": "actor"
-          },
-          {
-            "entity": "County Tyrone",
-            "role": "place"
           }
         ]
       },
@@ -102,10 +90,6 @@
           {
             "entity": "William James Baxter",
             "role": "actor"
-          },
-          {
-            "entity": "County Tyrone",
-            "role": "place"
           }
         ]
       }

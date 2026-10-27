@@ -1,11 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "cf346264cece40ae4d804987ee8008d2027b506fe63c2d1f1f4fac58b6326b86",
-  "recorded_at": "2026-10-26T23:51:45.959536Z",
+  "request_hash": "ebf43e59d78ce1a5e15c654b47fdac34aa9e39b129da7589f83a10bf96a02684",
+  "recorded_at": "2026-10-27T10:07:51.937393Z",
   "usage": {
-    "input_tokens": 4962,
-    "output_tokens": 3670
+    "input_tokens": 5084,
+    "output_tokens": 3566
   },
   "output": {
     "causes": [
@@ -36,10 +36,6 @@
             "role": "actor"
           },
           {
-            "entity": "Greater Manchester Violence Reduction Unit",
-            "role": "actor"
-          },
-          {
             "entity": "FARE-Scotland",
             "role": "undergoer"
           },
@@ -50,6 +46,10 @@
           {
             "entity": "Easterhouse",
             "role": "place"
+          },
+          {
+            "entity": "Greater Manchester Violence Reduction Unit",
+            "role": "actor"
           }
         ]
       },
@@ -109,7 +109,7 @@
           },
           {
             "entity": "UK government",
-            "role": "actor"
+            "role": "undergoer"
           }
         ]
       },
@@ -118,6 +118,18 @@
         "roles": [
           {
             "entity": "National Economic Council",
+            "role": "actor"
+          },
+          {
+            "entity": "Scotland",
+            "role": "actor"
+          },
+          {
+            "entity": "Wales",
+            "role": "actor"
+          },
+          {
+            "entity": "Northern Ireland",
             "role": "actor"
           }
         ]
@@ -167,6 +179,10 @@
           {
             "entity": "UK government",
             "role": "actor"
+          },
+          {
+            "entity": "Scotland",
+            "role": "undergoer"
           }
         ]
       },
@@ -225,7 +241,12 @@
       },
       {
         "fact": "F17",
-        "roles": []
+        "roles": [
+          {
+            "entity": "Prime Minister",
+            "role": "actor"
+          }
+        ]
       }
     ]
   }

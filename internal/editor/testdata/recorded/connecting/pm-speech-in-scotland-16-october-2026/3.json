@@ -1,11 +1,11 @@
 {
   "act": "connecting",
   "model": "claude-haiku-5-5",
-  "request_hash": "cf346264cece40ae4d804987ee8008d2027b506fe63c2d1f1f4fac58b6326b86",
-  "recorded_at": "2026-10-26T23:51:15.838794Z",
+  "request_hash": "ebf43e59d78ce1a5e15c654b47fdac34aa9e39b129da7589f83a10bf96a02684",
+  "recorded_at": "2026-10-27T10:07:20.453016Z",
   "usage": {
-    "input_tokens": 4962,
-    "output_tokens": 4535
+    "input_tokens": 5084,
+    "output_tokens": 3180
   },
   "output": {
     "causes": [
@@ -91,6 +91,10 @@
             "role": "actor"
           },
           {
+            "entity": "Easterhouse",
+            "role": "place"
+          },
+          {
             "entity": "Greater Manchester",
             "role": "place"
           }
@@ -102,6 +106,10 @@
           {
             "entity": "Scottish Government",
             "role": "actor"
+          },
+          {
+            "entity": "UK government",
+            "role": "undergoer"
           }
         ]
       },
@@ -111,6 +119,18 @@
           {
             "entity": "National Economic Council",
             "role": "actor"
+          },
+          {
+            "entity": "Scotland",
+            "role": "actor"
+          },
+          {
+            "entity": "Wales",
+            "role": "actor"
+          },
+          {
+            "entity": "Northern Ireland",
+            "role": "actor"
           }
         ]
       },
@@ -119,7 +139,7 @@
         "roles": [
           {
             "entity": "EU-UK Summit",
-            "role": "undergoer"
+            "role": "occasion"
           }
         ]
       },

@@ -7,8 +7,8 @@
      margin*. */}}
 
 {{/* margin-fold is the one control that folds a margined region's notes
-     away and back, given the state the region starts in ("open" on an
-     inspect page, "folded" on a reading page). static/margin-fold.js
+     away and back, given the state the region starts in ("open" on every
+     page but the Sunday read, a reading page, which starts "folded"). static/margin-fold.js
      toggles the region's data-margin. */}}
 {{define "margin-fold"}}<p class="margin-fold-row"><button type="button" class="margin-fold" data-margin-fold aria-expanded="{{if eq . "open"}}true{{else}}false{{end}}">Notes</button></p>{{end}}
 

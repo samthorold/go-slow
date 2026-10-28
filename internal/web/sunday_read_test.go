@@ -17,6 +17,25 @@ import (
 // sunday is the Sunday after saturday, past the Briefing's time.
 var sunday = saturday.AddDate(0, 0, 1)
 
+// foldedRegion asserts page holds its blocks in one margined region,
+// starting folded, with the one control that unfolds it, and returns the
+// region. The Sunday read is a reading page: its margin starts folded.
+func foldedRegion(t *testing.T, page string) string {
+	t.Helper()
+	regions := regexp.MustCompile(`<div class="margined" data-margin="(open|folded)">`).FindAllStringSubmatch(page, -1)
+	if len(regions) != 1 || regions[0][1] != "folded" {
+		t.Fatalf("want one margined region, folded; got %v:\n%s", regions, page)
+	}
+	controls := regexp.MustCompile(`<button type="button" class="margin-fold" data-margin-fold aria-expanded="false">[^<]+</button>`).FindAllString(page, -1)
+	if len(controls) != 1 {
+		t.Errorf("want one fold button, not expanded, got %d:\n%s", len(controls), page)
+	}
+	if !strings.Contains(page, `<script src="/static/margin-fold.js"></script>`) {
+		t.Errorf("the page does not load the fold behaviour:\n%s", page)
+	}
+	return page[strings.Index(page, `class="margined"`):]
+}
+
 // submitter is an agent that submits read at once.
 type submitter struct{ read string }
 

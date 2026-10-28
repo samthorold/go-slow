@@ -422,8 +422,8 @@ a.machine:focus-visible {
        </li></ul>
      </div>
    whose margin the one fold control (static/margin-fold.js) folds away and
-   back. The state lives in data-margin; an inspect page starts open, a
-   reading page folded. A page holding a region widens to fit the margin;
+   back. The state lives in data-margin; a page starts open (the Briefing,
+   a Story, an Item), except the Sunday read, a reading page, folded. A page holding a region widens to fit the margin;
    on a narrow window each block's notes drop below it. */
 body:has(.margined) main,
 body:has(.margined) nav,
@@ -547,8 +547,10 @@ body:has(.margined) #request-errors {
   margin-bottom: 0.75rem;
 }
 
-/* A Story's title is a block too: its notes and actions in the margin. */
-.block-body h1 {
+/* A Story's title is a block too, on its page and on the Briefing: its
+   notes and actions in the margin. */
+.block-body h1,
+.block-body h2 {
   margin-top: 0;
 }
 
@@ -630,12 +632,11 @@ body:has(.margined) #request-errors {
   margin: 0 0 0.35rem;
 }
 
-/* The reading pages (the Briefing, the Sunday read) read as text: a
-   Story is its title and statements, its margin folded at rest. Feedback is
-   their frequent act, so a block's Feedback controls (.actions) sit with its
-   text in the body column, which no fold hides, and a title's in its title
-   row (.title-row): hidden at rest and shown while the pointer or keyboard
-   focus is in the block or the row. Hidden visually, not with display: none
+/* The reading page (the Sunday read) reads as text, its margin folded at
+   rest. Feedback is its frequent act, so an Assessment's Feedback controls
+   (.actions) sit with its text in the body column, which no fold hides, and
+   the read's title's in its title row (.title-row): hidden at rest and shown
+   while the pointer or keyboard focus is in the block or the row. Hidden visually, not with display: none
    or visibility: hidden, so they stay in the tab order: tabbing into them is
    what reveals them. Feedback already given (.given-marks) is state and
    stays shown. */
@@ -662,8 +663,7 @@ body:has(.margined) #request-errors {
   margin: 0.2rem 0 0;
 }
 
-.title-row h1,
-.title-row h2 {
+.title-row h1 {
   margin-bottom: 0.5rem;
 }
 
@@ -682,7 +682,8 @@ body:has(.margined) #request-errors {
   margin-bottom: 0.5rem;
 }
 
-/* What a group of controls or a given mark is on: its Development's Fact. */
+/* What a group of controls or a given mark in a Briefing statement's
+   margin is on: its Development's Fact. */
 .about {
   margin-right: 0.5rem;
   font-style: italic;

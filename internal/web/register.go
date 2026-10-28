@@ -3,6 +3,7 @@ package web
 import (
 	"context"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/samthorold/go-slow/internal/editor"
@@ -38,6 +39,8 @@ type registerPage struct {
 
 type hypothesisRow struct {
 	Name, Part, Status, Why string
+	// StatusClass names the status's hue in the stylesheet: status-<it>.
+	StatusClass string
 	// Window is the last reading's, in words; empty for a reading of the
 	// Record as it stands.
 	Window  string
@@ -45,6 +48,14 @@ type hypothesisRow struct {
 	Found   []string
 	HasLast bool
 }
+
+// collapseFound is the most a reading found that the register lists open;
+// a longer list is collapsed behind its count.
+const collapseFound = 3
+
+// Collapsed reports whether what the last reading found is too long a list
+// to show open.
+func (h hypothesisRow) Collapsed() bool { return len(h.Found) > collapseFound }
 
 var registerTmpl = page("/register", "register.html")
 
@@ -70,7 +81,10 @@ func (a *app) register(w http.ResponseWriter, r *http.Request) {
 	}
 	var p registerPage
 	for _, h := range register.Read(rec) {
-		row := hypothesisRow{Name: h.Name, Part: string(h.Part), Status: string(h.Status), Why: h.Why}
+		row := hypothesisRow{
+			Name: h.Name, Part: string(h.Part), Why: h.Why,
+			Status: string(h.Status), StatusClass: strings.ToLower(string(h.Status)),
+		}
 		if h.Last != nil {
 			row.HasLast, row.Last, row.Found = true, string(h.Last.Status), h.Last.Found
 			if h.Last.From != "" {

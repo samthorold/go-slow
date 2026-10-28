@@ -3,23 +3,27 @@
 {{define "content"}}
 <h1>Register</h1>
 <p>Each hypothesis of the end state, with its status and its last reading, derived from the Record by its reading rule.</p>
-<table>
+<table class="register">
   <thead>
-    <tr><th>Hypothesis</th><th>Part</th><th>Status</th><th>Last reading</th></tr>
+    <tr><th>Status</th><th>Hypothesis</th><th>Part</th><th>Reading</th></tr>
   </thead>
   <tbody>
 {{- range .Hypotheses}}
     <tr>
+      <td><span class="status status-{{.StatusClass}}">{{.Status}}</span></td>
       <td>{{.Name}}</td>
       <td>{{.Part}}</td>
-      <td><strong>{{.Status}}</strong>{{if .Why}}: {{.Why}}{{end}}</td>
-      <td>
-        {{- if .HasLast}}{{.Last}}{{if .Window}}, {{.Window}}{{end}}
-        {{- if .Found}}<ul>{{range .Found}}<li>{{.}}</li>{{end}}</ul>{{end}}
-        {{- else}}None.{{end}}
+      <td class="quiet">
+        {{- if .Why}}<p>{{.Why}}</p>{{end}}
+        {{- if .HasLast}}Last reading: {{.Last}}{{if .Window}}, {{.Window}}{{end}}
+        {{- if .Collapsed}}<details><summary>{{len .Found}} found</summary>{{template "found" .Found}}</details>
+        {{- else if .Found}}{{template "found" .Found}}{{end}}
+        {{- else}}Last reading: none.{{end}}
       </td>
     </tr>
 {{- end}}
   </tbody>
 </table>
 {{end}}
+
+{{define "found"}}<ul>{{range .}}<li>{{.}}</li>{{end}}</ul>{{end}}

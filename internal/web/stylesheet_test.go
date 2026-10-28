@@ -45,8 +45,9 @@ func TestPagesAndTheStylesheetLoadNothingFromAnotherHost(t *testing.T) {
 // How it looks is judged in a browser; what the server can be held to is
 // that the stylesheet carries the rules later pages rely on: keyboard focus
 // outlined on everything that takes it, the quiet style as a class any block
-// can take (the Briefing's citations will), and a failed request standing out.
-func TestTheStylesheetCarriesFocusTheQuietStyleAndRequestErrors(t *testing.T) {
+// can take (the Briefing's citations will), a failed request standing out, and
+// a hue per status any page can take.
+func TestTheStylesheetCarriesFocusTheQuietStyleRequestErrorsAndStatusHues(t *testing.T) {
 	app := newApp(t, saturday)
 	link := stylesheetLink.FindStringSubmatch(get(t, app, "/").body)
 	if link == nil {
@@ -59,6 +60,12 @@ func TestTheStylesheetCarriesFocusTheQuietStyleAndRequestErrors(t *testing.T) {
 		"the quiet class":                regexp.MustCompile(`(?m)^\.quiet\s*\{`),
 		"the quiet class on hover/focus": regexp.MustCompile(`\.quiet:focus-within`),
 		"a failed request standing out":  regexp.MustCompile(`#request-errors:not\(:empty\)\s*\{[^}]*background:`),
+		// The register's statuses; a call's outcomes take the same hues.
+		"a status":        regexp.MustCompile(`(?m)^\.status\s*\{`),
+		"supported's hue": regexp.MustCompile(`(?m)^\.status-supported\s*\{[^}]*color:`),
+		"refuted's hue":   regexp.MustCompile(`(?m)^\.status-refuted\s*\{[^}]*color:`),
+		"undecided's hue": regexp.MustCompile(`(?m)^\.status-undecided\s*\{[^}]*color:`),
+		"Due's hue":       regexp.MustCompile(`(?m)^\.status-due\s*\{[^}]*color:`),
 	} {
 		if !rule.MatchString(css) {
 			t.Errorf("%s has no rule for %s", link[1], name)

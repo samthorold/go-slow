@@ -43,7 +43,7 @@ func TestEachStatementOnTheBriefingHasItsCitationsBesideItInAMarginStartingOpen(
 	region := openRegion(t, res.body)
 	statement := blockOf(t, region, "The Prime Minister spoke in Motherwell.")
 	for _, want := range []string{"Andy Burnham spoke in Motherwell.", `href="/stories/1#development-1"`,
-		`<span class="citation"><a href="/items/number-10/`, "<cite hx-disable>PM speech in Scotland</cite>"} {
+		`<span class="citation">`, `<a href="/items/number-10/`, "<cite hx-disable>PM speech in Scotland</cite>"} {
 		if !strings.Contains(statement.margin, want) {
 			t.Errorf("the statement's margin lacks %q:\n%s", want, statement.margin)
 		}
@@ -53,6 +53,24 @@ func TestEachStatementOnTheBriefingHasItsCitationsBesideItInAMarginStartingOpen(
 	}
 	if strings.Contains(res.body, `class="citations`) {
 		t.Errorf("the statement's citations are still in a disclosure:\n%s", res.body)
+	}
+}
+
+// noTen is how a citation of an Item from number10 opens: its Source's
+// short name, who is speaking, before the Item's title.
+const noTen = `<span class="citation"><span hx-disable>No 10</span> <a href="/items/number-10/`
+
+func TestTheBriefingCitesAnItemByItsSourcesShortNameBeforeItsTitle(t *testing.T) {
+	store := openStore(t)
+	speechStory(t, store)
+	writeBriefing(t, store, saturday, spoke)
+	app, _ := newAppWithLog(t, saturday, store)
+
+	res := get(t, app, "/")
+
+	statement := blockOf(t, openRegion(t, res.body), "The Prime Minister spoke in Motherwell.")
+	if !strings.Contains(statement.margin, noTen) {
+		t.Errorf("the statement's citation does not name its Source as %q:\n%s", noTen, statement.margin)
 	}
 }
 

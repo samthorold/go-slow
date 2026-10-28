@@ -17,6 +17,7 @@ import (
 var number10 = collect.Source{
 	ID:          "number-10",
 	Name:        "Prime Minister's Office, 10 Downing Street",
+	ShortName:   "No 10",
 	FeedURL:     "https://www.gov.uk/government/organisations/prime-ministers-office-10-downing-street.atom",
 	Attribution: collect.OGL,
 	UsualGap:    4 * 24 * time.Hour,

@@ -151,7 +151,7 @@ func (a *app) sundayRead(w http.ResponseWriter, r *http.Request) {
 	for _, st := range read.Statements {
 		row := readStatementRow{Anchor: statementAnchor(st.ID), Text: st.Text}
 		for _, c := range st.Cites {
-			row.Cites = append(row.Cites, citation(c, key))
+			row.Cites = append(row.Cites, a.citation(c, key))
 		}
 		p.Statements = append(p.Statements, row)
 	}
@@ -165,7 +165,7 @@ func (a *app) sundayRead(w http.ResponseWriter, r *http.Request) {
 			row.Supersedes = assessmentPath(as.Supersedes)
 		}
 		for _, f := range as.Facts {
-			row.Facts = append(row.Facts, citation(editor.Citation{Kind: editor.CitesFact, Fact: f}, key))
+			row.Facts = append(row.Facts, a.citation(editor.Citation{Kind: editor.CitesFact, Fact: f}, key))
 		}
 		p.Assessments = append(p.Assessments, row)
 	}
@@ -193,13 +193,13 @@ func (a *app) undoOnSundayRead(w http.ResponseWriter, r *http.Request) {
 
 // citation is what a statement in the read for day cites, as the page
 // shows it.
-func citation(c editor.Citation, day string) readCitationRow {
+func (a *app) citation(c editor.Citation, day string) readCitationRow {
 	switch c.Kind {
 	case editor.CitesDevelopment, editor.CitesFact:
 		item := itemPath(c.Fact.SourceID, c.Fact.EntryID)
 		fact := item + "#" + factAnchor(c.Fact.ID)
 		row := readCitationRow{Kind: "Fact", Text: c.Fact.Statement, Path: fact,
-			AsAt: factDate(c.Fact.Fact), Item: &itemCitation{Title: c.Fact.ItemTitle, Href: fact}}
+			AsAt: factDate(c.Fact.Fact), Item: new(a.cite(c.Fact.SourceID, c.Fact.ItemTitle, fact))}
 		if c.Kind == editor.CitesDevelopment {
 			row.Kind, row.Path = "Development", storyPath(c.Story.ID)+"#"+developmentAnchor(c.Fact.ID)
 		}

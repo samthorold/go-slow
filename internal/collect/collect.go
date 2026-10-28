@@ -38,10 +38,14 @@ const (
 // Source is an outlet or publisher the Owner has chosen, read through one
 // feed or API endpoint.
 type Source struct {
-	ID      string
-	Name    string
-	FeedURL string
-	Format  Format
+	ID   string
+	Name string
+	// ShortName is how a citation names the Source: who is speaking, not
+	// where it is published ("No 10", not "GOV.UK"). Sources from one
+	// speaker share it. For the pages only; no act is shown it.
+	ShortName string
+	FeedURL   string
+	Format    Format
 	// Text is how the Source's entries get their full text, where the feed
 	// carries only a summary or an opening.
 	Text Text

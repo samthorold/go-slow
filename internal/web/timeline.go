@@ -17,14 +17,15 @@ type timelineEntry struct {
 // timelineOf is a Timeline, its Developments ds in order, as entries: each
 // run of consecutive Developments from one Item is one entry, so a later
 // Item falling between two runs of the same Item splits them and the order
-// never misleads. row is how each Development is shown.
-func timelineOf(ds []editor.Development, row func(editor.Development) developmentRow) []timelineEntry {
+// never misleads. cite is how each entry cites its Item, and row how each
+// Development is shown.
+func timelineOf(ds []editor.Development, cite func(editor.Development) itemCitation, row func(editor.Development) developmentRow) []timelineEntry {
 	var out []timelineEntry
 	for i, d := range ds {
 		if i == 0 || d.SourceID != ds[i-1].SourceID || d.EntryID != ds[i-1].EntryID {
 			out = append(out, timelineEntry{
 				AsAt: factDate(d.Fact),
-				Item: citeItem(d),
+				Item: cite(d),
 			})
 		}
 		e := &out[len(out)-1]

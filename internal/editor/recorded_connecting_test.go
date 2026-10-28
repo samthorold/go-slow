@@ -189,12 +189,15 @@ func connectingVerdicts(t *testing.T, root string) []error {
 					t.Fatal(err)
 				}
 				for _, c := range connected {
-					if len(c.Shared)+len(c.Entities) == 0 {
-						shared("Story %q is connected to %q with no shared Fact behind it", s.Title, c.Title)
+					if len(c.Shared)+len(c.Items)+len(c.Entities) == 0 {
+						shared("Story %q is connected to %q with no shared Fact or Item behind it", s.Title, c.Title)
 					}
 					for _, e := range c.Entities {
 						if e.Here.ID == 0 || e.There.ID == 0 || e.Here.ID == e.There.ID {
 							shared("Story %q is connected to %q by %s as %s without a Fact on each side: %+v", s.Title, c.Title, e.Entity, e.Role, e)
+						}
+						if e.Here.SourceID == e.There.SourceID && e.Here.EntryID == e.There.EntryID {
+							shared("Story %q is connected to %q by %s as %s between Facts of one Item: %+v", s.Title, c.Title, e.Entity, e.Role, e)
 						}
 					}
 				}

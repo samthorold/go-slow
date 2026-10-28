@@ -350,7 +350,7 @@ func TestFeedbackOnWhatIsNotInTheRecordIsNotFound(t *testing.T) {
 // connectedStories makes two Stories: Scottish devolution (Story 1), whose
 // Development is the offer (Fact 1), and Burnham in Motherwell (Story 2),
 // whose Development is the speech (Fact 2), which the offer caused. Andy
-// Burnham is the actor in both.
+// Burnham is the actor in both. Two other Stories share nothing with them.
 func connectedStories(t *testing.T, store *sqlite.Store) {
 	t.Helper()
 	offer := item("offer", "Offer to Holyrood", saturday.Add(-72*time.Hour))
@@ -371,12 +371,16 @@ func connectedStories(t *testing.T, store *sqlite.Store) {
 		"facts": [{"fact": "F1", "developments_in": ["N1"]}]}`)
 	connectWaiting(t, store, `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "actor"}, {"entity": "Motherwell", "role": "place"}]}],
 		  "causes": [{"cause": "C1", "effect": "F1"}]}`)
+	otherStories(t, store, 2)
 }
 
 func TestWrongOnAFactWithdrawsTheConnectionsBuiltOnItAndTheStoriesItConnected(t *testing.T) {
 	store := openStore(t)
 	connectedStories(t, store)
 	app, _ := newAppWithLog(t, saturday, store)
+	if before := get(t, app, "/stories/2"); !strings.Contains(before.body, `id="connected"`) {
+		t.Fatalf("the Stories are not connected before the Feedback:\n%s", before.body)
+	}
 
 	res := send(t, app, "POST", "/stories/1/feedback", url.Values{"kind": {"wrong"}, "level": {"fact"}, "fact": {"1"}})
 

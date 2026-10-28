@@ -75,6 +75,9 @@
       {{- range .Shared}}
         <li>Both have the Development {{template "fact" .}}</li>
       {{- end}}
+      {{- range .Items}}
+        <li>Announced together in <a href="{{.Path}}"><span hx-disable>{{.Title}}</span></a></li>
+      {{- end}}
       {{- range .Entities}}
         <li><span hx-disable>{{.Entity}}</span> as {{.Role}} in both: here {{template "fact" .Here}}; there {{template "fact" .There}}</li>
       {{- end}}

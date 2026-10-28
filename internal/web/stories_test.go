@@ -3,6 +3,7 @@ package web_test
 import (
 	"log/slog"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -17,6 +18,23 @@ func placeWaiting(t *testing.T, store *sqlite.Store, output string) {
 	ed := editor.New(editor.Deps{Store: store, PlacingModel: fakeModel{output}, Log: slog.New(slog.DiscardHandler)})
 	if err := ed.PlaceWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
+	}
+}
+
+// otherStories starts n Stories, each from an Item of its own whose one Fact
+// involves no Entity, so that an Entity shared by the Stories already in
+// the Record is in no more than half of them, and still connects them.
+func otherStories(t *testing.T, store *sqlite.Store, n int) {
+	t.Helper()
+	for i := range n {
+		it := item("other-"+strconv.Itoa(i), "Other "+strconv.Itoa(i), saturday.Add(-96*time.Hour))
+		seed(t, store, saturday.AddDate(0, 0, -7), it)
+		if err := store.SaveReading(t.Context(), editor.Reading{SourceID: it.SourceID, EntryID: it.EntryID, Model: "fake",
+			Facts: []editor.Fact{{Statement: "Something else happened.", AsAt: time.Date(2026, time.October, 20, 0, 0, 0, 0, time.UTC),
+				Quote: "else"}}}, saturday); err != nil {
+			t.Fatal(err)
+		}
+		placeWaiting(t, store, `{"new_stories": [{"ref": "N1", "title": "Other `+strconv.Itoa(i)+`"}], "facts": [{"fact": "F1", "developments_in": ["N1"]}]}`)
 	}
 }
 
@@ -167,6 +185,7 @@ func TestAReciprocalActsTwoActorsAreKeptAndEachConnectsItsStoryOnTheStoryPage(t 
 	connected("meeting", "Burnham and Swinney meet", "Andy Burnham and John Swinney met.", "Andy Burnham", "John Swinney")
 	connected("swinney", "Swinney in Glasgow", "John Swinney spoke in Glasgow.", "John Swinney")
 	connected("burnham", "Burnham in Manchester", "Andy Burnham spoke in Manchester.", "Andy Burnham")
+	otherStories(t, store, 1)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	meeting := get(t, app, "/stories/1")
@@ -179,6 +198,40 @@ func TestAReciprocalActsTwoActorsAreKeptAndEachConnectsItsStoryOnTheStoryPage(t 
 		`<a href="/stories/2">`, `<a href="/stories/3">`} {
 		if !strings.Contains(section, want) {
 			t.Errorf("the meeting's connected Stories lack %q:\n%s", want, section)
+		}
+	}
+}
+
+func TestStoriesAnnouncedTogetherShowTheItemOnEachStorysPage(t *testing.T) {
+	store := openStore(t)
+	update := item("update", "Cost of Living update", saturday.Add(-72*time.Hour))
+	seed(t, store, saturday.AddDate(0, 0, -7), update)
+	day := time.Date(2026, time.October, 21, 0, 0, 0, 0, time.UTC)
+	if err := store.SaveReading(t.Context(), editor.Reading{
+		SourceID: update.SourceID, EntryID: update.EntryID, Model: "fake",
+		Facts: []editor.Fact{
+			{Statement: "Carer's Allowance was reformed.", AsAt: day, Quote: "reformed"},
+			{Statement: "The energy price cap was frozen.", AsAt: day, Quote: "frozen"},
+		},
+	}, saturday); err != nil {
+		t.Fatal(err)
+	}
+	placeWaiting(t, store, `{"new_stories": [{"ref": "N1", "title": "Carer's Allowance reform"}, {"ref": "N2", "title": "Energy prices"}],
+		"facts": [{"fact": "F1", "developments_in": ["N1"]}, {"fact": "F2", "developments_in": ["N2"]}]}`)
+	app, _ := newAppWithLog(t, saturday, store)
+
+	for _, side := range [][2]string{{"/stories/1", "/stories/2"}, {"/stories/2", "/stories/1"}} {
+		page := get(t, app, side[0])
+		at := strings.Index(page.body, `id="connected"`)
+		if page.status != 200 || at < 0 {
+			t.Fatalf("%s: status %d, or no connected Stories:\n%s", side[0], page.status, page.body)
+		}
+		section := page.body[at:]
+		for _, want := range []string{`<a href="` + side[1] + `">`,
+			`Announced together in <a href="/items/number-10/update"><span hx-disable>Cost of Living update</span></a>`} {
+			if !strings.Contains(section, want) {
+				t.Errorf("%s: the connected Stories lack %q:\n%s", side[0], want, section)
+			}
 		}
 	}
 }
@@ -206,6 +259,7 @@ func TestAStorysPageShowsTheStoriesConnectedToItAndWhy(t *testing.T) {
 	// And in the speech, which the offer caused.
 	connectWaiting(t, store, `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "actor"}, {"entity": "Motherwell", "role": "place"}]}],
 		  "causes": [{"cause": "C1", "effect": "F1"}]}`)
+	otherStories(t, store, 2)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	devolution := get(t, app, "/stories/1")

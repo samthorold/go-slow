@@ -198,6 +198,9 @@ func (r *sundayRun) storyTool(ctx context.Context, ref string) (string, error) {
 			for _, d := range c.Shared {
 				fmt.Fprintf(&b, "    shares %s\n", r.showDevelopment(other, d))
 			}
+			for _, it := range c.Items {
+				fmt.Fprintf(&b, "    announced together in %q\n", it.Title)
+			}
 			for _, e := range c.Entities {
 				fmt.Fprintf(&b, "    %s as %s here in %s and there in %s\n", e.Entity, e.Role,
 					r.showDevelopment(s, e.Here), r.showDevelopment(other, e.There))

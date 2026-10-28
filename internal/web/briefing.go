@@ -350,7 +350,7 @@ func (a *app) briefingCalls(r *http.Request, p *briefingPage, b editor.Briefing,
 		switch {
 		case !exists:
 			p.FailedAttempts = append(p.FailedAttempts, attemptRow{
-				Page: callPath(c.ID), At: when(c.At, loc), Outcome: string(c.Outcome), Why: c.Why,
+				Page: callPath(c.ID), At: when(c.At, loc), Outcome: outcomeOf(c.Outcome), Why: c.Why,
 			})
 		case c.Outcome == editor.Applied:
 			writtenBy = c.ID

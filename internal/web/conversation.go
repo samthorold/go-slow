@@ -9,7 +9,7 @@ import (
 )
 
 // conversationTmpl is a kept conversation's page.
-var conversationTmpl = page(noIndex, "conversation.html")
+var conversationTmpl = page(noIndex, "conversation.html", "outcome.html")
 
 // conversationPath is a kept conversation's page, at turn n if n is not
 // zero; empty for no conversation.
@@ -35,7 +35,7 @@ type conversationPage struct {
 	ReadPath     string
 	At           string
 	Model        string
-	Outcome      string
+	Outcome      outcome
 	Why          string
 	Instructions string
 	Tools        string
@@ -50,7 +50,7 @@ type turnRow struct {
 	At      string
 	Hash    string
 	Sent    []sentRow
-	Outcome string
+	Outcome outcome
 	Why     string
 	// The model's turn, if one came.
 	Answered      bool
@@ -60,6 +60,15 @@ type turnRow struct {
 	Text          string
 	Calls         []calledRow
 	Raw           string
+}
+
+// ShortHash is the turn's request hash cut to fit the margin; the whole
+// hash is its title.
+func (t turnRow) ShortHash() string {
+	if len(t.Hash) > 12 {
+		return t.Hash[:12]
+	}
+	return t.Hash
 }
 
 // sentRow is a message sent new with a turn: the act's text, or a tool's
@@ -94,7 +103,7 @@ func (a *app) conversation(w http.ResponseWriter, r *http.Request) {
 	loc := a.Now().Location()
 	tools, _ := json.Marshal(c.Tools)
 	p := conversationPage{
-		Act: c.Act, Day: c.Key, At: when(c.At, loc), Model: c.Model, Outcome: string(c.Outcome), Why: c.Why,
+		Act: c.Act, Day: c.Key, At: when(c.At, loc), Model: c.Model, Outcome: outcomeOf(c.Outcome), Why: c.Why,
 		Instructions: c.Instructions, Tools: pretty(tools),
 	}
 	if c.Act == "sunday_read" {
@@ -102,7 +111,7 @@ func (a *app) conversation(w http.ResponseWriter, r *http.Request) {
 	}
 	for _, t := range c.Turns {
 		row := turnRow{N: t.N, Anchor: turnAnchor(t.N), At: when(t.At, loc), Hash: t.RequestHash,
-			Outcome: string(t.Outcome), Why: t.Why}
+			Outcome: outcomeOf(t.Outcome), Why: t.Why}
 		for _, m := range t.Sent {
 			if m.Results == nil {
 				row.Sent = append(row.Sent, sentRow{Text: m.User})

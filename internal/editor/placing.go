@@ -56,8 +56,20 @@ type StoryConnection struct {
 	Title string
 	// Shared are the Developments the two Stories share.
 	Shared []Development
-	// Entities are the Entities their Facts involve in the same role.
+	// Items are the Items both Stories have Developments from: announced
+	// together in them. An Item reached only through a shared Development
+	// is not repeated here.
+	Items []SharedItem
+	// Entities are the Entities their Facts, drawn from different Items,
+	// involve in the same role, the rarest over Stories first.
 	Entities []SharedEntity
+}
+
+// SharedItem is an Item two Stories have Developments from.
+type SharedItem struct {
+	SourceID string
+	EntryID  string
+	Title    string
 }
 
 // SharedEntity is an Entity that Facts in two Stories involve in the same
@@ -65,8 +77,11 @@ type StoryConnection struct {
 type SharedEntity struct {
 	Entity string
 	Role   string
-	Here   Development
-	There  Development
+	// Stories is how many Stories' Facts involve the Entity: the fewer, the
+	// stronger the tie.
+	Stories int
+	Here    Development
+	There   Development
 }
 
 // CauseConnection is a cause Connection as the Record holds it: the Fact

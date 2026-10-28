@@ -1,6 +1,7 @@
 package editor_test
 
 import (
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -28,6 +29,39 @@ func twoStories(t *testing.T, placing string) *sqlite.Store {
 const inANewStory = `{"new_stories": [{"ref": "N1", "title": "Relations with Holyrood"}],
   "facts": [{"fact": "F1", "developments_in": ["N1"]}]}`
 
+// otherStories starts n Stories, each from an Item of its own whose one Fact
+// involves no Entity, so that an Entity shared by the Stories already in
+// the Record is in no more than half of them, and still connects them.
+func otherStories(t *testing.T, store *sqlite.Store, n int) {
+	t.Helper()
+	for i := range n {
+		entry := "other-" + strconv.Itoa(i)
+		it := collect.Item{SourceID: number10.ID, EntryID: entry, Title: "Other " + strconv.Itoa(i),
+			Link: "https://www.gov.uk/" + entry, Published: laterItem.Published, Attribution: collect.OGL, CollectedAt: saturday}
+		if _, err := store.AddItems(t.Context(), []collect.Item{it}); err != nil {
+			t.Fatal(err)
+		}
+		if err := store.SaveReading(t.Context(), editor.Reading{SourceID: it.SourceID, EntryID: entry, Model: "fake",
+			Facts: []editor.Fact{{Statement: "Something else happened.", AsAt: oct16, Quote: "else"}}}, saturday); err != nil {
+			t.Fatal(err)
+		}
+		waiting, err := store.FactsToPlace(t.Context())
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, w := range waiting {
+			if w.Item.EntryID != entry {
+				continue
+			}
+			id := w.Facts[0].ID
+			if err := store.SavePlacing(t.Context(), editor.Placing{SourceID: it.SourceID, EntryID: entry, Model: "fake",
+				Facts: []int64{id}, NewStories: []editor.NewStory{{Title: it.Title, FactIDs: []int64{id}}}}, saturday); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+}
+
 func connected(t *testing.T, store *sqlite.Store, id int64) []editor.StoryConnection {
 	t.Helper()
 	cs, err := store.ConnectedStories(t.Context(), id)
@@ -46,6 +80,7 @@ func TestTwoStoriesWhoseFactsInvolveAnEntityInTheSameRoleAreConnectedOnEachSide(
 	if err := ed.ConnectWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
+	otherStories(t, store, 2)
 
 	for _, side := range []struct {
 		id, other   int64
@@ -108,6 +143,7 @@ func TestAnInvolvementConnectingAddsConnectsStoriesByItsEntityAndRole(t *testing
 	if err := ed.ConnectWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
+	otherStories(t, store, 2)
 
 	cs := connected(t, store, 1)
 	if len(cs) != 1 || cs[0].ID != 2 || len(cs[0].Entities) != 1 ||

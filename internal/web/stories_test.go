@@ -226,10 +226,37 @@ func TestStoriesAnnouncedTogetherShowTheItemOnEachStorysPage(t *testing.T) {
 		}
 		section := page.body[at:]
 		for _, want := range []string{`<a href="` + side[1] + `">`,
-			`Announced together in <span class="citation"><a href="/items/number-10/update"><cite hx-disable>Cost of Living update</cite></a></span>`} {
+			`Announced together in ` + noTen + `update"><cite hx-disable>Cost of Living update</cite></a></span>`} {
 			if !strings.Contains(section, want) {
 				t.Errorf("%s: the connected Stories lack %q:\n%s", side[0], want, section)
 			}
+		}
+	}
+}
+
+func TestAStorysPageCitesEachItemByItsSourcesShortNameBeforeItsTitle(t *testing.T) {
+	store := openStore(t)
+	update := item("update", "Cost of Living update", saturday.Add(-72*time.Hour))
+	seed(t, store, saturday.AddDate(0, 0, -7), update)
+	day := time.Date(2026, time.October, 21, 0, 0, 0, 0, time.UTC)
+	if err := store.SaveReading(t.Context(), editor.Reading{
+		SourceID: update.SourceID, EntryID: update.EntryID, Model: "fake",
+		Facts: []editor.Fact{
+			{Statement: "Carer's Allowance was reformed.", AsAt: day, Quote: "reformed"},
+			{Statement: "The energy price cap was frozen.", AsAt: day, Quote: "frozen"},
+		},
+	}, saturday); err != nil {
+		t.Fatal(err)
+	}
+	placeWaiting(t, store, `{"new_stories": [{"ref": "N1", "title": "Carer's Allowance reform"}, {"ref": "N2", "title": "Energy prices"}],
+		"facts": [{"fact": "F1", "developments_in": ["N1"]}, {"fact": "F2", "developments_in": ["N2"]}]}`)
+	app, _ := newAppWithLog(t, saturday, store)
+
+	page := get(t, app, "/stories/1").body
+
+	for _, id := range []string{"timeline", "connected"} {
+		if s := section(t, page, id); !strings.Contains(s, noTen+"update") {
+			t.Errorf("the %s does not cite the Item by its Source's short name:\n%s", id, s)
 		}
 	}
 }
@@ -283,7 +310,7 @@ func TestAStorysPageShowsTheStoriesConnectedToItAndWhy(t *testing.T) {
 	}
 	causes := speech.body[at:]
 	offerAt, spokeAt := strings.Index(causes, "Andy Burnham made an offer to Holyrood."), strings.Index(causes, "Andy Burnham spoke in Motherwell.")
-	if offerAt < 0 || spokeAt < offerAt || !strings.Contains(causes, `<a href="/items/number-10/offer">`) ||
+	if offerAt < 0 || spokeAt < offerAt || !strings.Contains(causes, noTen+"offer") ||
 		!strings.Contains(causes, "PM speech in Scotland") {
 		t.Errorf("the speech's Story does not show the offer as its cause, tracing to both Items:\n%s", causes)
 	}

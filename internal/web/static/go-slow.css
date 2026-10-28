@@ -378,9 +378,9 @@ a.pill:hover {
   gap: 0.35rem;
 }
 
-/* An Item is a citation (.citation): its Source's short name, where the
-   page has one, then its title in italics, a link to where it is read:
-     <span class="citation">GOV.UK <a href="/items/…"><cite>Title</cite></a></span>
+/* An Item is a citation (.citation): its Source's short name, who is
+   speaking (where the Sources list holds it), then its title in italics, a link to where it is read:
+     <span class="citation">No 10 <a href="/items/…"><cite>Title</cite></a></span>
    (template "citation", given an itemCitation). */
 .citation {
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;

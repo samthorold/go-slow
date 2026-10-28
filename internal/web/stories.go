@@ -121,8 +121,8 @@ func developmentView(d editor.Development) developmentRow {
 }
 
 // citeItem is the Item d's Fact was drawn from, cited.
-func citeItem(d editor.Development) itemCitation {
-	return itemCitation{Title: d.ItemTitle, Href: itemPath(d.SourceID, d.EntryID)}
+func (a *app) citeItem(d editor.Development) itemCitation {
+	return a.cite(d.SourceID, d.ItemTitle, itemPath(d.SourceID, d.EntryID))
 }
 
 func storyPath(id int64) string { return "/stories/" + strconv.FormatInt(id, 10) }
@@ -181,7 +181,7 @@ func (a *app) storyWith(w http.ResponseWriter, r *http.Request, id int64, status
 	page := storyPath(id)
 	p := storyPage{Title: s.Title, FeedbackPath: page + "/feedback", Unwanted: s.Unwanted, Missed: s.Missed}
 	p.Gives = notOfferedAgain(givenIn(storyGives(p.FeedbackPath, id), kept, page), s.Unwanted)
-	p.Timeline = timelineOf(s.Timeline, func(d editor.Development) developmentRow {
+	p.Timeline = timelineOf(s.Timeline, a.citeItem, func(d editor.Development) developmentRow {
 		row := developmentView(d)
 		row.Made = made{Act: "placed", Call: d.PlacingCall}
 		if !d.Withdrawn {
@@ -192,7 +192,7 @@ func (a *app) storyWith(w http.ResponseWriter, r *http.Request, id int64, status
 	for _, c := range s.Causes {
 		row := causeRow{
 			Cause: developmentView(c.Cause), Effect: developmentView(c.Effect),
-			CauseItem: citeItem(c.Cause), EffectItem: citeItem(c.Effect),
+			CauseItem: a.citeItem(c.Cause), EffectItem: a.citeItem(c.Effect),
 			Withdrawn: c.Withdrawn, Made: made{Act: "connected", Call: c.Call},
 		}
 		if !c.Withdrawn {
@@ -211,7 +211,7 @@ func (a *app) storyWith(w http.ResponseWriter, r *http.Request, id int64, status
 			row.Shared = append(row.Shared, developmentView(d))
 		}
 		for _, it := range c.Items {
-			row.Items = append(row.Items, itemCitation{Title: it.Title, Href: itemPath(it.SourceID, it.EntryID)})
+			row.Items = append(row.Items, a.cite(it.SourceID, it.Title, itemPath(it.SourceID, it.EntryID)))
 		}
 		for _, e := range c.Entities {
 			row.Entities = append(row.Entities, pill{Name: e.Entity, Tag: e.Role})

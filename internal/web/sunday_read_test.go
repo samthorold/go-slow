@@ -116,6 +116,20 @@ func TestTheSundayReadsStatementsHaveWhatTheyCiteBesideThemInAFoldedMargin(t *te
 	}
 }
 
+func TestTheSundayReadCitesAnItemByItsSourcesShortNameBeforeItsTitle(t *testing.T) {
+	store := openStore(t)
+	speechStory(t, store)
+	writeSundayRead(t, store, sunday, assessed)
+	app, _ := newAppWithLog(t, sunday, store)
+
+	page := get(t, app, "/sunday-reads/2026-10-25").body
+
+	statement := blockOf(t, foldedRegion(t, page), "The Prime Minister is &lt;b")
+	if !strings.Contains(statement.margin, noTen) {
+		t.Errorf("the statement's citation does not name its Source as %q:\n%s", noTen, statement.margin)
+	}
+}
+
 func TestAssessmentsAreSetApartAsJudgementWithTheirNotesInTheMarginAndActionsOnHover(t *testing.T) {
 	store := openStore(t)
 	speechStory(t, store)

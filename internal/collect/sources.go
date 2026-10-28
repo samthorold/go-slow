@@ -22,10 +22,11 @@ func Sources() []Source {
 			// Number 10's own announcements: the Prime Minister's
 			// statements, speeches, calls and appointments, as published,
 			// which reporting on UK politics most often goes back to.
-			ID:      "govuk-number-10",
-			Name:    "Prime Minister's Office, 10 Downing Street (GOV.UK)",
-			FeedURL: "https://www.gov.uk/government/organisations/prime-ministers-office-10-downing-street.atom",
-			Format:  Atom,
+			ID:        "govuk-number-10",
+			Name:      "Prime Minister's Office, 10 Downing Street (GOV.UK)",
+			ShortName: "No 10",
+			FeedURL:   "https://www.gov.uk/government/organisations/prime-ministers-office-10-downing-street.atom",
+			Format:    Atom,
 			// Its entries carry only a summary; the text is the Content
 			// API document for each entry's path.
 			Text:        TextFromGOVUKContent,
@@ -42,10 +43,11 @@ func Sources() []Source {
 			// Written ministerial statements to both Houses: government
 			// announcements made to Parliament, as made. Read through the
 			// Written Questions Service API, never the main site.
-			ID:      "parliament-written-statements",
-			Name:    "UK Parliament: written statements",
-			FeedURL: "https://questions-statements-api.parliament.uk/api/writtenstatements/statements?take=50",
-			Format:  WrittenStatements,
+			ID:        "parliament-written-statements",
+			Name:      "UK Parliament: written statements",
+			ShortName: "Parliament",
+			FeedURL:   "https://questions-statements-api.parliament.uk/api/writtenstatements/statements?take=50",
+			Format:    WrittenStatements,
 			// The list carries only each statement's opening; the text is
 			// the statement itself, from the same API.
 			Text:        TextFromWrittenStatement,
@@ -64,6 +66,7 @@ func Sources() []Source {
 			// labour market and the rest of the official statistics.
 			ID:          "ons-releases",
 			Name:        "Office for National Statistics: releases",
+			ShortName:   "ONS",
 			FeedURL:     ons + "?release-type=type-published&sort=release_date_desc&limit=50",
 			Format:      ONSReleases,
 			Licence:     OGLv3,
@@ -80,6 +83,7 @@ func Sources() []Source {
 			// published, each a scheduled event, due on its release date.
 			ID:          "ons-release-calendar",
 			Name:        "Office for National Statistics: release calendar",
+			ShortName:   "ONS",
 			FeedURL:     ons + "?release-type=type-upcoming&sort=release_date_asc&limit=100",
 			Format:      ONSReleaseCalendar,
 			Licence:     OGLv3,

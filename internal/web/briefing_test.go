@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/feedback"
 	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/sqlite"
@@ -56,6 +57,7 @@ func appDeps(now time.Time, store *sqlite.Store, logs *bytes.Buffer) web.Deps {
 		Register:    store,
 		SundayReads: store,
 		Calls:       store,
+		Sources:     []collect.Source{number10},
 		BriefingAt:  7 * time.Hour,
 		Now:         func() time.Time { return now },
 		Log:         slog.New(slog.NewJSONHandler(logs, &slog.HandlerOptions{Level: slog.LevelDebug})),

@@ -35,10 +35,18 @@ func pillMentioned(e editor.Entity) pill {
 }
 
 // itemCitation is an Item as every page cites it (template "citation"): its
-// Source's name, where the page has it, and its title, linking where it is
+// Source's short name, who is speaking, and its title, linking where it is
 // read.
 type itemCitation struct {
 	Source, Title, Href string
+}
+
+// cite is the citation of an Item from the Source sourceID, titled title,
+// linking href: the Source named by its short name from the Sources list
+// (none if the list doesn't hold it). The short name is the pages' alone;
+// no act is shown it.
+func (a *app) cite(sourceID, title, href string) itemCitation {
+	return itemCitation{Source: a.shortNames[sourceID], Title: title, Href: href}
 }
 
 // made is how a block was made, shown in its margin as a machine label: the

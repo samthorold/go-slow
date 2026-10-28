@@ -152,6 +152,27 @@ func TestUndoingAWrongFactRestoresItAndKeepsThePieceMarkedUndone(t *testing.T) {
 	}
 }
 
+func TestKeptFeedbackOnAFactCarriesTheFactsItem(t *testing.T) {
+	store := threeFacts(t)
+	give(t, store, feedback.Draft{Kind: "new to me", Level: "fact", Fact: "3"})
+	give(t, store, feedback.Draft{Kind: "unwanted", Level: "story", Story: "1"})
+
+	kept, err := store.KeptFeedback(t.Context())
+	if err != nil || len(kept) != 2 {
+		t.Fatalf("kept Feedback: %+v %v", kept, err)
+	}
+	type item struct{ SourceID, EntryID string }
+	for _, k := range kept {
+		want := item{}
+		if k.Level == feedback.Fact {
+			want = item{SourceID: "number-10", EntryID: "speech"}
+		}
+		if got := (item{SourceID: k.SourceID, EntryID: k.EntryID}); got != want {
+			t.Errorf("%s Feedback carries Item %+v, want %+v", k.Level, got, want)
+		}
+	}
+}
+
 func TestUndoingUnwantedPutsTheStoryOrDevelopmentBackInTheBriefing(t *testing.T) {
 	for _, d := range []feedback.Draft{
 		{Kind: "unwanted", Level: "story", Story: "1"},

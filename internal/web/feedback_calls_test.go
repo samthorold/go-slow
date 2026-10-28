@@ -30,7 +30,7 @@ func TestFeedbackOnAFactLinksToTheReadingCallThatDrewIt(t *testing.T) {
 	give(t, app, url.Values{"kind": {"wrong"}, "level": {"fact"}, "fact": {"1"}})
 
 	page := get(t, app, "/feedback")
-	res := get(t, app, callLink(t, page.body, "<strong>wrong</strong>"))
+	res := get(t, app, callLink(t, page.body, kindLabel("wrong")))
 
 	if res.status != 200 || !strings.Contains(res.body, "reading") || !strings.Contains(res.body, "Title: PM speech in Scotland") {
 		t.Errorf("status %d, or the link is not to the reading call:\n%s", res.status, res.body)
@@ -67,7 +67,7 @@ func TestFeedbackOnAConnectionLinksToTheConnectingCallThatMadeIt(t *testing.T) {
 	give(t, app, url.Values{"kind": {"new to me"}, "level": {"connection"}, "fact": {"1"}, "to_fact": {"2"}})
 
 	page := get(t, app, "/feedback")
-	res := get(t, app, callLink(t, page.body, "<strong>new to me</strong>"))
+	res := get(t, app, callLink(t, page.body, kindLabel("new to me")))
 
 	if res.status != 200 || !strings.Contains(res.body, "Facts to connect:") || !strings.Contains(res.body, "Item: PM speech in Scotland") {
 		t.Errorf("status %d, or the link is not to the connecting call that made it:\n%s", res.status, res.body)
@@ -118,7 +118,7 @@ func TestFeedbackOnTheSundayReadOrAnAssessmentLinksToTheReadsConversation(t *tes
 
 			page := get(t, app, "/feedback")
 
-			i := strings.Index(page.body, "<strong>new to me</strong>")
+			i := strings.Index(page.body, kindLabel("new to me"))
 			if i < 0 || !strings.Contains(page.body[i:], `href="/conversations/1"`) {
 				t.Errorf("the Feedback does not link to the read's conversation:\n%s", page.body)
 			}
@@ -142,7 +142,7 @@ func TestWhatMissedAddedLinksToNoCallAndSaysTheOwnerMadeIt(t *testing.T) {
 	if strings.Contains(page.body, `href="/calls/`) {
 		t.Errorf("what the Owner made links to a call:\n%s", page.body)
 	}
-	if n := strings.Count(page.body, "You made what it is about, not an act: no call is behind it."); n != 4 {
+	if n := strings.Count(page.body, `<span class="machine">you made it</span>`); n != 4 {
 		t.Errorf("%d pieces say the Owner made what they are about, want 4:\n%s", n, page.body)
 	}
 }
@@ -162,7 +162,7 @@ func TestFeedbackOnADevelopmentOrItsStoryLinksToThePlacingCall(t *testing.T) {
 			give(t, app, tc.form)
 
 			page := get(t, app, "/feedback")
-			res := get(t, app, callLink(t, page.body, "<strong>new to me</strong>"))
+			res := get(t, app, callLink(t, page.body, kindLabel("new to me")))
 
 			if res.status != 200 || !strings.Contains(res.body, "You are placing the Facts drawn from one Item.") {
 				t.Errorf("status %d, or the link is not to the placing call:\n%s", res.status, res.body)

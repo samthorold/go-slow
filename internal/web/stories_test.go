@@ -2,6 +2,7 @@ package web_test
 
 import (
 	"log/slog"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -124,16 +125,12 @@ func TestADevelopmentOnAStorysPageShowsTheEntitiesItsFactInvolvesInTheirRoles(t 
 	app, _ := newAppWithLog(t, saturday, store)
 
 	res := get(t, app, "/stories/1")
-	at := strings.Index(res.body, `id="timeline"`)
-	if res.status != 200 || at < 0 {
-		t.Fatalf("status %d, or no Timeline:\n%s", res.status, res.body)
+	d := blockOf(t, section(t, res.body, "timeline"), "Andy Burnham spoke in Motherwell.")
+	if !strings.Contains(d.margin, `<span class="pill"><span hx-disable>Andy Burnham</span> · <span class="pill-tag">actor</span></span>`) {
+		t.Errorf("the Development's margin does not show Andy Burnham as its actor, a pill:\n%s", d.margin)
 	}
-	timeline := res.body[at:]
-	if !strings.Contains(timeline, "Involves <span hx-disable>Andy Burnham</span> as actor") {
-		t.Errorf("the Development does not show Andy Burnham as its actor:\n%s", timeline)
-	}
-	if strings.Contains(timeline, "<span hx-disable>Motherwell</span> as") {
-		t.Errorf("the Development shows Motherwell, which its Fact only mentions, as involved:\n%s", timeline)
+	if strings.Contains(d.margin, "Motherwell</span> ·") {
+		t.Errorf("the Development shows Motherwell, which its Fact only mentions, as involved:\n%s", d.margin)
 	}
 }
 
@@ -194,7 +191,8 @@ func TestAReciprocalActsTwoActorsAreKeptAndEachConnectsItsStoryOnTheStoryPage(t 
 		t.Fatalf("status %d, or no connected Stories:\n%s", meeting.status, meeting.body)
 	}
 	section := meeting.body[at:]
-	for _, want := range []string{"<span hx-disable>John Swinney</span> as actor in both", "<span hx-disable>Andy Burnham</span> as actor in both",
+	for _, want := range []string{`<span hx-disable>John Swinney</span> · <span class="pill-tag">actor</span>`,
+		`<span hx-disable>Andy Burnham</span> · <span class="pill-tag">actor</span>`,
 		`<a href="/stories/2">`, `<a href="/stories/3">`} {
 		if !strings.Contains(section, want) {
 			t.Errorf("the meeting's connected Stories lack %q:\n%s", want, section)
@@ -228,7 +226,7 @@ func TestStoriesAnnouncedTogetherShowTheItemOnEachStorysPage(t *testing.T) {
 		}
 		section := page.body[at:]
 		for _, want := range []string{`<a href="` + side[1] + `">`,
-			`Announced together in <a href="/items/number-10/update"><span hx-disable>Cost of Living update</span></a>`} {
+			`Announced together in <span class="citation"><a href="/items/number-10/update"><cite hx-disable>Cost of Living update</cite></a></span>`} {
 			if !strings.Contains(section, want) {
 				t.Errorf("%s: the connected Stories lack %q:\n%s", side[0], want, section)
 			}
@@ -268,8 +266,8 @@ func TestAStorysPageShowsTheStoriesConnectedToItAndWhy(t *testing.T) {
 		t.Fatalf("status %d, or no connected Stories:\n%s", devolution.status, devolution.body)
 	}
 	section := devolution.body[at:]
-	for _, want := range []string{`<a href="/stories/2">`, `hx-disable>&lt;b hx-get`, "Andy Burnham", "actor",
-		"Andy Burnham made an offer to Holyrood.", "Andy Burnham spoke in Motherwell.", `<a href="/items/number-10/offer">`} {
+	for _, want := range []string{`<a href="/stories/2">`, `hx-disable>&lt;b hx-get`,
+		`<span hx-disable>Andy Burnham</span> · <span class="pill-tag">actor</span>`} {
 		if !strings.Contains(section, want) {
 			t.Errorf("the connected Stories lack %q:\n%s", want, section)
 		}
@@ -288,5 +286,250 @@ func TestAStorysPageShowsTheStoriesConnectedToItAndWhy(t *testing.T) {
 	if offerAt < 0 || spokeAt < offerAt || !strings.Contains(causes, `<a href="/items/number-10/offer">`) ||
 		!strings.Contains(causes, "PM speech in Scotland") {
 		t.Errorf("the speech's Story does not show the offer as its cause, tracing to both Items:\n%s", causes)
+	}
+}
+
+// section is the page's section headed id, up to its end.
+func section(t *testing.T, page, id string) string {
+	t.Helper()
+	at := strings.Index(page, `id="`+id+`"`)
+	if at < 0 {
+		t.Fatalf("no section %q:\n%s", id, page)
+	}
+	rest := page[at:]
+	if end := strings.Index(rest, "</section>"); end >= 0 {
+		rest = rest[:end]
+	}
+	return rest
+}
+
+// costOfLiving reads the Cost of Living update, which mentions Rachel
+// Reeves, into facts, and places them all in one new Story, Story 1.
+func costOfLiving(t *testing.T, store *sqlite.Store, facts ...editor.Fact) {
+	t.Helper()
+	update := item("update", "Cost of Living update", saturday.Add(-72*time.Hour))
+	seed(t, store, saturday.AddDate(0, 0, -7), update)
+	if err := store.SaveReading(t.Context(), editor.Reading{
+		SourceID: update.SourceID, EntryID: update.EntryID, Model: "fake", Facts: facts,
+		Entities: []editor.Entity{{Name: "Rachel Reeves", Kind: "person"}},
+	}, saturday); err != nil {
+		t.Fatal(err)
+	}
+	var placed []string
+	for i := range facts {
+		placed = append(placed, `{"fact": "F`+strconv.Itoa(i+1)+`", "developments_in": ["N1"]}`)
+	}
+	placeWaiting(t, store, `{"new_stories": [{"ref": "N1", "title": "Cost of living"}], "facts": [`+strings.Join(placed, ", ")+`]}`)
+}
+
+func TestConsecutiveDevelopmentsOfOneItemAreOneTimelineEntryWithTheDateAndItemOnce(t *testing.T) {
+	store := openStore(t)
+	day := time.Date(2026, time.October, 21, 0, 0, 0, 0, time.UTC)
+	costOfLiving(t, store,
+		editor.Fact{Statement: "Carer's Allowance was reformed.", AsAt: day, Quote: "reformed"},
+		editor.Fact{Statement: "The energy price cap was frozen.", AsAt: day, Quote: "frozen"})
+	app, _ := newAppWithLog(t, saturday, store)
+
+	page := get(t, app, "/stories/1")
+	timeline := section(t, page.body, "timeline")
+
+	if n := strings.Count(timeline, `class="entry"`); n != 1 {
+		t.Errorf("want one timeline entry, got %d:\n%s", n, timeline)
+	}
+	for _, once := range []string{"Cost of Living update", "21 October 2026"} {
+		if n := strings.Count(timeline, once); n != 1 {
+			t.Errorf("%q shows %d times on the Timeline, want once:\n%s", once, n, timeline)
+		}
+	}
+	if !strings.Contains(timeline, `<a href="/items/number-10/update"><cite hx-disable>Cost of Living update</cite></a>`) {
+		t.Errorf("the entry does not cite its Item:\n%s", timeline)
+	}
+	for _, s := range []string{"Carer&#39;s Allowance was reformed.", "The energy price cap was frozen."} {
+		blockOf(t, timeline, s)
+	}
+}
+
+func TestALaterItemBetweenTwoRunsOfOneItemSplitsThemIntoTwoEntries(t *testing.T) {
+	store := openStore(t)
+	october := func(d int) time.Time { return time.Date(2026, time.October, d, 0, 0, 0, 0, time.UTC) }
+	costOfLiving(t, store,
+		editor.Fact{Statement: "Carer's Allowance was reformed.", AsAt: october(20), Quote: "reformed"},
+		editor.Fact{Statement: "The energy price cap will be frozen from the 22nd.", AsAt: october(22), Quote: "frozen"})
+	// A later Item, whose Fact falls between the update's two.
+	budget := item("budget", "Budget statement", saturday.Add(-24*time.Hour))
+	seed(t, store, saturday.AddDate(0, 0, -7), budget)
+	if err := store.SaveReading(t.Context(), editor.Reading{
+		SourceID: budget.SourceID, EntryID: budget.EntryID, Model: "fake",
+		Entities: []editor.Entity{{Name: "Rachel Reeves", Kind: "person"}},
+		Facts:    []editor.Fact{{Statement: "Rachel Reeves set out the Budget.", AsAt: october(21), Quote: "Budget"}},
+	}, saturday); err != nil {
+		t.Fatal(err)
+	}
+	placeWaiting(t, store, `{"new_stories": [], "facts": [{"fact": "F1", "developments_in": ["S1"]}]}`)
+	app, _ := newAppWithLog(t, saturday, store)
+
+	timeline := section(t, get(t, app, "/stories/1").body, "timeline")
+
+	heads := regexp.MustCompile(`<p class="entry-head"><time>([^<]+)</time>.*?<cite hx-disable>([^<]+)</cite>`).FindAllStringSubmatch(timeline, -1)
+	var got []string
+	for _, h := range heads {
+		got = append(got, h[1]+": "+h[2])
+	}
+	want := []string{"20 October 2026: Cost of Living update", "21 October 2026: Budget statement", "22 October 2026: Cost of Living update"}
+	if strings.Join(got, "; ") != strings.Join(want, "; ") {
+		t.Errorf("the entries are %q, want %q:\n%s", got, want, timeline)
+	}
+}
+
+func TestAStorysTitleHasItsNotesAndFeedbackInItsMarginWhichStartsOpen(t *testing.T) {
+	store := openStore(t)
+	speechStory(t, store)
+	app, _ := newAppWithLog(t, saturday, store)
+	for _, form := range []url.Values{
+		{"kind": {"missed"}, "level": {"story"}, "title": {"Scottish politics"}, "facts": {"1"}},
+		{"kind": {"unwanted"}, "level": {"story"}, "story": {"2"}},
+	} {
+		if res := send(t, app, "POST", "/stories/1/feedback", form); res.status != 303 {
+			t.Fatalf("status %d:\n%s", res.status, res.body)
+		}
+	}
+
+	page := get(t, app, "/stories/2").body
+
+	regions := regexp.MustCompile(`<div class="margined" data-margin="(open|folded)">`).FindAllStringSubmatch(page, -1)
+	if len(regions) != 1 || regions[0][1] != "open" {
+		t.Fatalf("want one margined region, open; got %v:\n%s", regions, page)
+	}
+	if !strings.Contains(page, `aria-expanded="true"`) {
+		t.Errorf("the page has no fold control, expanded:\n%s", page)
+	}
+	title := blockOf(t, page, "<h1 hx-disable>Scottish politics</h1>")
+	for _, note := range []string{"You started this Story", "Unwanted in the Briefing", `name="kind" value="new to me"`} {
+		if !strings.Contains(title.margin, note) {
+			t.Errorf("the title's margin lacks %q:\n%s", note, title.margin)
+		}
+	}
+	if !givenWithUndo(title.margin, "Unwanted", 2, "/stories/2") {
+		t.Errorf("the title's margin does not show Unwanted as given, with its undo:\n%s", title.margin)
+	}
+}
+
+func TestACauseIsABlockReadingCauseLedToEffectWithItsItemsCallAndActionsInItsMargin(t *testing.T) {
+	store := openStore(t)
+	connectedStories(t, store)
+	app, _ := newAppWithLog(t, saturday, store)
+
+	causes := section(t, get(t, app, "/stories/2").body, "causes")
+	c := blockOf(t, causes, "led to")
+
+	if !regexp.MustCompile(`Andy Burnham made an offer to Holyrood\.</span> led to <span hx-disable>Andy Burnham spoke in Motherwell\.`).MatchString(c.body) {
+		t.Errorf("the body does not read cause led to effect:\n%s", c.body)
+	}
+	for _, want := range []string{`<cite hx-disable>Offer to Holyrood</cite>`, `<cite hx-disable>PM speech in Scotland</cite>`,
+		`name="level" value="connection"`} {
+		if !strings.Contains(c.margin, want) || strings.Contains(c.body, want) {
+			t.Errorf("%q is not in the margin alone:\n%s%s", want, c.body, c.margin)
+		}
+	}
+	if !regexp.MustCompile(`<a class="machine" href="/calls/\d+">connected · call \d+</a>`).MatchString(c.margin) {
+		t.Errorf("the margin has no machine label \"connected · call N\":\n%s", c.margin)
+	}
+
+	// Withdrawn, it stays, struck through with the reason in its margin.
+	send(t, app, "POST", "/stories/2/feedback", url.Values{"kind": {"wrong"}, "level": {"connection"}, "fact": {"1"}, "to_fact": {"2"}})
+	withdrawn := blockOf(t, section(t, get(t, app, "/stories/2").body, "causes"), "led to")
+	if !strings.Contains(withdrawn.body, `class="struck"`) || !strings.Contains(withdrawn.margin, "Withdrawn") {
+		t.Errorf("the withdrawn Connection is not struck through with the reason in its margin:\n%s%s", withdrawn.body, withdrawn.margin)
+	}
+}
+
+func TestAConnectedStoryIsItsTitleInTheBodyWithItsReasonsInTheMargin(t *testing.T) {
+	store := openStore(t)
+	connectedStories(t, store)
+	app, _ := newAppWithLog(t, saturday, store)
+
+	connected := section(t, get(t, app, "/stories/1").body, "connected")
+	s := blockOf(t, connected, `<a href="/stories/2"><span hx-disable>Burnham in Motherwell</span></a>`)
+
+	if !strings.Contains(s.margin, `<span class="pill"><span hx-disable>Andy Burnham</span> · <span class="pill-tag">actor</span></span>`) {
+		t.Errorf("the margin does not show Andy Burnham, the actor in both, as a pill:\n%s", s.margin)
+	}
+	if strings.Contains(s.body, "Andy Burnham") {
+		t.Errorf("the reason is in the body:\n%s", s.body)
+	}
+}
+
+func TestTheMissedFormsAndTheOwnersFeedbackAreCollapsedAtTheFoot(t *testing.T) {
+	store := openStore(t)
+	connectedStories(t, store)
+	app, _ := newAppWithLog(t, saturday, store)
+	send(t, app, "POST", "/stories/2/feedback", url.Values{"kind": {"new to me"}, "level": {"story"}, "story": {"2"}})
+
+	page := get(t, app, "/stories/2").body
+
+	connected := strings.Index(page, `id="connected"`)
+	if connected < 0 {
+		t.Fatalf("no connected Stories:\n%s", page)
+	}
+	var last int
+	for _, summary := range []string{"<summary>Is a Development missing?</summary>", "<summary>Is a Story missing?</summary>",
+		"<summary>Your Feedback on this Story</summary>"} {
+		at := strings.Index(page, summary)
+		if at < connected || at < last {
+			t.Errorf("%s is not at the foot, in order:\n%s", summary, page)
+			continue
+		}
+		last = at
+		if open := strings.LastIndex(page[:at], "<details"); open < 0 || !strings.HasPrefix(page[open:], "<details>") {
+			t.Errorf("%s is not collapsed:\n%s", summary, page[open:at])
+		}
+	}
+}
+
+func TestWithdrawnAndUnwantedDevelopmentsStayStruckThroughWithTheReasonInTheirMargin(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		form   url.Values
+		reason string
+	}{
+		{"withdrawn", url.Values{"kind": {"wrong"}, "level": {"fact"}, "fact": {"1"}}, "Withdrawn"},
+		{"unwanted", url.Values{"kind": {"unwanted"}, "level": {"development"}, "story": {"1"}, "fact": {"1"}}, "Unwanted in the Briefing"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			store := openStore(t)
+			speechStory(t, store)
+			app, _ := newAppWithLog(t, saturday, store)
+			if res := send(t, app, "POST", "/stories/1/feedback", tc.form); res.status != 303 {
+				t.Fatalf("status %d:\n%s", res.status, res.body)
+			}
+
+			d := blockOf(t, section(t, get(t, app, "/stories/1").body, "timeline"), "Andy Burnham spoke in Motherwell.")
+
+			if !strings.Contains(d.body, `<p class="struck">`) {
+				t.Errorf("the %s Development is not struck through:\n%s", tc.name, d.body)
+			}
+			if !strings.Contains(d.margin, tc.reason) || strings.Contains(d.body, tc.reason) {
+				t.Errorf("the reason %q is not in the margin alone:\n%s%s", tc.reason, d.body, d.margin)
+			}
+		})
+	}
+}
+
+func TestADevelopmentShowsItsOwnDateInItsBodyOnlyWhereItDiffersFromItsEntrys(t *testing.T) {
+	store := openStore(t)
+	october := func(d int) time.Time { return time.Date(2026, time.October, d, 0, 0, 0, 0, time.UTC) }
+	costOfLiving(t, store,
+		editor.Fact{Statement: "Carer's Allowance was reformed.", AsAt: october(20), Quote: "reformed"},
+		editor.Fact{Statement: "Pensions rose.", AsAt: october(20), Quote: "rose"},
+		editor.Fact{Statement: "The energy price cap was frozen.", AsAt: october(21), Quote: "frozen"})
+	app, _ := newAppWithLog(t, saturday, store)
+
+	timeline := section(t, get(t, app, "/stories/1").body, "timeline")
+
+	if same := blockOf(t, timeline, "Pensions rose."); strings.Contains(same.body, "October") {
+		t.Errorf("a Development dated as its entry shows its date:\n%s", same.body)
+	}
+	if differs := blockOf(t, timeline, "The energy price cap was frozen."); !strings.Contains(differs.body, "<time>21 October 2026</time>") {
+		t.Errorf("a Development dated otherwise does not show its date:\n%s", differs.body)
 	}
 }

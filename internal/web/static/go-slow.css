@@ -502,6 +502,49 @@ body:has(.margined) #request-errors {
   }
 }
 
+/* What Feedback took out (a withdrawn or unwanted Development, a withdrawn
+   Connection) stays on the page, struck through in the quiet colour, with
+   the reason in its margin. */
+.struck {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+
+/* A Story's Timeline: an entry is a run of Developments from one Item, its
+   head (.entry-head) giving the date and the Item once, its Developments
+   blocks under it, reading on from one another. */
+.timeline {
+  list-style: none;
+  padding-left: 0;
+}
+
+.entry + .entry {
+  margin-top: 1.5rem;
+}
+
+.entry-head {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+}
+
+.entry .block {
+  margin-bottom: 0.75rem;
+}
+
+/* A Story's title is a block too: its notes and actions in the margin. */
+.block-body h1 {
+  margin-top: 0;
+}
+
+/* A Story's foot: what the Owner does less often, collapsed. */
+.story-foot {
+  margin-top: 2.25rem;
+  border-top: 1px solid var(--rule);
+  padding-top: 1rem;
+}
+
 /* The status hues (see the top of this file): a verdict, small and set in
    the hue of its status, so a glance down a column says where things stand. */
 .status {

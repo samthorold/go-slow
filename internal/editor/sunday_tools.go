@@ -41,7 +41,8 @@ func (r *sundayRun) tools() []Tool {
 		{
 			Name: "story",
 			Description: "A Story's whole Timeline, back to its start, with the cause Connections to and from its " +
-				"Developments and the Stories connected to it through shared Developments or Entities in the same role.",
+				"Developments and the Stories connected to it: through the Developments they share, an Item both have " +
+				"Developments from, or Entities their Facts from different Items involve in the same role.",
 			Schema: object(map[string]any{"story": refSchema("The Story's ref, such as S3.")}),
 		},
 		{
@@ -197,6 +198,9 @@ func (r *sundayRun) storyTool(ctx context.Context, ref string) (string, error) {
 			fmt.Fprintf(&b, "  %s: %s\n", storyRefOf(c.ID), c.Title)
 			for _, d := range c.Shared {
 				fmt.Fprintf(&b, "    shares %s\n", r.showDevelopment(other, d))
+			}
+			for _, it := range c.Items {
+				fmt.Fprintf(&b, "    announced together in %q\n", it.Title)
 			}
 			for _, e := range c.Entities {
 				fmt.Fprintf(&b, "    %s as %s here in %s and there in %s\n", e.Entity, e.Role,

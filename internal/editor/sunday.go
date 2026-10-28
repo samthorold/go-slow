@@ -252,7 +252,7 @@ The daily Briefing says what moved on each day. The Sunday read does something d
 The Record is everything collected and the editorial work done on it:
 - A Story is an ongoing subject followed across days (S3). Its Timeline is its Developments in order.
 - A Fact (F12) is a proposition drawn from a collected Item and corroborated, holding as at a date. A Development (S3:F12) is a Fact that moved a Story on; one Fact can be a Development in several Stories.
-- A cause Connection says one Fact led to another. Stories are connected through the Developments they share and the Entities their Facts involve in the same role.
+- A cause Connection says one Fact led to another. Stories are connected through the Developments they share, an Item both have Developments from (announced together in it), and the Entities their Facts from different Items involve in the same role.
 - An Assessment (A4) is a judgement an earlier Sunday read reached by reasoning over Facts, as at its date.
 Wikidata is a Reference source of background facts: who holds an office and since when, what something is.
 

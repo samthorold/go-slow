@@ -340,6 +340,46 @@ func TestFactsAboutCausesAndAssessmentsShowEachFactWithTheEntitiesItInvolvesInTh
 	}
 }
 
+func TestStoriesAnnouncedTogetherShowTheItemThatConnectsThem(t *testing.T) {
+	// An update's two Facts: one moves on the speech's Story, the other
+	// starts a Story of its own.
+	store := record(t)
+	readAndPlace(t, store, &fakeModel{output: startsAStory})
+	update := collect.Item{SourceID: number10.ID, EntryID: "update", Title: "Cost of Living update",
+		Link: "https://www.gov.uk/update", Published: laterItem.Published, Attribution: collect.OGL, CollectedAt: saturday}
+	if _, err := store.AddItems(t.Context(), []collect.Item{update}); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.SaveReading(t.Context(), editor.Reading{
+		SourceID: update.SourceID, EntryID: update.EntryID, Model: "fake",
+		Entities: []editor.Entity{{Name: "Andy Burnham", Kind: "person"}},
+		Facts: []editor.Fact{
+			{Statement: "Andy Burnham announced a Scottish fund.", AsAt: oct16.AddDate(0, 0, 1), Quote: "fund"},
+			{Statement: "Carer's Allowance was reformed.", AsAt: oct16.AddDate(0, 0, 1), Quote: "reformed"},
+		},
+	}, saturday); err != nil {
+		t.Fatal(err)
+	}
+	ed, logs := placer(store, &fakeModel{output: `{"new_stories": [{"ref": "N1", "title": "Carer's Allowance reform"}],
+	  "facts": [{"fact": "F1", "developments_in": ["S1"]}, {"fact": "F2", "developments_in": ["N1"]}]}`})
+	if err := ed.PlaceWaiting(t.Context(), saturday); err != nil {
+		t.Fatal(err)
+	}
+	agent := &fakeAgent{turns: []editor.Turn{calls("story", `{"story": "S1"}`), submits(citesTheSpeech)}}
+	ed, _ = reader(store, agent)
+
+	if err := ed.SundayRead(t.Context(), sundayMorning); err != nil {
+		t.Fatalf("%v\n%s", err, logs)
+	}
+
+	msgs := agent.sent[1].Messages
+	story := msgs[len(msgs)-1].Results[0].Content
+	_, connected, _ := strings.Cut(story, "Connected Stories:\n")
+	if want := "  S2: Carer's Allowance reform\n    announced together in \"Cost of Living update\"\n"; !strings.Contains(connected, want) {
+		t.Errorf("the connected Stories do not show %q:\n%s\n%s", want, story, logs)
+	}
+}
+
 func TestConnectedStoriesShowEachFactWithTheEntitiesItInvolvesInTheirRoles(t *testing.T) {
 	// The readout is in a Story of its own; a visit, F3, moves on both
 	// Stories, which it and Andy Burnham as actor connect.
@@ -363,6 +403,7 @@ func TestConnectedStoriesShowEachFactWithTheEntitiesItInvolvesInTheirRoles(t *te
 	}
 	connect(t, store, laterItem.EntryID, 2, editor.Role{Entity: "Andy Burnham", Role: "actor"}, editor.Role{Entity: "Edinburgh", Role: "place"})
 	connect(t, store, visit.EntryID, 3, editor.Role{Entity: "Andy Burnham", Role: "actor"})
+	otherStories(t, store, 2)
 	agent := &fakeAgent{turns: []editor.Turn{calls("story", `{"story": "S1"}`), submits(citesTheSpeech)}}
 	ed, _ = reader(store, agent)
 
@@ -506,6 +547,31 @@ func TestTheAgentHasNoToolThatWritesAFact(t *testing.T) {
 		props := tool.Schema["properties"].(map[string]any)
 		if _, ok := props["facts"]; ok {
 			t.Error("the read can submit Facts")
+		}
+	}
+}
+
+func TestTheAgentIsToldEachReasonStoriesAreConnected(t *testing.T) {
+	store := record(t)
+	readAndPlace(t, store, &fakeModel{output: startsAStory})
+	agent := &fakeAgent{turns: []editor.Turn{submits(citesTheSpeech)}}
+	ed, _ := reader(store, agent)
+
+	if err := ed.SundayRead(t.Context(), sundayMorning); err != nil {
+		t.Fatal(err)
+	}
+
+	var story string
+	for _, tool := range agent.sent[0].Tools {
+		if tool.Name == "story" {
+			story = tool.Description
+		}
+	}
+	for what, text := range map[string]string{"the story tool": story, "the instructions": agent.sent[0].Instructions} {
+		for _, reason := range []string{"Developments they share", "an Item", "Entities", "different Items"} {
+			if !strings.Contains(text, reason) {
+				t.Errorf("%s do not name %q as a reason Stories are connected:\n%s", what, reason, text)
+			}
 		}
 	}
 }

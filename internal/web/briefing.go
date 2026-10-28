@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"slices"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/samthorold/go-slow/internal/editor"
@@ -134,7 +135,7 @@ type failureRow struct {
 
 type briefedStoryRow struct {
 	ID    int64
-	Gives []giveButton
+	Gives gives
 	// MissedDevelopment is the form for a Development the Story missed.
 	MissedDevelopment missedDevelopmentForm
 	Title             string
@@ -149,14 +150,44 @@ type statementRow struct {
 	Cites []citationRow
 }
 
+// CitesLabel is the quiet marker that opens the statement's citations.
+func (s statementRow) CitesLabel() string {
+	if len(s.Cites) == 1 {
+		return "Cites 1 Development"
+	}
+	return "Cites " + strconv.Itoa(len(s.Cites)) + " Developments"
+}
+
 type citationRow struct {
-	Gives           []giveButton
-	AsAt            string
-	Statement       string
+	Gives     gives
+	AsAt      string
+	Statement string
+	// Short is the Fact's statement, shortened if need be, labelling the
+	// Feedback on the Development beside the statement that cites it.
+	Short           string
 	DevelopmentPath string
 	FactPath        string
 	ItemTitle       string
 	ItemPath        string
+}
+
+// labelLength is the most of a Fact's statement, in runes, that labels the
+// Feedback on its Development: enough to tell a statement's Developments
+// apart.
+const labelLength = 60
+
+// shorten is s, cut at the last word that fits within labelLength and marked
+// with an ellipsis if it is longer.
+func shorten(s string) string {
+	r := []rune(s)
+	if len(r) <= labelLength {
+		return s
+	}
+	cut := string(r[:labelLength])
+	if i := strings.LastIndex(cut, " "); i > 0 {
+		cut = cut[:i]
+	}
+	return strings.TrimRight(cut, " ,;:") + "…"
 }
 
 func developmentAnchor(factID int64) string { return "development-" + strconv.FormatInt(factID, 10) }
@@ -236,7 +267,7 @@ func (a *app) briefingWith(w http.ResponseWriter, r *http.Request, day time.Time
 				item := itemPath(d.SourceID, d.EntryID)
 				sr.Cites = append(sr.Cites, citationRow{
 					Gives: givenIn(developmentGives(p.FeedbackPath, bs.Story.ID, d.ID), kept, page),
-					AsAt:  factDate(d.Fact), Statement: d.Statement,
+					AsAt:  factDate(d.Fact), Statement: d.Statement, Short: shorten(d.Statement),
 					DevelopmentPath: storyPath(bs.Story.ID) + "#" + developmentAnchor(d.ID),
 					FactPath:        item + "#" + factAnchor(d.ID),
 					ItemTitle:       d.ItemTitle, ItemPath: item,

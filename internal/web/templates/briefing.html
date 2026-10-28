@@ -33,28 +33,60 @@
 <p>Nothing moved on in the Stories your Topics follow.</p>
 {{- end}}
 {{- range .Stories}}
-<section>
+{{/* A Story reads as its title and statements. Each block (the heading, a
+     statement) carries its own Feedback controls, shown only while the
+     pointer or keyboard focus is in the block (.actions, in the stylesheet);
+     Feedback already given is state, not an offer, and shows at rest.
+     A statement's citations are collapsed behind a disclosure, whose summary
+     also keeps the block focusable for the keyboard. */}}
+<section class="briefed-story">
+  <div class="story-head">
   <h2><a href="{{.Path}}"><span hx-disable>{{.Title}}</span></a></h2>
-  {{- template "gives" .Gives}}
-  {{- range .Statements}}
-  <p hx-disable>{{.Text}}</p>
-  <ul>
-    {{- range .Cites}}
-    <li><small><a href="{{.DevelopmentPath}}">Development</a> of <time>{{.AsAt}}</time>:
-      <a href="{{.FactPath}}"><span hx-disable>{{.Statement}}</span></a>,
-      from <a href="{{.ItemPath}}"><span hx-disable>{{.ItemTitle}}</span></a></small>
-      {{- template "gives" .Gives}}</li>
-    {{- end}}
-  </ul>
+  {{- with .Gives.Given}}
+  <div class="given-marks">{{template "gives" .}}</div>
   {{- end}}
+  {{- with .Gives.Offered}}
+  <div class="actions quiet" role="group" aria-label="Feedback on this Story">{{template "gives" .}}</div>
+  {{- end}}
+  </div>
+  {{- range .Statements}}
+  <div class="statement">
+  <p hx-disable>{{.Text}}</p>
+  <details class="citations quiet">
+    <summary>{{.CitesLabel}}</summary>
+    <ul>
+      {{- range .Cites}}
+      <li><a href="{{.DevelopmentPath}}">Development</a> of <time>{{.AsAt}}</time>:
+        <a href="{{.FactPath}}"><span hx-disable>{{.Statement}}</span></a>,
+        from <a href="{{.ItemPath}}"><span hx-disable>{{.ItemTitle}}</span></a></li>
+      {{- end}}
+    </ul>
+  </details>
+  {{- range $c := .Cites}}
+  {{- with $c.Gives.Given}}
+  <div class="given-marks"><span class="about" hx-disable>{{$c.Short}}</span> {{template "gives" .}}</div>
+  {{- end}}
+  {{- end}}
+  {{- range $c := .Cites}}
+  {{- with $c.Gives.Offered}}
+  <div class="actions quiet" role="group" aria-label="Feedback on: {{$c.Short}}"><span class="about" hx-disable>{{$c.Short}}</span>
+    {{- template "gives" .}}</div>
+  {{- end}}
+  {{- end}}
+  </div>
+  {{- end}}
+  <div class="missed quiet">
   {{- template "missedDevelopment" .MissedDevelopment}}
+  </div>
 </section>
 {{- end}}
 {{- with .TrailPath}}
 <p id="how-written"><small>{{if $.WithoutCall}}With nothing to tell, it was written without a model call. {{end}}<a href="{{.}}">How this was written</a></small></p>
 {{- end}}
 {{- if .Exists}}
+<div class="missed quiet">
 {{template "missedStory" .MissedStory}}
+</div>
 {{- end}}
 {{- if .Feedback}}
 <section aria-labelledby="your-feedback">

@@ -305,6 +305,75 @@ form.feedback {
   color: var(--link);
 }
 
+/* The Briefing reads as a briefing: a Story is its title and statements.
+   Each block (the Story's heading, a statement) carries its Feedback controls
+   (.actions), hidden at rest and shown while the pointer or keyboard focus is
+   in the block. Hidden visually, not with display: none or visibility:
+   hidden, so they stay in the tab order: tabbing into them is what reveals
+   them. Feedback already given (.given-marks) is state and stays shown. */
+.briefed-story h2 {
+  margin-bottom: 0.5rem;
+}
+
+.statement {
+  margin-bottom: 1.25rem;
+}
+
+.statement > p {
+  margin-bottom: 0.15rem;
+}
+
+.statement details,
+.given-marks {
+  margin: 0;
+}
+
+.story-head .given-marks {
+  margin-bottom: 0.5rem;
+}
+
+.given-marks {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.citations ul {
+  margin: 0.35rem 0 0.5rem;
+}
+
+.briefed-story .actions {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.briefed-story .statement:hover .actions,
+.briefed-story .statement:focus-within .actions,
+.briefed-story .story-head:hover .actions,
+.briefed-story .story-head:focus-within .actions {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip-path: none;
+  white-space: normal;
+  margin: 0.2rem 0 0;
+}
+
+/* What a group of controls or a given mark is on: its Development's Fact. */
+.briefed-story .about {
+  margin-right: 0.5rem;
+  font-style: italic;
+}
+
+.missed {
+  margin-top: 0.75rem;
+}
+
 /* Keyboard focus is always visible, on everything that takes it. */
 :focus-visible {
   outline: 2px solid var(--focus);

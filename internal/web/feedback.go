@@ -173,6 +173,19 @@ type giveButton struct {
 	UndoPath string
 }
 
+// gives are the pieces of Feedback offered on one target.
+type gives []giveButton
+
+// Given are those already standing on the target, each with its undo.
+func (gs gives) Given() gives {
+	return slices.DeleteFunc(slices.Clone(gs), func(g giveButton) bool { return g.UndoPath == "" })
+}
+
+// Offered are those not yet given, each a fresh button.
+func (gs gives) Offered() gives {
+	return slices.DeleteFunc(slices.Clone(gs), func(g giveButton) bool { return g.UndoPath != "" })
+}
+
 // about reports whether f is Feedback of g's kind on g's target.
 func (g giveButton) about(f feedback.Feedback) bool {
 	if string(f.Kind) != g.Kind || string(f.Level) != g.Level {

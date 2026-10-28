@@ -1,0 +1,23 @@
+{{/* The body-and-margin layout's pieces, shared by every page that shows
+     the Editor's work. A block is
+       <li class="block"> <div class="block-body">text</div>
+         <div class="block-margin">notes</div> </li>
+     inside a <div class="margined" data-margin="open|folded"> holding the
+     fold control (template "margin-fold"). See go-slow.css, *Body and
+     margin*. */}}
+
+{{/* margin-fold is the one control that folds a margined region's notes
+     away and back, given the state the region starts in ("open" on an
+     inspect page, "folded" on a reading page). static/margin-fold.js
+     toggles the region's data-margin. */}}
+{{define "margin-fold"}}<p class="margin-fold-row"><button type="button" class="margin-fold" data-margin-fold aria-expanded="{{if eq . "open"}}true{{else}}false{{end}}">Notes</button></p>{{end}}
+
+{{/* pills is a row of Entities, each a pill (template "pill"). */}}
+{{define "pills"}}{{if .}}<p class="pills">{{range .}}{{template "pill" .}} {{end}}</p>{{end}}{{end}}
+
+{{/* pill is one Entity: its name, then its Role or kind. The name is drawn
+     from collected text: inert. */}}
+{{define "pill"}}{{if .Href}}<a class="pill" href="{{.Href}}" hx-boost="false">{{else}}<span class="pill">{{end}}<span hx-disable>{{.Name}}</span> · <span class="pill-tag">{{.Tag}}</span>{{if .Href}}</a>{{else}}</span>{{end}}{{end}}
+
+{{/* made is a machine label: how a block was made, linking its call. */}}
+{{define "made"}}{{if .Call}}<a class="machine" href="{{.Href}}">{{.Label}}</a>{{end}}{{end}}

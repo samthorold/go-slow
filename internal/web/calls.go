@@ -27,7 +27,7 @@ type Calls interface {
 }
 
 // callTmpl is a kept call's page.
-var callTmpl = page(noIndex, "call.html")
+var callTmpl = page(noIndex, "call.html", "outcome.html")
 
 // callPage is the view model for a kept call's page: its request, its
 // response, what the act's checks said, and every attempt at the same work.
@@ -51,7 +51,7 @@ type callPage struct {
 	Tokens        tokens
 	Output        string
 	Raw           string
-	Outcome       string
+	Outcome       outcome
 	Why           string
 	Attempts      []attemptRow
 	// AttemptTokens are every attempt's tokens, summed.
@@ -72,10 +72,24 @@ func (t tokens) add(u tokens) tokens {
 	return tokens{t.Input + u.Input, t.Output + u.Output, t.CacheRead + u.CacheRead, t.Total + u.Total}
 }
 
+// outcome is what came of a call or a turn as shown: its word, and the
+// status hue of its verdict (Hue, the class suffix after "status-"), which
+// the stylesheet's header maps: applied is supported, refused (by the act's
+// checks) undecided, failed refuted. A turn that continued the conversation
+// is no verdict, and takes no hue.
+type outcome struct {
+	Word, Hue string
+}
+
+func outcomeOf(o editor.Outcome) outcome {
+	hue := map[editor.Outcome]string{editor.Applied: "supported", editor.Refused: "undecided", editor.Failed: "refuted"}[o]
+	return outcome{Word: string(o), Hue: hue}
+}
+
 type attemptRow struct {
 	Page    string
 	At      string
-	Outcome string
+	Outcome outcome
 	Why     string
 	// This is the attempt the page is about.
 	This bool
@@ -144,7 +158,7 @@ func (a *app) call(w http.ResponseWriter, r *http.Request) {
 		Act: c.Act, Work: strings.ReplaceAll(c.Key, "\n", " "), WorkPage: workPage(c.Act, c.Key),
 		At: when(c.At, loc), Batch: c.BatchID, Model: c.Model, Hash: c.RequestHash,
 		Instructions: c.Request.Instructions, Schema: pretty(schema), Input: c.Request.Input,
-		Outcome: string(c.Outcome), Why: c.Why,
+		Outcome: outcomeOf(c.Outcome), Why: c.Why,
 	}
 	var ps []string
 	for _, f := range c.Precedents {
@@ -156,7 +170,7 @@ func (a *app) call(w http.ResponseWriter, r *http.Request) {
 		p.Tokens, p.Output, p.Raw = tokensOf(res.Usage), pretty(res.Output), pretty(res.Raw)
 	}
 	for _, at := range attempts {
-		row := attemptRow{Page: callPath(at.ID), At: when(at.At, loc), Outcome: string(at.Outcome), Why: at.Why, This: at.ID == c.ID}
+		row := attemptRow{Page: callPath(at.ID), At: when(at.At, loc), Outcome: outcomeOf(at.Outcome), Why: at.Why, This: at.ID == c.ID}
 		p.Attempts = append(p.Attempts, row)
 		if at.Response != nil {
 			p.AttemptTokens = p.AttemptTokens.add(tokensOf(at.Response.Usage))

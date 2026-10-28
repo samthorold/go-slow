@@ -1,0 +1,50 @@
+package web
+
+import (
+	"net/url"
+	"strconv"
+
+	"github.com/samthorold/go-slow/internal/editor"
+)
+
+// pill is an Entity as every page shows it: its name and, as its tag, its
+// Role where it has one, otherwise its kind; linked where it has a page
+// (its Wikidata item).
+type pill struct {
+	Name, Tag, Href string
+}
+
+// pillsInvolved is the Entities f involves, each tagged with the Role
+// connecting gave it.
+func pillsInvolved(f editor.Fact) []pill {
+	out := make([]pill, 0, len(f.Involves))
+	for _, r := range f.Involves {
+		out = append(out, pill{Name: r.Entity, Tag: r.Role})
+	}
+	return out
+}
+
+// pillMentioned is an Entity an Item mentions, tagged with its kind and
+// linked to the Wikidata item it matched, if any.
+func pillMentioned(e editor.Entity) pill {
+	p := pill{Name: e.Name, Tag: e.Kind}
+	if e.WikidataID != "" {
+		p.Href = "https://www.wikidata.org/wiki/" + url.PathEscape(e.WikidataID)
+	}
+	return p
+}
+
+// made is how a block was made, shown in its margin as a machine label: the
+// act and the call it made, worded "<act> · call N" on every page.
+type made struct {
+	// Act is the act, as the label words it ("read").
+	Act string
+	// Call is the kept call, or 0 if none was kept.
+	Call int64
+}
+
+// Href is the call's page.
+func (m made) Href() string { return callPath(m.Call) }
+
+// Label is the label's wording.
+func (m made) Label() string { return m.Act + " · call " + strconv.FormatInt(m.Call, 10) }

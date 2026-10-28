@@ -28,7 +28,7 @@ type itemPage struct {
 	ReadAt      string
 	Model       string
 	Topics      []string
-	Mentions    []mentionRow
+	Mentions    []pill
 	Facts       []factRow
 	Claims      []claimRow
 }
@@ -38,24 +38,22 @@ type factRow struct {
 	// link to.
 	Anchor    string
 	Statement string
-	AsAt      string
-	Quote     string
-	// Involves are the Entities it involves, each in its role.
-	Involves []involvedRow
-	// Call is the page of the reading call that drew it, if one was kept.
-	Call string
+	// AsAt is the Fact's date, or "" where it is the Item's.
+	AsAt  string
+	Quote string
+	// Entities are the Entities it involves, each with its Role; none its
+	// Item only mentions.
+	Entities []pill
+	// Made is the reading call that drew it.
+	Made made
 }
 
 type claimRow struct {
 	Statement string
 	MadeBy    string
 	Quote     string
-}
-
-// mentionRow is an Entity the Item mentions, with its kind, and the link
-// to the Wikidata item it matched, if any.
-type mentionRow struct {
-	Name, Kind, Wikidata string
+	// Made is the reading call that drew it.
+	Made made
 }
 
 // itemPath is an Item's page: its Source and its entry id, each one path
@@ -88,27 +86,33 @@ func (a *app) item(w http.ResponseWriter, r *http.Request) {
 		Topics:      it.Topics,
 	}
 	for _, e := range it.Mentions {
-		m := mentionRow{Name: e.Name, Kind: e.Kind}
-		if e.WikidataID != "" {
-			m.Wikidata = "https://www.wikidata.org/wiki/" + url.PathEscape(e.WikidataID)
-		}
-		p.Mentions = append(p.Mentions, m)
+		p.Mentions = append(p.Mentions, pillMentioned(e))
+	}
+	// A Fact's date is a calendar date, in no time zone; the Item's is the
+	// day it was published where the Owner is.
+	const day = "2 January 2006"
+	published := ""
+	if !it.Published.IsZero() {
+		published = it.Published.In(loc).Format(day)
 	}
 	for _, f := range it.Facts {
+		asAt := f.AsAt.Format(day)
+		if asAt == published {
+			asAt = ""
+		}
 		p.Facts = append(p.Facts, factRow{
 			Anchor:    factAnchor(f.ID),
 			Statement: f.Statement,
-			// A Fact's date is a calendar date, in no time zone.
-			AsAt:     f.AsAt.Format("2 January 2006"),
-			Quote:    f.Quote,
-			Involves: involvedView(f),
-			Call:     callPath(it.ReadingCall),
+			AsAt:      asAt,
+			Quote:     f.Quote,
+			Entities:  pillsInvolved(f),
+			Made:      made{Act: "read", Call: it.ReadingCall},
 		})
 	}
 	// A Claim shows no Entities: a reading gives a Claim none, and who made
 	// it is its attribution.
 	for _, c := range it.Claims {
-		p.Claims = append(p.Claims, claimRow{Statement: c.Statement, MadeBy: c.MadeBy, Quote: c.Quote})
+		p.Claims = append(p.Claims, claimRow{Statement: c.Statement, MadeBy: c.MadeBy, Quote: c.Quote, Made: made{Act: "read", Call: it.ReadingCall}})
 	}
 	a.render(w, r, itemTmpl, p)
 }

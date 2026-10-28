@@ -22,7 +22,11 @@
   --alert-bg: #3a1518;
   --alert-text: #ffd6d6;
   --alert-rule: #ff6b6b;
+  /* An Entity's one hue, distinct from the link accent. */
+  --entity: #a8d8a0;
   --measure: 38rem;
+  --margin-col: 15rem;
+  --gutter: 2rem;
 }
 
 * {
@@ -303,6 +307,178 @@ form.feedback {
 .quiet:hover a,
 .quiet:focus-within a {
   color: var(--link);
+}
+
+/* The visual vocabulary: one meaning per shape, the same on every page.
+   Like .quiet, each is a class any page can take.
+
+   An Entity is a pill (.pill, a span, or an a where it links): its name,
+   then " · " and its Role, or its kind where it has no Role, in a .pill-tag
+   shown in small caps. One hue for every pill, whatever the Role:
+     <span class="pill"><span hx-disable>John Healey</span> · <span class="pill-tag">actor</span></span>
+   A row of pills is a <p class="pills">. */
+.pill {
+  display: inline-block;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--entity);
+  border: 1px solid var(--entity);
+  border-radius: 999px;
+  padding: 0 0.6em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+a.pill:hover {
+  background: var(--surface);
+}
+
+.pill-tag {
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.04em;
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+/* An Item is a citation (.citation): its Source's short name, then its
+   title in italics, a link:
+     <span class="citation">GOV.UK <a href="/items/…"><cite>Title</cite></a></span> */
+.citation {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.citation cite {
+  font-style: italic;
+}
+
+/* How something was made is a machine label (.machine): monospace, in the
+   muted colour, always worded "<act> · call N", linking the call:
+     <a class="machine" href="/calls/43">read · call 43</a>
+   (template "made"). */
+.machine {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+a.machine:hover,
+a.machine:focus-visible {
+  color: var(--text);
+  text-decoration: underline;
+}
+
+/* Body and margin: every page that shows the Editor's work lays each block
+   (a Fact, a Claim, a statement) out as its text in a body column and its
+   notes in a margin beside it, aligned with it: the quote (quiet), a date,
+   pills, the machine label and the block's Feedback actions, the margin's
+   only buttons. The blocks sit in one region,
+     <div class="margined" data-margin="open|folded">
+       {{template "margin-fold" "open|folded"}}
+       <ul class="blocks"><li class="block">
+         <div class="block-body">…</div><div class="block-margin">…</div>
+       </li></ul>
+     </div>
+   whose margin the one fold control (static/margin-fold.js) folds away and
+   back. The state lives in data-margin; an inspect page starts open, a
+   reading page folded. A page holding a region widens to fit the margin;
+   on a narrow window each block's notes drop below it. */
+body:has(.margined) main,
+body:has(.margined) nav,
+body:has(.margined) #request-errors {
+  max-width: calc(var(--measure) + var(--gutter) + var(--margin-col));
+}
+
+.margin-fold-row {
+  text-align: right;
+  margin: 0;
+}
+
+.blocks {
+  list-style: none;
+  padding-left: 0;
+}
+
+.block {
+  display: grid;
+  grid-template-columns: minmax(0, var(--measure)) var(--margin-col);
+  column-gap: var(--gutter);
+  margin-bottom: 1.25rem;
+}
+
+.block + .block {
+  margin-top: 0;
+}
+
+.block-body > :last-child {
+  margin-bottom: 0;
+}
+
+.block-margin {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.8rem;
+  color: var(--muted);
+  /* The margin's first line sits level with the body's. */
+  padding-top: 0.25rem;
+}
+
+.block-margin > * {
+  margin-bottom: 0.4rem;
+}
+
+.block-margin blockquote {
+  padding-left: 0.6rem;
+}
+
+.block-margin blockquote p {
+  margin: 0;
+}
+
+[data-margin="folded"] .block {
+  grid-template-columns: minmax(0, var(--measure));
+}
+
+[data-margin="folded"] .block-margin {
+  display: none;
+}
+
+/* A block's Feedback actions in its margin: hidden at rest, shown while the
+   pointer or keyboard focus is in the block. Hidden visually, never with
+   display: none, so they stay in the tab order and tabbing reveals them. */
+.block-margin .actions {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.block:hover .block-margin .actions,
+.block:focus-within .block-margin .actions {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip-path: none;
+  white-space: normal;
+}
+
+@media (max-width: 60rem) {
+  .block {
+    grid-template-columns: 1fr;
+  }
+
+  .block-margin {
+    padding: 0.35rem 0 0 0.75rem;
+  }
 }
 
 /* The Briefing reads as a briefing: a Story is its title and statements.

@@ -82,7 +82,7 @@ func TestAnItemsPageShowsItsFactsAndClaims(t *testing.T) {
 		t.Fatalf("status %d, not a full page:\n%s", res.status, res.body)
 	}
 	for _, want := range []string{
-		"Andy Burnham spoke in Motherwell.", "22 October 2026",
+		"Andy Burnham spoke in Motherwell.",
 		"Scotland is the true north.", "Andy Burnham",
 		`href="https://www.gov.uk/government/news/speech"`, "Open Government Licence v3.0",
 	} {
@@ -129,24 +129,29 @@ func TestAnItemsPageListsItsMentionsOnceAndPerFactOnlyTheEntitiesItInvolves(t *t
 		end := strings.Index(res.body[at:], "</section>")
 		return res.body[at : at+end]
 	}
+	// Each Entity is a pill: its name, then its kind where it has no Role.
 	mentions := section("mentions")
-	for _, want := range []string{`<a href="https://www.wikidata.org/wiki/Q123"`, "Andy Burnham", "person", "Motherwell", "place"} {
+	for _, want := range []string{
+		`<a class="pill" href="https://www.wikidata.org/wiki/Q123" hx-boost="false"><span hx-disable>Andy Burnham</span> · <span class="pill-tag">person</span></a>`,
+		`<span class="pill"><span hx-disable>Motherwell</span> · <span class="pill-tag">place</span></span>`,
+	} {
 		if !strings.Contains(mentions, want) {
-			t.Errorf("the mentions lack %q:\n%s", want, mentions)
+			t.Errorf("the mentions lack the pill %s:\n%s", want, mentions)
 		}
 	}
 	if n := strings.Count(mentions, "Andy Burnham</"); n != 1 {
 		t.Errorf("Andy Burnham is listed %d times among the mentions, want once:\n%s", n, mentions)
 	}
-	facts := section("facts")
-	if !strings.Contains(facts, "Involves <span hx-disable>Andy Burnham</span> as actor") {
-		t.Errorf("the Fact does not show Andy Burnham as its actor:\n%s", facts)
+	// A Fact's pills are the Entities it involves, each with its Role.
+	fact := blockOf(t, section("facts"), "Andy Burnham spoke in Motherwell.")
+	if !strings.Contains(fact.margin, `<span class="pill"><span hx-disable>Andy Burnham</span> · <span class="pill-tag">actor</span></span>`) {
+		t.Errorf("the Fact's margin does not show Andy Burnham as its actor:\n%s", fact.margin)
 	}
-	if strings.Contains(facts, "Motherwell</span> as") || strings.Contains(facts, "Andy Burnham, Motherwell") {
-		t.Errorf("the Fact lists Motherwell, which it only mentions:\n%s", facts)
+	if strings.Contains(fact.margin, "Motherwell</span> ·") {
+		t.Errorf("the Fact shows Motherwell, which it only mentions:\n%s", fact.margin)
 	}
-	if claims := section("claims"); strings.Contains(claims, "Involves") {
-		t.Errorf("the Claim shows an Entity list:\n%s", claims)
+	if claims := section("claims"); strings.Contains(claims, `class="pill"`) {
+		t.Errorf("the Claim shows Entities:\n%s", claims)
 	}
 }
 

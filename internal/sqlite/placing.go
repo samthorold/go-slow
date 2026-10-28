@@ -172,11 +172,18 @@ type candidate struct {
 	shares []string
 }
 
+// rarity is the weight of an Entity in of the stories Stories mention, an
+// inverse document frequency over Stories, log(1 + N/n), so an Entity in
+// nearly every Story still counts a little. What finds work by shared
+// Entities (placing's candidates, the Facts offered as a missed
+// Development) weights them by it.
+func rarity(in, stories int) float64 {
+	return math.Log1p(float64(stories) / float64(in))
+}
+
 // rankCandidates ranks the Stories the shared mentions are in, best first:
-// by the sum of each shared Entity's weight, an inverse document frequency
-// over Stories, log(1 + N/n) for an Entity n of the N Stories mention, so
-// an Entity in nearly every Story still counts a little; ties go to the
-// Story with the newest Development, then the newest Story.
+// by the sum of each shared Entity's rarity; ties go to the Story with the
+// newest Development, then the newest Story.
 func rankCandidates(shared []sharedMention) []candidate {
 	var out []candidate
 	at := map[int64]int{}
@@ -187,7 +194,7 @@ func rankCandidates(shared []sharedMention) []candidate {
 			at[m.story] = n
 			out = append(out, candidate{story: m.story, latest: m.latest})
 		}
-		out[n].score += math.Log1p(float64(m.stories) / float64(m.in))
+		out[n].score += rarity(m.in, m.stories)
 		out[n].shares = append(out[n].shares, m.entity)
 	}
 	slices.SortStableFunc(out, func(a, b candidate) int {

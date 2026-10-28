@@ -93,7 +93,7 @@ func TestTheActsNeverSeeAWithdrawnFact(t *testing.T) {
 func TestTheFactsToAddToAStoryAreThoseWhoseItemsMentionAnEntityItsItemsMention(t *testing.T) {
 	store := threeFacts(t)
 
-	facts, err := store.FactsToAdd(t.Context(), 1)
+	facts, err := store.FactsToAdd(t.Context(), 1, 20)
 
 	if err != nil || len(facts) != 1 || facts[0].ID != 3 {
 		t.Errorf("facts to add = %+v %v, want the third", facts, err)

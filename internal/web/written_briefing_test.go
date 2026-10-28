@@ -155,8 +155,9 @@ func TestTodaysBriefingShowsEachStatementTracingToItsDevelopmentFactAndItem(t *t
 		}
 	}
 	// The statement links to its Development on the Story's Timeline, to
-	// its Fact on the Item's page, and to the Item; each link resolves.
-	for _, pattern := range []string{`href="(/stories/1#development-\d+)"`, `href="(/items/[^"#]+#fact-\d+)"`, `href="(/items/[^"#]+)"`} {
+	// and to its Item, cited at the Fact on the Item's page; each link
+	// resolves.
+	for _, pattern := range []string{`href="(/stories/1#development-\d+)"`, `href="(/items/[^"#]+#fact-\d+)"`} {
 		m := regexp.MustCompile(pattern).FindStringSubmatch(res.body)
 		if m == nil {
 			t.Errorf("the statement has no link matching %s:\n%s", pattern, res.body)

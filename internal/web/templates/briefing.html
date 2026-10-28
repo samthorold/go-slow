@@ -22,7 +22,7 @@
 <p id="failed-attempts">Each attempt to write it:</p>
 <ol>
 {{- range .FailedAttempts}}
-  <li><a href="{{.Page}}">{{.At}}</a>: {{.Outcome}}</li>
+  <li><a href="{{.Page}}">{{.At}}</a>: {{.Outcome.Word}}</li>
 {{- end}}
 </ol>
 {{- end}}
@@ -32,15 +32,20 @@
 {{- else if not .Stories}}
 <p>Nothing moved on in the Stories your Topics follow.</p>
 {{- end}}
-{{- range .Stories}}
+{{- with .Stories}}
+{{/* A reading page: its margin starts folded, and the one control unfolds
+     it to show, beside each statement, the Developments it cites. */}}
+<div class="margined" data-margin="folded">
+{{template "margin-fold" "folded"}}
+{{- range .}}
 {{/* A Story reads as its title and statements. Each block (the heading, a
      statement) carries its own Feedback controls, shown only while the
      pointer or keyboard focus is in the block (.actions, in the stylesheet);
-     Feedback already given is state, not an offer, and shows at rest.
-     A statement's citations are collapsed behind a disclosure, whose summary
-     also keeps the block focusable for the keyboard. */}}
+     Feedback already given is state, not an offer, and shows at rest. A
+     statement's controls sit with its text, not in its margin: Feedback is
+     this page's frequent act, and a folded margin is out of reach. */}}
 <section class="briefed-story">
-  <div class="story-head">
+  <div class="title-row">
   <h2><a href="{{.Path}}"><span hx-disable>{{.Title}}</span></a></h2>
   {{- with .Gives.Given}}
   <div class="given-marks">{{template "gives" .}}</div>
@@ -49,36 +54,40 @@
   <div class="actions quiet" role="group" aria-label="Feedback on this Story">{{template "gives" .}}</div>
   {{- end}}
   </div>
+  <ul class="blocks">
   {{- range .Statements}}
-  <div class="statement">
-  <p hx-disable>{{.Text}}</p>
-  <details class="citations quiet">
-    <summary>{{.CitesLabel}}</summary>
-    <ul>
-      {{- range .Cites}}
-      <li><a href="{{.DevelopmentPath}}">Development</a> of <time>{{.AsAt}}</time>:
-        <a href="{{.FactPath}}"><span hx-disable>{{.Statement}}</span></a>,
-        from <a href="{{.ItemPath}}"><span hx-disable>{{.ItemTitle}}</span></a></li>
-      {{- end}}
-    </ul>
-  </details>
-  {{- range $c := .Cites}}
-  {{- with $c.Gives.Given}}
-  <div class="given-marks"><span class="about" hx-disable>{{$c.Short}}</span> {{template "gives" .}}</div>
+    <li class="block">
+      <div class="block-body">
+        <p hx-disable>{{.Text}}</p>
+        {{- range $c := .Cites}}
+        {{- with $c.Gives.Given}}
+        <div class="given-marks"><span class="about" hx-disable>{{$c.Short}}</span> {{template "gives" .}}</div>
+        {{- end}}
+        {{- end}}
+        {{- range $c := .Cites}}
+        {{- with $c.Gives.Offered}}
+        <div class="actions quiet" role="group" aria-label="Feedback on: {{$c.Short}}"><span class="about" hx-disable>{{$c.Short}}</span>
+          {{- template "gives" .}}</div>
+        {{- end}}
+        {{- end}}
+      </div>
+      <div class="block-margin">
+        {{- range .Cites}}
+        <div class="cited">
+          <p><a href="{{.DevelopmentPath}}"><span hx-disable>{{.Statement}}</span></a>{{with .AsAt}} <time>{{.}}</time>{{end}}</p>
+          <p>{{template "citation" .Item}}</p>
+        </div>
+        {{- end}}
+      </div>
+    </li>
   {{- end}}
-  {{- end}}
-  {{- range $c := .Cites}}
-  {{- with $c.Gives.Offered}}
-  <div class="actions quiet" role="group" aria-label="Feedback on: {{$c.Short}}"><span class="about" hx-disable>{{$c.Short}}</span>
-    {{- template "gives" .}}</div>
-  {{- end}}
-  {{- end}}
-  </div>
-  {{- end}}
+  </ul>
   <div class="missed quiet">
   {{- template "missedDevelopment" .MissedDevelopment}}
   </div>
 </section>
+{{- end}}
+</div>
 {{- end}}
 {{- with .TrailPath}}
 <p id="how-written"><small>{{if $.WithoutCall}}With nothing to tell, it was written without a model call. {{end}}<a href="{{.}}">How this was written</a></small></p>

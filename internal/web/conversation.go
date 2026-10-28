@@ -9,7 +9,7 @@ import (
 )
 
 // conversationTmpl is a kept conversation's page.
-var conversationTmpl = page(noIndex, "conversation.html")
+var conversationTmpl = page(noIndex, "conversation.html", "outcome.html")
 
 // conversationPath is a kept conversation's page, at turn n if n is not
 // zero; empty for no conversation.
@@ -35,7 +35,7 @@ type conversationPage struct {
 	ReadPath     string
 	At           string
 	Model        string
-	Outcome      string
+	Outcome      outcome
 	Why          string
 	Instructions string
 	Tools        string
@@ -50,7 +50,7 @@ type turnRow struct {
 	At      string
 	Hash    string
 	Sent    []sentRow
-	Outcome string
+	Outcome outcome
 	Why     string
 	// The model's turn, if one came.
 	Answered      bool
@@ -60,6 +60,15 @@ type turnRow struct {
 	Text          string
 	Calls         []calledRow
 	Raw           string
+}
+
+// ShortHash is the turn's request hash cut to fit the margin; the whole
+// hash is its title.
+func (t turnRow) ShortHash() string {
+	if len(t.Hash) > 12 {
+		return t.Hash[:12]
+	}
+	return t.Hash
 }
 
 // sentRow is a message sent new with a turn: the act's text, or a tool's
@@ -94,7 +103,7 @@ func (a *app) conversation(w http.ResponseWriter, r *http.Request) {
 	loc := a.Now().Location()
 	tools, _ := json.Marshal(c.Tools)
 	p := conversationPage{
-		Act: c.Act, Day: c.Key, At: when(c.At, loc), Model: c.Model, Outcome: string(c.Outcome), Why: c.Why,
+		Act: c.Act, Day: c.Key, At: when(c.At, loc), Model: c.Model, Outcome: outcomeOf(c.Outcome), Why: c.Why,
 		Instructions: c.Instructions, Tools: pretty(tools),
 	}
 	if c.Act == "sunday_read" {
@@ -102,7 +111,7 @@ func (a *app) conversation(w http.ResponseWriter, r *http.Request) {
 	}
 	for _, t := range c.Turns {
 		row := turnRow{N: t.N, Anchor: turnAnchor(t.N), At: when(t.At, loc), Hash: t.RequestHash,
-			Outcome: string(t.Outcome), Why: t.Why}
+			Outcome: outcomeOf(t.Outcome), Why: t.Why}
 		for _, m := range t.Sent {
 			if m.Results == nil {
 				row.Sent = append(row.Sent, sentRow{Text: m.User})
@@ -124,9 +133,23 @@ func (a *app) conversation(w http.ResponseWriter, r *http.Request) {
 	a.render(w, r, conversationTmpl, p)
 }
 
-// readConversation is the page of the conversation that wrote read, and of
-// the turn that submitted it, which reached its Assessments: the read's
-// last turn, since a read is written by the first submission that passes.
-func readConversation(read editor.SundayRead) (conversation, reached string) {
-	return conversationPath(read.ConversationID, 0), conversationPath(read.ConversationID, read.Turns)
+// reachedBy is how read's Assessments were reached: the turn that submitted
+// it, the read's last, since a read is written by the first submission that
+// passes.
+func reachedBy(read editor.SundayRead) reached {
+	return reached{Conversation: read.ConversationID, Turn: read.Turns}
 }
+
+// reached is how an Assessment was reached, shown in its margin as a machine
+// label worded "reached · turn N", linking the turn.
+type reached struct {
+	// Conversation is the conversation, or 0 if none was kept.
+	Conversation int64
+	Turn         int
+}
+
+// Href is the turn's place on the conversation's page.
+func (r reached) Href() string { return conversationPath(r.Conversation, r.Turn) }
+
+// Label is the label's wording.
+func (r reached) Label() string { return "reached · turn " + strconv.Itoa(r.Turn) }

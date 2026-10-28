@@ -8,7 +8,15 @@
    The quiet style: what should recede, "not shouting for your attention",
    sits flat and dim until hovered or focused. Buttons and forms get it by
    default; give any other block the class "quiet" to make it recede the same
-   way (it brightens while the pointer or keyboard focus is inside it). */
+   way (it brightens while the pointer or keyboard focus is inside it).
+
+   The status hues: one hue per verdict, for every page that says how
+   something stands or came out. Give the element the class "status" and one
+   of status-supported (green), status-refuted (red), status-undecided (amber)
+   or status-due (violet). The register's hypotheses take them by their
+   status; a call's outcomes take the same family: applied is
+   status-supported, refused (by the act's checks) status-undecided, failed
+   status-refuted. Each hue meets AA on --bg (above 8:1). */
 
 :root {
   color-scheme: dark;
@@ -22,6 +30,10 @@
   --alert-bg: #3a1518;
   --alert-text: #ffd6d6;
   --alert-rule: #ff6b6b;
+  --supported: #7ccf8f;
+  --refuted: #ff8f8f;
+  --undecided: #e5c070;
+  --due: #b9a4ff;
   --measure: 38rem;
 }
 
@@ -303,6 +315,38 @@ form.feedback {
 .quiet:hover a,
 .quiet:focus-within a {
   color: var(--link);
+}
+
+/* The status hues (see the top of this file): a verdict, small and set in
+   the hue of its status, so a glance down a column says where things stand. */
+.status {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-supported {
+  color: var(--supported);
+}
+
+.status-refuted {
+  color: var(--refuted);
+}
+
+.status-undecided {
+  color: var(--undecided);
+}
+
+.status-due {
+  color: var(--due);
+}
+
+/* The register: its reading's paragraphs and lists sit close in their cell. */
+.register td p,
+.register td ul,
+.register td details {
+  margin: 0 0 0.35rem;
 }
 
 /* The Briefing reads as a briefing: a Story is its title and statements.

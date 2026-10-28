@@ -3,45 +3,10 @@
 {{define "content"}}
 <h1>Topics</h1>
 
-<section aria-labelledby="followed">
-  <h2 id="followed">Followed</h2>
-  {{- if not .Topics}}
-  <p>No Topics yet.</p>
-  {{- end}}
-  <ul>
-  {{- $depths := .Depths}}
-  {{- range .Topics}}
-    {{/* What the Owner typed is inert: hx-disable on the elements holding it. */}}
-    <li id="topic-{{.ID}}">
-      <strong hx-disable>{{.Name}}</strong>
-      {{- if .Terms}}
-      <p><small>Terms: <span hx-disable>{{range $i, $t := .Terms}}{{if $i}}, {{end}}{{$t}}{{end}}</span></small></p>
-      {{- end}}
-      {{- if .Sources}}
-      <p><small>Sources: {{range $i, $s := .Sources}}{{if $i}}, {{end}}{{$s}}{{end}}</small></p>
-      {{- end}}
-      <form hx-put="/topics/{{.ID}}" hx-target="body" hx-swap="innerHTML">
-        <label>Depth
-          <select name="depth">
-          {{- $depth := .Depth}}
-          {{- range $depths}}
-            <option value="{{.}}"{{if eq . $depth}} selected{{end}}>{{.}}</option>
-          {{- end}}
-          </select>
-        </label>
-        <button>Change Depth</button>
-        {{- with .DepthError}} <span role="alert">{{.}}</span>{{end}}
-      </form>
-      <button hx-delete="/topics/{{.ID}}" hx-target="#topic-{{.ID}}" hx-swap="outerHTML"
-        hx-confirm="Stop following this Topic?">Remove</button>
-    </li>
-  {{- end}}
-  </ul>
-</section>
-
-<section aria-labelledby="take-up">
-  <h2 id="take-up">Take up a Topic</h2>
-  {{- with .Form}}
+{{/* Taking up a Topic is the rare act: collapsed, open again when it failed. */}}
+{{- with .Form}}
+<details class="take-up"{{if .Errors}} open{{end}}>
+  <summary>Take up a Topic</summary>
   <form method="post" action="/topics" hx-target="body" hx-swap="innerHTML">
     {{- with index .Errors ""}}<p role="alert">{{.}}</p>{{end}}
     <p>
@@ -72,6 +37,47 @@
     </fieldset>
     <button>Take up</button>
   </form>
+</details>
+{{- end}}
+
+<section aria-labelledby="followed">
+  <h2 id="followed">Followed</h2>
+  {{- if not .Topics}}
+  <p>No Topics yet.</p>
+  {{- else}}
+  <table class="topics">
+    <thead>
+      <tr><th>Topic</th><th>Depth</th><th>Terms</th><th>Sources</th><th></th></tr>
+    </thead>
+    <tbody>
+    {{- $depths := .Depths}}
+    {{- range .Topics}}
+      {{/* What the Owner typed is inert: hx-disable on the elements holding it. */}}
+      <tr id="topic-{{.ID}}">
+        <td><strong hx-disable>{{.Name}}</strong></td>
+        <td>
+          {{/* A segmented control: each Depth is a button that saves it. */}}
+          <form hx-put="/topics/{{.ID}}" hx-target="body" hx-swap="innerHTML" class="segmented" role="group" aria-label="Depth">
+            {{- $depth := .Depth}}
+            {{- range $depths}}
+            <button name="depth" value="{{.}}" aria-pressed="{{if eq . $depth}}true{{else}}false{{end}}">{{.}}</button>
+            {{- end}}
+            {{- with .DepthError}} <span role="alert">{{.}}</span>{{end}}
+          </form>
+        </td>
+        <td class="quiet"><span hx-disable>{{range $i, $t := .Terms}}{{if $i}}, {{end}}{{$t}}{{end}}</span></td>
+        <td class="quiet">{{range $i, $s := .Sources}}{{if $i}}, {{end}}{{$s}}{{end}}</td>
+        <td>
+          {{/* Shown while the pointer or keyboard focus is in the row (.actions, in the stylesheet). */}}
+          <div class="actions quiet">
+            <button hx-delete="/topics/{{.ID}}" hx-target="#topic-{{.ID}}" hx-swap="outerHTML"
+              hx-confirm="Stop following this Topic?">Remove</button>
+          </div>
+        </td>
+      </tr>
+    {{- end}}
+    </tbody>
+  </table>
   {{- end}}
 </section>
 {{end}}

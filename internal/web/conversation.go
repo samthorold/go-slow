@@ -124,9 +124,23 @@ func (a *app) conversation(w http.ResponseWriter, r *http.Request) {
 	a.render(w, r, conversationTmpl, p)
 }
 
-// readConversation is the page of the conversation that wrote read, and of
-// the turn that submitted it, which reached its Assessments: the read's
-// last turn, since a read is written by the first submission that passes.
-func readConversation(read editor.SundayRead) (conversation, reached string) {
-	return conversationPath(read.ConversationID, 0), conversationPath(read.ConversationID, read.Turns)
+// reachedBy is how read's Assessments were reached: the turn that submitted
+// it, the read's last, since a read is written by the first submission that
+// passes.
+func reachedBy(read editor.SundayRead) reached {
+	return reached{Conversation: read.ConversationID, Turn: read.Turns}
 }
+
+// reached is how an Assessment was reached, shown in its margin as a machine
+// label worded "reached · turn N", linking the turn.
+type reached struct {
+	// Conversation is the conversation, or 0 if none was kept.
+	Conversation int64
+	Turn         int
+}
+
+// Href is the turn's place on the conversation's page.
+func (r reached) Href() string { return conversationPath(r.Conversation, r.Turn) }
+
+// Label is the label's wording.
+func (r reached) Label() string { return "reached · turn " + strconv.Itoa(r.Turn) }

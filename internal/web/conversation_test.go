@@ -46,7 +46,7 @@ func TestTheSundayReadAndItsAssessmentsLinkToTheConversationShownTurnByTurn(t *t
 		t.Errorf("the read does not link its conversation:\n%s", read.body)
 	}
 	// The Assessment links to the turn that reached it.
-	section := regexp.MustCompile(`(?s)<section id="assessment-1">.*?</section>`).FindString(read.body)
+	section := regexp.MustCompile(`(?s)<li class="block" id="assessment-1">.*?</li>`).FindString(read.body)
 	if !strings.Contains(section, `href="/conversations/1#turn-2"`) {
 		t.Errorf("the Assessment does not link the turn that reached it:\n%s", section)
 	}

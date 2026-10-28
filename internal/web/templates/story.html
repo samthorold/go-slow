@@ -120,10 +120,3 @@
 {{- end}}
 </div>
 {{end}}
-
-{{/* block-gives is a block's Feedback in its margin: what is already given
-     is state and shows at rest; what is offered is its actions, shown while
-     the pointer or keyboard focus is in the block. */}}
-{{define "block-gives"}}{{with .Given}}
-            <div class="given-marks">{{template "gives" .}}</div>{{end}}{{with .Offered}}
-            <div class="actions" role="group" aria-label="Feedback">{{template "gives" .}}</div>{{end}}{{end}}

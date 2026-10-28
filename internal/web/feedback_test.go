@@ -334,7 +334,7 @@ func TestFeedbackIsUndoneFromAStorysPage(t *testing.T) {
 func TestFeedbackOnWhatIsNotInTheRecordIsNotFound(t *testing.T) {
 	app := newApp(t, saturday)
 
-	for _, path := range []string{today, "/stories/7/feedback"} {
+	for _, path := range []string{today, "/stories/7/feedback", "/items/nowhere/7/feedback"} {
 		if res := send(t, app, "POST", path, url.Values{"kind": {"wrong"}, "level": {"fact"}, "fact": {"7"}}); res.status != 404 {
 			t.Errorf("%s: status %d, want 404", path, res.status)
 		}

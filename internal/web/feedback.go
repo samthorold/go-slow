@@ -294,6 +294,12 @@ func readGives(path string, id int64) []giveButton {
 
 const confirmWrongFact = "Withdraw this Fact, and the Developments and Connections built on it?"
 
+// factGives is the Feedback on a Fact as reading drew it: wrong. New to me
+// is given on what the Owner reads, a Development, not on a reading.
+func factGives(path string, fact int64) []giveButton {
+	return []giveButton{{Path: path, Kind: string(feedback.Wrong), Level: string(feedback.Fact), Fact: fact, Label: "Wrong", Confirm: confirmWrongFact}}
+}
+
 // storyGives is the Feedback on a Story: not wanted in the Briefing, or new
 // to the Owner.
 func storyGives(path string, story int64) []giveButton {

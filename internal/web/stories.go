@@ -95,7 +95,13 @@ type connectedRow struct {
 	Path     string
 	Title    string
 	Shared   []developmentRow
+	Items    []sharedItemRow
 	Entities []sharedEntityRow
+}
+
+// sharedItemRow is an Item both Stories have Developments from.
+type sharedItemRow struct {
+	Title, Path string
 }
 
 // sharedEntityRow is an Entity both Stories' Facts involve in one role.
@@ -210,6 +216,9 @@ func (a *app) storyWith(w http.ResponseWriter, r *http.Request, id int64, status
 		row := connectedRow{Path: storyPath(c.ID), Title: c.Title}
 		for _, d := range c.Shared {
 			row.Shared = append(row.Shared, developmentView(d))
+		}
+		for _, it := range c.Items {
+			row.Items = append(row.Items, sharedItemRow{Title: it.Title, Path: itemPath(it.SourceID, it.EntryID)})
 		}
 		for _, e := range c.Entities {
 			row.Entities = append(row.Entities, sharedEntityRow{

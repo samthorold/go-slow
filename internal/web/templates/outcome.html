@@ -1,0 +1,3 @@
+{{/* outcome is what came of a call or a turn, in the status hue of its
+     verdict (see go-slow.css, the status hues). */}}
+{{define "outcome"}}<span class="status{{with .Hue}} status-{{.}}{{end}}">{{.Word}}</span>{{end}}

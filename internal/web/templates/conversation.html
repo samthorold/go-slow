@@ -2,56 +2,90 @@
 
 {{define "content"}}
 {{/* What a model was sent and what it answered are inert, like collected
-     text: hx-disable on the elements holding them. */}}
+     text: hx-disable on the elements holding them. A conversation's page is
+     for diagnosis: a one-line summary head, then each turn as a block, what
+     the agent did in its body and the turn's notes in the margin, open; the
+     bulk (what is sent on every turn, what each turn was sent, a tool call's
+     input, the provider's raw form) collapsed. */}}
 <p>{{if .ReadPath}}<a href="{{.ReadPath}}">The Sunday read for {{.Day}}</a>{{else}}<span hx-disable>{{.Day}}</span>{{end}}</p>
 <h1>A {{.Act}} conversation</h1>
-<p>Ended {{.At}}: <strong>{{.Outcome}}</strong>{{if .Why}}: <span hx-disable>{{.Why}}</span>{{end}}</p>
-<p>Asked of {{if .Model}}<code hx-disable>{{.Model}}</code>{{else}}a model not recorded{{end}}.
-  {{.Tokens.Total}} tokens over {{len .Turns}} {{if eq (len .Turns) 1}}turn{{else}}turns{{end}}:
-  {{.Tokens.Input}} input, {{.Tokens.Output}} output{{if .Tokens.CacheRead}}, {{.Tokens.CacheRead}} read from the cache{{end}}.</p>
+<p class="summary-head">{{template "outcome" .Outcome}} · {{.Tokens.Total}} tokens over {{len .Turns}} {{if eq (len .Turns) 1}}turn{{else}}turns{{end}} · {{if .Model}}<code hx-disable>{{.Model}}</code>{{else}}a model not recorded{{end}}</p>
+<p class="quiet"><small>Ended {{.At}}. {{.Tokens.Input}} input tokens, {{.Tokens.Output}} output{{if .Tokens.CacheRead}}, {{.Tokens.CacheRead}} read from the cache{{end}}.</small></p>
+{{- if .Why}}
+<p>Why: <span hx-disable>{{.Why}}</span></p>
+{{- end}}
 
 <section aria-labelledby="instructions">
   <h2 id="instructions">Sent on every turn</h2>
-  <h3>Instructions</h3>
-  <pre hx-disable>{{.Instructions}}</pre>
-  <h3>Tools</h3>
-  <pre hx-disable>{{.Tools}}</pre>
+  <details>
+    <summary>Instructions</summary>
+    <pre hx-disable>{{.Instructions}}</pre>
+  </details>
+  <details>
+    <summary>Tools</summary>
+    <pre hx-disable>{{.Tools}}</pre>
+  </details>
 </section>
 
-{{- range .Turns}}
-<section id="{{.Anchor}}" aria-labelledby="{{.Anchor}}-heading">
-  <h2 id="{{.Anchor}}-heading">Turn {{.N}}</h2>
-  <p>{{.At}}: <strong>{{.Outcome}}</strong>. Request hash <code>{{.Hash}}</code>.</p>
-  {{- if .Why}}
-  <pre hx-disable>{{.Why}}</pre>
+{{/* A conversation's page is an inspect page: its margin starts open. Each
+     turn's block carries its #turn-N anchor, which the Sunday read and its
+     Assessments link to. */}}
+<div class="margined" data-margin="open">
+{{template "margin-fold" "open"}}
+
+<section aria-labelledby="turns">
+  <h2 id="turns">Turns</h2>
+  <ul class="blocks">
+  {{- range .Turns}}
+    <li class="block" id="{{.Anchor}}">
+      <div class="block-body">
+        {{- if .Sent}}
+        <details>
+          <summary>Sent with turn {{.N}}</summary>
+          {{- range .Sent}}
+          {{- if .CallID}}
+          <p>The result of call <code hx-disable>{{.CallID}}</code>{{if .IsError}}, an error{{end}}:</p>
+          {{- end}}
+          <pre hx-disable>{{.Text}}</pre>
+          {{- end}}
+        </details>
+        {{- end}}
+        {{- if .Answered}}
+        {{- with .Text}}
+        <pre hx-disable>{{.}}</pre>
+        {{- end}}
+        {{- range .Calls}}
+        <details>
+          <summary>Called <code hx-disable>{{.Name}}</code> (<code hx-disable>{{.ID}}</code>)</summary>
+          <pre hx-disable>{{.Input}}</pre>
+        </details>
+        {{- end}}
+        {{- else}}
+        <p>No response came.</p>
+        {{- end}}
+        {{- if .Why}}
+        <p>Told back:</p>
+        <pre hx-disable>{{.Why}}</pre>
+        {{- end}}
+        {{- if .Raw}}
+        <details>
+          <summary>As the provider returned it</summary>
+          <pre hx-disable>{{.Raw}}</pre>
+        </details>
+        {{- end}}
+      </div>
+      <div class="block-margin">
+        <p><a class="machine" href="#{{.Anchor}}">turn {{.N}}</a> {{template "outcome" .Outcome}}</p>
+        {{- if .Answered}}
+        <p>{{.Tokens.Total}} tokens: {{.Tokens.Input}} input, {{.Tokens.Output}} output{{if .Tokens.CacheRead}}, {{.Tokens.CacheRead}} cached{{end}}</p>
+        <p>By <code hx-disable>{{.ReportedModel}}</code>{{with .StopReason}}, stopping for <code hx-disable>{{.}}</code>{{end}}</p>
+        {{- end}}
+        <p>{{.At}}</p>
+        <p>Request <code title="{{.Hash}}">{{.ShortHash}}</code></p>
+      </div>
+    </li>
   {{- end}}
-  <h3>Sent</h3>
-  {{- range .Sent}}
-  {{- if .CallID}}
-  <p>The result of call <code hx-disable>{{.CallID}}</code>{{if .IsError}}, an error{{end}}:</p>
-  {{- end}}
-  <pre hx-disable>{{.Text}}</pre>
-  {{- end}}
-  <h3>Answered</h3>
-  {{- if .Answered}}
-  <p>By <code hx-disable>{{.ReportedModel}}</code>{{with .StopReason}}, stopping for <code hx-disable>{{.}}</code>{{end}}.
-    {{.Tokens.Total}} tokens: {{.Tokens.Input}} input, {{.Tokens.Output}} output{{if .Tokens.CacheRead}}, {{.Tokens.CacheRead}} read from the cache{{end}}.</p>
-  {{- with .Text}}
-  <pre hx-disable>{{.}}</pre>
-  {{- end}}
-  {{- range .Calls}}
-  <p>Called <code hx-disable>{{.Name}}</code> (<code hx-disable>{{.ID}}</code>):</p>
-  <pre hx-disable>{{.Input}}</pre>
-  {{- end}}
-  {{- if .Raw}}
-  <details>
-    <summary>As the provider returned it</summary>
-    <pre hx-disable>{{.Raw}}</pre>
-  </details>
-  {{- end}}
-  {{- else}}
-  <p>No response came.</p>
-  {{- end}}
+  </ul>
 </section>
-{{- end}}
+</div>
 {{end}}

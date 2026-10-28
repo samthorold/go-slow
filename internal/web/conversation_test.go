@@ -85,6 +85,66 @@ func TestTheSundayReadAndItsAssessmentsLinkToTheConversationShownTurnByTurn(t *t
 	}
 }
 
+// sundayConversation is the page of a Sunday read written by an agent that
+// looks at a Story, then submits.
+func sundayConversation(t *testing.T) string {
+	t.Helper()
+	store := openStore(t)
+	speechStory(t, store)
+	var turns int
+	ed := editor.New(editor.Deps{Store: store, SundayReads: store, SundayReadModel: lookThenSubmit{assessed, &turns},
+		Wikidata: noWikidata{}, Log: slog.New(slog.DiscardHandler)})
+	if err := ed.SundayRead(t.Context(), sunday); err != nil {
+		t.Fatal(err)
+	}
+	app, _ := newAppWithLog(t, sunday, store)
+	return get(t, app, "/conversations/1").body
+}
+
+func TestAConversationsPageOpensWithAOneLineSummaryHeadItsOutcomeHued(t *testing.T) {
+	head := summaryHead(t, sundayConversation(t))
+
+	for _, want := range []string{`<span class="status status-supported">applied</span>`, "2 turns", "330 tokens"} {
+		if !strings.Contains(head, want) {
+			t.Errorf("the summary head lacks %q:\n%s", want, head)
+		}
+	}
+}
+
+func TestAConversationsTurnsAreBlocksWithTheirNotesInAnOpenMargin(t *testing.T) {
+	page := sundayConversation(t)
+
+	regions := regexp.MustCompile(`<div class="margined" data-margin="(open|folded)">`).FindAllStringSubmatch(page, -1)
+	if len(regions) != 1 || regions[0][1] != "open" {
+		t.Fatalf("want one margined region, open; got %v:\n%s", regions, page)
+	}
+	first := blockOf(t, page, "Looking at")
+	for _, want := range []string{`href="#turn-1"`, "110 tokens", `class="status">continued</span>`} {
+		if !strings.Contains(first.margin, want) {
+			t.Errorf("turn 1's margin lacks %q:\n%s", want, first.margin)
+		}
+	}
+	// The tools it called, briefly, are what it did: in the body.
+	if !strings.Contains(first.body, "story") {
+		t.Errorf("turn 1's body does not say it called the Story tool:\n%s", first.body)
+	}
+	second := blockOf(t, page, "Called <code hx-disable>submit_read</code>")
+	for _, want := range []string{`href="#turn-2"`, "220 tokens", `<span class="status status-supported">applied</span>`} {
+		if !strings.Contains(second.margin, want) {
+			t.Errorf("turn 2's margin lacks %q:\n%s", want, second.margin)
+		}
+	}
+	// #turn-N links land on the turn's block.
+	for _, n := range []string{"1", "2"} {
+		if !regexp.MustCompile(`<li class="block" id="turn-` + n + `"`).MatchString(page) {
+			t.Errorf("no block carries id turn-%s:\n%s", n, page)
+		}
+	}
+	if got := disclosure(t, page, "As the provider returned it"); got != "collapsed" {
+		t.Errorf("a turn's raw form is %s, want collapsed", got)
+	}
+}
+
 func TestAFailedReadLinksTheConversationOfItsAttempt(t *testing.T) {
 	store := openStore(t)
 	speechStory(t, store)

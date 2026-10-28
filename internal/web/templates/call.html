@@ -2,25 +2,32 @@
 
 {{define "content"}}
 {{/* What a model was sent and what it answered, and the work's key, are
-     inert, like collected text: hx-disable on the elements holding them. */}}
+     inert, like collected text: hx-disable on the elements holding them.
+     A call's page is for diagnosis: a one-line summary head, then what is
+     diagnosed with (the Input and the Output) open, the bulk collapsed. */}}
 <h1>A {{.Act}} call</h1>
-<p>On {{if .WorkPage}}<a href="{{.WorkPage}}" hx-disable>{{.Work}}</a>{{else}}<span hx-disable>{{.Work}}</span>{{end}},
-  {{.At}}{{if .Batch}}, in batch <code hx-disable>{{.Batch}}</code>{{else}}, in real time{{end}}.</p>
-<p><strong>{{.Outcome}}</strong>{{if .Why}}: <span hx-disable>{{.Why}}</span>{{end}}</p>
+<p class="summary-head">{{template "outcome" .Outcome}} · on {{if .WorkPage}}<a href="{{.WorkPage}}" hx-disable>{{.Work}}</a>{{else}}<span hx-disable>{{.Work}}</span>{{end}} · {{if .Model}}<code hx-disable>{{.Model}}</code>{{else}}a model not recorded{{end}} · {{.Tokens.Total}} tokens · {{len .Attempts}} {{if eq (len .Attempts) 1}}attempt{{else}}attempts{{end}}</p>
+<p class="quiet"><small>Made {{.At}}{{if .Batch}}, in batch <code hx-disable>{{.Batch}}</code>{{else}}, in real time{{end}}.
+  Request hash <code>{{.Hash}}</code>.</small></p>
+{{- if .Why}}
+<p>Why: <span hx-disable>{{.Why}}</span></p>
+{{- end}}
 
 <section aria-labelledby="request">
   <h2 id="request">The request</h2>
-  <p>Asked of {{if .Model}}<code hx-disable>{{.Model}}</code>{{else}}a model not recorded{{end}}.
-    Request hash <code>{{.Hash}}</code>.</p>
   {{- if .Precedents}}
   <p>Shown as precedent the Feedback {{.Precedents}}.</p>
   {{- end}}
-  <h3>Instructions</h3>
-  <pre hx-disable>{{.Instructions}}</pre>
   <h3>Input</h3>
   <pre hx-disable>{{.Input}}</pre>
-  <h3>Schema</h3>
-  <pre hx-disable>{{.Schema}}</pre>
+  <details>
+    <summary>Instructions</summary>
+    <pre hx-disable>{{.Instructions}}</pre>
+  </details>
+  <details>
+    <summary>Schema</summary>
+    <pre hx-disable>{{.Schema}}</pre>
+  </details>
 </section>
 
 <section aria-labelledby="response">
@@ -30,21 +37,26 @@
     {{.Tokens.Total}} tokens: {{.Tokens.Input}} input, {{.Tokens.Output}} output{{if .Tokens.CacheRead}}, {{.Tokens.CacheRead}} read from the cache{{end}}.</p>
   <h3>Output</h3>
   <pre hx-disable>{{.Output}}</pre>
-  <h3>As the provider returned it</h3>
-  <pre hx-disable>{{.Raw}}</pre>
+  <details>
+    <summary>As the provider returned it</summary>
+    <pre hx-disable>{{.Raw}}</pre>
+  </details>
   {{- else}}
   <p>No response came.</p>
   {{- end}}
 </section>
 
+{{/* The attempts are diagnosis only when there is more than one. */}}
 <section aria-labelledby="attempts">
   <h2 id="attempts">Every attempt at this work</h2>
-  <p>{{.AttemptTokens.Total}} tokens over {{len .Attempts}} {{if eq (len .Attempts) 1}}attempt{{else}}attempts{{end}}.</p>
-  <ol>
-  {{- range .Attempts}}
-    <li>{{if .This}}{{.At}}: {{.Outcome}} (this call){{else}}<a href="{{.Page}}">{{.At}}</a>: {{.Outcome}}{{end}}
-      {{- if .Why}}<p hx-disable><small>{{.Why}}</small></p>{{end}}</li>
-  {{- end}}
-  </ol>
+  <details{{if gt (len .Attempts) 1}} open{{end}}>
+    <summary>{{.AttemptTokens.Total}} tokens over {{len .Attempts}} {{if eq (len .Attempts) 1}}attempt{{else}}attempts{{end}}</summary>
+    <ol>
+    {{- range .Attempts}}
+      <li>{{if .This}}{{.At}}: {{template "outcome" .Outcome}} (this call){{else}}<a href="{{.Page}}">{{.At}}</a>: {{template "outcome" .Outcome}}{{end}}
+        {{- if .Why}}<p hx-disable><small>{{.Why}}</small></p>{{end}}</li>
+    {{- end}}
+    </ol>
+  </details>
 </section>
 {{end}}

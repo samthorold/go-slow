@@ -36,7 +36,7 @@ func TestATimelineIsOneEntryPerRunOfDevelopmentsFromOneItem(t *testing.T) {
 		development(4, "a", 22), development(5, "a", 22),
 	}
 
-	got := timelineOf(ds, developmentView)
+	got := timelineOf(ds, (&app{}).citeItem, developmentView)
 
 	want := [][]any{
 		{"Item a", developmentAnchor(1), developmentAnchor(2)},
@@ -65,7 +65,7 @@ func TestATimelineIsOneEntryPerRunOfDevelopmentsFromOneItem(t *testing.T) {
 func TestADevelopmentShowsItsDateOnlyWhereItDiffersFromItsEntrys(t *testing.T) {
 	ds := []editor.Development{development(1, "a", 20), development(2, "a", 21)}
 
-	got := timelineOf(ds, developmentView)
+	got := timelineOf(ds, (&app{}).citeItem, developmentView)
 
 	if len(got) != 1 {
 		t.Fatalf("want one entry, got %v", shape(got))

@@ -44,6 +44,10 @@ type Deps struct {
 	SundayReads SundayReads
 	// Calls answers the kept calls' pages.
 	Calls Calls
+	// Sources is the Sources list, from which a citation takes its
+	// Source's short name, by ID. A Source not in it is cited by the
+	// Item's title alone.
+	Sources []collect.Source
 	// BriefingAt is the time of day the Briefing is due (7h is 07:00): a
 	// day with none by then is flagged.
 	BriefingAt time.Duration
@@ -139,7 +143,10 @@ func page(index, name string, components ...string) *template.Template {
 
 // New builds the app from its dependencies.
 func New(d Deps) http.Handler {
-	a := &app{Deps: d}
+	a := &app{Deps: d, shortNames: map[string]string{}}
+	for _, s := range d.Sources {
+		a.shortNames[s.ID] = s.ShortName
+	}
 	mux := http.NewServeMux()
 	mux.Handle("GET /static/", http.FileServerFS(staticFS))
 	mux.HandleFunc("GET /{$}", a.todaysBriefing)
@@ -175,6 +182,8 @@ func New(d Deps) http.Handler {
 
 type app struct {
 	Deps
+	// shortNames are the Sources' short names, by Source ID.
+	shortNames map[string]string
 }
 
 // render writes a full page, rendered first so a template error can still

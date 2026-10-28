@@ -261,7 +261,7 @@ func (a *app) briefingWith(w http.ResponseWriter, r *http.Request, day time.Time
 					Gives: givenIn(developmentGives(p.FeedbackPath, bs.Story.ID, d.ID), kept, page),
 					AsAt:  factDate(d.Fact), Statement: d.Statement, Short: shorten(d.Statement),
 					DevelopmentPath: storyPath(bs.Story.ID) + "#" + developmentAnchor(d.ID),
-					Item:            itemCitation{Title: d.ItemTitle, Href: item + "#" + factAnchor(d.ID)},
+					Item:            a.cite(d.SourceID, d.ItemTitle, item+"#"+factAnchor(d.ID)),
 				})
 			}
 			row.Statements = append(row.Statements, sr)

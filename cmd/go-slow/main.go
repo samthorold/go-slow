@@ -190,6 +190,7 @@ func run(log *slog.Logger) error {
 		Register:    store,
 		SundayReads: store,
 		Calls:       store,
+		Sources:     sources,
 		BriefingAt:  cfg.BriefingAt,
 		Now:         time.Now,
 		Log:         log,

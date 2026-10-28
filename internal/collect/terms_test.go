@@ -169,6 +169,27 @@ func TestEveryListedSourceDeclaresItsTermsAndIsCollected(t *testing.T) {
 	}
 }
 
+// A citation names its Source by who is speaking, not where it is
+// published: every listed Source has a short name, and Sources from one
+// speaker share it.
+func TestEveryListedSourceHasAShortNameSayingWhoIsSpeaking(t *testing.T) {
+	want := map[string]string{
+		"govuk-number-10":               "No 10",
+		"parliament-written-statements": "Parliament",
+		"ons-releases":                  "ONS",
+		"ons-release-calendar":          "ONS",
+	}
+	for _, s := range collect.Sources() {
+		if s.ShortName == "" {
+			t.Errorf("%s has no short name", s.ID)
+			continue
+		}
+		if w, ok := want[s.ID]; ok && s.ShortName != w {
+			t.Errorf("%s is short-named %q, want %q", s.ID, s.ShortName, w)
+		}
+	}
+}
+
 func TestTheListedSourcesIncludeParliamentAndTheONS(t *testing.T) {
 	want := map[collect.Format]bool{
 		collect.Atom: false, collect.ONSReleases: false,

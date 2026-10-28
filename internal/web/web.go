@@ -61,45 +61,80 @@ var (
 	staticFS embed.FS
 )
 
-// briefingTmpl is the Briefing page: the layout around its content.
-var briefingTmpl = page("briefing.html", "briefing_status.html")
+// todaysBriefingTmpl is today's Briefing page: the layout around its
+// content. briefingTmpl is the same page for any other day, which is not the
+// navigation's Briefing (today's) and no index of its own.
+var (
+	todaysBriefingTmpl = page("/", "briefing.html", "briefing_status.html")
+	briefingTmpl       = page(noIndex, "briefing.html", "briefing_status.html")
+)
 
 // briefingStatusTmpl is the fragment the day's page polls while its
 // Briefing is being written.
 var briefingStatusTmpl = template.Must(template.ParseFS(templateFS, "templates/briefing_status.html"))
 
 // briefingsTmpl is the list of Briefings, by day.
-var briefingsTmpl = page("briefings.html")
+var briefingsTmpl = page("/briefings", "briefings.html")
 
 // itemsTmpl is the Items page.
-var itemsTmpl = page("items.html")
+var itemsTmpl = page("/items", "items.html")
 
 // itemTmpl is an Item's own page.
-var itemTmpl = page("item.html", "involves.html")
+var itemTmpl = page(noIndex, "item.html", "involves.html")
 
 // topicsTmpl is the Topics page.
-var topicsTmpl = page("topics.html")
+var topicsTmpl = page("/topics", "topics.html")
 
 // storiesTmpl is the Stories page, and storyTmpl a Story's own page.
 var (
-	storiesTmpl = page("stories.html")
-	storyTmpl   = page("story.html", "involves.html")
+	storiesTmpl = page("/stories", "stories.html")
+	storyTmpl   = page(noIndex, "story.html", "involves.html")
 )
 
 // feedbackTmpl is the Feedback page: every piece, as given.
-var feedbackTmpl = page("feedback_list.html")
+var feedbackTmpl = page("/feedback", "feedback_list.html")
 
 // sundayReadTmpl is a Sunday read's page.
-var sundayReadTmpl = page("sunday_read.html")
+var sundayReadTmpl = page(noIndex, "sunday_read.html")
+
+// navLink is one link of the layout's navigation, to a page with an index of
+// its own.
+type navLink struct {
+	Href, Name string
+	// Current is whether it links to the page shown.
+	Current bool
+}
+
+// indexes are the pages the navigation reaches, in its order: flat, one row.
+var indexes = []navLink{
+	{Href: "/", Name: "Briefing"},
+	{Href: "/briefings", Name: "Briefings"},
+	{Href: "/stories", Name: "Stories"},
+	{Href: "/items", Name: "Items"},
+	{Href: "/topics", Name: "Topics"},
+	{Href: "/feedback", Name: "Feedback"},
+	{Href: "/register", Name: "Register"},
+}
+
+// noIndex is the index of a page that is none of the navigation's indexes,
+// such as a Story's page: no link is marked current on it.
+const noIndex = ""
 
 // page parses a page template, and the components it renders, together
-// with the layout it fills.
-func page(name string, components ...string) *template.Template {
+// with the layout it fills. index is the navigation's link to the page, or
+// noIndex: what the page is is fixed by its template, not by the request.
+func page(index, name string, components ...string) *template.Template {
+	nav := make([]navLink, len(indexes))
+	for i, l := range indexes {
+		l.Current = l.Href == index
+		nav[i] = l
+	}
 	files := []string{"templates/layout.html", "templates/feedback.html", "templates/" + name}
 	for _, c := range components {
 		files = append(files, "templates/"+c)
 	}
-	return template.Must(template.ParseFS(templateFS, files...))
+	t := template.New("layout.html").Funcs(template.FuncMap{"nav": func() []navLink { return nav }})
+	return template.Must(t.ParseFS(templateFS, files...))
 }
 
 // New builds the app from its dependencies.

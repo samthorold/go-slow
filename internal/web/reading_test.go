@@ -160,10 +160,10 @@ func TestTheItemsPageSaysWhichItemsHaveBeenRead(t *testing.T) {
 	readSpeech(t, store, reading)
 	app, _ := newAppWithLog(t, saturday, store)
 
-	entry := itemEntry(t, get(t, app, "/items").body, "https://www.gov.uk/government/news/speech")
+	b := blockOf(t, get(t, app, "/items").body, "PM speech in Scotland")
 
-	if !strings.Contains(entry, "Read: 1 Fact, 1 Claim") || strings.Contains(entry, "Awaiting reading") {
-		t.Errorf("the read speech is not shown as read:\n%s", entry)
+	if !strings.Contains(b.margin, `<span class="machine" hx-disable>read · 1 Fact, 1 Claim</span>`) || strings.Contains(b.margin, "awaiting reading") {
+		t.Errorf("the read speech's margin does not label it read:\n%s", b.margin)
 	}
 }
 

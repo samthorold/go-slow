@@ -1,77 +1,90 @@
 {{define "title"}}Items{{end}}
 
-{{define "item"}}
-    {{/* Collected text is inert: hx-disable on the elements holding it. */}}
-    <li>
-      {{- if .Scheduled}}
-      <a href="{{.Link}}" hx-boost="false" hx-disable>{{.Title}}</a>
-      {{- else}}
-      <a href="{{.Page}}" hx-disable>{{.Title}}</a>
-      <small>(<a href="{{.Link}}" hx-boost="false">the original</a>)</small>
-      {{- end}}
-      <p><small>{{.Source}}{{if .When}}, {{.When}}{{end}}</small></p>
-      <p hx-disable>{{.Summary}}</p>
-      {{- if .Scheduled}}
-      {{- else if .Read}}
-      <p>Read: {{.Facts}} {{if eq .Facts 1}}Fact{{else}}Facts{{end}}, {{.Claims}} {{if eq .Claims 1}}Claim{{else}}Claims{{end}}</p>
-      {{- else if .Topics}}
-      <p>Awaiting reading for <span hx-disable>{{range $i, $t := .Topics}}{{if $i}}, {{end}}{{$t}}{{end}}</span></p>
-      {{- else if .Checked}}
-      <p><small>Waiting unread: touches no Topic</small></p>
-      {{- else}}
-      <p><small>Not yet checked against the Topics</small></p>
-      {{- end}}
-      <p><small>{{.Attribution}}</small></p>
-    </li>
-{{- end}}
-
 {{define "content"}}
 <h1>Items</h1>
 
-<section aria-labelledby="sources">
-  <h2 id="sources">Sources</h2>
+{{- if .Exceptions}}
+{{/* What needs the Owner's hand leads, at full weight, only when there is
+     any. */}}
+<section id="exceptions" class="exceptions" aria-labelledby="exceptions-heading">
+  <h2 id="exceptions-heading">Needs your hand</h2>
+  {{- if .Quiet}}
+  <h3 id="quiet">Quiet Sources</h3>
+  <ul>
+  {{- range .Quiet}}
+    <li>{{.Name}}: <strong>quiet: nothing new past its usual gap</strong>{{if .Newest}}, newest Item {{.Newest}}{{end}}</li>
+  {{- end}}
+  </ul>
+  {{- end}}
+  {{- if .Failed}}
+  <h3 id="failed">Failed work</h3>
+  {{/* The reasons can quote what a model answered: inert, like collected
+       text. Failed takes a call's failed hue. */}}
+  <p>Each failed every attempt and is no longer tried. Once the cause is fixed, take an act's work up again with the <code>retry</code> admin command beside it.</p>
+  <ul>
+  {{- range .Failed}}
+    <li>{{.Act}} <a href="{{.Page}}" hx-disable>{{.Title}}</a>: <span class="status status-refuted">failed</span> {{if .AttemptsPage}}<a href="{{.AttemptsPage}}">{{.Attempts}} times</a>{{else}}{{.Attempts}} times{{end}}, last {{.When}}
+      <p hx-disable>{{.Why}}</p>
+      <p><code>docker compose run --rm app retry {{.Act}}</code></p>
+    </li>
+  {{- end}}
+  </ul>
+  {{- end}}
+</section>
+{{- end}}
+
+{{/* The Sources, folded: with no exceptions, under one quiet line saying
+     so. */}}
+<details id="sources" class="sources">
+  <summary class="quiet">{{if .Exceptions}}Sources{{else}}All Sources current · no failed work{{end}}</summary>
   <ul>
   {{- range .Sources}}
     <li>{{.Name}}{{if .Newest}}: newest Item {{.Newest}}{{end}}{{if .Quiet}} <strong>quiet: nothing new past its usual gap</strong>{{end}}</li>
   {{- end}}
   </ul>
-</section>
+</details>
 
-<section aria-labelledby="failed">
-  <h2 id="failed">Failed work</h2>
-  {{- if not .Failed}}
-  <p>No work has failed.</p>
-  {{- else}}
-  {{/* The reasons can quote what a model answered: inert, like collected text. */}}
-  <p>Each failed every attempt and is no longer tried. Once the cause is fixed, take an act's work up again with the <code>retry</code> admin command.</p>
-  <ul>
-  {{- range .Failed}}
-    <li>{{.Act}} <a href="{{.Page}}" hx-disable>{{.Title}}</a>: failed {{if .AttemptsPage}}<a href="{{.AttemptsPage}}">{{.Attempts}} times</a>{{else}}{{.Attempts}} times{{end}}, last {{.When}}
-      <p hx-disable><small>{{.Why}}</small></p>
-      <p><small><code>retry {{.Act}}</code></small></p>
-    </li>
-  {{- end}}
-  </ul>
-  {{- end}}
-</section>
-
-<section aria-labelledby="upcoming">
-  <h2 id="upcoming">Upcoming</h2>
-  {{- if not .Upcoming}}
-  <p>Nothing is scheduled.</p>
-  {{- end}}
-  <ol>
-  {{- range .Upcoming}}{{template "item" .}}{{end}}
-  </ol>
-</section>
+{{/* The Items page is an inspect page: its margin starts open. Each
+     collected Item is a block: its title and summary in the body, its
+     Source, date, status and attribution in the margin. Collected text is
+     inert: hx-disable on the elements holding it. */}}
+<div class="margined" data-margin="open">
+{{template "margin-fold" "open"}}
 
 <section aria-labelledby="collected">
   <h2 id="collected">Collected</h2>
   {{- if not .Items}}
   <p>Nothing has been collected yet.</p>
   {{- end}}
-  <ol>
-  {{- range .Items}}{{template "item" .}}{{end}}
-  </ol>
+  <ul class="blocks">
+  {{- range .Items}}
+    <li class="block">
+      <div class="block-body">
+        <p><a href="{{.Page}}" hx-disable>{{.Title}}</a> <small>(<a href="{{.Link}}" hx-boost="false">the original</a>)</small></p>
+        <p class="quiet" hx-disable>{{.Summary}}</p>
+      </div>
+      <div class="block-margin">
+        <p class="quiet">{{.Source}}{{if .When}}, {{.When}}{{end}}</p>
+        <p><span class="machine" hx-disable>{{.Status}}</span></p>
+        <p class="quiet">{{.Attribution}}</p>
+      </div>
+    </li>
+  {{- end}}
+  </ul>
 </section>
+</div>
+
+{{/* Scheduled events not yet due, collapsed at the foot. Collected text is
+     inert. */}}
+<details id="upcoming" class="upcoming">
+  <summary>Upcoming</summary>
+  {{- if not .Upcoming}}
+  <p class="quiet">Nothing is scheduled.</p>
+  {{- end}}
+  <ol>
+  {{- range .Upcoming}}
+    <li><a href="{{.Link}}" hx-boost="false" hx-disable>{{.Title}}</a> <span class="quiet">{{.Source}}{{if .When}}, due {{.When}}{{end}} · {{.Attribution}}</span></li>
+  {{- end}}
+  </ol>
+</details>
 {{end}}

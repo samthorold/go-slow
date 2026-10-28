@@ -304,7 +304,7 @@ func missedStory(path string, facts []editor.Development, d feedback.Draft, errs
 
 // missedDevelopmentForm is the form for a Development the Owner says a
 // Story missed: one of the Facts whose Items mention an Entity its Items
-// mention.
+// mention, those sharing its rarest Entities first.
 type missedDevelopmentForm struct {
 	Path  string
 	Story int64
@@ -312,10 +312,15 @@ type missedDevelopmentForm struct {
 	Error string
 }
 
+// factsToAddLimit is the most Facts the missed-Development form offers: as
+// many as placing is shown candidate Stories, few enough to scan in one
+// list, with the Facts sharing the Story's rarest Entities first.
+const factsToAddLimit = 20
+
 // missedDevelopment is the missed-Development form for the Story, offering
 // facts, with d's error if d was a missed Development in it.
 func (a *app) missedDevelopment(r *http.Request, path string, story int64, d feedback.Draft, errs feedback.Errors) (missedDevelopmentForm, error) {
-	facts, err := a.Stories.FactsToAdd(r.Context(), story)
+	facts, err := a.Stories.FactsToAdd(r.Context(), story, factsToAddLimit)
 	if err != nil {
 		return missedDevelopmentForm{}, err
 	}

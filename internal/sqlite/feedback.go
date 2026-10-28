@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/feedback"
 	"github.com/samthorold/go-slow/internal/interest"
 )
@@ -186,40 +185,6 @@ func (s *Store) kept(ctx context.Context, where string, args ...any) ([]feedback
 			return nil, fmt.Errorf("kept feedback: %w", err)
 		}
 		out = append(out, k)
-	}
-	return out, rows.Err()
-}
-
-// FactsToAdd are the Facts the Owner may say a Story missed: those whose
-// Items mention an Entity its Developments' Items mention, and are not yet
-// one in it, newest first, found as placing finds its candidates. Withdrawn
-// Facts are never offered.
-func (s *Store) FactsToAdd(ctx context.Context, storyID int64) ([]editor.Fact, error) {
-	rows, err := s.db.QueryContext(ctx, `
-		SELECT DISTINCT facts.id, facts.source_id, facts.entry_id, facts.statement, facts.as_at, facts.quote
-		FROM developments mine
-			JOIN facts minefacts ON minefacts.id = mine.fact_id
-			JOIN item_mentions ours ON ours.source_id = minefacts.source_id AND ours.entry_id = minefacts.entry_id
-			JOIN item_mentions theirs ON theirs.entity_id = ours.entity_id
-			JOIN facts ON facts.source_id = theirs.source_id AND facts.entry_id = theirs.entry_id
-		WHERE mine.story_id = ?1 AND mine.withdrawn_by IS NULL AND facts.withdrawn_by IS NULL
-			AND NOT EXISTS (SELECT 1 FROM developments d WHERE d.story_id = ?1 AND d.fact_id = facts.id)
-		ORDER BY facts.as_at DESC, facts.id DESC`, storyID)
-	if err != nil {
-		return nil, fmt.Errorf("facts to add: %w", err)
-	}
-	defer func() { _ = rows.Close() }()
-	var out []editor.Fact
-	for rows.Next() {
-		var f editor.Fact
-		var asAt string
-		if err := rows.Scan(&f.ID, &f.SourceID, &f.EntryID, &f.Statement, &asAt, &f.Quote); err != nil {
-			return nil, fmt.Errorf("facts to add: %w", err)
-		}
-		if err := scanFact(&f, asAt); err != nil {
-			return nil, fmt.Errorf("facts to add: %w", err)
-		}
-		out = append(out, f)
 	}
 	return out, rows.Err()
 }

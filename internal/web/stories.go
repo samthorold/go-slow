@@ -44,94 +44,85 @@ type storyPage struct {
 	Title        string
 	// Unwanted and Missed are what Feedback has said of the Story.
 	Unwanted, Missed bool
-	Gives            []giveButton
+	Gives            gives
 	// MissedStory is the form for a missed Story gathering this one's
 	// Developments.
 	MissedStory       missedStoryForm
 	MissedDevelopment missedDevelopmentForm
-	Timeline          []developmentRow
-	Causes            []causeRow
-	Connected         []connectedRow
+	// Timeline is the Story's Developments in order, a run of them from
+	// one Item to an entry.
+	Timeline  []timelineEntry
+	Causes    []causeRow
+	Connected []connectedRow
 	// Feedback is the Feedback on the Story, its Developments, their Facts
 	// and its Connections, each to undo here.
 	Feedback []keptRow
 }
 
-// developmentRow is one Development on a Timeline, tracing to its Fact and
-// the Item the Fact was drawn from.
+// developmentRow is one Development, as a block: its statement in the body,
+// its notes in the margin. The Item its Fact was drawn from is its
+// timeline entry's.
 type developmentRow struct {
 	// Anchor is the Development's id on the page, which the Briefing's
 	// statements link to.
-	Anchor    string
+	Anchor string
+	// AsAt is its Fact's date; on a Timeline, only where it differs from
+	// its entry's.
 	AsAt      string
 	Statement string
 	Quote     string
-	ItemTitle string
-	ItemPath  string
-	// Involves are the Entities its Fact involves, each in its role.
-	Involves []involvedRow
+	// Pills are the Entities its Fact involves, each with its Role.
+	Pills []pill
 	// Withdrawn and Unwanted are what Feedback has marked it.
 	Withdrawn, Unwanted, Missed bool
-	// Call is the page of the placing call that made it a Development, if
-	// one was kept; set only on its own Story's Timeline.
-	Call string
+	// Made is the placing call that made it a Development, if one was
+	// kept; set only on its own Story's Timeline.
+	Made made
 	// Gives is the Feedback the Owner can give on it here.
-	Gives []giveButton
+	Gives gives
 }
+
+// Struck reports whether it is shown struck through: Feedback took it out
+// of the Briefing, and the Record keeps it, marked.
+func (d developmentRow) Struck() bool { return d.Withdrawn || d.Unwanted }
 
 // causeRow is a cause Connection, each Fact tracing to its Item.
 type causeRow struct {
 	Cause, Effect developmentRow
-	Withdrawn     bool
-	// Call is the page of the connecting call that made it, if one was
-	// kept.
-	Call  string
-	Gives []giveButton
+	// CauseItem and EffectItem are the Items its Facts were drawn from.
+	CauseItem, EffectItem itemCitation
+	Withdrawn             bool
+	// Made is the connecting call that made it, if one was kept.
+	Made  made
+	Gives gives
 }
 
-// connectedRow is a Story connected to this one, with the shared Facts that
-// are the reason.
+// connectedRow is a Story connected to this one, with what the two share,
+// the reasons.
 type connectedRow struct {
-	Path     string
-	Title    string
-	Shared   []developmentRow
-	Items    []sharedItemRow
-	Entities []sharedEntityRow
-}
-
-// sharedItemRow is an Item both Stories have Developments from.
-type sharedItemRow struct {
-	Title, Path string
-}
-
-// sharedEntityRow is an Entity both Stories' Facts involve in one role.
-type sharedEntityRow struct {
-	Entity, Role string
-	Here, There  developmentRow
-}
-
-// involvedRow is an Entity a Fact involves, in its role.
-type involvedRow struct {
-	Entity, Role string
-}
-
-// involvedView is the Entities f involves, in their roles.
-func involvedView(f editor.Fact) []involvedRow {
-	var out []involvedRow
-	for _, r := range f.Involves {
-		out = append(out, involvedRow{Entity: r.Entity, Role: r.Role})
-	}
-	return out
+	Path  string
+	Title string
+	// Shared are the Developments both have.
+	Shared []developmentRow
+	// Items are the Items both have Developments from: announced together.
+	Items []itemCitation
+	// Entities are the Entities both Stories' Facts involve in one Role,
+	// the rarest over Stories first.
+	Entities []pill
 }
 
 func developmentView(d editor.Development) developmentRow {
 	return developmentRow{
 		Anchor: developmentAnchor(d.ID),
 		AsAt:   factDate(d.Fact), Statement: d.Statement, Quote: d.Quote,
-		ItemTitle: d.ItemTitle, ItemPath: itemPath(d.SourceID, d.EntryID),
-		Involves:  involvedView(d.Fact),
+		Pills:     pillsInvolved(d.Fact),
 		Withdrawn: d.Withdrawn, Unwanted: d.Unwanted, Missed: d.Missed,
 	}
+}
+
+// citeItem is the Item d's Fact was drawn from, cited.
+func citeItem(d editor.Development) itemCitation {
+	return itemCitation{Title: d.ItemTitle, Href: itemPath(d.SourceID, d.EntryID)}
 }
 
 func storyPath(id int64) string { return "/stories/" + strconv.FormatInt(id, 10) }
@@ -190,22 +181,24 @@ func (a *app) storyWith(w http.ResponseWriter, r *http.Request, id int64, status
 	page := storyPath(id)
 	p := storyPage{Title: s.Title, FeedbackPath: page + "/feedback", Unwanted: s.Unwanted, Missed: s.Missed}
 	p.Gives = notOfferedAgain(givenIn(storyGives(p.FeedbackPath, id), kept, page), s.Unwanted)
-	for _, d := range s.Timeline {
+	p.Timeline = timelineOf(s.Timeline, func(d editor.Development) developmentRow {
 		row := developmentView(d)
-		row.Call = callPath(d.PlacingCall)
+		row.Made = made{Act: "placed", Call: d.PlacingCall}
 		if !d.Withdrawn {
 			row.Gives = notOfferedAgain(givenIn(developmentGives(p.FeedbackPath, id, d.ID), kept, page), d.Unwanted)
 		}
-		p.Timeline = append(p.Timeline, row)
-	}
+		return row
+	})
 	for _, c := range s.Causes {
-		p.Causes = append(p.Causes, causeRow{
+		row := causeRow{
 			Cause: developmentView(c.Cause), Effect: developmentView(c.Effect),
-			Withdrawn: c.Withdrawn, Call: callPath(c.Call),
-		})
-		if !c.Withdrawn {
-			p.Causes[len(p.Causes)-1].Gives = givenIn(connectionGives(p.FeedbackPath, c.Cause.ID, c.Effect.ID), kept, page)
+			CauseItem: citeItem(c.Cause), EffectItem: citeItem(c.Effect),
+			Withdrawn: c.Withdrawn, Made: made{Act: "connected", Call: c.Call},
 		}
+		if !c.Withdrawn {
+			row.Gives = givenIn(connectionGives(p.FeedbackPath, c.Cause.ID, c.Effect.ID), kept, page)
+		}
+		p.Causes = append(p.Causes, row)
 	}
 	p.MissedStory = missedStory(p.FeedbackPath, s.Timeline, d, errs)
 	if p.MissedDevelopment, err = a.missedDevelopment(r, p.FeedbackPath, id, d, errs); err != nil {
@@ -218,12 +211,10 @@ func (a *app) storyWith(w http.ResponseWriter, r *http.Request, id int64, status
 			row.Shared = append(row.Shared, developmentView(d))
 		}
 		for _, it := range c.Items {
-			row.Items = append(row.Items, sharedItemRow{Title: it.Title, Path: itemPath(it.SourceID, it.EntryID)})
+			row.Items = append(row.Items, itemCitation{Title: it.Title, Href: itemPath(it.SourceID, it.EntryID)})
 		}
 		for _, e := range c.Entities {
-			row.Entities = append(row.Entities, sharedEntityRow{
-				Entity: e.Entity, Role: e.Role, Here: developmentView(e.Here), There: developmentView(e.There),
-			})
+			row.Entities = append(row.Entities, pill{Name: e.Entity, Tag: e.Role})
 		}
 		p.Connected = append(p.Connected, row)
 	}

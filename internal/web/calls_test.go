@@ -88,10 +88,10 @@ func TestADevelopmentTheOwnerAddedLinksToNoPlacingCall(t *testing.T) {
 
 	missed := get(t, app, "/stories/2")
 
-	if !strings.Contains(missed.body, "Andy Burnham spoke in Motherwell.") || strings.Contains(missed.body, "How it was placed") {
+	if !strings.Contains(missed.body, "Andy Burnham spoke in Motherwell.") || strings.Contains(missed.body, "placed · call") {
 		t.Errorf("the Development the Owner added links to a placing call, or is not shown:\n%s", missed.body)
 	}
-	if placed := get(t, app, "/stories/1"); !strings.Contains(placed.body, "How it was placed") {
+	if placed := get(t, app, "/stories/1"); !strings.Contains(placed.body, "placed · call") {
 		t.Errorf("the Development placing made does not link to its call:\n%s", placed.body)
 	}
 }

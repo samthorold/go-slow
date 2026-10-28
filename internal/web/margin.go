@@ -34,6 +34,13 @@ func pillMentioned(e editor.Entity) pill {
 	return p
 }
 
+// itemCitation is an Item as every page cites it (template "citation"): its
+// Source's name, where the page has it, and its title, linking where it is
+// read.
+type itemCitation struct {
+	Source, Title, Href string
+}
+
 // made is how a block was made, shown in its margin as a machine label: the
 // act and the call it made, worded "<act> · call N" on every page.
 type made struct {

@@ -8,6 +8,34 @@
 <p>Everything you have told the Editor, as you said it, newest first.</p>
 {{- if not .Feedback}}
 <p>No Feedback yet.</p>
+{{- else}}
+<table class="feedback-table">
+  <thead>
+    <tr><th>When</th><th>Kind</th><th>About</th><th>Depth</th><th>How it was made</th><th></th></tr>
+  </thead>
+  <tbody>
+  {{- range .Feedback}}
+    <tr{{if .Undone}} class="undone"{{end}}>
+      <td class="when">{{.GivenAt}}
+        {{- if .Briefing}}<br><span class="quiet">on the <a href="{{.BriefPath}}">Briefing for {{.Briefing}}</a></span>{{end}}</td>
+      <td><span class="kind kind-{{.KindClass}}">{{.Kind}}</span></td>
+      <td class="subject"><span class="quiet">{{.LevelLabel}}</span> {{if .AboutPath}}<a href="{{.AboutPath}}">{{end -}}
+        {{if .About}}<span hx-disable>{{.About}}</span>{{end}}{{if .Typed}}<q hx-disable>{{.Typed}}</q>{{end -}}
+        {{if .AboutPath}}</a>{{end}}</td>
+      <td>{{with .Depth}}{{.}}{{else}}<span class="quiet">no Topic</span>{{end}}</td>
+      <td class="made">
+        {{- if .ByOwner}}<span class="machine">you made it</span>
+        {{- else}}{{range $i, $m := .Made}}{{if $i}}<br>{{end}}{{template "made" $m}}{{end}}
+        {{- if .Written}}<a class="machine" href="{{.WrittenHref}}">written · conversation {{.Written}}</a>{{end}}{{end}}</td>
+      <td>
+        {{- if .Undone}}<span class="quiet">Undone {{.Undone}}</span>
+        {{- else}}
+        {{/* Shown while the pointer or keyboard focus is in the row (.actions, in the stylesheet). */}}
+        <div class="actions quiet"><form class="feedback" hx-put="{{.UndoPath}}" hx-target="body" hx-swap="innerHTML"><button>Undo</button></form></div>
+        {{- end}}</td>
+    </tr>
+  {{- end}}
+  </tbody>
+</table>
 {{- end}}
-{{template "kept" .Feedback}}
 {{end}}

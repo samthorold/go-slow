@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"slices"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/samthorold/go-slow/internal/editor"
@@ -35,6 +36,8 @@ type feedbackPage struct {
 
 type keptRow struct {
 	Kind, Level string
+	// LevelLabel is the level as a page names it ("Sunday read").
+	LevelLabel string
 	// About names what it is about; AboutPath is its page, if it has one.
 	About, AboutPath string
 	// Typed is a missed Story's title, as the Owner typed it.
@@ -50,7 +53,41 @@ type keptRow struct {
 	// whether the Owner made it, so no call is behind it.
 	Behind  []behindLink
 	ByOwner bool
+	// Made is the same calls as machine labels, and Written the kept
+	// conversation behind an Assessment or a Sunday read, or 0.
+	Made    []made
+	Written int64
 }
+
+// WrittenHref is the page of the conversation behind it.
+func (r keptRow) WrittenHref() string { return conversationPath(r.Written, 0) }
+
+// madeBehind is the kept calls behind what k is about, as machine labels
+// worded by the act that made it.
+func madeBehind(k feedback.Kept) []made {
+	act := map[feedback.Level]string{
+		feedback.Fact: "read", feedback.Development: "placed",
+		feedback.Story: "placed", feedback.Connection: "connected",
+	}[k.Level]
+	var out []made
+	for _, id := range k.Calls {
+		if id != 0 {
+			out = append(out, made{Act: act, Call: id})
+		}
+	}
+	return out
+}
+
+// levelLabels name each level as a page shows it, capitalised as CONTEXT.md
+// names them.
+var levelLabels = map[feedback.Level]string{
+	feedback.Story: "Story", feedback.Development: "Development", feedback.Fact: "Fact",
+	feedback.Connection: "Connection", feedback.Assessment: "Assessment", feedback.SundayRead: "Sunday read",
+}
+
+// KindClass is the row's kind as a class name: "new to me" is
+// "new-to-me", so its label takes the hue .kind-new-to-me.
+func (r keptRow) KindClass() string { return strings.ReplaceAll(r.Kind, " ", "-") }
 
 // behindLink is a link to a kept call or conversation behind what a piece
 // of Feedback is about.
@@ -88,7 +125,19 @@ func (a *app) feedback(w http.ResponseWriter, r *http.Request) {
 	}
 	var p feedbackPage
 	for _, k := range kept {
-		p.Feedback = append(p.Feedback, a.keptRow(k, ""))
+		row := a.keptRow(k, "")
+		if row.AboutPath == "" && k.Level == feedback.Fact && len(k.Calls) > 0 {
+			// A Fact's page is its Item's, which its reading call was on.
+			c, found, err := a.Calls.Call(r.Context(), k.Calls[0])
+			if err != nil {
+				a.serverError(w, r, err)
+				return
+			}
+			if page := workPage(c.Act, c.Key); found && page != "" {
+				row.AboutPath = page + "#" + factAnchor(k.FactID)
+			}
+		}
+		p.Feedback = append(p.Feedback, row)
 	}
 	a.render(w, r, feedbackTmpl, p)
 }
@@ -105,6 +154,7 @@ func (a *app) keptRow(k feedback.Kept, page string) keptRow {
 		row.UndoPath = undonePath(page, k.ID)
 	}
 	row.Behind, row.ByOwner = behind(k), k.ByOwner
+	row.Made, row.Written = madeBehind(k), k.Conversation
 	switch k.Level {
 	case feedback.Story:
 		row.About = k.Story
@@ -121,7 +171,11 @@ func (a *app) keptRow(k feedback.Kept, page string) keptRow {
 	}
 	if k.StoryID != 0 {
 		row.AboutPath = storyPath(k.StoryID)
+		if k.Level == feedback.Development {
+			row.AboutPath += "#" + developmentAnchor(k.FactID)
+		}
 	}
+	row.LevelLabel = levelLabels[k.Level]
 	if day, ok := briefingGivenOn(k.Feedback); ok {
 		if d, err := time.Parse(time.DateOnly, day); err == nil {
 			row.Briefing, row.BriefPath = d.Format("2 January 2006"), briefingPath(day)

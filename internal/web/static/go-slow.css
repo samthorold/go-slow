@@ -22,7 +22,16 @@
    or status-due (violet). The register's hypotheses take them by their
    status; a call's outcomes take the same family: applied is
    status-supported, refused (by the act's checks) status-undecided, failed
-   status-refuted. Each hue meets AA on --bg (above 8:1). */
+   status-refuted. Each hue meets AA on --bg (above 8:1).
+
+   The kind hues: one hue per kind of Feedback, a family of its own, apart
+   from the status hues (a kind is what the Owner said, not a verdict) and
+   from the Entity's teal and the link blue. Give the label the class "kind"
+   and one of kind-wrong (pink), kind-unwanted (orange), kind-missed (lime)
+   or kind-new-to-me (sky). A kind is a filled label (the hue behind --bg
+   text), a shape no status or pill takes, so even a hue near another
+   meaning's reads as a kind. Each hue meets AA on --bg, and --bg on it
+   (above 8:1). */
 
 :root {
   color-scheme: dark;
@@ -43,6 +52,11 @@
   /* An Entity's one hue: teal, distinct from the link accent and from
      every status hue, so a pill never reads as a verdict. */
   --entity: #66d1c9;
+  /* The kind hues (see the top of this file). */
+  --kind-wrong: #ff9ecb;
+  --kind-unwanted: #f2a65a;
+  --kind-missed: #cddc6e;
+  --kind-new-to-me: #7cc8f0;
   --measure: 38rem;
   --margin-col: 15rem;
   --gutter: 2rem;
@@ -570,6 +584,37 @@ body:has(.margined) #request-errors {
   color: var(--due);
 }
 
+/* The kind hues (see the top of this file): a kind of Feedback, a short
+   filled label in its hue, so a glance down the Feedback page's Kind column
+   says what was said. */
+.kind {
+  display: inline-block;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--bg);
+  border-radius: 3px;
+  padding: 0 0.45em;
+  white-space: nowrap;
+}
+
+.kind-wrong {
+  background: var(--kind-wrong);
+}
+
+.kind-unwanted {
+  background: var(--kind-unwanted);
+}
+
+.kind-missed {
+  background: var(--kind-missed);
+}
+
+.kind-new-to-me {
+  background: var(--kind-new-to-me);
+}
+
 /* A diagnosis page (a call, a conversation) opens with a one-line summary
    head: its outcome in its status hue, then what it was on and what it cost. */
 .summary-head {
@@ -709,6 +754,10 @@ body:has(.margined) #request-errors {
   border-color: var(--text);
 }
 
+/* Row actions: a table row's controls (.actions in a cell of a row of
+   .topics or .feedback-table), hidden at rest the Briefing's way (in the
+   tab order) and shown while the pointer or keyboard focus is in the row. */
+.feedback-table .actions,
 .topics .actions {
   position: absolute;
   width: 1px;
@@ -718,6 +767,8 @@ body:has(.margined) #request-errors {
   white-space: nowrap;
 }
 
+.feedback-table tr:hover .actions,
+.feedback-table tr:focus-within .actions,
 .topics tr:hover .actions,
 .topics tr:focus-within .actions {
   position: static;
@@ -725,6 +776,66 @@ body:has(.margined) #request-errors {
   height: auto;
   overflow: visible;
   clip-path: none;
+}
+
+/* The Feedback page: a row per piece, newest first, widened like a
+   margined page. Its Kind is the one hued cell (.kind, above), About the
+   column that wraps (When wraps under its time); Undo is in the
+   row's actions (above). An undone row stays, struck through in the muted
+   colour, its kind no longer filled; its last cell says when it was undone,
+   unstruck. */
+body:has(.feedback-table) main,
+body:has(.feedback-table) nav,
+body:has(.feedback-table) #request-errors {
+  max-width: calc(var(--measure) + var(--gutter) + var(--margin-col));
+}
+
+.feedback-table {
+  width: 100%;
+}
+
+.feedback-table td {
+  white-space: nowrap;
+}
+
+.feedback-table td.subject,
+.feedback-table td.when {
+  white-space: normal;
+}
+
+.feedback-table td.subject {
+  width: 100%;
+  min-width: 14rem;
+}
+
+.feedback-table td.when {
+  min-width: 8rem;
+}
+
+/* No hue but the kind's: About's link is in the text colour, underlined. */
+.feedback-table .subject a {
+  color: inherit;
+}
+
+.feedback-table .when,
+.feedback-table .when .quiet {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.8rem;
+}
+
+.feedback-table .undone td:not(:last-child) {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.feedback-table .undone a {
+  color: inherit;
+}
+
+.feedback-table .undone .kind {
+  color: var(--muted);
+  background: none;
+  box-shadow: inset 0 0 0 1px var(--rule);
 }
 
 /* Keyboard focus is always visible, on everything that takes it. */

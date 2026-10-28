@@ -74,6 +74,99 @@ func TestTheSundayReadHasItsOwnPageLinkedFromThatDaysBriefing(t *testing.T) {
 	}
 }
 
+func TestTheSundayReadsStatementsHaveWhatTheyCiteBesideThemInAFoldedMargin(t *testing.T) {
+	store := openStore(t)
+	speechStory(t, store)
+	writeSundayRead(t, store, sunday, assessed)
+	app, _ := newAppWithLog(t, sunday, store)
+
+	page := get(t, app, "/sunday-reads/2026-10-25").body
+
+	region := foldedRegion(t, page)
+	statement := blockOf(t, region, "The Prime Minister is &lt;b")
+	for _, want := range []string{`href="#assessment-1"`, `href="/stories/1#development-1"`,
+		"Andy Burnham spoke in Motherwell.", "<cite hx-disable>PM speech in Scotland</cite>"} {
+		if !strings.Contains(statement.margin, want) {
+			t.Errorf("the statement's margin lacks %q:\n%s", want, statement.margin)
+		}
+	}
+	// New to me on the read is its title's action, shown on hover or focus.
+	title := regexp.MustCompile(`(?s)<div class="title-row">\s*<h1>Sunday read</h1>(.*?)</div>\s*</div>`).FindStringSubmatch(page)
+	if title == nil || !actionGroups.MatchString(title[0]) || !offers(title[1], "new to me", "sunday read", "read", "1") {
+		t.Errorf("the read's title carries no New to me among its actions:\n%s", page)
+	}
+}
+
+func TestAssessmentsAreSetApartAsJudgementWithTheirNotesInTheMarginAndActionsOnHover(t *testing.T) {
+	store := openStore(t)
+	speechStory(t, store)
+	writeSundayRead(t, store, sunday, assessed)
+	app, _ := newAppWithLog(t, sunday, store)
+
+	page := get(t, app, "/sunday-reads/2026-10-25").body
+
+	region := foldedRegion(t, page)
+	heading := strings.Index(region, "<h2>Assessments</h2>")
+	if heading < 0 {
+		t.Fatalf("no Assessments heading in the region:\n%s", region)
+	}
+	as := blockOf(t, region[heading:], "The Prime Minister is courting Scottish voters.")
+	if !strings.Contains(as.body, `class="block-body assessment"`) {
+		t.Errorf("the Assessment is not set apart as judgement:\n%s", as.body)
+	}
+	if !strings.Contains(as.margin, "Rests on") || !strings.Contains(as.margin, "Andy Burnham spoke in Motherwell.") {
+		t.Errorf("the margin does not say what it rests on:\n%s", as.margin)
+	}
+	if !regexp.MustCompile(`<a class="machine" href="/conversations/\d+#turn-1">reached · turn 1</a>`).MatchString(as.margin) {
+		t.Errorf("the margin has no machine label \"reached · turn N\" linking the turn:\n%s", as.margin)
+	}
+	groups := actionGroups.FindAllStringSubmatch(as.body, -1)
+	if len(groups) != 1 || !offers(groups[0][2], "wrong", "assessment", "assessment", "1") ||
+		!offers(groups[0][2], "new to me", "assessment", "assessment", "1") {
+		t.Errorf("the Assessment's body does not hold its actions, Wrong and New to me:\n%s", as.body)
+	}
+	if actionGroups.MatchString(as.margin) {
+		t.Errorf("the Assessment's actions are in the margin, which folds away:\n%s", as.margin)
+	}
+
+	css := get(t, app, "/static/go-slow.css").body
+	if !regexp.MustCompile(`(?m)^\.assessment\s*\{[^}]*border-left:`).MatchString(css) {
+		t.Errorf("no rule gives an Assessment its left rule:\n%s", css)
+	}
+}
+
+func TestAWithdrawnAssessmentIsStruckThroughAndQuiet(t *testing.T) {
+	store := openStore(t)
+	speechStory(t, store)
+	writeSundayRead(t, store, sunday, assessed)
+	app, _ := newAppWithLog(t, sunday, store)
+	send(t, app, "POST", readFeedback, url.Values{"kind": {"wrong"}, "level": {"assessment"}, "assessment": {"1"}})
+
+	page := get(t, app, "/sunday-reads/2026-10-25").body
+
+	as := blockOf(t, page, "The Prime Minister is courting Scottish voters.")
+	if !regexp.MustCompile(`class="block-body assessment quiet">\s*<p><del hx-disable>The Prime Minister is courting Scottish voters\.</del>`).MatchString(as.body) {
+		t.Errorf("the withdrawn Assessment is not struck through and quiet:\n%s", as.body)
+	}
+}
+
+func TestTheStoriesARunStartedAreAQuietListAtTheEnd(t *testing.T) {
+	store := openStore(t)
+	speechStory(t, store)
+	writeSundayRead(t, store, sunday, `{"statements": [{"text": "He spoke in Motherwell.", "cites": ["S1:F1"]}],
+		"assessments": [], "stories": [{"title": "Scotland's vote", "developments": ["S1:F1"]}]}`)
+	app, _ := newAppWithLog(t, sunday, store)
+
+	page := get(t, app, "/sunday-reads/2026-10-25").body
+
+	if !regexp.MustCompile(`(?s)<section class="quiet" aria-labelledby="stories-started">\s*<h2 id="stories-started">Stories started</h2>.*Scotland&#39;s vote`).MatchString(page) {
+		t.Errorf("the Stories started are not a quiet list:\n%s", page)
+	}
+	if strings.Index(page, "Stories started") < strings.Index(page, `class="margined"`) {
+		t.Errorf("the Stories started come before the read:\n%s", page)
+	}
+}
+
 const readFeedback = "/sunday-reads/2026-10-25/feedback"
 
 func TestWrongOnAnAssessmentWithdrawsItAndTheReadReRendersWithoutWhatCitesIt(t *testing.T) {

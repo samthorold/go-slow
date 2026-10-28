@@ -144,18 +144,10 @@ type briefedStoryRow struct {
 }
 
 // statementRow is one statement, with what it cites: each Development, on
-// its Story's Timeline, and its Fact and Item, on the Item's page.
+// its Story's Timeline, and its Item, cited at the Fact on the Item's page.
 type statementRow struct {
 	Text  string
 	Cites []citationRow
-}
-
-// CitesLabel is the quiet marker that opens the statement's citations.
-func (s statementRow) CitesLabel() string {
-	if len(s.Cites) == 1 {
-		return "Cites 1 Development"
-	}
-	return "Cites " + strconv.Itoa(len(s.Cites)) + " Developments"
 }
 
 type citationRow struct {
@@ -166,9 +158,9 @@ type citationRow struct {
 	// Feedback on the Development beside the statement that cites it.
 	Short           string
 	DevelopmentPath string
-	FactPath        string
-	ItemTitle       string
-	ItemPath        string
+	// Item is the Item the Development's Fact was drawn from, linking the
+	// Fact on its page.
+	Item itemCitation
 }
 
 // labelLength is the most of a Fact's statement, in runes, that labels the
@@ -269,8 +261,7 @@ func (a *app) briefingWith(w http.ResponseWriter, r *http.Request, day time.Time
 					Gives: givenIn(developmentGives(p.FeedbackPath, bs.Story.ID, d.ID), kept, page),
 					AsAt:  factDate(d.Fact), Statement: d.Statement, Short: shorten(d.Statement),
 					DevelopmentPath: storyPath(bs.Story.ID) + "#" + developmentAnchor(d.ID),
-					FactPath:        item + "#" + factAnchor(d.ID),
-					ItemTitle:       d.ItemTitle, ItemPath: item,
+					Item:            itemCitation{Title: d.ItemTitle, Href: item + "#" + factAnchor(d.ID)},
 				})
 			}
 			row.Statements = append(row.Statements, sr)

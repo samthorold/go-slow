@@ -364,9 +364,10 @@ a.pill:hover {
   gap: 0.35rem;
 }
 
-/* An Item is a citation (.citation): its Source's short name, then its
-   title in italics, a link:
-     <span class="citation">GOV.UK <a href="/items/…"><cite>Title</cite></a></span> */
+/* An Item is a citation (.citation): its Source's short name, where the
+   page has one, then its title in italics, a link to where it is read:
+     <span class="citation">GOV.UK <a href="/items/…"><cite>Title</cite></a></span>
+   (template "citation", given an itemCitation). */
 .citation {
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 0.8rem;
@@ -540,44 +541,17 @@ body:has(.margined) #request-errors {
   margin: 0 0 0.35rem;
 }
 
-/* The Briefing reads as a briefing: a Story is its title and statements.
-   Each block (the Story's heading, a statement) carries its Feedback controls
-   (.actions), hidden at rest and shown while the pointer or keyboard focus is
-   in the block. Hidden visually, not with display: none or visibility:
-   hidden, so they stay in the tab order: tabbing into them is what reveals
-   them. Feedback already given (.given-marks) is state and stays shown. */
-.briefed-story h2 {
-  margin-bottom: 0.5rem;
-}
-
-.statement {
-  margin-bottom: 1.25rem;
-}
-
-.statement > p {
-  margin-bottom: 0.15rem;
-}
-
-.statement details,
-.given-marks {
-  margin: 0;
-}
-
-.story-head .given-marks {
-  margin-bottom: 0.5rem;
-}
-
-.given-marks {
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 0.8rem;
-  color: var(--muted);
-}
-
-.citations ul {
-  margin: 0.35rem 0 0.5rem;
-}
-
-.briefed-story .actions {
+/* The reading pages (the Briefing, the Sunday read) read as text: a
+   Story is its title and statements, its margin folded at rest. Feedback is
+   their frequent act, so a block's Feedback controls (.actions) sit with its
+   text in the body column, which no fold hides, and a title's in its title
+   row (.title-row): hidden at rest and shown while the pointer or keyboard
+   focus is in the block or the row. Hidden visually, not with display: none
+   or visibility: hidden, so they stay in the tab order: tabbing into them is
+   what reveals them. Feedback already given (.given-marks) is state and
+   stays shown. */
+.block-body .actions,
+.title-row .actions {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -586,10 +560,10 @@ body:has(.margined) #request-errors {
   white-space: nowrap;
 }
 
-.briefed-story .statement:hover .actions,
-.briefed-story .statement:focus-within .actions,
-.briefed-story .story-head:hover .actions,
-.briefed-story .story-head:focus-within .actions {
+.block:hover .block-body .actions,
+.block:focus-within .block-body .actions,
+.title-row:hover .actions,
+.title-row:focus-within .actions {
   position: static;
   width: auto;
   height: auto;
@@ -599,10 +573,51 @@ body:has(.margined) #request-errors {
   margin: 0.2rem 0 0;
 }
 
+.title-row h1,
+.title-row h2 {
+  margin-bottom: 0.5rem;
+}
+
+.block-body > p {
+  margin-bottom: 0.15rem;
+}
+
+.given-marks {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+.title-row .given-marks {
+  margin-bottom: 0.5rem;
+}
+
 /* What a group of controls or a given mark is on: its Development's Fact. */
-.briefed-story .about {
+.about {
   margin-right: 0.5rem;
   font-style: italic;
+}
+
+/* What a statement cites, each in its margin: the Development, then its
+   Item. */
+.cited p {
+  margin: 0;
+}
+
+.cited + .cited {
+  margin-top: 0.5rem;
+}
+
+/* An Assessment is the Editor's judgement, not a report: set apart from the
+   statements by a left rule. Withdrawn, it is struck through and quiet. */
+.assessment {
+  border-left: 2px solid var(--muted);
+  padding-left: 0.9rem;
+}
+
+.assessment.quiet {
+  border-left-color: var(--rule);
 }
 
 .missed {

@@ -5,9 +5,18 @@
      cite was drawn from collected text: inert, with hx-disable on the
      elements holding them, so the boosted links still work. */}}
 <p><a href="{{.BriefingPath}}">The day's Briefing</a></p>
+{{/* New to me on the read is its title's action, shown on hover or focus
+     (.title-row); given, it shows at rest. */}}
+<div class="title-row">
 <h1>Sunday read</h1>
+{{- with .Gives.Given}}
+<div class="given-marks">{{template "gives" .}}</div>
+{{- end}}
+{{- with .Gives.Offered}}
+<div class="actions quiet" role="group" aria-label="Feedback on this read">{{template "gives" .}}</div>
+{{- end}}
+</div>
 <p>{{.Date}}{{with .Conversation}} · <a href="{{.}}">How this was written</a>{{end}}</p>
-{{- template "gives" .Gives}}
 {{- if not .Exists}}
 <p>There is no Sunday read yet.</p>
 {{- with .Failure}}
@@ -17,38 +26,76 @@
 {{- else if not .Statements}}
 <p>Nothing moved on this week in the Stories your Topics follow.</p>
 {{- end}}
-{{- range .Statements}}
-<section id="{{.Anchor}}">
-  <p hx-disable>{{.Text}}</p>
-  <ul>
-    {{- range .Cites}}
-    <li><small>{{template "readCite" .}}</small></li>
-    {{- end}}
-  </ul>
-</section>
+{{- if or .Statements .Assessments}}
+{{/* A reading page: its margin starts folded, and the one control unfolds
+     it to show, beside each statement and Assessment, what stands behind
+     it. */}}
+<div class="margined" data-margin="folded">
+{{template "margin-fold" "folded"}}
+{{- with .Statements}}
+<ul class="blocks">
+{{- range .}}
+  <li class="block" id="{{.Anchor}}">
+    <div class="block-body"><p hx-disable>{{.Text}}</p></div>
+    <div class="block-margin">
+      {{- range .Cites}}
+      {{template "readCite" .}}
+      {{- end}}
+    </div>
+  </li>
+{{- end}}
+</ul>
 {{- end}}
 {{- if .Assessments}}
 <h2>Assessments</h2>
+{{/* An Assessment is the Editor's judgement, set apart with a left rule
+     (.assessment); withdrawn, it is struck through and quiet. Its actions
+     sit with its text, like a statement's on the Briefing, so a folded
+     margin leaves them in reach. */}}
+<ul class="blocks">
 {{- range .Assessments}}
-<section id="{{.Anchor}}">
-  <p>{{if .Withdrawn}}<del hx-disable>{{.Statement}}</del> <strong>Withdrawn</strong>: you said it was wrong.{{else}}<strong hx-disable>{{.Statement}}</strong>{{end}}
-    <small>as at {{.AsAt}}{{with .Supersedes}}, superseding <a href="{{.}}">an earlier Assessment</a>{{end}}{{with .Reached}} · <a href="{{.}}">How it was reached</a>{{end}}</small></p>
-  {{- template "gives" .Gives}}
+  <li class="block" id="{{.Anchor}}">
+    <div class="block-body assessment{{if .Withdrawn}} quiet{{end}}">
+      {{- if .Withdrawn}}
+      <p><del hx-disable>{{.Statement}}</del> <strong>Withdrawn</strong>: you said it was wrong.</p>
+      {{- else}}
+      <p hx-disable>{{.Statement}}</p>
+      {{- end}}
+      {{- with .Gives.Given}}
+      <div class="given-marks">{{template "gives" .}}</div>
+      {{- end}}
+      {{- with .Gives.Offered}}
+      <div class="actions quiet" role="group" aria-label="Feedback on this Assessment">{{template "gives" .}}</div>
+      {{- end}}
+    </div>
+    <div class="block-margin">
+      <p>as at <time>{{.AsAt}}</time></p>
+      {{- range .Facts}}
+      <p>Rests on</p>
+      {{template "readCite" .}}
+      {{- end}}
+      {{- with .Supersedes}}
+      <p>Supersedes <a href="{{.}}">an earlier Assessment</a></p>
+      {{- end}}
+      {{- if .Reached.Conversation}}
+      <p><a class="machine" href="{{.Reached.Href}}">{{.Reached.Label}}</a></p>
+      {{- end}}
+    </div>
+  </li>
+{{- end}}
+</ul>
+{{- end}}
+</div>
+{{- end}}
+{{- if .Stories}}
+<section class="quiet" aria-labelledby="stories-started">
+  <h2 id="stories-started">Stories started</h2>
   <ul>
-    {{- range .Facts}}
-    <li><small>Rests on {{template "readCite" .}}</small></li>
+    {{- range .Stories}}
+    <li><a href="{{.Path}}"><span hx-disable>{{.Title}}</span></a></li>
     {{- end}}
   </ul>
 </section>
-{{- end}}
-{{- end}}
-{{- if .Stories}}
-<h2>Stories started</h2>
-<ul>
-  {{- range .Stories}}
-  <li><a href="{{.Path}}"><span hx-disable>{{.Title}}</span></a></li>
-  {{- end}}
-</ul>
 {{- end}}
 {{- if .Feedback}}
 <section aria-labelledby="your-feedback">
@@ -58,6 +105,11 @@
 {{- end}}
 {{end}}
 
-{{define "readCite"}}<a href="{{.Path}}">{{.Kind}}</a>{{with .AsAt}} of <time>{{.}}</time>{{end}}:
-  <span hx-disable>{{.Text}}</span>
-  {{- with .ItemPath}}, from <a href="{{.}}"><span hx-disable>{{$.ItemTitle}}</span></a>{{end}}{{end}}
+{{/* readCite is one thing cited, in a margin: what it is, linked where it
+     is read, then its Item, cited, if it has one. */}}
+{{define "readCite"}}<div class="cited">
+  <p><a href="{{.Path}}">{{.Kind}}</a>{{with .AsAt}} of <time>{{.}}</time>{{end}}: <span hx-disable>{{.Text}}</span></p>
+  {{- with .Item}}
+  <p>{{template "citation" .}}</p>
+  {{- end}}
+</div>{{end}}

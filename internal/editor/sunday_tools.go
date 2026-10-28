@@ -41,7 +41,8 @@ func (r *sundayRun) tools() []Tool {
 		{
 			Name: "story",
 			Description: "A Story's whole Timeline, back to its start, with the cause Connections to and from its " +
-				"Developments and the Stories connected to it through shared Developments or Entities in the same role.",
+				"Developments and the Stories connected to it: through the Developments they share, an Item both have " +
+				"Developments from, or Entities their Facts from different Items involve in the same role.",
 			Schema: object(map[string]any{"story": refSchema("The Story's ref, such as S3.")}),
 		},
 		{

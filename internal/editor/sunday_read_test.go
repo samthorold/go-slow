@@ -551,6 +551,31 @@ func TestTheAgentHasNoToolThatWritesAFact(t *testing.T) {
 	}
 }
 
+func TestTheAgentIsToldEachReasonStoriesAreConnected(t *testing.T) {
+	store := record(t)
+	readAndPlace(t, store, &fakeModel{output: startsAStory})
+	agent := &fakeAgent{turns: []editor.Turn{submits(citesTheSpeech)}}
+	ed, _ := reader(store, agent)
+
+	if err := ed.SundayRead(t.Context(), sundayMorning); err != nil {
+		t.Fatal(err)
+	}
+
+	var story string
+	for _, tool := range agent.sent[0].Tools {
+		if tool.Name == "story" {
+			story = tool.Description
+		}
+	}
+	for what, text := range map[string]string{"the story tool": story, "the instructions": agent.sent[0].Instructions} {
+		for _, reason := range []string{"Developments they share", "an Item", "Entities", "different Items"} {
+			if !strings.Contains(text, reason) {
+				t.Errorf("%s do not name %q as a reason Stories are connected:\n%s", what, reason, text)
+			}
+		}
+	}
+}
+
 func TestTheReadCanStartAStoryGatheringExistingDevelopments(t *testing.T) {
 	store := record(t)
 	readAndPlace(t, store, &fakeModel{output: startsAStory})

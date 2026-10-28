@@ -72,8 +72,9 @@ func TestAPageThatIsNoIndexCarriesTheNavigationWithNoLinkMarkedCurrent(t *testin
 
 	briefing := get(t, app, "/briefings/2026-10-24").body
 	paths := []string{"/briefings/2026-10-24", "/briefings/2026-10-24/trail"}
+	// An Item is cited at a Fact on its page: the path is up to the anchor.
 	for _, link := range []string{`/stories/\d+`, `/items/[^"#]+`} {
-		m := regexp.MustCompile(`href="(` + link + `)"`).FindStringSubmatch(briefing)
+		m := regexp.MustCompile(`href="(` + link + `)["#]`).FindStringSubmatch(briefing)
 		if m == nil {
 			t.Fatalf("the Briefing links no %s:\n%s", link, briefing)
 		}
@@ -148,7 +149,7 @@ func TestNoPageRepeatsTheNavigationAboveItsContent(t *testing.T) {
 		"/briefings/2026-10-24/trail": `/calls/\d+`,
 	} {
 		body := get(t, app, page).body
-		m := regexp.MustCompile(`href="(` + link + `)"`).FindStringSubmatch(body)
+		m := regexp.MustCompile(`href="(` + link + `)["#]`).FindStringSubmatch(body)
 		if m == nil {
 			t.Fatalf("GET %s links no %s:\n%s", page, link, body)
 		}

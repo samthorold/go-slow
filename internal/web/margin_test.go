@@ -22,8 +22,9 @@ func blockOf(t *testing.T, page, text string) block {
 		t.Fatalf("%q is in no block:\n%s", text, page)
 	}
 	rest := page[start:]
-	bodyAt := strings.Index(rest, `class="block-body"`)
-	marginAt := strings.Index(rest, `class="block-margin"`)
+	// A column may carry classes of its own (class="block-body assessment").
+	bodyAt := strings.Index(rest, `class="block-body`)
+	marginAt := strings.Index(rest, `class="block-margin`)
 	// A block ends where the next begins, or with its section.
 	end := strings.Index(rest[1:], `class="block"`) + 1
 	if sec := strings.Index(rest, "</section>"); end == 0 || (sec >= 0 && sec < end) {

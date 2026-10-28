@@ -56,7 +56,7 @@ type sundayReadPage struct {
 	BriefingPath string
 	Exists       bool
 	// Gives is the Feedback on the read as a whole.
-	Gives       []giveButton
+	Gives       gives
 	Statements  []readStatementRow
 	Assessments []assessmentRow
 	Stories     []startedStoryRow
@@ -82,24 +82,25 @@ type readStatementRow struct {
 // Assessment on this page or an earlier read's, or the Wikidata revision a
 // lookup saw.
 type readCitationRow struct {
-	Kind      string
-	Text      string
-	Path      string
-	AsAt      string
-	ItemTitle string
-	ItemPath  string
+	Kind string
+	Text string
+	Path string
+	AsAt string
+	// Item is the Item a cited Fact or Development was drawn from, cited at
+	// the Fact on its page; nil for anything else.
+	Item *itemCitation
 }
 
 type assessmentRow struct {
 	Anchor     string
-	Gives      []giveButton
+	Gives      gives
 	Withdrawn  bool
 	Statement  string
 	AsAt       string
 	Supersedes string
 	Facts      []readCitationRow
 	// Reached is the turn of the conversation that reached it.
-	Reached string
+	Reached reached
 }
 
 type startedStoryRow struct {
@@ -145,8 +146,8 @@ func (a *app) sundayRead(w http.ResponseWriter, r *http.Request) {
 				Conversation: conversationPath(f.ConversationID, 0)}
 		}
 	}
-	conversation, reached := readConversation(read)
-	p.Conversation = conversation
+	p.Conversation = conversationPath(read.ConversationID, 0)
+	reached := reachedBy(read)
 	for _, st := range read.Statements {
 		row := readStatementRow{Anchor: statementAnchor(st.ID), Text: st.Text}
 		for _, c := range st.Cites {
@@ -196,8 +197,9 @@ func citation(c editor.Citation, day string) readCitationRow {
 	switch c.Kind {
 	case editor.CitesDevelopment, editor.CitesFact:
 		item := itemPath(c.Fact.SourceID, c.Fact.EntryID)
-		row := readCitationRow{Kind: "Fact", Text: c.Fact.Statement, Path: item + "#" + factAnchor(c.Fact.ID),
-			AsAt: factDate(c.Fact.Fact), ItemTitle: c.Fact.ItemTitle, ItemPath: item}
+		fact := item + "#" + factAnchor(c.Fact.ID)
+		row := readCitationRow{Kind: "Fact", Text: c.Fact.Statement, Path: fact,
+			AsAt: factDate(c.Fact.Fact), Item: &itemCitation{Title: c.Fact.ItemTitle, Href: fact}}
 		if c.Kind == editor.CitesDevelopment {
 			row.Kind, row.Path = "Development", storyPath(c.Story.ID)+"#"+developmentAnchor(c.Fact.ID)
 		}

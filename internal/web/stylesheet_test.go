@@ -96,6 +96,7 @@ func TestTheStylesheetCarriesTheBodyAndMarginLayoutAndItsVocabulary(t *testing.T
 		"the pill's tag in small caps":           regexp.MustCompile(`(?m)^\.pill-tag\s*\{[^}]*small-caps`),
 		"the citation's title in italics":        regexp.MustCompile(`(?m)^\.citation cite\s*\{[^}]*font-style:\s*italic`),
 		"the machine label in monospace":         regexp.MustCompile(`(?m)^\.machine\s*\{[^}]*monospace`),
+		"struck through, in the quiet colour":    regexp.MustCompile(`(?m)^\.struck\s*\{[^}]*line-through[^}]*color:\s*var\(--muted\)`),
 	} {
 		if !rule.MatchString(css) {
 			t.Errorf("%s has no rule for %s", link[1], name)

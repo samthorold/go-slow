@@ -81,10 +81,111 @@ func TestABriefingsTrailListsItsCallAndThePlacingAndReadingCallsBehindEachDevelo
 	if strings.Join(acts, " ") != "briefing placing reading" {
 		t.Errorf("the trail links the calls %v, want the briefing's, then the Development's placing and reading:\n%s", acts, res.body)
 	}
-	for _, want := range []string{"Andy Burnham spoke in Motherwell.", "220 tokens", "550 tokens", "1100 tokens", "1870 tokens"} {
-		if !strings.Contains(res.body, want) {
-			t.Errorf("the trail lacks %q:\n%s", want, res.body)
+	_, rows := trailRows(t, res.body)
+	if len(rows) != 2 {
+		t.Fatalf("%d rows, want the writing call's and the one Development's:\n%s", len(rows), res.body)
+	}
+	cells := regexp.MustCompile(`(?s)<td[^>]*>(.*?)</td>`).FindAllStringSubmatch(rows[1], -1)
+	if len(cells) != 4 {
+		t.Fatalf("the Development's row has %d cells, want 4:\n%s", len(cells), rows[1])
+	}
+	for i, want := range []string{
+		`<a href="/stories/1#development-1"><span hx-disable>Andy Burnham spoke in Motherwell.</span></a>`,
+		`<a href="/stories/1"><span hx-disable>Andy Burnham in Scotland</span></a>`,
+		`<a class="machine" href="/calls/2">placed · call 2 · 550 tok</a>`,
+		`<a class="machine" href="/calls/1">read · call 1 · 1,100 tok</a>`,
+	} {
+		if got := strings.TrimSpace(cells[i][1]); got != want {
+			t.Errorf("cell %d is %s, want %s", i+1, got, want)
 		}
+	}
+}
+
+// trailRows is the trail's table: its head's cells, then each body row's.
+func trailRows(t *testing.T, page string) (head []string, rows []string) {
+	t.Helper()
+	table := regexp.MustCompile(`(?s)<table[ >].*?</table>`).FindString(page)
+	if table == "" {
+		t.Fatalf("the trail has no table:\n%s", page)
+	}
+	thead := regexp.MustCompile(`(?s)<thead>.*?</thead>`).FindString(table)
+	for _, m := range regexp.MustCompile(`(?s)<th(?:\s[^>]*)?>(.*?)</th>`).FindAllStringSubmatch(thead, -1) {
+		head = append(head, strings.TrimSpace(m[1]))
+	}
+	tbody := regexp.MustCompile(`(?s)<tbody>.*?</tbody>`).FindString(table)
+	return head, regexp.MustCompile(`(?s)<tr[\s>].*?</tr>`).FindAllString(tbody, -1)
+}
+
+func TestABriefingsTrailOpensWithItsTotalsThenATableWhoseFirstRowIsTheWritingCall(t *testing.T) {
+	store := openStore(t)
+	spokenBriefing(t, store)
+	app, _ := newAppWithLog(t, saturday, store)
+
+	page := get(t, app, "/briefings/2026-10-24/trail").body
+
+	table := strings.Index(page, "<table")
+	if total := strings.Index(page, "1,870 tokens over 3 calls"); total < 0 || table < 0 || total > table {
+		t.Errorf("the trail does not open with its totals, then the table:\n%s", page)
+	}
+	head, rows := trailRows(t, page)
+	if strings.Join(head, "|") != "Development|Story|Placed|Read" {
+		t.Errorf("the table's head is %q, want Development|Story|Placed|Read", head)
+	}
+	if len(rows) != 2 {
+		t.Fatalf("%d rows, want the writing call's and the one Development's:\n%s", len(rows), page)
+	}
+	if !regexp.MustCompile(`<a class="machine" href="/calls/\d+">written · call \d+ · 220 tok</a>`).MatchString(rows[0]) {
+		t.Errorf("the first row is not the writing call, as a machine label with its tokens:\n%s", rows[0])
+	}
+}
+
+func TestATrailSaysABriefingWrittenEmptyMadeNoCall(t *testing.T) {
+	store := openStore(t)
+	writeBriefing(t, store, saturday, spoke)
+	app, _ := newAppWithLog(t, saturday, store)
+
+	page := get(t, app, "/briefings/2026-10-24/trail").body
+
+	_, rows := trailRows(t, page)
+	if len(rows) != 1 || !strings.Contains(rows[0], "written without a model call") || strings.Contains(page, `href="/calls/`) {
+		t.Errorf("the trail does not say the empty Briefing made no call:\n%s", page)
+	}
+}
+
+func TestATrailSaysTheOwnerAddedAMissedDevelopment(t *testing.T) {
+	store := openStore(t)
+	// The speech read into two Facts, placing making the second a
+	// Development and leaving the first out, which the Owner then adds as
+	// missed.
+	twoFacts := strings.Replace(reading, `"facts": [`, `"facts": [{"statement": "Andy Burnham was in Motherwell.", "as_at": "2026-10-22",
+             "quote": "here in Motherwell"}, `, 1)
+	readSpeech(t, store, twoFacts)
+	ed := editor.New(editor.Deps{Store: store, Log: slog.New(slog.DiscardHandler), PlacingModel: fakeModel{
+		`{"new_stories": [{"ref": "N1", "title": "Andy Burnham in Scotland"}],
+		  "facts": [{"fact": "F1", "developments_in": []}, {"fact": "F2", "developments_in": ["N1"]}]}`}})
+	if err := ed.PlaceWaiting(t.Context(), saturday); err != nil {
+		t.Fatal(err)
+	}
+	app, _ := newAppWithLog(t, saturday, store)
+	if res := send(t, app, "POST", "/stories/1/feedback", url.Values{"kind": {"missed"}, "level": {"development"},
+		"story": {"1"}, "fact": {"1"}}); res.status != 303 {
+		t.Fatalf("status %d:\n%s", res.status, res.body)
+	}
+	writeBriefing(t, store, saturday, `{"stories": [{"story": "S1", "statements": [
+		{"text": "The Prime Minister spoke in Motherwell.", "developments": ["D1", "D2"]}]}]}`)
+
+	page := get(t, app, "/briefings/2026-10-24/trail").body
+
+	_, rows := trailRows(t, page)
+	var missed string
+	for _, r := range rows {
+		if strings.Contains(r, "Andy Burnham was in Motherwell.") {
+			missed = r
+		}
+	}
+	if !strings.Contains(missed, "you added it as missed") || strings.Contains(missed, "placed · call") ||
+		!strings.Contains(missed, "read · call 1 · ") {
+		t.Errorf("the missed Development's row does not say the Owner added it, beside its reading call:\n%s", page)
 	}
 }
 
@@ -124,7 +225,7 @@ func TestABriefingsTrailFollowsItAsWrittenThoughFeedbackTookAStatementOut(t *tes
 
 	res := get(t, app, "/briefings/2026-10-24/trail")
 
-	if !strings.Contains(res.body, "Andy Burnham spoke in Motherwell.") || !strings.Contains(res.body, "1870 tokens") {
+	if !strings.Contains(res.body, "Andy Burnham spoke in Motherwell.") || !strings.Contains(res.body, "1,870 tokens") {
 		t.Errorf("the trail drops what the Briefing was written from:\n%s", res.body)
 	}
 }
@@ -153,7 +254,7 @@ func TestATrailCountsEachCallOnceThoughSeveralDevelopmentsShareIt(t *testing.T) 
 
 	res := get(t, app, "/briefings/2026-10-24/trail")
 
-	for _, want := range []string{"Andy Burnham was in Motherwell.", "Andy Burnham spoke in Motherwell.", "1870 tokens over 3 calls"} {
+	for _, want := range []string{"Andy Burnham was in Motherwell.", "Andy Burnham spoke in Motherwell.", "1,870 tokens over 3 calls"} {
 		if !strings.Contains(res.body, want) {
 			t.Errorf("the trail lacks %q:\n%s", want, res.body)
 		}

@@ -88,7 +88,7 @@ var topicsTmpl = page("/topics", "topics.html")
 // storiesTmpl is the Stories page, and storyTmpl a Story's own page.
 var (
 	storiesTmpl = page("/stories", "stories.html")
-	storyTmpl   = page(noIndex, "story.html", "involves.html")
+	storyTmpl   = page(noIndex, "story.html")
 )
 
 // feedbackTmpl is the Feedback page: every piece, as given.
@@ -133,7 +133,7 @@ func page(index, name string, components ...string) *template.Template {
 	for _, c := range components {
 		files = append(files, "templates/"+c)
 	}
-	t := template.New("layout.html").Funcs(template.FuncMap{"nav": func() []navLink { return nav }})
+	t := template.New("layout.html").Funcs(template.FuncMap{"nav": func() []navLink { return nav }, "grouped": grouped})
 	return template.Must(t.ParseFS(templateFS, files...))
 }
 

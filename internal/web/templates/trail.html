@@ -5,39 +5,36 @@
      inert, with hx-disable on the elements holding them. */}}
 <p><a href="{{.BriefingPath}}">The Briefing for {{.Date}}</a></p>
 <h1>How this was written</h1>
-<p>{{.Tokens.Total}} tokens over {{.Calls}} {{if eq .Calls 1}}call{{else}}calls{{end}}:
-  {{.Tokens.Input}} input, {{.Tokens.Output}} output{{if .Tokens.CacheRead}}, {{.Tokens.CacheRead}} read from the cache{{end}}.</p>
+<p>{{grouped .Tokens.Total}} tokens over {{.Calls}} {{if eq .Calls 1}}call{{else}}calls{{end}}:
+  {{grouped .Tokens.Input}} input, {{grouped .Tokens.Output}} output{{if .Tokens.CacheRead}}, {{grouped .Tokens.CacheRead}} read from the cache{{end}}.</p>
 
-<section aria-labelledby="writing">
-  <h2 id="writing">Writing the Briefing</h2>
-  {{- with .Writing}}
-  <p>{{template "trailCall" .}}</p>
-  {{- else}}
-  {{- if .WithoutCall}}
-  <p>With nothing to tell, it was written without a model call.</p>
-  {{- else}}
-  <p>No call was kept for writing it.</p>
-  {{- end}}
-  {{- end}}
-</section>
-
-<section aria-labelledby="cited">
-  <h2 id="cited">Each Development it cites</h2>
-  {{- if not .Citations}}
-  <p>It cites none.</p>
-  {{- end}}
-  <ol>
+{{/* The calls, the writing call first, then each Development the Briefing
+     cites as written, with the calls behind it, each a machine label with
+     its tokens (template "made"). */}}
+<table class="trail">
+  <thead>
+    <tr><th scope="col">Development</th><th scope="col">Story</th><th scope="col">Placed</th><th scope="col">Read</th></tr>
+  </thead>
+  <tbody>
+    <tr id="writing">
+      <th scope="row">Writing the Briefing</th>
+      <td></td>
+      <td colspan="2">
+        {{- with .Writing}}{{template "made" .}}
+        {{- else}}<span class="quiet">{{if $.WithoutCall}}with nothing to tell, it was written without a model call{{else}}no call was kept{{end}}</span>
+        {{- end}}</td>
+    </tr>
   {{- range .Citations}}
-    <li><a href="{{.DevelopmentPath}}"><span hx-disable>{{.Statement}}</span></a>,
-      in <a href="{{.StoryPath}}"><span hx-disable>{{.Story}}</span></a>
-      <ul>
-        <li>Placed: {{with .Placing}}{{template "trailCall" .}}{{else}}{{if .Missed}}added by you as missed, with no call{{else}}no call was kept{{end}}{{end}}</li>
-        <li>Read: {{with .Reading}}{{template "trailCall" .}}{{else}}no call was kept{{end}}</li>
-      </ul>
-    </li>
+    <tr>
+      <td><a href="{{.DevelopmentPath}}"><span hx-disable>{{.Statement}}</span></a></td>
+      <td><a href="{{.StoryPath}}"><span hx-disable>{{.Story}}</span></a></td>
+      <td>{{with .Placing}}{{template "made" .}}{{else}}<span class="quiet">{{if .Missed}}you added it as missed{{else}}no call was kept{{end}}</span>{{end}}</td>
+      <td>{{with .Reading}}{{template "made" .}}{{else}}<span class="quiet">no call was kept</span>{{end}}</td>
+    </tr>
   {{- end}}
-  </ol>
-</section>
+  </tbody>
+</table>
+{{- if not .Citations}}
+<p>It cites no Development.</p>
+{{- end}}
 {{end}}
-
-{{define "trailCall"}}<a href="{{.Page}}">the {{.Act}} call</a> of {{.At}}{{with .Model}}, asked of <code hx-disable>{{.}}</code>{{end}}: {{.Tokens.Total}} tokens ({{.Tokens.Input}} input, {{.Tokens.Output}} output{{if .Tokens.CacheRead}}, {{.Tokens.CacheRead}} from the cache{{end}}){{end}}

@@ -39,7 +39,13 @@ func openStore(t *testing.T) *sqlite.Store {
 func newAppWithLog(t *testing.T, now time.Time, store *sqlite.Store) (http.Handler, *bytes.Buffer) {
 	t.Helper()
 	var logs bytes.Buffer
-	return web.New(web.Deps{
+	return web.New(appDeps(now, store, &logs)), &logs
+}
+
+// appDeps are the app's dependencies as main builds them, on the given store,
+// logging to logs.
+func appDeps(now time.Time, store *sqlite.Store, logs *bytes.Buffer) web.Deps {
+	return web.Deps{
 		Briefings:   store,
 		Items:       store,
 		Readings:    store,
@@ -52,8 +58,8 @@ func newAppWithLog(t *testing.T, now time.Time, store *sqlite.Store) (http.Handl
 		Calls:       store,
 		BriefingAt:  7 * time.Hour,
 		Now:         func() time.Time { return now },
-		Log:         slog.New(slog.NewJSONHandler(&logs, &slog.HandlerOptions{Level: slog.LevelDebug})),
-	}), &logs
+		Log:         slog.New(slog.NewJSONHandler(logs, &slog.HandlerOptions{Level: slog.LevelDebug})),
+	}
 }
 
 // response is what a browser would see of one request.

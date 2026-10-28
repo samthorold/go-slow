@@ -20,8 +20,8 @@ type Stories interface {
 	// from what they share.
 	ConnectedStories(ctx context.Context, id int64) ([]editor.StoryConnection, error)
 	// FactsToAdd are the Facts the Owner may say the Story id missed, as
-	// Developments.
-	FactsToAdd(ctx context.Context, id int64) ([]editor.Fact, error)
+	// Developments: at most limit, best first.
+	FactsToAdd(ctx context.Context, id int64, limit int) ([]editor.Fact, error)
 }
 
 // storiesPage is the view model for the Stories page.

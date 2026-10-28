@@ -9,7 +9,7 @@ import (
 )
 
 // conversationTmpl is a kept conversation's page.
-var conversationTmpl = page("conversation.html")
+var conversationTmpl = page(noIndex, "conversation.html")
 
 // conversationPath is a kept conversation's page, at turn n if n is not
 // zero; empty for no conversation.

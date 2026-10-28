@@ -259,7 +259,11 @@ func (a *app) briefingWith(w http.ResponseWriter, r *http.Request, day time.Time
 			return
 		}
 	}
-	a.renderStatus(w, r, status, briefingTmpl, p)
+	t := briefingTmpl
+	if dayOf(day).Equal(dayOf(a.Now())) {
+		t = todaysBriefingTmpl
+	}
+	a.renderStatus(w, r, status, t, p)
 }
 
 // briefingStatus is the view model for the day's Briefing status: written,

@@ -68,6 +68,10 @@ nav ul {
   gap: 0.25rem 1.25rem;
 }
 
+nav li + li {
+  margin-top: 0;
+}
+
 nav a {
   color: var(--muted);
   text-decoration: none;

@@ -3,7 +3,6 @@
 {{define "content"}}
 {{/* What a model was sent and what it answered, and the work's key, are
      inert, like collected text: hx-disable on the elements holding them. */}}
-<p><a href="/items">Items</a></p>
 <h1>A {{.Act}} call</h1>
 <p>On {{if .WorkPage}}<a href="{{.WorkPage}}" hx-disable>{{.Work}}</a>{{else}}<span hx-disable>{{.Work}}</span>{{end}},
   {{.At}}{{if .Batch}}, in batch <code hx-disable>{{.Batch}}</code>{{else}}, in real time{{end}}.</p>

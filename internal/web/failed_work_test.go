@@ -3,6 +3,7 @@ package web_test
 import (
 	"context"
 	"encoding/json"
+	"html"
 	"log/slog"
 	"strconv"
 	"strings"
@@ -25,15 +26,15 @@ func TestTheItemsPageShowsFailedWorkWithWhenAndWhyItLastFailed(t *testing.T) {
 
 	res := get(t, app, "/items")
 
-	i := strings.Index(res.body, `id="failed"`)
-	if i < 0 {
-		t.Fatalf("the Items page has no failed work:\n%s", res.body)
+	section := leadingExceptions(t, res.body)
+	if !strings.Contains(section, `id="failed"`) {
+		t.Fatalf("the exceptions lack failed work:\n%s", section)
 	}
-	section := res.body[i:]
-	section = section[:strings.Index(section, "</section>")]
 	for _, want := range []string{
 		"placing", `href="/items/number-10/speech"`, "PM speech in Scotland",
-		"Sat 24 Oct 2026, 06:30", "F1 is unplaced", "retry placing",
+		"Sat 24 Oct 2026, 06:30", "F1 is unplaced",
+		`<span class="status status-refuted">failed</span>`,
+		"<code>docker compose run --rm app retry placing</code>",
 	} {
 		if !strings.Contains(section, want) {
 			t.Errorf("failed work lacks %q:\n%s", want, section)
@@ -100,13 +101,41 @@ func TestFailedPlacingAndConnectingWorkLinksToEveryAttemptAtIt(t *testing.T) {
 	}
 }
 
-func TestTheItemsPageSaysWhenNoWorkHasFailed(t *testing.T) {
+func TestWithNoExceptionsTheItemsPageSaysSoQuietlyAndFoldsTheSources(t *testing.T) {
 	store := openStore(t)
+	seed(t, store, saturday.AddDate(0, -1, 0),
+		item("recent", "PM statement on the Budget", saturday.Add(-time.Hour)))
 	app, _ := newAppWithLog(t, saturday, store)
 
 	res := get(t, app, "/items")
 
-	if !strings.Contains(res.body, "No work has failed.") {
-		t.Errorf("the Items page does not say no work has failed:\n%s", res.body)
+	if strings.Contains(res.body, `id="exceptions"`) {
+		t.Errorf("exceptions are shown with none to show:\n%s", res.body)
 	}
+	sources := element(t, res.body, `id="sources"`, "</details>")
+	if !strings.Contains(sources, "<details") || strings.Contains(sources, "<details open") {
+		t.Errorf("the Sources list is not collapsed:\n%s", sources)
+	}
+	if !strings.Contains(sources, `<summary class="quiet">All Sources current · no failed work</summary>`) {
+		t.Errorf("the folded Sources do not say quietly that all is well:\n%s", sources)
+	}
+	if !strings.Contains(sources, html.EscapeString(number10.Name)) {
+		t.Errorf("the Sources list lacks the Source:\n%s", sources)
+	}
+}
+
+// element is body from the start of the tag holding marker to the first end
+// after it.
+func element(t *testing.T, body, marker, end string) string {
+	t.Helper()
+	i := strings.Index(body, marker)
+	if i < 0 {
+		t.Fatalf("no %q in:\n%s", marker, body)
+	}
+	i = strings.LastIndex(body[:i], "<")
+	j := strings.Index(body[i:], end)
+	if j < 0 {
+		t.Fatalf("no %q after %q:\n%s", end, marker, body[i:])
+	}
+	return body[i : i+j+len(end)]
 }

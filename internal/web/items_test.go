@@ -4,6 +4,7 @@ import (
 	"html"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -76,6 +77,34 @@ func TestTheItemsPageListsCollectedItemsNewestFirstLinkingToTheirOriginals(t *te
 	}
 }
 
+func TestACollectedItemHasItsTitleAndSummaryInTheBodyAndItsNotesInAnOpenMargin(t *testing.T) {
+	store := openStore(t)
+	seed(t, store, saturday.AddDate(0, 0, -7),
+		item("budget", "PM statement on the Budget", saturday.Add(-2*time.Hour)))
+	app, _ := newAppWithLog(t, saturday, store)
+
+	page := get(t, app, "/items").body
+	b := blockOf(t, page, "PM statement on the Budget")
+
+	if !regexp.MustCompile(`<div class="margined" data-margin="open">`).MatchString(page) {
+		t.Errorf("the collected Items are not in a margined region, open:\n%s", page)
+	}
+	if !strings.Contains(b.body, `<p class="quiet" hx-disable>Summary of PM statement on the Budget</p>`) {
+		t.Errorf("the body lacks the quiet summary:\n%s", b.body)
+	}
+	for _, want := range []string{
+		html.EscapeString(number10.Name), "Sat 24 Oct 2026, 05:30",
+		`<span class="machine" hx-disable>not yet checked</span>`, "Open Government Licence v3.0",
+	} {
+		if !strings.Contains(b.margin, want) {
+			t.Errorf("the margin lacks %q:\n%s", want, b.margin)
+		}
+		if strings.Contains(b.body, want) {
+			t.Errorf("the body holds %q, want it in the margin:\n%s", want, b.body)
+		}
+	}
+}
+
 // itemEntry is the Items page's entry for the Item linking to link.
 func itemEntry(t *testing.T, body, link string) string {
 	t.Helper()
@@ -107,7 +136,7 @@ func TestTakingUpATopicMarksTheWaitingItemsThatMatchItAsAwaitingReading(t *testi
 
 	after := get(t, app, "/items")
 	budget := itemEntry(t, after.body, "https://www.gov.uk/government/news/budget")
-	if !strings.Contains(budget, "Awaiting reading for") || !strings.Contains(budget, "The Budget") {
+	if !strings.Contains(budget, "awaiting reading for The Budget") {
 		t.Errorf("the Budget statement is not awaiting reading for The Budget:\n%s", budget)
 	}
 	call := itemEntry(t, after.body, "https://www.gov.uk/government/news/call")
@@ -131,7 +160,7 @@ func TestRemovingATopicLeavesItsItemsTouchingNoTopic(t *testing.T) {
 	}
 
 	budget := itemEntry(t, get(t, app, "/items").body, "https://www.gov.uk/government/news/budget")
-	if strings.Contains(budget, "Awaiting reading") || !strings.Contains(budget, "touches no Topic") {
+	if strings.Contains(budget, "awaiting reading") || !strings.Contains(budget, "touches no Topic") {
 		t.Errorf("the Budget statement still awaits reading for a removed Topic:\n%s", budget)
 	}
 }
@@ -164,12 +193,13 @@ func TestTheItemsPageShowsAScheduledReleaseAsUpcomingUntilItIsDue(t *testing.T) 
 
 	res := get(t, app, "/items")
 
-	upcoming := strings.Index(res.body, `id="upcoming"`)
-	collected := strings.Index(res.body, `id="collected"`)
-	if upcoming < 0 || collected < 0 {
-		t.Fatalf("page lacks an upcoming or collected section:\n%s", res.body)
+	section := element(t, res.body, `id="upcoming"`, "</details>")
+	if !strings.HasPrefix(section, "<details") || strings.HasPrefix(section, "<details open") {
+		t.Errorf("Upcoming is not collapsed:\n%s", section)
 	}
-	section := res.body[upcoming:collected]
+	if strings.Index(res.body, section) < strings.Index(res.body, `id="collected"`) {
+		t.Errorf("Upcoming is not at the foot, after the collected Items")
+	}
 	if !strings.Contains(section, "GDP first quarterly estimate") || !strings.Contains(section, "Mon 26 Oct 2026") {
 		t.Errorf("upcoming section lacks the scheduled release and its date:\n%s", section)
 	}
@@ -181,7 +211,7 @@ func TestTheItemsPageShowsAScheduledReleaseAsUpcomingUntilItIsDue(t *testing.T) 
 	}
 }
 
-func TestTheItemsPageShowsAQuietSource(t *testing.T) {
+func TestAQuietSourceLeadsTheItemsPageAtFullWeight(t *testing.T) {
 	store := openStore(t)
 	seed(t, store, saturday.AddDate(0, -1, 0),
 		item("old", "PM call with the President", saturday.AddDate(0, 0, -10)))
@@ -189,20 +219,30 @@ func TestTheItemsPageShowsAQuietSource(t *testing.T) {
 
 	res := get(t, app, "/items")
 
-	if !strings.Contains(res.body, "quiet") {
-		t.Errorf("page does not show the Source as quiet:\n%s", res.body)
+	exceptions := leadingExceptions(t, res.body)
+	for _, want := range []string{html.EscapeString(number10.Name), "quiet: nothing new past its usual gap"} {
+		if !strings.Contains(exceptions, want) {
+			t.Errorf("the exceptions lack %q:\n%s", want, exceptions)
+		}
+	}
+	if strings.Contains(res.body, "All Sources current") {
+		t.Errorf("the page says all Sources are current with one quiet:\n%s", res.body)
 	}
 }
 
-func TestTheItemsPageDoesNotFlagASourceWithinItsGap(t *testing.T) {
-	store := openStore(t)
-	seed(t, store, saturday.AddDate(0, -1, 0),
-		item("recent", "PM statement on the Budget", saturday.Add(-time.Hour)))
-	app, _ := newAppWithLog(t, saturday, store)
-
-	res := get(t, app, "/items")
-
-	if strings.Contains(res.body, "quiet") {
-		t.Errorf("page shows a Source within its gap as quiet:\n%s", res.body)
+// leadingExceptions is the Items page's exceptions, checked to come first,
+// before the Sources and the collected Items, and at full weight.
+func leadingExceptions(t *testing.T, body string) string {
+	t.Helper()
+	exceptions := element(t, body, `id="exceptions"`, "</section>")
+	at := strings.Index(body, exceptions)
+	for _, after := range []string{`id="sources"`, `id="collected"`} {
+		if i := strings.Index(body, after); i >= 0 && i < at {
+			t.Errorf("%s comes before the exceptions", after)
+		}
 	}
+	if open := exceptions[:strings.Index(exceptions, ">")]; strings.Contains(open, "quiet") || strings.HasPrefix(exceptions, "<details") {
+		t.Errorf("the exceptions recede: %s", open)
+	}
+	return exceptions
 }

@@ -2,6 +2,8 @@ package web
 
 import (
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/samthorold/go-slow/internal/collect"
@@ -11,11 +13,17 @@ import (
 // whether each Source has gone quiet, and the acts' work on Items that has
 // failed.
 type itemsPage struct {
-	Sources  []sourceRow
+	Sources []sourceRow
+	// Quiet are the Sources gone quiet, shown first, as exceptions.
+	Quiet    []sourceRow
 	Failed   []failedRow
 	Upcoming []itemRow
 	Items    []itemRow
 }
+
+// Exceptions is whether anything needs the Owner's hand: a quiet Source or
+// failed work.
+func (p itemsPage) Exceptions() bool { return len(p.Quiet) > 0 || len(p.Failed) > 0 }
 
 // failedRow is an act's work on an Item that failed every attempt.
 type failedRow struct {
@@ -43,10 +51,7 @@ type itemRow struct {
 	Source      string
 	When        string
 	Attribution string
-	// Scheduled is set for an upcoming scheduled event, shown with when it
-	// is due rather than how it stands against the Topics.
-	Scheduled bool
-	Checked   bool
+	Checked     bool
 	// Topics are those the Item awaits reading for.
 	Topics []string
 	// Page is the Item's own page, with what reading drew from it.
@@ -54,6 +59,30 @@ type itemRow struct {
 	Read   bool
 	Facts  int
 	Claims int
+}
+
+// Status is how a collected Item stands, as a machine label: "read · 3
+// Facts, 1 Claim", "awaiting reading for <Topic>", "touches no Topic" or
+// "not yet checked".
+func (r itemRow) Status() string {
+	switch {
+	case r.Read:
+		return "read · " + count(r.Facts, "Fact") + ", " + count(r.Claims, "Claim")
+	case len(r.Topics) > 0:
+		return "awaiting reading for " + strings.Join(r.Topics, ", ")
+	case r.Checked:
+		return "touches no Topic"
+	default:
+		return "not yet checked"
+	}
+}
+
+// count is n things, named in the singular or plural.
+func count(n int, thing string) string {
+	if n != 1 {
+		thing += "s"
+	}
+	return strconv.Itoa(n) + " " + thing
 }
 
 const shownTime = "Mon 2 Jan 2006, 15:04"
@@ -91,16 +120,18 @@ func (a *app) items(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 	for _, s := range statuses {
-		p.Sources = append(p.Sources, sourceRow{
+		src := sourceRow{
 			Name:   s.Name,
 			Newest: when(s.Newest, now.Location()),
 			Quiet:  s.Quiet(now),
-		})
+		}
+		p.Sources = append(p.Sources, src)
+		if src.Quiet {
+			p.Quiet = append(p.Quiet, src)
+		}
 	}
 	for _, it := range upcoming {
-		r := row(it, it.Due, now.Location())
-		r.Scheduled = true
-		p.Upcoming = append(p.Upcoming, r)
+		p.Upcoming = append(p.Upcoming, row(it, it.Due, now.Location()))
 	}
 	for _, it := range items {
 		r := row(it, it.Published, now.Location())

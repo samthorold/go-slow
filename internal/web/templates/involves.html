@@ -1,5 +1,0 @@
-{{/* involves is the Entities a Fact involves, each in the role connecting
-     gave it; none its Item only mentions. The names are drawn from
-     collected text: inert. */}}
-{{define "involves"}}{{if .}}
-      <p><small>Involves {{range $i, $r := .}}{{if $i}}, {{end}}<span hx-disable>{{$r.Entity}}</span> as {{$r.Role}}{{end}}</small></p>{{end}}{{end}}

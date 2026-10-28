@@ -60,5 +60,5 @@ repos:
         name: go test
         entry: go test -race ./...
         language: system
-        files: \.go$|\.html$|\.sql$|(^|/)go\.(mod|sum)$
+        files: \.go$|\.html$|\.sql$|\.css$|\.js$|(^|/)go\.(mod|sum)$
         pass_filenames: false

@@ -1,0 +1,339 @@
+/* go-slow's one stylesheet: dark and minimal. Plain CSS, no build step,
+   nothing fetched from another host (system fonts only).
+
+   The text a page is for (statements, headings) is body text at full
+   contrast; what supports it (metadata, citations, controls) is smaller and
+   dimmer. Every colour against --bg meets WCAG AA (4.5:1) for normal text.
+
+   The quiet style: what should recede, "not shouting for your attention",
+   sits flat and dim until hovered or focused. Buttons and forms get it by
+   default; give any other block the class "quiet" to make it recede the same
+   way (it brightens while the pointer or keyboard focus is inside it). */
+
+:root {
+  color-scheme: dark;
+  --bg: #15171a;
+  --surface: #1d2024;
+  --text: #e3e1dc;
+  --muted: #a3a8ae;
+  --rule: #33373d;
+  --link: #9cc4ff;
+  --focus: #ffd479;
+  --alert-bg: #3a1518;
+  --alert-text: #ffd6d6;
+  --alert-rule: #ff6b6b;
+  --measure: 38rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif;
+  font-size: 112.5%;
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 1.5rem 1.25rem 4rem;
+}
+
+main,
+nav {
+  max-width: var(--measure);
+  margin-inline: auto;
+}
+
+/* Navigation, from the layout: small, quiet, out of the reading's way. */
+nav {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.85rem;
+  color: var(--muted);
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+}
+
+nav li + li {
+  margin-top: 0;
+}
+
+nav a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+nav a:hover,
+nav a[aria-current] {
+  color: var(--text);
+}
+
+/* Type scale: headings carry the page, body text reads plainly. */
+h1,
+h2,
+h3 {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.25;
+  font-weight: 600;
+  margin: 2rem 0 0.75rem;
+}
+
+h1 {
+  font-size: 1.75rem;
+  margin-top: 0.5rem;
+}
+
+h2 {
+  font-size: 1.3rem;
+}
+
+h3 {
+  font-size: 1.05rem;
+}
+
+p,
+ul,
+ol,
+dl,
+blockquote,
+pre,
+table,
+details,
+fieldset {
+  margin: 0 0 1rem;
+}
+
+ul,
+ol {
+  padding-left: 1.25rem;
+}
+
+li + li {
+  margin-top: 0.35rem;
+}
+
+section {
+  margin-top: 2.25rem;
+}
+
+a {
+  color: var(--link);
+  text-underline-offset: 0.15em;
+  text-decoration-thickness: 1px;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* What supports the text: metadata, citations, times. */
+small,
+time,
+figcaption,
+legend {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+small a {
+  color: inherit;
+}
+
+small a:hover {
+  color: var(--text);
+}
+
+blockquote {
+  margin-left: 0;
+  padding-left: 1rem;
+  border-left: 2px solid var(--rule);
+}
+
+pre,
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+}
+
+pre {
+  background: var(--surface);
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+table {
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+th,
+td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.35rem 0.75rem 0.35rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--rule);
+}
+
+/* The quiet style. Controls sit flat and dim, not the browser's raised grey
+   boxes, and come forward when hovered or focused. */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.8rem;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 0.15rem 0.5rem;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:hover,
+button:focus-visible,
+input:hover,
+input:focus,
+select:hover,
+select:focus,
+textarea:hover,
+textarea:focus {
+  color: var(--text);
+  border-color: var(--muted);
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--muted);
+  padding: 0;
+}
+
+option {
+  background: var(--surface);
+  color: var(--text);
+}
+
+textarea {
+  width: 100%;
+}
+
+label,
+summary {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+summary {
+  cursor: pointer;
+}
+
+summary:hover,
+details[open] > summary {
+  color: var(--text);
+}
+
+fieldset {
+  border: 1px solid var(--rule);
+  padding: 0.5rem 0.75rem;
+}
+
+fieldset label {
+  display: block;
+}
+
+/* Feedback given inline sits beside what it is on, not on a line of its own. */
+form.feedback {
+  display: inline;
+  margin: 0 0.25rem 0 0;
+}
+
+.feedback.given {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* The reusable quiet style for any block that should recede: smaller and in
+   the muted colour (still AA), links included, until the pointer or keyboard
+   focus is inside it. Dimmed by colour, never by opacity, which would take
+   the text below AA. */
+.quiet {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.8rem;
+  color: var(--muted);
+  transition: color 0.15s;
+}
+
+.quiet a {
+  color: inherit;
+}
+
+.quiet:hover,
+.quiet:focus-within {
+  color: var(--text);
+}
+
+.quiet:hover a,
+.quiet:focus-within a {
+  color: var(--link);
+}
+
+/* Keyboard focus is always visible, on everything that takes it. */
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* A request that failed stands out; empty, the region takes no space. */
+#request-errors {
+  max-width: var(--measure);
+  margin: 0 auto;
+}
+
+#request-errors:not(:empty) {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--alert-text);
+  background: var(--alert-bg);
+  border-left: 4px solid var(--alert-rule);
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+[role="alert"]:not(#request-errors) {
+  color: var(--alert-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quiet {
+    transition: none;
+  }
+}

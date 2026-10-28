@@ -5,6 +5,10 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
+
+	"github.com/samthorold/go-slow/internal/editor"
+	"github.com/samthorold/go-slow/internal/feedback"
 )
 
 // feedbackRows is each row of the Feedback page's table, in order.
@@ -174,6 +178,30 @@ func TestUndoIsInTheRowsActionsAndAnUndoneRowIsStruckThrough(t *testing.T) {
 		if !rule.MatchString(css) {
 			t.Errorf("the stylesheet has no rule for %s", name)
 		}
+	}
+}
+
+// A Fact read before reading calls were kept still links to its Item's
+// page: the kept Feedback carries the Item, so no call is needed.
+func TestFeedbackOnAFactWithNoKeptReadingCallLinksToItsItem(t *testing.T) {
+	store := openStore(t)
+	seed(t, store, saturday.AddDate(0, 0, -7), item("speech", "PM speech in Scotland", saturday.Add(-48*time.Hour)))
+	if err := store.SaveReading(t.Context(), editor.Reading{SourceID: number10.ID, EntryID: "speech", Model: "fake",
+		Facts: []editor.Fact{{Statement: "Andy Burnham spoke in Motherwell.", AsAt: saturday, Quote: "Motherwell"}}},
+		saturday.Add(-time.Hour)); err != nil {
+		t.Fatal(err)
+	}
+	if _, errs, err := feedback.New(store).Give(t.Context(),
+		feedback.Draft{Kind: "wrong", Level: "fact", Fact: "1"}, saturday); err != nil || errs != nil {
+		t.Fatalf("give Feedback: %v %v", errs, err)
+	}
+	app, _ := newAppWithLog(t, saturday, store)
+
+	rows := feedbackRows(t, get(t, app, "/feedback").body)
+
+	href := `href="/items/` + regexp.QuoteMeta(number10.ID) + `/speech#fact-1"`
+	if len(rows) != 1 || !regexp.MustCompile(href).MatchString(rows[0]) {
+		t.Errorf("the Fact does not link to its Item's page (%s):\n%v", href, rows)
 	}
 }
 

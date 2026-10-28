@@ -133,7 +133,7 @@ func page(index, name string, components ...string) *template.Template {
 	for _, c := range components {
 		files = append(files, "templates/"+c)
 	}
-	t := template.New("layout.html").Funcs(template.FuncMap{"nav": func() []navLink { return nav }})
+	t := template.New("layout.html").Funcs(template.FuncMap{"nav": func() []navLink { return nav }, "grouped": grouped})
 	return template.Must(t.ParseFS(templateFS, files...))
 }
 

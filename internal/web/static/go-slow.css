@@ -381,7 +381,8 @@ a.pill:hover {
 /* How something was made is a machine label (.machine): monospace, in the
    muted colour, always worded "<act> · call N", linking the call:
      <a class="machine" href="/calls/43">read · call 43</a>
-   (template "made"). */
+   (template "made"), with the call's tokens where the page counts them
+   (the Briefing's trail: "placed · call 43 · 2,140 tok"). */
 .machine {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.75rem;

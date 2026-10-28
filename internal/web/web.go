@@ -166,6 +166,8 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("PUT /feedback/{feedback}/undone", a.undoOnFeedbackPage)
 	mux.HandleFunc("GET /items", a.items)
 	mux.HandleFunc("GET /items/{source}/{entry}", a.item)
+	mux.HandleFunc("POST /items/{source}/{entry}/feedback", a.itemFeedback)
+	mux.HandleFunc("PUT /items/{source}/{entry}/feedback/{feedback}/undone", a.undoOnItem)
 	mux.HandleFunc("GET /register", a.register)
 	mux.HandleFunc("GET /stories", a.stories)
 	mux.HandleFunc("GET /stories/{id}", a.story)

@@ -26,6 +26,9 @@
 
 <section aria-labelledby="facts">
   <h2 id="facts">Facts</h2>
+  {{- with .FeedbackError}}
+  <p role="alert">{{.}}</p>
+  {{- end}}
   {{- if not .Facts}}
   <p>Reading drew no Facts from this Item.</p>
   {{- end}}
@@ -40,6 +43,7 @@
         {{- end}}
         {{template "pills" .Entities}}
         {{if .Made.Call}}<p>{{template "made" .Made}}</p>{{end}}
+        {{- template "block-gives" .Gives}}
       </div>
     </li>
   {{- end}}

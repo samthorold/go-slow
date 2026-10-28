@@ -2,10 +2,12 @@ package web
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/url"
 
 	"github.com/samthorold/go-slow/internal/editor"
+	"github.com/samthorold/go-slow/internal/feedback"
 )
 
 // Readings answers the queries an Item's page needs.
@@ -31,6 +33,9 @@ type itemPage struct {
 	Mentions    []pill
 	Facts       []factRow
 	Claims      []claimRow
+	// FeedbackError is why Feedback last given on the page failed, if it
+	// did.
+	FeedbackError string
 }
 
 type factRow struct {
@@ -46,6 +51,8 @@ type factRow struct {
 	Entities []pill
 	// Made is the reading call that drew it.
 	Made made
+	// Gives is the Feedback the Owner can give on it here: wrong.
+	Gives gives
 }
 
 type claimRow struct {
@@ -63,7 +70,14 @@ func itemPath(sourceID, entryID string) string {
 }
 
 func (a *app) item(w http.ResponseWriter, r *http.Request) {
-	it, found, err := a.Readings.ReadItem(r.Context(), r.PathValue("source"), r.PathValue("entry"))
+	a.itemWith(w, r, http.StatusOK, nil)
+}
+
+// itemWith renders the Item's page the path names, with status, and why
+// Feedback given on it failed, if it did.
+func (a *app) itemWith(w http.ResponseWriter, r *http.Request, status int, errs feedback.Errors) {
+	sourceID, entryID := r.PathValue("source"), r.PathValue("entry")
+	it, found, err := a.Readings.ReadItem(r.Context(), sourceID, entryID)
 	if err != nil {
 		a.serverError(w, r, err)
 		return
@@ -72,6 +86,12 @@ func (a *app) item(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
+	kept, err := a.Kept.KeptFeedback(r.Context())
+	if err != nil {
+		a.serverError(w, r, err)
+		return
+	}
+	page := itemPath(sourceID, entryID)
 	loc := a.Now().Location()
 	p := itemPage{
 		Title:       it.Title,
@@ -84,6 +104,12 @@ func (a *app) item(w http.ResponseWriter, r *http.Request) {
 		ReadAt:      when(it.ReadAt, loc),
 		Model:       it.Model,
 		Topics:      it.Topics,
+		// The page's one form is a button naming its Fact: a failure is
+		// the form's, or that Fact's.
+		FeedbackError: errs[""],
+	}
+	if p.FeedbackError == "" {
+		p.FeedbackError = errs["fact"]
 	}
 	for _, e := range it.Mentions {
 		p.Mentions = append(p.Mentions, pillMentioned(e))
@@ -107,6 +133,7 @@ func (a *app) item(w http.ResponseWriter, r *http.Request) {
 			Quote:     f.Quote,
 			Entities:  pillsInvolved(f),
 			Made:      made{Act: "read", Call: it.ReadingCall},
+			Gives:     givenIn(factGives(page+"/feedback", f.ID), kept, page),
 		})
 	}
 	// A Claim shows no Entities: a reading gives a Claim none, and who made
@@ -114,5 +141,39 @@ func (a *app) item(w http.ResponseWriter, r *http.Request) {
 	for _, c := range it.Claims {
 		p.Claims = append(p.Claims, claimRow{Statement: c.Statement, MadeBy: c.MadeBy, Quote: c.Quote, Made: made{Act: "read", Call: it.ReadingCall}})
 	}
-	a.render(w, r, itemTmpl, p)
+	a.renderStatus(w, r, status, itemTmpl, p)
+}
+
+// itemFeedback is Feedback given on an Item's page, about one of its Facts.
+// It lands back on the page.
+func (a *app) itemFeedback(w http.ResponseWriter, r *http.Request) {
+	sourceID, entryID := r.PathValue("source"), r.PathValue("entry")
+	if _, found, err := a.Readings.ReadItem(r.Context(), sourceID, entryID); err != nil || !found {
+		if err != nil {
+			a.serverError(w, r, err)
+		} else {
+			http.NotFound(w, r)
+		}
+		return
+	}
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Bad form.", http.StatusBadRequest)
+		return
+	}
+	_, errs, err := a.Feedback.Give(r.Context(), draftFrom(r), a.Now())
+	switch {
+	case errors.Is(err, feedback.ErrNotInRecord):
+		http.NotFound(w, r)
+	case err != nil:
+		a.serverError(w, r, err)
+	case len(errs) > 0:
+		a.itemWith(w, r, http.StatusUnprocessableEntity, errs)
+	default:
+		http.Redirect(w, r, itemPath(sourceID, entryID), http.StatusSeeOther)
+	}
+}
+
+// undoOnItem is an undo from an Item's page, which it lands back on.
+func (a *app) undoOnItem(w http.ResponseWriter, r *http.Request) {
+	a.undo(w, r, itemPath(r.PathValue("source"), r.PathValue("entry")))
 }

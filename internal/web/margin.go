@@ -42,16 +42,39 @@ type itemCitation struct {
 }
 
 // made is how a block was made, shown in its margin as a machine label: the
-// act and the call it made, worded "<act> · call N" on every page.
+// act and the call it made, worded "<act> · call N" on every page, and
+// "<act> · call N · 2,140 tok" where the page counts tokens (the trail).
 type made struct {
 	// Act is the act, as the label words it ("read").
 	Act string
 	// Call is the kept call, or 0 if none was kept.
 	Call int64
+	// Tokens is the call's tokens, worded in the label only if Counted.
+	Tokens  int64
+	Counted bool
 }
 
 // Href is the call's page.
 func (m made) Href() string { return callPath(m.Call) }
 
 // Label is the label's wording.
-func (m made) Label() string { return m.Act + " · call " + strconv.FormatInt(m.Call, 10) }
+func (m made) Label() string {
+	l := m.Act + " · call " + strconv.FormatInt(m.Call, 10)
+	if m.Counted {
+		l += " · " + grouped(m.Tokens) + " tok"
+	}
+	return l
+}
+
+// grouped is n with its thousands separated by commas ("2,140").
+func grouped(n int64) string {
+	s := strconv.FormatInt(n, 10)
+	sign := ""
+	if n < 0 {
+		sign, s = "-", s[1:]
+	}
+	for i := len(s) - 3; i > 0; i -= 3 {
+		s = s[:i] + "," + s[i:]
+	}
+	return sign + s
+}

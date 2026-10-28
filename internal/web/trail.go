@@ -12,14 +12,16 @@ var trailTmpl = page(noIndex, "trail.html")
 
 func briefingTrailPath(day string) string { return briefingPath(day) + "/trail" }
 
-// trailPage is the view model for a Briefing's trail: the call that wrote
-// it, then, for each Development it cites, the placing call that made it and
-// the reading call that drew its Fact, with tokens per call and summed over
-// the distinct calls on the page.
+// trailPage is the view model for a Briefing's trail: a table whose first
+// row is the call that wrote it, then a row for each Development it cites,
+// with the placing call that made it and the reading call that drew its
+// Fact, each a machine label with its tokens; the tokens are summed over the
+// distinct calls on the page.
 type trailPage struct {
 	Date         string
 	BriefingPath string
-	Writing      *trailCall
+	// Writing is the call that wrote the Briefing, nil if none was kept.
+	Writing *made
 	// WithoutCall is whether the Briefing was written empty, with no model
 	// call.
 	WithoutCall bool
@@ -29,14 +31,6 @@ type trailPage struct {
 	Calls int
 }
 
-type trailCall struct {
-	Page   string
-	Act    string
-	At     string
-	Model  string
-	Tokens tokens
-}
-
 type trailCitation struct {
 	Story           string
 	StoryPath       string
@@ -44,9 +38,11 @@ type trailCitation struct {
 	DevelopmentPath string
 	// Missed is whether the Owner added the Development, so no placing call
 	// made it.
-	Missed  bool
-	Placing *trailCall
-	Reading *trailCall
+	Missed bool
+	// Placing and Reading are the calls behind the Development, nil where
+	// none was kept.
+	Placing *made
+	Reading *made
 }
 
 // briefingTrail is a written Briefing's trail. Checking how something was
@@ -69,27 +65,27 @@ func (a *app) briefingTrail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	p := trailPage{Date: day.Format("Monday 2 January 2006"), BriefingPath: briefingPath(key)}
-	seen := map[int64]*trailCall{}
-	// call is the kept call with id as the trail shows it, counted once in
-	// the page's tokens however often it is shown; nil for none.
-	call := func(id int64) (*trailCall, error) {
+	seen := map[int64]tokens{}
+	// call is the kept call with id as the trail labels it, the act worded
+	// act, counted once in the page's tokens however often it is shown; nil
+	// for none.
+	call := func(act string, id int64) (*made, error) {
 		if id == 0 {
 			return nil, nil
 		}
-		if c, ok := seen[id]; ok {
-			return c, nil
+		t, ok := seen[id]
+		if !ok {
+			c, found, err := a.Calls.Call(r.Context(), id)
+			if err != nil || !found {
+				return nil, err
+			}
+			if c.Response != nil {
+				t = tokensOf(c.Response.Usage)
+			}
+			seen[id] = t
+			p.Tokens, p.Calls = p.Tokens.add(t), p.Calls+1
 		}
-		c, found, err := a.Calls.Call(r.Context(), id)
-		if err != nil || !found {
-			return nil, err
-		}
-		row := &trailCall{Page: callPath(c.ID), Act: c.Act, At: when(c.At, now.Location()), Model: c.Model}
-		if c.Response != nil {
-			row.Tokens = tokensOf(c.Response.Usage)
-		}
-		seen[id] = row
-		p.Tokens, p.Calls = p.Tokens.add(row.Tokens), p.Calls+1
-		return row, nil
+		return &made{Act: act, Call: id, Tokens: t.Total, Counted: true}, nil
 	}
 	calls, err := a.Calls.CallsOn(r.Context(), briefingAct, key)
 	if err != nil {
@@ -98,7 +94,7 @@ func (a *app) briefingTrail(w http.ResponseWriter, r *http.Request) {
 	}
 	for _, c := range calls {
 		if c.Outcome == editor.Applied {
-			if p.Writing, err = call(c.ID); err != nil {
+			if p.Writing, err = call("written", c.ID); err != nil {
 				a.serverError(w, r, err)
 				return
 			}
@@ -116,11 +112,11 @@ func (a *app) briefingTrail(w http.ResponseWriter, r *http.Request) {
 			Story: c.StoryTitle, StoryPath: storyPath(c.StoryID), Statement: d.Statement,
 			DevelopmentPath: storyPath(c.StoryID) + "#" + developmentAnchor(d.ID), Missed: d.Missed,
 		}
-		if row.Placing, err = call(d.PlacingCall); err != nil {
+		if row.Placing, err = call("placed", d.PlacingCall); err != nil {
 			a.serverError(w, r, err)
 			return
 		}
-		if row.Reading, err = call(c.ReadingCall); err != nil {
+		if row.Reading, err = call("read", c.ReadingCall); err != nil {
 			a.serverError(w, r, err)
 			return
 		}

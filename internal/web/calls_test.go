@@ -266,6 +266,100 @@ func TestWhatACallSentAndGotIsInertOnItsPage(t *testing.T) {
 	}
 }
 
+// summaryHead is the paragraph a diagnosis page opens with, just under its
+// heading.
+func summaryHead(t *testing.T, page string) string {
+	t.Helper()
+	m := regexp.MustCompile(`(?s)</h1>\s*<p class="summary-head">(.*?)</p>`).FindStringSubmatch(page)
+	if m == nil {
+		t.Fatalf("the page does not open with a summary head under its heading:\n%s", page)
+	}
+	if strings.Contains(m[1], "\n") {
+		t.Errorf("the summary head is not one line:\n%s", m[1])
+	}
+	return m[1]
+}
+
+func TestACallsPageOpensWithAOneLineSummaryHeadItsOutcomeHued(t *testing.T) {
+	store := openStore(t)
+	failThrice(t, store)
+	app, _ := newAppWithLog(t, saturday, store)
+
+	head := summaryHead(t, get(t, app, "/calls/3").body)
+
+	for _, want := range []string{
+		`<span class="status status-undecided">refused</span>`,
+		`href="/items/`, // the work, linked
+		`<code hx-disable>m</code>`, "110 tokens", "3 attempts",
+	} {
+		if !strings.Contains(head, want) {
+			t.Errorf("the summary head lacks %q:\n%s", want, head)
+		}
+	}
+}
+
+func TestACallsOutcomeTakesTheStatusHueOfItsVerdict(t *testing.T) {
+	store := openStore(t)
+	readSpeech(t, store, reading)
+	app, _ := newAppWithLog(t, saturday, store)
+
+	head := summaryHead(t, get(t, app, "/calls/1").body)
+
+	if !strings.Contains(head, `<span class="status status-supported">applied</span>`) || !strings.Contains(head, "1 attempt") {
+		t.Errorf("the summary head of an applied call:\n%s", head)
+	}
+}
+
+// disclosure says how text first shows on page: "shown" outside any
+// <details>, "open" in an open one, "collapsed" in a closed one.
+func disclosure(t *testing.T, page, text string) string {
+	t.Helper()
+	at := strings.Index(page, text)
+	if at < 0 {
+		t.Fatalf("no %q on the page:\n%s", text, page)
+	}
+	start := strings.LastIndex(page[:at], "<details")
+	if start < 0 || strings.LastIndex(page[:at], "</details>") > start {
+		return "shown"
+	}
+	if strings.HasPrefix(page[start:], "<details open") {
+		return "open"
+	}
+	return "collapsed"
+}
+
+func TestACallsInputAndOutputAreOpenAndItsBulkCollapsed(t *testing.T) {
+	store := openStore(t)
+	failThrice(t, store)
+	app, _ := newAppWithLog(t, saturday, store)
+	page := get(t, app, "/calls/3").body
+
+	for heading, want := range map[string]string{
+		"<h3>Input</h3>": "shown", "<h3>Output</h3>": "shown",
+		"<summary>Instructions</summary>": "collapsed", "<summary>Schema</summary>": "collapsed",
+		"<summary>As the provider returned it</summary>": "collapsed",
+	} {
+		if got := disclosure(t, page, heading); got != want {
+			t.Errorf("%s is %s, want %s", heading, got, want)
+		}
+	}
+}
+
+func TestACallsAttemptsAreCollapsedWhenThereIsOneAndOpenWhenThereAreMore(t *testing.T) {
+	store := openStore(t)
+	failThrice(t, store)
+	readSpeech(t, store, reading)
+	app, _ := newAppWithLog(t, saturday, store)
+
+	// Call 4 is the speech's one reading; calls 1 to 3 the failed attempts.
+	if got := disclosure(t, get(t, app, "/calls/4").body, "this call"); got != "collapsed" {
+		t.Errorf("one attempt is %s, want collapsed", got)
+	}
+	if got := disclosure(t, get(t, app, "/calls/3").body, "this call"); got != "open" {
+		t.Errorf("three attempts are %s, want open", got)
+	}
+}
+
 func TestACallNotInTheRecordIsNotFound(t *testing.T) {
 	app := newApp(t, saturday)
 

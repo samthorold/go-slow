@@ -527,6 +527,14 @@ body:has(.margined) #request-errors {
   color: var(--due);
 }
 
+/* A diagnosis page (a call, a conversation) opens with a one-line summary
+   head: its outcome in its status hue, then what it was on and what it cost. */
+.summary-head {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
 /* The register: its reading's paragraphs and lists sit close in their cell. */
 .register td p,
 .register td ul,

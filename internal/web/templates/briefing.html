@@ -22,7 +22,7 @@
 <p id="failed-attempts">Each attempt to write it:</p>
 <ol>
 {{- range .FailedAttempts}}
-  <li><a href="{{.Page}}">{{.At}}</a>: {{.Outcome}}</li>
+  <li><a href="{{.Page}}">{{.At}}</a>: {{.Outcome.Word}}</li>
 {{- end}}
 </ol>
 {{- end}}

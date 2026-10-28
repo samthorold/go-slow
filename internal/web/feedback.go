@@ -126,16 +126,9 @@ func (a *app) feedback(w http.ResponseWriter, r *http.Request) {
 	var p feedbackPage
 	for _, k := range kept {
 		row := a.keptRow(k, "")
-		if row.AboutPath == "" && k.Level == feedback.Fact && len(k.Calls) > 0 {
-			// A Fact's page is its Item's, which its reading call was on.
-			c, found, err := a.Calls.Call(r.Context(), k.Calls[0])
-			if err != nil {
-				a.serverError(w, r, err)
-				return
-			}
-			if page := workPage(c.Act, c.Key); found && page != "" {
-				row.AboutPath = page + "#" + factAnchor(k.FactID)
-			}
+		if row.AboutPath == "" && k.Level == feedback.Fact && k.SourceID != "" {
+			// A Fact's page is its Item's.
+			row.AboutPath = itemPath(k.SourceID, k.EntryID) + "#" + factAnchor(k.FactID)
 		}
 		p.Feedback = append(p.Feedback, row)
 	}

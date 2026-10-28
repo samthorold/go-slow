@@ -153,7 +153,10 @@ func (s *Store) kept(ctx context.Context, where string, args ...any) ([]feedback
 			feedback.title, fact_ids, feedback.day, depth, given_at, coalesce(undone_at, ''),
 			coalesce(stories.title, ''), coalesce(f.statement, ''), coalesce(g.statement, ''),
 			coalesce(feedback.assessment_id, 0), coalesce(a.statement, ''), coalesce(feedback.read_id, 0),
-			coalesce(ar.day, r.day, ''), `+feedbackCalls+`, coalesce(ar.conversation_id, r.conversation_id, 0),
+			coalesce(ar.day, r.day, ''),
+			CASE level WHEN 'fact' THEN coalesce(f.source_id, '') ELSE '' END,
+			CASE level WHEN 'fact' THEN coalesce(f.entry_id, '') ELSE '' END,
+			`+feedbackCalls+`, coalesce(ar.conversation_id, r.conversation_id, 0),
 			`+feedbackByOwner+`
 		FROM feedback
 			LEFT JOIN stories ON stories.id = feedback.story_id
@@ -174,7 +177,7 @@ func (s *Store) kept(ctx context.Context, where string, args ...any) ([]feedback
 		var kind, level, facts, at, undone, calls string
 		if err := rows.Scan(&k.ID, &kind, &level, &k.StoryID, &k.FactID, &k.ToFactID, &k.Title, &facts, &k.Day,
 			&k.Depth, &at, &undone, &k.Story, &k.Fact, &k.ToFact, &k.AssessmentID, &k.Assessment, &k.ReadID, &k.ReadDay,
-			&calls, &k.Conversation, &k.ByOwner); err != nil {
+			&k.SourceID, &k.EntryID, &calls, &k.Conversation, &k.ByOwner); err != nil {
 			return nil, fmt.Errorf("kept feedback: %w", err)
 		}
 		if err := json.Unmarshal([]byte(calls), &k.Calls); err != nil {

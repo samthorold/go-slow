@@ -80,7 +80,7 @@ var briefingsTmpl = page("/briefings", "briefings.html")
 var itemsTmpl = page("/items", "items.html")
 
 // itemTmpl is an Item's own page.
-var itemTmpl = page(noIndex, "item.html", "involves.html")
+var itemTmpl = page(noIndex, "item.html")
 
 // topicsTmpl is the Topics page.
 var topicsTmpl = page("/topics", "topics.html")
@@ -129,7 +129,7 @@ func page(index, name string, components ...string) *template.Template {
 		l.Current = l.Href == index
 		nav[i] = l
 	}
-	files := []string{"templates/layout.html", "templates/feedback.html", "templates/" + name}
+	files := []string{"templates/layout.html", "templates/feedback.html", "templates/margin.html", "templates/" + name}
 	for _, c := range components {
 		files = append(files, "templates/"+c)
 	}

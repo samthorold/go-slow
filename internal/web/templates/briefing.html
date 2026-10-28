@@ -33,32 +33,39 @@
 <p>Nothing moved on in the Stories your Topics follow.</p>
 {{- end}}
 {{- with .Stories}}
-{{/* A reading page: its margin starts folded, and the one control unfolds
-     it to show, beside each statement, the Developments it cites. */}}
-<div class="margined" data-margin="folded">
-{{template "margin-fold" "folded"}}
+{{/* The Briefing looks as a Story's page does: its margin starts open,
+     and the one control folds it away to read the text alone. */}}
+<div class="margined" data-margin="open">
+{{template "margin-fold" "open"}}
 {{- range .}}
-{{/* A Story reads as its title and statements. Each block (the heading, a
-     statement) carries its own Feedback controls, shown only while the
-     pointer or keyboard focus is in the block (.actions, in the stylesheet);
-     Feedback already given is state, not an offer, and shows at rest. A
-     statement's controls sit with its text, not in its margin: Feedback is
-     this page's frequent act, and a folded margin is out of reach. */}}
+{{/* A Story reads as its title and statements, each a block. Each block's
+     Feedback is in its margin, as on a Story's page: what is already given
+     is state and shows at rest; what is offered is its actions (.actions),
+     shown only while the pointer or keyboard focus is in the block, and
+     folded away with the margin. */}}
 <section class="briefed-story">
-  <div class="title-row">
-  <h2><a href="{{.Path}}"><span hx-disable>{{.Title}}</span></a></h2>
-  {{- with .Gives.Given}}
-  <div class="given-marks">{{template "gives" .}}</div>
-  {{- end}}
-  {{- with .Gives.Offered}}
-  <div class="actions quiet" role="group" aria-label="Feedback on this Story">{{template "gives" .}}</div>
-  {{- end}}
-  </div>
   <ul class="blocks">
+    <li class="block">
+      <div class="block-body"><h2><a href="{{.Path}}"><span hx-disable>{{.Title}}</span></a></h2></div>
+      <div class="block-margin">
+        {{- with .Gives.Given}}
+        <div class="given-marks">{{template "gives" .}}</div>
+        {{- end}}
+        {{- with .Gives.Offered}}
+        <div class="actions" role="group" aria-label="Feedback on this Story">{{template "gives" .}}</div>
+        {{- end}}
+      </div>
+    </li>
   {{- range .Statements}}
     <li class="block">
-      <div class="block-body">
-        <p hx-disable>{{.Text}}</p>
+      <div class="block-body"><p hx-disable>{{.Text}}</p></div>
+      <div class="block-margin">
+        {{- range .Cites}}
+        <div class="cited">
+          <p><a href="{{.DevelopmentPath}}"><span hx-disable>{{.Statement}}</span></a>{{with .AsAt}} <time>{{.}}</time>{{end}}</p>
+          <p>{{template "citation" .Item}}</p>
+        </div>
+        {{- end}}
         {{- range $c := .Cites}}
         {{- with $c.Gives.Given}}
         <div class="given-marks"><span class="about" hx-disable>{{$c.Short}}</span> {{template "gives" .}}</div>
@@ -66,17 +73,9 @@
         {{- end}}
         {{- range $c := .Cites}}
         {{- with $c.Gives.Offered}}
-        <div class="actions quiet" role="group" aria-label="Feedback on: {{$c.Short}}"><span class="about" hx-disable>{{$c.Short}}</span>
+        <div class="actions" role="group" aria-label="Feedback on: {{$c.Short}}"><span class="about" hx-disable>{{$c.Short}}</span>
           {{- template "gives" .}}</div>
         {{- end}}
-        {{- end}}
-      </div>
-      <div class="block-margin">
-        {{- range .Cites}}
-        <div class="cited">
-          <p><a href="{{.DevelopmentPath}}"><span hx-disable>{{.Statement}}</span></a>{{with .AsAt}} <time>{{.}}</time>{{end}}</p>
-          <p>{{template "citation" .Item}}</p>
-        </div>
         {{- end}}
       </div>
     </li>

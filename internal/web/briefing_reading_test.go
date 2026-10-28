@@ -8,23 +8,23 @@ import (
 	"testing"
 )
 
-// The Briefing is for reading: its statements lead, and how each was made
-// (its citations) and the Feedback on what it cites recede. How that looks is
+// The Briefing looks as a Story's page does: its statements lead in the
+// body column, and how each was made (its citations) and the Feedback on
+// what it cites sit in its margin, which starts open. How that looks is
 // judged in a browser; what the server is held to is the structure the
 // stylesheet works on.
 
-// foldedRegion asserts page holds its blocks in one margined region,
-// starting folded, with the one control that unfolds it, and returns the
-// region.
-func foldedRegion(t *testing.T, page string) string {
+// openRegion asserts page holds its blocks in one margined region, starting
+// open, with the one control that folds it, and returns the region.
+func openRegion(t *testing.T, page string) string {
 	t.Helper()
 	regions := regexp.MustCompile(`<div class="margined" data-margin="(open|folded)">`).FindAllStringSubmatch(page, -1)
-	if len(regions) != 1 || regions[0][1] != "folded" {
-		t.Fatalf("want one margined region, folded; got %v:\n%s", regions, page)
+	if len(regions) != 1 || regions[0][1] != "open" {
+		t.Fatalf("want one margined region, open; got %v:\n%s", regions, page)
 	}
-	controls := regexp.MustCompile(`<button type="button" class="margin-fold" data-margin-fold aria-expanded="false">[^<]+</button>`).FindAllString(page, -1)
+	controls := regexp.MustCompile(`<button type="button" class="margin-fold" data-margin-fold aria-expanded="true">[^<]+</button>`).FindAllString(page, -1)
 	if len(controls) != 1 {
-		t.Errorf("want one fold button, not expanded, got %d:\n%s", len(controls), page)
+		t.Errorf("want one fold button, expanded, got %d:\n%s", len(controls), page)
 	}
 	if !strings.Contains(page, `<script src="/static/margin-fold.js"></script>`) {
 		t.Errorf("the page does not load the fold behaviour:\n%s", page)
@@ -32,7 +32,7 @@ func foldedRegion(t *testing.T, page string) string {
 	return page[strings.Index(page, `class="margined"`):]
 }
 
-func TestEachStatementOnTheBriefingHasItsCitationsBesideItInAFoldedMargin(t *testing.T) {
+func TestEachStatementOnTheBriefingHasItsCitationsBesideItInAMarginStartingOpen(t *testing.T) {
 	store := openStore(t)
 	speechStory(t, store)
 	writeBriefing(t, store, saturday, spoke)
@@ -40,7 +40,7 @@ func TestEachStatementOnTheBriefingHasItsCitationsBesideItInAFoldedMargin(t *tes
 
 	res := get(t, app, "/")
 
-	region := foldedRegion(t, res.body)
+	region := openRegion(t, res.body)
 	statement := blockOf(t, region, "The Prime Minister spoke in Motherwell.")
 	for _, want := range []string{"Andy Burnham spoke in Motherwell.", `href="/stories/1#development-1"`,
 		`<span class="citation"><a href="/items/number-10/`, "<cite hx-disable>PM speech in Scotland</cite>"} {
@@ -53,6 +53,31 @@ func TestEachStatementOnTheBriefingHasItsCitationsBesideItInAFoldedMargin(t *tes
 	}
 	if strings.Contains(res.body, `class="citations`) {
 		t.Errorf("the statement's citations are still in a disclosure:\n%s", res.body)
+	}
+}
+
+func TestEachStoryOnTheBriefingIsATitleBlockWithItsFeedbackInItsMargin(t *testing.T) {
+	store := openStore(t)
+	briefed(t, store)
+	app, _ := newAppWithLog(t, saturday, store)
+	send(t, app, "POST", today, url.Values{"kind": {"new to me"}, "level": {"story"}, "story": {"1"}})
+
+	page := get(t, app, "/").body
+
+	region := openRegion(t, page)
+	title := blockOf(t, region, `<a href="/stories/1"><span hx-disable>Andy Burnham in Scotland</span></a>`)
+	if !givenWithUndo(title.margin, "New to me", 1, "/briefings/2026-10-24") {
+		t.Errorf("the title's margin does not show New to me as given, with its undo:\n%s", title.margin)
+	}
+	story := actionGroups.FindStringSubmatch(title.margin)
+	if story == nil || story[1] != "Feedback on this Story" || !offers(story[2], "unwanted", "story", "story", "1") {
+		t.Errorf("the title's margin does not offer Unwanted on the Story:\n%s", title.margin)
+	}
+	if actionGroups.MatchString(title.body) || strings.Contains(title.body, "✓, given") {
+		t.Errorf("the title's Feedback is in the body column:\n%s", title.body)
+	}
+	if strings.Contains(page, `class="title-row"`) {
+		t.Errorf("a Story's title is still in a title row:\n%s", page)
 	}
 }
 
@@ -75,20 +100,20 @@ func twoDevelopments(t *testing.T) http.Handler {
 	return app
 }
 
-func TestAStatementOffersFeedbackOnEachDevelopmentItCitesLabelledByItsFact(t *testing.T) {
+func TestAStatementOffersFeedbackOnEachDevelopmentItCitesInItsMarginLabelledByItsFact(t *testing.T) {
 	app := twoDevelopments(t)
 
 	res := get(t, app, "/")
 
-	// The controls sit with the statement's text, not in its margin, so
-	// they are there with the margin folded.
+	// The controls sit in the statement's margin, beside its citations, as
+	// a block's do on a Story's page; folding the margin hides them with it.
 	statement := blockOf(t, res.body, "The Prime Minister spoke in Motherwell.")
-	if developmentActions.MatchString(statement.margin) {
-		t.Errorf("Development controls are in the margin, which folds away:\n%s", statement.margin)
+	if actionGroups.MatchString(statement.body) {
+		t.Errorf("Development controls are in the body column:\n%s", statement.body)
 	}
-	groups := developmentActions.FindAllStringSubmatch(statement.body, -1)
+	groups := developmentActions.FindAllStringSubmatch(statement.margin, -1)
 	if len(groups) != 2 {
-		t.Fatalf("%d groups of Development controls with the statement, want 2:\n%s", len(groups), statement.body)
+		t.Fatalf("%d groups of Development controls in the statement's margin, want 2:\n%s", len(groups), statement.margin)
 	}
 	labels := map[string]bool{}
 	for _, g := range groups {
@@ -118,16 +143,17 @@ func TestAStatementOffersFeedbackOnEachDevelopmentItCitesLabelledByItsFact(t *te
 	}
 }
 
-// The controls shown on hover are hidden at rest in a way that keeps them
-// focusable (not display: none or visibility: hidden, which take them out of
-// the tab order), so tabbing into a statement or a Story's heading reaches
-// them and reveals them, as hovering does.
-func TestTheStylesheetHidesTheBriefingsControlsAtRestAndRevealsThemOnHoverOrFocus(t *testing.T) {
+// The Sunday read is still a reading page: the controls of its title and
+// its Assessments sit with their text, hidden at rest in a way that keeps
+// them focusable (not display: none or visibility: hidden, which take them
+// out of the tab order), so tabbing in reaches them and reveals them, as
+// hovering does.
+func TestTheStylesheetHidesTheSundayReadsControlsAtRestAndRevealsThemOnHoverOrFocus(t *testing.T) {
 	app := newApp(t, saturday)
 	css := get(t, app, "/static/go-slow.css").body
 
-	// A statement's controls sit in its body column, which no fold hides;
-	// a title's beside it, in its title row.
+	// An Assessment's controls sit in its body column, which no fold hides;
+	// the read's title's beside it, in its title row.
 	rest := regexp.MustCompile(`(?m)^\.block-body \.actions,\s*\.title-row \.actions\s*\{([^}]*)\}`).FindStringSubmatch(css)
 	if rest == nil {
 		t.Fatalf("no rule hides the controls with a block's text, or a title's, at rest:\n%s", css)
@@ -151,7 +177,7 @@ func TestTheStylesheetHidesTheBriefingsControlsAtRestAndRevealsThemOnHoverOrFocu
 // on hover or focus of what it acts on: the Story's, and each Development's.
 var actionGroups = regexp.MustCompile(`(?s)<div class="actions[^"]*" role="group" aria-label="([^"]*)">(.*?)</div>`)
 
-func TestGivenFeedbackOnTheBriefingShowsAtRestOutsideTheControlsShownOnHover(t *testing.T) {
+func TestGivenFeedbackOnTheBriefingShowsAtRestInTheMarginOutsideTheControlsShownOnHover(t *testing.T) {
 	store := openStore(t)
 	briefed(t, store)
 	app, _ := newAppWithLog(t, saturday, store)
@@ -180,8 +206,13 @@ func TestGivenFeedbackOnTheBriefingShowsAtRestOutsideTheControlsShownOnHover(t *
 		offers(dev, "new to me", "development", "story", "1", "fact", "1") {
 		t.Errorf("the Development's controls do not offer just what is not given:\n%s", res.body)
 	}
-	// The given mark says which Development it is on.
-	if !regexp.MustCompile(`Andy Burnham spoke in Motherwell\.</span>\s*<span class="feedback given">New to me ✓, given`).MatchString(res.body) {
-		t.Errorf("the given mark on the Development does not say which it is on:\n%s", res.body)
+	// The given mark sits in the statement's margin and says which
+	// Development it is on.
+	statement := blockOf(t, res.body, "The Prime Minister spoke in Motherwell.")
+	if !regexp.MustCompile(`Andy Burnham spoke in Motherwell\.</span>\s*<span class="feedback given">New to me ✓, given`).MatchString(statement.margin) {
+		t.Errorf("the given mark on the Development is not in the statement's margin, saying which it is on:\n%s", statement.margin)
+	}
+	if strings.Contains(statement.body, "✓, given") {
+		t.Errorf("given Feedback is in the statement's body column:\n%s", statement.body)
 	}
 }

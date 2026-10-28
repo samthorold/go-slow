@@ -3,7 +3,6 @@
 {{define "content"}}
 {{/* Collected text, and what reading drew from it, is inert: hx-disable on
      the elements holding it. */}}
-<p><a href="/items">Items</a></p>
 <h1 hx-disable>{{.Title}}</h1>
 <p><small>{{.Source}}{{if .Published}}, {{.Published}}{{end}}</small></p>
 <p><a href="{{.Link}}" hx-boost="false" hx-disable>The original</a></p>

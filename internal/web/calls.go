@@ -27,7 +27,7 @@ type Calls interface {
 }
 
 // callTmpl is a kept call's page.
-var callTmpl = page("call.html")
+var callTmpl = page(noIndex, "call.html")
 
 // callPage is the view model for a kept call's page: its request, its
 // response, what the act's checks said, and every attempt at the same work.

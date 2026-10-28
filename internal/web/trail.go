@@ -8,7 +8,7 @@ import (
 )
 
 // trailTmpl is a Briefing's trail: how it was written.
-var trailTmpl = page("trail.html")
+var trailTmpl = page(noIndex, "trail.html")
 
 func briefingTrailPath(day string) string { return briefingPath(day) + "/trail" }
 

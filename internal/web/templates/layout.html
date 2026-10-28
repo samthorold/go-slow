@@ -10,6 +10,13 @@
   <script src="/static/request-errors.js"></script>
 </head>
 <body hx-boost="true">
+  <nav aria-label="Pages">
+    <ul>
+      {{- range nav}}
+      <li><a href="{{.Href}}"{{if .Current}} aria-current="page"{{end}}>{{.Name}}</a></li>
+      {{- end}}
+    </ul>
+  </nav>
   {{/* A request that fails without swapping (any 4xx but 422, any 5xx, or no answer at all) says so here. */}}
   <div id="request-errors" role="alert"></div>
   <main>

@@ -46,7 +46,7 @@ type hypothesisRow struct {
 	HasLast bool
 }
 
-var registerTmpl = page("register.html")
+var registerTmpl = page("/register", "register.html")
 
 func (a *app) register(w http.ResponseWriter, r *http.Request) {
 	now := a.Now()

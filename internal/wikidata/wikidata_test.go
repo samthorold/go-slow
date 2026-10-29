@@ -299,3 +299,82 @@ func TestRequestsStayOneAtATimeThroughARetry(t *testing.T) {
 		t.Errorf("%d requests, at most %d at once; want 4 (one retry), one at a time", calls, most)
 	}
 }
+
+// tooBusyAnswer is Wikidata's search refusing a lookup as too busy, in the
+// API's error shape.
+const tooBusyAnswer = `{"error": {"code": "cirrussearch-too-busy-error", "info": "Search is currently too busy. Please try again later.", "*": "See https://www.wikidata.org/w/api.php for API usage."}, "servedby": "mw-api-ext.eqiad.main-1"}`
+
+func TestALookupRefusedAsTooBusyIsSentAgainAfterABackoff(t *testing.T) {
+	calls := 0
+	wd, c := client(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		calls++
+		if calls == 1 {
+			_, _ = w.Write([]byte(tooBusyAnswer))
+			return
+		}
+		_, _ = w.Write([]byte(`{"search": [{"id": "Q1"}]}`))
+	}))
+
+	ids, err := wd.Search(t.Context(), "UK Space Agency")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !slices.Equal(ids, []string{"Q1"}) || calls != 2 {
+		t.Errorf("Search = %v after %d requests, want [Q1] after 2", ids, calls)
+	}
+	if len(c.slept) != 1 || c.slept[0] < 10*time.Second {
+		t.Errorf("slept %v before the retry, want a backoff of at least 10s", c.slept)
+	}
+}
+
+func TestALookupKeptTooBusyFailsAfterItsRetriesEachFurtherApart(t *testing.T) {
+	var seen []*http.Request
+	wd, c := client(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		seen = append(seen, r)
+		_, _ = w.Write([]byte(tooBusyAnswer))
+	}))
+
+	_, err := wd.Search(t.Context(), "UK Space Agency")
+
+	if err == nil || !strings.Contains(err.Error(), "cirrussearch-too-busy-error") {
+		t.Errorf("err = %v, want the too-busy error", err)
+	}
+	if len(seen) != 4 {
+		t.Fatalf("%d requests, want 4: the lookup and three retries", len(seen))
+	}
+	for _, r := range seen {
+		if r.Header.Get("User-Agent") != userAgent || r.URL.Query().Get("maxlag") == "" {
+			t.Errorf("request %s with User-Agent %q is not polite", r.URL, r.Header.Get("User-Agent"))
+		}
+	}
+	if want := []time.Duration{10 * time.Second, 20 * time.Second, 40 * time.Second}; !slices.Equal(c.slept, want) {
+		t.Errorf("slept %v, want %v", c.slept, want)
+	}
+}
+
+func TestATooBusyRefusalWithAnErrorStatusAndRetryAfterIsSentAgainAfterIt(t *testing.T) {
+	calls := 0
+	wd, c := client(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		calls++
+		if calls == 1 {
+			w.Header().Set("Retry-After", "30")
+			w.WriteHeader(http.StatusServiceUnavailable)
+			_, _ = w.Write([]byte(tooBusyAnswer))
+			return
+		}
+		_, _ = w.Write([]byte(`{"search": [{"id": "Q1"}]}`))
+	}))
+
+	ids, err := wd.Search(t.Context(), "UK Space Agency")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !slices.Equal(ids, []string{"Q1"}) || calls != 2 {
+		t.Errorf("Search = %v after %d requests, want [Q1] after 2", ids, calls)
+	}
+	if len(c.slept) != 1 || c.slept[0] != 30*time.Second {
+		t.Errorf("slept %v before the retry, want the 30s Retry-After asked", c.slept)
+	}
+}

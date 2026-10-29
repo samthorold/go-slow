@@ -3,6 +3,7 @@ package editor_test
 import (
 	"context"
 	"encoding/json"
+	"net/http"
 	"net/http/httptest"
 	"slices"
 	"testing"
@@ -312,6 +313,43 @@ func TestThreeItemsNamingThePrimeMinisterThreeWaysNameOneEntity(t *testing.T) {
 	}
 	if !slices.Contains(took, "Andy Burnham took office as Prime Minister of the United Kingdom on 20 July 2026.") {
 		t.Errorf("Facts from Wikidata = %v", took)
+	}
+}
+
+func TestAReadingWhoseLookupWikidataRefusesAsTooBusyIsWrittenAfterABackoff(t *testing.T) {
+	store := record(t)
+	recorded := wikidatatest.Handler("../wikidata/testdata")
+	refused := false
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !refused && r.URL.Query().Get("action") == "wbsearchentities" {
+			refused = true
+			_, _ = w.Write([]byte(`{"error": {"code": "cirrussearch-too-busy-error", "info": "Search is currently too busy. Please try again later."}}`))
+			return
+		}
+		recorded.ServeHTTP(w, r)
+	}))
+	t.Cleanup(srv.Close)
+	// The clock moves on only by sleeping.
+	now, slept := saturday, []time.Duration{}
+	wd := wikidata.New(wikidata.Options{
+		HTTP: srv.Client(), Endpoint: srv.URL, UserAgent: "go-slow-test", Gap: time.Second,
+		Now:   func() time.Time { return now },
+		Sleep: func(_ context.Context, d time.Duration) error { slept = append(slept, d); now = now.Add(d); return nil },
+	})
+	ed, logs := newEditor(store, &modelInTurn{outputs: []string{readingNaming("Andy Burnham", "")}}, wd)
+
+	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, _, _ := store.ReadItem(t.Context(), speech.SourceID, speech.EntryID); !got.Read {
+		t.Fatalf("the reading was not written\n%s", logs)
+	}
+	if e, found, _ := store.Entity(t.Context(), "Andy Burnham"); !found || e.WikidataID != "Q269909" {
+		t.Errorf("Andy Burnham is %+v, want Wikidata's Q269909 once the search answers", e)
+	}
+	if len(slept) == 0 || slices.Max(slept) < 10*time.Second {
+		t.Errorf("slept %v, want a backoff before the search was sent again", slept)
 	}
 }
 

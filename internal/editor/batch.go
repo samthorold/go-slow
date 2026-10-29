@@ -141,8 +141,10 @@ type BatchStore interface {
 	Attempts(ctx context.Context, act, key string) (int, error)
 	// EndBatch removes an ended batch, keeping its failed attempts, each
 	// with its call, and saving the batches its failed requests were
-	// resubmitted in, all at once. Work a failure marks failed no longer
-	// awaits its act.
+	// resubmitted in, all at once. One of those may be the ended batch
+	// itself, under its own ID, holding the requests still to apply: it is
+	// saved after the batch is removed. Work a failure marks failed no
+	// longer awaits its act.
 	EndBatch(ctx context.Context, batchID string, failures []WorkFailure, resubmitted []PendingBatch) error
 	CallKeeper
 }
@@ -178,9 +180,12 @@ func NewBatches(d BatchDeps) *Batches { return &Batches{BatchDeps: d} }
 // ended, resubmitting each failed request alone until its work has failed
 // MaxAttempts times, and gives up each batch past BatchDeadline as failed;
 // then it submits the work awaiting each act, and not already in a batch,
-// as one batch. Work marked failed no longer awaits its act. Only a
-// failing Record is an error; a failing batch interface is logged, and its
-// work tried again on the next run.
+// as one batch. Work marked failed no longer awaits its act. A result that
+// fails to apply for a reason other than the act's checks stops only itself:
+// its batch is kept holding the requests still to apply, applied again on
+// later runs at no model call, and counts an attempt only if it still fails
+// at BatchDeadline. Only a failing Record is an error; a failing batch
+// interface is logged, and its work tried again on the next run.
 func (b *Batches) ReadWaiting(ctx context.Context, now time.Time) error {
 	pending, err := b.Store.PendingBatches(ctx)
 	if err != nil {
@@ -255,7 +260,9 @@ func (b *Batches) call(batchID string, r PendingRequest, j Job, at time.Time) Ca
 }
 
 // settled is what settling a pending batch came to: whether it has ended,
-// its failed attempts, and the batches its failures were resubmitted in.
+// its failed attempts, and the batches to save in its place: those its
+// failures were resubmitted in, and itself again, holding only the requests
+// whose results are still to apply.
 type settled struct {
 	ended       bool
 	failures    []WorkFailure
@@ -290,6 +297,9 @@ func (b *Batches) settle(ctx context.Context, p PendingBatch, jobs map[string]ma
 	for _, r := range poll.Results {
 		results[r.ID] = r
 	}
+	// unapplied are the requests whose results failed to apply for a reason
+	// other than the act's checks, kept to be applied on a later run.
+	var unapplied []PendingRequest
 	for _, r := range p.Requests {
 		j, ok := jobs[r.Act][r.Key]
 		if !ok {
@@ -317,10 +327,23 @@ func (b *Batches) settle(ctx context.Context, p PendingBatch, jobs map[string]ma
 					"output_tokens", res.Response.Usage.OutputTokens)
 				continue
 			}
-			if !errors.Is(err, ErrFailedChecks) {
+			switch {
+			case errors.Is(err, ErrFailedChecks):
+				res.Err, outcome = err, Refused
+			case ctx.Err() != nil:
 				return settled{}, err
+			case now.Sub(p.SubmittedAt) < BatchDeadline:
+				// A passing fault, such as a lookup refused as too busy:
+				// the result is applied again on a later run, costing no
+				// model call and no attempt.
+				b.Log.ErrorContext(ctx, "batch result not applied", "batch", p.ID, "act", r.Act, "key", r.Key, "error", err)
+				unapplied = append(unapplied, r)
+				continue
+			default:
+				// Still failing at the batch's deadline: an attempt, as a
+				// lost batch's are.
+				res.Err = fmt.Errorf("result not applied by the batch's deadline: %w", err)
 			}
-			res.Err, outcome = err, Refused
 		}
 		call = call.ended(outcome, res.Err)
 		prior, err := b.Store.Attempts(ctx, r.Act, r.Key)
@@ -344,6 +367,12 @@ func (b *Batches) settle(ctx context.Context, p PendingBatch, jobs map[string]ma
 			continue
 		}
 		s.resubmitted = append(s.resubmitted, PendingBatch{ID: id, SubmittedAt: now, Requests: []PendingRequest{b.pending(r.ID, r.Act, j)}})
+	}
+	if len(unapplied) > 0 {
+		// The batch is kept, under its own identifier and submission time
+		// (so its deadline stands), holding only the requests still to
+		// apply.
+		s.resubmitted = append(s.resubmitted, PendingBatch{ID: p.ID, SubmittedAt: p.SubmittedAt, Requests: unapplied})
 	}
 	return s, nil
 }

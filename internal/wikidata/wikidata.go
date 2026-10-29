@@ -9,8 +9,10 @@
 // request, as a non-interactive client should, and backing off for as long
 // as Retry-After says on a 429, a 503 or a maxlag error. A lookup answered
 // maxlag is sent once more after the backoff, as Wikimedia asks (wait and
-// retry); a second maxlag answer, or any other error, fails it. robots.txt does not
-// govern the API, which is meant for programs; the API's usage policy does.
+// retry), and one the search refuses as too busy up to three times more,
+// each wait twice the last unless Retry-After says; a refusal past those, or
+// any other error, fails it. robots.txt does not govern the API, which is
+// meant for programs; the API's usage policy does.
 package wikidata
 
 import (
@@ -266,55 +268,94 @@ func (s statement) tenure() (editor.Tenure, bool) {
 // statement is a few hundred KiB.
 const maxResponse = 16 << 20
 
+// The API errors a lookup is sent again after, each after a backoff
+// (API:Etiquette: wait and retry), and how many times.
+const (
+	codeMaxlag  = "maxlag"
+	codeTooBusy = "cirrussearch-too-busy-error"
+)
+
+var retries = map[string]int{
+	codeMaxlag: 1,
+	// Search's pool of concurrent searches was full: a refusal of the
+	// moment, which a run of lookups meets in bursts, so it is given a few
+	// tries further apart.
+	codeTooBusy: 3,
+}
+
+// busyBackoff is the first wait after a too-busy refusal that names no
+// Retry-After; each refusal of the same lookup after it doubles it.
+const busyBackoff = 10 * time.Second
+
+// refusal is an API error a lookup is sent again after: its code, and the
+// Retry-After it came with.
+type refusal struct {
+	code, retryAfter string
+}
+
+// backoff is how long to wait after the nth refusal of one lookup with this
+// code: as long as Retry-After says, if it says; otherwise, for a too-busy
+// refusal, busyBackoff doubling, and for maxlag the polite default.
+func (r refusal) backoff(n int, now time.Time) time.Duration {
+	if r.code == codeTooBusy && strings.TrimSpace(r.retryAfter) == "" {
+		return busyBackoff << (n - 1)
+	}
+	return polite.RetryAfter(r.retryAfter, now)
+}
+
 // get asks the API with the parameters p, decoding the answer into v. A
-// maxlag answer is asked again once, after its backoff (API:Etiquette: wait
-// and retry); a second, or any other error, fails. The lock is held across
-// both, so the retry is still one request at a time.
+// maxlag or too-busy answer is asked again after its backoff, up to its
+// retries; one more, or any other error, fails. The lock is held throughout,
+// so the retries are still one request at a time.
 func (c *Client) get(ctx context.Context, p url.Values, v any) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	lagged, err := c.send(ctx, p, v)
-	if lagged {
-		_, err = c.send(ctx, p, v)
+	tries := map[string]int{}
+	for {
+		r, err := c.send(ctx, p, v)
+		if r == nil {
+			return err
+		}
+		tries[r.code]++
+		c.backoffUntil = later(c.backoffUntil, c.last.Add(r.backoff(tries[r.code], c.last)))
+		if tries[r.code] > retries[r.code] {
+			return err
+		}
 	}
-	return err
 }
 
 // send makes one request, waiting for the gap since the last request, and
-// any backoff asked for, first, and says whether the API answered maxlag.
-// The caller holds c.mu.
-func (c *Client) send(ctx context.Context, p url.Values, v any) (bool, error) {
+// any backoff asked for, first, and says whether the API refused it in a way
+// that is sent again. The caller holds c.mu.
+func (c *Client) send(ctx context.Context, p url.Values, v any) (*refusal, error) {
 	next := c.backoffUntil
 	if !c.last.IsZero() {
 		next = later(next, c.last.Add(c.Gap))
 	}
 	if wait := next.Sub(c.Now()); wait > 0 {
 		if err := c.Sleep(ctx, wait); err != nil {
-			return false, err
+			return nil, err
 		}
 	}
 	p.Set("format", "json")
 	p.Set("maxlag", maxlag)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.Endpoint+"?"+p.Encode(), nil)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 	req.Header.Set("User-Agent", c.UserAgent)
 	res, err := c.HTTP.Do(req)
 	c.last = c.Now()
 	if err != nil {
-		return false, fmt.Errorf("wikidata %s: %w", p.Get("action"), err)
+		return nil, fmt.Errorf("wikidata %s: %w", p.Get("action"), err)
 	}
 	defer func() { _ = res.Body.Close() }()
 	if res.StatusCode == http.StatusTooManyRequests || res.StatusCode == http.StatusServiceUnavailable {
 		c.backoffUntil = c.last.Add(polite.RetryAfter(res.Header.Get("Retry-After"), c.last))
 	}
-	if res.StatusCode != http.StatusOK {
-		return false, fmt.Errorf("wikidata %s: %s", p.Get("action"), res.Status)
-	}
 	body, err := io.ReadAll(io.LimitReader(res.Body, maxResponse))
 	if err != nil {
-		return false, fmt.Errorf("wikidata %s: %w", p.Get("action"), err)
+		return nil, fmt.Errorf("wikidata %s: %w", p.Get("action"), err)
 	}
 	var apiErr struct {
 		Error *struct {
@@ -322,17 +363,22 @@ func (c *Client) send(ctx context.Context, p url.Values, v any) (bool, error) {
 			Info string `json:"info"`
 		} `json:"error"`
 	}
-	if err := json.Unmarshal(body, &apiErr); err != nil {
-		return false, fmt.Errorf("wikidata %s: %w", p.Get("action"), err)
+	// The API answers its errors with 200, but a too-busy refusal is taken
+	// in the same shape whatever the status it comes with.
+	if jerr := json.Unmarshal(body, &apiErr); jerr != nil && res.StatusCode == http.StatusOK {
+		return nil, fmt.Errorf("wikidata %s: %w", p.Get("action"), jerr)
 	}
-	if e := apiErr.Error; e != nil {
-		lagged := e.Code == "maxlag"
-		if lagged {
-			c.backoffUntil = c.last.Add(polite.RetryAfter(res.Header.Get("Retry-After"), c.last))
+	if e := apiErr.Error; e != nil && (res.StatusCode == http.StatusOK || e.Code == codeTooBusy) {
+		err := fmt.Errorf("wikidata %s: %w: %s: %s", p.Get("action"), errAPI, e.Code, e.Info)
+		if _, ok := retries[e.Code]; ok {
+			return &refusal{code: e.Code, retryAfter: res.Header.Get("Retry-After")}, err
 		}
-		return lagged, fmt.Errorf("wikidata %s: %w: %s: %s", p.Get("action"), errAPI, e.Code, e.Info)
+		return nil, err
 	}
-	return false, json.Unmarshal(body, v)
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("wikidata %s: %s", p.Get("action"), res.Status)
+	}
+	return nil, json.Unmarshal(body, v)
 }
 
 // errAPI is an error the API answered with.

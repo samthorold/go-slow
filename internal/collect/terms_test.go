@@ -179,8 +179,11 @@ func TestEveryListedSourceHasAShortNameSayingWhoIsSpeaking(t *testing.T) {
 		"parliament-written-statements": "Parliament",
 		"ons-releases":                  "ONS",
 		"ons-release-calendar":          "ONS",
+		"govuk-uk-space-agency":         "UK Space Agency",
 	}
+	listed := map[string]bool{}
 	for _, s := range collect.Sources() {
+		listed[s.ID] = true
 		if s.ShortName == "" {
 			t.Errorf("%s has no short name", s.ID)
 			continue
@@ -189,6 +192,30 @@ func TestEveryListedSourceHasAShortNameSayingWhoIsSpeaking(t *testing.T) {
 			t.Errorf("%s is short-named %q, want %q", s.ID, s.ShortName, w)
 		}
 	}
+	for id := range want {
+		if !listed[id] {
+			t.Errorf("no Source %s is listed", id)
+		}
+	}
+}
+
+// The UK Space Agency publishes on GOV.UK as Number 10 does: its own
+// organisation's Atom feed, each entry's text from the Content API, under
+// the OGL. The GOV.UK Atom and Content API tests cover collecting it.
+func TestTheUKSpaceAgencyIsCollectedFromItsGOVUKFeed(t *testing.T) {
+	for _, s := range collect.Sources() {
+		if s.ID != "govuk-uk-space-agency" {
+			continue
+		}
+		if s.FeedURL != "https://www.gov.uk/government/organisations/uk-space-agency.atom" || s.Format != collect.Atom {
+			t.Errorf("UK Space Agency read from %s as format %d", s.FeedURL, s.Format)
+		}
+		if s.Text != collect.TextFromGOVUKContent || s.Licence != collect.OGLv3 || s.Attribution != collect.OGL || s.Keeps != collect.KeepFullText {
+			t.Errorf("UK Space Agency not declared as a GOV.UK Source under the OGL keeping full text: %+v", s)
+		}
+		return
+	}
+	t.Error("no UK Space Agency Source is listed")
 }
 
 func TestTheListedSourcesIncludeParliamentAndTheONS(t *testing.T) {

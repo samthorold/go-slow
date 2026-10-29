@@ -40,6 +40,26 @@ func Sources() []Source {
 			// costs it a 304 on every run.
 		},
 		{
+			// The UK Space Agency's news, guidance and research: the UK's
+			// civil space programme, launches and missions, as it
+			// publishes them, the first Source for space.
+			ID:        "govuk-uk-space-agency",
+			Name:      "UK Space Agency (GOV.UK)",
+			ShortName: "UK Space Agency",
+			FeedURL:   "https://www.gov.uk/government/organisations/uk-space-agency.atom",
+			Format:    Atom,
+			// As Number 10's, its entries carry only a summary; the text
+			// is the Content API document for each entry's path.
+			Text:        TextFromGOVUKContent,
+			Licence:     OGLv3,
+			Attribution: OGL,
+			Keeps:       KeepFullText,
+			// It posts several times a week, but its feed on 2026-10-29
+			// showed a gap of twelve days (1 to 13 October 2026); two
+			// weeks keeps such a lull from showing it quiet.
+			UsualGap: 14 * 24 * time.Hour,
+		},
+		{
 			// Written ministerial statements to both Houses: government
 			// announcements made to Parliament, as made. Read through the
 			// Written Questions Service API, never the main site.

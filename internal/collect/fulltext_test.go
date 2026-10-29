@@ -84,6 +84,52 @@ func TestANewGOVUKItemIsKeptWithItsDocumentsBodyAsItsText(t *testing.T) {
 	}
 }
 
+// listed is the listed Source with id, failing the test if there is none.
+func listed(t *testing.T, id string) collect.Source {
+	t.Helper()
+	for _, s := range collect.Sources() {
+		if s.ID == id {
+			return s
+		}
+	}
+	t.Fatalf("no listed Source has the id %s", id)
+	return collect.Source{}
+}
+
+// budgetSpeech is the Chancellor's Budget speech in HM Treasury's recorded
+// feed, whose Content API document is recorded beside it.
+const budgetSpeech = "/government/speeches/budget-2026-speech"
+
+func TestTheTreasurysBudgetSpeechIsCollectedFromItsFeedWithItsText(t *testing.T) {
+	pub, base := newAPI(t, nil)
+	src := listed(t, "govuk-hm-treasury")
+	feedPath, ok := strings.CutPrefix(src.FeedURL, "https://www.gov.uk")
+	if !ok {
+		t.Fatalf("the Treasury's feed is not on GOV.UK: %s", src.FeedURL)
+	}
+	// The recorded feed links to www.gov.uk; served from base, its entries'
+	// text is fetched from the fake.
+	pub.routes = map[string]string{
+		feedPath:                      strings.ReplaceAll(testdata(t, "govuk-hm-treasury.atom"), "https://www.gov.uk", base),
+		"/api/content" + budgetSpeech: testdata(t, "govuk-budget-2026-speech.json"),
+	}
+	src.FeedURL = base + feedPath
+	c, store := collectorFor(t, src)
+
+	c.Run(t.Context(), now)
+
+	it, ok, err := store.ReadItem(t.Context(), src.ID, base+budgetSpeech+"#2026-10-28T15:45:59Z")
+	if err != nil || !ok {
+		t.Fatalf("Budget speech not kept: %v %v", ok, err)
+	}
+	if !strings.Contains(it.Content, "Chancellor of the Exchequer to deliver my first Budget") {
+		t.Errorf("Budget speech kept without the speech as its text: %.200q", it.Content)
+	}
+	if it.Attribution != collect.OGL {
+		t.Errorf("Budget speech attributed %q, want the Open Government Licence's", it.Attribution)
+	}
+}
+
 // govuk is a fake GOV.UK: a feed answering conditional requests by its
 // ETag, and Content API documents, any of which can be made to fail with a
 // status and a Retry-After. It records every request.

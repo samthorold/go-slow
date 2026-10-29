@@ -60,6 +60,29 @@ func Sources() []Source {
 			UsualGap: 14 * 24 * time.Hour,
 		},
 		{
+			// HM Treasury's publications: the Chancellor's speeches and
+			// statements, the Budget and other fiscal events, Treasury
+			// statistics (such as the GDP deflators), consultations and
+			// policy papers.
+			ID:        "govuk-hm-treasury",
+			Name:      "HM Treasury (GOV.UK)",
+			ShortName: "Treasury",
+			FeedURL:   "https://www.gov.uk/government/organisations/hm-treasury.atom",
+			Format:    Atom,
+			// As Number 10's, its entries carry only a summary; the text is
+			// the Content API document for each entry's path.
+			Text:        TextFromGOVUKContent,
+			Licence:     OGLv3,
+			Attribution: OGL,
+			Keeps:       KeepFullText,
+			// It publishes most weekdays, but less steadily than Number 10:
+			// from May to October 2026 (GOV.UK's search, 29 October 2026)
+			// it went four or five days without publishing several times,
+			// and six once, in August. Seven days covers those; a longer
+			// gap is worth noticing.
+			UsualGap: 7 * 24 * time.Hour,
+		},
+		{
 			// Written ministerial statements to both Houses: government
 			// announcements made to Parliament, as made. Read through the
 			// Written Questions Service API, never the main site.

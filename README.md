@@ -13,7 +13,7 @@ Collection runs every few minutes. Reading, placing and connecting run in batche
 ```mermaid
 flowchart TD
     subgraph Sources["Sources (fetched politely)"]
-        GOV[GOV.UK: No 10, UK Space Agency]
+        GOV[GOV.UK: No 10, UK Space Agency, Treasury]
         PARL[Parliament written statements]
         ONS[ONS releases]
     end

@@ -175,6 +175,7 @@ func TestEveryListedSourceDeclaresItsTermsAndIsCollected(t *testing.T) {
 func TestEveryListedSourceHasAShortNameSayingWhoIsSpeaking(t *testing.T) {
 	want := map[string]string{
 		"govuk-number-10":               "No 10",
+		"govuk-hm-treasury":             "Treasury",
 		"parliament-written-statements": "Parliament",
 		"ons-releases":                  "ONS",
 		"ons-release-calendar":          "ONS",

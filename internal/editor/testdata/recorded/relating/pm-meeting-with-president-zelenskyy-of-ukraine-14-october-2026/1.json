@@ -1,0 +1,29 @@
+{
+  "act": "relating",
+  "model": "claude-haiku-5-5",
+  "request_hash": "74eaeeabbec99de8d478865de0c21dc2b57e6d6a865bd2bc3c8d64b1624288d9",
+  "recorded_at": "2026-10-30T22:25:26.355296Z",
+  "usage": {
+    "input_tokens": 2865,
+    "output_tokens": 1533
+  },
+  "output": {
+    "relations": [
+      {
+        "span": "S1",
+        "to": "C1",
+        "verdict": "follows"
+      },
+      {
+        "span": "S4",
+        "to": "C5",
+        "verdict": "follows"
+      },
+      {
+        "span": "S6",
+        "to": "C2",
+        "verdict": "follows"
+      }
+    ]
+  }
+}

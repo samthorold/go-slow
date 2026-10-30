@@ -19,6 +19,10 @@ type stubAct struct {
 	keys    []string
 	applied []string
 	fail    map[string]error
+	// input is what a key's request asks, by key; the key itself if none.
+	input map[string]string
+	// noCall are the keys whose work needs no call.
+	noCall []string
 }
 
 func (s *stubAct) act() editor.BatchAct {
@@ -30,9 +34,16 @@ func (s *stubAct) act() editor.BatchAct {
 				if slices.Contains(s.applied, k) {
 					continue
 				}
+				req := editor.Request{Act: "stub", Input: k}
+				if in, ok := s.input[k]; ok {
+					req.Input = in
+				}
+				if slices.Contains(s.noCall, k) {
+					req = editor.Request{}
+				}
 				jobs = append(jobs, editor.Job{
 					Key:     k,
-					Request: editor.Request{Act: "stub", Input: k},
+					Request: req,
 					Apply: func(context.Context, editor.Response, time.Time) error {
 						if err := s.fail[k]; err != nil {
 							return err
@@ -130,6 +141,52 @@ func TestNewWorkIsSubmittedInTheRunAResultFailsToApply(t *testing.T) {
 	}
 	if len(batcher.submitted) != 2 || len(batcher.submitted[1]) != 1 || batcher.submitted[1][0].Request.Input != "c" {
 		t.Fatalf("submitted %v, want c alone in a new batch: b is still in its batch", batcher.submitted)
+	}
+}
+
+func TestWorkThatNeedsNoCallIsAppliedAtOnceAndSubmittedNowhere(t *testing.T) {
+	store := record(t)
+	stub := &stubAct{keys: []string{"a", "b"}, noCall: []string{"b"}}
+	batcher := &fakeBatcher{}
+	b := stubBatches(store, batcher, stub.act())
+
+	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+		t.Fatal(err)
+	}
+
+	if !slices.Equal(stub.applied, []string{"b"}) {
+		t.Errorf("applied %v, want b at once", stub.applied)
+	}
+	if len(batcher.submitted) != 1 || len(batcher.submitted[0]) != 1 || batcher.submitted[0][0].Request.Input != "a" {
+		t.Errorf("submitted %v, want a alone", batcher.submitted)
+	}
+}
+
+func TestAResultForWorkWhoseRequestHasChangedSinceItWasSentIsRefusedAndTheWorkAskedAgain(t *testing.T) {
+	store := record(t)
+	stub := &stubAct{keys: []string{"a"}}
+	batcher := &fakeBatcher{}
+	b := stubBatches(store, batcher, stub.act())
+	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+		t.Fatal(err)
+	}
+	batcher.end(1, answerAll)
+	// The Record has moved: the work would now be asked otherwise, so the
+	// answer is to a question no longer the work's.
+	stub.input = map[string]string{"a": "a, as it stands now"}
+
+	if err := b.ReadWaiting(t.Context(), saturday.Add(15*time.Minute)); err != nil {
+		t.Fatal(err)
+	}
+
+	if len(stub.applied) != 0 {
+		t.Errorf("applied %v, want nothing", stub.applied)
+	}
+	if n := attempts(t, store, "a"); n != 1 {
+		t.Errorf("a counted %d attempts, want 1", n)
+	}
+	if len(batcher.submitted) != 2 || batcher.submitted[1][0].Request.Input != "a, as it stands now" {
+		t.Errorf("submitted %v, want a asked again as it stands", batcher.submitted)
 	}
 }
 

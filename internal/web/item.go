@@ -45,6 +45,9 @@ type spanRow struct {
 	Rejected bool
 	Speakers []string
 	Names    []pill
+	// Href is the Span's own page, where its relations are; empty where it
+	// is shown on that page.
+	Href string
 }
 
 // itemPage is the view model for an Item's page: the Item as collected, its
@@ -169,7 +172,9 @@ func (a *app) itemWith(w http.ResponseWriter, r *http.Request, status int, errs 
 	if cutYet {
 		p.CutBy = fmt.Sprintf("cut · %s v%d", c.Judge.Cutter, c.Judge.Version)
 		for i, s := range c.Spans {
-			p.Spans = append(p.Spans, spanOf(i+1, text, s, reading, it.Published, is))
+			row := spanOf(i+1, text, s, reading, it.Published, is)
+			row.Href = spanPath(editor.Address{SourceID: sourceID, EntryID: entryID, Span: s})
+			p.Spans = append(p.Spans, row)
 		}
 	}
 	for _, e := range it.Mentions {

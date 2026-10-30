@@ -68,7 +68,7 @@ func main() {
 // batchActs are the acts run in batches, in the order their work is
 // submitted.
 func batchActs(ed *editor.Editor) []editor.BatchAct {
-	return []editor.BatchAct{ed.Reading(), ed.Placing(), ed.Connecting()}
+	return []editor.BatchAct{ed.Reading(), ed.Relating()}
 }
 
 func run(log *slog.Logger) error {
@@ -98,8 +98,7 @@ func run(log *slog.Logger) error {
 		APIKey: string(cfg.AnthropicAPIKey),
 		Model:  cfg.ReadingModel,
 		ActModels: map[string]string{
-			"reading": cfg.ReadingModel, "placing": cfg.PlacingModel,
-			"connecting": cfg.ConnectingModel, "briefing": cfg.BriefingModel,
+			"reading": cfg.ReadingModel, "relating": cfg.RelatingModel, "briefing": cfg.BriefingModel,
 			"sunday_read": cfg.SundayReadModel,
 		},
 	})
@@ -114,7 +113,7 @@ func run(log *slog.Logger) error {
 		Sleep:     polite.Sleep,
 	})
 	ed := editor.New(editor.Deps{
-		Store: store, Model: models, PlacingModel: models, ConnectingModel: models, Wikidata: wd,
+		Store: store, Model: models, RelatingModel: models, Wikidata: wd,
 		Briefings: store, BriefingModel: models, SundayReads: store, SundayReadModel: models,
 		ModelFor: models.ModelFor, Log: log,
 	})
@@ -167,14 +166,11 @@ func run(log *slog.Logger) error {
 
 	// The Briefing is written in real time at the set time, on its own
 	// clock, checked every minute from the end of the start's Collection
-	// run. Past the set time it waits for the work collected before it to
-	// be done, up to editor.BriefingWait. Just before it is written,
-	// connecting runs again over the day's Facts. On Sundays the Sunday
-	// read is written just after it.
+	// run, over what the Record holds then: it never waits for reading or
+	// relating. On Sundays the Sunday read is written just after it.
 	schedule := editor.NewSchedule(editor.ScheduleDeps{
 		Store:      store,
 		At:         cfg.BriefingAt,
-		Before:     []func(context.Context, time.Time) error{ed.Reconnect},
 		Brief:      ed.Brief,
 		SundayRead: ed.SundayRead,
 		Log:        log,
@@ -199,6 +195,7 @@ func run(log *slog.Logger) error {
 		Items:       store,
 		Readings:    store,
 		Cuts:        store,
+		Relations:   store,
 		Topics:      topics,
 		Stories:     store,
 		Feedback:    feedback.New(store),

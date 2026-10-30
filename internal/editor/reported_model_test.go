@@ -26,21 +26,16 @@ func (r reporting) Complete(ctx context.Context, req editor.Request) (editor.Res
 	return res, err
 }
 
-// savedModels is the Record, keeping the model each placing and connecting
-// it is given was made on.
+// savedModels is the Record, keeping the model each relating it is given was
+// made on.
 type savedModels struct {
 	*sqlite.Store
-	placing, connecting []string
+	relating []string
 }
 
-func (s *savedModels) SavePlacing(ctx context.Context, p editor.Placing, at time.Time) error {
-	s.placing = append(s.placing, p.Model)
-	return s.Store.SavePlacing(ctx, p, at)
-}
-
-func (s *savedModels) SaveConnecting(ctx context.Context, c editor.Connecting, at time.Time) error {
-	s.connecting = append(s.connecting, c.Model)
-	return s.Store.SaveConnecting(ctx, c, at)
+func (s *savedModels) KeepRelating(ctx context.Context, r editor.Relating) error {
+	s.relating = append(s.relating, r.Judge.Model)
+	return s.Store.KeepRelating(ctx, r)
 }
 
 // askingFor is an Editor over store asking for each act's model by
@@ -91,36 +86,21 @@ func TestAReadingFromABatchKeepsTheModelReportedNotTheOneAskedFor(t *testing.T) 
 	}
 }
 
-func TestAPlacingKeepsTheModelReportedNotTheOneAskedFor(t *testing.T) {
+func TestARelatingKeepsTheModelReportedNotTheOneAskedFor(t *testing.T) {
 	store := &savedModels{Store: record(t)}
+	readNaming(t, store.Store, pressRelease, "Scotland")
+	readNaming(t, store.Store, holyrood, "Scotland")
 	ed := askingFor(store, editor.Deps{
-		Model:        &fakeModel{output: goodReading},
-		PlacingModel: reporting{&fakeModel{output: startsAStory}, "reported-placing"},
+		RelatingModel: reporting{&fakeModel{output: `{"relations": []}`}, "reported-relating"},
 	})
-	drawSpeechFacts(t, store.Store, saturday)
 
-	if err := ed.PlaceWaiting(t.Context(), saturday); err != nil {
+	if err := ed.RelateWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 
-	if len(store.placing) != 1 || store.placing[0] != "reported-placing" {
-		t.Errorf("placed by %q, want the model reported", store.placing)
-	}
-}
-
-func TestAConnectingKeepsTheModelReportedNotTheOneAskedFor(t *testing.T) {
-	record, _ := speechAndReadout(t)
-	store := &savedModels{Store: record}
-	ed := askingFor(store, editor.Deps{
-		ConnectingModel: reporting{&inTurn{outputs: []string{speechRoles, readoutCausedBySpeech}}, "reported-connecting"},
-	})
-
-	if err := ed.ConnectWaiting(t.Context(), saturday); err != nil {
-		t.Fatal(err)
-	}
-
-	if len(store.connecting) != 2 || store.connecting[0] != "reported-connecting" || store.connecting[1] != "reported-connecting" {
-		t.Errorf("connected by %q, want the model reported", store.connecting)
+	// The release, read first, is related with no call, and so by no model.
+	if len(store.relating) != 2 || store.relating[0] != "" || store.relating[1] != "reported-relating" {
+		t.Errorf("related by %q, want the model reported", store.relating)
 	}
 }
 

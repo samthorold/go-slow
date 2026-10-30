@@ -1,0 +1,50 @@
+{{define "title"}}{{.Title}}{{end}}
+
+{{define "content"}}
+{{/* A Span's page: the Span as its Item's newest reading reads it, its
+     Item, and its relations both ways, each linked to the call that made
+     it. Collected text is inert: hx-disable on the elements holding it. */}}
+<p>{{template "citation" .Item}}{{with .Published}} <small>{{.}}</small>{{end}}</p>
+<h1>{{.Title}}</h1>
+
+<div class="margined" data-margin="open">
+{{template "margin-fold" "open"}}
+<ul class="blocks">
+  {{- with .Span}}
+  <li class="block{{if .Rejected}} struck{{end}}">
+    <div class="block-body" hx-disable><p>{{range .Pieces}}{{if .Was}}<ins title="{{.Was}}">{{.Words}}</ins>{{else}}{{.Words}}{{end}}{{end}}</p></div>
+    <div class="block-margin">
+      {{- if .Rejected}}
+      <p class="quiet">rejected</p>
+      {{- end}}
+      {{- range .Speakers}}
+      <p class="quiet">spoken by <span hx-disable>{{.}}</span></p>
+      {{- end}}
+      {{template "pills" .Names}}
+      {{- with $.ReadBy}}
+      <p>{{template "made" .}}</p>
+      {{- end}}
+    </div>
+  </li>
+  {{- end}}
+</ul>
+
+<section aria-labelledby="relations">
+  <h2 id="relations">Relations</h2>
+  {{- if not .Relations}}
+  <p>No relation has been judged of this Span.</p>
+  {{- end}}
+  <ul class="blocks">
+  {{- range .Relations}}
+    <li class="block">
+      <div class="block-body"><p><span class="quiet">{{.How}}</span> <a href="{{.Href}}"><span hx-disable>{{.Words}}</span></a></p></div>
+      <div class="block-margin">
+        <p>{{template "citation" .Item}}</p>
+        <p>{{template "made" .Made}}</p>
+      </div>
+    </li>
+  {{- end}}
+  </ul>
+</section>
+</div>
+{{end}}

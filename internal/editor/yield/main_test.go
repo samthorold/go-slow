@@ -69,6 +69,32 @@ func TestEachLaterActIsCountedByWhatItDraws(t *testing.T) {
 
 // What connecting leaves out is counted, never judged: a Fact it gives no
 // Roles links nothing.
+func TestRelatingYieldCountsRelationsByKindAndASampleWithNoCallAsNone(t *testing.T) {
+	before, after := t.TempDir(), t.TempDir()
+	write(t, after, "relating/speech/1.json", `{"act": "relating", "output": {"relations": [
+		{"span": "S1", "to": "C1", "verdict": "follows"}, {"span": "S2", "to": "C1", "verdict": "follows"},
+		{"span": "S3", "to": "C2", "verdict": "same_as"}
+	]}}`)
+	write(t, after, "relating/speech/2.json", `{"act": "relating", "output": {"relations": [
+		{"span": "S1", "to": "C1", "verdict": "follows"}, {"span": "S4", "to": "C3", "verdict": "contradicts"}
+	]}}`)
+	// The first Item read had nothing read before it: related with no call.
+	write(t, after, "relating/first/1.json", `{"act": "", "model": "", "output": null}`)
+
+	got := yieldOf(t, before, after)
+
+	for _, want := range []string{
+		"### relating",
+		"| Fixture | Follows | Same as | Contradicts |",
+		"| relating/first (added) | – → 0 | – → 0 | – → 0 |",
+		"| relating/speech (added) | – → 1–2 | – → 0–1 | – → 0–1 |",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("yield lacks %q:\n%s", want, got)
+		}
+	}
+}
+
 func TestConnectingYieldCountsFactsInvolvingNoEntity(t *testing.T) {
 	before, after := t.TempDir(), t.TempDir()
 	write(t, before, "connecting/x.json", `{"act": "connecting", "output": {"causes": [], "facts": [

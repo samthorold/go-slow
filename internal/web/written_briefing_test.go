@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/samthorold/go-slow/internal/editor"
+	"github.com/samthorold/go-slow/internal/editor/frozentest"
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
 
@@ -30,9 +31,8 @@ func speechStory(t *testing.T, store *sqlite.Store, placedAt ...time.Time) {
 	if len(placedAt) > 0 {
 		at = placedAt[0]
 	}
-	ed := editor.New(editor.Deps{Store: store, Log: slog.New(slog.DiscardHandler), PlacingModel: fakeModel{
-		`{"new_stories": [{"ref": "N1", "title": "Andy Burnham in Scotland"}], "facts": [{"fact": "F1", "developments_in": ["N1"]}]}`}})
-	if err := ed.PlaceWaiting(t.Context(), at); err != nil {
+	if err := frozentest.PlaceWaiting(t.Context(), frozentest.Deps{Store: store, Log: slog.New(slog.DiscardHandler), Model: fakeModel{
+		`{"new_stories": [{"ref": "N1", "title": "Andy Burnham in Scotland"}], "facts": [{"fact": "F1", "developments_in": ["N1"]}]}`}}, at); err != nil {
 		t.Fatal(err)
 	}
 }

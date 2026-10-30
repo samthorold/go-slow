@@ -98,15 +98,6 @@ func drawSpeechFacts(t *testing.T, store *sqlite.Store, at time.Time) {
 	}
 }
 
-// factStatements is a reading's Facts, one statement a line.
-func factStatements(r editor.FactReading) string {
-	var b strings.Builder
-	for _, f := range r.Facts {
-		b.WriteString(f.Statement + "\n")
-	}
-	return b.String()
-}
-
 // replayFactReading is the frozen reading of it that m answers with, as
 // factReadingOf makes it.
 func replayFactReading(ctx context.Context, m editor.Model, it editor.Item) (editor.FactReading, error) {

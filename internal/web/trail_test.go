@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/samthorold/go-slow/internal/editor"
+	"github.com/samthorold/go-slow/internal/editor/frozentest"
 	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
@@ -46,15 +47,17 @@ func briefSpeech(t *testing.T, store *sqlite.Store, read, place, brief string) {
 		t.Fatalf("add Topic: %v %v", errs, err)
 	}
 	drawFacts(t, store, speech, read, editor.Usage{InputTokens: 1000, OutputTokens: 100})
+	log := slog.New(slog.DiscardHandler)
+	if err := frozentest.PlaceWaiting(t.Context(), frozentest.Deps{Store: store, Log: log,
+		Model: usageModel{place, editor.Usage{InputTokens: 500, OutputTokens: 50}}}, saturday); err != nil {
+		t.Fatal(err)
+	}
 	ed := editor.New(editor.Deps{
-		Store: store, Briefings: store, Wikidata: noWikidata{}, Log: slog.New(slog.DiscardHandler),
-		PlacingModel:  usageModel{place, editor.Usage{InputTokens: 500, OutputTokens: 50}},
+		Store: store, Briefings: store, Wikidata: noWikidata{}, Log: log,
 		BriefingModel: usageModel{brief, editor.Usage{InputTokens: 200, OutputTokens: 20}},
 	})
-	for _, act := range []func(context.Context, time.Time) error{ed.PlaceWaiting, ed.Brief} {
-		if err := act(t.Context(), saturday); err != nil {
-			t.Fatal(err)
-		}
+	if err := ed.Brief(t.Context(), saturday); err != nil {
+		t.Fatal(err)
 	}
 }
 
@@ -160,10 +163,9 @@ func TestATrailSaysTheOwnerAddedAMissedDevelopment(t *testing.T) {
 	twoFacts := strings.Replace(reading, `"facts": [`, `"facts": [{"statement": "Andy Burnham was in Motherwell.", "as_at": "2026-10-22",
              "quote": "here in Motherwell"}, `, 1)
 	readSpeech(t, store, twoFacts)
-	ed := editor.New(editor.Deps{Store: store, Log: slog.New(slog.DiscardHandler), PlacingModel: fakeModel{
+	if err := frozentest.PlaceWaiting(t.Context(), frozentest.Deps{Store: store, Log: slog.New(slog.DiscardHandler), Model: fakeModel{
 		`{"new_stories": [{"ref": "N1", "title": "Andy Burnham in Scotland"}],
-		  "facts": [{"fact": "F1", "developments_in": []}, {"fact": "F2", "developments_in": ["N1"]}]}`}})
-	if err := ed.PlaceWaiting(t.Context(), saturday); err != nil {
+		  "facts": [{"fact": "F1", "developments_in": []}, {"fact": "F2", "developments_in": ["N1"]}]}`}}, saturday); err != nil {
 		t.Fatal(err)
 	}
 	app, _ := newAppWithLog(t, saturday, store)

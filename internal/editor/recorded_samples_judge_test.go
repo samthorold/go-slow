@@ -311,17 +311,17 @@ func TestTheRecordedReadingsAreJudgedOnTheirSamples(t *testing.T) {
 }
 
 // A chained act's fixture is carried on, for the fixtures after it, by its
-// first sample to pass its checks. Hand-made samples of placing, each
-// fixture's first sample five times over, with the first fixture's first
-// sample refused on every attempt: that fixture is undecided, at four of
-// five, and every later fixture, placed over its second sample, is judged on
-// its own.
+// first sample to pass its checks. Hand-made samples of relating, each
+// fixture's first sample five times over, with the first fixture to make a
+// call refused on every attempt of its first sample: that fixture is
+// undecided, at four of five, and every later fixture, related over its
+// second sample, is judged on its own.
 func TestAChainedFixtureIsCarriedOnByItsFirstSampleToPass(t *testing.T) {
 	t.Parallel()
 	chainedFixtureCarriedOn(t, recordedDir)
 }
 
-// chainedFixtureCarriedOn is the test above over the samples of placing
+// chainedFixtureCarriedOn is the test above over the samples of relating
 // under source.
 func chainedFixtureCarriedOn(t *testing.T, source string) {
 	t.Helper()
@@ -329,30 +329,31 @@ func chainedFixtureCarriedOn(t *testing.T, source string) {
 		t.Skip("recording")
 	}
 	root := t.TempDir()
-	if err := os.CopyFS(filepath.Join(root, "placing", "inputs"), os.DirFS(filepath.Join(source, "placing", "inputs"))); err != nil {
+	if err := os.CopyFS(filepath.Join(root, "relating", "inputs"), os.DirFS(filepath.Join(source, "relating", "inputs"))); err != nil {
 		t.Fatal(err)
 	}
-	fixtures := fixtureItems(t)
-	for i, f := range fixtures {
-		first, err := sampleAt(samplePath(filepath.Join(source, "placing"), f.name, 1))
+	refused := ""
+	for _, f := range fixtureItems(t) {
+		first, err := sampleAt(samplePath(filepath.Join(source, "relating"), f.name, 1))
 		if err != nil {
 			t.Fatal(err)
 		}
 		for k := 1; k <= dailyRule.samples; k++ {
 			attempts := first.attempts()
-			if i == 0 && k == 1 {
+			if len(attempts) > 0 && (refused == "" || refused == f.name) && k == 1 {
+				refused = f.name
 				refusal := attempts[len(attempts)-1]
-				refusal.Output = json.RawMessage(`{"not": "a placing"}`)
+				refusal.Output = json.RawMessage(`{"not": "a relating"}`)
 				attempts = []recording{refusal, refusal, refusal}
 			}
-			keepSample(t, samplePath(filepath.Join(root, "placing"), f.name, k), attempts)
+			keepSample(t, samplePath(filepath.Join(root, "relating"), f.name, k), attempts)
 		}
 	}
-	errs := placingVerdicts(t, root)
+	errs := relatingVerdicts(t, root)
 	if len(errs) != 1 {
-		t.Fatalf("%d failures %v; want the first fixture's alone", len(errs), errs)
+		t.Fatalf("%d failures %v; want %s's alone", len(errs), errs, refused)
 	}
-	for _, want := range []string{fixtures[0].name, checksProperty, "undecided", "4 of 5"} {
+	for _, want := range []string{refused, checksProperty, "undecided", "4 of 5"} {
 		if !strings.Contains(errs[0].Error(), want) {
 			t.Errorf("%q does not say %q", errs[0], want)
 		}

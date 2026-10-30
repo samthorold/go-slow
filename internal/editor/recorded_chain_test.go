@@ -3,6 +3,7 @@ package editor_test
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -14,7 +15,9 @@ import (
 	"time"
 
 	"github.com/samthorold/go-slow/internal/collect"
+	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
+	"github.com/samthorold/go-slow/internal/editor/frozentest"
 	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
@@ -90,11 +93,25 @@ func newRecordAt(t *testing.T, path string, topics []interest.Draft) (*sqlite.St
 // actModel is the model an act runs on for one fixture, by its name.
 type actModel func(name string) (editor.Model, error)
 
-// chain is the models the daily acts run on: reading always, placing and
-// connecting only when set.
+// chain is the models the daily acts run on, each only when set: reading
+// (of Spans) and relating; and, for the old Briefing and the Sunday read,
+// whose frozen copies still carry them, the earlier reading act's Facts
+// (factReading) and the retired placing and connecting acts.
 type chain struct {
-	reading, placing, connecting actModel
+	reading, relating                actModel
+	factReading, placing, connecting actModel
 }
+
+// noMatch is a Wikidata that finds nothing: relating's recordings find
+// candidates by the names the readings judge alone, each the Editor's own
+// Entity, so they make no network call.
+type noMatch struct{}
+
+func (noMatch) Search(context.Context, string) ([]string, error) { return nil, nil }
+
+func (noMatch) Items(context.Context, []string) ([]editor.WikidataItem, error) { return nil, nil }
+
+func (noMatch) Labels(context.Context, []string) (map[string]string, error) { return nil, nil }
 
 // replayed answers each fixture's call from the recording kept for it in
 // dir. A missing recording is an error: a frozen copy is complete.
@@ -106,6 +123,19 @@ func replayed(dir string) actModel {
 		}
 		return replay{rec}, nil
 	}
+}
+
+// keptAt is the response kept at path.
+func keptAt(path string) (recording, error) {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return recording{}, err
+	}
+	var rec recording
+	if err := json.Unmarshal(b, &rec); err != nil {
+		return recording{}, fmt.Errorf("%s: %w", path, err)
+	}
+	return rec, nil
 }
 
 // firstSamples answers each fixture's call from the first sample kept for it
@@ -162,7 +192,21 @@ func (c chain) run(ctx context.Context, store *sqlite.Store, topics *interest.Se
 			model actModel
 			run   func(editor.Model, *slog.Logger) error
 		}{
-			{"reading", c.reading, func(m editor.Model, _ *slog.Logger) error {
+			{"reading", c.reading, func(m editor.Model, log *slog.Logger) error {
+				// Read as its Spans, then what it names looked up, as the
+				// Editor does after each Collection run.
+				if err := cut.New(store).CutNew(ctx, saturday); err != nil {
+					return err
+				}
+				if err := editor.New(editor.Deps{Store: store, Model: m, Log: log}).ReadWaiting(ctx, saturday); err != nil {
+					return err
+				}
+				return editor.NewLookups(editor.LookupDeps{Store: store, Wikidata: noMatch{}, Log: log}).LookUpWaiting(ctx, saturday)
+			}},
+			{"relating", c.relating, func(m editor.Model, log *slog.Logger) error {
+				return editor.New(editor.Deps{Store: store, RelatingModel: m, Log: log}).RelateWaiting(ctx, saturday)
+			}},
+			{"reading", c.factReading, func(m editor.Model, _ *slog.Logger) error {
 				// What the earlier reading act drew, frozen: the acts built on
 				// Facts rest on it.
 				reading, err := replayFactReading(ctx, m, it)
@@ -172,15 +216,15 @@ func (c chain) run(ctx context.Context, store *sqlite.Store, topics *interest.Se
 				return store.SaveFactReading(ctx, reading, saturday)
 			}},
 			{"placing", c.placing, func(m editor.Model, log *slog.Logger) error {
-				return editor.New(editor.Deps{Store: store, PlacingModel: m, Log: log}).PlaceWaiting(ctx, saturday)
+				return frozentest.PlaceWaiting(ctx, frozentest.Deps{Store: store, Model: m, Log: log}, saturday)
 			}},
 			{"connecting", c.connecting, func(m editor.Model, log *slog.Logger) error {
-				return editor.New(editor.Deps{Store: store, ConnectingModel: m, Log: log}).ConnectWaiting(ctx, saturday)
+				return frozentest.ConnectWaiting(ctx, frozentest.Deps{Store: store, Model: m, Log: log}, saturday)
 			}},
 		}
 		for _, s := range steps {
 			if s.model == nil {
-				break
+				continue
 			}
 			m, err := s.model(f.name)
 			if err != nil {
@@ -328,9 +372,9 @@ func frozenRecordAt(t *testing.T, path, dir string) *sqlite.Store {
 	t.Helper()
 	store, topics := newRecordAt(t, path, briefingTopics)
 	c := chain{
-		reading:    replayed(filepath.Join(dir, "reading")),
-		placing:    replayed(filepath.Join(dir, "placing")),
-		connecting: replayed(filepath.Join(dir, "connecting")),
+		factReading: replayed(filepath.Join(dir, "reading")),
+		placing:     replayed(filepath.Join(dir, "placing")),
+		connecting:  replayed(filepath.Join(dir, "connecting")),
 	}
 	if err := c.run(t.Context(), store, topics, fixtureItems(t)); err != nil {
 		t.Fatal(err)

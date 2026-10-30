@@ -3,7 +3,6 @@ package sqlite
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/samthorold/go-slow/internal/editor"
 )
@@ -61,33 +60,6 @@ func connectingCall(k string) string {
 func notFailed(act string) string {
 	return `NOT EXISTS (SELECT 1 FROM work_attempts w WHERE w.act = '` + act + `'
 		AND w.work_key = ` + itemWorkKey + ` AND w.failed = 1)`
-}
-
-// WorkAwaiting reports whether any work the Briefing is written from, on
-// the Items collected before collectedBefore, still awaits an act, whether
-// or not it sits in a pending batch: a Fact awaiting placing or connecting,
-// as FactsToPlace and FactsToConnect select them. Work marked failed awaits
-// nothing. Reading is not waited for: the Briefing is written from Facts,
-// which reading no longer draws, so waiting for it would only make the
-// Briefing late (system design: The Briefing doesn't wait for
-// construction).
-func (s *Store) WorkAwaiting(ctx context.Context, collectedBefore time.Time) (bool, error) {
-	var awaiting bool
-	err := s.db.QueryRowContext(ctx, `
-		SELECT EXISTS (SELECT 1 FROM items WHERE items.collected_at < ? AND (
-			EXISTS (SELECT 1 FROM facts
-				WHERE facts.source_id = items.source_id AND facts.entry_id = items.entry_id
-					AND facts.withdrawn_by IS NULL
-					AND ((NOT EXISTS (SELECT 1 FROM fact_placings p WHERE p.fact_id = facts.id)
-							AND `+notFailed("placing")+`)
-						OR (EXISTS (SELECT 1 FROM fact_placings p WHERE p.fact_id = facts.id)
-							AND NOT EXISTS (SELECT 1 FROM fact_connectings c WHERE c.fact_id = facts.id)
-							AND `+notFailed("connecting")+`)))))`,
-		formatTime(collectedBefore)).Scan(&awaiting)
-	if err != nil {
-		return false, fmt.Errorf("work awaiting: %w", err)
-	}
-	return awaiting, nil
 }
 
 // Attempts is how many attempts at the act's work with key have failed.

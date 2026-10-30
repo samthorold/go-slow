@@ -13,22 +13,14 @@ import (
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
 
-// schedule writes the Briefing at 07:00 with writer, after the steps in
-// before, and returns what happened in order.
-func schedule(store *sqlite.Store, writer *fakeModel, before ...string) (*editor.Schedule, *[]string) {
+// schedule writes the Briefing at 07:00 with writer, and returns what
+// happened in order.
+func schedule(store *sqlite.Store, writer *fakeModel) (*editor.Schedule, *[]string) {
 	var happened []string
 	ed, _ := briefer(store, writer)
-	var steps []func(context.Context, time.Time) error
-	for _, name := range before {
-		steps = append(steps, func(context.Context, time.Time) error {
-			happened = append(happened, name)
-			return errors.New(name + " failed")
-		})
-	}
 	return editor.NewSchedule(editor.ScheduleDeps{
-		Store:  store,
-		At:     7 * time.Hour,
-		Before: steps,
+		Store: store,
+		At:    7 * time.Hour,
 		Brief: func(ctx context.Context, now time.Time) error {
 			happened = append(happened, "brief")
 			return ed.Brief(ctx, now)
@@ -37,16 +29,11 @@ func schedule(store *sqlite.Store, writer *fakeModel, before ...string) (*editor
 	}), &happened
 }
 
-// readPlaceAndConnect does all the speech's work, so nothing collected
-// awaits an act and the Briefing has nothing to wait for.
+// readPlaceAndConnect places the speech's Fact in a Story, for the
+// Briefing to tell.
 func readPlaceAndConnect(t *testing.T, store *sqlite.Store) {
 	t.Helper()
 	readAndPlace(t, store, &fakeModel{output: startsAStory})
-	ed := editor.New(editor.Deps{Store: store, ConnectingModel: &fakeModel{output: speechRoles},
-		Log: slog.New(slog.DiscardHandler)})
-	if err := ed.ConnectWaiting(t.Context(), saturday); err != nil {
-		t.Fatal(err)
-	}
 }
 
 var (
@@ -54,11 +41,11 @@ var (
 	seven        = time.Date(2026, time.October, 24, 7, 0, 0, 0, time.UTC)
 )
 
-func TestTheBriefingIsWrittenOnceADayAtTheSetTimeAfterTheStepsBeforeIt(t *testing.T) {
+func TestTheBriefingIsWrittenOnceADayAtTheSetTime(t *testing.T) {
 	store := record(t)
 	readPlaceAndConnect(t, store)
 	writer := &fakeModel{output: spokeInMotherwell}
-	s, happened := schedule(store, writer, "connecting")
+	s, happened := schedule(store, writer)
 
 	s.Tick(t.Context(), sixFiftyNine)
 	if len(*happened) != 0 {
@@ -67,9 +54,7 @@ func TestTheBriefingIsWrittenOnceADayAtTheSetTimeAfterTheStepsBeforeIt(t *testin
 	s.Tick(t.Context(), seven)
 	s.Tick(t.Context(), seven.Add(time.Minute))
 
-	// A step before writing that fails is logged; the Briefing is still
-	// written.
-	if want := []string{"connecting", "brief"}; !slices.Equal(*happened, want) {
+	if want := []string{"brief"}; !slices.Equal(*happened, want) {
 		t.Errorf("happened = %v, want %v", *happened, want)
 	}
 	if _, found, err := store.Briefing(t.Context(), "2026-10-24"); err != nil || !found {

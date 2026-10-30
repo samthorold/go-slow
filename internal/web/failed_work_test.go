@@ -66,18 +66,15 @@ func (b *refusingBatcher) Poll(_ context.Context, id string) (editor.BatchPoll, 
 	return editor.BatchPoll{Ended: true, Results: out}, nil
 }
 
-func TestFailedPlacingAndConnectingWorkLinksToEveryAttemptAtIt(t *testing.T) {
-	for _, act := range []string{"placing", "connecting"} {
+func TestFailedRelatingWorkLinksToEveryAttemptAtIt(t *testing.T) {
+	for _, act := range []string{"relating"} {
 		t.Run(act, func(t *testing.T) {
-			store := openStore(t)
-			readSpeech(t, store, reading)
+			// The release, and a later Item naming Derby, read and awaiting
+			// relating.
+			store := readToRelate(t)
 			log := slog.New(slog.DiscardHandler)
 			ed := editor.New(editor.Deps{Store: store, Log: log})
-			batchAct := ed.Placing()
-			if act == "connecting" {
-				placeWaiting(t, store, `{"new_stories": [], "facts": [{"fact": "F1", "developments_in": []}]}`)
-				batchAct = ed.Connecting()
-			}
+			batchAct := ed.Relating()
 			b := editor.NewBatches(editor.BatchDeps{Store: store, Batcher: &refusingBatcher{output: `{}`},
 				Acts: []editor.BatchAct{batchAct}, Log: log})
 			// Submitted, then refused on each of its attempts.

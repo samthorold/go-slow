@@ -1,0 +1,588 @@
+{
+  "act": "reading",
+  "model": "claude-haiku-5-5",
+  "request_hash": "f9ab059432a16fac6eb1475533df887a989aff81c5a45b7de16228076aa6abb9",
+  "recorded_at": "2026-10-30T20:52:04.298695Z",
+  "usage": {
+    "input_tokens": 2484,
+    "output_tokens": 3980
+  },
+  "output": {
+    "names": [
+      {
+        "at": {
+          "span": 1,
+          "words": "The Prime Minister"
+        },
+        "kind": "person",
+        "name": "Prime Minister",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 1,
+          "words": "President Volodymyr Zelenskyy of Ukraine"
+        },
+        "kind": "person",
+        "name": "Volodymyr Zelenskyy",
+        "office": "President of Ukraine"
+      },
+      {
+        "at": {
+          "span": 1,
+          "words": "Downing Street"
+        },
+        "kind": "place",
+        "name": "Downing Street",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 1,
+          "words": "Ukraine"
+        },
+        "kind": "place",
+        "name": "Ukraine",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 2,
+          "words": "President Trump"
+        },
+        "kind": "person",
+        "name": "Trump",
+        "office": "President"
+      },
+      {
+        "at": {
+          "span": 2,
+          "words": "Russia"
+        },
+        "kind": "place",
+        "name": "Russia",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "Russia"
+        },
+        "kind": "place",
+        "name": "Russia",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "Ukraine"
+        },
+        "kind": "place",
+        "name": "Ukraine",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "the Prime Minister"
+        },
+        "kind": "person",
+        "name": "Prime Minister",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "UK"
+        },
+        "kind": "place",
+        "name": "UK",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 5,
+          "words": "The UK"
+        },
+        "kind": "place",
+        "name": "UK",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 5,
+          "words": "the Prime Minister"
+        },
+        "kind": "person",
+        "name": "Prime Minister",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 6,
+          "words": "the UK"
+        },
+        "kind": "place",
+        "name": "UK",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 6,
+          "words": "Ukraine"
+        },
+        "kind": "place",
+        "name": "Ukraine",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 7,
+          "words": "The UK"
+        },
+        "kind": "place",
+        "name": "UK",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 7,
+          "words": "the Prime Minister"
+        },
+        "kind": "person",
+        "name": "Prime Minister",
+        "office": "Prime Minister of the United Kingdom"
+      }
+    ],
+    "refers_to": [],
+    "rejected": [
+      8
+    ],
+    "speakers": [
+      {
+        "span": {
+          "span": 5,
+          "words": ""
+        },
+        "speaker": {
+          "span": 5,
+          "words": "the Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 7,
+          "words": ""
+        },
+        "speaker": {
+          "span": 7,
+          "words": "the Prime Minister"
+        }
+      }
+    ]
+  },
+  "earlier_attempts": [
+    {
+      "act": "reading",
+      "model": "claude-haiku-5-5",
+      "request_hash": "f9ab059432a16fac6eb1475533df887a989aff81c5a45b7de16228076aa6abb9",
+      "recorded_at": "2026-10-30T20:51:31.639977Z",
+      "usage": {
+        "input_tokens": 2484,
+        "output_tokens": 3212
+      },
+      "output": {
+        "names": [
+          {
+            "at": {
+              "span": 1,
+              "words": "The Prime Minister"
+            },
+            "kind": "person",
+            "name": "Prime Minister",
+            "office": "Prime Minister of the United Kingdom"
+          },
+          {
+            "at": {
+              "span": 1,
+              "words": "Volodymyr Zelenskyy"
+            },
+            "kind": "person",
+            "name": "Volodymyr Zelenskyy",
+            "office": "President of Ukraine"
+          },
+          {
+            "at": {
+              "span": 1,
+              "words": "Downing Street"
+            },
+            "kind": "place",
+            "name": "Downing Street",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 2,
+              "words": "President Trump"
+            },
+            "kind": "person",
+            "name": "Trump",
+            "office": "President"
+          },
+          {
+            "at": {
+              "span": 2,
+              "words": "Russia"
+            },
+            "kind": "place",
+            "name": "Russia",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 3,
+              "words": "Russia"
+            },
+            "kind": "place",
+            "name": "Russia",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 4,
+              "words": "the Prime Minister"
+            },
+            "kind": "person",
+            "name": "Prime Minister",
+            "office": "Prime Minister of the United Kingdom"
+          },
+          {
+            "at": {
+              "span": 4,
+              "words": "UK"
+            },
+            "kind": "place",
+            "name": "United Kingdom",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 4,
+              "words": "Russia"
+            },
+            "kind": "place",
+            "name": "Russia",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 4,
+              "words": "Ukraine"
+            },
+            "kind": "place",
+            "name": "Ukraine",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 5,
+              "words": "The Prime Minister"
+            },
+            "kind": "person",
+            "name": "Prime Minister",
+            "office": "Prime Minister of the United Kingdom"
+          },
+          {
+            "at": {
+              "span": 5,
+              "words": "UK"
+            },
+            "kind": "place",
+            "name": "United Kingdom",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 5,
+              "words": "Ukraine"
+            },
+            "kind": "place",
+            "name": "Ukraine",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 6,
+              "words": "UK"
+            },
+            "kind": "place",
+            "name": "United Kingdom",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 6,
+              "words": "Ukraine"
+            },
+            "kind": "place",
+            "name": "Ukraine",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 7,
+              "words": "UK"
+            },
+            "kind": "place",
+            "name": "United Kingdom",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 7,
+              "words": "the Prime Minister"
+            },
+            "kind": "person",
+            "name": "Prime Minister",
+            "office": "Prime Minister of the United Kingdom"
+          }
+        ],
+        "refers_to": [],
+        "rejected": [],
+        "speakers": [
+          {
+            "span": {
+              "span": 5,
+              "words": ""
+            },
+            "speaker": {
+              "span": 5,
+              "words": "the Prime Minister"
+            }
+          },
+          {
+            "span": {
+              "span": 7,
+              "words": ""
+            },
+            "speaker": {
+              "span": 7,
+              "words": "the Prime Minister"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "act": "reading",
+      "model": "claude-haiku-5-5",
+      "request_hash": "f9ab059432a16fac6eb1475533df887a989aff81c5a45b7de16228076aa6abb9",
+      "recorded_at": "2026-10-30T20:51:47.886627Z",
+      "usage": {
+        "input_tokens": 2484,
+        "output_tokens": 3915
+      },
+      "output": {
+        "names": [
+          {
+            "at": {
+              "span": 1,
+              "words": "The Prime Minister"
+            },
+            "kind": "person",
+            "name": "Prime Minister",
+            "office": "Prime Minister of the United Kingdom"
+          },
+          {
+            "at": {
+              "span": 1,
+              "words": "President Volodymyr Zelenskyy of Ukraine"
+            },
+            "kind": "person",
+            "name": "Volodymyr Zelenskyy",
+            "office": "President of Ukraine"
+          },
+          {
+            "at": {
+              "span": 1,
+              "words": "Downing Street"
+            },
+            "kind": "place",
+            "name": "Downing Street",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 2,
+              "words": "President Trump"
+            },
+            "kind": "person",
+            "name": "Trump",
+            "office": "President"
+          },
+          {
+            "at": {
+              "span": 2,
+              "words": "Russia"
+            },
+            "kind": "place",
+            "name": "Russia",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 3,
+              "words": "Russia"
+            },
+            "kind": "place",
+            "name": "Russia",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 4,
+              "words": "the Prime Minister"
+            },
+            "kind": "person",
+            "name": "Prime Minister",
+            "office": "Prime Minister of the United Kingdom"
+          },
+          {
+            "at": {
+              "span": 4,
+              "words": "Ukraine’s"
+            },
+            "kind": "place",
+            "name": "Ukraine",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 4,
+              "words": "Russia’s"
+            },
+            "kind": "place",
+            "name": "Russia",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 4,
+              "words": "the UK’s"
+            },
+            "kind": "place",
+            "name": "UK",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 5,
+              "words": "The UK"
+            },
+            "kind": "place",
+            "name": "UK",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 5,
+              "words": "Ukraine"
+            },
+            "kind": "place",
+            "name": "Ukraine",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 5,
+              "words": "the Prime Minister"
+            },
+            "kind": "person",
+            "name": "Prime Minister",
+            "office": "Prime Minister of the United Kingdom"
+          },
+          {
+            "at": {
+              "span": 6,
+              "words": "the UK"
+            },
+            "kind": "place",
+            "name": "UK",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 6,
+              "words": "Ukraine"
+            },
+            "kind": "place",
+            "name": "Ukraine",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 7,
+              "words": "the UK"
+            },
+            "kind": "place",
+            "name": "UK",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 7,
+              "words": "the Prime Minister"
+            },
+            "kind": "person",
+            "name": "Prime Minister",
+            "office": "Prime Minister of the United Kingdom"
+          }
+        ],
+        "refers_to": [],
+        "rejected": [],
+        "speakers": [
+          {
+            "span": {
+              "span": 3,
+              "words": ""
+            },
+            "speaker": {
+              "span": 3,
+              "words": "the leaders"
+            }
+          },
+          {
+            "span": {
+              "span": 4,
+              "words": ""
+            },
+            "speaker": {
+              "span": 4,
+              "words": "the Prime Minister"
+            }
+          },
+          {
+            "span": {
+              "span": 5,
+              "words": ""
+            },
+            "speaker": {
+              "span": 5,
+              "words": "the Prime Minister"
+            }
+          },
+          {
+            "span": {
+              "span": 7,
+              "words": ""
+            },
+            "speaker": {
+              "span": 7,
+              "words": "the Prime Minister"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

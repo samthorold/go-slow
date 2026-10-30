@@ -154,6 +154,31 @@ func TestAnItemAwaitsRelatingOnceReadAndWhatItNamesLookedUp(t *testing.T) {
 	}
 }
 
+func TestAnItemReadOnlyByACandidateJudgeIsNeitherRelatedNorACandidate(t *testing.T) {
+	s := relatingRecord(t)
+	c := collected(t, s, "tuesday", tuesdayText, tuesday)
+	cand := newCandidate(t, s, "claude-candidate")
+	r := editor.Reading{SourceID: "number-10", EntryID: "tuesday", CutID: c.ID, At: cutAt, Candidate: cand,
+		Judge: editor.Judge{Act: "reading", Version: 1, Model: "claude-candidate", RequestHash: "cand"}}
+	sp, _ := cut.Within(tuesdayText, c.Spans[0], "Scotland")
+	r.Names = []editor.Name{{At: editor.Address{SourceID: "number-10", EntryID: "tuesday", Span: sp}, Name: "Scotland", Kind: "place"}}
+	if err := s.KeepReading(t.Context(), r); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.KeepLookup(t.Context(), editor.NameLookup{Key: editor.LookupKey{Name: "Scotland", Kind: "place"},
+		Judge: editor.Looker, At: cutAt, WikidataID: "Q22", Label: "Scotland"}); err != nil {
+		t.Fatal(err)
+	}
+
+	if waiting, err := s.ItemsToRelate(t.Context()); err != nil || len(waiting) != 0 {
+		t.Errorf("an Item only a candidate has read awaits relating: %+v %v", waiting, err)
+	}
+	scot := editor.NamedEntity{WikidataID: "Q22", Name: "Scotland", Kind: "place"}
+	if got, err := s.SpansMentioning(t.Context(), []editor.NamedEntity{scot}, 1<<40); err != nil || len(got) != 0 {
+		t.Errorf("an Item only a candidate has read gives candidates: %v %v", entries(got), err)
+	}
+}
+
 func TestARejectedSpanIsNotRelatedNorACandidate(t *testing.T) {
 	s := relatingRecord(t)
 	read(t, s, "monday", mondayText, collected(t, s, "monday", mondayText, monday), []named{scotland}, 1)

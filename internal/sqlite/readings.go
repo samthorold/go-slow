@@ -3,7 +3,6 @@ package sqlite
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 
 	"github.com/samthorold/go-slow/internal/cut"
@@ -23,7 +22,22 @@ const (
 // Spans of and no reading has read, whatever it is about, each with its
 // newest Cut, oldest first. Work marked failed awaits nothing.
 func (s *Store) ItemsToRead(ctx context.Context) ([]editor.ToRead, error) {
-	out, err := s.uncutItemsToRead(ctx)
+	return s.cutItems(ctx, "items to read", newestLiveReading("items.source_id", "items.entry_id")+` IS NULL
+			AND `+notFailed("reading"))
+}
+
+// ItemsIn are the Items cut and published in the range, each with its
+// newest Cut, oldest first, whether read already or not, and whether their
+// reading failed or not: what reading a range again reads.
+func (s *Store) ItemsIn(ctx context.Context, r editor.Range) ([]editor.ToRead, error) {
+	return s.cutItems(ctx, "items in range", `items.published >= ? AND items.published < ?`,
+		formatTime(r.From), formatTime(r.To))
+}
+
+// cutItems are the Items cut that meet the condition where, oldest first,
+// each with its newest Cut.
+func (s *Store) cutItems(ctx context.Context, what, where string, args ...any) ([]editor.ToRead, error) {
+	out, err := s.uncutItems(ctx, what, where, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -37,21 +51,18 @@ func (s *Store) ItemsToRead(ctx context.Context) ([]editor.ToRead, error) {
 	return out, nil
 }
 
-// uncutItemsToRead are the Items awaiting reading, as ItemsToRead lists
-// them, before their Cuts are read.
-func (s *Store) uncutItemsToRead(ctx context.Context) ([]editor.ToRead, error) {
+// uncutItems are the Items cutItems lists, before their Cuts are read.
+func (s *Store) uncutItems(ctx context.Context, what, where string, args ...any) ([]editor.ToRead, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT items.source_id, items.entry_id, items.title, items.link, items.summary,
 			items.content, items.published
 		FROM items
 		WHERE EXISTS (SELECT 1 FROM cuts
 				WHERE cuts.source_id = items.source_id AND cuts.entry_id = items.entry_id)
-			AND NOT EXISTS (SELECT 1 FROM readings r
-				WHERE r.source_id = items.source_id AND r.entry_id = items.entry_id)
-			AND `+notFailed("reading")+`
-		ORDER BY items.published, items.collected_at, items.source_id, items.entry_id`)
+			AND `+where+`
+		ORDER BY items.published, items.collected_at, items.source_id, items.entry_id`, args...)
 	if err != nil {
-		return nil, fmt.Errorf("items to read: %w", err)
+		return nil, fmt.Errorf("%s: %w", what, err)
 	}
 	defer func() { _ = rows.Close() }()
 	var out []editor.ToRead
@@ -60,13 +71,13 @@ func (s *Store) uncutItemsToRead(ctx context.Context) ([]editor.ToRead, error) {
 		var published string
 		if err := rows.Scan(&it.SourceID, &it.EntryID, &it.Title, &it.Link, &it.Summary,
 			&it.Content, &published); err != nil {
-			return nil, fmt.Errorf("items to read: %w", err)
+			return nil, fmt.Errorf("%s: %w", what, err)
 		}
 		it.Published = parseTime(published)
 		out = append(out, editor.ToRead{Item: it})
 	}
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("items to read: %w", err)
+		return nil, fmt.Errorf("%s: %w", what, err)
 	}
 	return out, nil
 }
@@ -104,6 +115,12 @@ func (s *Store) KeepReading(ctx context.Context, r editor.Reading) error {
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 		id, r.SourceID, r.EntryID, r.CutID, r.Judge.Act, r.Judge.Version, r.Judge.Model, r.Judge.RequestHash); err != nil {
 		return fmt.Errorf("keep reading of %s: %w", r.EntryID, err)
+	}
+	if r.Candidate != 0 {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO candidate_readings (reading_id, candidate_id) VALUES (?, ?)`,
+			id, r.Candidate); err != nil {
+			return fmt.Errorf("keep reading of %s: as candidate %d: %w", r.EntryID, r.Candidate, err)
+		}
 	}
 	keep := func(kind string, shape int, query string, args ...any) error {
 		eid, err := event(kind, shape)
@@ -164,24 +181,76 @@ func readingAddresses(r editor.Reading) []editor.Address {
 	return append(out, r.Rejected...)
 }
 
-// NewestReading is the newest reading of the Item, with its judgements,
-// reporting whether the Item has one.
+// NewestReading is the reading of the Item a view reads, with its
+// judgements: the newest live judge's (newestLiveReading), reporting
+// whether the Item has one. A candidate's reading is never it until the
+// candidate is chosen.
 func (s *Store) NewestReading(ctx context.Context, sourceID, entryID string) (editor.Reading, bool, error) {
-	r := editor.Reading{SourceID: sourceID, EntryID: entryID}
-	var at string
-	err := s.db.QueryRowContext(ctx, `
-		SELECT readings.event_id, readings.cut_id, readings.act, readings.version, readings.model,
-			readings.request_hash, events.at, `+spansReadingCall("readings")+`
-		FROM readings JOIN events ON events.id = readings.event_id
-		WHERE readings.source_id = ? AND readings.entry_id = ?
-		ORDER BY readings.event_id DESC LIMIT 1`, sourceID, entryID,
-	).Scan(&r.ID, &r.CutID, &r.Judge.Act, &r.Judge.Version, &r.Judge.Model, &r.Judge.RequestHash, &at, &r.Call)
-	if errors.Is(err, sql.ErrNoRows) {
-		return editor.Reading{}, false, nil
-	}
-	if err != nil {
+	var id sql.NullInt64
+	if err := s.db.QueryRowContext(ctx, `SELECT `+newestLiveReading("?", "?"), sourceID, entryID).Scan(&id); err != nil {
 		return editor.Reading{}, false, fmt.Errorf("newest reading of %s: %w", entryID, err)
 	}
+	if !id.Valid {
+		return editor.Reading{}, false, nil
+	}
+	r, err := s.readingByID(ctx, id.Int64)
+	return r, err == nil, err
+}
+
+// CandidateReadings are the readings the candidate made, oldest first, each
+// with its judgements.
+func (s *Store) CandidateReadings(ctx context.Context, candidate int64) ([]editor.Reading, error) {
+	ids, err := s.candidateReadingIDs(ctx, candidate)
+	if err != nil {
+		return nil, fmt.Errorf("readings of candidate %d: %w", candidate, err)
+	}
+	out := make([]editor.Reading, 0, len(ids))
+	for _, id := range ids {
+		r, err := s.readingByID(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, r)
+	}
+	return out, nil
+}
+
+// candidateReadingIDs are the ids of the readings the candidate made,
+// oldest first.
+func (s *Store) candidateReadingIDs(ctx context.Context, candidate int64) ([]int64, error) {
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT reading_id FROM candidate_readings WHERE candidate_id = ? ORDER BY reading_id`, candidate)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+	var ids []int64
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	return ids, rows.Err()
+}
+
+// readingByID is the reading with the event id, with its judgements.
+func (s *Store) readingByID(ctx context.Context, id int64) (editor.Reading, error) {
+	var r editor.Reading
+	var at string
+	err := s.db.QueryRowContext(ctx, `
+		SELECT readings.event_id, readings.source_id, readings.entry_id, readings.cut_id, readings.act,
+			readings.version, readings.model, readings.request_hash, events.at, `+spansReadingCall("readings")+`,
+			coalesce((SELECT candidate_id FROM candidate_readings WHERE reading_id = readings.event_id), 0)
+		FROM readings JOIN events ON events.id = readings.event_id
+		WHERE readings.event_id = ?`, id,
+	).Scan(&r.ID, &r.SourceID, &r.EntryID, &r.CutID, &r.Judge.Act, &r.Judge.Version, &r.Judge.Model,
+		&r.Judge.RequestHash, &at, &r.Call, &r.Candidate)
+	if err != nil {
+		return editor.Reading{}, fmt.Errorf("reading %d: %w", id, err)
+	}
+	sourceID, entryID := r.SourceID, r.EntryID
 	r.At = parseTime(at)
 	addr := func(start, end int) editor.Address {
 		return editor.Address{SourceID: sourceID, EntryID: entryID, Span: cut.Span{Start: start, End: end}}
@@ -189,12 +258,12 @@ func (s *Store) NewestReading(ctx context.Context, sourceID, entryID string) (ed
 	each := func(query string, scan func(*sql.Rows) error) error {
 		rows, err := s.db.QueryContext(ctx, query, r.ID)
 		if err != nil {
-			return fmt.Errorf("newest reading of %s: %w", entryID, err)
+			return fmt.Errorf("reading of %s: %w", entryID, err)
 		}
 		defer func() { _ = rows.Close() }()
 		for rows.Next() {
 			if err := scan(rows); err != nil {
-				return fmt.Errorf("newest reading of %s: %w", entryID, err)
+				return fmt.Errorf("reading of %s: %w", entryID, err)
 			}
 		}
 		return rows.Err()
@@ -208,7 +277,7 @@ func (s *Store) NewestReading(ctx context.Context, sourceID, entryID string) (ed
 			r.RefersTo = append(r.RefersTo, editor.RefersTo{From: addr(fs, fe), To: addr(ts, te)})
 			return nil
 		}); err != nil {
-		return editor.Reading{}, false, err
+		return editor.Reading{}, err
 	}
 	if err := each(`SELECT span_start, span_end, name, kind, office FROM span_names WHERE reading_id = ? ORDER BY event_id`,
 		func(rows *sql.Rows) error {
@@ -221,7 +290,7 @@ func (s *Store) NewestReading(ctx context.Context, sourceID, entryID string) (ed
 			r.Names = append(r.Names, n)
 			return nil
 		}); err != nil {
-		return editor.Reading{}, false, err
+		return editor.Reading{}, err
 	}
 	if err := each(`SELECT span_start, span_end, speaker_start, speaker_end FROM speakers WHERE reading_id = ? ORDER BY event_id`,
 		func(rows *sql.Rows) error {
@@ -232,7 +301,7 @@ func (s *Store) NewestReading(ctx context.Context, sourceID, entryID string) (ed
 			r.Speakers = append(r.Speakers, editor.Speaker{Of: addr(s0, s1), By: addr(b0, b1)})
 			return nil
 		}); err != nil {
-		return editor.Reading{}, false, err
+		return editor.Reading{}, err
 	}
 	if err := each(`SELECT span_start, span_end FROM rejections WHERE reading_id = ? ORDER BY event_id`,
 		func(rows *sql.Rows) error {
@@ -243,7 +312,7 @@ func (s *Store) NewestReading(ctx context.Context, sourceID, entryID string) (ed
 			r.Rejected = append(r.Rejected, addr(start, end))
 			return nil
 		}); err != nil {
-		return editor.Reading{}, false, err
+		return editor.Reading{}, err
 	}
-	return r, true, nil
+	return r, nil
 }

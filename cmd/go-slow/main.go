@@ -44,7 +44,14 @@ func main() {
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	if len(os.Args) > 1 {
 		ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, os.Interrupt)
-		err := admin(ctx, log, os.Args[1:], os.LookupEnv, os.Stdin, &http.Client{Timeout: fetchTimeout})
+		err := admin(ctx, log, os.Args[1:], adminDeps{
+			Lookup: os.LookupEnv, Stdin: os.Stdin, Stdout: os.Stdout,
+			Web: &http.Client{Timeout: fetchTimeout},
+			Models: func(key config.Secret, model string) editor.Model {
+				return claude.New(claude.Options{APIKey: string(key), Model: model})
+			},
+			Now: time.Now,
+		})
 		stop()
 		if err != nil {
 			log.Error("go-slow admin command failed", "command", os.Args[1], "error", err)

@@ -17,17 +17,21 @@ const (
 	relationShape = 1
 )
 
-// firstRead is the event id of the first reading of the Item aliased items,
-// or NULL: the order Items were read in, which decides which of two Items
-// judges the pair of their Spans (system design: Relating a Span judges
-// once per pair, when the second of the two is read).
+// firstRead is the event id of the first live reading of the Item aliased
+// items, or NULL: the order Items were read in, which decides which of two
+// Items judges the pair of their Spans (system design: Relating a Span
+// judges once per pair, when the second of the two is read). A candidate's
+// reading, read by no view, reads nothing in. Re-judging an Item makes a
+// newer reading, never an earlier first one, so it moves no Item's turn.
 const firstRead = `(SELECT min(fr.event_id) FROM readings fr
-	WHERE fr.source_id = items.source_id AND fr.entry_id = items.entry_id)`
+	LEFT JOIN candidate_readings fcr ON fcr.reading_id = fr.event_id
+	LEFT JOIN candidate_choices fch ON fch.candidate_id = fcr.candidate_id
+	WHERE fr.source_id = items.source_id AND fr.entry_id = items.entry_id
+		AND (fcr.reading_id IS NULL OR fch.event_id IS NOT NULL))`
 
-// newestReadingOf is the event id of the newest reading of the Item aliased
-// items: the one a view reads.
-const newestReadingOf = `(SELECT max(nr.event_id) FROM readings nr
-	WHERE nr.source_id = items.source_id AND nr.entry_id = items.entry_id)`
+// newestReadingOf is the event id of the newest live reading of the Item
+// aliased items: the one a view reads (newestLiveReading).
+var newestReadingOf = newestLiveReading("items.source_id", "items.entry_id")
 
 // readItem is an Item with a reading, as relating reads it.
 type readItem struct {

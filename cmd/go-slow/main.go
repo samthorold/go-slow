@@ -21,6 +21,7 @@ import (
 	"github.com/samthorold/go-slow/internal/claude"
 	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/config"
+	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/feedback"
 	"github.com/samthorold/go-slow/internal/interest"
@@ -128,6 +129,9 @@ func run(log *slog.Logger) error {
 			Sleep:     polite.Sleep,
 		}),
 		Store: store,
+		// Cutting is plain code: the start's run cuts the Items already in
+		// the Record, and every run those it collects.
+		Cut:   cut.New(store),
 		Check: topics,
 		Read:  batches,
 		Log:   log,
@@ -183,6 +187,7 @@ func run(log *slog.Logger) error {
 		Briefings:   store,
 		Items:       store,
 		Readings:    store,
+		Cuts:        store,
 		Topics:      topics,
 		Stories:     store,
 		Feedback:    feedback.New(store),

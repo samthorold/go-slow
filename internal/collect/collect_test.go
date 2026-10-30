@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/samthorold/go-slow/internal/collect"
+	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/polite"
 	"github.com/samthorold/go-slow/internal/sqlite"
@@ -230,6 +231,36 @@ func TestACollectionRunTiesEachNewItemToTheTopicsTheCheckMatchesOrToNone(t *test
 	}
 	if !call.Checked || len(call.Topics) != 0 {
 		t.Errorf("PM call: checked %v, Topics %v; want checked, touching no Topic", call.Checked, call.Topics)
+	}
+}
+
+const feedWithText = `<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Prime Minister's Office, 10 Downing Street - Activity on GOV.UK</title>
+  <updated>2026-10-23T18:00:00+01:00</updated>
+  <entry>
+    <id>https://www.gov.uk/government/news/pm-statement#2026-10-23T18:00:00+01:00</id>
+    <updated>2026-10-23T18:00:00+01:00</updated>
+    <link rel="alternate" type="text/html" href="https://www.gov.uk/government/news/pm-statement"/>
+    <title>PM statement on the Budget</title>
+    <summary type="html">The Prime Minister made a statement.</summary>
+    <content type="html">&lt;p&gt;The Budget is fair. It funds the NHS.&lt;/p&gt;</content>
+  </entry>
+</feed>`
+
+func TestACollectionRunCutsTheItemsItCollectsIntoSpans(t *testing.T) {
+	f := newFixture(t, feedWithText, "")
+	f.collector.Cut = cut.New(f.store)
+
+	f.collector.Run(t.Context(), now)
+
+	c, text, found, err := f.store.NewestCut(t.Context(), "number-10",
+		"https://www.gov.uk/government/news/pm-statement#2026-10-23T18:00:00+01:00")
+	if err != nil || !found {
+		t.Fatalf("the collected Item has no Cut (%v)", err)
+	}
+	if c.Judge != cut.SentenceCutter || len(c.Spans) != 2 || cut.Words(text, c.Spans[1]) != "It funds the NHS." {
+		t.Errorf("Cut by %+v into %v of %q", c.Judge, c.Spans, text)
 	}
 }
 

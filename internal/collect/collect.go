@@ -154,6 +154,10 @@ type Deps struct {
 	Sources []Source
 	Fetcher Fetcher
 	Store   Store
+	// Cut, if set, runs after every run, before the check: it cuts the
+	// Items with text that have no Cut yet into Spans (system design: The
+	// grain belongs to the judgement, not to the Span).
+	Cut Cutter
 	// Check runs after every run, over the Items not yet checked.
 	Check Checker
 	// Read, if set, runs after the check: the Editor reads the Items
@@ -162,6 +166,11 @@ type Deps struct {
 	// earlier ones (The daily acts run in batches).
 	Read Reader
 	Log  *slog.Logger
+}
+
+// Cutter cuts the Items not yet cut into Spans, at now, in plain code.
+type Cutter interface {
+	CutNew(ctx context.Context, now time.Time) error
 }
 
 // Reader is the Editor's reading, run over the Items awaiting it. A reading
@@ -219,6 +228,12 @@ func (c *Collector) Run(ctx context.Context, now time.Time) {
 			continue
 		}
 		c.Log.InfoContext(ctx, "collected", "source", s.ID, "new_items", n)
+	}
+	// Items left uncut by a failure here are cut after the next run.
+	if c.Cut != nil {
+		if err := c.Cut.CutNew(ctx, now); err != nil {
+			c.Log.ErrorContext(ctx, "cutting failed", "error", err)
+		}
 	}
 	// Items left unchecked by a failure here are checked after the next run.
 	if err := c.Check.CheckNew(ctx); err != nil {

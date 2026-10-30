@@ -3,9 +3,11 @@ package web
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 
+	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/feedback"
 )
@@ -17,9 +19,28 @@ type Readings interface {
 	ReadItem(ctx context.Context, sourceID, entryID string) (editor.ReadItem, bool, error)
 }
 
-// itemPage is the view model for an Item's page: the Item as collected, and
-// the Facts and Claims reading drew from it.
+// Cuts answers the Spans an Item's page shows.
+type Cuts interface {
+	// NewestCut is the Item's newest Cut, with the Item's text as kept,
+	// reporting whether it has one.
+	NewestCut(ctx context.Context, sourceID, entryID string) (cut.Cut, string, bool, error)
+}
+
+// spanRow is one Span of the Item's newest Cut: its number in the Cut, and
+// its words.
+type spanRow struct {
+	N     int
+	Words string
+}
+
+// itemPage is the view model for an Item's page: the Item as collected, its
+// text as the Spans of its newest Cut, and the Facts and Claims reading drew
+// from it.
 type itemPage struct {
+	// Spans are the Spans of the Item's newest Cut, in order; none if it
+	// has none yet. CutBy is the Cut's Judge, as a machine label.
+	Spans       []spanRow
+	CutBy       string
 	Title       string
 	Link        string
 	Summary     string
@@ -110,6 +131,17 @@ func (a *app) itemWith(w http.ResponseWriter, r *http.Request, status int, errs 
 	}
 	if p.FeedbackError == "" {
 		p.FeedbackError = errs["fact"]
+	}
+	c, text, cutYet, err := a.Cuts.NewestCut(r.Context(), sourceID, entryID)
+	if err != nil {
+		a.serverError(w, r, err)
+		return
+	}
+	if cutYet {
+		p.CutBy = fmt.Sprintf("cut · %s v%d", c.Judge.Cutter, c.Judge.Version)
+		for i, s := range c.Spans {
+			p.Spans = append(p.Spans, spanRow{N: i + 1, Words: cut.Words(text, s)})
+		}
 	}
 	for _, e := range it.Mentions {
 		p.Mentions = append(p.Mentions, pillMentioned(e))

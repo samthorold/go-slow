@@ -35,11 +35,13 @@ type Deps struct {
 	Briefings Briefings
 	Items     Items
 	Readings  Readings
-	Topics    Topics
-	Stories   Stories
-	Feedback  Feedback
-	Kept      Kept
-	Register  Register
+	// Cuts answers an Item's Spans, from its newest Cut.
+	Cuts     Cuts
+	Topics   Topics
+	Stories  Stories
+	Feedback Feedback
+	Kept     Kept
+	Register Register
 	// SundayReads answers the Sunday read's page.
 	SundayReads SundayReads
 	// Calls answers the kept calls' pages.

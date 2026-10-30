@@ -216,16 +216,27 @@ func (b *Batches) ReadWaiting(ctx context.Context, now time.Time) error {
 			return err
 		}
 	}
-	// Results applied above are no longer waiting.
-	if jobs, err = b.waiting(ctx); err != nil {
-		return err
-	}
+	// Results applied above are no longer waiting. Each act's work is
+	// submitted in the order the act gives it, and a batch's results are
+	// applied in the order submitted: reading's oldest Item first, so of two
+	// Items read in one batch the later-published is read second.
 	var batch PendingBatch
 	var requests []BatchRequest
 	for _, act := range b.Acts {
-		for _, j := range jobs[act.Name] {
+		waiting, err := act.Waiting(ctx)
+		if err != nil {
+			return fmt.Errorf("work awaiting %s: %w", act.Name, err)
+		}
+		for _, j := range waiting {
 			id := requestID(act.Name, j.Key)
 			if inBatch[id] {
+				continue
+			}
+			if j.Request.Act == "" {
+				// Nothing to ask: written at once, with no call.
+				if err := j.Apply(ctx, Response{}, now); err != nil {
+					return err
+				}
 				continue
 			}
 			requests = append(requests, BatchRequest{ID: id, Request: j.Request})
@@ -316,6 +327,12 @@ func (b *Batches) settle(ctx context.Context, p PendingBatch, jobs map[string]ma
 		}
 		call := b.call(p.ID, r, j, now).answered(res.Response)
 		outcome := Failed
+		if res.Err == nil && r.Request != nil && RequestHash(*r.Request, "") != RequestHash(j.Request, "") {
+			// The work as it stands is asked otherwise (the Record it is
+			// shown has moved), so the answer is to a question no longer
+			// the work's: refused, and asked again as it stands.
+			res.Err, outcome = fmt.Errorf("%w: the work has changed since its request was sent", ErrFailedChecks), Refused
+		}
 		if res.Err == nil {
 			err := j.Apply(ctx, res.Response, now)
 			if err == nil {

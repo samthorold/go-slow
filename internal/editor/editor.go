@@ -15,6 +15,20 @@ type Store interface {
 	// KeepReading keeps a reading, each of its judgements as its own event
 	// with the reading's Judge, all at once.
 	KeepReading(ctx context.Context, r Reading) error
+	// ItemsToRelate are the Items awaiting relating, in the order they were
+	// first read: read, not yet related, and what their readings name
+	// looked up. Each comes with its Spans not rejected, and what each
+	// mentions; work marked failed awaits nothing.
+	ItemsToRelate(ctx context.Context) ([]ToRelate, error)
+	// SpansMentioning are the Spans not rejected, of Items first read before
+	// readBefore, that mention one of es.
+	SpansMentioning(ctx context.Context, es []NamedEntity, readBefore int64) ([]OtherSpan, error)
+	// ItemsMentioning is how many Items first read at or before readBefore
+	// mention each of es.
+	ItemsMentioning(ctx context.Context, es []NamedEntity, readBefore int64) (map[NamedEntity]int, error)
+	// KeepRelating keeps a relating, each of its relations as its own event
+	// with the relating's Judge, all at once.
+	KeepRelating(ctx context.Context, r Relating) error
 	// FactsToPlace are the Facts awaiting placing, by Item, oldest Item
 	// first.
 	FactsToPlace(ctx context.Context) ([]ToPlace, error)
@@ -52,6 +66,8 @@ type Deps struct {
 	Store Store
 	// Model is the model reading runs on, chosen by configuration.
 	Model Model
+	// RelatingModel is the model relating runs on, chosen by configuration.
+	RelatingModel Model
 	// PlacingModel is the model placing runs on, chosen by configuration.
 	PlacingModel Model
 	// ConnectingModel is the model connecting runs on, chosen by

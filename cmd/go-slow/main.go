@@ -192,6 +192,7 @@ func run(log *slog.Logger) error {
 		Items:       store,
 		Readings:    store,
 		Cuts:        store,
+		Relations:   store,
 		Topics:      topics,
 		Stories:     store,
 		Feedback:    feedback.New(store),

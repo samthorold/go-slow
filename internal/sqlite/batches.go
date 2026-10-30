@@ -9,7 +9,10 @@ import (
 	"github.com/samthorold/go-slow/internal/editor"
 )
 
-// PendingBatches are the batches submitted and not yet ended, oldest first.
+// PendingBatches are the batches submitted and not yet ended, oldest first,
+// each with its requests in the order they were submitted: results are
+// applied in that order, so of two Items read in one batch the one submitted
+// later, published later, is read second.
 func (s *Store) PendingBatches(ctx context.Context) ([]editor.PendingBatch, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT batches.id, batches.submitted_at, r.request_id, r.act, r.work_key,
@@ -18,7 +21,7 @@ func (s *Store) PendingBatches(ctx context.Context) ([]editor.PendingBatch, erro
 			LEFT JOIN call_texts i ON i.hash = r.instructions
 			LEFT JOIN call_texts s ON s.hash = r.schema
 			LEFT JOIN call_texts n ON n.hash = r.input
-		ORDER BY batches.submitted_at, batches.id, r.request_id`)
+		ORDER BY batches.submitted_at, batches.id, r.rowid`)
 	if err != nil {
 		return nil, fmt.Errorf("pending batches: %w", err)
 	}

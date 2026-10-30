@@ -36,8 +36,10 @@ type Deps struct {
 	Items     Items
 	Readings  Readings
 	// Cuts answers an Item's Spans, from its newest Cut.
-	Cuts     Cuts
-	Topics   Topics
+	Cuts Cuts
+	// Relations answers a Span's relations, for its page.
+	Relations Relations
+	Topics    Topics
 	Stories  Stories
 	Feedback Feedback
 	Kept     Kept
@@ -85,8 +87,11 @@ var briefingsTmpl = page("/briefings", "briefings.html")
 // itemsTmpl is the Items page.
 var itemsTmpl = page("/items", "items.html")
 
-// itemTmpl is an Item's own page.
-var itemTmpl = page(noIndex, "item.html")
+// itemTmpl is an Item's own page, and spanTmpl a Span's.
+var (
+	itemTmpl = page(noIndex, "item.html")
+	spanTmpl = page(noIndex, "span.html")
+)
 
 // topicsTmpl is the Topics page.
 var topicsTmpl = page("/topics", "topics.html")
@@ -170,6 +175,7 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("GET /items/{source}/{entry}", a.item)
 	mux.HandleFunc("POST /items/{source}/{entry}/feedback", a.itemFeedback)
 	mux.HandleFunc("PUT /items/{source}/{entry}/feedback/{feedback}/undone", a.undoOnItem)
+	mux.HandleFunc("GET /items/{source}/{entry}/spans/{span}", a.span)
 	mux.HandleFunc("GET /register", a.register)
 	mux.HandleFunc("GET /stories", a.stories)
 	mux.HandleFunc("GET /stories/{id}", a.story)

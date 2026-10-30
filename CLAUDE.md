@@ -12,6 +12,8 @@ A slow-news briefing: a Go web app, hypermedia-driven with htmx, storing the Rec
 
 @~/.claude/commons/guides/model-calls.md
 
+**Deviation from the Web apps Guide:** the Guide's lightweight CQRS says "not event sourcing"; go-slow's **Record** is event-based (system design: *The Record as events*), because it is a record of judgements, each kept with its judge, and views choose whose judgements they read and as at when. **Sources** and **Topics** stay plain records. The code below still describes the Record before it became events, until the slices of #208 land.
+
 There is no Go Guide yet; the Go tooling below is this repo's own until there is one. The Model calls Guide covers the Editor's acts; the system design's *The Editor* section is how go-slow applies it.
 
 ## Where things are

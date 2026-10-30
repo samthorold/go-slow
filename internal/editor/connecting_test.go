@@ -3,7 +3,6 @@ package editor_test
 import (
 	"encoding/json"
 	"errors"
-	"os"
 	"slices"
 	"strings"
 	"testing"
@@ -132,18 +131,16 @@ func TestAReciprocalActKeepsEachOfItsPartiesAsActor(t *testing.T) {
 	}
 }
 
+// reciprocalRule is the Role entry's reciprocal rule, in its words. CONTEXT.md
+// held it until the design dropped Roles (#208); connecting keeps it until
+// relating replaces connecting.
+const reciprocalRule = "An act the Fact states as mutual (they met, spoke, agreed together) has each party as an actor; " +
+	"an act with a direction (urged, assured, welcomed, offered) has its doer as actor and the one it was directed at as undergoer. " +
+	"A collective is one actor only where the Item names it as one (the G7, the signatories of a joint declaration); " +
+	"two Entities are never made into a joint actor."
+
 func TestConnectingsInstructionsStateTheReciprocalRuleInTheWordsOfTheRoleEntry(t *testing.T) {
-	b, err := os.ReadFile("../../CONTEXT.md")
-	if err != nil {
-		t.Fatal(err)
-	}
-	glossary := strings.ReplaceAll(string(b), "**", "")
-	from := strings.Index(glossary, "An act the Fact states as mutual")
-	to := strings.Index(glossary, "never made into a joint actor.")
-	if from < 0 || to < from {
-		t.Fatalf("the Role entry does not state the reciprocal rule:\n%s", glossary)
-	}
-	rule := strings.ReplaceAll(glossary[from:to+len("never made into a joint actor.")], "*", "")
+	rule := reciprocalRule
 	model := &fakeModel{output: connectsTheSpeech}
 	if _, err := editor.Connect(t.Context(), model, toConnect, []editor.Fact{offer}); err != nil {
 		t.Fatal(err)

@@ -50,6 +50,7 @@ func appDeps(now time.Time, store *sqlite.Store, logs *bytes.Buffer) web.Deps {
 		Briefings:   store,
 		Items:       store,
 		Readings:    store,
+		Cuts:        store,
 		Topics:      interest.New(store),
 		Stories:     store,
 		Feedback:    feedback.New(store),

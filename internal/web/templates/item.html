@@ -9,6 +9,20 @@
 <p hx-disable>{{.Summary}}</p>
 <p><small>{{.Attribution}}</small></p>
 
+{{- if .Spans}}
+{{/* The Item's text as the Spans of its newest Cut, numbered as the Cut
+     lists them: the numbers a judge cites them by. */}}
+<section aria-labelledby="text">
+  <h2 id="text">Text</h2>
+  <p><span class="machine">{{.CutBy}}</span></p>
+  <ol class="spans">
+  {{- range .Spans}}
+    <li id="span-{{.N}}" value="{{.N}}" hx-disable>{{.Words}}</li>
+  {{- end}}
+  </ol>
+</section>
+{{- end}}
+
 {{- if .Read}}
 <p><small>Read {{.ReadAt}} by {{.Model}}</small></p>
 

@@ -1,10 +1,12 @@
 package web_test
 
 import (
+	"context"
 	"encoding/json"
 	"log/slog"
 	"net/url"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -105,6 +107,48 @@ func TestAnItemsPageShowsItsSpansHydratedWithTheirSpeakersNamesAndRejections(t *
 	// How it was read is one click away.
 	if !regexp.MustCompile(`<a class="machine" href="/calls/\d+">read · call \d+</a>`).MatchString(page) {
 		t.Errorf("the page does not link the reading's call:\n%s", page)
+	}
+}
+
+// derbyOnly is a Wikidata holding Derby and nothing else.
+type derbyOnly struct{}
+
+func (derbyOnly) Search(_ context.Context, text string) ([]string, error) {
+	if text == "Derby" {
+		return []string{"Q43475"}, nil
+	}
+	return nil, nil
+}
+
+func (derbyOnly) Items(_ context.Context, ids []string) ([]editor.WikidataItem, error) {
+	if slices.Equal(ids, []string{"Q43475"}) {
+		return []editor.WikidataItem{{ID: "Q43475", Label: "Derby", Revision: 1}}, nil
+	}
+	return nil, nil
+}
+
+func (derbyOnly) Labels(context.Context, []string) (map[string]string, error) { return nil, nil }
+
+func TestAnItemsPageShowsTheEntitiesEachSpanMentionsAsPills(t *testing.T) {
+	store := openStore(t)
+	readRelease(t, store, releaseReading)
+	lookups := editor.NewLookups(editor.LookupDeps{Store: store, Wikidata: derbyOnly{}, Log: slog.New(slog.DiscardHandler)})
+	if err := lookups.LookUpWaiting(t.Context(), saturday); err != nil {
+		t.Fatal(err)
+	}
+	app, _ := newAppWithLog(t, saturday, store)
+
+	page := get(t, app, "/items/"+number10.ID+"/release").body
+
+	// "the city" refers to Derby, the Wikidata item.
+	if m := spanBlock(t, page, 2).margin; !strings.Contains(m,
+		`<a class="pill" href="https://www.wikidata.org/wiki/Q43475" hx-boost="false"><span hx-disable>Derby</span> · <span class="pill-tag">place</span></a>`) {
+		t.Errorf("S2 does not show Derby, which \"the city\" refers to:\n%s", m)
+	}
+	// "He" refers to Andy Burnham, the Editor's own with no match.
+	if m := spanBlock(t, page, 4).margin; !strings.Contains(m,
+		`<span class="pill"><span hx-disable>Andy Burnham</span> · <span class="pill-tag">person</span></span>`) {
+		t.Errorf("S4 does not show Andy Burnham, whom \"He\" refers to:\n%s", m)
 	}
 }
 

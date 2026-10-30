@@ -96,7 +96,8 @@ func run(log *slog.Logger) error {
 			"sunday_read": cfg.SundayReadModel,
 		},
 	})
-	// The Sunday read's tools look Wikidata up, politely, as go-slow.
+	// What the readings name, and the Sunday read's tools, look Wikidata
+	// up, politely, as go-slow.
 	wd := wikidata.New(wikidata.Options{
 		HTTP:      &http.Client{Timeout: fetchTimeout},
 		Endpoint:  wikidata.Endpoint,
@@ -134,7 +135,10 @@ func run(log *slog.Logger) error {
 		Cut:   cut.New(store),
 		Check: topics,
 		Read:  batches,
-		Log:   log,
+		// What the readings name is looked up in Wikidata after each run,
+		// in plain code, once per name.
+		LookUp: editor.NewLookups(editor.LookupDeps{Store: store, Wikidata: wd, Log: log}),
+		Log:    log,
 	})
 	// The timetable runs inside the app process, stopping with it.
 	ticker := time.NewTicker(cfg.CollectionInterval)

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"slices"
+	"time"
 
 	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
@@ -22,6 +23,9 @@ type Readings interface {
 	// NewestReading is the Item's newest reading of its Spans, reporting
 	// whether it has one.
 	NewestReading(ctx context.Context, sourceID, entryID string) (editor.Reading, bool, error)
+	// EntitiesNamed is the Entity each key names, as the Record's look-ups
+	// have it now; a key not yet looked up is left out.
+	EntitiesNamed(ctx context.Context, keys []editor.LookupKey) (map[editor.LookupKey]editor.NamedEntity, error)
 }
 
 // Cuts answers the Spans an Item's page shows.
@@ -157,10 +161,15 @@ func (a *app) itemWith(w http.ResponseWriter, r *http.Request, status int, errs 
 	if read {
 		p.ReadBy = &made{Act: "read", Call: reading.Call}
 	}
+	is, err := a.Readings.EntitiesNamed(r.Context(), reading.Keys(it.Published))
+	if err != nil {
+		a.serverError(w, r, err)
+		return
+	}
 	if cutYet {
 		p.CutBy = fmt.Sprintf("cut · %s v%d", c.Judge.Cutter, c.Judge.Version)
 		for i, s := range c.Spans {
-			p.Spans = append(p.Spans, spanOf(i+1, text, s, reading))
+			p.Spans = append(p.Spans, spanOf(i+1, text, s, reading, it.Published, is))
 		}
 	}
 	for _, e := range it.Mentions {
@@ -197,9 +206,10 @@ func (a *app) itemWith(w http.ResponseWriter, r *http.Request, status int, errs 
 }
 
 // spanOf is the Span s of text, numbered n in its Cut, as the reading r
-// judged it: what r judged of a stretch within it is shown with it. A Span
-// no reading judged reads as its words.
-func spanOf(n int, text string, s cut.Span, r editor.Reading) spanRow {
+// judged it, in an Item published on published: what r judged of a stretch
+// within it is shown with it, and the Entities it mentions as is has them.
+// A Span no reading judged reads as its words.
+func spanOf(n int, text string, s cut.Span, r editor.Reading, published time.Time, is map[editor.LookupKey]editor.NamedEntity) spanRow {
 	in := func(a editor.Address) bool { return a.Span.Start >= s.Start && a.Span.End <= s.End }
 	row := spanRow{N: n, Pieces: r.Hydrated(text, s)}
 	for _, a := range r.Rejected {
@@ -214,9 +224,17 @@ func spanOf(n int, text string, s cut.Span, r editor.Reading) spanRow {
 			}
 		}
 	}
-	for _, nm := range r.Names {
-		if in(nm.At) {
+	// What it mentions: each Entity its names are, or, for a name not yet
+	// looked up, the name as read, a person by their office.
+	var shown []editor.NamedEntity
+	for _, nm := range r.Mentions(s) {
+		e, ok := is[editor.KeyOf(nm, published)]
+		switch {
+		case !ok:
 			row.Names = append(row.Names, pill{Name: nm.Name, Tag: cmp.Or(nm.Office, nm.Kind)})
+		case !slices.Contains(shown, e):
+			shown = append(shown, e)
+			row.Names = append(row.Names, pillOf(e))
 		}
 	}
 	return row

@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"slices"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
 )
 
@@ -38,389 +38,195 @@ var speech = editor.Item{
 	Published: time.Date(2026, time.October, 16, 15, 59, 24, 0, time.UTC),
 }
 
+// goodReading is a reading of the speech, cut into its two sentences: S1
+// "It’s good to be back in Scotland, to be here in Motherwell." and S2
+// "Scotland will get £2 billion."
 const goodReading = `{
-  "facts": [
-    {"statement": "Andy Burnham gave a speech in Motherwell.", "as_at": "2026-10-16",
-     "quote": "to be here in Motherwell"}
+  "names": [
+    {"at": {"span": 1, "words": "Scotland"}, "kind": "place", "name": "Scotland", "office": ""},
+    {"at": {"span": 1, "words": "Motherwell"}, "kind": "place", "name": "Motherwell", "office": ""}
   ],
-  "claims": [
-    {"statement": "Scotland will get £2 billion.", "made_by": "Andy Burnham",
-     "quote": "Scotland will get £2 billion."}
+  "refers_to": [],
+  "rejected": [],
+  "speakers": []
+}`
+
+// release is an Item with a bare attribution, a quotation and references in
+// other words, cut into S1 "Andy Burnham said:", S2 "“This is fantastic news
+// for the city.", S3 "Derby has waited long enough.”" and S4 "He visited
+// the site on Monday."
+var release = editor.Item{
+	SourceID: "govuk-number-10", EntryID: "release", Title: "GBR headquarters in Derby",
+	Content:   "<p>Andy Burnham said:</p><p>“This is fantastic news for the city. Derby has waited long enough.”</p><p>He visited the site on Monday.</p>",
+	Published: time.Date(2026, time.October, 15, 9, 0, 0, 0, time.UTC),
+}
+
+const releaseReading = `{
+  "names": [
+    {"at": {"span": 1, "words": "Andy Burnham"}, "kind": "person", "name": "Andy Burnham", "office": "Prime Minister of the United Kingdom"},
+    {"at": {"span": 3, "words": "Derby"}, "kind": "place", "name": "Derby", "office": "City of Derby"}
   ],
-  "mentions": [
-    {"name": "Andy Burnham", "kind": "person", "role": "Prime Minister of the United Kingdom"},
-    {"name": "Motherwell", "kind": "place", "role": ""},
-    {"name": "Scotland", "kind": "place", "role": ""}
+  "refers_to": [
+    {"from": {"span": 2, "words": "the city"}, "to": {"span": 3, "words": "Derby"}},
+    {"from": {"span": 4, "words": "He"}, "to": {"span": 1, "words": "Andy Burnham"}}
+  ],
+  "rejected": [1],
+  "speakers": [
+    {"span": {"span": 2, "words": ""}, "speaker": {"span": 1, "words": "Andy Burnham"}},
+    {"span": {"span": 3, "words": ""}, "speaker": {"span": 1, "words": "Andy Burnham"}}
   ]
 }`
 
-// legacyReading is goodReading in reading's earlier schema, which gave the
-// Entities each Fact and Claim involved, inline, and no mentions.
-const legacyReading = `{
-  "facts": [
-    {"statement": "Andy Burnham gave a speech in Motherwell.", "as_at": "2026-10-16",
-     "quote": "to be here in Motherwell", "entities": [
-       {"name": "Andy Burnham", "kind": "person", "role": ""},
-       {"name": "Motherwell", "kind": "place", "role": ""}]}
-  ],
-  "claims": [
-    {"statement": "Scotland will get £2 billion.", "made_by": "Andy Burnham",
-     "quote": "Scotland will get £2 billion.", "entities": [
-       {"name": "Andy Burnham", "kind": "person", "role": "Prime Minister of the United Kingdom"},
-       {"name": "Scotland", "kind": "place", "role": ""}]}
-  ]
-}`
+// toRead is the Item as reading is given it: with its Cut by the sentence
+// cutter.
+func toRead(it editor.Item) editor.ToRead {
+	return editor.ToRead{Item: it, Cut: cut.Cut{ID: 7, SourceID: it.SourceID, EntryID: it.EntryID,
+		Judge: cut.SentenceCutter, Spans: cut.Sentences(it.Content)}}
+}
 
-func TestReadingAsksForTheItemsMentionsOnceAndNoEntitiesPerStatement(t *testing.T) {
-	model := &fakeModel{output: goodReading}
-	if _, err := editor.Read(t.Context(), model, speech); err != nil {
+// spanWords is the words at an address in it.
+func spanWords(it editor.Item, a editor.Address) string { return cut.Words(it.Content, a.Span) }
+
+func TestReadingShowsTheItemAsItsNumberedSpans(t *testing.T) {
+	model := &fakeModel{output: releaseReading}
+
+	if _, err := editor.Read(t.Context(), model, "claude-test", toRead(release)); err != nil {
 		t.Fatal(err)
 	}
-	req := model.sent[0]
 
-	props := req.Schema["properties"].(map[string]any)
-	mentions, ok := props["mentions"].(map[string]any)
-	if !ok || mentions["type"] != "array" {
-		t.Fatalf("the schema asks for no mentions: %+v", props)
-	}
-	item := mentions["items"].(map[string]any)["properties"].(map[string]any)
-	for _, f := range []string{"name", "kind", "role"} {
-		if _, ok := item[f]; !ok {
-			t.Errorf("a mention has no %s: %+v", f, item)
+	in := model.sent[0].Input
+	for _, want := range []string{
+		"Title: GBR headquarters in Derby\n",
+		"Published: 2026-10-15\n",
+		"S1: Andy Burnham said:\n",
+		"S2: “This is fantastic news for the city.\n",
+		"S3: Derby has waited long enough.”\n",
+		"S4: He visited the site on Monday.\n",
+	} {
+		if !strings.Contains(in, want) {
+			t.Errorf("the input does not show %q:\n%s", want, in)
 		}
 	}
-	if !slices.Contains(req.Schema["required"].([]string), "mentions") {
-		t.Errorf("mentions are not required: %v", req.Schema["required"])
+	if strings.Contains(in, "<p>") {
+		t.Errorf("the input shows the Item's markup:\n%s", in)
 	}
-	for _, statements := range []string{"facts", "claims"} {
-		fields := props[statements].(map[string]any)["items"].(map[string]any)["properties"].(map[string]any)
-		if _, ok := fields["entities"]; ok {
-			t.Errorf("each of the %s still lists its Entities: %+v", statements, fields)
+	props := model.sent[0].Schema["properties"].(map[string]any)
+	for _, kind := range []string{"names", "refers_to", "rejected", "speakers"} {
+		if _, ok := props[kind]; !ok {
+			t.Errorf("the schema asks for no %s: %v", kind, props)
 		}
 	}
-	// Involvement is connecting's judgement: reading no longer defines it.
-	if strings.Contains(req.Instructions, "involve") {
-		t.Errorf("reading's instructions still say what a statement involves:\n%s", req.Instructions)
+	for _, old := range []string{"facts", "claims", "mentions"} {
+		if _, ok := props[old]; ok {
+			t.Errorf("the schema still asks for %s", old)
+		}
 	}
 }
 
-func TestReadingGivesTheItemsMentionsOnceAndTiesNoEntityToItsFacts(t *testing.T) {
-	r, err := editor.Read(t.Context(), &fakeModel{output: goodReading}, speech)
+func TestReadingJudgesEachKindAtAnAddressInItsItem(t *testing.T) {
+	r, err := editor.Read(t.Context(), &fakeModel{output: releaseReading}, "claude-test", toRead(release))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	want := []editor.Entity{
-		{Name: "Andy Burnham", Kind: "person", Role: "Prime Minister of the United Kingdom"},
-		{Name: "Motherwell", Kind: "place"},
-		{Name: "Scotland", Kind: "place"},
+	if r.SourceID != release.SourceID || r.EntryID != release.EntryID || r.CutID != 7 {
+		t.Errorf("the reading is of %s %s on Cut %d", r.SourceID, r.EntryID, r.CutID)
 	}
-	if !slices.Equal(r.Entities, want) {
-		t.Errorf("Entities = %+v, want %+v", r.Entities, want)
+	if len(r.RefersTo) != 2 {
+		t.Fatalf("refers to = %+v", r.RefersTo)
 	}
-	// Which Entities a Fact involves is connecting's: reading ties none.
-	if got := r.Facts[0].Entities; len(got) != 0 {
-		t.Errorf("the Fact is tied to %v, want none", got)
+	if from, to := spanWords(release, r.RefersTo[0].From), spanWords(release, r.RefersTo[0].To); from != "the city" || to != "Derby" {
+		t.Errorf("the first refers to is %q to %q", from, to)
+	}
+	if len(r.Names) != 2 || spanWords(release, r.Names[0].At) != "Andy Burnham" || r.Names[0].Kind != "person" ||
+		r.Names[0].Office != "Prime Minister of the United Kingdom" {
+		t.Errorf("names = %+v", r.Names)
+	}
+	if len(r.Speakers) != 2 || spanWords(release, r.Speakers[0].Of) != "“This is fantastic news for the city." ||
+		spanWords(release, r.Speakers[0].By) != "Andy Burnham" {
+		t.Errorf("speakers = %+v", r.Speakers)
+	}
+	if len(r.Rejected) != 1 || spanWords(release, r.Rejected[0]) != "Andy Burnham said:" {
+		t.Errorf("rejected = %+v", r.Rejected)
+	}
+	for _, a := range append([]editor.Address{r.Rejected[0], r.Names[1].At}, r.RefersTo[1].From, r.Speakers[1].By) {
+		if a.SourceID != release.SourceID || a.EntryID != release.EntryID {
+			t.Errorf("an address outside the Item: %+v", a)
+		}
 	}
 }
 
-func TestAReadingInTheEarlierSchemaIsRefused(t *testing.T) {
-	_, err := editor.Read(t.Context(), &fakeModel{output: legacyReading}, speech)
-	if !errors.Is(err, editor.ErrFailedChecks) {
-		t.Errorf("err = %v, want ErrFailedChecks", err)
-	}
-}
+func TestReadingsJudgeIsTheCall(t *testing.T) {
+	model := &fakeModel{output: releaseReading}
 
-func TestReadingAnItemDrawsFactsThatCarryTheItemAndADate(t *testing.T) {
-	model := &fakeModel{output: goodReading}
-
-	r, err := editor.Read(t.Context(), model, speech)
+	r, err := editor.Read(t.Context(), model, "claude-test", toRead(release))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if len(r.Facts) != 1 {
-		t.Fatalf("Facts = %+v, want one", r.Facts)
-	}
-	f := r.Facts[0]
-	if f.SourceID != speech.SourceID || f.EntryID != speech.EntryID {
-		t.Errorf("Fact drawn from %s %s, want the speech", f.SourceID, f.EntryID)
-	}
-	if want := time.Date(2026, time.October, 16, 0, 0, 0, 0, time.UTC); !f.AsAt.Equal(want) {
-		t.Errorf("Fact holds as at %v, want %v", f.AsAt, want)
-	}
-	if f.Statement != "Andy Burnham gave a speech in Motherwell." {
-		t.Errorf("Fact = %q", f.Statement)
+	want := editor.Judge{Act: "reading", Version: editor.ReadingVersion, Model: "fake",
+		RequestHash: editor.RequestHash(model.sent[0], "claude-test")}
+	if r.Judge != want {
+		t.Errorf("judge = %+v, want %+v", r.Judge, want)
 	}
 }
 
-func TestAnEntityNamedWithTwoRolesKeepsTheFirstGiven(t *testing.T) {
-	output := strings.Replace(goodReading, `"mentions": [`,
-		`"mentions": [{"name": "Andy Burnham", "kind": "person", "role": ""},
-		{"name": "Andy Burnham", "kind": "person", "role": "Leader of the Labour Party"},`, 1)
-
-	r, err := editor.Read(t.Context(), &fakeModel{output: output}, speech)
+func TestAnOfficeGivenToAnythingButAPersonIsDropped(t *testing.T) {
+	r, err := editor.Read(t.Context(), &fakeModel{output: releaseReading}, "", toRead(release))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if r.Entities[0].Name != "Andy Burnham" || r.Entities[0].Role != "Leader of the Labour Party" {
-		t.Errorf("Entities = %+v, want Andy Burnham with the first role given", r.Entities)
-	}
-	if len(r.Entities) != 3 {
-		t.Errorf("Entities = %+v, want Andy Burnham once", r.Entities)
+	if derby := r.Names[1]; derby.Name != "Derby" || derby.Office != "" {
+		t.Errorf("Derby, a place, keeps an office: %+v", derby)
 	}
 }
 
-func TestOnlyAPersonKeepsTheRoleReadingGivesIt(t *testing.T) {
-	output := `{
-  "facts": [
-    {"statement": "Andy Burnham gave a speech at the Labour conference in Motherwell.", "as_at": "2026-10-16",
-     "quote": "to be here in Motherwell"}
-  ],
-  "claims": [],
-  "mentions": [
-    {"name": "Andy Burnham", "kind": "person", "role": "Prime Minister of the United Kingdom"},
-    {"name": "Labour Party", "kind": "organisation", "role": "host"},
-    {"name": "Motherwell", "kind": "place", "role": "venue"},
-    {"name": "Labour conference", "kind": "occasion", "role": "setting"}]
-}`
-
-	r, err := editor.Read(t.Context(), &fakeModel{output: output}, speech)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	want := []editor.Entity{
-		{Name: "Andy Burnham", Kind: "person", Role: "Prime Minister of the United Kingdom"},
-		{Name: "Labour Party", Kind: "organisation"},
-		{Name: "Motherwell", Kind: "place"},
-		{Name: "Labour conference", Kind: "occasion"},
-	}
-	if !slices.Equal(r.Entities, want) {
-		t.Errorf("Entities = %+v, want %+v", r.Entities, want)
-	}
-}
-
-func TestReadingKeepsWhoMadeEachClaim(t *testing.T) {
-	r, err := editor.Read(t.Context(), &fakeModel{output: goodReading}, speech)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if len(r.Claims) != 1 || r.Claims[0].MadeBy != "Andy Burnham" {
-		t.Fatalf("Claims = %+v, want one made by Andy Burnham", r.Claims)
-	}
-}
-
-func TestAReadingThatFailsTheChecksIsRejected(t *testing.T) {
+func TestAQuoteNotInItsSpanIsRefusedNamingTheSpanAndTheWords(t *testing.T) {
 	for name, output := range map[string]string{
-		"a Claim with no attribution":  strings.Replace(goodReading, `"made_by": "Andy Burnham"`, `"made_by": " "`, 1),
-		"output that is not JSON":      `{"facts": [`,
-		"output with an unknown field": strings.Replace(goodReading, `"claims"`, `"opinions"`, 1),
-		"a Fact with no date":          strings.Replace(goodReading, `"as_at": "2026-10-16"`, `"as_at": "last week"`, 1),
-		"a Fact with no statement":     strings.Replace(goodReading, `"statement": "Andy Burnham gave a speech in Motherwell."`, `"statement": ""`, 1),
-		"one name given two kinds": strings.Replace(goodReading, `"mentions": [`,
-			`"mentions": [{"name": "Motherwell", "kind": "organisation", "role": ""},`, 1),
-		"a reading that gives no mentions": `{"facts": [], "claims": []}`,
-		"a Fact with Entities of its own beside the mentions": strings.Replace(goodReading, `"quote": "to be here in Motherwell"`,
-			`"quote": "to be here in Motherwell", "entities": []`, 1),
-		"an Entity of no known kind": strings.Replace(goodReading, `"kind": "place"`, `"kind": "vibe"`, 1),
-		"an Entity with no name":     strings.Replace(goodReading, `"name": "Motherwell"`, `"name": " "`, 1),
-		// Everything traces: a Fact rests on the Item's own words.
-		"a Fact the Item does not say": strings.Replace(goodReading, `"quote": "to be here in Motherwell"`, `"quote": "to be here in Glasgow"`, 1),
+		"a name":       `{"names": [{"at": {"span": 2, "words": "Derby"}, "kind": "place", "name": "Derby", "office": ""}], "refers_to": [], "rejected": [], "speakers": []}`,
+		"a refers to":  `{"names": [], "refers_to": [{"from": {"span": 4, "words": "He"}, "to": {"span": 2, "words": "Derby"}}], "rejected": [], "speakers": []}`,
+		"a speaker":    `{"names": [], "refers_to": [], "rejected": [], "speakers": [{"span": {"span": 3, "words": ""}, "speaker": {"span": 2, "words": "Derby"}}]}`,
+		"a paraphrase": `{"names": [], "refers_to": [], "rejected": [], "speakers": [{"span": {"span": 2, "words": "Derby"}, "speaker": {"span": 1, "words": "Andy Burnham"}}]}`,
 	} {
 		t.Run(name, func(t *testing.T) {
-			_, err := editor.Read(t.Context(), &fakeModel{output: output}, speech)
+			_, err := editor.Read(t.Context(), &fakeModel{output: output}, "", toRead(release))
+
 			if !errors.Is(err, editor.ErrFailedChecks) {
+				t.Fatalf("err = %v, want ErrFailedChecks", err)
+			}
+			if !strings.Contains(err.Error(), "S2") || !strings.Contains(err.Error(), `"Derby"`) {
+				t.Errorf("the refusal does not name the Span and the words: %v", err)
+			}
+		})
+	}
+}
+
+func TestASpanNotInTheCutIsRefused(t *testing.T) {
+	for name, output := range map[string]string{
+		"rejected":   `{"names": [], "refers_to": [], "rejected": [5], "speakers": []}`,
+		"a name":     `{"names": [{"at": {"span": 0, "words": "x"}, "kind": "place", "name": "x", "office": ""}], "refers_to": [], "rejected": [], "speakers": []}`,
+		"a speaker":  `{"names": [], "refers_to": [], "rejected": [], "speakers": [{"span": {"span": 9, "words": ""}, "speaker": {"span": 1, "words": "Andy Burnham"}}]}`,
+		"no name":    `{"names": [{"at": {"span": 1, "words": "Andy Burnham"}, "kind": "person", "name": " ", "office": ""}], "refers_to": [], "rejected": [], "speakers": []}`,
+		"old schema": goodFactReading,
+	} {
+		t.Run(name, func(t *testing.T) {
+			if _, err := editor.Read(t.Context(), &fakeModel{output: output}, "", toRead(release)); !errors.Is(err, editor.ErrFailedChecks) {
 				t.Errorf("err = %v, want ErrFailedChecks", err)
 			}
 		})
 	}
 }
 
-func TestAFactsQuoteMatchesTheItemWhateverItsPunctuationAndMarkup(t *testing.T) {
-	// The Item has a curly apostrophe and a paragraph break; the quote, a
-	// straight one and a space.
-	output := strings.Replace(goodReading, `"quote": "to be here in Motherwell"`,
-		`"quote": "It's good to be back in Scotland, to be here in Motherwell. Scotland will"`, 1)
+// goodFactReading is an answer in the earlier reading act's schema.
+const goodFactReading = `{"facts": [], "claims": [], "mentions": []}`
 
-	if _, err := editor.Read(t.Context(), &fakeModel{output: output}, speech); err != nil {
-		t.Fatal(err)
-	}
-}
+func TestAReferenceToItselfIsNoReference(t *testing.T) {
+	output := `{"names": [], "refers_to": [{"from": {"span": 3, "words": "Derby"}, "to": {"span": 3, "words": "Derby"}}], "rejected": [], "speakers": []}`
 
-func TestAnItemWithItsTextIsReadWithoutItsSummary(t *testing.T) {
-	model := &fakeModel{output: goodReading}
-	if _, err := editor.Read(t.Context(), model, speech); err != nil {
-		t.Fatal(err)
-	}
+	r, err := editor.Read(t.Context(), &fakeModel{output: output}, "", toRead(release))
 
-	if in := model.sent[0].Input; strings.Contains(in, speech.Summary) || strings.Contains(in, "Summary:") {
-		t.Errorf("the input gives the summary of an Item with its text:\n%s", in)
-	}
-}
-
-func TestAnItemWithNoTextIsReadFromItsSummary(t *testing.T) {
-	noText := speech
-	noText.Content = ""
-	model := &fakeModel{output: `{"claims": [], "facts": [{"statement": "Andy Burnham gave a speech in Scotland.",
-		"as_at": "2026-10-16", "quote": "delivered a speech in Scotland today"}], "mentions": []}`}
-
-	r, err := editor.Read(t.Context(), model, noText)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !strings.Contains(model.sent[0].Input, "Summary: "+speech.Summary) || len(r.Facts) != 1 {
-		t.Errorf("an Item with no text is not read from its summary: %+v\n%s", r.Facts, model.sent[0].Input)
-	}
-}
-
-func TestAFactQuotingOnlyTheSummaryOfAnItemWithItsTextIsRefused(t *testing.T) {
-	output := strings.Replace(goodReading, `"quote": "to be here in Motherwell"`,
-		`"quote": "delivered a speech in Scotland today"`, 1)
-
-	_, err := editor.Read(t.Context(), &fakeModel{output: output}, speech)
-
-	if !errors.Is(err, editor.ErrFailedChecks) {
-		t.Errorf("err = %v, want ErrFailedChecks", err)
-	}
-}
-
-func TestAReadingShownNoPrecedentsIsToldNothingOfThem(t *testing.T) {
-	model := &fakeModel{output: goodReading}
-	if _, err := editor.Read(t.Context(), model, speech); err != nil {
-		t.Fatal(err)
-	}
-
-	r := model.sent[0]
-	if strings.Contains(strings.ToLower(r.Instructions), "precedent") || strings.Contains(r.Input, "Precedents") {
-		t.Errorf("a reading shown no precedents is told of them:\n%s\n---\n%s", r.Instructions, r.Input)
-	}
-}
-
-func TestAReadingShownPrecedentsIsToldOfThemAfterTheSameInstructions(t *testing.T) {
-	without, with := &fakeModel{output: goodReading}, &fakeModel{output: goodReading}
-	if _, err := editor.Read(t.Context(), without, speech); err != nil {
-		t.Fatal(err)
-	}
-	precedent := editor.Precedent{FeedbackID: 1, Kind: "wrong", Fact: "Scotland will get £2 billion.", Quote: "Scotland will get £2 billion."}
-	if _, err := editor.Read(t.Context(), with, speech, precedent); err != nil {
-		t.Fatal(err)
-	}
-
-	base, shown := without.sent[0].Instructions, with.sent[0].Instructions
-	if !strings.HasPrefix(shown, base) || !strings.Contains(shown[len(base):], "precedent") {
-		t.Errorf("the precedent block does not follow the act's own instructions:\n%s", shown)
-	}
-	// A precedent is a case, never a rule: the block restates no standard.
-	if strings.Contains(shown[len(base):], "A Fact is wrong when") {
-		t.Errorf("the precedent block restates what a Fact is:\n%s", shown[len(base):])
-	}
-	if !strings.Contains(with.sent[0].Input, `"feedback"`) {
-		t.Errorf("the precedent is not in the input:\n%s", with.sent[0].Input)
-	}
-}
-
-// A Fact is held true as at a date, and no one can corroborate what
-// something will do, cause or be worth: reading is told such a statement is
-// never a Fact, but a Claim, attributed.
-func TestReadingIsToldAProjectedEffectIsNeverAFact(t *testing.T) {
-	model := &fakeModel{output: goodReading}
-	if _, err := editor.Read(t.Context(), model, speech); err != nil {
-		t.Fatal(err)
-	}
-	instructions := model.sent[0].Instructions
-
-	for _, want := range []string{
-		"(an estimate, a forecast, a projected effect) can't be established yet, so it is never a Fact",
-		"as a Claim, made by whoever the Item attributes it to, or, if it attributes it to no one, by the Item's publisher",
-	} {
-		if !strings.Contains(instructions, want) {
-			t.Errorf("reading's instructions do not say %q:\n%s", want, instructions)
-		}
-	}
-}
-
-// An arrangement and a declared intention can be corroborated as at the
-// Item's date, so each is a Fact, worded as what it is, never as the act
-// it arranges or intends (system design: An arrangement is a Fact; A
-// declared intention is a Fact, as an intention). A promise is a declared
-// intention, so it is no longer listed among Claims.
-func TestReadingIsToldAnArrangementAndADeclaredIntentionAreFacts(t *testing.T) {
-	model := &fakeModel{output: goodReading}
-	if _, err := editor.Read(t.Context(), model, speech); err != nil {
-		t.Fatal(err)
-	}
-	instructions := model.sent[0].Instructions
-
-	for _, want := range []string{
-		"That something has been arranged is a Fact, worded as the arrangement as at its date",
-		"never as the event it arranges",
-		"That someone has declared what they will do is a Fact, whoever declares it and however the Item reports it (said, confirmed, assured), worded as their intention",
-		"never as the act done",
-		"what something will do, cause or be worth beyond what anyone intends (an estimate, a forecast, a projected effect) can't be established yet, so it is never a Fact",
-	} {
-		if !strings.Contains(instructions, want) {
-			t.Errorf("reading's instructions do not say %q:\n%s", want, instructions)
-		}
-	}
-	if _, claims, _ := strings.Cut(instructions, "- Claims:"); strings.Contains(strings.SplitN(claims, "\n", 2)[0], "promises") {
-		t.Errorf("reading's instructions list promises among Claims:\n%s", instructions)
-	}
-	// The standard is how a Fact is drawn, not a list of words: "is set to
-	// be built" words a present arrangement, which is a Fact.
-	if strings.Contains(instructions, "never worded with") {
-		t.Errorf("reading's instructions ban words from Facts:\n%s", instructions)
-	}
-}
-
-// Drawing what was said must not replace that it was said, nor what it
-// answers (system design: A declared intention is a Fact, as an intention):
-// reading is told, inside its Facts definition, that a saying and the event
-// it responds to are Facts too.
-func TestReadingIsToldASayingAndWhatItRespondsToAreFacts(t *testing.T) {
-	model := &fakeModel{output: goodReading}
-	if _, err := editor.Read(t.Context(), model, speech); err != nil {
-		t.Fatal(err)
-	}
-	instructions := model.sent[0].Instructions
-
-	want := "When the Item reports someone saying or responding to something, the saying and the event it responds to are Facts too, beside the Facts and Claims drawn from what was said."
-	_, facts, _ := strings.Cut(instructions, "- Facts:")
-	if !strings.Contains(strings.SplitN(facts, "\n", 2)[0], want) {
-		t.Errorf("reading's Facts definition does not say %q:\n%s", want, instructions)
-	}
-}
-
-func TestThereIsNoReadingWithoutAnItem(t *testing.T) {
-	model := &fakeModel{output: goodReading}
-
-	_, err := editor.Read(t.Context(), model, editor.Item{Title: "Untraceable"})
-
-	if !errors.Is(err, editor.ErrFailedChecks) {
-		t.Errorf("err = %v, want ErrFailedChecks", err)
-	}
-	if len(model.sent) != 0 {
-		t.Error("the model was called with no Item to read")
-	}
-}
-
-func TestTheModelIsGivenTheItemsTextAndTheActsSchema(t *testing.T) {
-	model := &fakeModel{output: goodReading}
-	if _, err := editor.Read(t.Context(), model, speech); err != nil {
-		t.Fatal(err)
-	}
-
-	r := model.sent[0]
-	if !strings.Contains(r.Input, "It’s good to be back in Scotland, to be here in Motherwell.") || strings.Contains(r.Input, "<p>") {
-		t.Errorf("input is not the Item's text:\n%s", r.Input)
-	}
-	if !strings.Contains(r.Input, "2026-10-16") {
-		t.Errorf("input does not give the Item's date:\n%s", r.Input)
-	}
-	if r.Schema["type"] != "object" || r.Instructions == "" {
-		t.Errorf("request lacks the act's schema or instructions: %+v", r)
+	if err != nil || len(r.RefersTo) != 0 {
+		t.Errorf("a Span referring to itself: %+v, %v", r.RefersTo, err)
 	}
 }

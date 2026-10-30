@@ -51,7 +51,7 @@ func (s *stories) item(day time.Time, mentions ...string) (editor.Item, int64) {
 	for _, m := range mentions {
 		es = append(es, editor.Entity{Name: m, Kind: "organisation"})
 	}
-	if err := s.store.SaveReading(s.t.Context(), editor.Reading{SourceID: it.SourceID, EntryID: entry, Model: "fake",
+	if err := s.store.SaveFactReading(s.t.Context(), editor.FactReading{SourceID: it.SourceID, EntryID: entry, Model: "fake",
 		Entities: es, Facts: []editor.Fact{{Statement: entry + " happened.", AsAt: day, Quote: entry}}}, day); err != nil {
 		s.t.Fatal(err)
 	}

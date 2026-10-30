@@ -89,7 +89,7 @@ func summaryOnlyRecord(t *testing.T, db string) {
 	if err := topics.CheckNew(ctx); err != nil {
 		t.Fatal(err)
 	}
-	if err := store.SaveReading(ctx, editor.Reading{SourceID: "govuk-number-10", EntryID: items[1].EntryID}, saturday); err != nil {
+	if err := store.SaveFactReading(ctx, editor.FactReading{SourceID: "govuk-number-10", EntryID: items[1].EntryID}, saturday); err != nil {
 		t.Fatal(err)
 	}
 }

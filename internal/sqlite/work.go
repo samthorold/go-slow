@@ -15,11 +15,24 @@ const itemWorkKey = `items.source_id || char(10) || items.entry_id`
 // factWorkKey is the work key of the Item the Fact aliased f was drawn from.
 func factWorkKey(f string) string { return f + `.source_id || char(10) || ` + f + `.entry_id` }
 
-// readingCall is the id of the latest applied reading call on the Item
-// whose work key is key, or 0: the reading whose Facts the Item keeps.
+// readingCall is the id of the latest applied call of the earlier reading
+// act on the Item whose work key is key, or 0: the reading whose Facts the
+// Item keeps. A call whose request a reading of the Item's Spans answered
+// is that reading's, not the earlier act's.
 func readingCall(key string) string {
 	return `coalesce((SELECT max(c.id) FROM model_calls c
-		WHERE c.act = 'reading' AND c.work_key = ` + key + ` AND c.outcome = 'applied'), 0)`
+		WHERE c.act = 'reading' AND c.work_key = ` + key + ` AND c.outcome = 'applied'
+			AND NOT EXISTS (SELECT 1 FROM readings r WHERE r.request_hash = c.request_hash
+				AND r.source_id || char(10) || r.entry_id = c.work_key)), 0)`
+}
+
+// spansReadingCall is the id of the applied reading call that made the
+// reading of Spans aliased r, or 0: the one on its Item answering its
+// request.
+func spansReadingCall(r string) string {
+	return `coalesce((SELECT max(c.id) FROM model_calls c
+		WHERE c.act = 'reading' AND c.outcome = 'applied' AND c.request_hash = ` + r + `.request_hash
+			AND c.work_key = ` + r + `.source_id || char(10) || ` + r + `.entry_id), 0)`
 }
 
 // placingCall is the id of the applied placing call that placed the Fact
@@ -50,21 +63,19 @@ func notFailed(act string) string {
 		AND w.work_key = ` + itemWorkKey + ` AND w.failed = 1)`
 }
 
-// WorkAwaiting reports whether any work on the Items collected before
-// collectedBefore still awaits an act, whether or not it sits in a pending
-// batch: an Item awaiting reading, or a Fact drawn from one awaiting placing
-// or connecting, as ItemsToRead, FactsToPlace and FactsToConnect select
-// them. Work marked failed awaits nothing.
+// WorkAwaiting reports whether any work the Briefing is written from, on
+// the Items collected before collectedBefore, still awaits an act, whether
+// or not it sits in a pending batch: a Fact awaiting placing or connecting,
+// as FactsToPlace and FactsToConnect select them. Work marked failed awaits
+// nothing. Reading is not waited for: the Briefing is written from Facts,
+// which reading no longer draws, so waiting for it would only make the
+// Briefing late (system design: The Briefing doesn't wait for
+// construction).
 func (s *Store) WorkAwaiting(ctx context.Context, collectedBefore time.Time) (bool, error) {
 	var awaiting bool
 	err := s.db.QueryRowContext(ctx, `
 		SELECT EXISTS (SELECT 1 FROM items WHERE items.collected_at < ? AND (
-			(EXISTS (SELECT 1 FROM item_topics t
-					WHERE t.source_id = items.source_id AND t.entry_id = items.entry_id)
-				AND NOT EXISTS (SELECT 1 FROM item_reads r
-					WHERE r.source_id = items.source_id AND r.entry_id = items.entry_id)
-				AND `+notFailed("reading")+`)
-			OR EXISTS (SELECT 1 FROM facts
+			EXISTS (SELECT 1 FROM facts
 				WHERE facts.source_id = items.source_id AND facts.entry_id = items.entry_id
 					AND facts.withdrawn_by IS NULL
 					AND ((NOT EXISTS (SELECT 1 FROM fact_placings p WHERE p.fact_id = facts.id)

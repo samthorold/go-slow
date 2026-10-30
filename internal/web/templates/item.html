@@ -11,20 +11,43 @@
 
 {{- if .Spans}}
 {{/* The Item's text as the Spans of its newest Cut, numbered as the Cut
-     lists them: the numbers a judge cites them by. */}}
+     lists them: the numbers a judge cites them by. Each is read as its
+     newest reading judged it: hydrated, each stretch that refers to another
+     shown as what it refers to (an ins, titled with the words it was);
+     whose words it is, what it names, and whether it is Rejected, in its
+     margin. */}}
 <section aria-labelledby="text">
   <h2 id="text">Text</h2>
-  <p><span class="machine">{{.CutBy}}</span></p>
-  <ol class="spans">
+  <p><span class="machine">{{.CutBy}}</span>{{with .ReadBy}} {{template "made" .}}{{end}}</p>
+  {{- if not .ReadBy}}
+  <p>Awaiting reading.</p>
+  {{- end}}
+  <div class="margined" data-margin="open">
+  {{template "margin-fold" "open"}}
+  <ol class="spans blocks">
   {{- range .Spans}}
-    <li id="span-{{.N}}" value="{{.N}}" hx-disable>{{.Words}}</li>
+    <li id="span-{{.N}}" value="{{.N}}" class="block{{if .Rejected}} struck{{end}}">
+      <div class="block-body" hx-disable><p>{{range .Pieces}}{{if .Was}}<ins title="{{.Was}}">{{.Words}}</ins>{{else}}{{.Words}}{{end}}{{end}}</p></div>
+      <div class="block-margin">
+        {{- if .Rejected}}
+        <p class="quiet">rejected</p>
+        {{- end}}
+        {{- range .Speakers}}
+        <p class="quiet">spoken by <span hx-disable>{{.}}</span></p>
+        {{- end}}
+        {{template "pills" .Names}}
+      </div>
+    </li>
   {{- end}}
   </ol>
+  </div>
 </section>
 {{- end}}
 
 {{- if .Read}}
-<p><small>Read {{.ReadAt}} by {{.Model}}</small></p>
+{{/* What the earlier reading act drew from the Item, before the Record's
+     unit was the Span: kept, and still what the Stories are built on. */}}
+<p><small>Facts drawn {{.ReadAt}} by {{.Model}}</small></p>
 
 <section aria-labelledby="mentions">
   <h2 id="mentions">Mentions</h2>
@@ -82,9 +105,5 @@
   </ul>
 </section>
 </div>
-{{- else if .Topics}}
-<p>Awaiting reading for <span hx-disable>{{range $i, $t := .Topics}}{{if $i}}, {{end}}{{$t}}{{end}}</span></p>
-{{- else}}
-<p>Not read: it touches no Topic.</p>
 {{- end}}
 {{end}}

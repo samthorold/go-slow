@@ -355,7 +355,7 @@ func connectedStories(t *testing.T, store *sqlite.Store) {
 	t.Helper()
 	offer := item("offer", "Offer to Holyrood", saturday.Add(-72*time.Hour))
 	seed(t, store, saturday.AddDate(0, 0, -7), offer)
-	if err := store.SaveReading(t.Context(), editor.Reading{
+	if err := store.SaveFactReading(t.Context(), editor.FactReading{
 		SourceID: offer.SourceID, EntryID: offer.EntryID, Model: "fake",
 		Entities: []editor.Entity{{Name: "Andy Burnham", Kind: "person"}},
 		Facts: []editor.Fact{{Statement: "Andy Burnham made an offer to Holyrood.",

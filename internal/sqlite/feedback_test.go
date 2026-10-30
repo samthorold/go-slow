@@ -43,7 +43,7 @@ func threeFacts(t *testing.T) *sqlite.Store {
 	fact := func(s string) editor.Fact {
 		return editor.Fact{Statement: s, AsAt: saturday, Quote: s}
 	}
-	if err := store.SaveReading(t.Context(), editor.Reading{SourceID: src.ID, EntryID: "speech", Model: "fake",
+	if err := store.SaveFactReading(t.Context(), editor.FactReading{SourceID: src.ID, EntryID: "speech", Model: "fake",
 		Entities: []editor.Entity{{Name: "Andy Burnham", Kind: "person"}},
 		Facts:    []editor.Fact{fact("One."), fact("Two."), fact("Three.")}}, saturday.Add(-50*time.Minute)); err != nil {
 		t.Fatal(err)

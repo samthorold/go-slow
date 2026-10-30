@@ -139,7 +139,7 @@ func TestPlacingIsShownAtMostEightPrecedentsTheMostRelevantThenTheNewest(t *test
 	if _, err := store.AddItems(t.Context(), []collect.Item{visit}); err != nil {
 		t.Fatal(err)
 	}
-	if err := store.SaveReading(t.Context(), editor.Reading{
+	if err := store.SaveFactReading(t.Context(), editor.FactReading{
 		SourceID: visit.SourceID, EntryID: visit.EntryID, Model: "fake",
 		Entities: []editor.Entity{{Name: "Andy Burnham", Kind: "person"}, {Name: "Motherwell", Kind: "place"},
 			{Name: "County Tyrone", Kind: "place"}},
@@ -247,7 +247,7 @@ func TestPlacingIsShownPastFeedbackOnDevelopmentsSharingItsTopicsAndTheDepthItIs
 	if err := interest.New(store).CheckNew(t.Context()); err != nil {
 		t.Fatal(err)
 	}
-	if err := store.SaveReading(t.Context(), editor.Reading{
+	if err := store.SaveFactReading(t.Context(), editor.FactReading{
 		SourceID: glasgowItem.SourceID, EntryID: glasgowItem.EntryID, Model: "fake",
 		Entities: []editor.Entity{{Name: "Glasgow", Kind: "place"}},
 		Facts: []editor.Fact{{Statement: "Glasgow will get new funding.", AsAt: oct16,

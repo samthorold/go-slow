@@ -96,7 +96,7 @@ func run(log *slog.Logger) error {
 			"sunday_read": cfg.SundayReadModel,
 		},
 	})
-	// Reading looks Entities up in Wikidata first, politely, as go-slow.
+	// The Sunday read's tools look Wikidata up, politely, as go-slow.
 	wd := wikidata.New(wikidata.Options{
 		HTTP:      &http.Client{Timeout: fetchTimeout},
 		Endpoint:  wikidata.Endpoint,

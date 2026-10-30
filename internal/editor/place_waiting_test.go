@@ -30,13 +30,11 @@ func placer(store *sqlite.Store, placing *fakeModel) (*editor.Editor, *bytes.Buf
 const startsAStory = `{"new_stories": [{"ref": "N1", "title": "Andy Burnham in Scotland"}],
   "facts": [{"fact": "F1", "developments_in": ["N1"]}]}`
 
-// readAndPlace reads the speech and places its Fact with placing.
+// readAndPlace draws the speech's Fact and places it with placing.
 func readAndPlace(t *testing.T, store *sqlite.Store, placing *fakeModel) *editor.Editor {
 	t.Helper()
 	ed, _ := placer(store, placing)
-	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
-		t.Fatal(err)
-	}
+	drawSpeechFacts(t, store, saturday)
 	if err := ed.PlaceWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
@@ -84,7 +82,7 @@ func readLater(t *testing.T, store *sqlite.Store) {
 	if _, err := store.AddItems(t.Context(), []collect.Item{laterItem}); err != nil {
 		t.Fatal(err)
 	}
-	if err := store.SaveReading(t.Context(), editor.Reading{
+	if err := store.SaveFactReading(t.Context(), editor.FactReading{
 		SourceID: laterItem.SourceID, EntryID: laterItem.EntryID, Model: "fake",
 		Entities: []editor.Entity{{Name: "Andy Burnham", Kind: "person"}, {Name: "Edinburgh", Kind: "place"}},
 		Facts: []editor.Fact{{Statement: "Andy Burnham met the First Minister in Edinburgh.",
@@ -148,9 +146,7 @@ func TestAPlacingThatFailsWritesNothingAndIsRetried(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			store := record(t)
 			ed, logs := placer(store, placing)
-			if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
-				t.Fatal(err)
-			}
+			drawSpeechFacts(t, store, saturday)
 
 			if err := ed.PlaceWaiting(t.Context(), saturday); err != nil {
 				t.Fatal(err)

@@ -12,45 +12,14 @@ import (
 	"github.com/samthorold/go-slow/internal/editor"
 )
 
-// ItemsToRead are the Items awaiting reading: tied to a Topic and not yet
-// read, oldest first.
-func (s *Store) ItemsToRead(ctx context.Context) ([]editor.Item, error) {
-	rows, err := s.db.QueryContext(ctx, `
-		SELECT items.source_id, items.entry_id, items.title, items.link, items.summary,
-			items.content, items.published
-		FROM items
-		WHERE EXISTS (SELECT 1 FROM item_topics t
-				WHERE t.source_id = items.source_id AND t.entry_id = items.entry_id)
-			AND NOT EXISTS (SELECT 1 FROM item_reads r
-				WHERE r.source_id = items.source_id AND r.entry_id = items.entry_id)
-			AND `+notFailed("reading")+`
-		ORDER BY items.published, items.collected_at`)
-	if err != nil {
-		return nil, fmt.Errorf("items to read: %w", err)
-	}
-	defer func() { _ = rows.Close() }()
-	var out []editor.Item
-	for rows.Next() {
-		var it editor.Item
-		var published string
-		if err := rows.Scan(&it.SourceID, &it.EntryID, &it.Title, &it.Link, &it.Summary,
-			&it.Content, &published); err != nil {
-			return nil, fmt.Errorf("items to read: %w", err)
-		}
-		it.Published = parseTime(published)
-		out = append(out, it)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("items to read: %w", err)
-	}
-	return out, nil
-}
-
-// SaveReading writes a reading's Entities, as what its Item mentions, its
-// Facts and Claims, tied to no Entity (which a Fact involves is
-// connecting's), and marks its Item read, all at once. An Entity already in
-// the Record by name is reused.
-func (s *Store) SaveReading(ctx context.Context, r editor.Reading, readAt time.Time) error {
+// SaveFactReading writes what the earlier reading act drew from an Item:
+// its Entities, as what its Item mentions, its Facts and Claims, tied to no
+// Entity (which a Fact involves is connecting's), and marks its Item read by
+// that act, all at once. An Entity already in the Record by name is reused.
+// No act draws Facts now; the Record keeps those drawn before, which the
+// acts built on Facts still read, and tests and the frozen recordings of
+// those acts write them this way.
+func (s *Store) SaveFactReading(ctx context.Context, r editor.FactReading, readAt time.Time) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -134,9 +103,6 @@ func (s *Store) SaveReading(ctx context.Context, r editor.Reading, readAt time.T
 		INSERT INTO item_reads (source_id, entry_id, read_at, model) VALUES (?, ?, ?, ?)`,
 		r.SourceID, r.EntryID, formatTime(readAt), r.Model); err != nil {
 		return fmt.Errorf("mark %s read: %w", r.EntryID, err)
-	}
-	if err := keepPrecedents(ctx, tx, "reading", r.SourceID, r.EntryID, r.Precedents, readAt); err != nil {
-		return err
 	}
 	return tx.Commit()
 }

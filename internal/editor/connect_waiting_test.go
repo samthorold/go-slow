@@ -86,7 +86,7 @@ func TestConnectingIsShownTheItemsMentionsAsTheRecordKeepsThem(t *testing.T) {
 	if _, err := store.AddItems(t.Context(), []collect.Item{glasgowItem}); err != nil {
 		t.Fatal(err)
 	}
-	if err := store.SaveReading(t.Context(), editor.Reading{
+	if err := store.SaveFactReading(t.Context(), editor.FactReading{
 		SourceID: glasgowItem.SourceID, EntryID: glasgowItem.EntryID, Model: "fake",
 		Entities: []editor.Entity{{Name: "Glasgow", Kind: "place"}, {Name: "Clyde", Kind: "place"}},
 		Facts: []editor.Fact{{Statement: "Glasgow will get new funding.", AsAt: oct16,
@@ -159,9 +159,7 @@ func TestACauseBetweenTwoFactsIsKeptAndTracesToTheItemsThatSupportIt(t *testing.
 func TestConnectingRunsInBatchesOnceAFactIsPlaced(t *testing.T) {
 	store := record(t)
 	ed, _ := placer(store, &fakeModel{})
-	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
-		t.Fatal(err)
-	}
+	drawSpeechFacts(t, store, saturday)
 	batcher := &fakeBatcher{}
 	log := slog.New(slog.DiscardHandler)
 	b := editor.NewBatches(editor.BatchDeps{Store: store, Batcher: batcher,
@@ -199,9 +197,7 @@ func TestConnectingRunsAgainOverTheDaysFactsBeforeTheBriefing(t *testing.T) {
 	store := record(t)
 	yesterday := saturday.Add(-24 * time.Hour)
 	ed, _ := placer(store, &fakeModel{output: startsAStory})
-	if err := ed.ReadWaiting(t.Context(), yesterday); err != nil {
-		t.Fatal(err)
-	}
+	drawSpeechFacts(t, store, yesterday)
 	if err := ed.PlaceWaiting(t.Context(), yesterday); err != nil {
 		t.Fatal(err)
 	}

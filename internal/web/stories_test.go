@@ -30,7 +30,7 @@ func otherStories(t *testing.T, store *sqlite.Store, n int) {
 	for i := range n {
 		it := item("other-"+strconv.Itoa(i), "Other "+strconv.Itoa(i), saturday.Add(-96*time.Hour))
 		seed(t, store, saturday.AddDate(0, 0, -7), it)
-		if err := store.SaveReading(t.Context(), editor.Reading{SourceID: it.SourceID, EntryID: it.EntryID, Model: "fake",
+		if err := store.SaveFactReading(t.Context(), editor.FactReading{SourceID: it.SourceID, EntryID: it.EntryID, Model: "fake",
 			Facts: []editor.Fact{{Statement: "Something else happened.", AsAt: time.Date(2026, time.October, 20, 0, 0, 0, 0, time.UTC),
 				Quote: "else"}}}, saturday); err != nil {
 			t.Fatal(err)
@@ -76,7 +76,7 @@ func TestAStorysPageShowsItsTimelineEachDevelopmentTracingToItsFactAndItem(t *te
 	// at an earlier date: the Timeline is in the order of the Facts' dates.
 	earlier := item("offer", "Offer to Holyrood", saturday.Add(-72*time.Hour))
 	seed(t, store, saturday.AddDate(0, 0, -7), earlier)
-	if err := store.SaveReading(t.Context(), editor.Reading{
+	if err := store.SaveFactReading(t.Context(), editor.FactReading{
 		SourceID: earlier.SourceID, EntryID: earlier.EntryID, Model: "fake",
 		Entities: []editor.Entity{{Name: "Andy Burnham", Kind: "person"}},
 		Facts: []editor.Fact{{Statement: "Andy Burnham made an offer to Holyrood.",
@@ -168,7 +168,7 @@ func TestAReciprocalActsTwoActorsAreKeptAndEachConnectsItsStoryOnTheStoryPage(t 
 			entities = append(entities, editor.Entity{Name: n, Kind: "person"})
 			roles = append(roles, `{"entity": "`+n+`", "role": "actor"}`)
 		}
-		if err := store.SaveReading(t.Context(), editor.Reading{
+		if err := store.SaveFactReading(t.Context(), editor.FactReading{
 			SourceID: it.SourceID, EntryID: it.EntryID, Model: "fake", Entities: entities,
 			Facts: []editor.Fact{{Statement: statement, AsAt: time.Date(2026, time.October, 21, 0, 0, 0, 0, time.UTC),
 				Quote: "q"}},
@@ -205,7 +205,7 @@ func TestStoriesAnnouncedTogetherShowTheItemOnEachStorysPage(t *testing.T) {
 	update := item("update", "Cost of Living update", saturday.Add(-72*time.Hour))
 	seed(t, store, saturday.AddDate(0, 0, -7), update)
 	day := time.Date(2026, time.October, 21, 0, 0, 0, 0, time.UTC)
-	if err := store.SaveReading(t.Context(), editor.Reading{
+	if err := store.SaveFactReading(t.Context(), editor.FactReading{
 		SourceID: update.SourceID, EntryID: update.EntryID, Model: "fake",
 		Facts: []editor.Fact{
 			{Statement: "Carer's Allowance was reformed.", AsAt: day, Quote: "reformed"},
@@ -239,7 +239,7 @@ func TestAStorysPageCitesEachItemByItsSourcesShortNameBeforeItsTitle(t *testing.
 	update := item("update", "Cost of Living update", saturday.Add(-72*time.Hour))
 	seed(t, store, saturday.AddDate(0, 0, -7), update)
 	day := time.Date(2026, time.October, 21, 0, 0, 0, 0, time.UTC)
-	if err := store.SaveReading(t.Context(), editor.Reading{
+	if err := store.SaveFactReading(t.Context(), editor.FactReading{
 		SourceID: update.SourceID, EntryID: update.EntryID, Model: "fake",
 		Facts: []editor.Fact{
 			{Statement: "Carer's Allowance was reformed.", AsAt: day, Quote: "reformed"},
@@ -266,7 +266,7 @@ func TestAStorysPageShowsTheStoriesConnectedToItAndWhy(t *testing.T) {
 	// An offer to Holyrood starts one Story; the speech, a later Item, another.
 	offer := item("offer", "Offer to Holyrood", saturday.Add(-72*time.Hour))
 	seed(t, store, saturday.AddDate(0, 0, -7), offer)
-	if err := store.SaveReading(t.Context(), editor.Reading{
+	if err := store.SaveFactReading(t.Context(), editor.FactReading{
 		SourceID: offer.SourceID, EntryID: offer.EntryID, Model: "fake",
 		Entities: []editor.Entity{{Name: "Andy Burnham", Kind: "person"}},
 		Facts: []editor.Fact{{Statement: "Andy Burnham made an offer to Holyrood.",
@@ -336,7 +336,7 @@ func costOfLiving(t *testing.T, store *sqlite.Store, facts ...editor.Fact) {
 	t.Helper()
 	update := item("update", "Cost of Living update", saturday.Add(-72*time.Hour))
 	seed(t, store, saturday.AddDate(0, 0, -7), update)
-	if err := store.SaveReading(t.Context(), editor.Reading{
+	if err := store.SaveFactReading(t.Context(), editor.FactReading{
 		SourceID: update.SourceID, EntryID: update.EntryID, Model: "fake", Facts: facts,
 		Entities: []editor.Entity{{Name: "Rachel Reeves", Kind: "person"}},
 	}, saturday); err != nil {
@@ -385,7 +385,7 @@ func TestALaterItemBetweenTwoRunsOfOneItemSplitsThemIntoTwoEntries(t *testing.T)
 	// A later Item, whose Fact falls between the update's two.
 	budget := item("budget", "Budget statement", saturday.Add(-24*time.Hour))
 	seed(t, store, saturday.AddDate(0, 0, -7), budget)
-	if err := store.SaveReading(t.Context(), editor.Reading{
+	if err := store.SaveFactReading(t.Context(), editor.FactReading{
 		SourceID: budget.SourceID, EntryID: budget.EntryID, Model: "fake",
 		Entities: []editor.Entity{{Name: "Rachel Reeves", Kind: "person"}},
 		Facts:    []editor.Fact{{Statement: "Rachel Reeves set out the Budget.", AsAt: october(21), Quote: "Budget"}},

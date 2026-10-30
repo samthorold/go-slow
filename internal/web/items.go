@@ -3,7 +3,6 @@ package web
 import (
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/samthorold/go-slow/internal/collect"
@@ -51,29 +50,29 @@ type itemRow struct {
 	Source      string
 	When        string
 	Attribution string
-	Checked     bool
-	// Topics are those the Item awaits reading for.
-	Topics []string
-	// Page is the Item's own page, with what reading drew from it.
-	Page   string
-	Read   bool
-	Facts  int
-	Claims int
+	// Page is the Item's own page, with what reading judged of it.
+	Page string
+	// HasText, Cut and Read are how far it has come; Names, Speakers and
+	// Rejected what its newest reading judged.
+	HasText, Cut, Read        bool
+	Names, Speakers, Rejected int
 }
 
-// Status is how a collected Item stands, as a machine label: "read · 3
-// Facts, 1 Claim", "awaiting reading for <Topic>", "touches no Topic" or
-// "not yet checked".
+// Status is how a collected Item stands with reading, as a machine label,
+// whatever Topics it touches (Topics select nothing): "read · 3 names, 1
+// speaker, 2 rejected", "awaiting reading", "awaiting cutting" or "no text
+// yet".
 func (r itemRow) Status() string {
 	switch {
 	case r.Read:
-		return "read · " + count(r.Facts, "Fact") + ", " + count(r.Claims, "Claim")
-	case len(r.Topics) > 0:
-		return "awaiting reading for " + strings.Join(r.Topics, ", ")
-	case r.Checked:
-		return "touches no Topic"
+		return "read · " + count(r.Names, "name") + ", " + count(r.Speakers, "speaker") + ", " +
+			strconv.Itoa(r.Rejected) + " rejected"
+	case r.Cut:
+		return "awaiting reading"
+	case r.HasText:
+		return "awaiting cutting"
 	default:
-		return "not yet checked"
+		return "no text yet"
 	}
 }
 
@@ -135,8 +134,8 @@ func (a *app) items(w http.ResponseWriter, r *http.Request) {
 	}
 	for _, it := range items {
 		r := row(it, it.Published, now.Location())
-		r.Checked, r.Topics = it.Checked, it.Topics
-		r.Read, r.Facts, r.Claims = it.Read, it.Facts, it.Claims
+		r.HasText, r.Cut, r.Read = it.HasText, it.Cut, it.Read
+		r.Names, r.Speakers, r.Rejected = it.Names, it.Speakers, it.Rejected
 		p.Items = append(p.Items, r)
 	}
 	a.render(w, r, itemsTmpl, p)

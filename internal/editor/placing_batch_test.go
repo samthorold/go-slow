@@ -30,7 +30,7 @@ func readTyroneNotice(t *testing.T, store *sqlite.Store) {
 	if _, err := store.AddItems(t.Context(), []collect.Item{tyroneNotice}); err != nil {
 		t.Fatal(err)
 	}
-	if err := store.SaveReading(t.Context(), editor.Reading{
+	if err := store.SaveFactReading(t.Context(), editor.FactReading{
 		SourceID: tyroneNotice.SourceID, EntryID: tyroneNotice.EntryID, Model: "fake",
 		Entities: []editor.Entity{{Name: "County Tyrone", Kind: "place"}},
 		Facts: []editor.Fact{{Statement: "A Lord-Lieutenant of County Tyrone was appointed.", AsAt: oct16,
@@ -42,10 +42,7 @@ func readTyroneNotice(t *testing.T, store *sqlite.Store) {
 
 func TestPlacingRunsInBatchesAndAFactWaitsForTheStoriesAnEarlierItemMayStart(t *testing.T) {
 	store := record(t)
-	ed, _ := placer(store, &fakeModel{})
-	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
-		t.Fatal(err)
-	}
+	drawSpeechFacts(t, store, saturday)
 	readTyroneNotice(t, store)
 	readLater(t, store)
 	batcher := &fakeBatcher{}

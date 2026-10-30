@@ -31,7 +31,7 @@ func (s *stories) read(day time.Time, n int, mentions ...string) (editor.Item, [
 		s.facts++
 		ids = append(ids, s.facts)
 	}
-	if err := s.store.SaveReading(s.t.Context(), editor.Reading{SourceID: it.SourceID, EntryID: entry, Model: "fake",
+	if err := s.store.SaveFactReading(s.t.Context(), editor.FactReading{SourceID: it.SourceID, EntryID: entry, Model: "fake",
 		Entities: es, Facts: fs}, day); err != nil {
 		s.t.Fatal(err)
 	}

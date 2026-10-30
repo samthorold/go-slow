@@ -1,432 +1,1578 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "f537bab074d33c4ab6369e31e69b55c073648f7dcf1f622135ccef226d6ae2ce",
-  "recorded_at": "2026-10-26T22:45:39.576991Z",
+  "request_hash": "1c8068d716982ebb9b7e71e037cf78cc6d8529aa5652cead0ed6497d9e1cb628",
+  "recorded_at": "2026-10-30T21:01:44.105334Z",
   "usage": {
-    "input_tokens": 4485,
-    "output_tokens": 13020
+    "input_tokens": 5188,
+    "output_tokens": 16105
   },
   "output": {
-    "claims": [
-      {
-        "made_by": "Prime Minister of the United Kingdom",
-        "quote": "Britain is back and can be relied upon as a consistent and stable partner",
-        "statement": "Britain is back and can be relied upon as a consistent and stable partner in an uncertain world."
-      },
-      {
-        "made_by": "Prime Minister of the United Kingdom",
-        "quote": "Russian strikes have intensified even further",
-        "statement": "Russian strikes have intensified even further since the Prime Minister's meeting with President Zelenskyy."
-      },
-      {
-        "made_by": "Prime Minister of the United Kingdom",
-        "quote": "the quickest way to get it back onto world markets without rewarding the aggressor is an energy ceasefire",
-        "statement": "An energy ceasefire is the quickest way to get diesel back onto world markets without rewarding the aggressor."
-      },
-      {
-        "made_by": "Prime Minister of the United Kingdom",
-        "quote": "We know Russia is conducting a campaign of hybrid attacks and sabotage across Europe",
-        "statement": "Russia is conducting a campaign of hybrid attacks and sabotage across Europe."
-      },
-      {
-        "made_by": "Prime Minister of the United Kingdom",
-        "quote": "This support is needed to protect civilians.",
-        "statement": "The British air defence and refuelling support to Saudi Arabia is needed to protect civilians."
-      },
-      {
-        "made_by": "Prime Minister of the United Kingdom",
-        "quote": "it is highly likely to have been coordinated in Iran, almost certainly directed by Iran",
-        "statement": "The attack at RAF Fairford is highly likely to have been coordinated in Iran and almost certainly directed by Iran's Islamic Revolutionary Guard."
-      },
-      {
-        "made_by": "Prime Minister of the United Kingdom",
-        "quote": "Together, these deals will add the equivalent of over 10 billion pounds per year to the UK economy by 2040",
-        "statement": "The UK-EU deals will add the equivalent of over 10 billion pounds per year to the UK economy by 2040."
-      },
-      {
-        "made_by": "Prime Minister of the United Kingdom",
-        "quote": "faces a 100% rate of document checks at the border",
-        "statement": "Scottish salmon faces a 100% rate of document checks at the border."
-      },
-      {
-        "made_by": "Prime Minister of the United Kingdom",
-        "quote": "costing us around 100 million pounds in lost exports",
-        "statement": "Document checks on Scottish salmon cost around 100 million pounds in lost exports."
-      },
-      {
-        "made_by": "Prime Minister of the United Kingdom",
-        "quote": "the burden that can reach 1,400 pounds on a single shipment",
-        "statement": "The paperwork burden on farmers and food producers can reach 1,400 pounds on a single shipment."
-      },
-      {
-        "made_by": "Prime Minister of the United Kingdom",
-        "quote": "export health certificates, which can cost up to 200 pounds each time",
-        "statement": "Export health certificates can cost up to 200 pounds each time."
-      },
-      {
-        "made_by": "Prime Minister of the United Kingdom",
-        "quote": "the proposed energy deal could cut wholesale energy costs by 20%",
-        "statement": "The proposed energy deal could cut wholesale energy costs in Northern Ireland by 20%."
-      },
-      {
-        "made_by": "Prime Minister of the United Kingdom",
-        "quote": "public opinion currently supports a pragmatic approach like the one I am suggesting",
-        "statement": "Public opinion currently supports a pragmatic approach to the long-term relationship with the EU."
-      },
-      {
-        "made_by": "Prime Minister of the United Kingdom",
-        "quote": "Sticking with the status quo is not good enough for Britain",
-        "statement": "Sticking with the status quo in the relationship with the EU is not good enough for Britain."
-      },
-      {
-        "made_by": "President of Microsoft",
-        "quote": "Leading voices like the President of Microsoft are saying Britain is the world leader in AI safety",
-        "statement": "Britain is the world leader in AI safety."
-      }
-    ],
-    "facts": [
-      {
-        "as_at": "2026-10-12",
-        "quote": "I took a clear message to the UN",
-        "statement": "The Prime Minister took a clear message to the United Nations General Assembly."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "as I assure President Zelenskyy at our meeting in New York",
-        "statement": "The Prime Minister met President Zelenskyy in New York."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "When I spoke to President Zelenskyy on Saturday",
-        "statement": "The Prime Minister spoke with President Zelenskyy on Saturday."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "we have announced new funding",
-        "statement": "The UK has announced new funding to help Ukraine through its fifth winter under Russian bombardment."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "a new sanctions package so that over 90% of Russia",
-        "statement": "The UK has announced a new sanctions package covering over 90% of Russia's oil producing capacity."
-      },
-      {
-        "as_at": "2026-10-11",
-        "quote": "announcement yesterday of a reciprocal energy ceasefire",
-        "statement": "President Trump announced a reciprocal energy ceasefire on 2026-10-11."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "I raised this with President Trump in New York",
-        "statement": "The Prime Minister raised the energy ceasefire with President Trump in New York."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "President Zelenskyy has assured me Ukraine would immediately implement it",
-        "statement": "President Zelenskyy has assured the Prime Minister that Ukraine intends to implement the energy ceasefire immediately once a start date is confirmed."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "I was clear in all of my meetings, including with the NATO Secretary General in Oxfordshire",
-        "statement": "The Prime Minister met the NATO Secretary General in Oxfordshire."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "we will meet our NATO commitments in full",
-        "statement": "The UK intends to meet its NATO commitments in full."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "In Berlin last week, Chancellor Merz and I agreed a new partnership",
-        "statement": "The Prime Minister and Chancellor Merz agreed a new partnership in Berlin to tackle hybrid threats."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "I confirmed our commitment to establish a new National Centre for Information Defence",
-        "statement": "The UK intends to establish a new National Centre for Information Defence."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "as recommended by the Foreign Affairs Select Committee",
-        "statement": "The Foreign Affairs Select Committee recommended the National Centre for Information Defence."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "in Berlin I indicated Britain",
-        "statement": "The Prime Minister indicated in Berlin Britain's openness to Germany joining the Global Combat Air Programme alongside Italy and Japan."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "a Voyager aircraft to Saudi Arabia to provide air-to-air refuelling support",
-        "statement": "The UK decided to send air defence and a Voyager aircraft to Saudi Arabia to provide air-to-air refuelling support."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "it has already completed 14 operational missions",
-        "statement": "The Voyager aircraft in Saudi Arabia has completed 14 operational missions."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "I condemn the appalling attacks on the King Khalid International Airport",
-        "statement": "Attacks on King Khalid International Airport have occurred and the Prime Minister condemns them."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "We will continue to stand with Saudi Arabia against the Houthis",
-        "statement": "The UK intends to continue to stand with Saudi Arabia against the Houthis."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "we have been in close contact with the US about protective security at our shared bases",
-        "statement": "The UK has been in close contact with the US about protective security at shared bases since UNGA."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "our police and military personnel for their swift response",
-        "statement": "Police and military personnel responded swiftly to incidents at RAF Fairford and RAF Molesworth."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "My right honourable friend the Home Secretary will update the House regarding the incident at RAF Fairford",
-        "statement": "The Home Secretary intends to update the House regarding the incident at RAF Fairford."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "using our full range of powers to target them and their funding streams",
-        "statement": "The UK intends to use its full range of powers to target Iran's use of criminal networks and their funding streams."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "And we will bring further sanctions to restrict the capacity of Iran",
-        "statement": "The UK intends to bring further sanctions to restrict the capacity of Iran and the IRGC."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "In my meeting with the President, I also raised the Falkland Islands",
-        "statement": "The Prime Minister raised the Falkland Islands with President Trump."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "I emphasise this point in my speech to the General Assembly",
-        "statement": "The Prime Minister emphasised the Falklands point in the General Assembly speech."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "I also had a positive meeting with the President of the European Commission, Ursula von der Leyen",
-        "statement": "The Prime Minister had a positive meeting with Ursula von der Leyen in New York."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "it will take place in Brussels on the 20th November",
-        "statement": "The UK-EU summit is scheduled for 20 November in Brussels."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "I will work hard over the next 5 weeks to achieve it",
-        "statement": "The Prime Minister intends to work hard over the next 5 weeks to secure a deal with the EU."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "as we take up the presidency of the G20 in 2027",
-        "statement": "The UK is to take up the presidency of the G20 in 2027."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "I confirmed in New York that we will place AI centre stage in our presidency",
-        "statement": "The Prime Minister confirmed in New York that the UK will place AI centre stage in its G20 presidency."
-      }
-    ],
-    "mentions": [
-      {
-        "kind": "person",
-        "name": "Prime Minister",
-        "role": "Prime Minister of the United Kingdom"
-      },
-      {
-        "kind": "person",
-        "name": "Mr Speaker",
-        "role": "Speaker of the House of Commons"
-      },
-      {
-        "kind": "person",
-        "name": "the new member for Holborn and St Pancras",
-        "role": "Member of Parliament for Holborn and St Pancras"
-      },
-      {
-        "kind": "person",
-        "name": "President Zelenskyy",
-        "role": "President of Ukraine"
-      },
-      {
-        "kind": "person",
-        "name": "President Trump",
-        "role": "President of the United States"
-      },
-      {
-        "kind": "person",
-        "name": "NATO Secretary General",
-        "role": "Secretary General of NATO"
-      },
-      {
-        "kind": "person",
-        "name": "Chancellor Merz",
-        "role": "Chancellor of Germany"
-      },
-      {
-        "kind": "person",
-        "name": "Ursula von der Leyen",
-        "role": "President of the European Commission"
-      },
-      {
-        "kind": "person",
-        "name": "Home Secretary",
-        "role": "Home Secretary of the United Kingdom"
-      },
-      {
-        "kind": "person",
-        "name": "President of Microsoft",
-        "role": "President of Microsoft"
-      },
-      {
-        "kind": "organisation",
-        "name": "United Nations",
-        "role": "International organisation whose Charter the Prime Minister upholds"
-      },
-      {
-        "kind": "organisation",
-        "name": "NATO",
-        "role": "Defensive military alliance"
-      },
-      {
-        "kind": "organisation",
-        "name": "European Commission",
-        "role": "Executive body of the European Union"
-      },
-      {
-        "kind": "organisation",
-        "name": "Foreign Affairs Select Committee",
-        "role": "House of Commons committee that recommended the National Centre for Information Defence"
-      },
-      {
-        "kind": "organisation",
-        "name": "Islamic Revolutionary Guard",
-        "role": "Iranian body assessed to have directed the incident at RAF Fairford"
-      },
-      {
-        "kind": "organisation",
-        "name": "Houthis",
-        "role": "Group Britain will stand against with Saudi Arabia"
-      },
-      {
-        "kind": "organisation",
-        "name": "Microsoft",
-        "role": "Technology company whose president spoke on AI safety"
-      },
-      {
-        "kind": "organisation",
-        "name": "G20",
-        "role": "Group whose presidency the UK will take up in 2027"
-      },
-      {
+    "names": [
+      {
+        "at": {
+          "span": 1,
+          "words": "United Nations General Assembly"
+        },
         "kind": "occasion",
         "name": "United Nations General Assembly",
-        "role": "Assembly the Prime Minister addressed in New York"
+        "office": ""
       },
       {
-        "kind": "occasion",
-        "name": "UK-EU summit",
-        "role": "Summit scheduled for 20 November in Brussels"
+        "at": {
+          "span": 1,
+          "words": "the House"
+        },
+        "kind": "organisation",
+        "name": "House of Commons",
+        "office": ""
       },
       {
+        "at": {
+          "span": 1,
+          "words": "Mr Speaker"
+        },
+        "kind": "person",
+        "name": "Mr Speaker",
+        "office": "Speaker of the House of Commons"
+      },
+      {
+        "at": {
+          "span": 2,
+          "words": "the new member for Holborn and St Pancras"
+        },
+        "kind": "person",
+        "name": "the new member for Holborn and St Pancras",
+        "office": "Member of Parliament for Holborn and St Pancras"
+      },
+      {
+        "at": {
+          "span": 5,
+          "words": "my Honourable Friend"
+        },
+        "kind": "person",
+        "name": "the new member for Holborn and St Pancras",
+        "office": "Member of Parliament for Holborn and St Pancras"
+      },
+      {
+        "at": {
+          "span": 6,
+          "words": "Britain"
+        },
         "kind": "place",
         "name": "Britain",
-        "role": "Country led by the Prime Minister"
+        "office": ""
       },
       {
-        "kind": "place",
-        "name": "New York",
-        "role": "Location of the Prime Minister's meetings with Zelenskyy, Trump and von der Leyen"
+        "at": {
+          "span": 6,
+          "words": "the UN"
+        },
+        "kind": "organisation",
+        "name": "United Nations",
+        "office": ""
       },
       {
-        "kind": "place",
-        "name": "Berlin",
-        "role": "Location of the Prime Minister's meeting with Chancellor Merz"
+        "at": {
+          "span": 7,
+          "words": "President Zelenskyy"
+        },
+        "kind": "person",
+        "name": "Zelenskyy",
+        "office": "President of Ukraine"
       },
       {
-        "kind": "place",
-        "name": "Brussels",
-        "role": "Location of the UK-EU summit"
-      },
-      {
-        "kind": "place",
-        "name": "Oxfordshire",
-        "role": "Location of the Prime Minister's meeting with the NATO Secretary General"
-      },
-      {
+        "at": {
+          "span": 7,
+          "words": "Ukraine"
+        },
         "kind": "place",
         "name": "Ukraine",
-        "role": "Country under Russian bombardment receiving UK funding"
+        "office": ""
       },
       {
+        "at": {
+          "span": 7,
+          "words": "New York"
+        },
+        "kind": "place",
+        "name": "New York",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 9,
+          "words": "President Zelenskyy"
+        },
+        "kind": "person",
+        "name": "Zelenskyy",
+        "office": "President of Ukraine"
+      },
+      {
+        "at": {
+          "span": 9,
+          "words": "Russia"
+        },
         "kind": "place",
         "name": "Russia",
-        "role": "Country conducting strikes on Ukraine and hybrid attacks in Europe"
+        "office": ""
       },
       {
+        "at": {
+          "span": 12,
+          "words": "UK"
+        },
         "kind": "place",
-        "name": "Iran",
-        "role": "Country assessed to have coordinated the RAF Fairford incident"
+        "name": "United Kingdom",
+        "office": ""
       },
       {
+        "at": {
+          "span": 14,
+          "words": "President Trump"
+        },
+        "kind": "person",
+        "name": "Trump",
+        "office": "President of the United States"
+      },
+      {
+        "at": {
+          "span": 16,
+          "words": "President Trump"
+        },
+        "kind": "person",
+        "name": "Trump",
+        "office": "President of the United States"
+      },
+      {
+        "at": {
+          "span": 17,
+          "words": "President Zelenskyy"
+        },
+        "kind": "person",
+        "name": "Zelenskyy",
+        "office": "President of Ukraine"
+      },
+      {
+        "at": {
+          "span": 17,
+          "words": "Ukraine"
+        },
         "kind": "place",
-        "name": "Saudi Arabia",
-        "role": "Country receiving UK air defence and Voyager support"
+        "name": "Ukraine",
+        "office": ""
       },
       {
+        "at": {
+          "span": 18,
+          "words": "NATO"
+        },
+        "kind": "organisation",
+        "name": "NATO",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 21,
+          "words": "NATO Secretary General"
+        },
+        "kind": "person",
+        "name": "NATO Secretary General",
+        "office": "Secretary General of NATO"
+      },
+      {
+        "at": {
+          "span": 21,
+          "words": "Oxfordshire"
+        },
         "kind": "place",
-        "name": "Falkland Islands",
-        "role": "Territory whose islanders' will to remain British the Prime Minister raised"
+        "name": "Oxfordshire",
+        "office": ""
       },
       {
+        "at": {
+          "span": 22,
+          "words": "Russia"
+        },
         "kind": "place",
-        "name": "RAF Fairford",
-        "role": "RAF base where an incident occurred"
+        "name": "Russia",
+        "office": ""
       },
       {
-        "kind": "place",
-        "name": "RAF Molesworth",
-        "role": "RAF base where an incident occurred"
-      },
-      {
-        "kind": "place",
-        "name": "King Khalid International Airport",
-        "role": "Airport in Saudi Arabia that was attacked"
-      },
-      {
+        "at": {
+          "span": 22,
+          "words": "Europe"
+        },
         "kind": "place",
         "name": "Europe",
-        "role": "Region where Russia is conducting hybrid attacks and sabotage"
+        "office": ""
       },
       {
+        "at": {
+          "span": 23,
+          "words": "Chancellor Merz"
+        },
+        "kind": "person",
+        "name": "Merz",
+        "office": "Chancellor of Germany"
+      },
+      {
+        "at": {
+          "span": 23,
+          "words": "Berlin"
+        },
+        "kind": "place",
+        "name": "Berlin",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 25,
+          "words": "Foreign Affairs Select Committee"
+        },
+        "kind": "organisation",
+        "name": "Foreign Affairs Select Committee",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 25,
+          "words": "UN General Assembly"
+        },
+        "kind": "occasion",
+        "name": "United Nations General Assembly",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 26,
+          "words": "Berlin"
+        },
+        "kind": "place",
+        "name": "Berlin",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 26,
+          "words": "Germany"
+        },
+        "kind": "place",
+        "name": "Germany",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 26,
+          "words": "Italy"
+        },
+        "kind": "place",
+        "name": "Italy",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 26,
+          "words": "Japan"
+        },
+        "kind": "place",
+        "name": "Japan",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 27,
+          "words": "President Trump"
+        },
+        "kind": "person",
+        "name": "Trump",
+        "office": "President of the United States"
+      },
+      {
+        "at": {
+          "span": 27,
+          "words": "Middle East"
+        },
+        "kind": "place",
+        "name": "Middle East",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 28,
+          "words": "Britain"
+        },
+        "kind": "place",
+        "name": "Britain",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 28,
+          "words": "Saudi Arabia"
+        },
+        "kind": "place",
+        "name": "Saudi Arabia",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 31,
+          "words": "King Khalid International Airport"
+        },
+        "kind": "place",
+        "name": "King Khalid International Airport",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 32,
+          "words": "Saudi Arabia"
+        },
+        "kind": "place",
+        "name": "Saudi Arabia",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 32,
+          "words": "Houthis"
+        },
+        "kind": "organisation",
+        "name": "Houthis",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 33,
+          "words": "UNGA"
+        },
+        "kind": "occasion",
+        "name": "United Nations General Assembly",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 33,
+          "words": "the US"
+        },
+        "kind": "place",
+        "name": "United States",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 34,
+          "words": "RAF Fairford"
+        },
+        "kind": "place",
+        "name": "RAF Fairford",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 34,
+          "words": "RAF Molesworth"
+        },
+        "kind": "place",
+        "name": "RAF Molesworth",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 35,
+          "words": "the Home Secretary"
+        },
+        "kind": "person",
+        "name": "the Home Secretary",
+        "office": "Home Secretary"
+      },
+      {
+        "at": {
+          "span": 36,
+          "words": "Iran"
+        },
+        "kind": "place",
+        "name": "Iran",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 36,
+          "words": "Islamic Revolutionary Guard"
+        },
+        "kind": "organisation",
+        "name": "Islamic Revolutionary Guard",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 38,
+          "words": "Iran"
+        },
+        "kind": "place",
+        "name": "Iran",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 39,
+          "words": "IRGC"
+        },
+        "kind": "organisation",
+        "name": "Islamic Revolutionary Guard",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 40,
+          "words": "the Falkland Islands"
+        },
+        "kind": "place",
+        "name": "Falkland Islands",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 40,
+          "words": "the President"
+        },
+        "kind": "person",
+        "name": "Trump",
+        "office": "President of the United States"
+      },
+      {
+        "at": {
+          "span": 42,
+          "words": "Ursula von der Leyen"
+        },
+        "kind": "person",
+        "name": "Ursula von der Leyen",
+        "office": "President of the European Commission"
+      },
+      {
+        "at": {
+          "span": 42,
+          "words": "European Commission"
+        },
+        "kind": "organisation",
+        "name": "European Commission",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 42,
+          "words": "New York"
+        },
+        "kind": "place",
+        "name": "New York",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 42,
+          "words": "the forthcoming UK-EU summit"
+        },
+        "kind": "occasion",
+        "name": "UK-EU summit",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 43,
+          "words": "Brussels"
+        },
+        "kind": "place",
+        "name": "Brussels",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 54,
+          "words": "Scotland"
+        },
         "kind": "place",
         "name": "Scotland",
-        "role": "Part of the UK whose salmon exports face document checks"
+        "office": ""
       },
       {
+        "at": {
+          "span": 54,
+          "words": "Wales"
+        },
         "kind": "place",
         "name": "Wales",
-        "role": "Part of the UK whose shellfish exports are banned in the EU"
+        "office": ""
       },
       {
+        "at": {
+          "span": 60,
+          "words": "Northern Ireland"
+        },
         "kind": "place",
         "name": "Northern Ireland",
-        "role": "Part of the UK where the proposed energy deal could cut costs"
+        "office": ""
       },
       {
+        "at": {
+          "span": 63,
+          "words": "EU"
+        },
+        "kind": "organisation",
+        "name": "European Union",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 72,
+          "words": "Britain"
+        },
         "kind": "place",
-        "name": "Holborn and St Pancras",
-        "role": "Constituency of the new member"
+        "name": "Britain",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 72,
+          "words": "G20"
+        },
+        "kind": "occasion",
+        "name": "G20",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 74,
+          "words": "Microsoft"
+        },
+        "kind": "organisation",
+        "name": "Microsoft",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 74,
+          "words": "the President of Microsoft"
+        },
+        "kind": "person",
+        "name": "the President of Microsoft",
+        "office": "President of Microsoft"
+      },
+      {
+        "at": {
+          "span": 77,
+          "words": "Britain"
+        },
+        "kind": "place",
+        "name": "Britain",
+        "office": ""
+      }
+    ],
+    "refers_to": [
+      {
+        "from": {
+          "span": 2,
+          "words": "her"
+        },
+        "to": {
+          "span": 2,
+          "words": "the new member for Holborn and St Pancras"
+        }
+      },
+      {
+        "from": {
+          "span": 5,
+          "words": "my Honourable Friend"
+        },
+        "to": {
+          "span": 2,
+          "words": "the new member for Holborn and St Pancras"
+        }
+      },
+      {
+        "from": {
+          "span": 5,
+          "words": "her"
+        },
+        "to": {
+          "span": 2,
+          "words": "the new member for Holborn and St Pancras"
+        }
+      },
+      {
+        "from": {
+          "span": 9,
+          "words": "he"
+        },
+        "to": {
+          "span": 7,
+          "words": "President Zelenskyy"
+        }
+      },
+      {
+        "from": {
+          "span": 11,
+          "words": "them"
+        },
+        "to": {
+          "span": 7,
+          "words": "Ukraine"
+        }
+      },
+      {
+        "from": {
+          "span": 15,
+          "words": "It"
+        },
+        "to": {
+          "span": 13,
+          "words": "an energy ceasefire"
+        }
+      },
+      {
+        "from": {
+          "span": 17,
+          "words": "him"
+        },
+        "to": {
+          "span": 17,
+          "words": "President Zelenskyy"
+        }
+      },
+      {
+        "from": {
+          "span": 17,
+          "words": "it"
+        },
+        "to": {
+          "span": 16,
+          "words": "a reciprocal energy ceasefire"
+        }
+      },
+      {
+        "from": {
+          "span": 29,
+          "words": "it"
+        },
+        "to": {
+          "span": 28,
+          "words": "a Voyager aircraft"
+        }
+      },
+      {
+        "from": {
+          "span": 30,
+          "words": "This support"
+        },
+        "to": {
+          "span": 28,
+          "words": "air-to-air refuelling support"
+        }
+      },
+      {
+        "from": {
+          "span": 36,
+          "words": "it"
+        },
+        "to": {
+          "span": 35,
+          "words": "the incident at RAF Fairford"
+        }
+      },
+      {
+        "from": {
+          "span": 40,
+          "words": "the President"
+        },
+        "to": {
+          "span": 14,
+          "words": "President Trump"
+        }
+      },
+      {
+        "from": {
+          "span": 41,
+          "words": "their"
+        },
+        "to": {
+          "span": 40,
+          "words": "the islanders"
+        }
+      },
+      {
+        "from": {
+          "span": 43,
+          "words": "it"
+        },
+        "to": {
+          "span": 42,
+          "words": "the forthcoming UK-EU summit"
+        }
+      },
+      {
+        "from": {
+          "span": 44,
+          "words": "This summit"
+        },
+        "to": {
+          "span": 42,
+          "words": "the forthcoming UK-EU summit"
+        }
+      },
+      {
+        "from": {
+          "span": 46,
+          "words": "The Summit"
+        },
+        "to": {
+          "span": 42,
+          "words": "the forthcoming UK-EU summit"
+        }
+      },
+      {
+        "from": {
+          "span": 49,
+          "words": "It"
+        },
+        "to": {
+          "span": 48,
+          "words": "this opportunity"
+        }
+      },
+      {
+        "from": {
+          "span": 56,
+          "words": "it"
+        },
+        "to": {
+          "span": 55,
+          "words": "the agreement on the table"
+        }
+      },
+      {
+        "from": {
+          "span": 59,
+          "words": "It"
+        },
+        "to": {
+          "span": 55,
+          "words": "the agreement on the table"
+        }
+      },
+      {
+        "from": {
+          "span": 62,
+          "words": "it"
+        },
+        "to": {
+          "span": 62,
+          "words": "a deal along these lines"
+        }
+      },
+      {
+        "from": {
+          "span": 73,
+          "words": "it"
+        },
+        "to": {
+          "span": 73,
+          "words": "AI"
+        }
+      }
+    ],
+    "rejected": [
+      1
+    ],
+    "speakers": [
+      {
+        "span": {
+          "span": 1,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 2,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 3,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 4,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 5,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 6,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 7,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 8,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 9,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 10,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 11,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 12,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 13,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 14,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 15,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 16,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 17,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 18,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 19,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 20,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 21,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 22,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 23,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 24,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 25,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 26,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 27,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 28,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 29,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 30,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 31,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 32,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 33,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 34,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 35,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 36,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 37,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 38,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 39,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 40,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 41,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 42,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 43,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 44,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 45,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 46,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 47,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 48,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 49,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 50,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 51,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 52,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 53,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 54,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 55,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 56,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 57,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 58,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 59,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 60,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 61,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 62,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 63,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 64,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 65,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 66,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 67,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 68,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 69,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 70,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 71,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 72,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 73,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 74,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 75,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 76,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 77,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 78,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
+      },
+      {
+        "span": {
+          "span": 79,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "I"
+        }
       }
     ]
   },
@@ -434,449 +1580,693 @@
     {
       "act": "reading",
       "model": "claude-haiku-5-5",
-      "request_hash": "f537bab074d33c4ab6369e31e69b55c073648f7dcf1f622135ccef226d6ae2ce",
-      "recorded_at": "2026-10-26T22:44:54.206499Z",
+      "request_hash": "1c8068d716982ebb9b7e71e037cf78cc6d8529aa5652cead0ed6497d9e1cb628",
+      "recorded_at": "2026-10-30T21:00:46.340566Z",
       "usage": {
-        "input_tokens": 4485,
-        "output_tokens": 9335
+        "input_tokens": 5188,
+        "output_tokens": 12997
       },
       "output": {
-        "claims": [
+        "names": [
           {
-            "made_by": "Prime Minister",
-            "quote": "Britain is back and can be relied upon as a consistent and stable partner in an uncertain world",
-            "statement": "Britain is back and can be relied upon as a consistent and stable partner in an uncertain world."
-          },
-          {
-            "made_by": "Prime Minister",
-            "quote": "Russian strikes have intensified even further",
-            "statement": "Russian strikes on Ukraine have intensified even further in the three weeks since the New York meeting."
-          },
-          {
-            "made_by": "Prime Minister",
-            "quote": "Our largest food export, Scottish salmon, faces a 100% rate of document checks at the border, costing us around 100 million pounds in lost exports.",
-            "statement": "Scottish salmon faces a 100% rate of document checks at the border, costing around £100 million in lost exports."
-          },
-          {
-            "made_by": "Prime Minister",
-            "quote": "Together, these deals will add the equivalent of over 10 billion pounds per year to the UK economy by 2040",
-            "statement": "The UK-EU deals together will add over £10 billion per year to the UK economy by 2040."
-          },
-          {
-            "made_by": "Prime Minister",
-            "quote": "In Northern Ireland, the proposed energy deal could cut wholesale energy costs by 20%.",
-            "statement": "The proposed energy deal could cut wholesale energy costs in Northern Ireland by 20%."
-          },
-          {
-            "made_by": "Prime Minister",
-            "quote": "For small businesses, it means no more export health certificates, which can cost up to 200 pounds each time.",
-            "statement": "Export health certificates can cost up to £200 each time."
-          },
-          {
-            "made_by": "Prime Minister",
-            "quote": "it can reach 1,400 pounds on a single shipment",
-            "statement": "The paperwork burden can reach £1,400 on a single shipment for farmers and food producers."
-          },
-          {
-            "made_by": "Prime Minister",
-            "quote": "the clear and declared will of the islanders to remain British",
-            "statement": "The Falkland Islanders have a clear and declared will to remain British."
-          },
-          {
-            "made_by": "Prime Minister",
-            "quote": "I can tell you, Mr Speaker, that will never happen.",
-            "statement": "Daylight attacks intended to break Ukraine's will will never succeed."
-          },
-          {
-            "made_by": "Prime Minister",
-            "quote": "it is highly likely to have been coordinated in Iran, almost certainly directed by Iran’s Islamic Revolutionary Guard",
-            "statement": "The RAF Fairford incident was highly likely coordinated in Iran and almost certainly directed by Iran's Islamic Revolutionary Guard."
-          },
-          {
-            "made_by": "Prime Minister",
-            "quote": "I believe our chances of doing so will be enhanced by being open to a discussion about our relationship with the EU in the longer term.",
-            "statement": "Openness to discussing the long-term relationship with the EU will enhance the chances of a successful summit outcome."
-          },
-          {
-            "made_by": "Prime Minister",
-            "quote": "public opinion currently supports a pragmatic approach like the one I am suggesting",
-            "statement": "Public opinion currently supports a pragmatic approach to the EU relationship."
-          },
-          {
-            "made_by": "President of Microsoft",
-            "quote": "Leading voices like the President of Microsoft are saying Britain is the world leader in AI safety.",
-            "statement": "Britain is the world leader in AI safety."
-          }
-        ],
-        "facts": [
-          {
-            "as_at": "2026-10-12",
-            "quote": "I took a clear message to the UN",
-            "statement": "The Prime Minister took a message to the United Nations General Assembly."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "as I assure President Zelenskyy at our meeting in New York",
-            "statement": "The Prime Minister met President Zelenskyy in New York."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "When I spoke to President Zelenskyy on Saturday",
-            "statement": "The Prime Minister spoke to President Zelenskyy on Saturday."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "we have announced new funding to help them get through their fifth winter under Russian bombardment",
-            "statement": "The UK has announced new funding to help Ukraine get through its fifth winter under Russian bombardment."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "a new sanctions package so that over 90% of Russia’s oil producing capacity is now covered by UK sanctions",
-            "statement": "A new UK sanctions package covers over 90% of Russia's oil producing capacity."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "I raised this with President Trump in New York.",
-            "statement": "The Prime Minister raised an energy ceasefire with President Trump in New York."
-          },
-          {
-            "as_at": "2026-10-11",
-            "quote": "President Trump’s announcement yesterday of a reciprocal energy ceasefire",
-            "statement": "President Trump announced a reciprocal energy ceasefire on 2026-10-11."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "President Zelenskyy has assured me Ukraine would immediately implement it when a start date is confirmed",
-            "statement": "Ukraine intends to implement the energy ceasefire immediately when a start date is confirmed."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "I was clear in all of my meetings, including with the NATO Secretary General in Oxfordshire",
-            "statement": "The Prime Minister met the NATO Secretary General in Oxfordshire."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "we will meet our NATO commitments in full",
-            "statement": "The UK intends to meet its NATO commitments in full."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "In Berlin last week, Chancellor Merz and I agreed a new partnership to tackle these hybrid threats.",
-            "statement": "The Prime Minister and Chancellor Merz agreed a new partnership to tackle hybrid threats in Berlin."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "in Berlin I indicated Britain’s openness to Germany joining the Global Combat Air Programme alongside Italy and Japan",
-            "statement": "The Prime Minister indicated Britain's openness to Germany joining the Global Combat Air Programme."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "I confirmed our commitment to establish a new National Centre for Information Defence",
-            "statement": "The Prime Minister confirmed the UK's commitment to establish a National Centre for Information Defence."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "I confirmed Britain’s decision to send air defence and a Voyager aircraft to Saudi Arabia",
-            "statement": "Britain decided to send air defence and a Voyager aircraft to Saudi Arabia."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "it has already completed 14 operational missions",
-            "statement": "The Voyager aircraft deployed to Saudi Arabia has completed 14 operational missions."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "I condemn the appalling attacks on the King Khalid International Airport.",
-            "statement": "Attacks on King Khalid International Airport have taken place and the Prime Minister condemns them."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "We will continue to stand with Saudi Arabia against the Houthis.",
-            "statement": "The UK intends to continue standing with Saudi Arabia against the Houthis."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "to the incidents at RAF Fairford and RAF Molesworth",
-            "statement": "Incidents took place at RAF Fairford and RAF Molesworth, and police and military personnel responded swiftly."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "My right honourable friend the Home Secretary will update the House regarding the incident at RAF Fairford.",
-            "statement": "The Home Secretary intends to update the House on the RAF Fairford incident."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "we will bring further sanctions to restrict the capacity of Iran and the IRGC to do us harm",
-            "statement": "The UK intends to bring further sanctions to restrict the capacity of Iran and the IRGC."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "In my meeting with the President, I also raised the Falkland Islands",
-            "statement": "The Prime Minister raised the Falkland Islands with President Trump."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "In my meeting with President Trump, we discussed the situation in the Middle East.",
-            "statement": "The Prime Minister met President Trump and discussed the situation in the Middle East."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "I had a positive meeting with the President of the European Commission, Ursula von der Leyen",
-            "statement": "The Prime Minister met Ursula von der Leyen in New York."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "it will take place in Brussels on the 20th November",
-            "statement": "The UK-EU summit is scheduled for 20 November in Brussels."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "On the table is a trade deal on food and drink products, a deal on emissions trading progress towards linking our energy systems, a new youth experience scheme and deeper cooperation on immigration.",
-            "statement": "A food and drink trade deal, emissions trading progress, a youth experience scheme and deeper immigration cooperation are on the table for the UK-EU summit."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "I will work hard over the next 5 weeks to achieve it",
-            "statement": "The Prime Minister intends to work hard over the next 5 weeks to secure a deal with the EU."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "as we take up the presidency of the G20 in 2027",
-            "statement": "The UK takes up the presidency of the G20 in 2027."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "I confirmed in New York that we will place AI centre stage in our presidency",
-            "statement": "The Prime Minister confirmed in New York that AI will be central to the UK's G20 presidency."
-          },
-          {
-            "as_at": "2026-10-12",
-            "quote": "Welcome the new member for Holborn and St Pancras to her place",
-            "statement": "The new member for Holborn and St Pancras has taken her place in the House of Commons."
-          }
-        ],
-        "mentions": [
-          {
-            "kind": "person",
-            "name": "Prime Minister",
-            "role": "Prime Minister of the United Kingdom"
-          },
-          {
-            "kind": "organisation",
-            "name": "House of Commons",
-            "role": "lower house of the UK Parliament"
-          },
-          {
+            "at": {
+              "span": 1,
+              "words": "United Nations General Assembly"
+            },
             "kind": "occasion",
             "name": "United Nations General Assembly",
-            "role": "UN General Assembly session"
+            "office": ""
           },
           {
-            "kind": "organisation",
-            "name": "United Nations",
-            "role": "international organisation whose Charter sets shared values"
-          },
-          {
-            "kind": "place",
-            "name": "Britain",
-            "role": ""
-          },
-          {
-            "kind": "place",
-            "name": "Ukraine",
-            "role": ""
-          },
-          {
-            "kind": "place",
-            "name": "Russia",
-            "role": ""
-          },
-          {
-            "kind": "place",
-            "name": "New York",
-            "role": ""
-          },
-          {
+            "at": {
+              "span": 1,
+              "words": "Mr Speaker"
+            },
             "kind": "person",
-            "name": "President Zelenskyy",
-            "role": "President of Ukraine"
+            "name": "Mr Speaker",
+            "office": "Speaker of the House of Commons"
           },
           {
+            "at": {
+              "span": 1,
+              "words": "the House"
+            },
+            "kind": "organisation",
+            "name": "House of Commons",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 2,
+              "words": "the new member for Holborn and St Pancras"
+            },
             "kind": "person",
-            "name": "President Trump",
-            "role": "President of the United States"
+            "name": "Member for Holborn and St Pancras",
+            "office": "Member of Parliament for Holborn and St Pancras"
           },
           {
-            "kind": "organisation",
-            "name": "NATO",
-            "role": "defensive alliance"
-          },
-          {
-            "kind": "person",
-            "name": "NATO Secretary General",
-            "role": "NATO Secretary General"
-          },
-          {
-            "kind": "place",
-            "name": "Oxfordshire",
-            "role": ""
-          },
-          {
-            "kind": "person",
-            "name": "Chancellor Merz",
-            "role": "Chancellor of Germany"
-          },
-          {
-            "kind": "place",
-            "name": "Berlin",
-            "role": ""
-          },
-          {
-            "kind": "place",
-            "name": "Germany",
-            "role": ""
-          },
-          {
-            "kind": "organisation",
-            "name": "Global Combat Air Programme",
-            "role": "multinational combat air programme"
-          },
-          {
-            "kind": "place",
-            "name": "Italy",
-            "role": ""
-          },
-          {
-            "kind": "place",
-            "name": "Japan",
-            "role": ""
-          },
-          {
-            "kind": "organisation",
-            "name": "Foreign Affairs Select Committee",
-            "role": "select committee of the House of Commons"
-          },
-          {
-            "kind": "organisation",
-            "name": "National Centre for Information Defence",
-            "role": "planned UK information defence body"
-          },
-          {
-            "kind": "place",
-            "name": "Saudi Arabia",
-            "role": ""
-          },
-          {
-            "kind": "place",
-            "name": "King Khalid International Airport",
-            "role": ""
-          },
-          {
-            "kind": "organisation",
-            "name": "Houthis",
-            "role": ""
-          },
-          {
-            "kind": "place",
-            "name": "Middle East",
-            "role": ""
-          },
-          {
-            "kind": "place",
-            "name": "RAF Fairford",
-            "role": ""
-          },
-          {
-            "kind": "place",
-            "name": "RAF Molesworth",
-            "role": ""
-          },
-          {
-            "kind": "person",
-            "name": "Home Secretary",
-            "role": "Home Secretary"
-          },
-          {
-            "kind": "place",
-            "name": "Iran",
-            "role": ""
-          },
-          {
-            "kind": "organisation",
-            "name": "Islamic Revolutionary Guard",
-            "role": "Iranian military force, referred to as the IRGC"
-          },
-          {
-            "kind": "place",
-            "name": "Falkland Islands",
-            "role": ""
-          },
-          {
-            "kind": "person",
-            "name": "Ursula von der Leyen",
-            "role": "President of the European Commission"
-          },
-          {
-            "kind": "organisation",
-            "name": "European Commission",
-            "role": "executive body of the EU"
-          },
-          {
-            "kind": "organisation",
-            "name": "EU",
-            "role": "European Union"
-          },
-          {
-            "kind": "occasion",
-            "name": "UK-EU summit",
-            "role": "forthcoming summit in Brussels"
-          },
-          {
-            "kind": "place",
-            "name": "Brussels",
-            "role": ""
-          },
-          {
-            "kind": "place",
-            "name": "Northern Ireland",
-            "role": ""
-          },
-          {
-            "kind": "place",
-            "name": "Scotland",
-            "role": ""
-          },
-          {
-            "kind": "place",
-            "name": "Wales",
-            "role": ""
-          },
-          {
-            "kind": "occasion",
-            "name": "G20",
-            "role": "presidency held by the UK in 2027"
-          },
-          {
-            "kind": "organisation",
-            "name": "Microsoft",
-            "role": "technology company"
-          },
-          {
-            "kind": "person",
-            "name": "President of Microsoft",
-            "role": "President of Microsoft"
-          },
-          {
-            "kind": "person",
-            "name": "new member for Holborn and St Pancras",
-            "role": "Member of Parliament for Holborn and St Pancras"
-          },
-          {
+            "at": {
+              "span": 2,
+              "words": "Holborn and St Pancras"
+            },
             "kind": "place",
             "name": "Holborn and St Pancras",
-            "role": "constituency"
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 5,
+              "words": "my Honourable Friend"
+            },
+            "kind": "person",
+            "name": "Member for Holborn and St Pancras",
+            "office": "Member of Parliament for Holborn and St Pancras"
+          },
+          {
+            "at": {
+              "span": 6,
+              "words": "Britain"
+            },
+            "kind": "place",
+            "name": "United Kingdom",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 6,
+              "words": "UN"
+            },
+            "kind": "organisation",
+            "name": "United Nations",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 7,
+              "words": "New York"
+            },
+            "kind": "place",
+            "name": "New York",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 7,
+              "words": "Ukraine"
+            },
+            "kind": "place",
+            "name": "Ukraine",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 7,
+              "words": "President Zelenskyy"
+            },
+            "kind": "person",
+            "name": "Zelenskyy",
+            "office": "President of Ukraine"
+          },
+          {
+            "at": {
+              "span": 9,
+              "words": "President Zelenskyy"
+            },
+            "kind": "person",
+            "name": "Zelenskyy",
+            "office": "President of Ukraine"
+          },
+          {
+            "at": {
+              "span": 9,
+              "words": "Russia"
+            },
+            "kind": "place",
+            "name": "Russia",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 10,
+              "words": "Mr Speaker"
+            },
+            "kind": "person",
+            "name": "Mr Speaker",
+            "office": "Speaker of the House of Commons"
+          },
+          {
+            "at": {
+              "span": 14,
+              "words": "President Trump"
+            },
+            "kind": "person",
+            "name": "Trump",
+            "office": "President of the United States"
+          },
+          {
+            "at": {
+              "span": 16,
+              "words": "President Trump"
+            },
+            "kind": "person",
+            "name": "Trump",
+            "office": "President of the United States"
+          },
+          {
+            "at": {
+              "span": 17,
+              "words": "President Zelenskyy"
+            },
+            "kind": "person",
+            "name": "Zelenskyy",
+            "office": "President of Ukraine"
+          },
+          {
+            "at": {
+              "span": 18,
+              "words": "NATO"
+            },
+            "kind": "organisation",
+            "name": "North Atlantic Treaty Organization",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 18,
+              "words": "Mr Speaker"
+            },
+            "kind": "person",
+            "name": "Mr Speaker",
+            "office": "Speaker of the House of Commons"
+          },
+          {
+            "at": {
+              "span": 21,
+              "words": "NATO Secretary General"
+            },
+            "kind": "person",
+            "name": "NATO Secretary General",
+            "office": "Secretary General of NATO"
+          },
+          {
+            "at": {
+              "span": 22,
+              "words": "Russia"
+            },
+            "kind": "place",
+            "name": "Russia",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 23,
+              "words": "Chancellor Merz"
+            },
+            "kind": "person",
+            "name": "Merz",
+            "office": "Chancellor of Germany"
+          },
+          {
+            "at": {
+              "span": 23,
+              "words": "Berlin"
+            },
+            "kind": "place",
+            "name": "Berlin",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 25,
+              "words": "National Centre for Information Defence"
+            },
+            "kind": "organisation",
+            "name": "National Centre for Information Defence",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 25,
+              "words": "Foreign Affairs Select Committee"
+            },
+            "kind": "organisation",
+            "name": "Foreign Affairs Select Committee",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 25,
+              "words": "UN General Assembly"
+            },
+            "kind": "occasion",
+            "name": "United Nations General Assembly",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 26,
+              "words": "Berlin"
+            },
+            "kind": "place",
+            "name": "Berlin",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 26,
+              "words": "Germany"
+            },
+            "kind": "place",
+            "name": "Germany",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 26,
+              "words": "Global Combat Air Programme"
+            },
+            "kind": "organisation",
+            "name": "Global Combat Air Programme",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 26,
+              "words": "Italy"
+            },
+            "kind": "place",
+            "name": "Italy",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 26,
+              "words": "Japan"
+            },
+            "kind": "place",
+            "name": "Japan",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 27,
+              "words": "President Trump"
+            },
+            "kind": "person",
+            "name": "Trump",
+            "office": "President of the United States"
+          },
+          {
+            "at": {
+              "span": 28,
+              "words": "Saudi Arabia"
+            },
+            "kind": "place",
+            "name": "Saudi Arabia",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 31,
+              "words": "King Khalid International Airport"
+            },
+            "kind": "place",
+            "name": "King Khalid International Airport",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 32,
+              "words": "Saudi Arabia"
+            },
+            "kind": "place",
+            "name": "Saudi Arabia",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 32,
+              "words": "Houthis"
+            },
+            "kind": "organisation",
+            "name": "Houthis",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 33,
+              "words": "Mr Speaker"
+            },
+            "kind": "person",
+            "name": "Mr Speaker",
+            "office": "Speaker of the House of Commons"
+          },
+          {
+            "at": {
+              "span": 34,
+              "words": "RAF Fairford"
+            },
+            "kind": "place",
+            "name": "RAF Fairford",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 34,
+              "words": "RAF Molesworth"
+            },
+            "kind": "place",
+            "name": "RAF Molesworth",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 35,
+              "words": "my right honourable friend the Home Secretary"
+            },
+            "kind": "person",
+            "name": "Home Secretary",
+            "office": "Home Secretary"
+          },
+          {
+            "at": {
+              "span": 35,
+              "words": "RAF Fairford"
+            },
+            "kind": "place",
+            "name": "RAF Fairford",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 36,
+              "words": "Iran"
+            },
+            "kind": "place",
+            "name": "Iran",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 36,
+              "words": "Islamic Revolutionary Guard"
+            },
+            "kind": "organisation",
+            "name": "Islamic Revolutionary Guard",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 38,
+              "words": "Iran"
+            },
+            "kind": "place",
+            "name": "Iran",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 39,
+              "words": "Iran"
+            },
+            "kind": "place",
+            "name": "Iran",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 39,
+              "words": "IRGC"
+            },
+            "kind": "organisation",
+            "name": "Islamic Revolutionary Guard",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 40,
+              "words": "Falkland Islands"
+            },
+            "kind": "place",
+            "name": "Falkland Islands",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 41,
+              "words": "General Assembly"
+            },
+            "kind": "occasion",
+            "name": "United Nations General Assembly",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 42,
+              "words": "Ursula von der Leyen"
+            },
+            "kind": "person",
+            "name": "Ursula von der Leyen",
+            "office": "President of the European Commission"
+          },
+          {
+            "at": {
+              "span": 42,
+              "words": "UK-EU summit"
+            },
+            "kind": "occasion",
+            "name": "UK-EU summit",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 42,
+              "words": "Mr Speaker"
+            },
+            "kind": "person",
+            "name": "Mr Speaker",
+            "office": "Speaker of the House of Commons"
+          },
+          {
+            "at": {
+              "span": 43,
+              "words": "Brussels"
+            },
+            "kind": "place",
+            "name": "Brussels",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 46,
+              "words": "The Summit"
+            },
+            "kind": "occasion",
+            "name": "UK-EU summit",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 48,
+              "words": "Mr Speaker"
+            },
+            "kind": "person",
+            "name": "Mr Speaker",
+            "office": "Speaker of the House of Commons"
+          },
+          {
+            "at": {
+              "span": 60,
+              "words": "Northern Ireland"
+            },
+            "kind": "place",
+            "name": "Northern Ireland",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 63,
+              "words": "the EU"
+            },
+            "kind": "organisation",
+            "name": "European Union",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 71,
+              "words": "Mr Speaker"
+            },
+            "kind": "person",
+            "name": "Mr Speaker",
+            "office": "Speaker of the House of Commons"
+          },
+          {
+            "at": {
+              "span": 72,
+              "words": "G20"
+            },
+            "kind": "occasion",
+            "name": "G20 presidency",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 74,
+              "words": "President of Microsoft"
+            },
+            "kind": "person",
+            "name": "President of Microsoft",
+            "office": "President of Microsoft"
+          },
+          {
+            "at": {
+              "span": 76,
+              "words": "Mr Speaker"
+            },
+            "kind": "person",
+            "name": "Mr Speaker",
+            "office": "Speaker of the House of Commons"
           }
-        ]
+        ],
+        "refers_to": [
+          {
+            "from": {
+              "span": 2,
+              "words": "her"
+            },
+            "to": {
+              "span": 2,
+              "words": "the new member for Holborn and St Pancras"
+            }
+          },
+          {
+            "from": {
+              "span": 5,
+              "words": "my Honourable Friend"
+            },
+            "to": {
+              "span": 2,
+              "words": "the new member for Holborn and St Pancras"
+            }
+          },
+          {
+            "from": {
+              "span": 5,
+              "words": "this House"
+            },
+            "to": {
+              "span": 1,
+              "words": "the House"
+            }
+          },
+          {
+            "from": {
+              "span": 9,
+              "words": "he"
+            },
+            "to": {
+              "span": 9,
+              "words": "President Zelenskyy"
+            }
+          },
+          {
+            "from": {
+              "span": 11,
+              "words": "them"
+            },
+            "to": {
+              "span": 7,
+              "words": "Ukraine"
+            }
+          },
+          {
+            "from": {
+              "span": 15,
+              "words": "It"
+            },
+            "to": {
+              "span": 13,
+              "words": "an energy ceasefire"
+            }
+          },
+          {
+            "from": {
+              "span": 17,
+              "words": "it"
+            },
+            "to": {
+              "span": 16,
+              "words": "a reciprocal energy ceasefire"
+            }
+          },
+          {
+            "from": {
+              "span": 29,
+              "words": "it"
+            },
+            "to": {
+              "span": 28,
+              "words": "a Voyager aircraft"
+            }
+          },
+          {
+            "from": {
+              "span": 36,
+              "words": "it"
+            },
+            "to": {
+              "span": 35,
+              "words": "the incident at RAF Fairford"
+            }
+          },
+          {
+            "from": {
+              "span": 40,
+              "words": "the President"
+            },
+            "to": {
+              "span": 14,
+              "words": "President Trump"
+            }
+          },
+          {
+            "from": {
+              "span": 40,
+              "words": "the islanders"
+            },
+            "to": {
+              "span": 40,
+              "words": "Falkland Islands"
+            }
+          },
+          {
+            "from": {
+              "span": 43,
+              "words": "it"
+            },
+            "to": {
+              "span": 42,
+              "words": "UK-EU summit"
+            }
+          },
+          {
+            "from": {
+              "span": 48,
+              "words": "this House"
+            },
+            "to": {
+              "span": 1,
+              "words": "the House"
+            }
+          }
+        ],
+        "rejected": [
+          3,
+          4,
+          79
+        ],
+        "speakers": []
       }
     }
   ]

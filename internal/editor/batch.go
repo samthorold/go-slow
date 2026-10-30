@@ -407,26 +407,22 @@ func (e *Editor) Reading() BatchAct {
 	return BatchAct{
 		Name: "reading",
 		Waiting: func(ctx context.Context) ([]Job, error) {
-			items, err := e.Store.ItemsToRead(ctx)
+			waiting, err := e.Store.ItemsToRead(ctx)
 			if err != nil {
 				return nil, err
 			}
-			jobs := make([]Job, 0, len(items))
-			for _, it := range items {
-				ps, err := e.Store.ReadingPrecedents(ctx, it, precedentsShown)
-				if err != nil {
-					return nil, err
-				}
-				req, err := readingRequest(it, ps)
-				if err != nil {
-					continue
-				}
+			jobs := make([]Job, 0, len(waiting))
+			for _, tr := range waiting {
+				req := readingRequest(tr)
 				jobs = append(jobs, Job{
-					Key:        itemKey(it),
-					Request:    req,
-					Precedents: feedbackIDs(ps),
+					Key:     itemKey(tr.Item),
+					Request: req,
 					Apply: func(ctx context.Context, res Response, now time.Time) error {
-						return e.keep(ctx, it, ps, res, now)
+						r, err := checkReading(tr, req, modelOf(e.ModelFor, req.Act), res)
+						if err != nil {
+							return err
+						}
+						return e.keepReading(ctx, r, now)
 					},
 				})
 			}

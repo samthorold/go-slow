@@ -186,7 +186,7 @@ func TestUndoIsInTheRowsActionsAndAnUndoneRowIsStruckThrough(t *testing.T) {
 func TestFeedbackOnAFactWithNoKeptReadingCallLinksToItsItem(t *testing.T) {
 	store := openStore(t)
 	seed(t, store, saturday.AddDate(0, 0, -7), item("speech", "PM speech in Scotland", saturday.Add(-48*time.Hour)))
-	if err := store.SaveReading(t.Context(), editor.Reading{SourceID: number10.ID, EntryID: "speech", Model: "fake",
+	if err := store.SaveFactReading(t.Context(), editor.FactReading{SourceID: number10.ID, EntryID: "speech", Model: "fake",
 		Facts: []editor.Fact{{Statement: "Andy Burnham spoke in Motherwell.", AsAt: saturday, Quote: "Motherwell"}}},
 		saturday.Add(-time.Hour)); err != nil {
 		t.Fatal(err)

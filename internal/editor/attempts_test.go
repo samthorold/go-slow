@@ -80,10 +80,7 @@ func keepsFailing(t *testing.T, answer func(editor.BatchRequest) editor.BatchRes
 
 func TestAnItemHeldBackBehindAnItemWhosePlacingFailedGoesAhead(t *testing.T) {
 	store := record(t)
-	ed, _ := placer(store, &fakeModel{})
-	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
-		t.Fatal(err)
-	}
+	drawSpeechFacts(t, store, saturday)
 	// The readout shares Andy Burnham with the speech, so waits behind it.
 	readLater(t, store)
 	batcher := &fakeBatcher{}
@@ -112,9 +109,7 @@ func TestAnItemHeldBackBehindAnItemWhosePlacingFailedGoesAhead(t *testing.T) {
 func TestConnectingThatKeepsFailingIsNoLongerSubmitted(t *testing.T) {
 	store := record(t)
 	ed, _ := placer(store, &fakeModel{output: startsAStory})
-	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
-		t.Fatal(err)
-	}
+	drawSpeechFacts(t, store, saturday)
 	if err := ed.PlaceWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}

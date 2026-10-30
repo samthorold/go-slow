@@ -33,9 +33,7 @@ func TestAPlacingInRealTimeLeavesAKeptCall(t *testing.T) {
 	store := record(t)
 	m := &answeringModel{res: answered(startsAStory)}
 	ed := keepingPlacer(store, m)
-	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
-		t.Fatal(err)
-	}
+	drawSpeechFacts(t, store, saturday)
 
 	if err := ed.PlaceWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
@@ -63,9 +61,7 @@ func TestAPlacingInRealTimeLeavesAKeptCall(t *testing.T) {
 func TestAPlacingInRealTimeRefusedByItsChecksIsKeptWithItsReason(t *testing.T) {
 	store := record(t)
 	ed := keepingPlacer(store, &answeringModel{res: answered(`{"new_stories": [], "facts": []}`)})
-	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
-		t.Fatal(err)
-	}
+	drawSpeechFacts(t, store, saturday)
 
 	if err := ed.PlaceWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)

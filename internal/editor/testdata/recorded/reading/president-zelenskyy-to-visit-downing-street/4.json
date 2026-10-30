@@ -1,182 +1,566 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "1c18e7042327739a6d1338412101627d51550b7c93eaa8b1da636f0b9cf82e7a",
-  "recorded_at": "2026-10-26T22:47:28.269227Z",
+  "request_hash": "2e9537070d1d11ea1022aa0e9137736f75d19ab8d414380bd1fd1a101d04c644",
+  "recorded_at": "2026-10-30T21:04:32.000461Z",
   "usage": {
-    "input_tokens": 2808,
-    "output_tokens": 4494
+    "input_tokens": 3351,
+    "output_tokens": 8550
   },
   "output": {
-    "claims": [
+    "names": [
       {
-        "made_by": "Andy Burnham",
-        "quote": "Our rock-solid support to Ukraine is vital for keeping us safe here in the UK",
-        "statement": "UK support to Ukraine is vital for keeping the UK safe."
-      },
-      {
-        "made_by": "Andy Burnham",
-        "quote": "Russia’s aggression cannot be allowed to succeed on our continent.",
-        "statement": "Russia's aggression cannot be allowed to succeed on the European continent."
-      },
-      {
-        "made_by": "UK Government",
-        "quote": "have proven extremely effective against jet-powered drones",
-        "statement": "British Lightweight Multirole Missiles have proven extremely effective against jet-powered drones."
-      },
-      {
-        "made_by": "UK Government",
-        "quote": "The drones are faster and can fly far higher than propeller-driven Shaheds, making them harder to detect and destroy before they hit targets.",
-        "statement": "The jet-powered drones are faster and fly higher than propeller-driven Shaheds, making them harder to detect and destroy before they hit targets."
-      },
-      {
-        "made_by": "John Healey",
-        "quote": "to curtail the war chest funding Putin so desperately wants",
-        "statement": "Urging partners to back the ban on Russian LNG will curtail the war chest funding Putin."
-      },
-      {
-        "made_by": "John Healey",
-        "quote": "Conflict in the Middle East and in Europe is hitting people across the world.",
-        "statement": "Conflict in the Middle East and in Europe is hitting people across the world."
-      }
-    ],
-    "facts": [
-      {
-        "as_at": "2026-10-13",
-        "quote": "to host President Volodymyr Zelenskyy at Downing Street today",
-        "statement": "The Prime Minister is hosting President Volodymyr Zelenskyy at Downing Street on 2026-10-13."
-      },
-      {
-        "as_at": "2026-10-13",
-        "quote": "President Zelenskyy will arrive in the UK this morning",
-        "statement": "President Zelenskyy is due to arrive in the UK on 2026-10-13."
-      },
-      {
-        "as_at": "2026-10-13",
-        "quote": "The Prime Minister has also asked Ministers to draw up further sanctions, military aid, and fiscal packages to provide urgent support in the coming weeks.",
-        "statement": "The Prime Minister has asked Ministers to draw up further sanctions, military aid and fiscal packages."
-      },
-      {
-        "as_at": "2026-10-13",
-        "quote": "The UK has already committed £1.6 billion to deliver more than 5000 LMMs to Ukraine over the next four years",
-        "statement": "The UK has committed £1.6 billion to deliver more than 5000 British Lightweight Multirole Missiles to Ukraine over the next four years."
-      },
-      {
-        "as_at": "2026-10-13",
-        "quote": "the £45m package of missiles announced today",
-        "statement": "The UK has announced a £45 million package of missiles for Ukraine."
-      },
-      {
-        "as_at": "2026-10-13",
-        "quote": "The UK will accelerate deliveries of British Lightweight Multirole Missiles (LMMs)",
-        "statement": "The UK intends to accelerate deliveries of British Lightweight Multirole Missiles to Ukraine."
-      },
-      {
-        "as_at": "2026-10-13",
-        "quote": "will accelerate £10 million of the £45m package of missiles announced today to meet Ukraine’s most urgent winter requirements",
-        "statement": "The UK intends to accelerate £10 million of the £45 million missile package to meet Ukraine's most urgent winter requirements."
-      },
-      {
-        "as_at": "2026-10-13",
-        "quote": "standing by plans to fully implement a maritime services ban on Russian liquefied natural gas (LNG) exports",
-        "statement": "The UK intends to fully implement a maritime services ban on Russian LNG exports."
-      },
-      {
-        "as_at": "2026-10-13",
-        "quote": "Chancellor John Healey will use his meetings at the IMF in Bangkok",
-        "statement": "Chancellor John Healey is attending IMF meetings in Bangkok."
-      },
-      {
-        "as_at": "2026-10-12",
-        "quote": "the Foreign Secretary did the same with partners at the Warsaw Security Forum yesterday [TUE]",
-        "statement": "The Foreign Secretary urged partners to fully implement a ban on Russian LNG at the Warsaw Security Forum on 2026-10-12."
-      },
-      {
-        "as_at": "2026-10-13",
-        "quote": "As Russia continues its bombardment of Ukraine’s capital Kyiv and energy infrastructure",
-        "statement": "Russia is continuing its bombardment of Kyiv and Ukraine's energy infrastructure."
-      },
-      {
-        "as_at": "2026-10-13",
-        "quote": "Ahead of the two leaders meeting today, Prime Minister Andy Burnham said:",
-        "statement": "Prime Minister Andy Burnham made a statement ahead of the meeting with President Zelenskyy."
-      },
-      {
-        "as_at": "2026-10-13",
-        "quote": "Chancellor of the Exchequer John Healey said:",
-        "statement": "Chancellor of the Exchequer John Healey made a statement urging partners to back the ban on Russian LNG."
-      }
-    ],
-    "mentions": [
-      {
-        "kind": "person",
-        "name": "Andy Burnham",
-        "role": "Prime Minister of the United Kingdom"
-      },
-      {
+        "at": {
+          "span": 1,
+          "words": "President Volodymyr Zelenskyy"
+        },
         "kind": "person",
         "name": "Volodymyr Zelenskyy",
-        "role": "President of Ukraine"
+        "office": "President of Ukraine"
       },
       {
+        "at": {
+          "span": 2,
+          "words": "President Zelenskyy"
+        },
         "kind": "person",
-        "name": "John Healey",
-        "role": "Chancellor of the Exchequer"
+        "name": "Volodymyr Zelenskyy",
+        "office": "President of Ukraine"
       },
       {
+        "at": {
+          "span": 4,
+          "words": "President Zelenskyy"
+        },
         "kind": "person",
-        "name": "Foreign Secretary",
-        "role": ""
+        "name": "Volodymyr Zelenskyy",
+        "office": "President of Ukraine"
       },
       {
-        "kind": "person",
-        "name": "Putin",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Downing Street",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "United Kingdom",
-        "role": ""
-      },
-      {
+        "at": {
+          "span": 1,
+          "words": "Ukraine"
+        },
         "kind": "place",
         "name": "Ukraine",
-        "role": ""
+        "office": ""
       },
       {
+        "at": {
+          "span": 2,
+          "words": "Ukraine"
+        },
+        "kind": "place",
+        "name": "Ukraine",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 3,
+          "words": "Ukraine"
+        },
+        "kind": "place",
+        "name": "Ukraine",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 5,
+          "words": "Ukraine"
+        },
+        "kind": "place",
+        "name": "Ukraine",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 6,
+          "words": "Ukraine"
+        },
+        "kind": "place",
+        "name": "Ukraine",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 8,
+          "words": "Ukraine’s"
+        },
+        "kind": "place",
+        "name": "Ukraine",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 17,
+          "words": "Ukraine’s"
+        },
+        "kind": "place",
+        "name": "Ukraine",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 1,
+          "words": "the UK’s"
+        },
+        "kind": "place",
+        "name": "United Kingdom",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 2,
+          "words": "UK"
+        },
+        "kind": "place",
+        "name": "United Kingdom",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "the UK"
+        },
+        "kind": "place",
+        "name": "United Kingdom",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 5,
+          "words": "the UK"
+        },
+        "kind": "place",
+        "name": "United Kingdom",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 8,
+          "words": "The UK"
+        },
+        "kind": "place",
+        "name": "United Kingdom",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 10,
+          "words": "the UK"
+        },
+        "kind": "place",
+        "name": "United Kingdom",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 15,
+          "words": "the UK’s"
+        },
+        "kind": "place",
+        "name": "United Kingdom",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 21,
+          "words": "the UK"
+        },
+        "kind": "place",
+        "name": "United Kingdom",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 1,
+          "words": "Prime Minister"
+        },
+        "kind": "person",
+        "name": "Andy Burnham",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 2,
+          "words": "the Prime Minister"
+        },
+        "kind": "person",
+        "name": "Andy Burnham",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 9,
+          "words": "Prime Minister Andy Burnham"
+        },
+        "kind": "person",
+        "name": "Andy Burnham",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 14,
+          "words": "The Prime Minister"
+        },
+        "kind": "person",
+        "name": "Andy Burnham",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 3,
+          "words": "the Chancellor"
+        },
+        "kind": "person",
+        "name": "John Healey",
+        "office": "Chancellor of the Exchequer"
+      },
+      {
+        "at": {
+          "span": 15,
+          "words": "Chancellor John Healey"
+        },
+        "kind": "person",
+        "name": "John Healey",
+        "office": "Chancellor of the Exchequer"
+      },
+      {
+        "at": {
+          "span": 17,
+          "words": "the Chancellor"
+        },
+        "kind": "person",
+        "name": "John Healey",
+        "office": "Chancellor of the Exchequer"
+      },
+      {
+        "at": {
+          "span": 18,
+          "words": "Chancellor of the Exchequer John Healey"
+        },
+        "kind": "person",
+        "name": "John Healey",
+        "office": "Chancellor of the Exchequer"
+      },
+      {
+        "at": {
+          "span": 3,
+          "words": "IMF"
+        },
+        "kind": "organisation",
+        "name": "International Monetary Fund",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 15,
+          "words": "IMF"
+        },
+        "kind": "organisation",
+        "name": "International Monetary Fund",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 3,
+          "words": "Russia"
+        },
         "kind": "place",
         "name": "Russia",
-        "role": ""
+        "office": ""
       },
       {
+        "at": {
+          "span": 4,
+          "words": "Russia"
+        },
         "kind": "place",
-        "name": "Kyiv",
-        "role": ""
+        "name": "Russia",
+        "office": ""
       },
       {
+        "at": {
+          "span": 5,
+          "words": "Russia’s"
+        },
+        "kind": "place",
+        "name": "Russia",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 10,
+          "words": "Russia"
+        },
+        "kind": "place",
+        "name": "Russia",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 13,
+          "words": "Russia’s"
+        },
+        "kind": "place",
+        "name": "Russia",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 17,
+          "words": "Russia"
+        },
+        "kind": "place",
+        "name": "Russia",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 3,
+          "words": "the US’"
+        },
         "kind": "place",
         "name": "United States",
-        "role": ""
+        "office": ""
       },
       {
+        "at": {
+          "span": 4,
+          "words": "the United States’"
+        },
+        "kind": "place",
+        "name": "United States",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "Putin"
+        },
+        "kind": "person",
+        "name": "Putin",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 20,
+          "words": "Putin"
+        },
+        "kind": "person",
+        "name": "Putin",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 21,
+          "words": "Putin"
+        },
+        "kind": "person",
+        "name": "Putin",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 1,
+          "words": "Downing Street"
+        },
+        "kind": "place",
+        "name": "Downing Street",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 6,
+          "words": "Kyiv"
+        },
+        "kind": "place",
+        "name": "Kyiv",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 17,
+          "words": "Kyiv"
+        },
+        "kind": "place",
+        "name": "Kyiv",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 15,
+          "words": "Bangkok"
+        },
         "kind": "place",
         "name": "Bangkok",
-        "role": ""
+        "office": ""
       },
       {
-        "kind": "organisation",
-        "name": "IMF",
-        "role": ""
-      },
-      {
+        "at": {
+          "span": 16,
+          "words": "Warsaw Security Forum"
+        },
         "kind": "occasion",
         "name": "Warsaw Security Forum",
-        "role": ""
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 16,
+          "words": "the Foreign Secretary"
+        },
+        "kind": "person",
+        "name": "Foreign Secretary",
+        "office": "Foreign Secretary of the United Kingdom"
+      }
+    ],
+    "refers_to": [
+      {
+        "from": {
+          "span": 2,
+          "words": "he"
+        },
+        "to": {
+          "span": 9,
+          "words": "Prime Minister Andy Burnham"
+        }
+      },
+      {
+        "from": {
+          "span": 6,
+          "words": "which"
+        },
+        "to": {
+          "span": 6,
+          "words": "British Lightweight Multirole Missiles (LMMs)"
+        }
+      },
+      {
+        "from": {
+          "span": 7,
+          "words": "The drones"
+        },
+        "to": {
+          "span": 6,
+          "words": "jet-powered drones"
+        }
+      },
+      {
+        "from": {
+          "span": 7,
+          "words": "them"
+        },
+        "to": {
+          "span": 6,
+          "words": "jet-powered drones"
+        }
+      },
+      {
+        "from": {
+          "span": 7,
+          "words": "they"
+        },
+        "to": {
+          "span": 6,
+          "words": "jet-powered drones"
+        }
+      },
+      {
+        "from": {
+          "span": 8,
+          "words": "the £45m package"
+        },
+        "to": {
+          "span": 5,
+          "words": "£45 million of surface-to-air missiles deliveries"
+        }
+      },
+      {
+        "from": {
+          "span": 15,
+          "words": "his"
+        },
+        "to": {
+          "span": 18,
+          "words": "Chancellor of the Exchequer John Healey"
+        }
+      }
+    ],
+    "rejected": [
+      9,
+      18
+    ],
+    "speakers": [
+      {
+        "span": {
+          "span": 10,
+          "words": ""
+        },
+        "speaker": {
+          "span": 9,
+          "words": "Prime Minister Andy Burnham"
+        }
+      },
+      {
+        "span": {
+          "span": 11,
+          "words": ""
+        },
+        "speaker": {
+          "span": 9,
+          "words": "Prime Minister Andy Burnham"
+        }
+      },
+      {
+        "span": {
+          "span": 12,
+          "words": ""
+        },
+        "speaker": {
+          "span": 9,
+          "words": "Prime Minister Andy Burnham"
+        }
+      },
+      {
+        "span": {
+          "span": 13,
+          "words": ""
+        },
+        "speaker": {
+          "span": 9,
+          "words": "Prime Minister Andy Burnham"
+        }
+      },
+      {
+        "span": {
+          "span": 19,
+          "words": ""
+        },
+        "speaker": {
+          "span": 18,
+          "words": "Chancellor of the Exchequer John Healey"
+        }
+      },
+      {
+        "span": {
+          "span": 20,
+          "words": ""
+        },
+        "speaker": {
+          "span": 18,
+          "words": "Chancellor of the Exchequer John Healey"
+        }
+      },
+      {
+        "span": {
+          "span": 21,
+          "words": ""
+        },
+        "speaker": {
+          "span": 18,
+          "words": "Chancellor of the Exchequer John Healey"
+        }
       }
     ]
   }

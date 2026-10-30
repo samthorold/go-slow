@@ -8,16 +8,13 @@ import (
 
 // Store is the part of the Record the Editor reads and writes.
 type Store interface {
-	// ItemsToRead are the Items awaiting reading: tied to a Topic by the
-	// lazy-reading check, and not yet read.
-	ItemsToRead(ctx context.Context) ([]Item, error)
-	// ReadingPrecedents are at most limit pieces of the Owner's Feedback
-	// that a Fact was wrong, on Facts from Items sharing a Topic with it:
-	// those sharing the most Topics first, then the newest.
-	ReadingPrecedents(ctx context.Context, it Item, limit int) ([]Precedent, error)
-	// SaveReading writes a reading to the Record, all at once, and marks
-	// its Item read at readAt.
-	SaveReading(ctx context.Context, r Reading, readAt time.Time) error
+	// ItemsToRead are the Items awaiting reading: every Item cut and not
+	// yet read, whatever it is about, each with its newest Cut, oldest
+	// first. Work marked failed awaits nothing.
+	ItemsToRead(ctx context.Context) ([]ToRead, error)
+	// KeepReading keeps a reading, each of its judgements as its own event
+	// with the reading's Judge, all at once.
+	KeepReading(ctx context.Context, r Reading) error
 	// FactsToPlace are the Facts awaiting placing, by Item, oldest Item
 	// first.
 	FactsToPlace(ctx context.Context) ([]ToPlace, error)
@@ -60,7 +57,7 @@ type Deps struct {
 	// ConnectingModel is the model connecting runs on, chosen by
 	// configuration.
 	ConnectingModel Model
-	// Wikidata is where reading looks Entities up first.
+	// Wikidata is the Reference source the Sunday read's tools look up.
 	Wikidata Wikidata
 	// Briefings is the part of the Record the Briefing is written from and
 	// kept in, and BriefingModel the model it is written with.
@@ -85,63 +82,51 @@ type Editor struct {
 // New builds the Editor.
 func New(d Deps) *Editor { return &Editor{Deps: d} }
 
-// ReadWaiting reads every Item awaiting reading, at now. A reading that fails
-// (a failed call, a result that fails the checks) is logged and writes
-// nothing, so its Item stays awaiting reading and is read on the next run;
-// it does not stop the others. Only a failing Record is an error.
+// ReadWaiting reads every Item awaiting reading, at now, in real time: the
+// synchronous path, for when no batch interface is available. A reading
+// that fails (a failed call, a result that fails the checks) is logged and
+// writes nothing, so its Item stays awaiting reading and is read on the next
+// run; it does not stop the others. Only a failing Record is an error.
 func (e *Editor) ReadWaiting(ctx context.Context, now time.Time) error {
-	items, err := e.Store.ItemsToRead(ctx)
+	waiting, err := e.Store.ItemsToRead(ctx)
 	if err != nil {
 		return err
 	}
-	for _, it := range items {
-		ps, err := e.Store.ReadingPrecedents(ctx, it, precedentsShown)
-		if err != nil {
+	for _, tr := range waiting {
+		req := readingRequest(tr)
+		var r Reading
+		call, err := e.callNow(ctx, e.Model, itemKey(tr.Item), req, nil, now, func(res Response) (err error) {
+			r, err = checkReading(tr, req, modelOf(e.ModelFor, req.Act), res)
 			return err
-		}
-		r, call, err := e.readNow(ctx, it, ps, now)
+		})
 		if err != nil {
-			if call != nil {
-				if err := e.Store.KeepCall(ctx, *call); err != nil {
-					return err
-				}
+			if err := e.Store.KeepCall(ctx, call); err != nil {
+				return err
 			}
-			e.Log.ErrorContext(ctx, "reading failed", "source", it.SourceID, "entry", it.EntryID, "error", err)
+			e.Log.ErrorContext(ctx, "reading failed", "source", tr.Item.SourceID, "entry", tr.Item.EntryID, "error", err)
 			continue
 		}
-		if err := e.Store.SaveReading(ctx, r, now); err != nil {
+		if err := e.keepReading(ctx, r, now); err != nil {
 			return err
 		}
-		if err := e.Store.KeepCall(ctx, *call); err != nil {
+		if err := e.Store.KeepCall(ctx, call); err != nil {
 			return err
 		}
-		e.Log.InfoContext(ctx, "read", "source", it.SourceID, "entry", it.EntryID,
-			"facts", len(r.Facts), "claims", len(r.Claims), "model", r.Model,
-			"input_tokens", r.Usage.InputTokens, "output_tokens", r.Usage.OutputTokens)
 	}
 	return nil
 }
 
-// readNow reads an Item in real time, shown the precedents, at now: the
-// reading, ready to write, and its call, ended as it came out. The call is
-// nil only when no request could be made. A reading whose call failed, whose
-// result fails the checks or whose Entities could not be looked up is an
-// error, and its call says which.
-func (e *Editor) readNow(ctx context.Context, it Item, ps []Precedent, now time.Time) (Reading, *Call, error) {
-	req, err := readingRequest(it, ps)
-	if err != nil {
-		return Reading{}, nil, err
-	}
-	var r Reading
-	call, err := e.callNow(ctx, e.Model, itemKey(it), req, feedbackIDs(ps), now, func(res Response) error {
-		checked, err := checkReading(it, ps, res)
-		if err != nil {
-			return err
-		}
-		r, err = resolve(ctx, e.Wikidata, checked, it.Published, now)
+// keepReading keeps a reading judged at now, and logs it.
+func (e *Editor) keepReading(ctx context.Context, r Reading, now time.Time) error {
+	r.At = now
+	if err := e.Store.KeepReading(ctx, r); err != nil {
 		return err
-	})
-	return r, &call, err
+	}
+	e.Log.InfoContext(ctx, "read", "source", r.SourceID, "entry", r.EntryID,
+		"refers_to", len(r.RefersTo), "names", len(r.Names), "speakers", len(r.Speakers),
+		"rejected", len(r.Rejected), "model", r.Judge.Model,
+		"input_tokens", r.Usage.InputTokens, "output_tokens", r.Usage.OutputTokens)
+	return nil
 }
 
 // itemKey is the key an act's work on an Item is kept under: its Source and
@@ -263,23 +248,6 @@ type StoryListing struct {
 	// Developments is how many it has, and Latest the date of the latest.
 	Developments int
 	Latest       time.Time
-}
-
-// keep checks a model's answer on an Item, looks its Entities up in
-// Wikidata and writes the reading to the Record, at now. A result that fails
-// the checks is ErrFailedChecks and writes nothing. A failed lookup writes
-// nothing either and is an error like the Record's: in a batch, the batch
-// stays pending and its results are applied once Wikidata answers, with no
-// new model call.
-func (e *Editor) keep(ctx context.Context, it Item, precedents []Precedent, res Response, now time.Time) error {
-	r, err := checkReading(it, precedents, res)
-	if err != nil {
-		return err
-	}
-	if r, err = resolve(ctx, e.Wikidata, r, it.Published, now); err != nil {
-		return err
-	}
-	return e.Store.SaveReading(ctx, r, now)
 }
 
 // KnownEntity is an Entity as the Record holds it.

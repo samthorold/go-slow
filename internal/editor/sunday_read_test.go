@@ -142,7 +142,7 @@ func placeTheCall(t *testing.T, store *sqlite.Store, placedAt time.Time) {
 	if _, errs, err := interest.New(store).Add(ctx, interest.Draft{Name: "Finland", Depth: "following", Terms: "Finland"}); err != nil || errs != nil {
 		t.Fatalf("add Topic: %v %v", errs, err)
 	}
-	if err := store.SaveReading(ctx, editor.Reading{
+	if err := store.SaveFactReading(ctx, editor.FactReading{
 		SourceID: number10.ID, EntryID: "call",
 		Entities: []editor.Entity{{Name: "Andy Burnham", Kind: "person"}, {Name: "Finland", Kind: "place"}},
 		Facts: []editor.Fact{{
@@ -350,7 +350,7 @@ func TestStoriesAnnouncedTogetherShowTheItemThatConnectsThem(t *testing.T) {
 	if _, err := store.AddItems(t.Context(), []collect.Item{update}); err != nil {
 		t.Fatal(err)
 	}
-	if err := store.SaveReading(t.Context(), editor.Reading{
+	if err := store.SaveFactReading(t.Context(), editor.FactReading{
 		SourceID: update.SourceID, EntryID: update.EntryID, Model: "fake",
 		Entities: []editor.Entity{{Name: "Andy Burnham", Kind: "person"}},
 		Facts: []editor.Fact{
@@ -389,7 +389,7 @@ func TestConnectedStoriesShowEachFactWithTheEntitiesItInvolvesInTheirRoles(t *te
 	if _, err := store.AddItems(t.Context(), []collect.Item{visit}); err != nil {
 		t.Fatal(err)
 	}
-	if err := store.SaveReading(t.Context(), editor.Reading{
+	if err := store.SaveFactReading(t.Context(), editor.FactReading{
 		SourceID: visit.SourceID, EntryID: visit.EntryID, Model: "fake",
 		Entities: []editor.Entity{{Name: "Andy Burnham", Kind: "person"}, {Name: "Glasgow", Kind: "place"}},
 		Facts: []editor.Fact{{Statement: "Andy Burnham visited Glasgow.", AsAt: oct16.AddDate(0, 0, 2),

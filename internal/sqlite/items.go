@@ -183,8 +183,9 @@ func (s *Store) GiveText(ctx context.Context, sourceID, entryID, text string) (b
 
 // ListItems lists the Items in the Record, newest first, each with whether
 // the lazy-reading check has looked at it and the Topics it tied it to,
-// and whether it has been read, apart from scheduled events, which Upcoming
-// lists.
+// whether it has its text and is cut, and whether its Spans have been read,
+// with what its newest reading judged, apart from scheduled events, which
+// Upcoming lists.
 func (s *Store) ListItems(ctx context.Context) ([]collect.ListedItem, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT items.source_id, items.entry_id,
@@ -194,13 +195,16 @@ func (s *Store) ListItems(ctx context.Context) ([]collect.ListedItem, error) {
 			(SELECT json_group_array(topics.name ORDER BY topics.name)
 				FROM item_topics JOIN topics ON topics.id = item_topics.topic_id
 				WHERE item_topics.source_id = items.source_id AND item_topics.entry_id = items.entry_id),
-			EXISTS (SELECT 1 FROM item_reads r
-				WHERE r.source_id = items.source_id AND r.entry_id = items.entry_id),
-			(SELECT count(*) FROM facts f
-				WHERE f.source_id = items.source_id AND f.entry_id = items.entry_id),
-			(SELECT count(*) FROM claims c
-				WHERE c.source_id = items.source_id AND c.entry_id = items.entry_id)
+			items.content != '',
+			EXISTS (SELECT 1 FROM cuts
+				WHERE cuts.source_id = items.source_id AND cuts.entry_id = items.entry_id),
+			newest.event_id IS NOT NULL,
+			(SELECT count(*) FROM span_names n WHERE n.reading_id = newest.event_id),
+			(SELECT count(*) FROM speakers s WHERE s.reading_id = newest.event_id),
+			(SELECT count(*) FROM rejections j WHERE j.reading_id = newest.event_id)
 		FROM items JOIN sources ON sources.id = items.source_id
+			LEFT JOIN readings newest ON newest.event_id = (SELECT max(r.event_id) FROM readings r
+				WHERE r.source_id = items.source_id AND r.entry_id = items.entry_id)
 		WHERE items.due = ''
 		ORDER BY items.published DESC, items.collected_at DESC`)
 	if err != nil {
@@ -213,7 +217,7 @@ func (s *Store) ListItems(ctx context.Context) ([]collect.ListedItem, error) {
 		var published, topics string
 		if err := rows.Scan(&it.SourceID, &it.EntryID,
 			&it.SourceName, &it.Title, &it.Link, &it.Summary, &published, &it.Attribution,
-			&it.Checked, &topics, &it.Read, &it.Facts, &it.Claims); err != nil {
+			&it.Checked, &topics, &it.HasText, &it.Cut, &it.Read, &it.Names, &it.Speakers, &it.Rejected); err != nil {
 			return nil, fmt.Errorf("list items: %w", err)
 		}
 		it.Published = parseTime(published)

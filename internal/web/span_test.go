@@ -22,6 +22,20 @@ const hostingReading = `{"names": [{"at": {"span": 1, "words": "Derby"}, "kind":
 // of the later Item follows the release's S2.
 func relatedRecord(t *testing.T) *sqlite.Store {
 	t.Helper()
+	store := readToRelate(t)
+	ed := editor.New(editor.Deps{Store: store, RelatingModel: fakeModel{`{"relations": [{"span": "S1", "to": "C1", "verdict": "follows"}]}`},
+		Log: slog.New(slog.DiscardHandler)})
+	if err := ed.RelateWaiting(t.Context(), saturday); err != nil {
+		t.Fatal(err)
+	}
+	return store
+}
+
+// readToRelate is a store holding the release, read, and a later Item read
+// after it saying Derby will host the headquarters, what both name looked
+// up, awaiting relating.
+func readToRelate(t *testing.T) *sqlite.Store {
+	t.Helper()
 	store := openStore(t)
 	readRelease(t, store, releaseReading)
 	hosting := item("hosting", "Derby to host GBR", saturday)
@@ -35,10 +49,6 @@ func relatedRecord(t *testing.T) *sqlite.Store {
 		t.Fatal(err)
 	}
 	if err := editor.NewLookups(editor.LookupDeps{Store: store, Wikidata: derbyOnly{}, Log: log}).LookUpWaiting(t.Context(), saturday); err != nil {
-		t.Fatal(err)
-	}
-	ed := editor.New(editor.Deps{Store: store, RelatingModel: fakeModel{`{"relations": [{"span": "S1", "to": "C1", "verdict": "follows"}]}`}, Log: log})
-	if err := ed.RelateWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 	return store

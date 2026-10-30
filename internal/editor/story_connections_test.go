@@ -2,7 +2,6 @@ package editor_test
 
 import (
 	"strconv"
-	"strings"
 	"testing"
 	"time"
 
@@ -149,25 +148,6 @@ func TestAnInvolvementConnectingAddsConnectsStoriesByItsEntityAndRole(t *testing
 	if len(cs) != 1 || cs[0].ID != 2 || len(cs[0].Entities) != 1 ||
 		cs[0].Entities[0].Entity != "Scotland" || cs[0].Entities[0].Role != "place" {
 		t.Errorf("the speech's Story is connected to %+v, want the ferries' Story by Scotland as place\n%s", cs, logs)
-	}
-}
-
-func TestARoleGivenToANameOfAnotherItemsReadingIsRefused(t *testing.T) {
-	// Scotland is in the Record, from the speech's reading, but the readout's
-	// reading never gave it.
-	store := twoStories(t, inANewStory)
-	readoutWithScotland := `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "actor"},
-	  {"entity": "Edinburgh", "role": "place"}, {"entity": "Scotland", "role": "place"}]}], "causes": []}`
-	ed, logs := connector(store, &inTurn{outputs: []string{speechRoles, readoutWithScotland}})
-
-	if err := ed.ConnectWaiting(t.Context(), saturday); err != nil {
-		t.Fatal(err)
-	}
-
-	waiting, err := store.FactsToConnect(t.Context())
-	if err != nil || len(waiting) != 1 || waiting[0].Item.EntryID != laterItem.EntryID ||
-		!strings.Contains(logs.String(), `F1 gives a role to \"Scotland\"`) {
-		t.Errorf("awaiting connecting: %+v %v, want the readout refused for Scotland\n%s", waiting, err, logs)
 	}
 }
 

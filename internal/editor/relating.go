@@ -84,6 +84,14 @@ type Relation struct {
 	From, To Address
 }
 
+// Corroborates is whether r is corroboration: the same as across
+// independent Sources. One publisher saying a thing twice (a speech and its
+// press release) corroborates nothing (system design: Corroboration is same
+// as across independent Sources). It is worked out, never judged.
+func (r Relation) Corroborates() bool {
+	return r.Kind == SameAs && r.From.SourceID != r.To.SourceID
+}
+
 // SpanRelation is a relation as a Span's page shows it: the relation, the
 // Span at its other end, and the relating that judged it, with its Judge and
 // the call that made it (zero if none was kept).

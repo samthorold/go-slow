@@ -1,0 +1,215 @@
+{
+  "act": "reading",
+  "model": "claude-haiku-5-5",
+  "request_hash": "d61630b8da56ec7e628f87a7f61713559933fe9ca0584a70359768b64455af9f",
+  "recorded_at": "2026-10-30T21:14:18.903468Z",
+  "usage": {
+    "input_tokens": 2577,
+    "output_tokens": 4797
+  },
+  "output": {
+    "names": [
+      {
+        "at": {
+          "span": 1,
+          "words": "Mr William James Baxter QPM DL"
+        },
+        "kind": "person",
+        "name": "William James Baxter",
+        "office": "Lord-Lieutenant of County Tyrone"
+      },
+      {
+        "at": {
+          "span": 1,
+          "words": "Sir Robert William Lowry Scott KCVO OBE"
+        },
+        "kind": "person",
+        "name": "Sir Robert William Lowry Scott",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 1,
+          "words": "The King"
+        },
+        "kind": "person",
+        "name": "The King",
+        "office": "King"
+      },
+      {
+        "at": {
+          "span": 1,
+          "words": "County Tyrone"
+        },
+        "kind": "place",
+        "name": "County Tyrone",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 3,
+          "words": "RUC/PSNI"
+        },
+        "kind": "organisation",
+        "name": "RUC/PSNI",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 3,
+          "words": "Omagh"
+        },
+        "kind": "place",
+        "name": "Omagh",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 3,
+          "words": "Omagh bombing"
+        },
+        "kind": "occasion",
+        "name": "Omagh bombing 1998",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "Omagh Police District Voluntary Welfare Support Group"
+        },
+        "kind": "organisation",
+        "name": "Omagh Police District Voluntary Welfare Support Group",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 5,
+          "words": "Newtownstewart Presbyterian Church"
+        },
+        "kind": "organisation",
+        "name": "Newtownstewart Presbyterian Church",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 6,
+          "words": "Royal British Legion"
+        },
+        "kind": "organisation",
+        "name": "Royal British Legion",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 6,
+          "words": "Newtownstewart"
+        },
+        "kind": "place",
+        "name": "Newtownstewart",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 6,
+          "words": "County Tyrone"
+        },
+        "kind": "place",
+        "name": "County Tyrone",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 8,
+          "words": "County Tyrone"
+        },
+        "kind": "place",
+        "name": "County Tyrone",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 9,
+          "words": "County Tyrone"
+        },
+        "kind": "place",
+        "name": "County Tyrone",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 9,
+          "words": "Pearl"
+        },
+        "kind": "person",
+        "name": "Pearl",
+        "office": ""
+      }
+    ],
+    "refers_to": [
+      {
+        "from": {
+          "span": 3,
+          "words": "his"
+        },
+        "to": {
+          "span": 1,
+          "words": "Mr William James Baxter"
+        }
+      },
+      {
+        "from": {
+          "span": 4,
+          "words": "He"
+        },
+        "to": {
+          "span": 1,
+          "words": "Mr William James Baxter"
+        }
+      },
+      {
+        "from": {
+          "span": 5,
+          "words": "He"
+        },
+        "to": {
+          "span": 1,
+          "words": "Mr William James Baxter"
+        }
+      },
+      {
+        "from": {
+          "span": 7,
+          "words": "He"
+        },
+        "to": {
+          "span": 1,
+          "words": "Mr William James Baxter"
+        }
+      },
+      {
+        "from": {
+          "span": 9,
+          "words": "He"
+        },
+        "to": {
+          "span": 1,
+          "words": "Mr William James Baxter"
+        }
+      },
+      {
+        "from": {
+          "span": 9,
+          "words": "his"
+        },
+        "to": {
+          "span": 1,
+          "words": "Mr William James Baxter"
+        }
+      }
+    ],
+    "rejected": [
+      2
+    ],
+    "speakers": []
+  }
+}

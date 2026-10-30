@@ -271,6 +271,13 @@ func (s *sampleModel) Complete(ctx context.Context, req editor.Request) (editor.
 		// Kept for another request: drawn afresh.
 		s.attempts, s.next = nil, 0
 	}
+	if s.live == nil && len(s.attempts) == 0 && !s.unchecked {
+		// A sample of work that made no call (an Item related with no
+		// candidates) now makes one.
+		err := stale(filepath.Base(filepath.Dir(s.path))+" sample "+strings.TrimSuffix(filepath.Base(s.path), ".json"), "", hash, s.cmd)
+		s.report(err)
+		return editor.Response{}, err
+	}
 	if s.live == nil {
 		return editor.Response{}, fmt.Errorf("%s: no attempt kept past the %d made", s.path, len(s.attempts))
 	}
@@ -348,6 +355,11 @@ func sampled(t *testing.T, dir, fixture string, r rule, cmd rerecordCmd, run fun
 	var total editor.Usage
 	for _, m := range models {
 		results = append(results, run(m))
+		if m.live != nil && len(m.attempts) == 0 {
+			// Work that made no call, such as relating an Item with no
+			// candidates, is kept as a sample of none.
+			keepSample(t, m.path, nil)
+		}
 		for _, a := range m.attempts {
 			total.InputTokens += a.Usage.InputTokens
 			total.OutputTokens += a.Usage.OutputTokens

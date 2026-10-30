@@ -26,12 +26,9 @@ type Config struct {
 	// ReadingModel is the Claude model the Editor reads Items with
 	// (READING_MODEL, such as claude-haiku-5-5).
 	ReadingModel string
-	// PlacingModel is the Claude model the Editor places Facts with
-	// (PLACING_MODEL, such as claude-haiku-5-5).
-	PlacingModel string
-	// ConnectingModel is the Claude model the Editor connects Facts with
-	// (CONNECTING_MODEL, such as claude-haiku-5-5).
-	ConnectingModel string
+	// RelatingModel is the Claude model the Editor relates Spans with
+	// (RELATING_MODEL, such as claude-haiku-5-5).
+	RelatingModel string
 	// BriefingModel is the Claude model the Editor writes the Briefing with
 	// (BRIEFING_MODEL, such as claude-haiku-5-5).
 	BriefingModel string
@@ -69,7 +66,7 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 	}
 	port, dbPath := get("PORT"), get("DATABASE_PATH")
 	contact, interval := get("COLLECTION_CONTACT"), get("COLLECTION_INTERVAL")
-	model, placing, connecting := get("READING_MODEL"), get("PLACING_MODEL"), get("CONNECTING_MODEL")
+	model, relating := get("READING_MODEL"), get("RELATING_MODEL")
 	briefing, briefingTime := get("BRIEFING_MODEL"), get("BRIEFING_TIME")
 	sundayRead := get("SUNDAY_READ_MODEL")
 	key := get("GOSLOW_ANTHROPIC_API_KEY")
@@ -88,7 +85,7 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 	// Only the Claude adapter exists yet (open-weight models come through
 	// OpenRouter later), so any other model would fail on every call.
 	for _, v := range [][2]string{
-		{"READING_MODEL", model}, {"PLACING_MODEL", placing}, {"CONNECTING_MODEL", connecting}, {"BRIEFING_MODEL", briefing},
+		{"READING_MODEL", model}, {"RELATING_MODEL", relating}, {"BRIEFING_MODEL", briefing},
 		{"SUNDAY_READ_MODEL", sundayRead},
 	} {
 		if !strings.HasPrefix(v[1], "claude-") {
@@ -105,8 +102,7 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 		CollectionContact:  contact,
 		CollectionInterval: every,
 		ReadingModel:       model,
-		PlacingModel:       placing,
-		ConnectingModel:    connecting,
+		RelatingModel:      relating,
 		BriefingModel:      briefing,
 		SundayReadModel:    sundayRead,
 		BriefingAt:         time.Duration(clock.Hour())*time.Hour + time.Duration(clock.Minute())*time.Minute,

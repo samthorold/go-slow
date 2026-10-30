@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"log/slog"
 	"strings"
 	"testing"
 	"time"
@@ -78,63 +77,6 @@ func keepsFailing(t *testing.T, answer func(editor.BatchRequest) editor.BatchRes
 	}
 }
 
-func TestAnItemHeldBackBehindAnItemWhosePlacingFailedGoesAhead(t *testing.T) {
-	store := record(t)
-	drawSpeechFacts(t, store, saturday)
-	// The readout shares Andy Burnham with the speech, so waits behind it.
-	readLater(t, store)
-	batcher := &fakeBatcher{}
-	b := placingBatches(store, batcher)
-	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
-		t.Fatal(err)
-	}
-	for n := 1; n <= editor.MaxAttempts; n++ {
-		if got := batcher.submitted[n-1]; len(got) != 1 || strings.Contains(got[0].Request.Input, laterItem.Title) {
-			t.Fatalf("batch %d is %v, want the speech's placing alone", n, got)
-		}
-		batcher.end(n, failingChecks)
-		if err := b.ReadWaiting(t.Context(), saturday); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if len(batcher.submitted) != editor.MaxAttempts+1 {
-		t.Fatalf("%d batches submitted, want the readout's after the speech's %d", len(batcher.submitted), editor.MaxAttempts)
-	}
-	if got := batcher.submitted[editor.MaxAttempts]; len(got) != 1 || !strings.Contains(got[0].Request.Input, laterItem.Title) {
-		t.Errorf("last batch %v, want the readout placed once the speech's placing failed", got)
-	}
-}
-
-func TestConnectingThatKeepsFailingIsNoLongerSubmitted(t *testing.T) {
-	store := record(t)
-	ed, _ := placer(store, &fakeModel{output: startsAStory})
-	drawSpeechFacts(t, store, saturday)
-	if err := ed.PlaceWaiting(t.Context(), saturday); err != nil {
-		t.Fatal(err)
-	}
-	batcher := &fakeBatcher{}
-	b := editor.NewBatches(editor.BatchDeps{Store: store, Batcher: batcher,
-		Acts: []editor.BatchAct{ed.Connecting()}, Log: slog.New(slog.DiscardHandler)})
-	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
-		t.Fatal(err)
-	}
-	for n := 1; n <= editor.MaxAttempts; n++ {
-		batcher.end(n, failingChecks)
-		if err := b.ReadWaiting(t.Context(), saturday); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if len(batcher.submitted) != editor.MaxAttempts {
-		t.Errorf("%d batches submitted, want %d", len(batcher.submitted), editor.MaxAttempts)
-	}
-	failed, err := store.FailedWork(t.Context())
-	if err != nil || len(failed) != 1 || failed[0].Act != "connecting" {
-		t.Errorf("failed work %+v %v, want the speech's connecting", failed, err)
-	}
-}
-
 func TestRetryingAnActsFailedWorkResetsItsAttempts(t *testing.T) {
 	store := record(t)
 	batcher := &fakeBatcher{}
@@ -154,11 +96,11 @@ func TestRetryingAnActsFailedWorkResetsItsAttempts(t *testing.T) {
 	fail()
 
 	// Another act's retry leaves reading's failed work failed.
-	if n, err := store.RetryFailed(t.Context(), "placing"); err != nil || n != 0 {
-		t.Fatalf("retrying placing cleared %d %v, want none", n, err)
+	if n, err := store.RetryFailed(t.Context(), "relating"); err != nil || n != 0 {
+		t.Fatalf("retrying relating cleared %d %v, want none", n, err)
 	}
 	if waiting, _ := store.ItemsToRead(t.Context()); len(waiting) != 0 {
-		t.Fatalf("retrying placing took reading's failed work up again: %+v", waiting)
+		t.Fatalf("retrying relating took reading's failed work up again: %+v", waiting)
 	}
 	if n, err := store.RetryFailed(t.Context(), "reading"); err != nil || n != 1 {
 		t.Fatalf("retrying reading cleared %d %v, want the speech's", n, err)

@@ -10,14 +10,14 @@ import (
 	"time"
 
 	"github.com/samthorold/go-slow/internal/editor"
+	"github.com/samthorold/go-slow/internal/editor/frozentest"
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
 
 // placeWaiting places the Facts awaiting placing with output.
 func placeWaiting(t *testing.T, store *sqlite.Store, output string) {
 	t.Helper()
-	ed := editor.New(editor.Deps{Store: store, PlacingModel: fakeModel{output}, Log: slog.New(slog.DiscardHandler)})
-	if err := ed.PlaceWaiting(t.Context(), saturday); err != nil {
+	if err := frozentest.PlaceWaiting(t.Context(), frozentest.Deps{Store: store, Model: fakeModel{output}, Log: slog.New(slog.DiscardHandler)}, saturday); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -139,13 +139,12 @@ func TestADevelopmentOnAStorysPageShowsTheEntitiesItsFactInvolvesInTheirRoles(t 
 func connectWaiting(t *testing.T, store *sqlite.Store, outputs ...string) {
 	t.Helper()
 	for _, out := range outputs {
-		ed := editor.New(editor.Deps{Store: store, ConnectingModel: fakeModel{out}, Log: slog.New(slog.DiscardHandler)})
 		waiting, err := store.FactsToConnect(t.Context())
 		if err != nil || len(waiting) == 0 {
 			t.Fatalf("nothing awaiting connecting: %v", err)
 		}
 		// Only the first Item awaiting connecting is answered by out.
-		if err := ed.ConnectWaiting(t.Context(), saturday); err != nil {
+		if err := frozentest.ConnectWaiting(t.Context(), frozentest.Deps{Store: store, Model: fakeModel{out}, Log: slog.New(slog.DiscardHandler)}, saturday); err != nil {
 			t.Fatal(err)
 		}
 		if after, _ := store.FactsToConnect(t.Context()); len(after) != len(waiting)-1 {

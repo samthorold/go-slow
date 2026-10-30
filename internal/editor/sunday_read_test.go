@@ -366,9 +366,9 @@ func TestStoriesAnnouncedTogetherShowTheItemThatConnectsThem(t *testing.T) {
 		t.Fatal(err)
 	}
 	agent := &fakeAgent{turns: []editor.Turn{calls("story", `{"story": "S1"}`), submits(citesTheSpeech)}}
-	ed, _ = reader(store, agent)
+	rd, _ := reader(store, agent)
 
-	if err := ed.SundayRead(t.Context(), sundayMorning); err != nil {
+	if err := rd.SundayRead(t.Context(), sundayMorning); err != nil {
 		t.Fatalf("%v\n%s", err, logs)
 	}
 
@@ -405,9 +405,9 @@ func TestConnectedStoriesShowEachFactWithTheEntitiesItInvolvesInTheirRoles(t *te
 	connect(t, store, visit.EntryID, 3, editor.Role{Entity: "Andy Burnham", Role: "actor"})
 	otherStories(t, store, 2)
 	agent := &fakeAgent{turns: []editor.Turn{calls("story", `{"story": "S1"}`), submits(citesTheSpeech)}}
-	ed, _ = reader(store, agent)
+	rd, _ := reader(store, agent)
 
-	if err := ed.SundayRead(t.Context(), sundayMorning); err != nil {
+	if err := rd.SundayRead(t.Context(), sundayMorning); err != nil {
 		t.Fatalf("%v\n%s", err, logs)
 	}
 

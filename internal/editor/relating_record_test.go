@@ -161,6 +161,36 @@ func TestCandidatesAreRankedByTheRarityOfWhatTheyShareAndCappedNotByRecency(t *t
 	}
 }
 
+func TestRelatingThatKeepsFailingIsMarkedFailedAndNoLongerSubmitted(t *testing.T) {
+	store := record(t)
+	readNaming(t, store, pressRelease, "Scotland")
+	readNaming(t, store, holyrood, "Scotland")
+	batcher := &fakeBatcher{}
+	log := slog.New(slog.DiscardHandler)
+	ed := editor.New(editor.Deps{Store: store, Log: log})
+	b := editor.NewBatches(editor.BatchDeps{Store: store, Batcher: batcher, Acts: []editor.BatchAct{ed.Relating()}, Log: log})
+	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+		t.Fatal(err)
+	}
+	for n := 1; n <= editor.MaxAttempts; n++ {
+		batcher.end(n, failingChecks)
+		if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if len(batcher.submitted) != editor.MaxAttempts {
+		t.Errorf("%d batches submitted, want %d", len(batcher.submitted), editor.MaxAttempts)
+	}
+	failed, err := store.FailedWork(t.Context())
+	if err != nil || len(failed) != 1 || failed[0].Act != "relating" || failed[0].EntryID != holyrood.EntryID {
+		t.Errorf("failed work %+v %v, want the speech's relating", failed, err)
+	}
+	if waiting, err := store.ItemsToRelate(t.Context()); err != nil || len(waiting) != 0 {
+		t.Errorf("awaiting relating: %+v %v", waiting, err)
+	}
+}
+
 func TestTwoItemsInOneBatchAreRelatedOnceByTheLaterPublished(t *testing.T) {
 	store := record(t)
 	withFerries(t, store)

@@ -134,6 +134,25 @@ func TestARelationToASpanNotShownIsRefused(t *testing.T) {
 	}
 }
 
+func TestSameAsAcrossIndependentSourcesIsCorroborationAndWithinOnePublisherIsNot(t *testing.T) {
+	speech := editor.Address{SourceID: "govuk-number-10", EntryID: "speech"}
+	release := editor.Address{SourceID: "govuk-number-10", EntryID: "release"}
+	poll := editor.Address{SourceID: "pollster", EntryID: "poll"}
+	for _, tc := range []struct {
+		rel  editor.Relation
+		want bool
+	}{
+		{editor.Relation{Kind: editor.SameAs, From: speech, To: release}, false},
+		{editor.Relation{Kind: editor.SameAs, From: poll, To: release}, true},
+		{editor.Relation{Kind: editor.Follows, From: poll, To: release}, false},
+		{editor.Relation{Kind: editor.Contradicts, From: poll, To: release}, false},
+	} {
+		if got := tc.rel.Corroborates(); got != tc.want {
+			t.Errorf("%+v corroborates: %v, want %v", tc.rel, got, tc.want)
+		}
+	}
+}
+
 func TestACandidateOfTheSameItemIsRefused(t *testing.T) {
 	// A Store that gave one would be wrong: Spans of one Item are not
 	// related to each other.

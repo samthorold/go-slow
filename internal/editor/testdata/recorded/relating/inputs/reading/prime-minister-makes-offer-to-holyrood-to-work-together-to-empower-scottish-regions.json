@@ -1,0 +1,421 @@
+{
+  "act": "reading",
+  "model": "claude-haiku-5-5",
+  "request_hash": "9f6653a628033d0716fdae463edfb365030d6251cbda7a5fe423eda19a075dcb",
+  "recorded_at": "2026-10-30T21:11:46.42845Z",
+  "usage": {
+    "input_tokens": 2822,
+    "output_tokens": 6325
+  },
+  "output": {
+    "names": [
+      {
+        "at": {
+          "span": 1,
+          "words": "the Prime Minister"
+        },
+        "kind": "person",
+        "name": "Andy Burnham",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 1,
+          "words": "Scotland’s First Minister"
+        },
+        "kind": "person",
+        "name": "Scotland’s First Minister",
+        "office": "First Minister of Scotland"
+      },
+      {
+        "at": {
+          "span": 1,
+          "words": "Westminster"
+        },
+        "kind": "place",
+        "name": "Westminster",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 1,
+          "words": "Holyrood"
+        },
+        "kind": "place",
+        "name": "Holyrood",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 2,
+          "words": "Andy Burnham"
+        },
+        "kind": "person",
+        "name": "Andy Burnham",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 2,
+          "words": "the Scottish Government"
+        },
+        "kind": "organisation",
+        "name": "Scottish Government",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 2,
+          "words": "Holyrood"
+        },
+        "kind": "place",
+        "name": "Holyrood",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 2,
+          "words": "Lanarkshire"
+        },
+        "kind": "place",
+        "name": "Lanarkshire",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 3,
+          "words": "the Prime Minister"
+        },
+        "kind": "person",
+        "name": "Andy Burnham",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 3,
+          "words": "the Scottish Parliament"
+        },
+        "kind": "organisation",
+        "name": "Scottish Parliament",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "the Scottish Government"
+        },
+        "kind": "organisation",
+        "name": "Scottish Government",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "the UK Government"
+        },
+        "kind": "organisation",
+        "name": "UK Government",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "No10 North"
+        },
+        "kind": "organisation",
+        "name": "No10 North",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "the Scotland Office"
+        },
+        "kind": "organisation",
+        "name": "Scotland Office",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "Scotland"
+        },
+        "kind": "place",
+        "name": "Scotland",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 5,
+          "words": "Andy Burnham"
+        },
+        "kind": "person",
+        "name": "Andy Burnham",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 6,
+          "words": "the First Minister"
+        },
+        "kind": "person",
+        "name": "Scotland’s First Minister",
+        "office": "First Minister of Scotland"
+      },
+      {
+        "at": {
+          "span": 7,
+          "words": "No10 North"
+        },
+        "kind": "organisation",
+        "name": "No10 North",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 7,
+          "words": "Scotland"
+        },
+        "kind": "place",
+        "name": "Scotland",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 8,
+          "words": "the Scottish Government"
+        },
+        "kind": "organisation",
+        "name": "Scottish Government",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 10,
+          "words": "Douglas Alexander"
+        },
+        "kind": "person",
+        "name": "Douglas Alexander",
+        "office": "Scottish Secretary"
+      },
+      {
+        "at": {
+          "span": 12,
+          "words": "North Lanarkshire"
+        },
+        "kind": "place",
+        "name": "North Lanarkshire",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 12,
+          "words": "Fife"
+        },
+        "kind": "place",
+        "name": "Fife",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 12,
+          "words": "the Highlands"
+        },
+        "kind": "place",
+        "name": "the Highlands",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 12,
+          "words": "London"
+        },
+        "kind": "place",
+        "name": "London",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 12,
+          "words": "Edinburgh"
+        },
+        "kind": "place",
+        "name": "Edinburgh",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 13,
+          "words": "The Prime Minister’s"
+        },
+        "kind": "person",
+        "name": "Andy Burnham",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 13,
+          "words": "the Scottish Government"
+        },
+        "kind": "organisation",
+        "name": "Scottish Government",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 13,
+          "words": "the Scotland Office"
+        },
+        "kind": "organisation",
+        "name": "Scotland Office",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 13,
+          "words": "Scotland"
+        },
+        "kind": "place",
+        "name": "Scotland",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 14,
+          "words": "Scotland"
+        },
+        "kind": "place",
+        "name": "Scotland",
+        "office": ""
+      }
+    ],
+    "refers_to": [
+      {
+        "from": {
+          "span": 1,
+          "words": "him"
+        },
+        "to": {
+          "span": 2,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "from": {
+          "span": 2,
+          "words": "his"
+        },
+        "to": {
+          "span": 2,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "from": {
+          "span": 4,
+          "words": "he"
+        },
+        "to": {
+          "span": 2,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "from": {
+          "span": 13,
+          "words": "them"
+        },
+        "to": {
+          "span": 2,
+          "words": "the Scottish Government"
+        }
+      }
+    ],
+    "rejected": [
+      5,
+      10
+    ],
+    "speakers": [
+      {
+        "span": {
+          "span": 6,
+          "words": ""
+        },
+        "speaker": {
+          "span": 5,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "span": {
+          "span": 7,
+          "words": ""
+        },
+        "speaker": {
+          "span": 5,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "span": {
+          "span": 8,
+          "words": ""
+        },
+        "speaker": {
+          "span": 5,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "span": {
+          "span": 9,
+          "words": ""
+        },
+        "speaker": {
+          "span": 5,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "span": {
+          "span": 11,
+          "words": ""
+        },
+        "speaker": {
+          "span": 10,
+          "words": "Douglas Alexander"
+        }
+      },
+      {
+        "span": {
+          "span": 12,
+          "words": ""
+        },
+        "speaker": {
+          "span": 10,
+          "words": "Douglas Alexander"
+        }
+      },
+      {
+        "span": {
+          "span": 13,
+          "words": ""
+        },
+        "speaker": {
+          "span": 10,
+          "words": "Douglas Alexander"
+        }
+      },
+      {
+        "span": {
+          "span": 14,
+          "words": ""
+        },
+        "speaker": {
+          "span": 10,
+          "words": "Douglas Alexander"
+        }
+      }
+    ]
+  }
+}

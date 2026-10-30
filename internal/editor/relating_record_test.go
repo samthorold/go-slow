@@ -3,6 +3,7 @@ package editor_test
 import (
 	"bytes"
 	"log/slog"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -155,9 +156,8 @@ func TestCandidatesAreRankedByTheRarityOfWhatTheyShareAndCappedNotByRecency(t *t
 	if !strings.Contains(in, "C1: Derby gets rail money.\n") {
 		t.Errorf("the Span sharing the rarer Entity is not first:\n%s", in)
 	}
-	_, list, _ := strings.Cut(in, "Candidates of each Span:\nS1: ")
-	if refs := strings.Split(strings.TrimSpace(list), ", "); len(refs) != 10 {
-		t.Errorf("S1 is weighed against %d candidates, want 10: %v", len(refs), refs)
+	if n := regexp.MustCompile(`(?m)^C\d+: `).FindAllString(in, -1); len(n) != 10 {
+		t.Errorf("S1 is weighed against %d candidates, want 10:\n%s", len(n), in)
 	}
 }
 

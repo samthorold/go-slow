@@ -114,9 +114,37 @@ type act struct {
 
 var acts = []act{
 	{"reading", []string{"Spans", "Rejected", "Names", "Speakers", "Refers to"}, countReading},
+	{"relating", []string{"Follows", "Same as", "Contradicts"}, countRelating},
 	{"placing", []string{"Developments", "New Stories"}, countPlacing},
 	{"connecting", []string{"Connections", "Mentions involved in no Fact", "Facts involving no Entity"}, countConnecting},
 	{"briefing", []string{"Statements", "Stories"}, countBriefing},
+}
+
+// countRelating counts the relations a relating judged, by kind. A sample of
+// an Item related with no call (its Spans had no candidates) judged none.
+func countRelating(out json.RawMessage, _ about) ([]int, error) {
+	var r struct {
+		Relations []struct {
+			Verdict string `json:"verdict"`
+		} `json:"relations"`
+	}
+	if len(out) > 0 && string(out) != "null" {
+		if err := json.Unmarshal(out, &r); err != nil {
+			return nil, err
+		}
+	}
+	n := []int{0, 0, 0}
+	for _, rel := range r.Relations {
+		switch rel.Verdict {
+		case "follows":
+			n[0]++
+		case "same_as":
+			n[1]++
+		case "contradicts":
+			n[2]++
+		}
+	}
+	return n, nil
 }
 
 // countPlacing counts each Fact's Developments (one per Story it is placed
@@ -332,6 +360,13 @@ func load(dir, govuk string) (counts, outputs, error) {
 		var rec recording
 		if json.Unmarshal(data, &rec) != nil {
 			return nil
+		}
+		if rec.Act == "" && (rec.Output == nil || string(rec.Output) == "null") {
+			// A sample of work that made no call is its act's, by where it
+			// is kept: <act>/<fixture>/<k>.json.
+			if rel, err := filepath.Rel(dir, path); err == nil {
+				rec.Act, _, _ = strings.Cut(filepath.ToSlash(rel), "/")
+			}
 		}
 		for _, a := range acts {
 			if a.name != rec.Act {

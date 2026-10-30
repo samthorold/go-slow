@@ -117,8 +117,8 @@ type fakeAct struct {
 }
 
 var (
-	itemLine      = regexp.MustCompile(`(?m)^Item: (.*)$`)
-	candidateLine = regexp.MustCompile(`(?m)^(S\d+): (C\d+)`)
+	itemLine = regexp.MustCompile(`(?m)^Item: (.*)$`)
+	spanLine = regexp.MustCompile(`(?m)^(S\d+)(?: \(spoken by [^)]*\))?: `)
 )
 
 func (f *fakeAct) Complete(_ context.Context, req editor.Request) (editor.Response, error) {
@@ -128,16 +128,15 @@ func (f *fakeAct) Complete(_ context.Context, req editor.Request) (editor.Respon
 	var out any
 	switch req.Act {
 	case "relating":
-		// Each Span is the same as its first candidate.
+		// The first Span is the same as the first candidate.
 		type relation struct {
 			Span    string `json:"span"`
 			To      string `json:"to"`
 			Verdict string `json:"verdict"`
 		}
-		_, list, _ := strings.Cut(req.Input, "\nCandidates of each Span:\n")
 		rels := []relation{}
-		for _, m := range candidateLine.FindAllStringSubmatch(list, -1) {
-			rels = append(rels, relation{m[1], m[2], editor.SameAs})
+		if m := spanLine.FindStringSubmatch(req.Input); m != nil {
+			rels = append(rels, relation{m[1], "C1", editor.SameAs})
 		}
 		out = map[string]any{"relations": rels}
 	default:

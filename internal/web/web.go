@@ -40,10 +40,10 @@ type Deps struct {
 	// Relations answers a Span's relations, for its page.
 	Relations Relations
 	Topics    Topics
-	Stories  Stories
-	Feedback Feedback
-	Kept     Kept
-	Register Register
+	Stories   Stories
+	Feedback  Feedback
+	Kept      Kept
+	Register  Register
 	// SundayReads answers the Sunday read's page.
 	SundayReads SundayReads
 	// Calls answers the kept calls' pages.

@@ -2,6 +2,7 @@ package editor
 
 import (
 	"bytes"
+	"cmp"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -120,19 +121,19 @@ type Relating struct {
 }
 
 // relatingInstructions are the relating act's own instructions.
-const relatingInstructions = `You are the Editor of a private slow-news briefing. You are relating the Spans of one Item to Spans of other Items already in the Record. A Span is a stretch of an Item's text as its publisher wrote it; a stretch that refers to something in other words is shown as what it refers to. The Item's Spans are numbered S1, S2 and so on. The Spans of other Items it is weighed against, its candidates, are numbered C1, C2 and so on, under the Items they are from, each with its date. Last, each Span to relate is listed with its own candidates.
+const relatingInstructions = `You are the Editor of a private slow-news briefing. You are relating the Spans of one Item to Spans of other Items already in the Record. A Span is a stretch of an Item's text as its publisher wrote it; a stretch that refers to something in other words is shown as what it refers to. The Item's Spans are numbered S1, S2 and so on. Below them are its candidates: Spans of other Items that name what this Item names, numbered C1, C2 and so on, under the Items they are from, each with its date.
 
-Weigh each Span against each of its own candidates, and judge the pair as one of:
-- follows: one of the two moves on what the other said. The later-published takes up what the earlier said and says what has happened since, what is now being done, decided or argued about it: a speech that argues what a press release said the speaker "will argue", a decision on a proposal, a response to an announcement. The later-published Span always follows the earlier; you only say the pair is one.
-- same_as: the two say the same thing, in the same or other words, whoever says it.
+Weigh each of the Item's Spans against each candidate, and judge each pair as one of:
+- follows: the later-published of the two moves on what the earlier said. It does, decides or argues what the earlier said would be done, decided or argued (a speech that makes the argument or the offer a press release said the speaker "will" make), or says what has happened to it since (a response to it, a decision on it, its next step). The later-published Span always follows the earlier; you only say the pair is one.
+- same_as: the two say the same thing about how things are or were, in the same or other words, whoever says it, even where one gives it as what someone will say ("she will say X" and "X").
 - contradicts: the two cannot both hold.
 - none of these: give nothing for the pair. Two Spans that only share a subject, a name, a place or a day are none of these, and so are most pairs.
 
-Give each pair at most one verdict, and relate a Span only to its own candidates, by their numbers. Keep to what the Spans say; do not add background knowledge.`
+Give each pair at most one verdict, by the numbers of its two Spans. Keep to what the Spans say; do not add background knowledge.`
 
-// relatingSchema is the relating act's output schema for tr, shown as the
-// refs ref gives. Its refs are enumerated (the Spans that have candidates,
-// and the candidates), so a model answers only in refs the checks know. Its
+// relatingSchema is the relating act's output schema for an Item's Spans and
+// the candidates they are shown, by their refs. The refs are enumerated (the
+// Spans to relate, and the candidates), so a model answers only in refs the checks know. Its
 // fields are in name order (span, to, verdict), so the model names the pair
 // before it judges it.
 func relatingSchema(spans, pool []string) map[string]any {
@@ -161,21 +162,34 @@ type relatingOutput struct {
 }
 
 // shown is how an Item awaiting relating is shown: its candidates, each
-// once, in the order first given, numbered from C1.
+// once, numbered from C1.
 type shown struct {
 	pool []OtherSpan
 }
 
-// shownAs is tr's candidates, each once, in the order first given.
+// shownAs is tr's candidates, each once: every Span's, pooled, since an
+// Item's Spans are each weighed against all of them. A Span whose own
+// mentions found none (a reading names a place once, where its Item says it
+// often) is still weighed against those its neighbours found. They are
+// grouped by Item, the Items in the order their first candidate was found,
+// and in order within each.
 func shownAs(tr ToRelate) shown {
 	var s shown
+	var items []string
 	for _, sp := range tr.Spans {
 		for _, c := range sp.Candidates {
 			if !slices.ContainsFunc(s.pool, func(o OtherSpan) bool { return o.At == c.At }) {
 				s.pool = append(s.pool, c)
 			}
+			if key := itemKey(c.Item); !slices.Contains(items, key) {
+				items = append(items, key)
+			}
 		}
 	}
+	slices.SortStableFunc(s.pool, func(a, b OtherSpan) int {
+		return cmp.Or(cmp.Compare(slices.Index(items, itemKey(a.Item)), slices.Index(items, itemKey(b.Item))),
+			cmp.Compare(a.At.Span.Start, b.At.Span.Start))
+	})
 	return s
 }
 
@@ -195,8 +209,8 @@ func (tr ToRelate) hasCandidates() bool {
 }
 
 // Relate is the act of relating an Item's Spans on the model m, which is
-// asked for as the model named asked: each Span judged against each of its
-// candidates, as one it follows, is the same as or contradicts, or none of
+// asked for as the model named asked: each Span judged against each
+// candidate its Item is shown, as one it follows, is the same as or contradicts, or none of
 // these. An Item whose Spans have no candidates is related with no call. A
 // result that fails the act's checks is ErrFailedChecks, and none of it is
 // returned.
@@ -236,11 +250,9 @@ func relatingRequest(tr ToRelate) Request {
 	for _, sp := range tr.Spans {
 		fmt.Fprintf(&b, "S%d%s: %s\n", sp.N, spokenBy(tr.Reading.SpeakerOf(tr.Item.Content, sp.Span)),
 			tr.Reading.HydratedWords(tr.Item.Content, sp.Span))
-		if len(sp.Candidates) > 0 {
-			spans = append(spans, "S"+strconv.Itoa(sp.N))
-		}
+		spans = append(spans, "S"+strconv.Itoa(sp.N))
 	}
-	b.WriteString("\nSpans of other Items:\n")
+	b.WriteString("\nCandidates, Spans of other Items:\n")
 	var refs []string
 	for i, c := range s.pool {
 		if i == 0 || c.Item.SourceID != s.pool[i-1].Item.SourceID || c.Item.EntryID != s.pool[i-1].Item.EntryID {
@@ -250,17 +262,6 @@ func relatingRequest(tr ToRelate) Request {
 		ref := "C" + strconv.Itoa(i+1)
 		refs = append(refs, ref)
 		fmt.Fprintf(&b, "%s%s: %s\n", ref, spokenBy(c.Speaker), c.Words)
-	}
-	b.WriteString("\nCandidates of each Span:\n")
-	for _, sp := range tr.Spans {
-		if len(sp.Candidates) == 0 {
-			continue
-		}
-		var own []string
-		for _, c := range sp.Candidates {
-			own = append(own, s.ref(c.At))
-		}
-		fmt.Fprintf(&b, "S%d: %s\n", sp.N, strings.Join(own, ", "))
 	}
 	return Request{Act: "relating", Instructions: relatingInstructions, Input: b.String(), Schema: relatingSchema(spans, refs)}
 }
@@ -318,18 +319,18 @@ func checkRelating(tr ToRelate, req Request, asked string, res Response) (Relati
 	verdicts := map[[2]Address]string{}
 	for _, rel := range *out.Relations {
 		i := slices.IndexFunc(tr.Spans, func(sp SpanToRelate) bool { return "S"+strconv.Itoa(sp.N) == rel.Span })
-		if i < 0 || len(tr.Spans[i].Candidates) == 0 {
-			return refuse("%s is not a Span of the Item shown with candidates", rel.Span)
+		if i < 0 {
+			return refuse("%s is not a Span of the Item shown to relate", rel.Span)
 		}
 		sp := tr.Spans[i]
 		if strings.HasPrefix(rel.To, "S") {
 			return refuse("%s is related to %s, a Span of the same Item", rel.Span, rel.To)
 		}
-		j := slices.IndexFunc(sp.Candidates, func(c OtherSpan) bool { return s.ref(c.At) == rel.To })
+		j := slices.IndexFunc(s.pool, func(c OtherSpan) bool { return s.ref(c.At) == rel.To })
 		if j < 0 {
-			return refuse("%s is related to %s, which was not shown as one of its candidates", rel.Span, rel.To)
+			return refuse("%s is related to %s, which was not shown as a candidate", rel.Span, rel.To)
 		}
-		c := sp.Candidates[j]
+		c := s.pool[j]
 		if c.At.SourceID == it.SourceID && c.At.EntryID == it.EntryID {
 			return refuse("%s is related to %s, a Span of the same Item", rel.Span, rel.To)
 		}

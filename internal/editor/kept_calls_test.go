@@ -7,18 +7,7 @@ import (
 	"time"
 
 	"github.com/samthorold/go-slow/internal/editor"
-	"github.com/samthorold/go-slow/internal/sqlite"
 )
-
-// callsOn are the calls kept on act's work on the speech.
-func callsOn(t *testing.T, store *sqlite.Store, act string) []editor.Call {
-	t.Helper()
-	calls, err := store.CallsOn(t.Context(), act, speechKey)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return calls
-}
 
 func TestARelatingInABatchLeavesAKeptCall(t *testing.T) {
 	store := record(t)

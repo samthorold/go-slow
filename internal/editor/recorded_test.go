@@ -37,10 +37,9 @@ var rerecordFlag = flag.Bool("record", false, "call the real model on the fixtur
 
 // How each act's own recorded test is re-recorded.
 var (
-	readingCommand          = rerecordCmd{"TestRecordedReadings", "READING_MODEL"}
-	placingPrecedentCommand = rerecordCmd{"TestRecordedPlacingPrecedent", "PLACING_MODEL"}
-	briefingCommand         = rerecordCmd{"TestRecordedBriefing", "BRIEFING_MODEL"}
-	sundayReadCommand       = rerecordCmd{"TestRecordedSundayRead", "SUNDAY_READ_MODEL"}
+	readingCommand    = rerecordCmd{"TestRecordedReadings", "READING_MODEL"}
+	briefingCommand   = rerecordCmd{"TestRecordedBriefing", "BRIEFING_MODEL"}
+	sundayReadCommand = rerecordCmd{"TestRecordedSundayRead", "SUNDAY_READ_MODEL"}
 )
 
 // recording is one kept response, with the hash of the request it answered

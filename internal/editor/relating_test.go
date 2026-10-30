@@ -53,7 +53,7 @@ func toRelate(it editor.Item, candidates map[int][]editor.OtherSpan) editor.ToRe
 	return tr
 }
 
-func TestRelatingShowsEachSpanItsCandidatesFromOtherItems(t *testing.T) {
+func TestRelatingShowsTheItemsSpansAndTheCandidatesFoundForThem(t *testing.T) {
 	model := &fakeModel{output: `{"relations": []}`}
 	tr := toRelate(holyrood, map[int][]editor.OtherSpan{1: {other(pressRelease, 1)}, 2: {other(pressRelease, 2)}})
 
@@ -70,8 +70,6 @@ func TestRelatingShowsEachSpanItsCandidatesFromOtherItems(t *testing.T) {
 		"Published: 2026-10-14\n",
 		"C1: The PM will argue for more powers for the regions.\n",
 		"C2: Scotland is one of the most centralised nations in Europe.\n",
-		"S1: C1\n",
-		"S2: C2\n",
 	} {
 		if !strings.Contains(in, want) {
 			t.Errorf("the input does not show %q:\n%s", want, in)
@@ -117,11 +115,10 @@ func TestFollowsRunsFromTheLaterPublishedSpanToTheEarlier(t *testing.T) {
 func TestARelationToASpanNotShownIsRefused(t *testing.T) {
 	tr := toRelate(holyrood, map[int][]editor.OtherSpan{1: {other(pressRelease, 1)}, 2: {other(pressRelease, 2)}})
 	for name, output := range map[string]string{
-		"a candidate of another Span": `{"relations": [{"span": "S1", "to": "C2", "verdict": "follows"}]}`,
-		"no candidate at all":         `{"relations": [{"span": "S1", "to": "C9", "verdict": "follows"}]}`,
-		"a Span of the same Item":     `{"relations": [{"span": "S1", "to": "S2", "verdict": "same_as"}]}`,
-		"a Span not to relate":        `{"relations": [{"span": "S7", "to": "C1", "verdict": "follows"}]}`,
-		"no such verdict":             `{"relations": [{"span": "S1", "to": "C1", "verdict": "updates"}]}`,
+		"no candidate at all":     `{"relations": [{"span": "S1", "to": "C9", "verdict": "follows"}]}`,
+		"a Span of the same Item": `{"relations": [{"span": "S1", "to": "S2", "verdict": "same_as"}]}`,
+		"a Span not to relate":    `{"relations": [{"span": "S7", "to": "C1", "verdict": "follows"}]}`,
+		"no such verdict":         `{"relations": [{"span": "S1", "to": "C1", "verdict": "updates"}]}`,
 		"two verdicts on one pair": `{"relations": [{"span": "S1", "to": "C1", "verdict": "follows"},
 			{"span": "S1", "to": "C1", "verdict": "contradicts"}]}`,
 	} {

@@ -19,8 +19,8 @@ func schedule(store *sqlite.Store, writer *fakeModel) (*editor.Schedule, *[]stri
 	var happened []string
 	ed, _ := briefer(store, writer)
 	return editor.NewSchedule(editor.ScheduleDeps{
-		Store:  store,
-		At:     7 * time.Hour,
+		Store: store,
+		At:    7 * time.Hour,
 		Brief: func(ctx context.Context, now time.Time) error {
 			happened = append(happened, "brief")
 			return ed.Brief(ctx, now)

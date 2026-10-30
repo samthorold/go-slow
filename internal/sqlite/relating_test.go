@@ -90,9 +90,8 @@ func read(t *testing.T, s *Store, entry, text string, c cut.Cut, names []named, 
 }
 
 var (
-	monday    = time.Date(2026, time.October, 12, 9, 0, 0, 0, time.UTC)
-	tuesday   = monday.AddDate(0, 0, 1)
-	wednesday = monday.AddDate(0, 0, 2)
+	monday  = time.Date(2026, time.October, 12, 9, 0, 0, 0, time.UTC)
+	tuesday = monday.AddDate(0, 0, 1)
 )
 
 const (

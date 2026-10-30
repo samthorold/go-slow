@@ -76,20 +76,6 @@ func (m *inTurn) Complete(_ context.Context, r editor.Request) (editor.Response,
 	return editor.Response{Output: json.RawMessage(out), Model: "fake"}, nil
 }
 
-// speechAndReadout is a Record holding the speech and the later readout,
-// both read and placed in one Story.
-func speechAndReadout(t *testing.T) (*sqlite.Store, int64) {
-	t.Helper()
-	store := record(t)
-	readAndPlace(t, store, &fakeModel{output: startsAStory})
-	readLater(t, store)
-	ed, _ := placer(store, &fakeModel{output: `{"new_stories": [], "facts": [{"fact": "F1", "developments_in": ["S1"]}]}`})
-	if err := ed.PlaceWaiting(t.Context(), saturday); err != nil {
-		t.Fatal(err)
-	}
-	return store, 1
-}
-
 const speechRoles = `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "actor"}, {"entity": "Motherwell", "role": "place"}]}], "causes": []}`
 
 // readoutCausedBySpeech connects the readout's Fact as caused by the speech's.

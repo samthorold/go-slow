@@ -23,4 +23,3 @@ type Precedent struct {
 	Depth   interest.Depth
 	GivenAt time.Time
 }
-

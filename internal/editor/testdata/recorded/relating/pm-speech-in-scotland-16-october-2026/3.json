@@ -1,0 +1,59 @@
+{
+  "act": "relating",
+  "model": "claude-haiku-5-5",
+  "request_hash": "115d2f4b9ae5861b29a8cb3c417ac785da5879d40dd41649bb2b9ae2bd71af3e",
+  "recorded_at": "2026-10-30T22:26:50.640174Z",
+  "usage": {
+    "input_tokens": 14772,
+    "output_tokens": 1998
+  },
+  "output": {
+    "relations": [
+      {
+        "span": "S290",
+        "to": "C12",
+        "verdict": "follows"
+      },
+      {
+        "span": "S290",
+        "to": "C7",
+        "verdict": "follows"
+      },
+      {
+        "span": "S290",
+        "to": "C14",
+        "verdict": "follows"
+      },
+      {
+        "span": "S296",
+        "to": "C10",
+        "verdict": "follows"
+      },
+      {
+        "span": "S283",
+        "to": "C7",
+        "verdict": "follows"
+      },
+      {
+        "span": "S144",
+        "to": "C9",
+        "verdict": "same_as"
+      },
+      {
+        "span": "S153",
+        "to": "C8",
+        "verdict": "same_as"
+      },
+      {
+        "span": "S141",
+        "to": "C8",
+        "verdict": "same_as"
+      },
+      {
+        "span": "S66",
+        "to": "C11",
+        "verdict": "same_as"
+      }
+    ]
+  }
+}

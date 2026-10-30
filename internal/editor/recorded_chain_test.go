@@ -98,7 +98,7 @@ type actModel func(name string) (editor.Model, error)
 // whose frozen copies still carry them, the earlier reading act's Facts
 // (factReading) and the retired placing and connecting acts.
 type chain struct {
-	reading, relating                  actModel
+	reading, relating                actModel
 	factReading, placing, connecting actModel
 }
 
@@ -373,8 +373,8 @@ func frozenRecordAt(t *testing.T, path, dir string) *sqlite.Store {
 	store, topics := newRecordAt(t, path, briefingTopics)
 	c := chain{
 		factReading: replayed(filepath.Join(dir, "reading")),
-		placing:    replayed(filepath.Join(dir, "placing")),
-		connecting: replayed(filepath.Join(dir, "connecting")),
+		placing:     replayed(filepath.Join(dir, "placing")),
+		connecting:  replayed(filepath.Join(dir, "connecting")),
 	}
 	if err := c.run(t.Context(), store, topics, fixtureItems(t)); err != nil {
 		t.Fatal(err)

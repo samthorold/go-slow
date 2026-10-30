@@ -149,6 +149,28 @@ func (s *Store) ItemsToRelate(ctx context.Context) ([]editor.ToRelate, error) {
 	return out, nil
 }
 
+// namesRead are the keys of every name the newest readings of the Items
+// first read op (SQL "<" or "<=") readBefore judge, each once.
+func (s *Store) namesRead(ctx context.Context, op string, readBefore int64) ([]editor.LookupKey, error) {
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT DISTINCT n.name, n.kind, n.office, `+lookupOn+`
+		FROM items JOIN span_names n ON n.reading_id = `+newestReadingOf+`
+		WHERE `+firstRead+` `+op+` ?`, readBefore)
+	if err != nil {
+		return nil, fmt.Errorf("names read: %w", err)
+	}
+	defer func() { _ = rows.Close() }()
+	var keys []editor.LookupKey
+	for rows.Next() {
+		var k editor.LookupKey
+		if err := rows.Scan(&k.Name, &k.Kind, &k.Office, &k.On); err != nil {
+			return nil, fmt.Errorf("names read: %w", err)
+		}
+		keys = append(keys, k)
+	}
+	return keys, rows.Err()
+}
+
 // itemsNaming are the Items first read at or before readBefore (before it,
 // if strictly) whose newest reading names one of the Entities es, as the
 // Record's look-ups have each name now.
@@ -160,26 +182,11 @@ func (s *Store) itemsNaming(ctx context.Context, es []editor.NamedEntity, readBe
 	if strictly {
 		op = "<"
 	}
-	// Every name the Record's newest readings judge, with what it is now.
-	rows, err := s.db.QueryContext(ctx, `
-		SELECT DISTINCT n.name, n.kind, n.office, `+lookupOn+`
-		FROM items JOIN span_names n ON n.reading_id = `+newestReadingOf+`
-		WHERE `+firstRead+` `+op+` ?`, readBefore)
+	keys, err := s.namesRead(ctx, op, readBefore)
 	if err != nil {
-		return nil, fmt.Errorf("names read: %w", err)
-	}
-	var keys []editor.LookupKey
-	for rows.Next() {
-		var k editor.LookupKey
-		if err := rows.Scan(&k.Name, &k.Kind, &k.Office, &k.On); err != nil {
-			_ = rows.Close()
-			return nil, fmt.Errorf("names read: %w", err)
-		}
-		keys = append(keys, k)
-	}
-	if err := rows.Close(); err != nil {
 		return nil, err
 	}
+	// What each is now.
 	is, err := s.EntitiesNamed(ctx, keys)
 	if err != nil {
 		return nil, err
@@ -323,31 +330,8 @@ func relatingCall(r string) string {
 // the relating that judged it, with its Judge and call, in the order they
 // were judged.
 func (s *Store) RelationsOf(ctx context.Context, a editor.Address) ([]editor.SpanRelation, error) {
-	rows, err := s.db.QueryContext(ctx, `
-		SELECT rel.kind, rel.from_source_id, rel.from_entry_id, rel.from_start, rel.from_end,
-			rel.to_source_id, rel.to_entry_id, rel.to_start, rel.to_end,
-			rl.event_id, rl.act, rl.version, rl.model, rl.request_hash, `+relatingCall("rl")+`
-		FROM relations rel JOIN relatings rl ON rl.event_id = rel.relating_id
-		WHERE (rel.from_source_id = ? AND rel.from_entry_id = ? AND rel.from_start = ? AND rel.from_end = ?)
-			OR (rel.to_source_id = ? AND rel.to_entry_id = ? AND rel.to_start = ? AND rel.to_end = ?)
-		ORDER BY rel.event_id`,
-		a.SourceID, a.EntryID, a.Span.Start, a.Span.End, a.SourceID, a.EntryID, a.Span.Start, a.Span.End)
+	out, err := s.relationsAt(ctx, a)
 	if err != nil {
-		return nil, fmt.Errorf("relations of a Span: %w", err)
-	}
-	var out []editor.SpanRelation
-	for rows.Next() {
-		var sr editor.SpanRelation
-		f, t := &sr.Relation.From, &sr.Relation.To
-		if err := rows.Scan(&sr.Relation.Kind, &f.SourceID, &f.EntryID, &f.Span.Start, &f.Span.End,
-			&t.SourceID, &t.EntryID, &t.Span.Start, &t.Span.End,
-			&sr.RelatingID, &sr.Judge.Act, &sr.Judge.Version, &sr.Judge.Model, &sr.Judge.RequestHash, &sr.Call); err != nil {
-			_ = rows.Close()
-			return nil, fmt.Errorf("relations of a Span: %w", err)
-		}
-		out = append(out, sr)
-	}
-	if err := rows.Close(); err != nil {
 		return nil, err
 	}
 	for i, sr := range out {
@@ -362,6 +346,36 @@ func (s *Store) RelationsOf(ctx context.Context, a editor.Address) ([]editor.Spa
 		out[i].Other = other
 	}
 	return out, nil
+}
+
+// relationsAt are the relations judged of the Span at a, either way, with
+// their relatings, in the order they were judged.
+func (s *Store) relationsAt(ctx context.Context, a editor.Address) ([]editor.SpanRelation, error) {
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT rel.kind, rel.from_source_id, rel.from_entry_id, rel.from_start, rel.from_end,
+			rel.to_source_id, rel.to_entry_id, rel.to_start, rel.to_end,
+			rl.event_id, rl.act, rl.version, rl.model, rl.request_hash, `+relatingCall("rl")+`
+		FROM relations rel JOIN relatings rl ON rl.event_id = rel.relating_id
+		WHERE (rel.from_source_id = ? AND rel.from_entry_id = ? AND rel.from_start = ? AND rel.from_end = ?)
+			OR (rel.to_source_id = ? AND rel.to_entry_id = ? AND rel.to_start = ? AND rel.to_end = ?)
+		ORDER BY rel.event_id`,
+		a.SourceID, a.EntryID, a.Span.Start, a.Span.End, a.SourceID, a.EntryID, a.Span.Start, a.Span.End)
+	if err != nil {
+		return nil, fmt.Errorf("relations of a Span: %w", err)
+	}
+	defer func() { _ = rows.Close() }()
+	var out []editor.SpanRelation
+	for rows.Next() {
+		var sr editor.SpanRelation
+		f, t := &sr.Relation.From, &sr.Relation.To
+		if err := rows.Scan(&sr.Relation.Kind, &f.SourceID, &f.EntryID, &f.Span.Start, &f.Span.End,
+			&t.SourceID, &t.EntryID, &t.Span.Start, &t.Span.End,
+			&sr.RelatingID, &sr.Judge.Act, &sr.Judge.Version, &sr.Judge.Model, &sr.Judge.RequestHash, &sr.Call); err != nil {
+			return nil, fmt.Errorf("relations of a Span: %w", err)
+		}
+		out = append(out, sr)
+	}
+	return out, rows.Err()
 }
 
 // SpanAt is the Span at a as its Item's newest reading reads it: its words,

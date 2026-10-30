@@ -87,7 +87,7 @@ func TestTheRetryCommandTakesAnActsFailedWorkUpAgain(t *testing.T) {
 	failedRecord(t, db)
 	log := slog.New(slog.DiscardHandler)
 
-	if err := admin(t.Context(), log, []string{"retry", "reading"}, env(db), nil, nil); err != nil {
+	if err := admin(t.Context(), log, []string{"retry", "reading"}, adminDeps{Lookup: env(db)}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -99,7 +99,7 @@ func TestTheRetryCommandTakesAnActsFailedWorkUpAgain(t *testing.T) {
 		t.Errorf("failed work %+v, want only placing's left", failed)
 	}
 
-	if err := admin(t.Context(), log, []string{"retry"}, env(db), nil, nil); err != nil {
+	if err := admin(t.Context(), log, []string{"retry"}, adminDeps{Lookup: env(db)}); err != nil {
 		t.Fatal(err)
 	}
 	if failed, _ := inRecord(t, db); len(failed) != 0 {
@@ -111,7 +111,7 @@ func TestTheRetryCommandRefusesAnActItDoesNotKnow(t *testing.T) {
 	db := filepath.Join(t.TempDir(), "go-slow.db")
 	failedRecord(t, db)
 
-	if err := admin(t.Context(), slog.New(slog.DiscardHandler), []string{"retry", "briefing"}, env(db), nil, nil); err == nil {
+	if err := admin(t.Context(), slog.New(slog.DiscardHandler), []string{"retry", "briefing"}, adminDeps{Lookup: env(db)}); err == nil {
 		t.Error("retrying an act that is not run in batches did not fail")
 	}
 	if failed, _ := inRecord(t, db); len(failed) != 2 {

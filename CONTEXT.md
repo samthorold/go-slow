@@ -66,6 +66,10 @@ _Avoid_: Annotation, label, inference
 What made a **Judgement**: the act, the version of its instructions, and the model. A new version of an act is a new **Judge**.
 _Avoid_: Annotator, model (a model is one part of a **Judge**)
 
+**Candidate**:
+A **Judge** whose **Judgements** are kept beside the live ones and read by no view until the **Owner** chooses it; once chosen it is a live **Judge**.
+_Avoid_: Shadow judge, experiment
+
 **Follows**:
 A **Span** *follows* an earlier-published **Span** of another **Item** when it moves on what that one said: the speech that argues what the press release said it "will argue". Many-to-many: a **Span** can follow several, and be followed by several.
 _Avoid_: Updates, continues (a chain, which *follows* is not)

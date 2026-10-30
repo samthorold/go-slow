@@ -73,6 +73,9 @@ type Reading struct {
 	// CutID is the Cut the Item was shown as.
 	CutID int64
 	Judge Judge
+	// Candidate is the candidate Judge it was made as, read by no view until
+	// that candidate is chosen; zero for a reading made as the live judge.
+	Candidate int64
 	// At is when it was judged.
 	At       time.Time
 	RefersTo []RefersTo

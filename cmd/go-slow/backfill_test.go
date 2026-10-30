@@ -109,8 +109,8 @@ func TestTheBackfillCommandGivesUnreadSummaryOnlyItemsTheirTextAndChecksThemAgai
 		t.Fatal(err)
 	}
 
-	if err := admin(t.Context(), slog.New(slog.DiscardHandler), []string{"backfill"}, env(db), nil,
-		&http.Client{Transport: to{u}}); err != nil {
+	if err := admin(t.Context(), slog.New(slog.DiscardHandler), []string{"backfill"},
+		adminDeps{Lookup: env(db), Web: &http.Client{Transport: to{u}}}); err != nil {
 		t.Fatal(err)
 	}
 

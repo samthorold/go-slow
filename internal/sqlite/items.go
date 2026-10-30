@@ -203,8 +203,7 @@ func (s *Store) ListItems(ctx context.Context) ([]collect.ListedItem, error) {
 			(SELECT count(*) FROM speakers s WHERE s.reading_id = newest.event_id),
 			(SELECT count(*) FROM rejections j WHERE j.reading_id = newest.event_id)
 		FROM items JOIN sources ON sources.id = items.source_id
-			LEFT JOIN readings newest ON newest.event_id = (SELECT max(r.event_id) FROM readings r
-				WHERE r.source_id = items.source_id AND r.entry_id = items.entry_id)
+			LEFT JOIN readings newest ON newest.event_id = `+newestLiveReading("items.source_id", "items.entry_id")+`
 		WHERE items.due = ''
 		ORDER BY items.published DESC, items.collected_at DESC`)
 	if err != nil {

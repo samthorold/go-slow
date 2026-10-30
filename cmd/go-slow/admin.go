@@ -19,8 +19,23 @@ import (
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
 
+// adminDeps are what the admin commands are given by main.
+type adminDeps struct {
+	// Lookup reads the config's environment.
+	Lookup func(string) (string, bool)
+	// Stdin is what is piped in, and Stdout where a command prints what
+	// the Owner reads (logs go to the log).
+	Stdin  io.Reader
+	Stdout io.Writer
+	// Web fetches from Sources.
+	Web *http.Client
+	// Models is the model adapter on the model named, with the key.
+	Models func(key config.Secret, model string) editor.Model
+	Now    func() time.Time
+}
+
 // admin runs a one-off admin command, from the same binary and config as
-// the app, the config read through lookup.
+// the app, the config read through d.Lookup.
 //
 //	commits: keeps the commits to go-slow, read from git log on stdin, for
 //	the register's quiet window and its changes to the Editor. The app
@@ -43,10 +58,13 @@ import (
 //	them again. Items already read are left as they are:
 //
 //	  docker compose run --rm app backfill
-func admin(ctx context.Context, log *slog.Logger, args []string, lookup func(string) (string, bool), stdin io.Reader, web *http.Client) error {
+//
+//	rejudge: judges a range of the Record again with a chosen judge, priced
+//	first; see rejudge.
+func admin(ctx context.Context, log *slog.Logger, args []string, d adminDeps) error {
 	switch args[0] {
 	case "backfill":
-		cfg, err := config.Load(lookup)
+		cfg, err := config.Load(d.Lookup)
 		if err != nil {
 			return err
 		}
@@ -62,7 +80,7 @@ func admin(ctx context.Context, log *slog.Logger, args []string, lookup func(str
 		n, err := collect.Backfill(ctx, collect.BackfillDeps{
 			Sources: sources,
 			Fetcher: polite.New(polite.Options{
-				HTTP:      web,
+				HTTP:      d.Web,
 				UserAgent: polite.UserAgent(cfg.CollectionContact),
 				Now:       time.Now,
 				Sleep:     polite.Sleep,
@@ -77,11 +95,11 @@ func admin(ctx context.Context, log *slog.Logger, args []string, lookup func(str
 		log.Info("items given their text", "given", n)
 		return nil
 	case "commits":
-		cfg, err := config.Load(lookup)
+		cfg, err := config.Load(d.Lookup)
 		if err != nil {
 			return err
 		}
-		commits, err := register.ParseGitLog(stdin)
+		commits, err := register.ParseGitLog(d.Stdin)
 		if err != nil {
 			return fmt.Errorf("read git log (want --format='%s' --name-only): %w", register.GitLogFormat, err)
 		}
@@ -108,7 +126,7 @@ func admin(ctx context.Context, log *slog.Logger, args []string, lookup func(str
 		if act != "" && !slices.Contains(known, act) {
 			return fmt.Errorf("unknown act %q (known: %s)", act, strings.Join(known, ", "))
 		}
-		cfg, err := config.Load(lookup)
+		cfg, err := config.Load(d.Lookup)
 		if err != nil {
 			return err
 		}
@@ -123,7 +141,9 @@ func admin(ctx context.Context, log *slog.Logger, args []string, lookup func(str
 		}
 		log.Info("failed work cleared for retry", "act", act, "cleared", n)
 		return nil
+	case "rejudge":
+		return rejudge(ctx, log, args[1:], d)
 	default:
-		return fmt.Errorf("unknown command %q (known: backfill, commits, retry)", args[0])
+		return fmt.Errorf("unknown command %q (known: backfill, commits, rejudge, retry)", args[0])
 	}
 }

@@ -36,7 +36,8 @@ type sampleFile struct {
 
 // attempts are the sample's attempts in the order they were made.
 func (s sampleFile) attempts() []recording {
-	if s.Output == nil {
+	if s.Output == nil || string(s.Output) == "null" {
+		// A sample of work that made no call keeps none.
 		return s.EarlierAttempts
 	}
 	return append(slices.Clone(s.EarlierAttempts), s.recording)

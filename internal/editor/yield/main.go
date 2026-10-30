@@ -5,6 +5,10 @@
 //
 //	go run ./internal/editor/yield <before> <after>
 //
+// Relating is counted by its relations' kinds; a sample of an Item related
+// with no call counts none. Placing and connecting, retired, are counted
+// from recordings made before they were.
+//
 // Each argument is a recordings directory (internal/editor/testdata/recorded,
 // or an older copy of it, e.g. extracted with git archive). A fixture
 // recorded as several samples (<fixture>/<k>.json) is counted by each

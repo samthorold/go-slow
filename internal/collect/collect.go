@@ -103,11 +103,13 @@ type ListedItem struct {
 	// awaits reading for each. None, once Checked, is an Item that touches
 	// no Topic.
 	Topics []string
-	// Read is whether the Editor has read the Item, drawing Facts and
-	// Claims from it.
-	Read   bool
-	Facts  int
-	Claims int
+	// HasText is whether the Item has its text, and Cut whether a Cut lists
+	// its Spans.
+	HasText, Cut bool
+	// Read is whether the Editor has read the Item's Spans; Names, Speakers
+	// and Rejected are how many of each its newest reading judged.
+	Read                      bool
+	Names, Speakers, Rejected int
 }
 
 // Checker is the lazy-reading check, run over the Items Collection has just

@@ -146,6 +146,13 @@ var anyTag = regexp.MustCompile(`<[^>]*>`)
 // Words is the words the Span of text holds, as read: tags dropped, entities
 // decoded and each run of space one space.
 func Words(text string, s Span) string {
+	return strings.TrimSpace(Stretch(text, s))
+}
+
+// Stretch is the words of the Span s of text as a stretch of a longer Span:
+// as Words, but with the space at either end kept, as one space, so the
+// stretches of a Span read as the Span when put back together.
+func Stretch(text string, s Span) string {
 	if s.Start < 0 || s.End > len(text) || s.Start >= s.End {
 		return ""
 	}
@@ -153,5 +160,5 @@ func Words(text string, s Span) string {
 	// inside words or between them.
 	w := anyTag.ReplaceAllString(text[s.Start:s.End], "")
 	w = html.UnescapeString(w)
-	return strings.TrimSpace(space.ReplaceAllString(w, " "))
+	return space.ReplaceAllString(w, " ")
 }

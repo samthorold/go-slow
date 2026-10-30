@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"html"
-	"log/slog"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -12,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/sqlite"
@@ -34,7 +34,8 @@ func (noWikidata) Items(context.Context, []string) ([]editor.WikidataItem, error
 
 func (noWikidata) Labels(context.Context, []string) (map[string]string, error) { return nil, nil }
 
-// readSpeech seeds a speech, ties it to a Topic and reads it with output.
+// readSpeech seeds a speech, ties it to a Topic and draws its Facts and
+// Claims from output, as the earlier reading act did.
 func readSpeech(t *testing.T, store *sqlite.Store, output string) {
 	t.Helper()
 	speech := item("speech", "PM speech in Scotland", saturday.Add(-48*time.Hour))
@@ -46,8 +47,60 @@ func readSpeech(t *testing.T, store *sqlite.Store, output string) {
 	if _, errs, err := topics.Add(t.Context(), interest.Draft{Name: "Scotland", Depth: "close", Terms: "Scotland"}); err != nil || errs != nil {
 		t.Fatalf("add Topic: %v %v", errs, err)
 	}
-	ed := editor.New(editor.Deps{Store: store, Model: fakeModel{output}, Wikidata: noWikidata{}, Log: slog.New(slog.DiscardHandler)})
-	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
+	drawFacts(t, store, speech, output, editor.Usage{})
+}
+
+// drawFacts draws the Item's Facts, Claims and mentions from output, in the
+// earlier reading act's schema, into the Record, with that act's kept call,
+// reporting usage, as that act left them: no act draws Facts now, but the
+// Record keeps those it drew, which the pages built on Facts still show.
+func drawFacts(t *testing.T, store *sqlite.Store, it collect.Item, output string, usage editor.Usage) {
+	t.Helper()
+	var out struct {
+		Facts []struct {
+			Statement string `json:"statement"`
+			AsAt      string `json:"as_at"`
+			Quote     string `json:"quote"`
+		} `json:"facts"`
+		Claims []struct {
+			Statement string `json:"statement"`
+			MadeBy    string `json:"made_by"`
+			Quote     string `json:"quote"`
+		} `json:"claims"`
+		Mentions []struct {
+			Name string `json:"name"`
+			Kind string `json:"kind"`
+			Role string `json:"role"`
+		} `json:"mentions"`
+	}
+	if err := json.Unmarshal([]byte(output), &out); err != nil {
+		t.Fatal(err)
+	}
+	r := editor.FactReading{SourceID: it.SourceID, EntryID: it.EntryID, Model: "fake"}
+	for _, m := range out.Mentions {
+		r.Entities = append(r.Entities, editor.Entity{Name: m.Name, Kind: m.Kind, Role: m.Role})
+	}
+	for _, f := range out.Facts {
+		asAt, err := time.Parse(time.DateOnly, f.AsAt)
+		if err != nil {
+			t.Fatal(err)
+		}
+		r.Facts = append(r.Facts, editor.Fact{Statement: f.Statement, AsAt: asAt, Quote: f.Quote})
+	}
+	for _, c := range out.Claims {
+		r.Claims = append(r.Claims, editor.Claim{Statement: c.Statement, MadeBy: c.MadeBy, Quote: c.Quote})
+	}
+	if err := store.SaveFactReading(t.Context(), r, saturday); err != nil {
+		t.Fatal(err)
+	}
+	req := editor.Request{Act: "reading", Instructions: "You are the Editor of a private slow-news briefing. Draw the Item's Facts and Claims.",
+		Input: "Title: " + it.Title, Schema: map[string]any{"type": "object", "additionalProperties": false}}
+	if err := store.KeepCall(t.Context(), editor.Call{
+		Act: "reading", Key: it.SourceID + "\n" + it.EntryID, At: saturday, Model: "fake",
+		Request: req, RequestHash: editor.RequestHash(req, "fake"),
+		Response: &editor.Response{Output: json.RawMessage(output), Model: "fake", Usage: usage},
+		Outcome:  editor.Applied,
+	}); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -98,7 +151,7 @@ func TestAnItemsPageListsItsMentionsOnceAndPerFactOnlyTheEntitiesItInvolves(t *t
 	seed(t, store, saturday.AddDate(0, 0, -7), it)
 	// A reading gives the Item's mentions once, and ties no statement to
 	// them.
-	if err := store.SaveReading(t.Context(), editor.Reading{
+	if err := store.SaveFactReading(t.Context(), editor.FactReading{
 		SourceID: it.SourceID, EntryID: it.EntryID, Model: "fake",
 		Entities: []editor.Entity{
 			{Name: "Andy Burnham", Kind: "person", WikidataID: "Q123", Label: "Andy Burnham"},
@@ -152,18 +205,6 @@ func TestAnItemsPageListsItsMentionsOnceAndPerFactOnlyTheEntitiesItInvolves(t *t
 	}
 	if claims := section("claims"); strings.Contains(claims, `class="pill"`) {
 		t.Errorf("the Claim shows Entities:\n%s", claims)
-	}
-}
-
-func TestTheItemsPageSaysWhichItemsHaveBeenRead(t *testing.T) {
-	store := openStore(t)
-	readSpeech(t, store, reading)
-	app, _ := newAppWithLog(t, saturday, store)
-
-	b := blockOf(t, get(t, app, "/items").body, "PM speech in Scotland")
-
-	if !strings.Contains(b.margin, `<span class="machine" hx-disable>read · 1 Fact, 1 Claim</span>`) || strings.Contains(b.margin, "awaiting reading") {
-		t.Errorf("the read speech's margin does not label it read:\n%s", b.margin)
 	}
 }
 

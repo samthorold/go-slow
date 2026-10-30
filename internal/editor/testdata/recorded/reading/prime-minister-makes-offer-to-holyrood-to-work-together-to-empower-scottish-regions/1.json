@@ -1,167 +1,420 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "a535f688998081b1cc7923f40589fc00f5aca48974701b48c55138d35bf6c3e3",
-  "recorded_at": "2026-10-26T22:47:58.322536Z",
+  "request_hash": "9f6653a628033d0716fdae463edfb365030d6251cbda7a5fe423eda19a075dcb",
+  "recorded_at": "2026-10-30T21:11:46.42845Z",
   "usage": {
-    "input_tokens": 2301,
-    "output_tokens": 3661
+    "input_tokens": 2822,
+    "output_tokens": 6325
   },
   "output": {
-    "claims": [
+    "names": [
       {
-        "made_by": "Andy Burnham",
-        "quote": "the Scottish Government is one of the most centralised devolved administrations in Europe",
-        "statement": "The Scottish Government is one of the most centralised devolved administrations in Europe."
-      },
-      {
-        "made_by": "Andy Burnham",
-        "quote": "the Prime Minister will argue the next stage of devolution should place more decision-making in the hands of Scotland’s regions and cities",
-        "statement": "The next stage of devolution should place more decision-making in the hands of Scotland's regions and cities to drive reindustrialisation."
-      },
-      {
-        "made_by": "Andy Burnham",
-        "quote": "Through No10 North, we are rewiring the state",
-        "statement": "The UK Government is rewiring the state through No10 North."
-      },
-      {
-        "made_by": "Andy Burnham",
-        "quote": "With us working together, there is no limit to what we can achieve for the Scottish people.",
-        "statement": "If the UK and Scottish Governments work together, there is no limit to what they can achieve for the Scottish people."
-      },
-      {
-        "made_by": "Douglas Alexander",
-        "quote": "People in North Lanarkshire, in Fife or in the Highlands know what their communities need better than any minister, whether they sit in London or Edinburgh.",
-        "statement": "People in North Lanarkshire, Fife and the Highlands know what their communities need better than any minister, whether in London or Edinburgh."
-      },
-      {
-        "made_by": "Douglas Alexander",
-        "quote": "The Prime Minister’s offer to the Scottish Government is a genuine one",
-        "statement": "The Prime Minister's offer to the Scottish Government is a genuine one."
-      },
-      {
-        "made_by": "Douglas Alexander",
-        "quote": "the Scotland Office is ready to roll up its sleeves alongside them to make it happen",
-        "statement": "The Scotland Office is ready to work alongside the Scottish Government to make the offer happen."
-      }
-    ],
-    "facts": [
-      {
-        "as_at": "2026-10-15",
-        "quote": "after speaking with young people today in Lanarkshire",
-        "statement": "Andy Burnham spoke with young people in Lanarkshire on 2026-10-15."
-      },
-      {
-        "as_at": "2026-10-15",
-        "quote": "In a speech today, the Prime Minister will invite Scotland’s First Minister to work with him",
-        "statement": "The Prime Minister intends to invite the First Minister to work with him in a speech on 2026-10-15."
-      },
-      {
-        "as_at": "2026-10-15",
-        "quote": "This is me making an offer to the Scottish Government.",
-        "statement": "The Prime Minister has made an offer to the Scottish Government."
-      },
-      {
-        "as_at": "2026-10-15",
-        "quote": "he will call on the Scottish Government to work with the UK Government through No10 North and the Scotland Office",
-        "statement": "The Prime Minister intends to call on the Scottish Government to work with the UK Government through No10 North and the Scotland Office."
-      },
-      {
-        "as_at": "2026-10-15",
-        "quote": "During my first week in office, I told the First Minister that I wanted to work with him",
-        "statement": "The Prime Minister told the First Minister during his first week in office that he wanted to work with him."
-      },
-      {
-        "as_at": "2026-10-15",
-        "quote": "despite significant devolution from Westminster over the last 27 years",
-        "statement": "There has been significant devolution from Westminster over the last 27 years."
-      },
-      {
-        "as_at": "2026-10-15",
-        "quote": "The Scottish Secretary, Douglas Alexander said:",
-        "statement": "Douglas Alexander, the Scottish Secretary, made a statement on 2026-10-15."
-      }
-    ],
-    "mentions": [
-      {
+        "at": {
+          "span": 1,
+          "words": "the Prime Minister"
+        },
         "kind": "person",
         "name": "Andy Burnham",
-        "role": "Prime Minister of the United Kingdom"
+        "office": "Prime Minister of the United Kingdom"
       },
       {
+        "at": {
+          "span": 1,
+          "words": "Scotland’s First Minister"
+        },
         "kind": "person",
-        "name": "First Minister",
-        "role": "First Minister of Scotland"
+        "name": "Scotland’s First Minister",
+        "office": "First Minister of Scotland"
       },
       {
+        "at": {
+          "span": 1,
+          "words": "Westminster"
+        },
+        "kind": "place",
+        "name": "Westminster",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 1,
+          "words": "Holyrood"
+        },
+        "kind": "place",
+        "name": "Holyrood",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 2,
+          "words": "Andy Burnham"
+        },
         "kind": "person",
-        "name": "Douglas Alexander",
-        "role": "Scottish Secretary"
+        "name": "Andy Burnham",
+        "office": "Prime Minister of the United Kingdom"
       },
       {
+        "at": {
+          "span": 2,
+          "words": "the Scottish Government"
+        },
         "kind": "organisation",
         "name": "Scottish Government",
-        "role": "Government of Scotland"
+        "office": ""
       },
       {
-        "kind": "organisation",
-        "name": "UK Government",
-        "role": "Government of the United Kingdom"
-      },
-      {
-        "kind": "organisation",
-        "name": "Scottish Parliament",
-        "role": "Devolved legislature of Scotland, also called Holyrood"
-      },
-      {
-        "kind": "organisation",
-        "name": "Westminster",
-        "role": "UK Parliament"
-      },
-      {
-        "kind": "organisation",
-        "name": "No10 North",
-        "role": "UK Government initiative to rewire the state"
-      },
-      {
-        "kind": "organisation",
-        "name": "Scotland Office",
-        "role": "UK Government department for Scotland"
-      },
-      {
+        "at": {
+          "span": 2,
+          "words": "Holyrood"
+        },
         "kind": "place",
-        "name": "Scotland",
-        "role": ""
+        "name": "Holyrood",
+        "office": ""
       },
       {
+        "at": {
+          "span": 2,
+          "words": "Lanarkshire"
+        },
         "kind": "place",
         "name": "Lanarkshire",
-        "role": ""
+        "office": ""
       },
       {
+        "at": {
+          "span": 3,
+          "words": "the Prime Minister"
+        },
+        "kind": "person",
+        "name": "Andy Burnham",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 3,
+          "words": "the Scottish Parliament"
+        },
+        "kind": "organisation",
+        "name": "Scottish Parliament",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "the Scottish Government"
+        },
+        "kind": "organisation",
+        "name": "Scottish Government",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "the UK Government"
+        },
+        "kind": "organisation",
+        "name": "UK Government",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "No10 North"
+        },
+        "kind": "organisation",
+        "name": "No10 North",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "the Scotland Office"
+        },
+        "kind": "organisation",
+        "name": "Scotland Office",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "Scotland"
+        },
+        "kind": "place",
+        "name": "Scotland",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 5,
+          "words": "Andy Burnham"
+        },
+        "kind": "person",
+        "name": "Andy Burnham",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 6,
+          "words": "the First Minister"
+        },
+        "kind": "person",
+        "name": "Scotland’s First Minister",
+        "office": "First Minister of Scotland"
+      },
+      {
+        "at": {
+          "span": 7,
+          "words": "No10 North"
+        },
+        "kind": "organisation",
+        "name": "No10 North",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 7,
+          "words": "Scotland"
+        },
+        "kind": "place",
+        "name": "Scotland",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 8,
+          "words": "the Scottish Government"
+        },
+        "kind": "organisation",
+        "name": "Scottish Government",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 10,
+          "words": "Douglas Alexander"
+        },
+        "kind": "person",
+        "name": "Douglas Alexander",
+        "office": "Scottish Secretary"
+      },
+      {
+        "at": {
+          "span": 12,
+          "words": "North Lanarkshire"
+        },
         "kind": "place",
         "name": "North Lanarkshire",
-        "role": ""
+        "office": ""
       },
       {
+        "at": {
+          "span": 12,
+          "words": "Fife"
+        },
         "kind": "place",
         "name": "Fife",
-        "role": ""
+        "office": ""
       },
       {
+        "at": {
+          "span": 12,
+          "words": "the Highlands"
+        },
         "kind": "place",
-        "name": "Highlands",
-        "role": ""
+        "name": "the Highlands",
+        "office": ""
       },
       {
+        "at": {
+          "span": 12,
+          "words": "London"
+        },
         "kind": "place",
         "name": "London",
-        "role": ""
+        "office": ""
       },
       {
+        "at": {
+          "span": 12,
+          "words": "Edinburgh"
+        },
         "kind": "place",
         "name": "Edinburgh",
-        "role": ""
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 13,
+          "words": "The Prime Minister’s"
+        },
+        "kind": "person",
+        "name": "Andy Burnham",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 13,
+          "words": "the Scottish Government"
+        },
+        "kind": "organisation",
+        "name": "Scottish Government",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 13,
+          "words": "the Scotland Office"
+        },
+        "kind": "organisation",
+        "name": "Scotland Office",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 13,
+          "words": "Scotland"
+        },
+        "kind": "place",
+        "name": "Scotland",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 14,
+          "words": "Scotland"
+        },
+        "kind": "place",
+        "name": "Scotland",
+        "office": ""
+      }
+    ],
+    "refers_to": [
+      {
+        "from": {
+          "span": 1,
+          "words": "him"
+        },
+        "to": {
+          "span": 2,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "from": {
+          "span": 2,
+          "words": "his"
+        },
+        "to": {
+          "span": 2,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "from": {
+          "span": 4,
+          "words": "he"
+        },
+        "to": {
+          "span": 2,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "from": {
+          "span": 13,
+          "words": "them"
+        },
+        "to": {
+          "span": 2,
+          "words": "the Scottish Government"
+        }
+      }
+    ],
+    "rejected": [
+      5,
+      10
+    ],
+    "speakers": [
+      {
+        "span": {
+          "span": 6,
+          "words": ""
+        },
+        "speaker": {
+          "span": 5,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "span": {
+          "span": 7,
+          "words": ""
+        },
+        "speaker": {
+          "span": 5,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "span": {
+          "span": 8,
+          "words": ""
+        },
+        "speaker": {
+          "span": 5,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "span": {
+          "span": 9,
+          "words": ""
+        },
+        "speaker": {
+          "span": 5,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "span": {
+          "span": 11,
+          "words": ""
+        },
+        "speaker": {
+          "span": 10,
+          "words": "Douglas Alexander"
+        }
+      },
+      {
+        "span": {
+          "span": 12,
+          "words": ""
+        },
+        "speaker": {
+          "span": 10,
+          "words": "Douglas Alexander"
+        }
+      },
+      {
+        "span": {
+          "span": 13,
+          "words": ""
+        },
+        "speaker": {
+          "span": 10,
+          "words": "Douglas Alexander"
+        }
+      },
+      {
+        "span": {
+          "span": 14,
+          "words": ""
+        },
+        "speaker": {
+          "span": 10,
+          "words": "Douglas Alexander"
+        }
       }
     ]
   }

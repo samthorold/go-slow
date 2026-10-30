@@ -1,127 +1,206 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "dbc308feb3414bf6e70983260e45659c834b1bc7164ec09f2231e86a6ed0f878",
-  "recorded_at": "2026-10-26T22:36:03.566135Z",
+  "request_hash": "d61630b8da56ec7e628f87a7f61713559933fe9ca0584a70359768b64455af9f",
+  "recorded_at": "2026-10-30T21:14:30.192598Z",
   "usage": {
-    "input_tokens": 2070,
-    "output_tokens": 3344
+    "input_tokens": 2577,
+    "output_tokens": 2792
   },
   "output": {
-    "claims": [],
-    "facts": [
+    "names": [
       {
-        "as_at": "2026-10-15",
-        "quote": "The King has been pleased to appoint Mr William James Baxter QPM DL as His Majesty’s Lord-Lieutenant of County Tyrone",
-        "statement": "The King appointed William James Baxter as Lord-Lieutenant of County Tyrone."
-      },
-      {
-        "as_at": "2026-06-17",
-        "quote": "following his retirement on 17th June 2026",
-        "statement": "Sir Robert William Lowry Scott retired as Lord-Lieutenant of County Tyrone on 17 June 2026."
-      },
-      {
-        "as_at": "2026-10-15",
-        "quote": "served in the RUC/PSNI from 1973 until his retirement in 2003",
-        "statement": "William James Baxter served in the RUC/PSNI from 1973 until retiring in 2003."
-      },
-      {
-        "as_at": "2026-10-15",
-        "quote": "was District Commander in Omagh from 1997",
-        "statement": "William James Baxter was District Commander in Omagh from 1997."
-      },
-      {
-        "as_at": "2026-10-15",
-        "quote": "including the day of the Omagh bombing in 1998",
-        "statement": "William James Baxter was District Commander in Omagh on the day of the Omagh bombing in 1998."
-      },
-      {
-        "as_at": "2026-10-15",
-        "quote": "He has served as Chairperson of the Omagh Police District Voluntary Welfare Support Group",
-        "statement": "William James Baxter has served as Chairperson of the Omagh Police District Voluntary Welfare Support Group."
-      },
-      {
-        "as_at": "2026-10-15",
-        "quote": "He served as Clerk of Kirk Session, Newtownstewart Presbyterian Church, for 26 years",
-        "statement": "William James Baxter served as Clerk of Kirk Session at Newtownstewart Presbyterian Church for 26 years."
-      },
-      {
-        "as_at": "2026-10-15",
-        "quote": "was an Elder for 31 years",
-        "statement": "William James Baxter was an Elder for 31 years."
-      },
-      {
-        "as_at": "2026-10-15",
-        "quote": "Mr Baxter has served as Sheriff for County Tyrone in 2013",
-        "statement": "William James Baxter served as Sheriff for County Tyrone in 2013."
-      },
-      {
-        "as_at": "2026-10-15",
-        "quote": "is President of the Royal British Legion in Newtownstewart",
-        "statement": "William James Baxter is President of the Royal British Legion in Newtownstewart."
-      },
-      {
-        "as_at": "2026-10-15",
-        "quote": "Mr Baxter has served as Deputy Lieutenant of County Tyrone for 14 years",
-        "statement": "William James Baxter has served as Deputy Lieutenant of County Tyrone for 14 years."
-      }
-    ],
-    "mentions": [
-      {
-        "kind": "person",
-        "name": "The King",
-        "role": "King"
-      },
-      {
+        "at": {
+          "span": 1,
+          "words": "Mr William James Baxter"
+        },
         "kind": "person",
         "name": "William James Baxter",
-        "role": "Lord-Lieutenant of County Tyrone"
+        "office": "His Majesty's Lord-Lieutenant of County Tyrone"
       },
       {
+        "at": {
+          "span": 1,
+          "words": "Sir Robert William Lowry Scott KCVO OBE"
+        },
         "kind": "person",
-        "name": "Robert William Lowry Scott",
-        "role": "former Lord-Lieutenant of County Tyrone"
+        "name": "Sir Robert William Lowry Scott KCVO OBE",
+        "office": "former Lord-Lieutenant of County Tyrone"
       },
       {
+        "at": {
+          "span": 1,
+          "words": "County Tyrone"
+        },
         "kind": "place",
         "name": "County Tyrone",
-        "role": ""
+        "office": ""
       },
       {
+        "at": {
+          "span": 3,
+          "words": "Mr Baxter"
+        },
+        "kind": "person",
+        "name": "William James Baxter",
+        "office": "His Majesty's Lord-Lieutenant of County Tyrone"
+      },
+      {
+        "at": {
+          "span": 3,
+          "words": "RUC/PSNI"
+        },
         "kind": "organisation",
         "name": "RUC/PSNI",
-        "role": "police service"
+        "office": ""
       },
       {
+        "at": {
+          "span": 3,
+          "words": "Omagh"
+        },
         "kind": "place",
         "name": "Omagh",
-        "role": ""
+        "office": ""
       },
       {
+        "at": {
+          "span": 3,
+          "words": "the Omagh bombing in 1998"
+        },
         "kind": "occasion",
         "name": "Omagh bombing",
-        "role": "bombing in Omagh in 1998"
+        "office": ""
       },
       {
+        "at": {
+          "span": 4,
+          "words": "Omagh Police District Voluntary Welfare Support Group"
+        },
         "kind": "organisation",
         "name": "Omagh Police District Voluntary Welfare Support Group",
-        "role": "voluntary welfare support group"
+        "office": ""
       },
       {
-        "kind": "place",
-        "name": "Newtownstewart",
-        "role": ""
-      },
-      {
+        "at": {
+          "span": 5,
+          "words": "Newtownstewart Presbyterian Church"
+        },
         "kind": "organisation",
         "name": "Newtownstewart Presbyterian Church",
-        "role": "church"
+        "office": ""
       },
       {
+        "at": {
+          "span": 6,
+          "words": "Mr Baxter"
+        },
+        "kind": "person",
+        "name": "William James Baxter",
+        "office": "His Majesty's Lord-Lieutenant of County Tyrone"
+      },
+      {
+        "at": {
+          "span": 6,
+          "words": "Royal British Legion"
+        },
         "kind": "organisation",
         "name": "Royal British Legion",
-        "role": "charity"
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 6,
+          "words": "Newtownstewart"
+        },
+        "kind": "place",
+        "name": "Newtownstewart",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 8,
+          "words": "Mr Baxter"
+        },
+        "kind": "person",
+        "name": "William James Baxter",
+        "office": "His Majesty's Lord-Lieutenant of County Tyrone"
+      },
+      {
+        "at": {
+          "span": 8,
+          "words": "County Tyrone"
+        },
+        "kind": "place",
+        "name": "County Tyrone",
+        "office": ""
       }
-    ]
+    ],
+    "refers_to": [
+      {
+        "from": {
+          "span": 1,
+          "words": "his"
+        },
+        "to": {
+          "span": 1,
+          "words": "Sir Robert William Lowry Scott KCVO OBE"
+        }
+      },
+      {
+        "from": {
+          "span": 3,
+          "words": "his"
+        },
+        "to": {
+          "span": 3,
+          "words": "Mr Baxter"
+        }
+      },
+      {
+        "from": {
+          "span": 4,
+          "words": "He"
+        },
+        "to": {
+          "span": 1,
+          "words": "Mr William James Baxter"
+        }
+      },
+      {
+        "from": {
+          "span": 5,
+          "words": "He"
+        },
+        "to": {
+          "span": 1,
+          "words": "Mr William James Baxter"
+        }
+      },
+      {
+        "from": {
+          "span": 7,
+          "words": "He"
+        },
+        "to": {
+          "span": 1,
+          "words": "Mr William James Baxter"
+        }
+      },
+      {
+        "from": {
+          "span": 9,
+          "words": "He"
+        },
+        "to": {
+          "span": 1,
+          "words": "Mr William James Baxter"
+        }
+      }
+    ],
+    "rejected": [
+      2
+    ],
+    "speakers": []
   }
 }

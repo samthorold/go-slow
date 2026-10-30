@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/samthorold/go-slow/internal/collect"
+	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/sqlite"
@@ -25,8 +26,7 @@ func env(db string) func(string) (string, bool) {
 	return func(k string) (string, bool) { v, ok := vars[k]; return v, ok }
 }
 
-// failedRecord is a Record at db holding an Item awaiting reading for a
-// Topic, whose reading and placing are both marked failed.
+// failedRecord is a Record at db holding an Item cut and awaiting reading, whose reading and placing are both marked failed.
 func failedRecord(t *testing.T, db string) {
 	t.Helper()
 	ctx := t.Context()
@@ -41,7 +41,7 @@ func failedRecord(t *testing.T, db string) {
 		t.Fatal(err)
 	}
 	if _, err := store.AddItems(ctx, []collect.Item{{SourceID: src.ID, EntryID: "speech", Title: "PM speech in Scotland",
-		Link: "https://example.org/speech", Published: saturday, Attribution: collect.OGL, CollectedAt: saturday}}); err != nil {
+		Link: "https://example.org/speech", Content: "<p>It is good to be in Scotland.</p>", Published: saturday, Attribution: collect.OGL, CollectedAt: saturday}}); err != nil {
 		t.Fatal(err)
 	}
 	topics := interest.New(store)
@@ -49,6 +49,9 @@ func failedRecord(t *testing.T, db string) {
 		t.Fatalf("add Topic: %v %v", errs, err)
 	}
 	if err := topics.CheckNew(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if err := cut.New(store).CutNew(ctx, saturday); err != nil {
 		t.Fatal(err)
 	}
 	var failures []editor.WorkFailure
@@ -63,7 +66,7 @@ func failedRecord(t *testing.T, db string) {
 
 // inRecord is what the Record at db holds of failed work and work awaiting
 // reading.
-func inRecord(t *testing.T, db string) (failed []editor.FailedWork, toRead []editor.Item) {
+func inRecord(t *testing.T, db string) (failed []editor.FailedWork, toRead []editor.ToRead) {
 	t.Helper()
 	store, err := sqlite.Open(t.Context(), db)
 	if err != nil {

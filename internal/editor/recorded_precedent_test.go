@@ -93,7 +93,7 @@ func placingPrecedentSample(t *testing.T, root, name string, m *sampleModel) sam
 	if !strings.Contains(normal(stripTags(body)), normal(reaction.Quote)) {
 		t.Fatalf("the precedent's quote is not in the readout: %q", reaction.Quote)
 	}
-	if err := store.SaveReading(ctx, editor.Reading{
+	if err := store.SaveFactReading(ctx, editor.FactReading{
 		SourceID: merz.SourceID, EntryID: merz.EntryID, Model: "fixture",
 		Entities: []editor.Entity{{Name: "Friedrich Merz", Kind: "person"}, {Name: "Ukraine", Kind: "place"}},
 		Facts:    []editor.Fact{reaction},
@@ -115,9 +115,9 @@ func placingPrecedentSample(t *testing.T, root, name string, m *sampleModel) sam
 	// The reaction to place, read as recorded.
 	it, _ := fixture(t, filepath.Join("testdata", "govuk", name+".json"))
 	addItem(it)
-	reading, err := editor.Read(ctx, replay{kept(t, filepath.Join(inputsOf(root, "precedent", "reading"), name+".json"))}, it)
+	reading, err := replayFactReading(ctx, replay{kept(t, filepath.Join(inputsOf(root, "precedent", "reading"), name+".json"))}, it)
 	if err != nil {
-		t.Fatalf("the recorded reading fails its checks: %v", err)
+		t.Fatalf("the frozen reading is not one of Facts: %v", err)
 	}
 	// The reaction's own Fact: the UK government's response to the
 	// agreement. The reading may draw other Facts, such as the agreement
@@ -130,7 +130,7 @@ func placingPrecedentSample(t *testing.T, root, name string, m *sampleModel) sam
 		t.Fatalf("the reading draws no Fact of the government's response, so placing is not tested on the reaction: %s", factStatements(reading))
 	}
 	response := reading.Facts[i].Statement
-	if err := store.SaveReading(ctx, reading, saturday); err != nil {
+	if err := store.SaveFactReading(ctx, reading, saturday); err != nil {
 		t.Fatal(err)
 	}
 	waiting, err := store.FactsToPlace(ctx)

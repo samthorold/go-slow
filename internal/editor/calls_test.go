@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
@@ -102,7 +103,7 @@ func TestAReadingRefusedByItsChecksInABatchIsKeptWithItsReason(t *testing.T) {
 	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
-	bad := `{"facts": [{"statement": "x", "as_at": "2026-10-22", "quote": "not in the Item"}], "claims": [], "mentions": []}`
+	bad := refusedReading
 	batcher.end(1, func(editor.BatchRequest) editor.BatchResult {
 		return editor.BatchResult{Response: answered(bad)}
 	})
@@ -118,7 +119,7 @@ func TestAReadingRefusedByItsChecksInABatchIsKeptWithItsReason(t *testing.T) {
 		t.Fatalf("kept %d calls, want 1", len(calls))
 	}
 	c := calls[0]
-	if c.Outcome != editor.Refused || !strings.Contains(c.Why, "quote is not in the Item") {
+	if c.Outcome != editor.Refused || !strings.Contains(c.Why, `the words "not in the Item" are not in S1`) {
 		t.Errorf("outcome %q (%q), want refused with the check's reason", c.Outcome, c.Why)
 	}
 	if c.Response == nil || string(c.Response.Output) != bad {
@@ -152,18 +153,20 @@ func TestABatchRequestWithNoResultIsKeptWithNoResponse(t *testing.T) {
 
 func TestABatchCallKeepsTheRequestAsSentNotAsTheWorkStandsWhenItEnds(t *testing.T) {
 	store := record(t)
-	fact := readGlasgow(t, store)
-	wrongAt(t, store, fact, saturday)
 	batcher := &fakeBatcher{}
 	b := keepingBatches(store, batcher)
 	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 	sent := batcher.submitted[0][0].Request
-	// More Feedback after the request went: had the request been built
-	// again when the batch ended, it would show two precedents.
-	wrongAt(t, store, readTied(t, store, ferries, editor.Fact{Statement: "Ferries run.", AsAt: oct16,
-		Quote: "will run more often"}, "Arran"), saturday)
+	// A newer Cut after the request went, listing the speech's text as one
+	// Span: had the request been built again when the batch ended, it would
+	// show one Span, not two.
+	whole := cut.Span{Start: 3, End: len(speech.Content) - len("</p>")}
+	if err := store.KeepCut(t.Context(), cut.Cut{SourceID: speech.SourceID, EntryID: speech.EntryID,
+		Judge: cut.Judge{Cutter: "whole", Version: 1}, At: saturday, Spans: []cut.Span{whole}}); err != nil {
+		t.Fatal(err)
+	}
 	batcher.end(1, func(editor.BatchRequest) editor.BatchResult {
 		return editor.BatchResult{Response: answered(goodReading)}
 	})
@@ -174,9 +177,6 @@ func TestABatchCallKeepsTheRequestAsSentNotAsTheWorkStandsWhenItEnds(t *testing.
 	c := onlyCall(t, store)
 	if c.Request.Input != sent.Input || c.RequestHash != editor.RequestHash(sent, "fake-reading") {
 		t.Errorf("kept input\n%s\nwant as sent\n%s", c.Request.Input, sent.Input)
-	}
-	if len(c.Precedents) != 1 || c.Precedents[0] == 0 {
-		t.Errorf("precedents kept %v, want the one shown", c.Precedents)
 	}
 }
 

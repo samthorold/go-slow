@@ -57,20 +57,6 @@ func precedentLine(i int, p Precedent) string {
 	return string(b)
 }
 
-// readingPrecedentLine is one precedent as reading is shown it: a Fact the
-// Owner said was wrong, with the Item's words it was drawn from.
-func readingPrecedentLine(i int, p Precedent) string {
-	b, _ := json.Marshal(struct {
-		Ref      string `json:"ref"`
-		Feedback string `json:"feedback"`
-		Depth    string `json:"depth"`
-		Fact     string `json:"fact"`
-		Quote    string `json:"quote"`
-		Given    string `json:"given"`
-	}{"P" + strconv.Itoa(i+1), p.Kind, depthName(p.Depth), p.Fact, p.Quote, p.GivenAt.UTC().Format(time.DateOnly)})
-	return string(b)
-}
-
 func depthName(d interest.Depth) string {
 	if s := d.String(); s != "" {
 		return s

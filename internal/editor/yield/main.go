@@ -11,8 +11,10 @@
 // sample's last attempt, and shown as the range its samples drew (least–most);
 // a total is the range from every fixture's least to its most. Frozen copies
 // of upstream recordings (inputs/) are not counted; connecting's copies of
-// readings are read only for the mentions the act was shown. It reports, it
-// never fails on a change in yield.
+// readings are read only for the mentions the act was shown. Reading's Spans
+// are those the sentence cutter makes of the fixture Item, from the fixtures
+// beside either directory (../govuk). It reports, it never fails on a change
+// in yield.
 package main
 
 import (
@@ -24,10 +26,11 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/samthorold/go-slow/internal/cut"
 )
 
 func main() {
@@ -41,11 +44,12 @@ func run(args []string, w io.Writer) error {
 	if len(args) != 2 {
 		return errors.New("usage: yield <before> <after>")
 	}
-	before, beforeOut, err := load(args[0])
+	govuk := fixturesBeside(args[1], args[0])
+	before, beforeOut, err := load(args[0], govuk)
 	if err != nil {
 		return err
 	}
-	after, afterOut, err := load(args[1])
+	after, afterOut, err := load(args[1], govuk)
 	if err != nil {
 		return err
 	}
@@ -58,15 +62,27 @@ func run(args []string, w io.Writer) error {
 	return err
 }
 
+// fixturesBeside is the fixture Items' directory beside the first of dirs
+// that has one, or empty if none has.
+func fixturesBeside(dirs ...string) string {
+	for _, d := range dirs {
+		g := filepath.Join(d, "..", "govuk")
+		if info, err := os.Stat(g); err == nil && info.IsDir() {
+			return g
+		}
+	}
+	return ""
+}
+
 // recording is the little of a kept response the report needs.
 type recording struct {
 	Act    string          `json:"act"`
 	Output json.RawMessage `json:"output"`
 }
 
-// entity is an Entity a reading names, by kind and name. Readings recorded
-// before Entities carried a kind name them as a plain string, read as a name
-// with no kind.
+// entity is an Entity a reading of Facts names, by kind and name. Readings
+// recorded before Entities carried a kind name them as a plain string, read
+// as a name with no kind.
 type entity struct {
 	Kind string `json:"kind"`
 	Name string `json:"name"`
@@ -81,15 +97,23 @@ func (e *entity) UnmarshalJSON(data []byte) error {
 	return json.Unmarshal(data, (*plain)(e))
 }
 
+// about is what a recording's count may need beyond its output: for
+// connecting, the mentions it was shown; for reading, the Spans of its
+// fixture's Cut.
+type about struct {
+	shown set
+	spans int
+}
+
 // act is one recorded act's columns and how a recording's output is counted.
 type act struct {
 	name    string
 	columns []string
-	count   func(out json.RawMessage, shown set) ([]int, error)
+	count   func(out json.RawMessage, a about) ([]int, error)
 }
 
 var acts = []act{
-	{"reading", []string{"Facts", "Claims", "Entities", "Projection-worded Facts"}, countReading},
+	{"reading", []string{"Spans", "Rejected", "Names", "Speakers", "Refers to"}, countReading},
 	{"placing", []string{"Developments", "New Stories"}, countPlacing},
 	{"connecting", []string{"Connections", "Mentions involved in no Fact", "Facts involving no Entity"}, countConnecting},
 	{"briefing", []string{"Statements", "Stories"}, countBriefing},
@@ -97,7 +121,7 @@ var acts = []act{
 
 // countPlacing counts each Fact's Developments (one per Story it is placed
 // in) and the Stories the placing started.
-func countPlacing(out json.RawMessage, _ set) ([]int, error) {
+func countPlacing(out json.RawMessage, _ about) ([]int, error) {
 	var r struct {
 		Facts []struct {
 			DevelopmentsIn []string `json:"developments_in"`
@@ -118,7 +142,7 @@ func countPlacing(out json.RawMessage, _ set) ([]int, error) {
 // left out: the mentions it was shown (by name) that it gave no Role in any
 // Fact, and the Facts it gave no Roles. What it leaves out is counted, never
 // judged.
-func countConnecting(out json.RawMessage, shown set) ([]int, error) {
+func countConnecting(out json.RawMessage, a about) ([]int, error) {
 	var r struct {
 		Causes []json.RawMessage `json:"causes"`
 		Facts  []struct {
@@ -141,7 +165,7 @@ func countConnecting(out json.RawMessage, shown set) ([]int, error) {
 		}
 	}
 	inNoFact := 0
-	for name := range shown {
+	for name := range a.shown {
 		if !involved[name] {
 			inNoFact++
 		}
@@ -150,9 +174,10 @@ func countConnecting(out json.RawMessage, shown set) ([]int, error) {
 }
 
 // shownMentions are the names a connecting fixture's Item mentions, as the
-// act was shown them: those of its frozen copy of the fixture's reading,
-// under <dir>/connecting/inputs/reading/. A fixture with no such copy (one
-// recorded before acts kept their inputs) was shown none the report can see.
+// act was shown them: those of its frozen copy of the fixture's reading of
+// Facts, under <dir>/connecting/inputs/reading/. A fixture with no such copy
+// (one recorded before acts kept their inputs) was shown none the report can
+// see.
 func shownMentions(dir, fixture string) (set, error) {
 	name := strings.TrimPrefix(fixture, "connecting/")
 	data, err := os.ReadFile(filepath.Join(dir, "connecting", "inputs", "reading", name+".json")) //nolint:gosec // a dev tool reading the directory it was given
@@ -163,7 +188,7 @@ func shownMentions(dir, fixture string) (set, error) {
 		return nil, err
 	}
 	var rec struct {
-		Output readingOutput `json:"output"`
+		Output factReading `json:"output"`
 	}
 	if err := json.Unmarshal(data, &rec); err != nil {
 		return nil, fmt.Errorf("%s's frozen reading: %w", fixture, err)
@@ -176,7 +201,7 @@ func shownMentions(dir, fixture string) (set, error) {
 }
 
 // countBriefing counts the Briefing's statements and the Stories they are in.
-func countBriefing(out json.RawMessage, _ set) ([]int, error) {
+func countBriefing(out json.RawMessage, _ about) ([]int, error) {
 	var r struct {
 		Stories []struct {
 			Statements []json.RawMessage `json:"statements"`
@@ -192,65 +217,79 @@ func countBriefing(out json.RawMessage, _ set) ([]int, error) {
 	return []int{statements, len(r.Stories)}, nil
 }
 
-// readingOutput is the little of a reading the report needs. A reading
-// gives the Item's mentions once; one in the earlier schema gave Entities
-// with each Fact and Claim, which together are what its Item mentions.
-type readingOutput struct {
-	Facts    []readStatement `json:"facts"`
-	Claims   []readStatement `json:"claims"`
-	Mentions []entity        `json:"mentions"`
-}
-
-type readStatement struct {
-	Statement string   `json:"statement"`
-	Entities  []entity `json:"entities"`
+// factReading is the little of the earlier reading act's output (Facts,
+// Claims and mentions), as connecting's frozen copies keep it, the report
+// needs. One in its earlier schema gave Entities with each Fact and Claim,
+// which together are what its Item mentions.
+type factReading struct {
+	Facts []struct {
+		Entities []entity `json:"entities"`
+	} `json:"facts"`
+	Claims []struct {
+		Entities []entity `json:"entities"`
+	} `json:"claims"`
+	Mentions []entity `json:"mentions"`
 }
 
 // mentions are the distinct Entities the reading's Item mentions.
-func (r readingOutput) mentions() map[entity]bool {
+func (r factReading) mentions() map[entity]bool {
 	distinct := map[entity]bool{}
 	for _, e := range r.Mentions {
 		distinct[e] = true
 	}
-	for _, s := range append(append([]readStatement{}, r.Facts...), r.Claims...) {
-		for _, e := range s.Entities {
+	for _, f := range r.Facts {
+		for _, e := range f.Entities {
+			distinct[e] = true
+		}
+	}
+	for _, c := range r.Claims {
+		for _, e := range c.Entities {
 			distinct[e] = true
 		}
 	}
 	return distinct
 }
 
-func countReading(out json.RawMessage, _ set) ([]int, error) {
-	var r readingOutput
+// countReading counts a reading of Spans: the Spans its fixture was shown
+// as, those it Rejected, the names and speakers it gave and the stretches it
+// said refer to others. A reading by the earlier act, which drew Facts,
+// judged none of these, and counts none.
+func countReading(out json.RawMessage, a about) ([]int, error) {
+	var r struct {
+		Names    []json.RawMessage `json:"names"`
+		RefersTo []json.RawMessage `json:"refers_to"`
+		Rejected []json.RawMessage `json:"rejected"`
+		Speakers []json.RawMessage `json:"speakers"`
+	}
 	if err := json.Unmarshal(out, &r); err != nil {
 		return nil, err
 	}
-	worded := 0
-	for _, f := range r.Facts {
-		if wordedAsFutureAct(f.Statement) {
-			worded++
-		}
-	}
-	return []int{len(r.Facts), len(r.Claims), len(r.mentions()), worded}, nil
+	return []int{a.spans, len(r.Rejected), len(r.Names), len(r.Speakers), len(r.RefersTo)}, nil
 }
 
-// futureAct is a statement worded as a future act, each word with the one
-// after it. A Fact worded so is counted, not judged: "is set to be built"
-// words a present arrangement, which is a Fact.
-var futureAct = regexp.MustCompile(`(?i)\b(will|would|set to|expected to|is to)\b(\s+\pL+)?`)
-
-// wordedAsFutureAct is whether a statement is worded as a future act. Will
-// is the auxiliary, never the noun ("the islanders' will to remain"), which
-// is followed by to or of where the auxiliary is followed by a verb.
-func wordedAsFutureAct(s string) bool {
-	for _, m := range futureAct.FindAllStringSubmatch(s, -1) {
-		next := strings.ToLower(strings.TrimSpace(m[2]))
-		if strings.EqualFold(m[1], "will") && (next == "to" || next == "of") {
-			continue
-		}
-		return true
+// fixtureSpans is how many Spans the sentence cutter makes of the fixture
+// Item name in govuk (a GOV.UK Content API document), or 0 if there is no
+// such fixture.
+func fixtureSpans(govuk, name string) (int, error) {
+	if govuk == "" {
+		return 0, nil
 	}
-	return false
+	data, err := os.ReadFile(filepath.Join(govuk, name+".json")) //nolint:gosec // a dev tool reading the fixtures beside the directory it was given
+	if errors.Is(err, fs.ErrNotExist) {
+		return 0, nil
+	}
+	if err != nil {
+		return 0, err
+	}
+	var doc struct {
+		Details struct {
+			Body string `json:"body"`
+		} `json:"details"`
+	}
+	if err := json.Unmarshal(data, &doc); err != nil {
+		return 0, fmt.Errorf("fixture %s: %w", name, err)
+	}
+	return len(cut.Sentences(doc.Details.Body)), nil
 }
 
 // counts is, per act, each fixture's counts, one per sample: a fixture
@@ -267,7 +306,7 @@ func fixtureOf(rel string) string {
 	return rel
 }
 
-func load(dir string) (counts, outputs, error) {
+func load(dir, govuk string) (counts, outputs, error) {
 	c, o := counts{}, outputs{}
 	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -303,13 +342,18 @@ func load(dir string) (counts, outputs, error) {
 				return err
 			}
 			f := fixtureOf(strings.TrimSuffix(filepath.ToSlash(rel), ".json"))
-			var shown set
-			if a.name == "connecting" {
-				if shown, err = shownMentions(dir, f); err != nil {
+			var ab about
+			switch a.name {
+			case "connecting":
+				if ab.shown, err = shownMentions(dir, f); err != nil {
+					return err
+				}
+			case "reading":
+				if ab.spans, err = fixtureSpans(govuk, strings.TrimPrefix(f, "reading/")); err != nil {
 					return err
 				}
 			}
-			n, err := a.count(rec.Output, shown)
+			n, err := a.count(rec.Output, ab)
 			if err != nil {
 				return fmt.Errorf("%s: %w", path, err)
 			}

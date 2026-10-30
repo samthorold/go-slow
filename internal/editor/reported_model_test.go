@@ -58,12 +58,12 @@ func TestAReadingKeepsTheModelReportedNotTheOneAskedFor(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	it, found, err := store.ReadItem(t.Context(), speech.SourceID, speech.EntryID)
+	r, found, err := store.NewestReading(t.Context(), speech.SourceID, speech.EntryID)
 	if err != nil || !found {
-		t.Fatalf("ReadItem: %v %v", found, err)
+		t.Fatalf("NewestReading: %v %v", found, err)
 	}
-	if it.Model != "reported-reading" {
-		t.Errorf("read by %q, want the model reported", it.Model)
+	if r.Judge.Model != "reported-reading" {
+		t.Errorf("read by %q, want the model reported", r.Judge.Model)
 	}
 }
 
@@ -82,12 +82,12 @@ func TestAReadingFromABatchKeepsTheModelReportedNotTheOneAskedFor(t *testing.T) 
 		t.Fatal(err)
 	}
 
-	it, found, err := store.ReadItem(t.Context(), speech.SourceID, speech.EntryID)
+	r, found, err := store.NewestReading(t.Context(), speech.SourceID, speech.EntryID)
 	if err != nil || !found {
-		t.Fatalf("ReadItem: %v %v", found, err)
+		t.Fatalf("NewestReading: %v %v", found, err)
 	}
-	if it.Model != "fake-reported" {
-		t.Errorf("read by %q, want the model reported", it.Model)
+	if r.Judge.Model != "fake-reported" {
+		t.Errorf("read by %q, want the model reported", r.Judge.Model)
 	}
 }
 
@@ -97,9 +97,7 @@ func TestAPlacingKeepsTheModelReportedNotTheOneAskedFor(t *testing.T) {
 		Model:        &fakeModel{output: goodReading},
 		PlacingModel: reporting{&fakeModel{output: startsAStory}, "reported-placing"},
 	})
-	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
-		t.Fatal(err)
-	}
+	drawSpeechFacts(t, store.Store, saturday)
 
 	if err := ed.PlaceWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)

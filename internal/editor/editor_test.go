@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/samthorold/go-slow/internal/collect"
+	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/sqlite"
@@ -21,9 +22,9 @@ var number10 = collect.Source{
 	Keeps: collect.KeepFullText, Attribution: collect.OGL, UsualGap: time.Hour,
 }
 
-// record is a Record holding the speech and a call readout, with a Topic
-// on Scotland: the speech is awaiting reading for it, the readout touches
-// no Topic.
+// record is a Record holding the speech, cut and awaiting reading, and a
+// call readout with no text, which is not cut and so not read; with a Topic
+// on Scotland, which the speech touches.
 func record(t *testing.T) *sqlite.Store {
 	t.Helper()
 	ctx := t.Context()
@@ -55,20 +56,13 @@ func record(t *testing.T) *sqlite.Store {
 	if err := topics.CheckNew(ctx); err != nil {
 		t.Fatal(err)
 	}
+	if err := cut.New(store).CutNew(ctx, saturday); err != nil {
+		t.Fatal(err)
+	}
 	return store
 }
 
-func newEditor(store *sqlite.Store, model editor.Model, wd editor.Wikidata) (*editor.Editor, *bytes.Buffer) {
-	var logs bytes.Buffer
-	return editor.New(editor.Deps{
-		Store:    store,
-		Model:    model,
-		Wikidata: wd,
-		Log:      slog.New(slog.NewTextHandler(&logs, nil)),
-	}), &logs
-}
-
-func TestTheEditorReadsTheItemsAwaitingReadingIntoTheRecord(t *testing.T) {
+func TestTheEditorReadsEachItemCutIntoTheRecordEachJudgementWithItsJudge(t *testing.T) {
 	store := record(t)
 	model := &fakeModel{output: goodReading}
 	ed, _ := newEditor(store, model, &fakeWikidata{})
@@ -78,29 +72,18 @@ func TestTheEditorReadsTheItemsAwaitingReadingIntoTheRecord(t *testing.T) {
 	}
 
 	if len(model.sent) != 1 {
-		t.Fatalf("model called %d times, want once: only the speech touches a Topic", len(model.sent))
+		t.Fatalf("model called %d times, want once: only the speech has text to cut", len(model.sent))
 	}
-	got, found, err := store.ReadItem(t.Context(), speech.SourceID, speech.EntryID)
+	r, found, err := store.NewestReading(t.Context(), speech.SourceID, speech.EntryID)
 	if err != nil || !found {
-		t.Fatalf("ReadItem: %v %v", found, err)
+		t.Fatalf("NewestReading: %v %v", found, err)
 	}
-	if !got.Read {
-		t.Error("the speech is not marked read")
+	if r.Judge.Act != "reading" || r.Judge.Version != editor.ReadingVersion || r.Judge.Model != "fake" ||
+		r.Judge.RequestHash != editor.RequestHash(model.sent[0], "") || !r.At.Equal(saturday) {
+		t.Errorf("reading judged by %+v at %v", r.Judge, r.At)
 	}
-	if len(got.Facts) != 1 || got.Facts[0].Statement != "Andy Burnham gave a speech in Motherwell." {
-		t.Errorf("Facts = %+v", got.Facts)
-	}
-	if f := got.Facts[0]; f.SourceID != speech.SourceID || f.EntryID != speech.EntryID ||
-		!f.AsAt.Equal(time.Date(2026, time.October, 16, 0, 0, 0, 0, time.UTC)) {
-		t.Errorf("the Fact does not carry its Item and date: %+v", f)
-	}
-	// The Item mentions three Entities; until connecting, its Fact involves
-	// none of them.
-	if len(got.Mentions) != 3 || len(got.Facts[0].Involves) != 0 {
-		t.Errorf("mentions = %v, the Fact involves %v; want three mentions and no involvement", got.Mentions, got.Facts[0].Involves)
-	}
-	if len(got.Claims) != 1 || got.Claims[0].MadeBy != "Andy Burnham" {
-		t.Errorf("Claims = %+v", got.Claims)
+	if len(r.Names) != 2 || spanWords(speech, r.Names[1].At) != "Motherwell" {
+		t.Errorf("names = %+v", r.Names)
 	}
 }
 
@@ -120,30 +103,32 @@ func TestAnItemOnceReadIsNotReadAgain(t *testing.T) {
 	}
 }
 
-func TestTakingUpATopicTiesOnlyItemsNotYetRead(t *testing.T) {
+func TestAnItemTouchingNoTopicIsReadAllTheSame(t *testing.T) {
 	store := record(t)
-	ed, _ := newEditor(store, &fakeModel{output: goodReading}, &fakeWikidata{})
+	if _, err := store.AddItems(t.Context(), []collect.Item{{
+		SourceID: number10.ID, EntryID: "budget", Title: "The Budget", Content: "<p>The Chancellor set out the Budget.</p>",
+		Published: saturday, Attribution: collect.OGL, CollectedAt: saturday,
+	}}); err != nil {
+		t.Fatal(err)
+	}
+	if err := cut.New(store).CutNew(t.Context(), saturday); err != nil {
+		t.Fatal(err)
+	}
+	model := &fakeModel{output: `{"names": [], "refers_to": [], "rejected": [], "speakers": []}`}
+	ed, _ := newEditor(store, model, &fakeWikidata{})
+
 	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 
-	if _, errs, err := interest.New(store).Add(t.Context(),
-		interest.Draft{Name: "Motherwell", Depth: "close", Terms: "Motherwell"}); err != nil || errs != nil {
-		t.Fatalf("add Topic: %v %v", errs, err)
-	}
-
-	got, _, err := store.ReadItem(t.Context(), speech.SourceID, speech.EntryID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(got.Topics) != 1 || got.Topics[0] != "Scotland" {
-		t.Errorf("the read speech is tied to %v; a Topic taken up after reading waits on unread Items only", got.Topics)
+	if _, found, err := store.NewestReading(t.Context(), number10.ID, "budget"); err != nil || !found {
+		t.Errorf("the Budget, touching no Topic, was not read (%v)", err)
 	}
 }
 
 func TestAReadingThatFailsWritesNothingAndTheItemStaysAwaitingReading(t *testing.T) {
 	for name, model := range map[string]*fakeModel{
-		"failing the checks": {output: `{"facts": [], "claims": [{"statement": "x", "made_by": "", "quote": "x"}], "mentions": []}`},
+		"failing the checks": {output: refusedReading},
 		"a failed call":      {err: errors.New("overloaded")},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -154,12 +139,8 @@ func TestAReadingThatFailsWritesNothingAndTheItemStaysAwaitingReading(t *testing
 				t.Fatal(err)
 			}
 
-			got, _, err := store.ReadItem(t.Context(), speech.SourceID, speech.EntryID)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if got.Read || len(got.Facts)+len(got.Claims) > 0 {
-				t.Errorf("a failed reading was written: %+v", got)
+			if _, found, err := store.NewestReading(t.Context(), speech.SourceID, speech.EntryID); err != nil || found {
+				t.Errorf("a failed reading was kept (%v)", err)
 			}
 			if logs.Len() == 0 {
 				t.Error("the failure was not logged")
@@ -169,9 +150,19 @@ func TestAReadingThatFailsWritesNothingAndTheItemStaysAwaitingReading(t *testing
 			if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
 				t.Fatal(err)
 			}
-			if got, _, _ := store.ReadItem(t.Context(), speech.SourceID, speech.EntryID); !got.Read {
+			if _, found, _ := store.NewestReading(t.Context(), speech.SourceID, speech.EntryID); !found {
 				t.Error("the Item was not read on the next run")
 			}
 		})
 	}
+}
+
+func newEditor(store *sqlite.Store, model editor.Model, wd editor.Wikidata) (*editor.Editor, *bytes.Buffer) {
+	var logs bytes.Buffer
+	return editor.New(editor.Deps{
+		Store:    store,
+		Model:    model,
+		Wikidata: wd,
+		Log:      slog.New(slog.NewTextHandler(&logs, nil)),
+	}), &logs
 }

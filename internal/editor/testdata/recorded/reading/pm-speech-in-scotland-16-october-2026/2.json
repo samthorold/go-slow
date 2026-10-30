@@ -1,363 +1,416 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "a08c629f62edd5fc9ecd9e820eea7038c0710a6fed3551b485b2ad9cdf5e48ba",
-  "recorded_at": "2026-10-26T22:40:32.282361Z",
+  "request_hash": "6c49881ec186d68660dd849b7160c65a24f710a3d042c7222f189d23abee2fb6",
+  "recorded_at": "2026-10-30T20:54:19.681103Z",
   "usage": {
-    "input_tokens": 10908,
-    "output_tokens": 10573
+    "input_tokens": 12337,
+    "output_tokens": 8022
   },
   "output": {
-    "claims": [
+    "names": [
       {
-        "made_by": "Prime Minister",
-        "quote": "a defence sector that already supports 12,000 jobs here in Scotland",
-        "statement": "The defence sector supports 12,000 jobs in Scotland."
-      },
-      {
-        "made_by": "Prime Minister",
-        "quote": "around one in twenty shops lying empty",
-        "statement": "Around one in twenty shops in Edinburgh are lying empty."
-      },
-      {
-        "made_by": "Prime Minister",
-        "quote": "more likely one in five",
-        "statement": "In Dundee, it is more likely that one in five shops is empty."
-      },
-      {
-        "made_by": "Prime Minister",
-        "quote": "around one in six young people here are not in education, employment or training",
-        "statement": "Around one in six young people in Scotland are not in education, employment or training."
-      },
-      {
-        "made_by": "Prime Minister",
-        "quote": "A man in East Renfrewshire can live, as I understand, on average seven years longer than a man in Glasgow",
-        "statement": "A man in East Renfrewshire can on average live seven years longer than a man in Glasgow."
-      },
-      {
-        "made_by": "Prime Minister",
-        "quote": "Scotland, the most devolved nation in the UK, is itself one of the most centralised nations in Europe.",
-        "statement": "Scotland is one of the most centralised nations in Europe."
-      },
-      {
-        "made_by": "Prime Minister",
-        "quote": "Scotland could lose out",
-        "statement": "Scotland could lose out if it does not move now."
-      },
-      {
-        "made_by": "Prime Minister",
-        "quote": "There is a risk that some of the towns and the cities become underpowered",
-        "statement": "There is a risk that some Scottish towns and cities become underpowered."
-      },
-      {
-        "made_by": "Prime Minister",
-        "quote": "a world-leading video games industry",
-        "statement": "Dundee has a world-leading video games industry."
-      },
-      {
-        "made_by": "Prime Minister",
-        "quote": "public transport in Scotland is way better in the capital of Scotland than it is in any other city or town in Scotland",
-        "statement": "Public transport in Scotland is better in the capital than in any other city or town."
-      },
-      {
-        "made_by": "Prime Minister",
-        "quote": "the working population has shrunk",
-        "statement": "The working population in Inverclyde has shrunk."
-      }
-    ],
-    "facts": [
-      {
-        "as_at": "2026-10-16",
-        "quote": "to be here in Motherwell",
-        "statement": "The Prime Minister spoke in Motherwell on 16 October 2026."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "the Scottish government has this week agreed to match the UK government’s £10 million",
-        "statement": "The Scottish government agreed this week to match the UK government's £10 million for two defence technical excellence colleges."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "Douglas informed me of that news today",
-        "statement": "Douglas informed the Prime Minister of the Scottish government's match funding decision on 16 October 2026."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "at the EU-UK Summit on the 20th of November",
-        "statement": "An EU-UK Summit is scheduled for 20 November."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "in a couple of weeks, the National Economic Council will meet with the First Ministers of Scotland and Wales",
-        "statement": "The National Economic Council is scheduled to meet with the First Ministers of Scotland and Wales in a couple of weeks."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "When I walked into Downing Street in July",
-        "statement": "The Prime Minister entered Downing Street in July."
-      },
-      {
-        "as_at": "2023-08-01",
-        "quote": "I visited FARE-Scotland at Bannatyne House in Easterhouse",
-        "statement": "The Prime Minister visited FARE-Scotland at Bannatyne House in Easterhouse in August 2023."
-      },
-      {
-        "as_at": "2017-01-01",
-        "quote": "I left Westminster in 2017 to become the first Mayor of Greater Manchester",
-        "statement": "The Prime Minister left Westminster in 2017 to become the first Mayor of Greater Manchester."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "I was the MP there for sixteen years from the early 2000s",
-        "statement": "The Prime Minister was MP for Leigh for sixteen years from the early 2000s."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "the buses on the roads of Greater Manchester today were built by Alexander Dennis in Falkirk",
-        "statement": "Buses on the roads of Greater Manchester were built by Alexander Dennis in Falkirk."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "Twenty-seven years on, you led the way on devolution here in Scotland with the creation of the Scottish Parliament.",
-        "statement": "The Scottish Parliament was created 27 years before 2026."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "The review led by Alan Milburn is challenging us to look at this very differently.",
-        "statement": "A review led by Alan Milburn is underway."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "the Scottish government has also announced a long-term programme for local government reform",
-        "statement": "The Scottish government has announced a long-term programme for local government reform."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "has seen companies like Chemify turn groundbreaking research into real manufacturing jobs in Glasgow",
-        "statement": "Chemify has turned research into manufacturing jobs in Glasgow."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "It’s why we’re putting a billion pounds into research and innovation across the UK in the coming years.",
-        "statement": "The UK government intends to invest a billion pounds in research and innovation across the UK in the coming years."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "An offer of DWP devolution.",
-        "statement": "The Prime Minister has made an offer to Scotland of DWP devolution."
-      },
-      {
-        "as_at": "2026-10-16",
-        "quote": "working with the Scottish government to help secure new investment and new opportunities for the Grangemouth site",
-        "statement": "The UK government is working with the Scottish government to help secure new investment and new opportunities for the Grangemouth site."
-      }
-    ],
-    "mentions": [
-      {
-        "kind": "person",
-        "name": "Prime Minister",
-        "role": "Prime Minister of the United Kingdom"
-      },
-      {
+        "at": {
+          "span": 2,
+          "words": "Douglas"
+        },
         "kind": "person",
         "name": "Douglas",
-        "role": ""
+        "office": ""
       },
       {
-        "kind": "person",
-        "name": "Pamela",
-        "role": "Local MP"
-      },
-      {
-        "kind": "person",
-        "name": "John Swinney",
-        "role": ""
-      },
-      {
-        "kind": "person",
-        "name": "Euan",
-        "role": ""
-      },
-      {
-        "kind": "person",
-        "name": "Darren McGarvey",
-        "role": "Author of Poverty Safari"
-      },
-      {
-        "kind": "person",
-        "name": "Alan Milburn",
-        "role": "Leader of the review on young people's employment"
-      },
-      {
-        "kind": "organisation",
-        "name": "Scottish Violence Reduction Unit",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
-        "name": "Greater Manchester Violence Reduction Unit",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
-        "name": "FARE-Scotland",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
-        "name": "Scottish government",
-        "role": "Government of Scotland"
-      },
-      {
-        "kind": "organisation",
-        "name": "UK government",
-        "role": "Government of the United Kingdom"
-      },
-      {
-        "kind": "organisation",
-        "name": "Scottish Parliament",
-        "role": "Devolved legislature of Scotland, also called Holyrood"
-      },
-      {
-        "kind": "organisation",
-        "name": "Westminster",
-        "role": "UK Parliament"
-      },
-      {
-        "kind": "organisation",
-        "name": "Whitehall",
-        "role": "UK government departments"
-      },
-      {
-        "kind": "organisation",
-        "name": "National Economic Council",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
-        "name": "Chemify",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
-        "name": "Alexander Dennis",
-        "role": ""
-      },
-      {
-        "kind": "organisation",
-        "name": "EU",
-        "role": "European Union, partner in the EU-UK Summit"
-      },
-      {
-        "kind": "organisation",
-        "name": "Hibs",
-        "role": "Football club"
-      },
-      {
-        "kind": "organisation",
-        "name": "Hearts",
-        "role": "Football club"
-      },
-      {
-        "kind": "place",
-        "name": "Scotland",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Greater Manchester",
-        "role": ""
-      },
-      {
+        "at": {
+          "span": 3,
+          "words": "Motherwell"
+        },
         "kind": "place",
         "name": "Motherwell",
-        "role": ""
+        "office": ""
       },
       {
+        "at": {
+          "span": 5,
+          "words": "Manchester"
+        },
         "kind": "place",
-        "name": "Easterhouse",
-        "role": ""
+        "name": "Manchester",
+        "office": ""
       },
       {
-        "kind": "place",
-        "name": "Downing Street",
-        "role": "Office of the Prime Minister"
+        "at": {
+          "span": 6,
+          "words": "Number 10 North"
+        },
+        "kind": "organisation",
+        "name": "Number 10 North",
+        "office": ""
       },
       {
-        "kind": "place",
-        "name": "Ravenscraig",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Leigh",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Bickershaw Colliery",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Glasgow",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Edinburgh",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Dundee",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Aberdeen",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Inverclyde",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "East Renfrewshire",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Falkirk",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Lanarkshire",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Grangemouth",
-        "role": ""
-      },
-      {
-        "kind": "place",
-        "name": "Highlands and Islands",
-        "role": ""
-      },
-      {
+        "at": {
+          "span": 13,
+          "words": "Commonwealth Games"
+        },
         "kind": "occasion",
         "name": "Commonwealth Games",
-        "role": "Multi-sport event held in Glasgow"
+        "office": ""
       },
       {
+        "at": {
+          "span": 13,
+          "words": "Glasgow"
+        },
+        "kind": "place",
+        "name": "Glasgow",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 17,
+          "words": "Motherwell"
+        },
+        "kind": "place",
+        "name": "Motherwell",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 21,
+          "words": "Downing Street"
+        },
+        "kind": "place",
+        "name": "Downing Street",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 28,
+          "words": "Westminster"
+        },
+        "kind": "organisation",
+        "name": "Westminster",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 28,
+          "words": "Greater Manchester"
+        },
+        "kind": "place",
+        "name": "Greater Manchester",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 36,
+          "words": "FARE-Scotland"
+        },
+        "kind": "organisation",
+        "name": "FARE-Scotland",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 36,
+          "words": "Bannatyne House"
+        },
+        "kind": "place",
+        "name": "Bannatyne House",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 36,
+          "words": "Easterhouse"
+        },
+        "kind": "place",
+        "name": "Easterhouse",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 36,
+          "words": "Scottish Violence Reduction Unit"
+        },
+        "kind": "organisation",
+        "name": "Scottish Violence Reduction Unit",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 36,
+          "words": "Greater Manchester Violence Reduction Unit"
+        },
+        "kind": "organisation",
+        "name": "Greater Manchester Violence Reduction Unit",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 58,
+          "words": "Darren McGarvey"
+        },
+        "kind": "person",
+        "name": "Darren McGarvey",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 72,
+          "words": "Pamela"
+        },
+        "kind": "person",
+        "name": "Pamela",
+        "office": "Member of Parliament for Motherwell"
+      },
+      {
+        "at": {
+          "span": 80,
+          "words": "Ravenscraig"
+        },
+        "kind": "place",
+        "name": "Ravenscraig",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 88,
+          "words": "Leigh"
+        },
+        "kind": "place",
+        "name": "Leigh",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 90,
+          "words": "Bickershaw Colliery"
+        },
+        "kind": "place",
+        "name": "Bickershaw Colliery",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 141,
+          "words": "Scottish Parliament"
+        },
+        "kind": "organisation",
+        "name": "Scottish Parliament",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 175,
+          "words": "Scottish government"
+        },
+        "kind": "organisation",
+        "name": "Scottish government",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 175,
+          "words": "UK government"
+        },
+        "kind": "organisation",
+        "name": "UK government",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 179,
+          "words": "John Swinney"
+        },
+        "kind": "person",
+        "name": "John Swinney",
+        "office": "First Minister of Scotland"
+      },
+      {
+        "at": {
+          "span": 183,
+          "words": "Grangemouth"
+        },
+        "kind": "place",
+        "name": "Grangemouth",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 190,
+          "words": "EU-UK Summit"
+        },
         "kind": "occasion",
         "name": "EU-UK Summit",
-        "role": "Summit on 20 November"
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 198,
+          "words": "Alexander Dennis"
+        },
+        "kind": "organisation",
+        "name": "Alexander Dennis",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 198,
+          "words": "Falkirk"
+        },
+        "kind": "place",
+        "name": "Falkirk",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 200,
+          "words": "Euan"
+        },
+        "kind": "person",
+        "name": "Euan",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 204,
+          "words": "Dundee"
+        },
+        "kind": "place",
+        "name": "Dundee",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 211,
+          "words": "Chemify"
+        },
+        "kind": "organisation",
+        "name": "Chemify",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 241,
+          "words": "Alan Milburn"
+        },
+        "kind": "person",
+        "name": "Alan Milburn",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 283,
+          "words": "First Minister"
+        },
+        "kind": "person",
+        "name": "John Swinney",
+        "office": "First Minister of Scotland"
+      },
+      {
+        "at": {
+          "span": 286,
+          "words": "John"
+        },
+        "kind": "person",
+        "name": "John Swinney",
+        "office": "First Minister of Scotland"
+      },
+      {
+        "at": {
+          "span": 305,
+          "words": "DWP"
+        },
+        "kind": "organisation",
+        "name": "DWP",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 318,
+          "words": "National Economic Council"
+        },
+        "kind": "organisation",
+        "name": "National Economic Council",
+        "office": ""
       }
-    ]
+    ],
+    "refers_to": [
+      {
+        "from": {
+          "span": 9,
+          "words": "it"
+        },
+        "to": {
+          "span": 6,
+          "words": "Number 10 North"
+        }
+      },
+      {
+        "from": {
+          "span": 14,
+          "words": "them"
+        },
+        "to": {
+          "span": 13,
+          "words": "Glasgow"
+        }
+      },
+      {
+        "from": {
+          "span": 37,
+          "words": "they"
+        },
+        "to": {
+          "span": 36,
+          "words": "FARE-Scotland"
+        }
+      },
+      {
+        "from": {
+          "span": 80,
+          "words": "this college"
+        },
+        "to": {
+          "span": 2,
+          "words": "the college"
+        }
+      },
+      {
+        "from": {
+          "span": 113,
+          "words": "this college"
+        },
+        "to": {
+          "span": 2,
+          "words": "the college"
+        }
+      },
+      {
+        "from": {
+          "span": 295,
+          "words": "Number 10 South"
+        },
+        "to": {
+          "span": 6,
+          "words": "Number 10 North"
+        }
+      }
+    ],
+    "rejected": [
+      1,
+      12,
+      19,
+      25,
+      44,
+      45,
+      53,
+      54,
+      59,
+      77,
+      331,
+      343,
+      344
+    ],
+    "speakers": []
   }
 }

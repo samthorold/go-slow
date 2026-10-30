@@ -41,7 +41,7 @@ func otherStories(t *testing.T, store *sqlite.Store, n int) {
 		if _, err := store.AddItems(t.Context(), []collect.Item{it}); err != nil {
 			t.Fatal(err)
 		}
-		if err := store.SaveReading(t.Context(), editor.Reading{SourceID: it.SourceID, EntryID: entry, Model: "fake",
+		if err := store.SaveFactReading(t.Context(), editor.FactReading{SourceID: it.SourceID, EntryID: entry, Model: "fake",
 			Facts: []editor.Fact{{Statement: "Something else happened.", AsAt: oct16, Quote: "else"}}}, saturday); err != nil {
 			t.Fatal(err)
 		}
@@ -124,7 +124,7 @@ func TestAnInvolvementConnectingAddsConnectsStoriesByItsEntityAndRole(t *testing
 	if _, err := store.AddItems(t.Context(), []collect.Item{visit}); err != nil {
 		t.Fatal(err)
 	}
-	if err := store.SaveReading(t.Context(), editor.Reading{
+	if err := store.SaveFactReading(t.Context(), editor.FactReading{
 		SourceID: visit.SourceID, EntryID: visit.EntryID, Model: "fake",
 		Entities: []editor.Entity{{Name: "Scotland", Kind: "place"}},
 		Facts: []editor.Fact{{Statement: "Scotland's ferries were funded.", AsAt: oct16.AddDate(0, 0, 1),
@@ -180,7 +180,7 @@ func TestTwoStoriesSharingADevelopmentAreConnectedTheMomentItIsPlaced(t *testing
 	if _, err := store.AddItems(t.Context(), []collect.Item{third}); err != nil {
 		t.Fatal(err)
 	}
-	if err := store.SaveReading(t.Context(), editor.Reading{
+	if err := store.SaveFactReading(t.Context(), editor.FactReading{
 		SourceID: third.SourceID, EntryID: third.EntryID, Model: "fake",
 		Entities: []editor.Entity{{Name: "Andy Burnham", Kind: "person"}},
 		Facts: []editor.Fact{{Statement: "Andy Burnham visited Glasgow.", AsAt: oct16.AddDate(0, 0, 2),

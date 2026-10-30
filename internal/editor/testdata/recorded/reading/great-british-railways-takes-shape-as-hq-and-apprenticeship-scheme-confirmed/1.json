@@ -1,212 +1,519 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "7d35e9051113eb0276f61a62b0548d2ce4407db5c607b08e3346d298b563d5da",
-  "recorded_at": "2026-10-26T22:36:52.942011Z",
+  "request_hash": "9da1dbc9aeac7a1b3f4fd51718102968ff4059a927eaa412a8ef3043a95bf25b",
+  "recorded_at": "2026-10-30T20:49:13.1934Z",
   "usage": {
-    "input_tokens": 3397,
-    "output_tokens": 4753
+    "input_tokens": 4010,
+    "output_tokens": 6176
   },
   "output": {
-    "claims": [
+    "names": [
       {
-        "made_by": "Great British Railways (publisher)",
-        "quote": "Rail passengers across Britain are a step closer to a railway run in their interests",
-        "statement": "Rail passengers across Britain are a step closer to a railway run in their interests."
-      },
-      {
-        "made_by": "Great British Railways (publisher)",
-        "quote": "an estimated £151 million boost to the region’s economy",
-        "statement": "The new HQ will bring an estimated £151 million boost to the region's economy."
-      },
-      {
-        "made_by": "Great British Railways (publisher)",
-        "quote": "The new HQ will bring hundreds of rail jobs to the city",
-        "statement": "The new HQ will bring hundreds of rail jobs to Derby."
-      },
-      {
-        "made_by": "Great British Railways (publisher)",
-        "quote": "Construction of the brand-new development in at Becketwell, a brownfield site in the heart of Derby city centre, is expected to begin in early 2027 and be completed by spring 2029",
-        "statement": "Construction of the Becketwell headquarters is expected to begin in early 2027 and be completed by spring 2029."
-      },
-      {
-        "made_by": "Great British Railways (publisher)",
-        "quote": "helping to cement the city’s role as Europe’s largest rail hub",
-        "statement": "Derby is Europe's largest rail hub."
-      },
-      {
-        "made_by": "Great British Railways (publisher)",
-        "quote": "supporting the government’s mission to drive growth in every postcode",
-        "statement": "The HQ supports the government's mission to drive growth in every postcode."
-      },
-      {
-        "made_by": "Andy Burnham",
-        "quote": "For too long, people have put up with a railway that often lets them down.",
-        "statement": "For too long, people have put up with a railway that often lets them down."
-      },
-      {
-        "made_by": "Andy Burnham",
-        "quote": "This will bring investment and good jobs, giving young people the chance to build their future in the place they call home.",
-        "statement": "Great British Railways' move to Derby will bring investment and good jobs for young people."
-      },
-      {
-        "made_by": "Heidi Alexander",
-        "quote": "The biggest shake-up to our railways in a generation is underway.",
-        "statement": "The biggest shake-up to the railways in a generation is underway."
-      },
-      {
-        "made_by": "Heidi Alexander",
-        "quote": "The modern fit-for-purpose headquarters in Derby will provide a focal point for GBR’s work, strengthening collaboration",
-        "statement": "The Derby headquarters will provide a focal point for GBR's work and strengthen collaboration."
-      },
-      {
-        "made_by": "Pat McFadden",
-        "quote": "This foundation apprenticeship will give young people the chance to explore career paths within the sector",
-        "statement": "The foundation apprenticeship will give young people the chance to explore career paths within the rail sector."
-      },
-      {
-        "made_by": "Claire Ward",
-        "quote": "This is fantastic news for Derby.",
-        "statement": "The announcement is fantastic news for Derby."
-      },
-      {
-        "made_by": "Claire Ward",
-        "quote": "Young people should have the chance to learn new skills and build a career in an industry with such deep roots here",
-        "statement": "Young people should have the chance to learn new skills and build a rail career in the East Midlands without having to move away."
-      }
-    ],
-    "facts": [
-      {
-        "as_at": "2026-10-15",
-        "quote": "the site of Great British Railways’ (GBR) headquarters is unveiled today (15 October 2026) in Derby",
-        "statement": "The site of Great British Railways' headquarters was unveiled in Derby."
-      },
-      {
-        "as_at": "2026-10-14",
-        "quote": "Up to 600 apprentices between 16 and 21 years old will enrol over the next 4 years on the rail foundation apprenticeship",
-        "statement": "Up to 600 apprentices aged 16 to 21 are scheduled to enrol over the next four years on the rail foundation apprenticeship."
-      },
-      {
-        "as_at": "2026-10-14",
-        "quote": "fares frozen for the first time in 30 years",
-        "statement": "Fares have been frozen for the first time in 30 years."
-      },
-      {
-        "as_at": "2026-10-14",
-        "quote": "76,000 extra seats a week introduced across the network",
-        "statement": "76,000 extra seats a week have been introduced across the network."
-      },
-      {
-        "as_at": "2026-10-14",
-        "quote": "a fleet of new GBR trains set to be built in Britain",
-        "statement": "A fleet of new GBR trains is set to be built in Britain."
-      },
-      {
-        "as_at": "2026-10-14",
-        "quote": "The site will accommodate up to 450 GBR staff",
-        "statement": "The site will accommodate up to 450 GBR staff."
-      },
-      {
-        "as_at": "2026-10-14",
-        "quote": "the recent £1 billion investment in a new fleet of trains for the north set to be built at Alstom’s Derby site",
-        "statement": "A £1 billion investment in a new fleet of trains for the north has been made, set to be built at Alstom's Derby site."
-      },
-      {
-        "as_at": "2026-10-14",
-        "quote": "less than 7% of the railway’s workforce is under 25",
-        "statement": "Less than 7% of the railway's workforce is under 25."
-      },
-      {
-        "as_at": "2026-10-14",
-        "quote": "This forms part of our £2.5 billion youth employment support package",
-        "statement": "The foundation apprenticeship forms part of a £2.5 billion youth employment support package."
-      },
-      {
-        "as_at": "2026-10-14",
-        "quote": "Prime Minister Andy Burnham said:",
-        "statement": "Prime Minister Andy Burnham made a statement about the railway and the Derby headquarters."
-      },
-      {
-        "as_at": "2026-10-14",
-        "quote": "Transport Secretary Heidi Alexander said:",
-        "statement": "Transport Secretary Heidi Alexander made a statement about Great British Railways and Derby."
-      },
-      {
-        "as_at": "2026-10-14",
-        "quote": "Work and Pensions Secretary Pat McFadden said:",
-        "statement": "Work and Pensions Secretary Pat McFadden made a statement about the foundation apprenticeship."
-      },
-      {
-        "as_at": "2026-10-14",
-        "quote": "Mayor of the East Midlands, Claire Ward, said:",
-        "statement": "Mayor of the East Midlands Claire Ward made a statement about the Derby announcement."
-      }
-    ],
-    "mentions": [
-      {
-        "kind": "organisation",
-        "name": "Great British Railways",
-        "role": "publicly owned railway body whose headquarters is being sited in Derby"
-      },
-      {
-        "kind": "place",
-        "name": "Becketwell",
-        "role": "brownfield site in Derby city centre chosen for the GBR headquarters"
-      },
-      {
-        "kind": "place",
-        "name": "Derby",
-        "role": "city selected for the GBR headquarters and apprenticeships"
-      },
-      {
+        "at": {
+          "span": 12,
+          "words": "Andy Burnham"
+        },
         "kind": "person",
         "name": "Andy Burnham",
-        "role": "Prime Minister of the United Kingdom"
+        "office": "Prime Minister of the United Kingdom"
       },
       {
+        "at": {
+          "span": 20,
+          "words": "Heidi Alexander"
+        },
         "kind": "person",
         "name": "Heidi Alexander",
-        "role": "Transport Secretary"
+        "office": "Transport Secretary"
       },
       {
+        "at": {
+          "span": 30,
+          "words": "Pat McFadden"
+        },
         "kind": "person",
         "name": "Pat McFadden",
-        "role": "Work and Pensions Secretary"
+        "office": "Work and Pensions Secretary"
       },
       {
+        "at": {
+          "span": 34,
+          "words": "Claire Ward"
+        },
         "kind": "person",
         "name": "Claire Ward",
-        "role": "Mayor of the East Midlands"
+        "office": "Mayor of the East Midlands"
       },
       {
+        "at": {
+          "span": 4,
+          "words": "Great British Railways"
+        },
+        "kind": "organisation",
+        "name": "Great British Railways",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 16,
+          "words": "Great British Railways"
+        },
+        "kind": "organisation",
+        "name": "Great British Railways",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 22,
+          "words": "Great British Railways"
+        },
+        "kind": "organisation",
+        "name": "Great British Railways",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "Derby"
+        },
+        "kind": "place",
+        "name": "Derby",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 16,
+          "words": "Derby"
+        },
+        "kind": "place",
+        "name": "Derby",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 22,
+          "words": "Derby"
+        },
+        "kind": "place",
+        "name": "Derby",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 8,
+          "words": "Becketwell"
+        },
+        "kind": "place",
+        "name": "Becketwell",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 26,
+          "words": "Department for Transport"
+        },
         "kind": "organisation",
         "name": "Department for Transport",
-        "role": "government department partnering on transport links for the headquarters"
+        "office": ""
       },
       {
+        "at": {
+          "span": 26,
+          "words": "Derby City Council"
+        },
         "kind": "organisation",
         "name": "Derby City Council",
-        "role": "partner in delivering transport links and walking routes"
+        "office": ""
       },
       {
+        "at": {
+          "span": 26,
+          "words": "East Midlands Combined Authority"
+        },
         "kind": "organisation",
         "name": "East Midlands Combined Authority",
-        "role": "partner in delivering transport links and walking routes"
+        "office": ""
       },
       {
+        "at": {
+          "span": 27,
+          "words": "Alstom’s"
+        },
         "kind": "organisation",
         "name": "Alstom",
-        "role": "manufacturer building the new trains at its Derby site"
+        "office": ""
       },
       {
-        "kind": "place",
-        "name": "East Midlands",
-        "role": "region covered by the Mayor of the East Midlands"
-      },
-      {
+        "at": {
+          "span": 7,
+          "words": "Britain"
+        },
         "kind": "place",
         "name": "Britain",
-        "role": "country in which the railway and new trains are based"
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 28,
+          "words": "Midlands"
+        },
+        "kind": "place",
+        "name": "East Midlands",
+        "office": ""
+      }
+    ],
+    "refers_to": [
+      {
+        "from": {
+          "span": 2,
+          "words": "the city"
+        },
+        "to": {
+          "span": 4,
+          "words": "Derby"
+        }
+      },
+      {
+        "from": {
+          "span": 9,
+          "words": "the city"
+        },
+        "to": {
+          "span": 4,
+          "words": "Derby"
+        }
+      },
+      {
+        "from": {
+          "span": 9,
+          "words": "the region’s"
+        },
+        "to": {
+          "span": 4,
+          "words": "Derby"
+        }
+      },
+      {
+        "from": {
+          "span": 11,
+          "words": "the city’s"
+        },
+        "to": {
+          "span": 4,
+          "words": "Derby"
+        }
+      },
+      {
+        "from": {
+          "span": 16,
+          "words": "its"
+        },
+        "to": {
+          "span": 16,
+          "words": "Great British Railways"
+        }
+      },
+      {
+        "from": {
+          "span": 16,
+          "words": "a city"
+        },
+        "to": {
+          "span": 16,
+          "words": "Derby"
+        }
+      },
+      {
+        "from": {
+          "span": 17,
+          "words": "the place they call home"
+        },
+        "to": {
+          "span": 4,
+          "words": "Derby"
+        }
+      },
+      {
+        "from": {
+          "span": 23,
+          "words": "the city"
+        },
+        "to": {
+          "span": 4,
+          "words": "Derby"
+        }
+      },
+      {
+        "from": {
+          "span": 25,
+          "words": "the organisation’s"
+        },
+        "to": {
+          "span": 22,
+          "words": "Great British Railways"
+        }
+      },
+      {
+        "from": {
+          "span": 26,
+          "words": "The site"
+        },
+        "to": {
+          "span": 8,
+          "words": "Becketwell"
+        }
+      },
+      {
+        "from": {
+          "span": 36,
+          "words": "here"
+        },
+        "to": {
+          "span": 4,
+          "words": "Derby"
+        }
+      },
+      {
+        "from": {
+          "span": 36,
+          "words": "the city"
+        },
+        "to": {
+          "span": 4,
+          "words": "Derby"
+        }
+      },
+      {
+        "from": {
+          "span": 38,
+          "words": "here"
+        },
+        "to": {
+          "span": 4,
+          "words": "Derby"
+        }
+      }
+    ],
+    "rejected": [
+      12,
+      20,
+      30,
+      34,
+      41,
+      42,
+      43
+    ],
+    "speakers": [
+      {
+        "span": {
+          "span": 13,
+          "words": ""
+        },
+        "speaker": {
+          "span": 12,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "span": {
+          "span": 14,
+          "words": ""
+        },
+        "speaker": {
+          "span": 12,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "span": {
+          "span": 15,
+          "words": ""
+        },
+        "speaker": {
+          "span": 12,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "span": {
+          "span": 16,
+          "words": ""
+        },
+        "speaker": {
+          "span": 12,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "span": {
+          "span": 17,
+          "words": ""
+        },
+        "speaker": {
+          "span": 12,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "span": {
+          "span": 18,
+          "words": ""
+        },
+        "speaker": {
+          "span": 12,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "span": {
+          "span": 19,
+          "words": ""
+        },
+        "speaker": {
+          "span": 12,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "span": {
+          "span": 21,
+          "words": ""
+        },
+        "speaker": {
+          "span": 20,
+          "words": "Heidi Alexander"
+        }
+      },
+      {
+        "span": {
+          "span": 22,
+          "words": ""
+        },
+        "speaker": {
+          "span": 20,
+          "words": "Heidi Alexander"
+        }
+      },
+      {
+        "span": {
+          "span": 23,
+          "words": ""
+        },
+        "speaker": {
+          "span": 20,
+          "words": "Heidi Alexander"
+        }
+      },
+      {
+        "span": {
+          "span": 24,
+          "words": ""
+        },
+        "speaker": {
+          "span": 20,
+          "words": "Heidi Alexander"
+        }
+      },
+      {
+        "span": {
+          "span": 25,
+          "words": ""
+        },
+        "speaker": {
+          "span": 20,
+          "words": "Heidi Alexander"
+        }
+      },
+      {
+        "span": {
+          "span": 31,
+          "words": ""
+        },
+        "speaker": {
+          "span": 30,
+          "words": "Pat McFadden"
+        }
+      },
+      {
+        "span": {
+          "span": 32,
+          "words": ""
+        },
+        "speaker": {
+          "span": 30,
+          "words": "Pat McFadden"
+        }
+      },
+      {
+        "span": {
+          "span": 33,
+          "words": ""
+        },
+        "speaker": {
+          "span": 30,
+          "words": "Pat McFadden"
+        }
+      },
+      {
+        "span": {
+          "span": 35,
+          "words": ""
+        },
+        "speaker": {
+          "span": 34,
+          "words": "Claire Ward"
+        }
+      },
+      {
+        "span": {
+          "span": 36,
+          "words": ""
+        },
+        "speaker": {
+          "span": 34,
+          "words": "Claire Ward"
+        }
+      },
+      {
+        "span": {
+          "span": 37,
+          "words": ""
+        },
+        "speaker": {
+          "span": 34,
+          "words": "Claire Ward"
+        }
+      },
+      {
+        "span": {
+          "span": 38,
+          "words": ""
+        },
+        "speaker": {
+          "span": 34,
+          "words": "Claire Ward"
+        }
+      },
+      {
+        "span": {
+          "span": 39,
+          "words": ""
+        },
+        "speaker": {
+          "span": 34,
+          "words": "Claire Ward"
+        }
+      },
+      {
+        "span": {
+          "span": 40,
+          "words": ""
+        },
+        "speaker": {
+          "span": 34,
+          "words": "Claire Ward"
+        }
       }
     ]
   }

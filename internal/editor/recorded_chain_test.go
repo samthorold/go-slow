@@ -163,12 +163,13 @@ func (c chain) run(ctx context.Context, store *sqlite.Store, topics *interest.Se
 			run   func(editor.Model, *slog.Logger) error
 		}{
 			{"reading", c.reading, func(m editor.Model, _ *slog.Logger) error {
-				reading, err := editor.Read(ctx, m, it)
+				// What the earlier reading act drew, frozen: the acts built on
+				// Facts rest on it.
+				reading, err := replayFactReading(ctx, m, it)
 				if err != nil {
-					why = err.Error()
-					return nil
+					return err
 				}
-				return store.SaveReading(ctx, reading, saturday)
+				return store.SaveFactReading(ctx, reading, saturday)
 			}},
 			{"placing", c.placing, func(m editor.Model, log *slog.Logger) error {
 				return editor.New(editor.Deps{Store: store, PlacingModel: m, Log: log}).PlaceWaiting(ctx, saturday)

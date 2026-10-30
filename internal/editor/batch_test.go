@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/samthorold/go-slow/internal/collect"
+	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/sqlite"
@@ -69,17 +70,18 @@ func newBatches(store *sqlite.Store, b editor.Batcher) (*editor.Batches, *bytes.
 	}), &logs
 }
 
-// ferries is a second Item awaiting reading for the Topic on Scotland.
+// ferries is a second Item awaiting reading.
 var ferries = collect.Item{
 	SourceID: number10.ID, EntryID: "ferries", Title: "Ferries to the islands",
 	Link: "https://www.gov.uk/ferries", Summary: "Ferries to Scotland's islands will run more often.",
+	Content:   "<p>Ferries to Scotland's islands will run more often.</p>",
 	Published: saturday, Attribution: collect.OGL, CollectedAt: saturday,
 }
 
-const ferriesReading = `{"claims": [], "facts": [{"statement": "Ferries will run more often.",
-  "as_at": "2026-10-24", "quote": "Ferries to Scotland's islands will run more often"}], "mentions": []}`
+const ferriesReading = `{"names": [{"at": {"span": 1, "words": "Scotland"}, "kind": "place", "name": "Scotland", "office": ""}],
+  "refers_to": [], "rejected": [], "speakers": []}`
 
-// withFerries adds the ferries Item to the Record, awaiting reading.
+// withFerries adds the ferries Item to the Record, cut and awaiting reading.
 func withFerries(t *testing.T, store *sqlite.Store) {
 	t.Helper()
 	if _, err := store.AddItems(t.Context(), []collect.Item{ferries}); err != nil {
@@ -88,6 +90,19 @@ func withFerries(t *testing.T, store *sqlite.Store) {
 	if err := interest.New(store).CheckNew(t.Context()); err != nil {
 		t.Fatal(err)
 	}
+	if err := cut.New(store).CutNew(t.Context(), saturday); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// newestReading is the Item's newest reading, if it has been read.
+func newestReading(t *testing.T, store *sqlite.Store, sourceID, entryID string) (editor.Reading, bool) {
+	t.Helper()
+	r, found, err := store.NewestReading(t.Context(), sourceID, entryID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return r, found
 }
 
 // byItem answers each request with the reading of the Item it is about.
@@ -116,16 +131,10 @@ func TestABatchsResultsAreMatchedToTheirItemsByIdentifierNotPosition(t *testing.
 		t.Fatal(err)
 	}
 
-	for entry, want := range map[string]string{
-		speech.EntryID:  "Andy Burnham gave a speech in Motherwell.",
-		ferries.EntryID: "Ferries will run more often.",
-	} {
-		got, _, err := store.ReadItem(t.Context(), number10.ID, entry)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if !got.Read || len(got.Facts) != 1 || got.Facts[0].Statement != want {
-			t.Errorf("%s: read %v, Facts %+v, want %q", entry, got.Read, got.Facts, want)
+	for entry, want := range map[string]int{speech.EntryID: 2, ferries.EntryID: 1} {
+		got, read := newestReading(t, store, number10.ID, entry)
+		if !read || len(got.Names) != want {
+			t.Errorf("%s: read %v, names %+v, want %d", entry, read, got.Names, want)
 		}
 	}
 }
@@ -154,10 +163,10 @@ func TestABatchStillProcessingIsWaitedForAcrossARestartWithoutBlocking(t *testin
 	if err := b.ReadWaiting(t.Context(), saturday.Add(30*time.Minute)); err != nil {
 		t.Fatal(err)
 	}
-	if got, _, _ := store.ReadItem(t.Context(), speech.SourceID, speech.EntryID); !got.Read {
+	if _, read := newestReading(t, store, speech.SourceID, speech.EntryID); !read {
 		t.Error("the speech was not read when its batch ended after the restart")
 	}
-	if got, _, _ := store.ReadItem(t.Context(), ferries.SourceID, ferries.EntryID); got.Read {
+	if _, read := newestReading(t, store, ferries.SourceID, ferries.EntryID); read {
 		t.Error("the ferries were read before their batch ended")
 	}
 }
@@ -187,10 +196,10 @@ func TestAFailedRequestInABatchIsResubmittedAloneAndTheRestAreApplied(t *testing
 				t.Fatal(err)
 			}
 
-			if got, _, _ := store.ReadItem(t.Context(), speech.SourceID, speech.EntryID); !got.Read {
+			if _, read := newestReading(t, store, speech.SourceID, speech.EntryID); !read {
 				t.Error("the speech was held up by the ferries' failure")
 			}
-			if got, _, _ := store.ReadItem(t.Context(), ferries.SourceID, ferries.EntryID); got.Read || len(got.Facts) > 0 {
+			if got, read := newestReading(t, store, ferries.SourceID, ferries.EntryID); read {
 				t.Errorf("the failed reading was written: %+v", got)
 			}
 			if len(batcher.submitted) != 2 || len(batcher.submitted[1]) != 1 ||
@@ -206,7 +215,7 @@ func TestAFailedRequestInABatchIsResubmittedAloneAndTheRestAreApplied(t *testing
 			if err := b.ReadWaiting(t.Context(), saturday); err != nil {
 				t.Fatal(err)
 			}
-			if got, _, _ := store.ReadItem(t.Context(), ferries.SourceID, ferries.EntryID); !got.Read {
+			if _, read := newestReading(t, store, ferries.SourceID, ferries.EntryID); !read {
 				t.Error("the resubmitted reading was not applied")
 			}
 			if len(batcher.submitted) != 2 {
@@ -258,12 +267,12 @@ func TestTheItemsAwaitingReadingAreSubmittedAsOneBatchAndReadWhenItEnds(t *testi
 	}
 
 	if len(batcher.submitted) != 1 || len(batcher.submitted[0]) != 1 {
-		t.Fatalf("submitted %v, want one batch of one request: only the speech touches a Topic", batcher.submitted)
+		t.Fatalf("submitted %v, want one batch of one request: only the speech has text to cut", batcher.submitted)
 	}
 	if r := batcher.submitted[0][0].Request; r.Act != "reading" || r.Instructions == "" {
 		t.Errorf("the request is not reading's: %+v", r)
 	}
-	if got, _, _ := store.ReadItem(t.Context(), speech.SourceID, speech.EntryID); got.Read {
+	if _, read := newestReading(t, store, speech.SourceID, speech.EntryID); read {
 		t.Fatal("the speech is read before its batch has ended")
 	}
 
@@ -272,11 +281,7 @@ func TestTheItemsAwaitingReadingAreSubmittedAsOneBatchAndReadWhenItEnds(t *testi
 		t.Fatal(err)
 	}
 
-	got, _, err := store.ReadItem(t.Context(), speech.SourceID, speech.EntryID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !got.Read || len(got.Facts) != 1 || len(got.Claims) != 1 {
+	if got, read := newestReading(t, store, speech.SourceID, speech.EntryID); !read || len(got.Names) != 2 || !got.At.Equal(saturday.Add(15*time.Minute)) {
 		t.Errorf("the speech's reading is not in the Record: %+v", got)
 	}
 	if len(batcher.submitted) != 1 {

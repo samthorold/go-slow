@@ -149,6 +149,11 @@ func TestEverySampleOfAFixtureCarriesTheSameRequestHash(t *testing.T) {
 	}
 }
 
+// refusedReading is a reading of the speech the act's checks refuse: it
+// cites words the speech's Span does not have.
+const refusedReading = `{"names": [{"at": {"span": 1, "words": "not in the Item"}, "kind": "place", "name": "Nowhere", "office": ""}],
+	"refers_to": [], "rejected": [], "speakers": []}`
+
 // refusedThenRead answers its first call with output the reading act's
 // checks refuse, and every later one with a reading they take.
 type refusedThenRead struct{ calls int }
@@ -156,7 +161,7 @@ type refusedThenRead struct{ calls int }
 func (m *refusedThenRead) Complete(context.Context, editor.Request) (editor.Response, error) {
 	m.calls++
 	if m.calls == 1 {
-		return editor.Response{Output: json.RawMessage(`{"facts": [{"statement": "Made up.", "as_at": "2026-10-16", "quote": "not in the Item"}], "claims": [], "mentions": []}`), Model: "fake"}, nil
+		return editor.Response{Output: json.RawMessage(refusedReading), Model: "fake"}, nil
 	}
 	return editor.Response{Output: json.RawMessage(goodReading), Model: "fake"}, nil
 }
@@ -166,7 +171,7 @@ func (m *refusedThenRead) Complete(context.Context, editor.Request) (editor.Resp
 func readSample(t *testing.T, m *sampleModel) bool {
 	t.Helper()
 	passed, err := runSample(m, func(model editor.Model) (bool, error) {
-		_, err := editor.Read(t.Context(), model, speech)
+		_, err := editor.Read(t.Context(), model, "", toRead(speech))
 		return err == nil, nil
 	})
 	if err != nil {
@@ -202,7 +207,7 @@ func TestASampleIsRecordedAttemptByAttempt(t *testing.T) {
 // A sample refused on every attempt fails, after MaxAttempts.
 func TestASampleRefusedOnEveryAttemptFails(t *testing.T) {
 	path := samplePath(t.TempDir(), "the-speech", 1)
-	live := &fakeModel{output: `{"facts": [{"statement": "Made up.", "as_at": "2026-10-16", "quote": "not in the Item"}], "claims": [], "mentions": []}`}
+	live := &fakeModel{output: refusedReading}
 	m := recordingSample(t, path, live, "claude-haiku-5-5", readingCommand)
 	if readSample(t, m) {
 		t.Fatal("a refused sample passed")
@@ -260,7 +265,9 @@ func TestTheRecordedReadingsAreJudgedOnTheirSamples(t *testing.T) {
 	const name = "pm-speech-in-scotland-16-october-2026"
 	path := filepath.Join("testdata", "govuk", name+".json")
 	it, _ := fixture(t, path)
-	good := kept(t, filepath.Join(recordedDir, "placing", "inputs", "reading", name+".json")).Output
+	// A reading judging nothing passes the act's checks, and the speech has
+	// no case a property of its own rests on.
+	good := `{"names": [], "refers_to": [], "rejected": [], "speakers": []}`
 	model := pinnedModel(t, "READING_MODEL")
 	for _, tc := range []struct {
 		passing int
@@ -272,13 +279,13 @@ func TestTheRecordedReadingsAreJudgedOnTheirSamples(t *testing.T) {
 	} {
 		root := t.TempDir()
 		for k := 1; k <= 5; k++ {
-			live := &fakeModel{output: string(good)}
+			live := &fakeModel{output: good}
 			if k > tc.passing {
-				live.output = `{"facts": [{"statement": "Made up.", "as_at": "2026-10-16", "quote": "not in the Item"}], "claims": [], "mentions": []}`
+				live.output = refusedReading
 			}
 			m := recordingSample(t, samplePath(filepath.Join(root, "reading"), name, k), live, model, readingCommand)
 			if _, err := runSample(m, func(model editor.Model) (bool, error) {
-				_, err := editor.Read(t.Context(), model, it)
+				_, err := editor.Read(t.Context(), model, "", fixtureToRead(it))
 				return err == nil, nil
 			}); err != nil {
 				t.Fatal(err)

@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
-	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -26,9 +25,13 @@ import (
 // must pass their checks, and every downstream act must be asked about every
 // fixture. A change to an earlier act's output that a later act can't take
 // fails here at once, with no recording made.
+//
+// Reading feeds none of them now: it judges Spans, and the acts downstream
+// are still built on the Facts the earlier reading act drew, which they read
+// from their own frozen copies until they move onto Spans.
 func TestEachActsCurrentRecordingsAreTakenByTheActsDownstream(t *testing.T) {
 	t.Parallel()
-	for _, act := range []string{"reading", "placing", "connecting"} {
+	for _, act := range []string{"placing", "connecting"} {
 		t.Run(act, func(t *testing.T) {
 			if err := feedDownstream(t, recordedDir, act); err != nil {
 				t.Error(err)
@@ -37,63 +40,14 @@ func TestEachActsCurrentRecordingsAreTakenByTheActsDownstream(t *testing.T) {
 	}
 }
 
-// A hand-made reading that draws every proposition of an Item as a Claim
-// passes reading's checks, but gives placing nothing: placing takes only
-// Facts. The compatibility check fails on it.
-func TestTheCompatibilityCheckFailsOnAReadingPlacingCannotTake(t *testing.T) {
-	root := t.TempDir()
-	if err := os.CopyFS(filepath.Join(root, "reading"), os.DirFS(filepath.Join(recordedDir, "reading"))); err != nil {
-		t.Fatal(err)
-	}
-	name := "appointment-of-lord-lieutenant-of-county-tyrone-15-october-2026"
-	path := samplePath(filepath.Join(root, "reading"), name, 1)
-	sample, err := sampleAt(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-	attempts := sample.attempts()
-	rec := attempts[len(attempts)-1]
-	var out struct {
-		Facts    []map[string]any `json:"facts"`
-		Claims   []map[string]any `json:"claims"`
-		Mentions json.RawMessage  `json:"mentions"`
-	}
-	if err := json.Unmarshal(rec.Output, &out); err != nil {
-		t.Fatal(err)
-	}
-	if len(out.Facts) == 0 {
-		t.Fatalf("%s draws no Facts to make Claims of", name)
-	}
-	for _, f := range out.Facts {
-		delete(f, "as_at")
-		f["made_by"] = "the Item"
-		out.Claims = append(out.Claims, f)
-	}
-	out.Facts = []map[string]any{}
-	b, err := json.Marshal(out)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rec.Output = b
-	attempts[len(attempts)-1] = rec
-	keepSample(t, path, attempts)
-
-	err = feedDownstream(t, root, "reading")
-	if err == nil || !strings.Contains(err.Error(), "placing was never asked") {
-		t.Fatalf("feedDownstream = %v; want placing never asked about %s", err, name)
-	}
-}
-
 // downstream are the acts that rest on each act's recordings, and the
 // frozen inputs each act's own recordings rest on.
 var (
 	downstream = map[string][]string{
-		"reading":    {"placing", "connecting", "briefing", "sunday read"},
 		"placing":    {"connecting", "briefing", "sunday read"},
 		"connecting": {"briefing", "sunday read"},
 	}
 	upstream = map[string][]string{
-		"reading":    nil,
 		"placing":    {"reading"},
 		"connecting": {"reading", "placing"},
 	}

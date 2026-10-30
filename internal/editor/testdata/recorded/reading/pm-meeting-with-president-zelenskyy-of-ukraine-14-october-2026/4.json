@@ -1,97 +1,181 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "407934b6a583729ed85bb2613ebe488d666cc743138985126baf3cc8b02d4cf6",
-  "recorded_at": "2026-10-26T22:39:02.664708Z",
+  "request_hash": "f9ab059432a16fac6eb1475533df887a989aff81c5a45b7de16228076aa6abb9",
+  "recorded_at": "2026-10-30T20:52:54.007784Z",
   "usage": {
-    "input_tokens": 1984,
-    "output_tokens": 2772
+    "input_tokens": 2484,
+    "output_tokens": 4374
   },
   "output": {
-    "claims": [
+    "names": [
       {
-        "made_by": "Prime Minister; President Volodymyr Zelenskyy",
-        "quote": "It was clear that Russia had no interest in peace, the leaders underlined.",
-        "statement": "Russia had no interest in peace."
-      },
-      {
-        "made_by": "Prime Minister; President Volodymyr Zelenskyy",
-        "quote": "Russia’s blatant indiscriminate attacks on civilians and energy infrastructure",
-        "statement": "Russia's attacks on civilians and energy infrastructure have been blatant and indiscriminate."
-      }
-    ],
-    "facts": [
-      {
-        "as_at": "2026-10-14",
-        "quote": "welcomed President Volodymyr Zelenskyy of Ukraine to Downing Street this afternoon",
-        "statement": "The Prime Minister welcomed President Volodymyr Zelenskyy of Ukraine to Downing Street on 14 October 2026."
-      },
-      {
-        "as_at": "2026-10-14",
-        "quote": "reflecting on their call on Saturday",
-        "statement": "The leaders had a call on Saturday before the meeting."
-      },
-      {
-        "as_at": "2026-10-14",
-        "quote": "since President Trump called for an energy ceasefire",
-        "statement": "President Trump called for an energy ceasefire."
-      },
-      {
-        "as_at": "2026-10-14",
-        "quote": "the Prime Minister set out the UK’s latest package of Lightweight Multirole Missiles",
-        "statement": "The Prime Minister set out the UK's latest package of Lightweight Multirole Missiles for Ukraine."
-      },
-      {
-        "as_at": "2026-10-14",
-        "quote": "the leaders discussed how the UK could accelerate defensive support to Ukraine ahead of the winter",
-        "statement": "The leaders discussed how the UK could accelerate defensive support to Ukraine ahead of the winter."
-      },
-      {
-        "as_at": "2026-10-14",
-        "quote": "The UK would continue to develop innovative military solutions for use on the battlefield in Ukraine",
-        "statement": "The UK intends to continue developing innovative military solutions for use on the battlefield in Ukraine, including retrofitting British capability onto equipment gifted from other partners."
-      },
-      {
-        "as_at": "2026-10-14",
-        "quote": "The UK would also continue its diplomatic efforts to support international supplies of defensive equipment too",
-        "statement": "The UK intends to continue its diplomatic efforts to support international supplies of defensive equipment."
-      }
-    ],
-    "mentions": [
-      {
+        "at": {
+          "span": 1,
+          "words": "Prime Minister"
+        },
         "kind": "person",
         "name": "Prime Minister",
-        "role": "Prime Minister of the United Kingdom"
+        "office": "Prime Minister of the United Kingdom"
       },
       {
+        "at": {
+          "span": 1,
+          "words": "President Volodymyr Zelenskyy of Ukraine"
+        },
         "kind": "person",
         "name": "Volodymyr Zelenskyy",
-        "role": "President of Ukraine"
+        "office": "President of Ukraine"
       },
       {
-        "kind": "person",
-        "name": "Trump",
-        "role": "President"
-      },
-      {
+        "at": {
+          "span": 1,
+          "words": "Downing Street"
+        },
         "kind": "place",
         "name": "Downing Street",
-        "role": ""
+        "office": ""
       },
       {
-        "kind": "place",
-        "name": "Ukraine",
-        "role": ""
+        "at": {
+          "span": 2,
+          "words": "President Trump"
+        },
+        "kind": "person",
+        "name": "Trump",
+        "office": "President"
       },
       {
-        "kind": "place",
-        "name": "UK",
-        "role": ""
-      },
-      {
+        "at": {
+          "span": 2,
+          "words": "Russia"
+        },
         "kind": "place",
         "name": "Russia",
-        "role": ""
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 3,
+          "words": "Russia"
+        },
+        "kind": "place",
+        "name": "Russia",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "Ukraine"
+        },
+        "kind": "place",
+        "name": "Ukraine",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "Prime Minister"
+        },
+        "kind": "person",
+        "name": "Prime Minister",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "UK"
+        },
+        "kind": "place",
+        "name": "United Kingdom",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 5,
+          "words": "UK"
+        },
+        "kind": "place",
+        "name": "United Kingdom",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 5,
+          "words": "Prime Minister"
+        },
+        "kind": "person",
+        "name": "Prime Minister",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 5,
+          "words": "Ukraine"
+        },
+        "kind": "place",
+        "name": "Ukraine",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 6,
+          "words": "UK"
+        },
+        "kind": "place",
+        "name": "United Kingdom",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 6,
+          "words": "Ukraine"
+        },
+        "kind": "place",
+        "name": "Ukraine",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 7,
+          "words": "UK"
+        },
+        "kind": "place",
+        "name": "United Kingdom",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 7,
+          "words": "Prime Minister"
+        },
+        "kind": "person",
+        "name": "Prime Minister",
+        "office": "Prime Minister of the United Kingdom"
+      }
+    ],
+    "refers_to": [],
+    "rejected": [],
+    "speakers": [
+      {
+        "span": {
+          "span": 5,
+          "words": ""
+        },
+        "speaker": {
+          "span": 5,
+          "words": "the Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 7,
+          "words": ""
+        },
+        "speaker": {
+          "span": 7,
+          "words": "the Prime Minister"
+        }
       }
     ]
   }

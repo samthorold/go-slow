@@ -45,13 +45,13 @@ func briefSpeech(t *testing.T, store *sqlite.Store, read, place, brief string) {
 	if _, errs, err := interest.New(store).Add(t.Context(), interest.Draft{Name: "Scotland", Depth: "close", Terms: "Scotland"}); err != nil || errs != nil {
 		t.Fatalf("add Topic: %v %v", errs, err)
 	}
+	drawFacts(t, store, speech, read, editor.Usage{InputTokens: 1000, OutputTokens: 100})
 	ed := editor.New(editor.Deps{
 		Store: store, Briefings: store, Wikidata: noWikidata{}, Log: slog.New(slog.DiscardHandler),
-		Model:         usageModel{read, editor.Usage{InputTokens: 1000, OutputTokens: 100}},
 		PlacingModel:  usageModel{place, editor.Usage{InputTokens: 500, OutputTokens: 50}},
 		BriefingModel: usageModel{brief, editor.Usage{InputTokens: 200, OutputTokens: 20}},
 	})
-	for _, act := range []func(context.Context, time.Time) error{ed.ReadWaiting, ed.PlaceWaiting, ed.Brief} {
+	for _, act := range []func(context.Context, time.Time) error{ed.PlaceWaiting, ed.Brief} {
 		if err := act(t.Context(), saturday); err != nil {
 			t.Fatal(err)
 		}

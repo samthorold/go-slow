@@ -15,6 +15,7 @@ import (
 	"time"
 	"unicode"
 
+	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
 )
 
@@ -26,7 +27,7 @@ import (
 // makes a model call. Recording is deliberate, and costs five calls per
 // fixture, and more for attempts the checks refuse:
 //
-//	go test -count=1 ./internal/editor -run TestRecordedReadings -record
+//	go test -count=1 -timeout 90m ./internal/editor -run TestRecordedReadings -record
 //
 // with GOSLOW_ANTHROPIC_API_KEY and READING_MODEL set in the environment.
 // It keeps the samples kept for the request the act sends now, so it resumes
@@ -37,7 +38,6 @@ var rerecordFlag = flag.Bool("record", false, "call the real model on the fixtur
 // How each act's own recorded test is re-recorded.
 var (
 	readingCommand          = rerecordCmd{"TestRecordedReadings", "READING_MODEL"}
-	readingPrecedentCommand = rerecordCmd{"TestRecordedReadingPrecedent", "READING_MODEL"}
 	placingPrecedentCommand = rerecordCmd{"TestRecordedPlacingPrecedent", "PLACING_MODEL"}
 	briefingCommand         = rerecordCmd{"TestRecordedBriefing", "BRIEFING_MODEL"}
 	sundayReadCommand       = rerecordCmd{"TestRecordedSundayRead", "SUNDAY_READ_MODEL"}
@@ -137,6 +137,13 @@ func fixture(t *testing.T, path string) (editor.Item, string) {
 	}, c.Details.Body
 }
 
+// fixtureToRead is a fixture Item as reading is given it in use: with the
+// Cut the sentence cutter makes of its text.
+func fixtureToRead(it editor.Item) editor.ToRead {
+	return editor.ToRead{Item: it, Cut: cut.Cut{ID: 1, SourceID: it.SourceID, EntryID: it.EntryID,
+		Judge: cut.SentenceCutter, Spans: cut.Sentences(it.Content)}}
+}
+
 func TestRecordedReadings(t *testing.T) {
 	paths, err := filepath.Glob("testdata/govuk/*.json")
 	if err != nil || len(paths) == 0 {
@@ -156,19 +163,18 @@ func TestRecordedReadings(t *testing.T) {
 func readingVerdicts(t *testing.T, root, path string) []error {
 	t.Helper()
 	name := strings.TrimSuffix(filepath.Base(path), ".json")
-	it, body := fixture(t, path)
-	text := normal(stripTags(it.Title + " " + it.Summary + " " + body))
-	if name == commonsStatement {
-		commonsCasesPresent(t, text)
+	it, _ := fixture(t, path)
+	tr := fixtureToRead(it)
+	spans := make([]string, len(tr.Cut.Spans))
+	for i, s := range tr.Cut.Spans {
+		spans[i] = cut.Words(it.Content, s)
 	}
-	if name == reactionFixture {
-		reactionCasesPresent(t, text)
-	}
+	casesPresent(t, name, spans)
 	return sampled(t, filepath.Join(root, "reading"), name, dailyRule, readingCommand, func(m *sampleModel) sampleResult {
 		var r editor.Reading
 		passed, err := runSample(m, func(model editor.Model) (bool, error) {
 			var err error
-			r, err = editor.Read(t.Context(), model, it)
+			r, err = editor.Read(t.Context(), model, m.model, tr)
 			return err == nil, nil
 		})
 		if err != nil {
@@ -178,208 +184,173 @@ func readingVerdicts(t *testing.T, root, path string) []error {
 			return sampleResult{}
 		}
 		p := properties{}
-		traces := p.property("every Fact traces to its Item, as at a date, on words in it")
-		for _, f := range r.Facts {
-			if f.SourceID != it.SourceID || f.EntryID != it.EntryID {
-				traces("Fact %q traces to %s %s", f.Statement, f.SourceID, f.EntryID)
-			}
-			if f.AsAt.IsZero() {
-				traces("Fact %q holds as at no date", f.Statement)
-			}
-			if !strings.Contains(text, normal(f.Quote)) {
-				traces("Fact %q rests on words not in the Item: %q", f.Statement, f.Quote)
-			}
+		read := readingOf{it: it, r: r, spans: tr.Cut.Spans}
+		bareAttributionsRejected(p, read, spans)
+		for _, q := range quotations[name] {
+			quotationSpoken(p, read, q)
 		}
-		attributed := p.property("Claims keep their attribution")
-		for _, c := range r.Claims {
-			if strings.TrimSpace(c.MadeBy) == "" {
-				attributed("Claim %q has no attribution", c.Statement)
-			}
+		for _, ref := range references[name] {
+			referenceFollowed(p, read, ref)
 		}
 		if name == "pm-meeting-with-president-zelenskyy-of-ukraine-14-october-2026" {
-			// The readout names the Prime Minister only by office: the
-			// Entity carries the role, which Wikidata resolves by date.
-			p.holds("a person is given the role of Prime Minister", slices.ContainsFunc(r.Entities, func(e editor.Entity) bool {
-				return e.Kind == "person" && strings.Contains(e.Role, "Prime Minister")
-			}), "none is: %+v", r.Entities)
-		}
-		if name == "pm-speech-in-scotland-16-october-2026" {
-			speechFacts(p, r, normal(stripTags(body)))
-		}
-		if name == commonsStatement {
-			commonsStatementFacts(p, r)
-		}
-		if name == reactionFixture {
-			reactionFacts(p, r)
+			// The readout names the Prime Minister only by office: the name
+			// carries the office, which Wikidata resolves by date.
+			p.holds("a person is named with the office of Prime Minister", slices.ContainsFunc(r.Names, func(n editor.Name) bool {
+				return n.Kind == "person" && strings.Contains(n.Office, "Prime Minister")
+			}), "none is: %+v", r.Names)
 		}
 		return sampleResult{passed: true, held: p}
 	})
 }
 
-// commonsStatement is the Prime Minister's statement to the House of
-// Commons, which carries an arrangement (the UK-EU summit), a declared
-// intention (further sanctions on Iran) and an estimate (what the UK-EU
-// deals will add to the economy).
-const commonsStatement = "pm-statement-to-the-house-of-commons-12-october-2026"
+// readingOf is a sample's reading of a fixture, with the fixture's Spans.
+type readingOf struct {
+	it    editor.Item
+	r     editor.Reading
+	spans []cut.Span
+}
 
-// commonsCasesPresent fails unless the statement's text carries each case
-// its properties rest on, so a changed fixture can't leave them testing
-// nothing.
-func commonsCasesPresent(t *testing.T, text string) {
-	t.Helper()
-	for _, c := range []string{
-		"i can confirm to the house today that it will take place in brussels on the 20th november",
-		"we will bring further sanctions to restrict the capacity of iran and the irgc to do us harm",
-		"these deals will add the equivalent of over 10 billion pounds per year to the uk economy by 2040",
-	} {
-		if !strings.Contains(text, normal(c)) {
-			t.Fatalf("the statement no longer carries the case %q", c)
+// within is whether the address a is inside Span n (from 1).
+func (o readingOf) within(a editor.Address, n int) bool {
+	s := o.spans[n-1]
+	return a.Span.Start >= s.Start && a.Span.End <= s.End
+}
+
+// bareAttribution is a Span that only says who speaks the quotation after
+// it: "Prime Minister Andy Burnham said:", a few words ending in "said:".
+var bareAttribution = regexp.MustCompile(`^(\S+\s+){1,7}said:$`)
+
+// bareAttributionsRejected asserts each bare attribution in the fixture is
+// Rejected: it says nothing of its own, and who it names is the speaker of
+// the quotation after it.
+func bareAttributionsRejected(p properties, o readingOf, spans []string) {
+	for i, w := range spans {
+		if !bareAttribution.MatchString(w) {
+			continue
+		}
+		p.holds("a bare “X said:” Span is Rejected", slices.ContainsFunc(o.r.Rejected, func(a editor.Address) bool {
+			return a.Span == o.spans[i]
+		}), "S%d %q is not", i+1, w)
+	}
+}
+
+// quotation is a fixture's quotation: Spans from to to, the words of whoever
+// the Span before them names, by words in that Span.
+type quotation struct {
+	from, to int
+	who      string
+}
+
+// quotations are each fixture's quotations, by fixture.
+var quotations = map[string][]quotation{
+	"great-british-railways-takes-shape-as-hq-and-apprenticeship-scheme-confirmed": {
+		{13, 19, "Andy Burnham"}, {21, 24, "Heidi Alexander"}, {31, 33, "Pat McFadden"}, {35, 40, "Claire Ward"},
+	},
+	"prime-minister-makes-offer-to-holyrood-to-work-together-to-empower-scottish-regions": {
+		{6, 9, "Andy Burnham"}, {11, 14, "Douglas Alexander"},
+	},
+	"president-zelenskyy-to-visit-downing-street": {
+		{10, 13, "Andy Burnham"}, {19, 21, "John Healey"},
+	},
+	"uk-government-response-to-agreement-between-us-and-russia-9-october": {
+		{2, 7, "spokesperson"},
+	},
+}
+
+// quotationSpoken asserts every Span of a quotation is given as its speaker
+// who the Item says spoke it, and no one else.
+func quotationSpoken(p properties, o readingOf, q quotation) {
+	spoken := p.property("a quoted Span's speaker is who the Item says spoke it")
+	for n := q.from; n <= q.to; n++ {
+		var by []string
+		for _, s := range o.r.Speakers {
+			if o.within(s.Of, n) {
+				by = append(by, o.r.Words(o.it.Content, s.By))
+			}
+		}
+		if len(by) == 0 {
+			spoken("S%d, %s's, has no speaker", n, q.who)
+		}
+		for _, b := range by {
+			if !strings.Contains(strings.ToLower(b), strings.ToLower(q.who)) {
+				spoken("S%d, %s's, is given as %q's", n, q.who, b)
+			}
 		}
 	}
 }
 
-var (
-	// summitDate is the summit's date as a statement gives it: in words
-	// ("20 November", "20th November", "November 20") or as a date
-	// (2026-11-20).
-	summitDate   = regexp.MustCompile(`(?i)\b(20(th)? november|november 20(th)?|2026-11-20)\b`)
-	takesPlace   = regexp.MustCompile(`(?i)\bwill take place\b`)
-	tenBillion   = regexp.MustCompile(`(?i)\b10\s*(billion|bn)\b`)
-	sanctionWord = regexp.MustCompile(`(?i)\bsanction`)
-	iranOrIRGC   = regexp.MustCompile(`(?i)\b(iran|irgc)\b`)
-)
+// reference is a fixture's stretch, words opening Span n, that names in
+// other words what words containing to name.
+type reference struct {
+	n         int
+	words, to string
+}
 
-func TestTheSummitsDateIsMatchedInWordsOrAsADate(t *testing.T) {
+// references are each fixture's references in other words, by fixture.
+var references = map[string][]reference{
+	"appointment-of-lord-lieutenant-of-county-tyrone-15-october-2026": {
+		{4, "He", "Baxter"}, {5, "He", "Baxter"}, {7, "He", "Baxter"}, {9, "He", "Baxter"},
+	},
+	"great-british-railways-takes-shape-as-hq-and-apprenticeship-scheme-confirmed": {
+		{9, "the city", "Derby"},
+	},
+}
+
+// referenceFollowed asserts the reference refers to its antecedent: the
+// stretch reads, followed through what it refers to, as words naming it.
+func referenceFollowed(p properties, o readingOf, ref reference) {
+	name := "a pronoun refers to its antecedent"
+	if ref.words != "He" {
+		name = "a description refers to what it describes"
+	}
+	followed := p.property(name)
+	var at *editor.Address
+	for _, r := range o.r.RefersTo {
+		if o.within(r.From, ref.n) && cut.Words(o.it.Content, r.From.Span) == ref.words {
+			at = &r.From
+			break
+		}
+	}
+	if at == nil {
+		followed("%q in S%d refers to nothing", ref.words, ref.n)
+		return
+	}
+	if w := o.r.Words(o.it.Content, *at); !strings.Contains(w, ref.to) {
+		followed("%q in S%d refers to %q, not %s", ref.words, ref.n, w, ref.to)
+	}
+}
+
+// casesPresent fails unless the fixture's Spans carry each case its
+// properties rest on, so a changed fixture or cutter can't leave them
+// testing nothing.
+func casesPresent(t *testing.T, name string, spans []string) {
+	t.Helper()
+	for _, q := range quotations[name] {
+		if q.to > len(spans) || !strings.HasSuffix(spans[q.from-2], "said:") ||
+			!strings.Contains(strings.ToLower(spans[q.from-2]), strings.ToLower(q.who)) {
+			t.Fatalf("%s no longer carries %s's quotation after S%d", name, q.who, q.from-1)
+		}
+	}
+	for _, ref := range references[name] {
+		if ref.n > len(spans) || !strings.Contains(spans[ref.n-1], ref.words) {
+			t.Fatalf("%s's S%d no longer has %q", name, ref.n, ref.words)
+		}
+	}
+}
+
+func TestABareAttributionIsAFewWordsEndingInSaid(t *testing.T) {
 	for s, want := range map[string]bool{
-		"The UK-EU summit is scheduled for 20 November in Brussels":    true,
-		"The UK-EU summit is scheduled for Brussels on 20th November":  true,
-		"The UK-EU summit is scheduled for Brussels on November 20":    true,
-		"The UK-EU summit is scheduled for Brussels on 2026-11-20":     true,
-		"The UK-EU summit is scheduled for Brussels on 2026-11-21":     false,
-		"The UK-EU summit is scheduled for Brussels on 120 November":   false,
-		"The UK-EU summit is scheduled for Brussels in late November.": false,
+		"Prime Minister Andy Burnham said:":                                         true,
+		"A UK government spokesperson said:":                                        true,
+		"Mayor of the East Midlands, Claire Ward, said:":                            true,
+		"Ahead of the two leaders meeting today, Prime Minister Andy Burnham said:": false,
+		"Please don’t tell anyone in Manchester that I said that.":                  false,
+		"said:": false,
 	} {
-		if got := summitDate.MatchString(s); got != want {
-			t.Errorf("summitDate matches %q: %v, want %v", s, got, want)
+		if got := bareAttribution.MatchString(s); got != want {
+			t.Errorf("%q is a bare attribution: %v, want %v", s, got, want)
 		}
 	}
-}
-
-// commonsStatementFacts asserts the statement's arrangement and declared
-// intention are drawn as Facts, as what they are, and its estimate as a
-// Claim (system design: An arrangement is a Fact; A declared intention is
-// a Fact, as an intention).
-func commonsStatementFacts(p properties, r editor.Reading) {
-	summit := func(s string) bool { return strings.Contains(strings.ToLower(s), "summit") }
-	p.holds("a Fact states the UK-EU summit's arrangement", slices.ContainsFunc(r.Facts, func(f editor.Fact) bool {
-		s := f.Statement
-		return summit(s) && strings.Contains(strings.ToLower(s), "brussels") && summitDate.MatchString(s) && !takesPlace.MatchString(s)
-	}), "none does: %s", factStatements(r))
-	event := p.property("no Fact says the UK-EU summit will take place")
-	for _, f := range r.Facts {
-		if summit(f.Statement) && takesPlace.MatchString(f.Statement) {
-			event("Fact %q", f.Statement)
-		}
-	}
-	// Which statements are drawn is not this property's: the intention,
-	// when drawn, is classified as a Fact.
-	intention := p.property("the further-sanctions intention on Iran, when drawn, is a Fact, never a Claim")
-	for _, c := range r.Claims {
-		if sanctionWord.MatchString(c.Statement) && iranOrIRGC.MatchString(c.Statement) {
-			intention("Claim %q", c.Statement)
-		}
-	}
-	estimate := p.property("the £10 billion estimate is a Claim, not a Fact")
-	for _, f := range r.Facts {
-		if tenBillion.MatchString(f.Statement) {
-			estimate("Fact %q", f.Statement)
-		}
-	}
-	if !slices.ContainsFunc(r.Claims, func(c editor.Claim) bool { return tenBillion.MatchString(c.Statement) }) {
-		estimate("no Claim states it")
-	}
-}
-
-// reactionCasesPresent fails unless the reaction's text carries the event
-// it responds to (the agreement between the US and Russia) and the saying
-// (a government spokesperson's), so a changed fixture can't leave its
-// properties testing nothing.
-func reactionCasesPresent(t *testing.T, text string) {
-	t.Helper()
-	for _, c := range []string{
-		"response to agreement between us and russia",
-		"a uk government spokesperson said",
-	} {
-		if !strings.Contains(text, normal(c)) {
-			t.Fatalf("the reaction no longer carries the case %q", c)
-		}
-	}
-}
-
-var (
-	agreementWord = regexp.MustCompile(`(?i)\bagree`)
-	russiaWord    = regexp.MustCompile(`(?i)\brussia`)
-	// usWord is the United States, never the pronoun "us".
-	usWord       = regexp.MustCompile(`\b(US|USA|U\.S\.)\b|(?i:\bunited states\b|\bamerica)`)
-	respondsWord = regexp.MustCompile(`(?i)\b(respon|statement)`)
-	speakerWord  = regexp.MustCompile(`(?i)\b(government|spokesperson)\b`)
-)
-
-// reactionFacts asserts the reaction's saying and the event it responds
-// to are drawn as Facts, beside what was said (system design: A declared
-// intention is a Fact, as an intention).
-func reactionFacts(p properties, r editor.Reading) {
-	p.holds("a Fact states the agreement between the US and Russia", slices.ContainsFunc(r.Facts, func(f editor.Fact) bool {
-		s := f.Statement
-		return agreementWord.MatchString(s) && russiaWord.MatchString(s) && usWord.MatchString(s)
-	}), "none does: %s", factStatements(r))
-	p.holds("a Fact states the government's response", slices.ContainsFunc(r.Facts, func(f editor.Fact) bool {
-		return respondsWord.MatchString(f.Statement) && speakerWord.MatchString(f.Statement)
-	}), "none does: %s", factStatements(r))
-}
-
-func TestTheReactionsCasesAreMatchedOnTheEventAndTheSaying(t *testing.T) {
-	for s, want := range map[string][2]bool{
-		"An agreement between the US and Russia was reached on 9 October.":                    {true, false},
-		"The United States and Russia agreed a deal.":                                         {true, false},
-		"A UK government spokesperson responded to the agreement between the US and Russia.":  {true, true},
-		"The UK Government made a statement on the US-Russia agreement.":                      {true, true},
-		"The UK fully supports US-led efforts to secure a just and lasting peace in Ukraine.": {false, false},
-		"The UK government intends to maintain pressure on Russia through sanctions.":         {false, false},
-		"The UK government continues to monitor developments closely.":                        {false, false},
-		"Russia agreed to talks that would do us harm.":                                       {false, false},
-	} {
-		agreement := agreementWord.MatchString(s) && russiaWord.MatchString(s) && usWord.MatchString(s)
-		response := respondsWord.MatchString(s) && speakerWord.MatchString(s)
-		if got := [2]bool{agreement, response}; got != want {
-			t.Errorf("%q: (agreement, response) = %v, want %v", s, got, want)
-		}
-	}
-}
-
-// speechFacts asserts a speech's Facts come from its primary text: the
-// speech as GOV.UK published it, not its title or summary.
-func speechFacts(p properties, r editor.Reading, body string) {
-	primary := p.property("a speech's Facts come from its primary text")
-	if len(r.Facts) == 0 {
-		primary("the speech yields no Facts")
-	}
-	for _, f := range r.Facts {
-		if !strings.Contains(body, normal(f.Quote)) {
-			primary("speech Fact %q does not come from the speech's text: %q", f.Statement, f.Quote)
-		}
-	}
-	p.holds("a Fact places the speech in Motherwell", strings.Contains(strings.ToLower(factStatements(r)), "motherwell"),
-		"none does: %s", factStatements(r))
-}
-
-// factStatements is a reading's Facts, one statement a line.
-func factStatements(r editor.Reading) string {
-	var b strings.Builder
-	for _, f := range r.Facts {
-		b.WriteString(f.Statement + "\n")
-	}
-	return b.String()
 }
 
 var tag = regexp.MustCompile(`<[^>]*>`)

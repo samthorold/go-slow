@@ -284,6 +284,33 @@ func TestACollectionRunReadsTheItemsAwaitingReadingAfterTheCheck(t *testing.T) {
 	}
 }
 
+// lookUpAll stands in for the look-up step: it records each run, and
+// whether reading had run before it.
+type lookUpAll struct {
+	reader *readAll
+	runs   []time.Time
+	after  []int
+}
+
+func (l *lookUpAll) LookUpWaiting(_ context.Context, now time.Time) error {
+	l.runs = append(l.runs, now)
+	l.after = append(l.after, len(l.reader.runs))
+	return nil
+}
+
+func TestACollectionRunLooksUpWhatReadingsNameAfterReading(t *testing.T) {
+	f := newFixture(t, feedV1, "")
+	reader := &readAll{}
+	looker := &lookUpAll{reader: reader}
+	f.collector.Read, f.collector.LookUp = reader, looker
+
+	f.collector.Run(t.Context(), now)
+
+	if len(looker.runs) != 1 || !looker.runs[0].Equal(now) || looker.after[0] != 1 {
+		t.Errorf("the look-up step ran at %v after %v readings, want once at %v, after reading", looker.runs, looker.after, now)
+	}
+}
+
 func TestRunningCollectionAgainStoresNoDuplicates(t *testing.T) {
 	// No ETag: the server answers in full every time.
 	f := newFixture(t, feedV1, "")

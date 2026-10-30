@@ -34,6 +34,12 @@ func pillMentioned(e editor.Entity) pill {
 	return p
 }
 
+// pillOf is an Entity as the Record's look-ups have it, tagged with its kind
+// and linked to its Wikidata item, if it is one.
+func pillOf(e editor.NamedEntity) pill {
+	return pillMentioned(editor.Entity{Name: e.Name, Kind: e.Kind, WikidataID: e.WikidataID})
+}
+
 // itemCitation is an Item as every page cites it (template "citation"): its
 // Source's short name, who is speaking, and its title, linking where it is
 // read.

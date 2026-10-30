@@ -167,7 +167,18 @@ type Deps struct {
 	// once or by submitting them in a batch and applying the results of
 	// earlier ones (The daily acts run in batches).
 	Read Reader
-	Log  *slog.Logger
+	// LookUp, if set, runs after reading: plain code looks up in Wikidata
+	// what the readings name, as its own step, so a look-up refused or
+	// delayed holds up no reading (system design: Entities are looked up by
+	// name, not by Span).
+	LookUp Looker
+	Log    *slog.Logger
+}
+
+// Looker is the look-up step, run over the names not yet looked up. A
+// look-up that fails is left for the next run.
+type Looker interface {
+	LookUpWaiting(ctx context.Context, now time.Time) error
 }
 
 // Cutter cuts the Items not yet cut into Spans, at now, in plain code.
@@ -244,6 +255,11 @@ func (c *Collector) Run(ctx context.Context, now time.Time) {
 	if c.Read != nil {
 		if err := c.Read.ReadWaiting(ctx, now); err != nil {
 			c.Log.ErrorContext(ctx, "reading failed", "error", err)
+		}
+	}
+	if c.LookUp != nil {
+		if err := c.LookUp.LookUpWaiting(ctx, now); err != nil {
+			c.Log.ErrorContext(ctx, "looking up failed", "error", err)
 		}
 	}
 }

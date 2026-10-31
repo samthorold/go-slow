@@ -213,7 +213,13 @@ var maxSamplesFlag = flag.Int("max-samples", 0, "recording the Sunday read, the 
 // together. Re-record it after the act's instructions, tools or checks
 // change, or to bring it onto the earlier acts' recordings, and only on the
 // Owner's say.
-func TestRecordedSundayRead(t *testing.T) { recordedSundayRead(t, recordedDir) }
+//
+// It replays over its own directory copied alone (ownDirectory), as the
+// Briefing's does, so a read that reads another act's recordings fails.
+func TestRecordedSundayRead(t *testing.T) {
+	t.Parallel()
+	recordedSundayRead(t, ownDirectory(t, "sunday"))
+}
 
 // recordedSundayRead replays (or records) the Sunday read from the
 // recordings under root.
@@ -239,25 +245,35 @@ func recordedSundayRead(t *testing.T, root string) {
 // toldRecordFile is the file of a closed Record holding the fixture Items,
 // with the readings and relatings under dir replayed into it and Saturday's
 // Briefing written over them by the one kept under dir/briefing: the
-// Sunday read's frozen copies.
+// Sunday read's frozen copies. It is built once for the bytes of the
+// fixtures and the copies (frozenOnce).
 func toldRecordFile(t *testing.T, dir string) string {
 	t.Helper()
-	path := spanRecordFile(t, dir)
-	store, err := sqlite.Open(t.Context(), path)
-	if err != nil {
-		t.Fatal(err)
-	}
-	s, err := sampleAt(filepath.Join(dir, "briefing", "saturday.json"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !briefingSample(t, store, &sampleModel{attempts: s.attempts(), unchecked: true}) {
-		t.Fatal("the frozen Briefing fails the act's checks")
-	}
-	if err := store.Close(); err != nil {
-		t.Fatal(err)
-	}
-	return path
+	dirs := []string{filepath.Join("testdata", "govuk"), filepath.Join(dir, "reading"), filepath.Join(dir, "relating"),
+		filepath.Join(dir, "briefing")}
+	return frozenOnce(t, "told", dirs, func(path string) {
+		b, err := os.ReadFile(spanRecordFile(t, dir))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, b, 0o600); err != nil {
+			t.Fatal(err)
+		}
+		store, err := sqlite.Open(t.Context(), path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		s, err := sampleAt(filepath.Join(dir, "briefing", "saturday.json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !briefingSample(t, store, &sampleModel{attempts: s.attempts(), unchecked: true}) {
+			t.Fatal("the frozen Briefing fails the act's checks")
+		}
+		if err := store.Close(); err != nil {
+			t.Fatal(err)
+		}
+	})
 }
 
 // casesPresentForSundayRead fails unless what the week's Briefing told

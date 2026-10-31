@@ -345,45 +345,6 @@ func sampleNumber(path string) int {
 	return k
 }
 
-// Each recorded act downstream of another replays over its own directory
-// alone: copied away from every other act's recordings, it replays all the
-// way through. So re-recording any act, reading included, changes nothing
-// another act replays.
-func TestEachRecordedActReplaysOverItsOwnInputsAlone(t *testing.T) {
-	t.Parallel()
-	if *rerecordFlag {
-		t.Skip("recording writes the acts' own directories")
-	}
-	// Placing, connecting, the Briefing and the precedents' own recorded tests
-	// replay over their own directories copied alone (ownDirectory), so they
-	// are not replayed twice here.
-	for _, tc := range []struct {
-		act     string
-		replays []func(*testing.T, string)
-	}{
-		{"sunday", []func(*testing.T, string){recordedSundayRead}},
-	} {
-		for i, replay := range tc.replays {
-			t.Run(fmt.Sprintf("%s/%d", tc.act, i), func(t *testing.T) {
-				t.Parallel()
-				done := false
-				// A replay that skipped tested nothing.
-				t.Cleanup(func() {
-					if !done && !t.Failed() {
-						t.Errorf("%s did not replay all the way over its own directory", tc.act)
-					}
-				})
-				root := t.TempDir()
-				if err := os.CopyFS(filepath.Join(root, tc.act), os.DirFS(filepath.Join(recordedDir, tc.act))); err != nil {
-					t.Fatal(err)
-				}
-				replay(t, root)
-				done = true
-			})
-		}
-	}
-}
-
 // The chain replay: the Briefing's frozen copies and each of its samples are
 // one consistent run of the Editor, and over it every statement of the
 // Briefing cites Spans of the fixture Items, within their text, that reading

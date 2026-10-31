@@ -58,19 +58,21 @@ func briefingSample(t *testing.T, store *sqlite.Store, m *sampleModel) bool {
 
 // spanRecordFile is the file of a closed Record holding the fixture Items,
 // with the readings and relatings under dir replayed into it: an act's
-// frozen copies, for the acts that rest on both.
+// frozen copies, for the acts that rest on both. It is built once for the
+// bytes of the fixtures and the copies (frozenOnce).
 func spanRecordFile(t *testing.T, dir string) string {
 	t.Helper()
-	path := filepath.Join(t.TempDir(), "frozen.db")
-	store, topics := newRecordAt(t, path, nil)
-	c := chain{reading: replayed(filepath.Join(dir, "reading")), relating: replayed(filepath.Join(dir, "relating"))}
-	if err := c.run(t.Context(), store, topics, fixtureItems(t)); err != nil {
-		t.Fatal(err)
-	}
-	if err := store.Close(); err != nil {
-		t.Fatal(err)
-	}
-	return path
+	reading, relating := filepath.Join(dir, "reading"), filepath.Join(dir, "relating")
+	return frozenOnce(t, "span", []string{filepath.Join("testdata", "govuk"), reading, relating}, func(path string) {
+		store, topics := newRecordAt(t, path, nil)
+		c := chain{reading: replayed(reading), relating: replayed(relating)}
+		if err := c.run(t.Context(), store, topics, fixtureItems(t)); err != nil {
+			t.Fatal(err)
+		}
+		if err := store.Close(); err != nil {
+			t.Fatal(err)
+		}
+	})
 }
 
 // The Span of the railways release that projects what its headquarters will

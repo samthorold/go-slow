@@ -26,7 +26,6 @@ func TestTheOwnerAddsATopicAndSeesItOnTheTopicsPage(t *testing.T) {
 
 	res := send(t, app, http.MethodPost, "/topics", url.Values{
 		"name":  {"Reform UK"},
-		"depth": {"close"},
 		"terms": {"Reform UK\nFarage"},
 	})
 
@@ -40,24 +39,49 @@ func TestTheOwnerAddsATopicAndSeesItOnTheTopicsPage(t *testing.T) {
 	if page.status != http.StatusOK {
 		t.Fatalf("GET /topics: status = %d", page.status)
 	}
-	for _, want := range []string{"<!doctype html>", "Reform UK", "Farage", `<button name="depth" value="close" aria-pressed="true">`} {
+	for _, want := range []string{"<!doctype html>", "Reform UK", "Farage"} {
 		if !strings.Contains(page.body, want) {
 			t.Errorf("Topics page lacks %q:\n%s", want, page.body)
 		}
 	}
 }
 
+// Topics have no Depth: the page neither shows nor takes one, and there is
+// no command to change it.
+func TestTheTopicsPageHasNoDepth(t *testing.T) {
+	app := newApp(t, saturday)
+	addTopic(t, app, url.Values{"name": {"Reform UK"}, "terms": {"Reform UK"}})
+
+	page := get(t, app, "/topics").body
+	res := send(t, app, http.MethodPut, "/topics/1", url.Values{"depth": {"close"}})
+
+	if strings.Contains(page, "Depth") || strings.Contains(page, `name="depth"`) {
+		t.Errorf("the Topics page still offers a Depth:\n%s", page)
+	}
+	if res.status != http.StatusMethodNotAllowed {
+		t.Errorf("PUT /topics/1: status %d, want 405", res.status)
+	}
+}
+
+// The page says what a Topic does now: it counts, and selects nothing.
+func TestTheTopicsPageSaysTopicsCountAndSelectNothing(t *testing.T) {
+	page := get(t, newApp(t, saturday), "/topics").body
+
+	if !strings.Contains(page, "select nothing") || !strings.Contains(page, `<a href="/items">`) {
+		t.Errorf("the page does not say Topics select nothing, or link the counts:\n%s", page)
+	}
+}
+
 func TestATopicThatFailsValidationReRendersTheFormWithItsErrors(t *testing.T) {
 	app := newApp(t, saturday)
 	if res := send(t, app, http.MethodPost, "/topics", url.Values{
-		"name": {"Reform UK"}, "depth": {"close"}, "terms": {"Reform UK"},
+		"name": {"Reform UK"}, "terms": {"Reform UK"},
 	}); res.status != http.StatusSeeOther {
 		t.Fatalf("first add: status = %d", res.status)
 	}
 
 	res := send(t, app, http.MethodPost, "/topics", url.Values{
 		"name":  {"reform uk "},
-		"depth": {"obsessive"},
 		"terms": {"Farage"},
 	})
 
@@ -67,7 +91,6 @@ func TestATopicThatFailsValidationReRendersTheFormWithItsErrors(t *testing.T) {
 	for _, want := range []string{
 		"<form",
 		"already a Topic",
-		"Choose a Depth",
 		">Farage</textarea>",
 		`value="reform uk "`,
 	} {
@@ -85,51 +108,9 @@ func addTopic(t *testing.T, app http.Handler, form url.Values) {
 	}
 }
 
-func TestTheOwnerChangesATopicsDepth(t *testing.T) {
-	app := newApp(t, saturday)
-	addTopic(t, app, url.Values{"name": {"Reform UK"}, "depth": {"passing"}, "terms": {"Reform UK"}})
-
-	res := send(t, app, http.MethodPut, "/topics/1", url.Values{"depth": {"close"}})
-
-	if res.status != http.StatusSeeOther {
-		t.Fatalf("status = %d, want 303:\n%s", res.status, res.body)
-	}
-	if loc := res.header.Get("Location"); loc != "/topics" {
-		t.Errorf("Location = %q, want /topics", loc)
-	}
-	page := get(t, app, "/topics")
-	if !strings.Contains(page.body, `<button name="depth" value="close" aria-pressed="true">`) {
-		t.Errorf("Topic is not shown at its new Depth:\n%s", page.body)
-	}
-}
-
-func TestAnUnknownDepthIsRefusedWith422(t *testing.T) {
-	app := newApp(t, saturday)
-	addTopic(t, app, url.Values{"name": {"Reform UK"}, "depth": {"passing"}, "terms": {"Reform UK"}})
-
-	res := send(t, app, http.MethodPut, "/topics/1", url.Values{"depth": {"obsessive"}})
-
-	if res.status != http.StatusUnprocessableEntity {
-		t.Fatalf("status = %d, want 422", res.status)
-	}
-	if !strings.Contains(topicRow(res.body, 1), "Choose a Depth") {
-		t.Errorf("the Topic's row does not say why:\n%s", res.body)
-	}
-}
-
-func TestChangingTheDepthOfAnUnknownTopicIsNotFound(t *testing.T) {
-	app := newApp(t, saturday)
-
-	res := send(t, app, http.MethodPut, "/topics/7", url.Values{"depth": {"close"}})
-
-	if res.status != http.StatusNotFound {
-		t.Errorf("status = %d, want 404", res.status)
-	}
-}
-
 func TestTheOwnerRemovesATopic(t *testing.T) {
 	app := newApp(t, saturday)
-	addTopic(t, app, url.Values{"name": {"Reform UK"}, "depth": {"passing"}, "terms": {"Reform UK"}})
+	addTopic(t, app, url.Values{"name": {"Reform UK"}, "terms": {"Reform UK"}})
 	page := get(t, app, "/topics")
 	if !strings.Contains(page.body, `hx-delete="/topics/1"`) || !strings.Contains(page.body, "hx-confirm=") {
 		t.Fatalf("Topics page has no confirmed Remove control:\n%s", page.body)
@@ -153,7 +134,6 @@ func TestWhatTheOwnerTypedIsInertOnTheTopicsPage(t *testing.T) {
 	app := newApp(t, saturday)
 	addTopic(t, app, url.Values{
 		"name":  {`<span hx-get="/evil" hx-trigger="load">Reform</span>`},
-		"depth": {"close"},
 		"terms": {`<b hx-delete="/">Farage</b>`},
 	})
 
@@ -172,10 +152,10 @@ func topicRow(body string, id int) string {
 	return regexp.MustCompile(`(?s)<tr id="topic-` + strconv.Itoa(id) + `"[^>]*>.*?</tr>`).FindString(body)
 }
 
-func TestFollowedTopicsRenderAsATableOfTopicDepthTermsAndSources(t *testing.T) {
+func TestFollowedTopicsRenderAsATableOfTopicTermsAndSources(t *testing.T) {
 	app := newApp(t, saturday)
 	addTopic(t, app, url.Values{
-		"name": {"Reform UK"}, "depth": {"close"}, "terms": {"Reform UK\nFarage"}, "source": {"govuk-number-10"},
+		"name": {"Reform UK"}, "terms": {"Reform UK\nFarage"}, "source": {"govuk-number-10"},
 	})
 
 	res := get(t, app, "/topics")
@@ -186,7 +166,7 @@ func TestFollowedTopicsRenderAsATableOfTopicDepthTermsAndSources(t *testing.T) {
 	for _, c := range cols {
 		got = append(got, c[1])
 	}
-	if want := []string{"Topic", "Depth", "Terms", "Sources", ""}; !slices.Equal(got, want) {
+	if want := []string{"Topic", "Terms", "Sources", ""}; !slices.Equal(got, want) {
 		t.Errorf("the Followed table's columns are %q, want %q:\n%s", got, want, res.body)
 	}
 	row := topicRow(res.body, 1)
@@ -194,13 +174,13 @@ func TestFollowedTopicsRenderAsATableOfTopicDepthTermsAndSources(t *testing.T) {
 		t.Fatalf("no row for the Topic:\n%s", res.body)
 	}
 	cells := regexp.MustCompile(`(?s)<td([^>]*)>(.*?)</td>`).FindAllStringSubmatch(row, -1)
-	if len(cells) != 5 {
-		t.Fatalf("the row has %d cells, want 5:\n%s", len(cells), row)
+	if len(cells) != 4 {
+		t.Fatalf("the row has %d cells, want 4:\n%s", len(cells), row)
 	}
 	if !strings.Contains(cells[0][2], "Reform UK") {
 		t.Errorf("the Topic cell lacks the name:\n%s", cells[0][2])
 	}
-	for i, want := range map[int]string{2: "Reform UK, Farage", 3: "govuk-number-10"} {
+	for i, want := range map[int]string{1: "Reform UK, Farage", 2: "govuk-number-10"} {
 		if !strings.Contains(cells[i][2], want) {
 			t.Errorf("cell %d lacks %q:\n%s", i, want, cells[i][2])
 		}
@@ -210,41 +190,12 @@ func TestFollowedTopicsRenderAsATableOfTopicDepthTermsAndSources(t *testing.T) {
 	}
 }
 
-// A row's Depth is a button per Depth that saves on click, the current one
-// pressed, with no other button to submit it.
-func TestATopicsDepthIsAButtonPerDepthThatSavesOnClick(t *testing.T) {
-	app := newApp(t, saturday)
-	addTopic(t, app, url.Values{"name": {"Reform UK"}, "depth": {"passing"}, "terms": {"Reform UK"}})
-
-	row := topicRow(get(t, app, "/topics").body, 1)
-
-	form := regexp.MustCompile(`(?s)<form hx-put="/topics/1"[^>]*>.*?</form>`).FindString(row)
-	if form == "" {
-		t.Fatalf("the row has no form putting its Depth:\n%s", row)
-	}
-	buttons := regexp.MustCompile(`<button[^>]*>`).FindAllString(form, -1)
-	if len(buttons) != 3 {
-		t.Fatalf("the Depth form has %d buttons, want one per Depth:\n%s", len(buttons), form)
-	}
-	for i, d := range []string{"passing", "following", "close"} {
-		pressed := strconv.FormatBool(d == "passing")
-		for _, want := range []string{`name="depth"`, `value="` + d + `"`, `aria-pressed="` + pressed + `"`} {
-			if !strings.Contains(buttons[i], want) {
-				t.Errorf("the %s button lacks %s: %s", d, want, buttons[i])
-			}
-		}
-	}
-	if strings.Contains(form, "<select") || strings.Contains(form, "Change Depth") {
-		t.Errorf("the Depth form still has a select or a separate button:\n%s", form)
-	}
-}
-
 // Remove is in the row's actions, hidden at rest in a way that keeps it in
 // the tab order and shown while the pointer or keyboard focus is in the row,
 // as the Briefing's controls are.
 func TestRemoveIsInTheRowsActionsShownOnHoverOrFocus(t *testing.T) {
 	app := newApp(t, saturday)
-	addTopic(t, app, url.Values{"name": {"Reform UK"}, "depth": {"passing"}, "terms": {"Reform UK"}})
+	addTopic(t, app, url.Values{"name": {"Reform UK"}, "terms": {"Reform UK"}})
 
 	row := topicRow(get(t, app, "/topics").body, 1)
 
@@ -272,7 +223,7 @@ var takeUp = regexp.MustCompile(`(?s)<details([^>]*)>\s*<summary>Take up a Topic
 
 func TestTakingUpATopicIsCollapsedAboveTheTable(t *testing.T) {
 	app := newApp(t, saturday)
-	addTopic(t, app, url.Values{"name": {"Reform UK"}, "depth": {"passing"}, "terms": {"Reform UK"}})
+	addTopic(t, app, url.Values{"name": {"Reform UK"}, "terms": {"Reform UK"}})
 
 	res := get(t, app, "/topics")
 
@@ -294,7 +245,7 @@ func TestTakingUpATopicIsCollapsedAboveTheTable(t *testing.T) {
 func TestAFailedTakeUpReRendersItOpen(t *testing.T) {
 	app := newApp(t, saturday)
 
-	res := send(t, app, http.MethodPost, "/topics", url.Values{"name": {"Reform UK"}, "depth": {"obsessive"}, "terms": {"Farage"}})
+	res := send(t, app, http.MethodPost, "/topics", url.Values{"name": {"Reform UK"}, "source": {"govuk-number-10"}})
 
 	if res.status != http.StatusUnprocessableEntity {
 		t.Fatalf("status = %d, want 422", res.status)
@@ -306,22 +257,24 @@ func TestAFailedTakeUpReRendersItOpen(t *testing.T) {
 	if !strings.Contains(m[1], "open") {
 		t.Errorf("a failed take-up is re-rendered closed: <details%s>", m[1])
 	}
-	if !strings.Contains(m[0], "Choose a Depth") {
+	if !strings.Contains(m[0], "at least one term") {
 		t.Errorf("the disclosure does not hold the errors:\n%s", m[0])
 	}
 }
 
-func TestATopicMustTieSomething(t *testing.T) {
+// A Span touches a Topic by its terms alone, so a Topic needs one, Sources
+// or not.
+func TestATopicMustHaveATerm(t *testing.T) {
 	app := newApp(t, saturday)
 
 	res := send(t, app, http.MethodPost, "/topics", url.Values{
-		"name": {"Standards in public life"}, "depth": {"following"},
+		"name": {"Standards in public life"}, "source": {"govuk-number-10"},
 	})
 
 	if res.status != http.StatusUnprocessableEntity {
 		t.Fatalf("status = %d, want 422", res.status)
 	}
-	if !strings.Contains(res.body, "at least one term or Source") {
+	if !strings.Contains(res.body, "at least one term") {
 		t.Errorf("form does not say what is missing:\n%s", res.body)
 	}
 }

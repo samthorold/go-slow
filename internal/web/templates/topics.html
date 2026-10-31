@@ -3,6 +3,8 @@
 {{define "content"}}
 <h1>Topics</h1>
 
+<p class="quiet">Topics select nothing: every Item is read, and what is told is the Editor's judgement. A Span touches a Topic when it names one of its terms, as whole words, and the <a href="/items">Items</a> page counts, per Source, the Stories that touch one and those that don't.</p>
+
 {{/* Taking up a Topic is the rare act: collapsed, open again when it failed. */}}
 {{- with .Form}}
 <details class="take-up"{{if .Errors}} open{{end}}>
@@ -14,23 +16,12 @@
       {{- with index .Errors "name"}} <span role="alert">{{.}}</span>{{end}}
     </p>
     <p>
-      <label>Depth
-        <select name="depth">
-        {{- $depth := .Depth}}
-        {{- range $.Depths}}
-          <option value="{{.}}"{{if eq . $depth}} selected{{end}}>{{.}}</option>
-        {{- end}}
-        </select>
-      </label>
-      {{- with index .Errors "depth"}} <span role="alert">{{.}}</span>{{end}}
-    </p>
-    <p>
       <label>Terms, one per line: keywords, or the names of who or what it is about<br>
         <textarea name="terms" rows="4">{{.Terms}}</textarea></label>
       {{- with index .Errors "terms"}} <span role="alert">{{.}}</span>{{end}}
     </p>
     <fieldset>
-      <legend>Every Item from these Sources</legend>
+      <legend>Every Item from these Sources, for the Sunday read</legend>
       {{- range $.Sources}}
       <label><input type="checkbox" name="source" value="{{.ID}}"{{if .Checked}} checked{{end}}> {{.Name}}</label>
       {{- end}}
@@ -47,24 +38,13 @@
   {{- else}}
   <table class="topics">
     <thead>
-      <tr><th>Topic</th><th>Depth</th><th>Terms</th><th>Sources</th><th></th></tr>
+      <tr><th>Topic</th><th>Terms</th><th>Sources</th><th></th></tr>
     </thead>
     <tbody>
-    {{- $depths := .Depths}}
     {{- range .Topics}}
       {{/* What the Owner typed is inert: hx-disable on the elements holding it. */}}
       <tr id="topic-{{.ID}}">
         <td><strong hx-disable>{{.Name}}</strong></td>
-        <td>
-          {{/* A segmented control: each Depth is a button that saves it. */}}
-          <form hx-put="/topics/{{.ID}}" hx-target="body" hx-swap="innerHTML" class="segmented" role="group" aria-label="Depth">
-            {{- $depth := .Depth}}
-            {{- range $depths}}
-            <button name="depth" value="{{.}}" aria-pressed="{{if eq . $depth}}true{{else}}false{{end}}">{{.}}</button>
-            {{- end}}
-            {{- with .DepthError}} <span role="alert">{{.}}</span>{{end}}
-          </form>
-        </td>
         <td class="quiet"><span hx-disable>{{range $i, $t := .Terms}}{{if $i}}, {{end}}{{$t}}{{end}}</span></td>
         <td class="quiet">{{range $i, $s := .Sources}}{{if $i}}, {{end}}{{$s}}{{end}}</td>
         <td>

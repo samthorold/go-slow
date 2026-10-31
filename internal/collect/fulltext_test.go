@@ -349,7 +349,7 @@ func TestTheCheckTiesANewItemByATermFoundOnlyInItsFullText(t *testing.T) {
 	_, base := newGOVUK(t)
 	c, store := collectorFor(t, govukAt(base))
 	if _, errs, err := interest.New(store).Add(t.Context(), interest.Draft{
-		Name: "Omagh", Depth: "close", Terms: "Omagh",
+		Name: "Omagh", Terms: "Omagh",
 	}); err != nil || errs != nil {
 		t.Fatalf("add Topic: %v %v", errs, err)
 	}

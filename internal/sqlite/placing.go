@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/samthorold/go-slow/internal/editor"
-	"github.com/samthorold/go-slow/internal/interest"
 )
 
 // FactsToPlace are the Facts not yet placed, by Item, in the order the
@@ -30,9 +29,7 @@ func (s *Store) FactsToPlace(ctx context.Context) ([]editor.ToPlace, error) {
 func (s *Store) factsByItem(ctx context.Context, where string, args ...any) ([]editor.ToPlace, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT facts.id, facts.source_id, facts.entry_id, facts.statement, facts.as_at, facts.quote,
-			items.title, items.link, items.published,
-			(SELECT coalesce(max(topics.depth), 0) FROM item_topics JOIN topics ON topics.id = item_topics.topic_id
-				WHERE item_topics.source_id = items.source_id AND item_topics.entry_id = items.entry_id)
+			items.title, items.link, items.published
 		FROM facts JOIN items USING (source_id, entry_id)
 		WHERE facts.withdrawn_by IS NULL AND (`+where+`)
 		ORDER BY items.published, items.collected_at, facts.source_id, facts.entry_id, facts.id`, args...)
@@ -45,9 +42,8 @@ func (s *Store) factsByItem(ctx context.Context, where string, args ...any) ([]e
 		var f editor.Fact
 		var it editor.Item
 		var asAt, published string
-		var depth interest.Depth
 		if err := rows.Scan(&f.ID, &f.SourceID, &f.EntryID, &f.Statement, &asAt, &f.Quote,
-			&it.Title, &it.Link, &published, &depth); err != nil {
+			&it.Title, &it.Link, &published); err != nil {
 			return nil, err
 		}
 		if err := scanFact(&f, asAt); err != nil {
@@ -55,7 +51,7 @@ func (s *Store) factsByItem(ctx context.Context, where string, args ...any) ([]e
 		}
 		if n := len(out); n == 0 || out[n-1].Item.SourceID != f.SourceID || out[n-1].Item.EntryID != f.EntryID {
 			it.SourceID, it.EntryID, it.Published = f.SourceID, f.EntryID, parseTime(published)
-			out = append(out, editor.ToPlace{Item: it, Depth: depth})
+			out = append(out, editor.ToPlace{Item: it})
 		}
 		out[len(out)-1].Facts = append(out[len(out)-1].Facts, f)
 	}

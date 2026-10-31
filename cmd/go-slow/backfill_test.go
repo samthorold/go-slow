@@ -83,7 +83,7 @@ func summaryOnlyRecord(t *testing.T, db string) {
 		t.Fatal(err)
 	}
 	topics := interest.New(store)
-	if _, errs, err := topics.Add(ctx, interest.Draft{Name: "Omagh", Depth: "following", Terms: "Omagh"}); err != nil || errs != nil {
+	if _, errs, err := topics.Add(ctx, interest.Draft{Name: "Omagh", Terms: "Omagh"}); err != nil || errs != nil {
 		t.Fatalf("add Topic: %v %v", errs, err)
 	}
 	if err := topics.CheckNew(ctx); err != nil {

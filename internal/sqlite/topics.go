@@ -12,7 +12,7 @@ import (
 // Topics lists the Topics, by name.
 func (s *Store) Topics(ctx context.Context) ([]interest.Topic, error) {
 	rows, err := s.db.QueryContext(ctx,
-		`SELECT id, name, depth, sources, terms FROM topics ORDER BY name`)
+		`SELECT id, name, sources, terms FROM topics ORDER BY name`)
 	if err != nil {
 		return nil, fmt.Errorf("list topics: %w", err)
 	}
@@ -21,7 +21,7 @@ func (s *Store) Topics(ctx context.Context) ([]interest.Topic, error) {
 	for rows.Next() {
 		var t interest.Topic
 		var sources, terms string
-		if err := rows.Scan(&t.ID, &t.Name, &t.Depth, &sources, &terms); err != nil {
+		if err := rows.Scan(&t.ID, &t.Name, &sources, &terms); err != nil {
 			return nil, fmt.Errorf("list topics: %w", err)
 		}
 		t.Sources, t.Terms = splitLines(sources), splitLines(terms)
@@ -33,11 +33,14 @@ func (s *Store) Topics(ctx context.Context) ([]interest.Topic, error) {
 	return out, nil
 }
 
-// AddTopic stores a new Topic and returns it with its id.
+// AddTopic stores a new Topic and returns it with its id. Topics have no
+// Depth; the column the Record keeps one in is read only by the Sunday read
+// and by Feedback's Depth, until each is replaced, and a Topic taken up now
+// is kept at following there, the middle of the scale.
 func (s *Store) AddTopic(ctx context.Context, t interest.Topic) (interest.Topic, error) {
 	res, err := s.db.ExecContext(ctx,
 		`INSERT INTO topics (name, depth, sources, terms) VALUES (?, ?, ?, ?)`,
-		t.Name, int(t.Depth), strings.Join(t.Sources, "\n"), strings.Join(t.Terms, "\n"))
+		t.Name, int(interest.Following), strings.Join(t.Sources, "\n"), strings.Join(t.Terms, "\n"))
 	if err != nil {
 		return t, fmt.Errorf("add topic %q: %w", t.Name, err)
 	}
@@ -45,7 +48,10 @@ func (s *Store) AddTopic(ctx context.Context, t interest.Topic) (interest.Topic,
 	return t, err
 }
 
-// SetDepth changes a Topic's Depth, reporting whether the Topic exists.
+// SetDepth changes the Depth the Record keeps for a Topic, reporting whether
+// the Topic exists. Nothing the Owner does sets it: it is there for the
+// recorded Sunday read, whose frozen Record was built with Topics at
+// several Depths, until the Sunday read tells Spans.
 func (s *Store) SetDepth(ctx context.Context, id int64, d interest.Depth) (bool, error) {
 	return changed(s.db.ExecContext(ctx, `UPDATE topics SET depth = ? WHERE id = ?`, int(d), id))
 }
@@ -55,7 +61,7 @@ func (s *Store) RemoveTopic(ctx context.Context, id int64) (bool, error) {
 	return changed(s.db.ExecContext(ctx, `DELETE FROM topics WHERE id = ?`, id))
 }
 
-// UncheckedItems are the Items the lazy-reading check has not yet looked at.
+// UncheckedItems are the Items the check tying Items to Topics has not yet looked at.
 func (s *Store) UncheckedItems(ctx context.Context) ([]interest.Item, error) {
 	return s.checkItems(ctx, `
 		SELECT items.source_id, items.entry_id, items.title, items.summary, items.content
@@ -127,7 +133,7 @@ func (s *Store) Tie(ctx context.Context, ties []interest.Checked) error {
 	return tx.Commit()
 }
 
-// tie marks an Item as awaiting reading for each of the Topics.
+// tie ties an Item to each of the Topics.
 func tie(ctx context.Context, tx *sql.Tx, sourceID, entryID string, topicIDs ...int64) error {
 	for _, id := range topicIDs {
 		if _, err := tx.ExecContext(ctx, `

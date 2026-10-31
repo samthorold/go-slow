@@ -41,11 +41,13 @@ func TestEachLaterActIsCountedByWhatItDraws(t *testing.T) {
 		"facts": [], "causes": [{"cause": "F1", "effect": "F2"}, {"cause": "F2", "effect": "F3"}]
 	}}`)
 	write(t, after, "connecting/statement.json", `{"act": "connecting", "output": {"facts": [], "causes": []}}`)
+	// The Briefing over Stories, the earlier shape, before; over Spans after.
 	write(t, before, "briefing/saturday.json", `{"act": "briefing", "output": {"stories": [
-		{"story": "S1", "statements": [{"text": "a"}, {"text": "b"}]}
+		{"story": "S1", "statements": [{"text": "a", "developments": ["D1"]}, {"text": "b", "developments": ["D1", "D2"]}]}
 	]}}`)
-	write(t, after, "briefing/saturday.json", `{"act": "briefing", "output": {"stories": [
-		{"story": "S1", "statements": [{"text": "a"}]}, {"story": "S2", "statements": [{"text": "c"}]}
+	write(t, after, "briefing/saturday.json", `{"act": "briefing", "output": {"statements": [
+		{"spans": ["S1", "S2"], "stories": [{"span": "S1", "story": ["E1"]}], "text": "a"},
+		{"spans": ["S2", "S3"], "stories": [], "text": "c"}
 	]}}`)
 
 	got := yieldOf(t, before, after)
@@ -58,8 +60,8 @@ func TestEachLaterActIsCountedByWhatItDraws(t *testing.T) {
 		"| Fixture | Connections |",
 		"| connecting/statement | 2 → 0 |",
 		"### briefing",
-		"| Fixture | Statements | Stories |",
-		"| briefing/saturday | 2 → 2 | 1 → 2 |",
+		"| Fixture | Statements | Spans cited | Stories gathered |",
+		"| briefing/saturday | 2 → 2 | 2 → 3 | 1 → 1 |",
 	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("the report has no line %q; it is:\n%s", want, got)

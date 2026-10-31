@@ -61,7 +61,7 @@ const assessed = `{"statements": [
 func TestTheSundayReadHasItsOwnPageLinkedFromThatDaysBriefing(t *testing.T) {
 	store := openStore(t)
 	speechStory(t, store)
-	writeBriefing(t, store, sunday, `{}`)
+	writeStoryBriefing(t, store, sunday, `{}`)
 	writeSundayRead(t, store, sunday, assessed)
 	app, _ := newAppWithLog(t, sunday, store)
 

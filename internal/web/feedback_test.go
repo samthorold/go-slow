@@ -17,7 +17,7 @@ const today = "/briefings/2026-10-24/feedback"
 func TestWrongOnAFactFromTheBriefingWithdrawsItAndTheBriefingReRendersWithoutIt(t *testing.T) {
 	store := openStore(t)
 	speechStory(t, store)
-	writeBriefing(t, store, saturday, spoke)
+	writeStoryBriefing(t, store, saturday, spoke)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	before := get(t, app, "/")
@@ -52,7 +52,7 @@ func TestUnwantedTakesAStoryOrADevelopmentOutOfTheBriefingAndMarksItInTheRecord(
 		t.Run(tc.name, func(t *testing.T) {
 			store := openStore(t)
 			speechStory(t, store)
-			writeBriefing(t, store, saturday, spoke)
+			writeStoryBriefing(t, store, saturday, spoke)
 			app, _ := newAppWithLog(t, saturday, store)
 
 			res := send(t, app, "POST", today, tc.form)
@@ -74,7 +74,7 @@ func TestUnwantedTakesAStoryOrADevelopmentOutOfTheBriefingAndMarksItInTheRecord(
 func TestMissedOnAStoryFromTheBriefingStartsItGatheringTheFactsChosen(t *testing.T) {
 	store := openStore(t)
 	speechStory(t, store)
-	writeBriefing(t, store, saturday, spoke)
+	writeStoryBriefing(t, store, saturday, spoke)
 	app, _ := newAppWithLog(t, saturday, store)
 	page := get(t, app, "/")
 	if !strings.Contains(page.body, `name="title"`) || !strings.Contains(page.body, `name="facts" value="1"`) {
@@ -98,7 +98,7 @@ func TestMissedOnAStoryFromTheBriefingStartsItGatheringTheFactsChosen(t *testing
 func TestAMissedStoryWithNoTitleReRendersItsFormWith422(t *testing.T) {
 	store := openStore(t)
 	speechStory(t, store)
-	writeBriefing(t, store, saturday, spoke)
+	writeStoryBriefing(t, store, saturday, spoke)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	for _, path := range []string{today, "/stories/1/feedback"} {
@@ -123,7 +123,7 @@ func TestMissedOnADevelopmentAddsTheFactChosenToTheStory(t *testing.T) {
 			store := openStore(t)
 			connectedStories(t, store)
 			// Only the speech is tied to a Topic, so only its Story is told.
-			writeBriefing(t, store, saturday, `{"stories": [{"story": "S2", "statements": [
+			writeStoryBriefing(t, store, saturday, `{"stories": [{"story": "S2", "statements": [
 				{"text": "The Prime Minister spoke in Motherwell.", "developments": ["D1"]}]}]}`)
 			app, _ := newAppWithLog(t, saturday, store)
 			page := get(t, app, path)
@@ -156,7 +156,7 @@ func TestMissedOnADevelopmentAddsTheFactChosenToTheStory(t *testing.T) {
 func TestEveryPieceOfFeedbackIsKeptAsGivenWithItsDepthAndWhen(t *testing.T) {
 	store := openStore(t)
 	speechStory(t, store)
-	writeBriefing(t, store, saturday, spoke)
+	writeStoryBriefing(t, store, saturday, spoke)
 	app, _ := newAppWithLog(t, saturday, store)
 	for _, give := range []struct {
 		path string
@@ -205,7 +205,7 @@ func undoForm(body string, id int) string {
 func TestFeedbackIsUndoneFromTheFeedbackPageAndTheBriefingReRendersWithWhatItHid(t *testing.T) {
 	store := openStore(t)
 	speechStory(t, store)
-	writeBriefing(t, store, saturday, spoke)
+	writeStoryBriefing(t, store, saturday, spoke)
 	app, _ := newAppWithLog(t, saturday, store)
 	send(t, app, "POST", today, url.Values{"kind": {"wrong"}, "level": {"fact"}, "fact": {"1"}})
 	path := undoForm(get(t, app, "/feedback").body, 1)
@@ -236,7 +236,7 @@ func TestFeedbackIsUndoneFromTheFeedbackPageAndTheBriefingReRendersWithWhatItHid
 func TestABriefingEmptiedByFeedbackSaysSoAndTheFeedbackIsUndoneFromIt(t *testing.T) {
 	store := openStore(t)
 	speechStory(t, store)
-	writeBriefing(t, store, saturday, spoke)
+	writeStoryBriefing(t, store, saturday, spoke)
 	app, _ := newAppWithLog(t, saturday, store)
 	send(t, app, "POST", today, url.Values{"kind": {"unwanted"}, "level": {"story"}, "story": {"1"}})
 
@@ -263,7 +263,7 @@ func TestABriefingEmptiedByFeedbackSaysSoAndTheFeedbackIsUndoneFromIt(t *testing
 func TestFeedbackGivenOnTheBriefingIsUndoneFromIt(t *testing.T) {
 	store := openStore(t)
 	speechStory(t, store)
-	writeBriefing(t, store, saturday, spoke)
+	writeStoryBriefing(t, store, saturday, spoke)
 	app, _ := newAppWithLog(t, saturday, store)
 	send(t, app, "POST", today, url.Values{"kind": {"new to me"}, "level": {"development"}, "story": {"1"}, "fact": {"1"}})
 	send(t, app, "POST", today, url.Values{"kind": {"missed"}, "level": {"story"}, "title": {"Scottish politics"}, "facts": {"1"}})

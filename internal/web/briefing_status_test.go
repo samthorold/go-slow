@@ -34,7 +34,7 @@ func TestWhileTheBriefingIsBeingWrittenTheDaysPagePollsUntilItIsWritten(t *testi
 		t.Errorf("the fragment does not poll again while the Briefing is being written:\n%s", waiting.body)
 	}
 
-	writeBriefing(t, store, saturday, `{}`)
+	writeStoryBriefing(t, store, saturday, `{}`)
 	written := get(t, app, "/briefings/2026-10-24/status")
 	if strings.Contains(written.body, "hx-trigger") {
 		t.Errorf("the fragment polls on once the Briefing is written:\n%s", written.body)

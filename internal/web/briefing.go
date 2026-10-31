@@ -14,9 +14,13 @@ import (
 
 // Briefings answers the queries the Briefing pages need.
 type Briefings interface {
-	// Briefing is the day's Briefing (YYYY-MM-DD), reporting whether one
-	// was written.
+	// Briefing is the day's Briefing (YYYY-MM-DD) over Spans, reporting
+	// whether one was written.
 	Briefing(ctx context.Context, day string) (editor.Briefing, bool, error)
+	// StoryBriefing is the day's Briefing in its earlier shape, over
+	// Stories, reporting whether one was written so: the Record keeps those
+	// it wrote, and their pages still show them.
+	StoryBriefing(ctx context.Context, day string) (editor.StoryBriefing, bool, error)
 	// BriefingFailure is the latest failure to write the day's Briefing.
 	BriefingFailure(ctx context.Context, day string) (editor.BriefingFailure, bool, error)
 	// BriefingDays are the days a Briefing was written for, and the first
@@ -92,9 +96,14 @@ func dayOf(t time.Time) time.Time {
 
 // briefingPage is the view model for a day's Briefing page.
 type briefingPage struct {
-	Date    string
-	Exists  bool
-	Stories []briefedStoryRow
+	Date   string
+	Exists bool
+	// Told is whether the Briefing tells Spans, in Statements, each with
+	// the Spans it cites in its margin; one written before it did tells
+	// Stories.
+	Told       bool
+	Statements []toldRow
+	Stories    []briefedStoryRow
 	// Status is the day's Briefing status, for a day with no Briefing.
 	Status briefingStatus
 	// SundayReadPath is the Sunday read's page, on a Sunday.
@@ -123,6 +132,32 @@ type briefingPage struct {
 	TakenOut []keptRow
 	// Feedback is the rest of the Feedback given on the Briefing.
 	Feedback []keptRow
+}
+
+// toldRow is one statement of a Briefing over Spans, with the Spans it
+// cites: each its words, linking its page, whose words they are, and its
+// Item.
+type toldRow struct {
+	Text  string
+	Cites []toldCite
+}
+
+type toldCite struct {
+	spanLink
+	Speaker string
+}
+
+// toldRows are the statements of b as the page shows them.
+func (a *app) toldRows(b editor.Briefing) []toldRow {
+	var out []toldRow
+	for _, st := range b.Statements {
+		row := toldRow{Text: st.Text}
+		for _, c := range st.Cites {
+			row.Cites = append(row.Cites, toldCite{spanLink: a.linkTo(c), Speaker: c.Speaker})
+		}
+		out = append(out, row)
+	}
+	return out
 }
 
 type failureRow struct {
@@ -198,24 +233,35 @@ func (a *app) briefing(w http.ResponseWriter, r *http.Request, day time.Time) {
 // briefingWith renders the Briefing page with the Feedback last entered on
 // it and why it failed, if it did.
 func (a *app) briefingWith(w http.ResponseWriter, r *http.Request, day time.Time, status int, d feedback.Draft, errs feedback.Errors) {
-	b, exists, err := a.Briefings.Briefing(r.Context(), day.Format(time.DateOnly))
+	key := day.Format(time.DateOnly)
+	told, isTold, err := a.Briefings.Briefing(r.Context(), key)
 	if err != nil {
 		a.serverError(w, r, err)
 		return
 	}
-	if exists && r.Method == http.MethodGet {
+	b, exists, err := a.Briefings.StoryBriefing(r.Context(), key)
+	if err != nil {
+		a.serverError(w, r, err)
+		return
+	}
+	b.Day = key
+	if (isTold || exists) && r.Method == http.MethodGet {
 		// Opening a Briefing is kept for the register, as a side record.
-		a.opened(r, a.Register.OpenedBriefing, b.Day)
+		a.opened(r, a.Register.OpenedBriefing, key)
 	}
 	p := briefingPage{
-		Date: day.Format("Monday 2 January 2006"), Exists: exists,
-		FeedbackPath: briefingPath(day.Format(time.DateOnly)) + "/feedback",
+		Date: day.Format("Monday 2 January 2006"), Exists: exists || isTold, Told: isTold,
+		FeedbackPath: briefingPath(key) + "/feedback",
+	}
+	if isTold {
+		p.Statements = a.toldRows(told)
+		b.Model = told.Judge.Model
 	}
 	if day.Weekday() == time.Sunday {
 		// The Sunday read is written alongside Sunday's Briefing.
 		p.SundayReadPath = sundayReadPath(day.Format(time.DateOnly))
 	}
-	if !exists {
+	if !p.Exists {
 		p.Status = a.statusOf(day, false)
 		// The outputs appear: a day with no Briefing by the set time is
 		// flagged, with the latest failure to write it, if there was one.
@@ -232,7 +278,7 @@ func (a *app) briefingWith(w http.ResponseWriter, r *http.Request, day time.Time
 			p.Failure = &failureRow{At: when(f.At, day.Location()), Reason: f.Reason}
 		}
 	}
-	if err := a.briefingCalls(r, &p, b, exists, day.Location()); err != nil {
+	if err := a.briefingCalls(r, &p, b.Day, b.Model, p.Exists, day.Location()); err != nil {
 		a.serverError(w, r, err)
 		return
 	}
@@ -320,7 +366,7 @@ func (a *app) briefingStatus(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	_, written, err := a.Briefings.Briefing(r.Context(), r.PathValue("day"))
+	written, err := a.written(r.Context(), r.PathValue("day"))
 	if err != nil {
 		a.serverError(w, r, err)
 		return
@@ -328,11 +374,22 @@ func (a *app) briefingStatus(w http.ResponseWriter, r *http.Request) {
 	a.fragment(w, r, briefingStatusTmpl, "briefingStatus", a.statusOf(day, written))
 }
 
+// written is whether the day's Briefing was written, in either shape.
+func (a *app) written(ctx context.Context, day string) (bool, error) {
+	_, told, err := a.Briefings.Briefing(ctx, day)
+	if err != nil || told {
+		return told, err
+	}
+	_, written, err := a.Briefings.StoryBriefing(ctx, day)
+	return written, err
+}
+
 // briefingCalls links the day's Briefing page to how it was written: a
 // written Briefing to its trail, saying if it was written with no call; a
-// day with no Briefing to each failed attempt to write it.
-func (a *app) briefingCalls(r *http.Request, p *briefingPage, b editor.Briefing, exists bool, loc *time.Location) error {
-	calls, err := a.Calls.CallsOn(r.Context(), briefingAct, b.Day)
+// day with no Briefing to each failed attempt to write it. model is what
+// wrote it, empty for none.
+func (a *app) briefingCalls(r *http.Request, p *briefingPage, day, model string, exists bool, loc *time.Location) error {
+	calls, err := a.Calls.CallsOn(r.Context(), briefingAct, day)
 	if err != nil {
 		return err
 	}
@@ -348,9 +405,9 @@ func (a *app) briefingCalls(r *http.Request, p *briefingPage, b editor.Briefing,
 		}
 	}
 	// A Briefing written empty is the one with no model to name.
-	p.WithoutCall = exists && writtenBy == 0 && b.Model == ""
+	p.WithoutCall = exists && writtenBy == 0 && model == ""
 	if exists {
-		p.TrailPath = briefingTrailPath(b.Day)
+		p.TrailPath = briefingTrailPath(day)
 	}
 	return nil
 }
@@ -358,7 +415,7 @@ func (a *app) briefingCalls(r *http.Request, p *briefingPage, b editor.Briefing,
 // briefingFeedbackRows lists, on the written Briefing, the Feedback given on
 // it, each to undo there; and, when Feedback took every Story out, says so,
 // listing the Feedback that did. kept is every piece of Feedback.
-func (a *app) briefingFeedbackRows(r *http.Request, p *briefingPage, b editor.Briefing, kept []feedback.Kept) error {
+func (a *app) briefingFeedbackRows(r *http.Request, p *briefingPage, b editor.StoryBriefing, kept []feedback.Kept) error {
 	takenOut, err := a.Briefings.TakenOutBy(r.Context(), b.Day)
 	if err != nil {
 		return err

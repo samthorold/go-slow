@@ -110,10 +110,21 @@ func (s *Store) commits(ctx context.Context) ([]register.Commit, error) {
 	return out, rows.Err()
 }
 
-// untraced names every Development in a Briefing that traces to no Item,
-// every Fact that traces to no Item, and every Fact from a Reference source
-// that traces to no lookup of it.
+// untraced names every statement of a Briefing over Spans that cites no
+// Span, or a Span outside its Item's text; every Development in a Briefing
+// over Stories that traces to no Item, every Fact that traces to no Item,
+// and every Fact from a Reference source that traces to no lookup of it.
 const untraced = `
+	SELECT 'Statement ' || (st.position + 1) || ' of the Briefing of ' || t.day || ' cites no Span.'
+	FROM told_statements st JOIN told_briefings t ON t.event_id = st.briefing_id
+	WHERE NOT EXISTS (SELECT 1 FROM told_citations c WHERE c.statement_id = st.event_id)
+	UNION ALL
+	SELECT 'Statement ' || (st.position + 1) || ' of the Briefing of ' || t.day || ' cites a Span outside its Item''s text.'
+	FROM told_citations c JOIN told_statements st ON st.event_id = c.statement_id
+		JOIN told_briefings t ON t.event_id = st.briefing_id
+		JOIN items i ON i.source_id = c.source_id AND i.entry_id = c.entry_id
+	WHERE c.span_end > length(CAST(i.content AS BLOB))
+	UNION ALL
 	SELECT 'The Development of Fact ' || sd.fact_id || ' in the Briefing of ' || bs.day || ' traces to no Item.'
 	FROM statement_developments sd
 		JOIN briefing_statements bs ON bs.id = sd.statement_id

@@ -29,13 +29,6 @@ func schedule(store *sqlite.Store, writer *fakeModel) (*editor.Schedule, *[]stri
 	}), &happened
 }
 
-// readPlaceAndConnect places the speech's Fact in a Story, for the
-// Briefing to tell.
-func readPlaceAndConnect(t *testing.T, store *sqlite.Store) {
-	t.Helper()
-	readAndPlace(t, store, &fakeModel{output: startsAStory})
-}
-
 var (
 	sixFiftyNine = time.Date(2026, time.October, 24, 6, 59, 0, 0, time.UTC)
 	seven        = time.Date(2026, time.October, 24, 7, 0, 0, 0, time.UTC)
@@ -43,7 +36,6 @@ var (
 
 func TestTheBriefingIsWrittenOnceADayAtTheSetTime(t *testing.T) {
 	store := record(t)
-	readPlaceAndConnect(t, store)
 	writer := &fakeModel{output: spokeInMotherwell}
 	s, happened := schedule(store, writer)
 
@@ -70,7 +62,6 @@ func TestTheBriefingIsWrittenOnceADayAtTheSetTime(t *testing.T) {
 
 func TestABriefingThatFailedIsTriedAgainLater(t *testing.T) {
 	store := record(t)
-	readPlaceAndConnect(t, store)
 	writer := &fakeModel{err: errors.New("overloaded")}
 	s, happened := schedule(store, writer)
 
@@ -102,7 +93,8 @@ func sundaySchedule(t *testing.T, store *sqlite.Store, agent *fakeAgent) (*edito
 
 func TestTheSundayReadIsWrittenOnSundayAfterTheBriefing(t *testing.T) {
 	store := record(t)
-	readPlaceAndConnect(t, store)
+	// The Sunday read is shown the week's Stories, until it tells Spans.
+	readAndPlace(t, store, &fakeModel{output: startsAStory})
 	s, happened := sundaySchedule(t, store, &fakeAgent{turns: []editor.Turn{submits(citesTheSpeech)}})
 	sunday := seven.AddDate(0, 0, 1)
 
@@ -121,7 +113,8 @@ func TestTheSundayReadIsWrittenOnSundayAfterTheBriefing(t *testing.T) {
 
 func TestASundayReadThatFailedIsTriedAgainAFewTimes(t *testing.T) {
 	store := record(t)
-	readPlaceAndConnect(t, store)
+	// The Sunday read is shown the week's Stories, until it tells Spans.
+	readAndPlace(t, store, &fakeModel{output: startsAStory})
 	s, happened := sundaySchedule(t, store, &fakeAgent{}) // never submits
 	sunday := seven.AddDate(0, 0, 1)
 

@@ -75,6 +75,8 @@ type OtherSpan struct {
 	Entities []NamedEntity
 	// Shares are the Entities it shares with the Span it is a candidate of.
 	Shares []NamedEntity
+	// ReadingID is the reading it is read as; zero if its Item is only cut.
+	ReadingID int64
 }
 
 // Relation is a relation between two Spans of different Items, from the
@@ -97,6 +99,8 @@ func (r Relation) Corroborates() bool {
 // Span at its other end, and the relating that judged it, with its Judge and
 // the call that made it (zero if none was kept).
 type SpanRelation struct {
+	// ID is the relation's in the Record: later relations have greater ids.
+	ID         int64
 	Relation   Relation
 	Other      OtherSpan
 	RelatingID int64

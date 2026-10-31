@@ -8,16 +8,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/editor/frozentest"
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
 
-// writeBriefing writes the Briefing at at, with output as the model's.
-func writeBriefing(t *testing.T, store *sqlite.Store, at time.Time, output string) {
+// writeStoryBriefing writes a Briefing over Stories at at, with output as
+// the earlier act's model's: the shape the Record keeps for the days before
+// the Briefing told Spans, whose pages still show it.
+func writeStoryBriefing(t *testing.T, store *sqlite.Store, at time.Time, output string) {
 	t.Helper()
-	ed := editor.New(editor.Deps{Store: store, Briefings: store, BriefingModel: fakeModel{output}, Log: slog.New(slog.DiscardHandler)})
-	if err := ed.Brief(t.Context(), at); err != nil {
+	if err := frozentest.Brief(t.Context(), frozentest.BriefDeps{Store: store, Model: fakeModel{output},
+		Log: slog.New(slog.DiscardHandler)}, at); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -42,15 +43,14 @@ const spoke = `{"stories": [{"story": "S1", "statements": [
 
 func TestABriefingThatFailedItsChecksIsNotShownAndTheFailureIs(t *testing.T) {
 	store := openStore(t)
-	speechStory(t, store)
-	writeBriefing(t, store, saturday, `{"stories": [{"story": "S1", "statements": [
-		{"text": "Scotland is the true north.", "developments": []}]}]}`)
+	readRelease(t, store, releaseReading)
+	tell(t, store, saturday, fakeModel{`{"statements": [{"spans": [], "text": "Scotland is the true north."}]}`})
 	app, _ := newAppWithLog(t, saturday, store)
 
 	res := get(t, app, "/")
 
-	// The failure quotes the statement; no Story is told.
-	if res.status != 200 || strings.Contains(res.body, "<section") {
+	// The failure quotes the statement; nothing is told.
+	if res.status != 200 || strings.Contains(res.body, `class="blocks"`) {
 		t.Fatalf("status %d, or the rejected Briefing is shown:\n%s", res.status, res.body)
 	}
 	for _, want := range []string{"Writing the Briefing failed", "untraced statement"} {
@@ -73,15 +73,56 @@ func TestADayWithNoBriefingByTheSetTimeIsFlagged(t *testing.T) {
 	}
 }
 
-func TestABriefingWithNothingToTellSaysSo(t *testing.T) {
+func TestABriefingWithNothingReadSinceTheLastSaysSo(t *testing.T) {
 	store := openStore(t)
-	writeBriefing(t, store, saturday, `{}`)
+	tell(t, store, saturday, fakeModel{`{}`})
 	app, _ := newAppWithLog(t, saturday, store)
 
 	res := get(t, app, "/")
 
-	if !strings.Contains(res.body, "Nothing moved on") || strings.Contains(res.body, "Missed") {
+	if !strings.Contains(res.body, "Nothing was read since the last Briefing.") || strings.Contains(res.body, "Missed") {
 		t.Errorf("the empty Briefing does not say so:\n%s", res.body)
+	}
+}
+
+func TestABriefingThatJudgedNothingWorthTellingSaysSo(t *testing.T) {
+	store := openStore(t)
+	readRelease(t, store, releaseReading)
+	tell(t, store, saturday, fakeModel{`{"statements": []}`})
+	app, _ := newAppWithLog(t, saturday, store)
+
+	res := get(t, app, "/")
+
+	if !strings.Contains(res.body, "Nothing read since the last Briefing was worth telling.") {
+		t.Errorf("the Briefing does not say it told nothing:\n%s", res.body)
+	}
+}
+
+func TestEachStatementOfTheBriefingHasTheSpansItCitesInItsMarginEachLinkingItsPage(t *testing.T) {
+	store := openStore(t)
+	readRelease(t, store, releaseReading)
+	tell(t, store, saturday, teller{text: "Andy Burnham called it <b>fantastic</b> news for Derby.", tell: "This is fantastic news"})
+	app, _ := newAppWithLog(t, saturday, store)
+
+	page := get(t, app, "/").body
+
+	for _, want := range []string{
+		`<div class="margined" data-margin="open">`,
+		`<p hx-disable>Andy Burnham called it &lt;b&gt;fantastic&lt;/b&gt; news for Derby.</p>`,
+		`<span hx-disable>“This is fantastic news for Derby.</span>`,
+		`spoken by <span hx-disable>Andy Burnham</span>`,
+		`<cite hx-disable>GBR headquarters in Derby</cite>`,
+	} {
+		if !strings.Contains(page, want) {
+			t.Errorf("the Briefing lacks %q:\n%s", want, page)
+		}
+	}
+	m := regexp.MustCompile(`<a href="(/items/` + number10.ID + `/release/spans/\d+-\d+)">`).FindStringSubmatch(page)
+	if m == nil {
+		t.Fatalf("the cited Span does not link its page:\n%s", page)
+	}
+	if res := get(t, app, m[1]); res.status != 200 || !strings.Contains(res.body, "fantastic news") {
+		t.Errorf("%s: status %d:\n%s", m[1], res.status, res.body)
 	}
 }
 
@@ -89,9 +130,9 @@ func TestPastBriefingsHaveTheirOwnPagesByDateAndMissedDaysAreFlagged(t *testing.
 	store := openStore(t)
 	thursday := saturday.AddDate(0, 0, -2)
 	speechStory(t, store, thursday)
-	writeBriefing(t, store, thursday, spoke)
+	writeStoryBriefing(t, store, thursday, spoke)
 	// Friday's was never written; Saturday's says nothing moved on.
-	writeBriefing(t, store, saturday, `{}`)
+	writeStoryBriefing(t, store, saturday, `{}`)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	list := get(t, app, "/briefings")
@@ -127,7 +168,7 @@ func TestPastBriefingsHaveTheirOwnPagesByDateAndMissedDaysAreFlagged(t *testing.
 func TestWhatTheBriefingSaysIsInert(t *testing.T) {
 	store := openStore(t)
 	speechStory(t, store)
-	writeBriefing(t, store, saturday, `{"stories": [{"story": "S1", "statements": [
+	writeStoryBriefing(t, store, saturday, `{"stories": [{"story": "S1", "statements": [
 		{"text": "<b hx-get=\"/evil\">Motherwell</b>", "developments": ["D1"]}]}]}`)
 	app, _ := newAppWithLog(t, saturday, store)
 
@@ -141,7 +182,7 @@ func TestWhatTheBriefingSaysIsInert(t *testing.T) {
 func TestTodaysBriefingShowsEachStatementTracingToItsDevelopmentFactAndItem(t *testing.T) {
 	store := openStore(t)
 	speechStory(t, store)
-	writeBriefing(t, store, saturday, spoke)
+	writeStoryBriefing(t, store, saturday, spoke)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	res := get(t, app, "/")

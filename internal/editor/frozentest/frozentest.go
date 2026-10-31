@@ -1,11 +1,12 @@
 // Package frozentest writes the outputs of the retired placing and connecting
-// acts into a Record, for tests: the old Briefing's and the Sunday read's
-// replays rest on frozen copies of those acts' recordings (Stories,
-// Developments, roles and causes), and tests of the pages that show them
-// build them the same way. Relating replaced both acts (system design:
-// Relating a Span); nothing in the app places or connects, and this package
-// is not part of it. It goes when the Briefing and the Sunday read no
-// longer read Stories built of Facts.
+// acts, and of the Briefing over Stories they fed, into a Record, for tests:
+// the Sunday read's replays rest on frozen copies of those acts' recordings
+// (Stories, Developments, roles and causes), and tests of the pages that
+// show them, a Briefing over Stories among them, build them the same way.
+// Relating replaced both acts (system design: Relating a Span), and the
+// Briefing tells Spans; nothing in the app places, connects or writes a
+// Briefing over Stories, and this package is not part of it. It goes when
+// the Sunday read and the pages no longer read Stories built of Facts.
 package frozentest
 
 import (

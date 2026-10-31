@@ -249,6 +249,7 @@ func otherSpan(it editor.Item, r editor.Reading, sp cut.Span, n int, mentions []
 	return editor.OtherSpan{
 		At: editor.Address{SourceID: it.SourceID, EntryID: it.EntryID, Span: sp}, N: n, Item: it,
 		Words: r.HydratedWords(it.Content, sp), Speaker: r.SpeakerOf(it.Content, sp), Entities: mentions,
+		ReadingID: r.ID,
 	}
 }
 
@@ -356,7 +357,7 @@ func (s *Store) RelationsOf(ctx context.Context, a editor.Address) ([]editor.Spa
 // their relatings, in the order they were judged.
 func (s *Store) relationsAt(ctx context.Context, a editor.Address) ([]editor.SpanRelation, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT rel.kind, rel.from_source_id, rel.from_entry_id, rel.from_start, rel.from_end,
+		SELECT rel.event_id, rel.kind, rel.from_source_id, rel.from_entry_id, rel.from_start, rel.from_end,
 			rel.to_source_id, rel.to_entry_id, rel.to_start, rel.to_end,
 			rl.event_id, rl.act, rl.version, rl.model, rl.request_hash, `+relatingCall("rl")+`
 		FROM relations rel JOIN relatings rl ON rl.event_id = rel.relating_id
@@ -372,7 +373,7 @@ func (s *Store) relationsAt(ctx context.Context, a editor.Address) ([]editor.Spa
 	for rows.Next() {
 		var sr editor.SpanRelation
 		f, t := &sr.Relation.From, &sr.Relation.To
-		if err := rows.Scan(&sr.Relation.Kind, &f.SourceID, &f.EntryID, &f.Span.Start, &f.Span.End,
+		if err := rows.Scan(&sr.ID, &sr.Relation.Kind, &f.SourceID, &f.EntryID, &f.Span.Start, &f.Span.End,
 			&t.SourceID, &t.EntryID, &t.Span.Start, &t.Span.End,
 			&sr.RelatingID, &sr.Judge.Act, &sr.Judge.Version, &sr.Judge.Model, &sr.Judge.RequestHash, &sr.Call); err != nil {
 			return nil, fmt.Errorf("relations of a Span: %w", err)

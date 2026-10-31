@@ -52,11 +52,9 @@ func briefSpeech(t *testing.T, store *sqlite.Store, read, place, brief string) {
 		Model: usageModel{place, editor.Usage{InputTokens: 500, OutputTokens: 50}}}, saturday); err != nil {
 		t.Fatal(err)
 	}
-	ed := editor.New(editor.Deps{
-		Store: store, Briefings: store, Wikidata: noWikidata{}, Log: log,
-		BriefingModel: usageModel{brief, editor.Usage{InputTokens: 200, OutputTokens: 20}},
-	})
-	if err := ed.Brief(t.Context(), saturday); err != nil {
+	// A Briefing over Stories, the earlier shape, whose trail still shows.
+	if err := frozentest.Brief(t.Context(), frozentest.BriefDeps{Store: store, Log: log,
+		Model: usageModel{brief, editor.Usage{InputTokens: 200, OutputTokens: 20}}}, saturday); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -144,7 +142,7 @@ func TestABriefingsTrailOpensWithItsTotalsThenATableWhoseFirstRowIsTheWritingCal
 
 func TestATrailSaysABriefingWrittenEmptyMadeNoCall(t *testing.T) {
 	store := openStore(t)
-	writeBriefing(t, store, saturday, spoke)
+	writeStoryBriefing(t, store, saturday, spoke)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	page := get(t, app, "/briefings/2026-10-24/trail").body
@@ -173,7 +171,7 @@ func TestATrailSaysTheOwnerAddedAMissedDevelopment(t *testing.T) {
 		"story": {"1"}, "fact": {"1"}}); res.status != 303 {
 		t.Fatalf("status %d:\n%s", res.status, res.body)
 	}
-	writeBriefing(t, store, saturday, `{"stories": [{"story": "S1", "statements": [
+	writeStoryBriefing(t, store, saturday, `{"stories": [{"story": "S1", "statements": [
 		{"text": "The Prime Minister spoke in Motherwell.", "developments": ["D1", "D2"]}]}]}`)
 
 	page := get(t, app, "/briefings/2026-10-24/trail").body

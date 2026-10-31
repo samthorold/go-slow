@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"html"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -13,7 +12,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"unicode"
 
 	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
@@ -350,20 +348,6 @@ func TestABareAttributionIsAFewWordsEndingInSaid(t *testing.T) {
 			t.Errorf("%q is a bare attribution: %v, want %v", s, got, want)
 		}
 	}
-}
-
-var tag = regexp.MustCompile(`<[^>]*>`)
-
-// stripTags is HTML as plain text: written here, apart from the act's own,
-// so the assertions don't take the act's word for what the Item says.
-func stripTags(s string) string { return html.UnescapeString(tag.ReplaceAllString(s, " ")) }
-
-// normal is s as lowercase words separated by single spaces.
-func normal(s string) string {
-	f := strings.FieldsFunc(strings.ToLower(s), func(r rune) bool {
-		return !unicode.IsLetter(r) && !unicode.IsDigit(r)
-	})
-	return " " + strings.Join(f, " ") + " "
 }
 
 // recorder passes a call to the real model and keeps what it answered, with

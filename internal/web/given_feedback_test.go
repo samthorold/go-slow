@@ -108,7 +108,7 @@ func TestAnUnwantedStoryShowsItsUnwantedAsGivenOnItsPageWithItsUndo(t *testing.T
 func briefed(t *testing.T, store *sqlite.Store) {
 	t.Helper()
 	speechStory(t, store)
-	writeBriefing(t, store, saturday, spoke)
+	writeStoryBriefing(t, store, saturday, spoke)
 }
 
 // read is the speech's Story, with Sunday's read assessing it.
@@ -121,7 +121,7 @@ func read(t *testing.T, store *sqlite.Store) {
 func TestNewToMeOnADevelopmentOfTheBriefingShowsAsGivenThereWithItsUndo(t *testing.T) {
 	store := openStore(t)
 	speechStory(t, store)
-	writeBriefing(t, store, saturday, spoke)
+	writeStoryBriefing(t, store, saturday, spoke)
 	app, _ := newAppWithLog(t, saturday, store)
 	if before := get(t, app, "/"); !offers(before.body, "new to me", "development", "story", "1", "fact", "1") {
 		t.Fatalf("the Briefing offers no New to me on the Development:\n%s", before.body)

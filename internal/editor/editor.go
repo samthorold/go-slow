@@ -29,6 +29,10 @@ type Store interface {
 	// KeepRelating keeps a relating, each of its relations as its own event
 	// with the relating's Judge, all at once.
 	KeepRelating(ctx context.Context, r Relating) error
+	// StandingWrong is the wrong standing on judgements of the kinds
+	// judged, each with what it is about, newest first: what reading and
+	// relating are shown as precedent.
+	StandingWrong(ctx context.Context, judged []string) ([]Precedent, error)
 	CallKeeper
 }
 
@@ -70,14 +74,14 @@ func New(d Deps) *Editor { return &Editor{Deps: d} }
 // writes nothing, so its Item stays awaiting reading and is read on the next
 // run; it does not stop the others. Only a failing Record is an error.
 func (e *Editor) ReadWaiting(ctx context.Context, now time.Time) error {
-	waiting, err := e.Store.ItemsToRead(ctx)
+	waiting, err := e.toRead(ctx)
 	if err != nil {
 		return err
 	}
 	for _, tr := range waiting {
 		req := readingRequest(tr)
 		var r Reading
-		call, err := e.callNow(ctx, e.Model, itemKey(tr.Item), req, nil, now, func(res Response) (err error) {
+		call, err := e.callNow(ctx, e.Model, itemKey(tr.Item), req, precedentIDs(tr.Precedents), now, func(res Response) (err error) {
 			r, err = checkReading(tr, req, modelOf(e.ModelFor, req.Act), res)
 			return err
 		})
@@ -96,6 +100,23 @@ func (e *Editor) ReadWaiting(ctx context.Context, now time.Time) error {
 		}
 	}
 	return nil
+}
+
+// toRead are the Items awaiting reading, each with the precedents it is
+// shown.
+func (e *Editor) toRead(ctx context.Context) ([]ToRead, error) {
+	waiting, err := e.Store.ItemsToRead(ctx)
+	if err != nil || len(waiting) == 0 {
+		return waiting, err
+	}
+	wrong, err := e.Store.StandingWrong(ctx, readingJudged)
+	if err != nil {
+		return nil, err
+	}
+	for i := range waiting {
+		waiting[i].Precedents = readingPrecedents(wrong, waiting[i].Item)
+	}
+	return waiting, nil
 }
 
 // keepReading keeps a reading judged at now, and logs it.

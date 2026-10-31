@@ -107,19 +107,15 @@ func (e *Editor) Relating() BatchAct {
 	return BatchAct{
 		Name: "relating",
 		Waiting: func(ctx context.Context) ([]Job, error) {
-			waiting, err := e.Store.ItemsToRelate(ctx)
+			waiting, err := e.toRelate(ctx)
 			if err != nil {
 				return nil, err
 			}
 			jobs := make([]Job, 0, len(waiting))
 			for _, tr := range waiting {
-				tr, err := e.withCandidates(ctx, tr)
-				if err != nil {
-					return nil, err
-				}
 				job := Job{Key: itemKey(tr.Item)}
 				if tr.hasCandidates() {
-					job.Request = relatingRequest(tr)
+					job.Request, job.Precedents = relatingRequest(tr), precedentIDs(tr.Precedents)
 				}
 				req := job.Request
 				job.Apply = func(ctx context.Context, res Response, now time.Time) error {
@@ -145,15 +141,11 @@ func (e *Editor) Relating() BatchAct {
 // nothing, so its Item stays awaiting relating; it does not stop the
 // others. Only a failing Record is an error.
 func (e *Editor) RelateWaiting(ctx context.Context, now time.Time) error {
-	waiting, err := e.Store.ItemsToRelate(ctx)
+	waiting, err := e.toRelate(ctx)
 	if err != nil {
 		return err
 	}
 	for _, tr := range waiting {
-		tr, err := e.withCandidates(ctx, tr)
-		if err != nil {
-			return err
-		}
 		if !tr.hasCandidates() {
 			if err := e.keepRelating(ctx, unshownRelating(tr), now); err != nil {
 				return err
@@ -162,7 +154,7 @@ func (e *Editor) RelateWaiting(ctx context.Context, now time.Time) error {
 		}
 		req := relatingRequest(tr)
 		var r Relating
-		call, err := e.callNow(ctx, e.RelatingModel, itemKey(tr.Item), req, nil, now, func(res Response) (err error) {
+		call, err := e.callNow(ctx, e.RelatingModel, itemKey(tr.Item), req, precedentIDs(tr.Precedents), now, func(res Response) (err error) {
 			r, err = checkRelating(tr, req, modelOf(e.ModelFor, req.Act), res)
 			return err
 		})
@@ -181,6 +173,33 @@ func (e *Editor) RelateWaiting(ctx context.Context, now time.Time) error {
 		}
 	}
 	return nil
+}
+
+// toRelate are the Items awaiting relating, each with its candidates and,
+// where it has some, the precedents it is shown.
+func (e *Editor) toRelate(ctx context.Context) ([]ToRelate, error) {
+	waiting, err := e.Store.ItemsToRelate(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var wrong []Precedent
+	fetched := false
+	for i, tr := range waiting {
+		if tr, err = e.withCandidates(ctx, tr); err != nil {
+			return nil, err
+		}
+		if tr.hasCandidates() {
+			if !fetched {
+				if wrong, err = e.Store.StandingWrong(ctx, relatingJudged); err != nil {
+					return nil, err
+				}
+				fetched = true
+			}
+			tr.Precedents = relatingPrecedents(wrong, tr)
+		}
+		waiting[i] = tr
+	}
+	return waiting, nil
 }
 
 // keepRelating keeps a relating judged at now, and logs it.

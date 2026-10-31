@@ -18,8 +18,8 @@ import (
 func TestOpeningABriefingIsRecordedWithItsDateOncePerDay(t *testing.T) {
 	store := openStore(t)
 	thursday := saturday.AddDate(0, 0, -2)
-	writeBriefing(t, store, thursday, `{}`)
-	writeBriefing(t, store, saturday, `{}`)
+	writeStoryBriefing(t, store, thursday, `{}`)
+	writeStoryBriefing(t, store, saturday, `{}`)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	first := get(t, app, "/")
@@ -74,8 +74,8 @@ func TestTheRegisterLeadsEachRowWithItsStatusInItsHue(t *testing.T) {
 	store := openStore(t)
 	thursday := saturday.AddDate(0, 0, -2)
 	speechStory(t, store, thursday)
-	writeBriefing(t, store, thursday, spoke)
-	writeBriefing(t, store, saturday, `{}`)
+	writeStoryBriefing(t, store, thursday, spoke)
+	writeStoryBriefing(t, store, saturday, `{}`)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	body := get(t, app, "/register").body
@@ -102,9 +102,9 @@ func TestTheRegisterReadsTheNecessaryConditionsFromTheRecord(t *testing.T) {
 	store := openStore(t)
 	thursday := saturday.AddDate(0, 0, -2)
 	speechStory(t, store, thursday)
-	writeBriefing(t, store, thursday, spoke)
+	writeStoryBriefing(t, store, thursday, spoke)
 	// Friday's was never written.
-	writeBriefing(t, store, saturday, `{}`)
+	writeStoryBriefing(t, store, saturday, `{}`)
 	if err := store.SyncSources(t.Context(), collect.Sources(), saturday.AddDate(0, 0, -30)); err != nil {
 		t.Fatal(err)
 	}
@@ -127,7 +127,7 @@ func TestTheRegisterReadsTheNecessaryConditionsFromTheRecord(t *testing.T) {
 
 func TestTheRegistersReasonAndLastReadingAreQuiet(t *testing.T) {
 	store := openStore(t)
-	writeBriefing(t, store, saturday, `{}`)
+	writeStoryBriefing(t, store, saturday, `{}`)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	body := get(t, app, "/register").body
@@ -159,7 +159,7 @@ func (u untracedRecord) RegisterRecord(ctx context.Context, loc *time.Location) 
 
 func TestTheRegisterCollapsesALongListOfWhatWasFound(t *testing.T) {
 	store := openStore(t)
-	writeBriefing(t, store, saturday, `{}`)
+	writeStoryBriefing(t, store, saturday, `{}`)
 	if err := store.SyncSources(t.Context(), collect.Sources(), saturday.AddDate(0, 0, -30)); err != nil {
 		t.Fatal(err)
 	}

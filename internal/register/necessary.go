@@ -49,16 +49,17 @@ func readAppear(r Record) Hypothesis {
 	return h
 }
 
-// readTraces reads "Everything traces": every Development in a Briefing
-// traces to an Item, and every Fact to an Item or a Reference source.
-// Refuted by any untraced one.
+// readTraces reads "Everything traces": every statement of a Briefing cites
+// a Span in its Item's text (or, in a Briefing over Stories, a Development
+// tracing to an Item), and every Fact traces to an Item or a Reference
+// source. Refuted by any untraced one.
 func readTraces(r Record) Hypothesis {
 	h := Hypothesis{Name: Traces, Part: Necessary, Status: Due}
 	if len(r.Briefings) == 0 {
 		h.Why = "No reading yet: no Briefing has been written."
 		return h
 	}
-	rd := Reading{Status: Supported, Found: []string{"Every Development and Fact traces."}}
+	rd := Reading{Status: Supported, Found: []string{"Every statement of a Briefing, Development and Fact traces."}}
 	if len(r.Untraced) > 0 {
 		rd.Status, rd.Found = Refuted, r.Untraced
 	}

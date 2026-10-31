@@ -10,6 +10,7 @@ import (
 	"slices"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/samthorold/go-slow/internal/editor"
 )
@@ -24,14 +25,39 @@ import (
 // asked about. A change to an earlier act's output that a later act can't
 // take fails here at once, with no recording made.
 //
-// Reading feeds relating. The old Briefing and the Sunday read rest on
-// Facts, from their own frozen copies of the retired placing and connecting
-// acts, so no current recording feeds them.
+// Reading feeds relating, and both feed the Briefing. The Sunday read rests
+// on Facts, from its own frozen copies of the retired placing and
+// connecting acts, so no current recording feeds it.
 func TestEachActsCurrentRecordingsAreTakenByTheActsDownstream(t *testing.T) {
 	t.Parallel()
 	if err := feedDownstream(t, recordedDir, "reading"); err != nil {
 		t.Error(err)
 	}
+	if err := feedBriefing(t, recordedDir); err != nil {
+		t.Error(err)
+	}
+}
+
+// feedBriefing replays the current readings and relatings under root (each
+// fixture's first sample) and writes the Briefing over them on a fake
+// model. It is an error if the Briefing's request fails to build, or the
+// fake's answer fails its checks.
+func feedBriefing(t *testing.T, root string) error {
+	t.Helper()
+	store, topics := newRecord(t, nil)
+	c := chain{reading: firstSamples(filepath.Join(root, "reading")), relating: firstSamples(filepath.Join(root, "relating"))}
+	if err := c.run(t.Context(), store, topics, fixtureItems(t)); err != nil {
+		return err
+	}
+	ed, logs := briefer(store, &fakeAct{act: "briefing"})
+	if err := ed.Brief(t.Context(), briefingAt); err != nil {
+		return err
+	}
+	b, found, err := store.Briefing(t.Context(), briefingAt.Format(time.DateOnly))
+	if err != nil || !found || len(b.Statements) != 1 {
+		return fmt.Errorf("the Briefing over the current readings and relatings = %+v, %v, %w:\n%s", b, found, err, logs)
+	}
+	return nil
 }
 
 // A reading relating can't take fails the check: one that names nothing
@@ -139,6 +165,12 @@ func (f *fakeAct) Complete(_ context.Context, req editor.Request) (editor.Respon
 			rels = append(rels, relation{m[1], "C1", editor.SameAs})
 		}
 		out = map[string]any{"relations": rels}
+	case "briefing":
+		// The first Span shown is told, with an empty Story.
+		out = map[string]any{
+			"statements": []any{map[string]any{"spans": []string{"S1"},
+				"stories": []any{map[string]any{"span": "S1", "story": []string{}}}, "text": "Told."}},
+		}
 	default:
 		return editor.Response{}, fmt.Errorf("no fake for the act %q", req.Act)
 	}

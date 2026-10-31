@@ -35,7 +35,7 @@ func openRegion(t *testing.T, page string) string {
 func TestEachStatementOnTheBriefingHasItsCitationsBesideItInAMarginStartingOpen(t *testing.T) {
 	store := openStore(t)
 	speechStory(t, store)
-	writeBriefing(t, store, saturday, spoke)
+	writeStoryBriefing(t, store, saturday, spoke)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	res := get(t, app, "/")
@@ -63,7 +63,7 @@ const noTen = `<span class="citation"><span hx-disable>No 10</span> <a href="/it
 func TestTheBriefingCitesAnItemByItsSourcesShortNameBeforeItsTitle(t *testing.T) {
 	store := openStore(t)
 	speechStory(t, store)
-	writeBriefing(t, store, saturday, spoke)
+	writeStoryBriefing(t, store, saturday, spoke)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	res := get(t, app, "/")

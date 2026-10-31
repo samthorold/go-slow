@@ -109,9 +109,10 @@ func (s *Store) selected(ctx context.Context, after, upTo time.Time) ([]int64, m
 	return ids, byStory, rows.Err()
 }
 
-// SaveBriefing keeps a Briefing: its Stories in order, and each statement
-// with the Developments it cites, all at once.
-func (s *Store) SaveBriefing(ctx context.Context, b editor.Briefing) error {
+// SaveStoryBriefing keeps a Briefing over Stories (the earlier shape, written
+// now only by tests of the pages that still show it): its Stories in order,
+// and each statement with the Developments it cites, all at once.
+func (s *Store) SaveStoryBriefing(ctx context.Context, b editor.StoryBriefing) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -235,13 +236,15 @@ func (s *Store) TakenOutBy(ctx context.Context, day string) ([]int64, error) {
 	return ids, rows.Err()
 }
 
-// Briefing is the day's Briefing, reporting whether one was written: its
-// Stories in order, and each statement with the Developments it cites,
-// traced to their Facts and Items.
-func (s *Store) Briefing(ctx context.Context, day string) (editor.Briefing, bool, error) {
-	b := editor.Briefing{Day: day}
+// StoryBriefing is the day's Briefing over Stories, reporting whether one
+// was written in that shape (the earlier shape, before the Briefing told
+// Spans): its Stories in order, and each statement with the Developments it
+// cites, traced to their Facts and Items.
+func (s *Store) StoryBriefing(ctx context.Context, day string) (editor.StoryBriefing, bool, error) {
+	b := editor.StoryBriefing{Day: day}
 	var at string
-	err := s.db.QueryRowContext(ctx, `SELECT written_at, model FROM briefings WHERE day = ?`, day).Scan(&at, &b.Model)
+	err := s.db.QueryRowContext(ctx, `SELECT written_at, model FROM briefings
+		WHERE day = ? AND NOT EXISTS (SELECT 1 FROM told_briefings t WHERE t.day = briefings.day)`, day).Scan(&at, &b.Model)
 	if errors.Is(err, sql.ErrNoRows) {
 		return b, false, nil
 	}
@@ -288,7 +291,7 @@ func (s *Store) Briefing(ctx context.Context, day string) (editor.Briefing, bool
 		}
 		bs := &b.Stories[len(b.Stories)-1]
 		if statementID != lastStatement {
-			bs.Statements = append(bs.Statements, editor.Statement{Text: text})
+			bs.Statements = append(bs.Statements, editor.StoryStatement{Text: text})
 			lastStatement = statementID
 		}
 		st := &bs.Statements[len(bs.Statements)-1]
@@ -300,10 +303,11 @@ func (s *Store) Briefing(ctx context.Context, day string) (editor.Briefing, bool
 	return b, true, nil
 }
 
-// BriefingCitations are the Developments the day's Briefing cites, each once,
-// in the order it first cites them, as it was written: Feedback that later
-// took a statement out leaves what was cited, and the calls behind it.
-func (s *Store) BriefingCitations(ctx context.Context, day string) ([]editor.BriefingCitation, error) {
+// StoryBriefingCitations are the Developments the day's Briefing over
+// Stories cites, each once, in the order it first cites them, as it was
+// written: Feedback that later took a statement out leaves what was cited,
+// and the calls behind it.
+func (s *Store) StoryBriefingCitations(ctx context.Context, day string) ([]editor.BriefingCitation, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT d.story_id, stories.title, facts.id, facts.source_id, facts.entry_id, facts.statement,
 			facts.as_at, facts.quote, items.title, d.missed_by IS NOT NULL,

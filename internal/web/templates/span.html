@@ -29,10 +29,31 @@
   {{- end}}
 </ul>
 
+{{/* Its Story: the latest gathering a Briefing made of it, then the
+     relations judged since, not yet gathered by any. The page calls no
+     model: what it shows is a judgement someone made, dated. */}}
+{{- with .Gathered}}
+<section aria-labelledby="story">
+  <h2 id="story">Its Story</h2>
+  <p class="quiet">As <a href="{{.BriefingPath}}">the Briefing for {{.BriefingDate}}</a> gathered it {{template "made" .Made}}</p>
+  {{- if not .Spans}}
+  <p>Nothing moved on what it says, or was moved on by it.</p>
+  {{- end}}
+  <ul class="blocks">
+  {{- range .Spans}}
+    <li class="block">
+      <div class="block-body"><p><a href="{{.Href}}"><span hx-disable>{{.Words}}</span></a></p></div>
+      <div class="block-margin"><p>{{template "citation" .Item}}</p></div>
+    </li>
+  {{- end}}
+  </ul>
+</section>
+{{- end}}
+
 <section aria-labelledby="relations">
-  <h2 id="relations">Relations</h2>
+  <h2 id="relations">{{if .Gathered}}Relations judged since{{else}}Relations{{end}}</h2>
   {{- if not .Relations}}
-  <p>No relation has been judged of this Span.</p>
+  <p>{{if .Gathered}}No relation has been judged of this Span since.{{else}}No relation has been judged of this Span.{{end}}</p>
   {{- end}}
   <ul class="blocks">
   {{- range .Relations}}
@@ -41,6 +62,7 @@
       <div class="block-margin">
         <p>{{template "citation" .Item}}</p>
         <p>{{template "made" .Made}}</p>
+        <p class="quiet">not yet gathered</p>
       </div>
     </li>
   {{- end}}

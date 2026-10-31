@@ -85,7 +85,7 @@ func TestAServerErrorLogsTheErrorBehindItOnItsRequestLine(t *testing.T) {
 func TestAPostOfFeedbackLogsItsStatusAndNeverItsFormValues(t *testing.T) {
 	store := openStore(t)
 	speechStory(t, store)
-	writeBriefing(t, store, saturday, spoke)
+	writeStoryBriefing(t, store, saturday, spoke)
 	app, logs := newAppWithLog(t, saturday, store)
 
 	send(t, app, http.MethodPost, today, url.Values{"kind": {"missed"}, "level": {"story"},

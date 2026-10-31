@@ -7,6 +7,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
@@ -17,6 +18,25 @@ type Relations interface {
 	// RelationsOf are the relations judged of the Span at a, either way,
 	// each with the Span at its other end and the call that made it.
 	RelationsOf(ctx context.Context, a editor.Address) ([]editor.SpanRelation, error)
+	// LatestGathering is the latest Story gathered from the Span at a,
+	// reporting whether one was.
+	LatestGathering(ctx context.Context, a editor.Address) (editor.GatheredStory, bool, error)
+}
+
+// gatheringRow is a Span's latest gathering, as its page shows it: the
+// Briefing that gathered it, linked, and the call that wrote it, and the
+// Spans it holds, each linking its page with its Item.
+type gatheringRow struct {
+	BriefingPath, BriefingDate string
+	Made                       made
+	Spans                      []spanLink
+}
+
+// spanLink is a Span linking its page, with its Item.
+type spanLink struct {
+	Words string
+	Href  string
+	Item  itemCitation
 }
 
 // spanPage is the view model for a Span's page: the Span as its Item's
@@ -27,7 +47,12 @@ type spanPage struct {
 	// Published is when its Item was published.
 	Published string
 	// ReadBy is the call of its Item's newest reading, if it has one.
-	ReadBy    *made
+	ReadBy *made
+	// Gathered is its latest gathering, if a Briefing told it; Relations
+	// are then the relations judged since, else every relation judged of
+	// it, none of them yet gathered (system design: A Story is gathered by
+	// the pass that tells it).
+	Gathered  *gatheringRow
 	Relations []relationRow
 }
 
@@ -41,6 +66,12 @@ type relationRow struct {
 	Href  string
 	Item  itemCitation
 	Made  made
+}
+
+// linkTo is the Span o, linking its page, with its Item.
+func (a *app) linkTo(o editor.OtherSpan) spanLink {
+	return spanLink{Words: o.Words, Href: spanPath(o.At),
+		Item: a.cite(o.Item.SourceID, o.Item.Title, itemPath(o.Item.SourceID, o.Item.EntryID))}
 }
 
 // spanPath is the page of the Span at a: its Item's page, then its start and
@@ -124,7 +155,27 @@ func (a *app) span(w http.ResponseWriter, r *http.Request) {
 		a.serverError(w, r, err)
 		return
 	}
+	g, gathered, err := a.Relations.LatestGathering(ctx, at)
+	if err != nil {
+		a.serverError(w, r, err)
+		return
+	}
+	if gathered {
+		day, err := time.ParseInLocation(time.DateOnly, g.Day, a.Now().Location())
+		if err != nil {
+			a.serverError(w, r, err)
+			return
+		}
+		p.Gathered = &gatheringRow{BriefingPath: briefingPath(g.Day), BriefingDate: day.Format("Monday 2 January 2006"),
+			Made: made{Act: "gathered", Call: g.Call}}
+		for _, o := range g.Spans {
+			p.Gathered.Spans = append(p.Gathered.Spans, a.linkTo(o))
+		}
+	}
 	for _, rel := range rels {
+		if gathered && rel.ID < g.ID {
+			continue // judged before the latest gathering, which weighed it
+		}
 		o := rel.Other
 		p.Relations = append(p.Relations, relationRow{
 			How:   howRelated(rel.Relation, at),

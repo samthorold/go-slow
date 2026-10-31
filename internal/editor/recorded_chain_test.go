@@ -364,13 +364,23 @@ func sampleNumber(path string) int {
 	return k
 }
 
+// sundayTopics are the fixed Topics and Depths the recorded Sunday read's
+// Record is built with (they were the earlier Briefing's): until the Sunday
+// read tells Spans (#218), it is shown the Stories they select. No Topic
+// follows the Lord-Lieutenancy of County Tyrone.
+var sundayTopics = []interest.Draft{
+	{Name: "Ukraine", Depth: "close", Terms: "Ukraine\nZelenskyy\nRussia"},
+	{Name: "Railways", Depth: "following", Terms: "Great British Railways"},
+	{Name: "Scotland", Depth: "passing", Terms: "Scotland\nScottish\nHolyrood"},
+}
+
 // frozenRecordAt is a Record kept at path holding the fixture Items, tied to
-// the briefingTopics, with the recordings of reading, placing and connecting
-// under dir replayed into it: an act's frozen copies, for the acts that rest
-// on all three.
+// the sundayTopics, with the recordings of the earlier reading of Facts,
+// placing and connecting under dir replayed into it: the Sunday read's
+// frozen copies, which rest on all three.
 func frozenRecordAt(t *testing.T, path, dir string) *sqlite.Store {
 	t.Helper()
-	store, topics := newRecordAt(t, path, briefingTopics)
+	store, topics := newRecordAt(t, path, sundayTopics)
 	c := chain{
 		factReading: replayed(filepath.Join(dir, "reading")),
 		placing:     replayed(filepath.Join(dir, "placing")),
@@ -433,22 +443,22 @@ func TestEachRecordedActReplaysOverItsOwnInputsAlone(t *testing.T) {
 }
 
 // The chain replay: the Briefing's frozen copies and each of its samples are
-// one consistent run of the Editor, and over it every statement of the Briefing
-// traces through a Development and its Fact to a quote in the Item the Fact
-// was drawn from. It asserts only what spans the acts; each act's own
-// properties, whether its recording is stale and how many of its samples
-// pass its checks, are its recorded test's, so it replays unchecked, over
-// every sample of the Briefing that passes.
-func TestRecordedChainTracesEveryBriefingStatementToAQuote(t *testing.T) {
+// one consistent run of the Editor, and over it every statement of the
+// Briefing cites Spans of the fixture Items, within their text, that reading
+// did not reject (system design: Everything traces). It asserts only what
+// spans the acts; each act's own properties, whether its recording is stale
+// and how many of its samples pass its checks, are its recorded test's, so
+// it replays unchecked, over every sample of the Briefing that passes.
+func TestRecordedChainTracesEveryBriefingStatementToSpansNotRejected(t *testing.T) {
 	t.Parallel()
 	ctx := t.Context()
 	dir := filepath.Join(recordedDir, "briefing")
-	texts := map[string]string{} // EntryID -> the Item's text
+	texts := map[string]string{} // EntryID -> the Item's text as kept
 	for _, f := range fixtureItems(t) {
-		texts[f.item.EntryID] = normal(stripTags(f.item.Title + " " + f.item.Summary + " " + f.item.Content))
+		texts[f.item.EntryID] = f.item.Content
 	}
 	traced := 0
-	frozen := frozenRecordFile(t, filepath.Join(dir, "inputs"))
+	frozen := spanRecordFile(t, filepath.Join(dir, "inputs"))
 	for k := 1; k <= dailyRule.samples; k++ {
 		s, err := sampleAt(samplePath(dir, "saturday", k))
 		if err != nil {
@@ -462,25 +472,26 @@ func TestRecordedChainTracesEveryBriefingStatementToAQuote(t *testing.T) {
 		if err != nil || !found {
 			t.Fatalf("sample %d: no Briefing written: %v %v", k, found, err)
 		}
-		n := 0
-		for _, bs := range b.Stories {
-			for _, st := range bs.Statements {
-				n++
-				if len(st.Developments) == 0 {
-					t.Errorf("sample %d: %q: a statement citing no Development: %q", k, bs.Story.Title, st.Text)
+		for _, st := range b.Statements {
+			if len(st.Cites) == 0 {
+				t.Errorf("sample %d: a statement citing no Span: %q", k, st.Text)
+			}
+			for _, c := range st.Cites {
+				text, ok := texts[c.At.EntryID]
+				if !ok || c.At.Span.End > len(text) {
+					t.Errorf("sample %d: %q cites a Span in no fixture's text: %+v", k, st.Text, c.At)
+					continue
 				}
-				for _, d := range st.Developments {
-					text, ok := texts[d.EntryID]
-					switch {
-					case !ok:
-						t.Errorf("sample %d: %q: %q cites a Development whose Fact traces to no Item: %+v", k, bs.Story.Title, st.Text, d)
-					case strings.TrimSpace(d.Quote) == "" || !strings.Contains(text, normal(d.Quote)):
-						t.Errorf("sample %d: %q: %q cites %q, whose quote is not in its Item: %q", k, bs.Story.Title, st.Text, d.Statement, d.Quote)
-					}
+				r, read, err := store.NewestReading(ctx, c.At.SourceID, c.At.EntryID)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if read && slices.ContainsFunc(r.Rejected, func(a editor.Address) bool { return a == c.At }) {
+					t.Errorf("sample %d: %q cites %q, which reading rejected", k, st.Text, c.Words)
 				}
 			}
 		}
-		if n == 0 {
+		if len(b.Statements) == 0 {
 			t.Errorf("sample %d: the Briefing makes no statement, so nothing is traced", k)
 		}
 		traced++

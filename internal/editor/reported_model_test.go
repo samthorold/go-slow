@@ -106,7 +106,6 @@ func TestARelatingKeepsTheModelReportedNotTheOneAskedFor(t *testing.T) {
 
 func TestTheBriefingKeepsTheModelReportedNotTheOneAskedFor(t *testing.T) {
 	store := record(t)
-	readAndPlace(t, store, &fakeModel{output: startsAStory})
 	ed := askingFor(store, editor.Deps{Briefings: store,
 		BriefingModel: reporting{&fakeModel{output: spokeInMotherwell}, "reported-briefing"}})
 
@@ -118,8 +117,8 @@ func TestTheBriefingKeepsTheModelReportedNotTheOneAskedFor(t *testing.T) {
 	if err != nil || !found {
 		t.Fatalf("Briefing: %v %v", found, err)
 	}
-	if b.Model != "reported-briefing" {
-		t.Errorf("written by %q, want the model reported", b.Model)
+	if b.Judge.Model != "reported-briefing" {
+		t.Errorf("written by %q, want the model reported", b.Judge.Model)
 	}
 }
 

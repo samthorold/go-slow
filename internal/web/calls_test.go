@@ -136,7 +136,7 @@ func TestAConnectionLinksToTheConnectingCallThatMadeIt(t *testing.T) {
 func TestTheBriefingLinksToTheCallThatWroteIt(t *testing.T) {
 	store := openStore(t)
 	speechStory(t, store)
-	writeBriefing(t, store, saturday, spoke)
+	writeStoryBriefing(t, store, saturday, spoke)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	trail := get(t, app, regexp.MustCompile(`id="how-written".*?href="([^"]+)"`).FindStringSubmatch(get(t, app, "/briefings/2026-10-24").body)[1])
@@ -156,8 +156,8 @@ func TestADayWhoseBriefingFailedLinksToEachFailedAttempt(t *testing.T) {
 	store := openStore(t)
 	speechStory(t, store)
 	untraced := `{"stories": [{"story": "S1", "statements": [{"text": "Scotland is the true north.", "developments": []}]}]}`
-	writeBriefing(t, store, saturday, untraced)
-	writeBriefing(t, store, saturday.Add(editor.RetryBriefing), untraced)
+	writeStoryBriefing(t, store, saturday, untraced)
+	writeStoryBriefing(t, store, saturday.Add(editor.RetryBriefing), untraced)
 	app, _ := newAppWithLog(t, saturday.Add(time.Hour), store)
 
 	page := get(t, app, "/briefings/2026-10-24").body
@@ -179,7 +179,7 @@ func TestADayWhoseBriefingFailedLinksToEachFailedAttempt(t *testing.T) {
 
 func TestABriefingWrittenEmptySaysItWasWrittenWithoutAModelCall(t *testing.T) {
 	store := openStore(t)
-	writeBriefing(t, store, saturday, spoke)
+	writeStoryBriefing(t, store, saturday, spoke)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	page := get(t, app, "/briefings/2026-10-24").body

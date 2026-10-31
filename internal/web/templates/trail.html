@@ -8,6 +8,37 @@
 <p>{{grouped .Tokens.Total}} tokens over {{.Calls}} {{if eq .Calls 1}}call{{else}}calls{{end}}:
   {{grouped .Tokens.Input}} input, {{grouped .Tokens.Output}} output{{if .Tokens.CacheRead}}, {{grouped .Tokens.CacheRead}} read from the cache{{end}}.</p>
 
+{{- if .Told}}
+{{/* The calls, the writing call first, then each Span the Briefing cites
+     as written, with the reading and relating calls behind it, each a
+     machine label with its tokens (template "made"). */}}
+<table class="trail">
+  <thead>
+    <tr><th scope="col">Span</th><th scope="col">Item</th><th scope="col">Read</th><th scope="col">Related</th></tr>
+  </thead>
+  <tbody>
+    <tr id="writing">
+      <th scope="row">Writing the Briefing</th>
+      <td></td>
+      <td colspan="2">
+        {{- with .Writing}}{{template "made" .}}
+        {{- else}}<span class="quiet">{{if $.WithoutCall}}with nothing read since the last, it was written without a model call{{else}}no call was kept{{end}}</span>
+        {{- end}}</td>
+    </tr>
+  {{- range .Spans}}
+    <tr>
+      <td><a href="{{.Href}}"><span hx-disable>{{.Words}}</span></a></td>
+      <td>{{template "citation" .Item}}</td>
+      <td>{{with .Reading}}{{template "made" .}}{{else}}<span class="quiet">{{if .Unread}}not yet read{{else}}no call was kept{{end}}</span>{{end}}</td>
+      <td>{{range .Relating}}{{template "made" .}} {{else}}<span class="quiet">not yet related</span>{{end}}</td>
+    </tr>
+  {{- end}}
+  </tbody>
+</table>
+{{- if not .Spans}}
+<p>It cites no Span.</p>
+{{- end}}
+{{- else}}
 {{/* The calls, the writing call first, then each Development the Briefing
      cites as written, with the calls behind it, each a machine label with
      its tokens (template "made"). */}}
@@ -36,5 +67,6 @@
 </table>
 {{- if not .Citations}}
 <p>It cites no Development.</p>
+{{- end}}
 {{- end}}
 {{end}}

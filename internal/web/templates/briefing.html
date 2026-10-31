@@ -26,6 +26,35 @@
 {{- end}}
 </ol>
 {{- end}}
+{{- else if .Told}}
+{{- if not .Statements}}
+<p>{{if .WithoutCall}}Nothing was read since the last Briefing.{{else}}Nothing read since the last Briefing was worth telling.{{end}}</p>
+{{- else}}
+{{/* The Briefing over Spans: each statement a block, the Spans it cites
+     in its margin, each linking its page, with whose words it is and its
+     Item. The margin starts open; the one control folds it away. */}}
+<div class="margined" data-margin="open">
+{{template "margin-fold" "open"}}
+<ul class="blocks">
+{{- range .Statements}}
+  <li class="block">
+    <div class="block-body"><p hx-disable>{{.Text}}</p></div>
+    <div class="block-margin">
+      {{- range .Cites}}
+      <div class="cited">
+        <p class="quiet"><a href="{{.Href}}"><span hx-disable>{{.Words}}</span></a></p>
+        {{- with .Speaker}}
+        <p class="quiet">spoken by <span hx-disable>{{.}}</span></p>
+        {{- end}}
+        <p>{{template "citation" .Item}}</p>
+      </div>
+      {{- end}}
+    </div>
+  </li>
+{{- end}}
+</ul>
+</div>
+{{- end}}
 {{- else if .Emptied}}
 <p>Your Feedback took every Story out of this Briefing. Something did move on; this is the Feedback that took it out, which you can undo:</p>
 {{template "kept" .TakenOut}}
@@ -91,7 +120,7 @@
 {{- with .TrailPath}}
 <p id="how-written"><small>{{if $.WithoutCall}}With nothing to tell, it was written without a model call. {{end}}<a href="{{.}}">How this was written</a></small></p>
 {{- end}}
-{{- if .Exists}}
+{{- if and .Exists (not .Told)}}
 <div class="missed quiet">
 {{template "missedStory" .MissedStory}}
 </div>

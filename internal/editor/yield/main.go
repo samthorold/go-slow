@@ -121,7 +121,7 @@ var acts = []act{
 	{"relating", []string{"Follows", "Same as", "Contradicts"}, countRelating},
 	{"placing", []string{"Developments", "New Stories"}, countPlacing},
 	{"connecting", []string{"Connections", "Mentions involved in no Fact", "Facts involving no Entity"}, countConnecting},
-	{"briefing", []string{"Statements", "Stories"}, countBriefing},
+	{"briefing", []string{"Statements", "Spans cited", "Stories gathered"}, countBriefing},
 }
 
 // countRelating counts the relations a relating judged, by kind. A sample of
@@ -232,21 +232,43 @@ func shownMentions(dir, fixture string) (set, error) {
 	return names, nil
 }
 
-// countBriefing counts the Briefing's statements and the Stories they are in.
+// countBriefing counts the Briefing's statements, the distinct Spans they
+// cite and the Stories it gathered (those the model gathered: a Span told
+// with no relations has an empty Story the act keeps without asking). A
+// Briefing over Stories, the earlier shape, counts its statements, the
+// distinct Developments they cite and the Stories it told.
 func countBriefing(out json.RawMessage, _ about) ([]int, error) {
 	var r struct {
+		Statements []struct {
+			Spans   []string          `json:"spans"`
+			Stories []json.RawMessage `json:"stories"`
+		} `json:"statements"`
 		Stories []struct {
-			Statements []json.RawMessage `json:"statements"`
+			Statements []struct {
+				Developments []string `json:"developments"`
+			} `json:"statements"`
 		} `json:"stories"`
 	}
 	if err := json.Unmarshal(out, &r); err != nil {
 		return nil, err
 	}
-	statements := 0
+	cited := set{}
+	statements, gathered := len(r.Statements), len(r.Stories)
+	for _, st := range r.Statements {
+		gathered += len(st.Stories)
+		for _, s := range st.Spans {
+			cited[s] = true
+		}
+	}
 	for _, s := range r.Stories {
 		statements += len(s.Statements)
+		for _, st := range s.Statements {
+			for _, d := range st.Developments {
+				cited[d] = true
+			}
+		}
 	}
-	return []int{statements, len(r.Stories)}, nil
+	return []int{statements, len(cited), gathered}, nil
 }
 
 // factReading is the little of the earlier reading act's output (Facts,

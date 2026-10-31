@@ -1,6 +1,58 @@
 package editor
 
-import "github.com/samthorold/go-slow/internal/interest"
+import (
+	"time"
+
+	"github.com/samthorold/go-slow/internal/interest"
+)
+
+// ToBrief is a Story the Owner's Topics select, with the Developments it has
+// had in a window: what the Sunday read is shown of the week, until it reads
+// Spans (and what the earlier Briefing, over Stories, was shown of a day).
+type ToBrief struct {
+	Story Story
+	// Today are the Developments in the window, in order.
+	Today []Development
+	// Topics are the names of the Topics whose Items the Developments came
+	// from, and Depth the closest Depth among them.
+	Topics []string
+	Depth  interest.Depth
+}
+
+// StoryBriefing is a Briefing in its earlier shape: the Stories that moved
+// on, each told in statements citing the Developments they rest on. The
+// Record keeps those it wrote, and their days' pages still show them; none
+// is written now (the Briefing tells Spans).
+type StoryBriefing struct {
+	Day       string
+	WrittenAt time.Time
+	Stories   []BriefedStory
+	Model     string
+}
+
+// BriefedStory is one Story as a StoryBriefing tells it.
+type BriefedStory struct {
+	Story      Story
+	Statements []StoryStatement
+}
+
+// StoryStatement is one statement of a StoryBriefing, with the Developments
+// it rests on.
+type StoryStatement struct {
+	Text         string
+	Developments []Development
+}
+
+// BriefingCitation is a Development a StoryBriefing cites, as it was
+// written, with the kept calls behind it: the placing call that made it a
+// Development (in Development.PlacingCall) and ReadingCall, the reading call
+// that drew its Fact; each zero if none was kept.
+type BriefingCitation struct {
+	StoryID     int64
+	StoryTitle  string
+	Development Development
+	ReadingCall int64
+}
 
 // ToPlace is an Item's Facts awaiting placing. They are placed together, in
 // one call, so Facts from one Item can start one new Story between them.

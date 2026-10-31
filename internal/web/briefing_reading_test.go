@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-// The Briefing looks as a Story's page does: its statements lead in the
+// The Briefing looks as a Span's page does: its statements lead in the
 // body column, and how each was made (its citations) and the Feedback on
 // what it cites sit in its margin, which starts open. How that looks is
 // judged in a browser; what the server is held to is the structure the
@@ -31,22 +31,19 @@ func openRegion(t *testing.T, page string) string {
 }
 
 func TestEachStatementOnTheBriefingHasItsCitationsBesideItInAMarginStartingOpen(t *testing.T) {
-	store := openStore(t)
-	speechStory(t, store)
-	writeStoryBriefing(t, store, saturday, spoke)
-	app, _ := newAppWithLog(t, saturday, store)
+	app, _ := newAppWithLog(t, saturday, toldBriefing(t))
 
 	res := get(t, app, "/")
 
 	region := openRegion(t, res.body)
-	statement := blockOf(t, region, "The Prime Minister spoke in Motherwell.")
-	for _, want := range []string{"Andy Burnham spoke in Motherwell.", `href="/stories/1#development-1"`,
-		`<span class="citation">`, `<a href="/items/number-10/`, "<cite hx-disable>PM speech in Scotland</cite>"} {
+	statement := blockOf(t, region, "Derby will host the headquarters.")
+	for _, want := range []string{`<span class="citation">`, `<a href="/items/number-10/hosting`,
+		"<cite hx-disable>Derby to host GBR</cite>", `/items/number-10/hosting/spans/`} {
 		if !strings.Contains(statement.margin, want) {
 			t.Errorf("the statement's margin lacks %q:\n%s", want, statement.margin)
 		}
 	}
-	if strings.Contains(statement.body, "PM speech in Scotland") {
+	if strings.Contains(statement.body, "Derby to host GBR") {
 		t.Errorf("the Item's title is in the body column:\n%s", statement.body)
 	}
 	if strings.Contains(res.body, `class="citations`) {
@@ -59,14 +56,11 @@ func TestEachStatementOnTheBriefingHasItsCitationsBesideItInAMarginStartingOpen(
 const noTen = `<span class="citation"><span hx-disable>No 10</span> <a href="/items/number-10/`
 
 func TestTheBriefingCitesAnItemByItsSourcesShortNameBeforeItsTitle(t *testing.T) {
-	store := openStore(t)
-	speechStory(t, store)
-	writeStoryBriefing(t, store, saturday, spoke)
-	app, _ := newAppWithLog(t, saturday, store)
+	app, _ := newAppWithLog(t, saturday, toldBriefing(t))
 
 	res := get(t, app, "/")
 
-	statement := blockOf(t, openRegion(t, res.body), "The Prime Minister spoke in Motherwell.")
+	statement := blockOf(t, openRegion(t, res.body), "Derby will host the headquarters.")
 	if !strings.Contains(statement.margin, noTen) {
 		t.Errorf("the statement's citation does not name its Source as %q:\n%s", noTen, statement.margin)
 	}

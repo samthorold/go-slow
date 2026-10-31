@@ -8,7 +8,7 @@ import (
 )
 
 // fullPages are pages every Record has, each rendered in the layout.
-var fullPages = []string{"/", "/briefings", "/stories", "/items", "/topics", "/feedback", "/register"}
+var fullPages = []string{"/", "/briefings", "/items", "/topics", "/feedback", "/register"}
 
 // stylesheetLink matches a layout's link to a stylesheet, as served.
 var stylesheetLink = regexp.MustCompile(`<link rel="stylesheet" href="([^"]+)">`)

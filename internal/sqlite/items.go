@@ -122,14 +122,18 @@ func (s *Store) Known(ctx context.Context, sourceID string, entryIDs []string) (
 	return known, nil
 }
 
-// Untexted lists the Source's Items that have no text and are not yet read,
+// uncut is SQL true for an Item, aliased items, no Cut lists the Spans of:
+// nothing has been judged of it, since every judgement is about an address
+// a Cut listed.
+const uncut = `NOT EXISTS (SELECT 1 FROM cuts WHERE cuts.source_id = items.source_id AND cuts.entry_id = items.entry_id)`
+
+// Untexted lists the Source's Items that have no text and are not yet cut,
 // apart from scheduled events.
 func (s *Store) Untexted(ctx context.Context, sourceID string) ([]collect.Item, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT items.source_id, items.entry_id, items.title, items.link, items.summary
-		FROM items LEFT JOIN item_reads USING (source_id, entry_id)
-		WHERE items.source_id = ? AND items.content = '' AND items.due = ''
-			AND item_reads.source_id IS NULL
+		FROM items
+		WHERE items.source_id = ? AND items.content = '' AND items.due = '' AND `+uncut+`
 		ORDER BY items.published, items.entry_id`, sourceID)
 	if err != nil {
 		return nil, fmt.Errorf("untexted items of %s: %w", sourceID, err)
@@ -149,52 +153,30 @@ func (s *Store) Untexted(ctx context.Context, sourceID string) ([]collect.Item, 
 	return out, nil
 }
 
-// GiveText gives an unread Item with no text its text, and clears its
-// check, so the lazy-reading check looks at it again with its text; the
-// Topics it was tied to stay tied. It reports whether the Item was given
-// it: one read meanwhile, or given text already, is left as it was. This
-// is the one change ever made to an Item kept in the Record (system design:
-// An Item is collected with its full text, or not yet).
+// GiveText gives an uncut Item with no text its text. It reports whether
+// the Item was given it: one cut meanwhile, or given text already, is left
+// as it was. This is the one change ever made to an Item kept in the Record
+// (system design: An Item is collected with its full text, or not yet).
 func (s *Store) GiveText(ctx context.Context, sourceID, entryID, text string) (bool, error) {
-	tx, err := s.db.BeginTx(ctx, nil)
-	if err != nil {
-		return false, err
-	}
-	defer func() { _ = tx.Rollback() }()
-	res, err := tx.ExecContext(ctx, `
+	res, err := s.db.ExecContext(ctx, `
 		UPDATE items SET content = ?
-		WHERE source_id = ? AND entry_id = ? AND content = ''
-			AND NOT EXISTS (SELECT 1 FROM item_reads r
-				WHERE r.source_id = items.source_id AND r.entry_id = items.entry_id)`,
+		WHERE source_id = ? AND entry_id = ? AND content = '' AND `+uncut,
 		text, sourceID, entryID)
 	if err != nil {
 		return false, fmt.Errorf("give text to %s: %w", entryID, err)
 	}
 	n, err := res.RowsAffected()
-	if err != nil || n == 0 {
-		return false, err
-	}
-	if _, err := tx.ExecContext(ctx,
-		`DELETE FROM item_checks WHERE source_id = ? AND entry_id = ?`, sourceID, entryID); err != nil {
-		return false, fmt.Errorf("give text to %s: %w", entryID, err)
-	}
-	return true, tx.Commit()
+	return n > 0, err
 }
 
 // ListItems lists the Items in the Record, newest first, each with whether
-// the lazy-reading check has looked at it and the Topics it tied it to,
-// whether it has its text and is cut, and whether its Spans have been read,
-// with what its newest reading judged, apart from scheduled events, which
+// it has its text and is cut, and whether its Spans have been read, with
+// what its newest reading judged, apart from scheduled events, which
 // Upcoming lists.
 func (s *Store) ListItems(ctx context.Context) ([]collect.ListedItem, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT items.source_id, items.entry_id,
 			sources.name, items.title, items.link, items.summary, items.published, items.attribution,
-			EXISTS (SELECT 1 FROM item_checks c
-				WHERE c.source_id = items.source_id AND c.entry_id = items.entry_id),
-			(SELECT json_group_array(topics.name ORDER BY topics.name)
-				FROM item_topics JOIN topics ON topics.id = item_topics.topic_id
-				WHERE item_topics.source_id = items.source_id AND item_topics.entry_id = items.entry_id),
 			items.content != '',
 			EXISTS (SELECT 1 FROM cuts
 				WHERE cuts.source_id = items.source_id AND cuts.entry_id = items.entry_id),
@@ -213,16 +195,13 @@ func (s *Store) ListItems(ctx context.Context) ([]collect.ListedItem, error) {
 	var out []collect.ListedItem
 	for rows.Next() {
 		var it collect.ListedItem
-		var published, topics string
+		var published string
 		if err := rows.Scan(&it.SourceID, &it.EntryID,
 			&it.SourceName, &it.Title, &it.Link, &it.Summary, &published, &it.Attribution,
-			&it.Checked, &topics, &it.HasText, &it.Cut, &it.Read, &it.Names, &it.Speakers, &it.Rejected); err != nil {
+			&it.HasText, &it.Cut, &it.Read, &it.Names, &it.Speakers, &it.Rejected); err != nil {
 			return nil, fmt.Errorf("list items: %w", err)
 		}
 		it.Published = parseTime(published)
-		if err := json.Unmarshal([]byte(topics), &it.Topics); err != nil {
-			return nil, fmt.Errorf("list items: topics: %w", err)
-		}
 		out = append(out, it)
 	}
 	if err := rows.Err(); err != nil {

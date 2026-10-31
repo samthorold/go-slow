@@ -18,10 +18,6 @@ type Calls interface {
 	// CallsOn are the calls an act made on a piece of work, in the order
 	// they were kept.
 	CallsOn(ctx context.Context, act, key string) ([]editor.Call, error)
-	// StoryBriefingCitations are the Developments the day's Briefing over
-	// Stories cites as it was written, each once, with the calls behind
-	// them.
-	StoryBriefingCitations(ctx context.Context, day string) ([]editor.BriefingCitation, error)
 	// BriefingTrail is each Span the day's Briefing over Spans cites, as
 	// written, with the reading and relating calls behind it.
 	BriefingTrail(ctx context.Context, day string) ([]editor.CitedSpan, error)

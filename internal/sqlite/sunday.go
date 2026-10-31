@@ -20,8 +20,16 @@ const (
 	assessmentShape    = 1
 )
 
-// LastSundayReadWritten is when the latest Sunday read was written, in
-// either shape, or zero.
+// nullID is id, or NULL for none.
+func nullID(id int64) any {
+	if id == 0 {
+		return nil
+	}
+	return id
+}
+
+// LastSundayReadWritten is when the latest Sunday read was written, or
+// zero.
 func (s *Store) LastSundayReadWritten(ctx context.Context) (time.Time, error) {
 	var at string
 	if err := s.db.QueryRowContext(ctx, `SELECT coalesce(max(written_at), '') FROM sunday_reads`).Scan(&at); err != nil {
@@ -63,8 +71,7 @@ func (s *Store) BriefingsWritten(ctx context.Context, after, upTo time.Time) ([]
 // KeepSundayRead keeps a Sunday read for its day as an event, with its
 // Judge, and each Assessment, statement and Story it gathered as an event
 // of its own, tied to it, all at once, with its conversation. The day and
-// the run's turns and tokens are kept in sunday_reads, beside the reads of
-// the earlier shape.
+// the run's turns and tokens are kept in sunday_reads.
 func (s *Store) KeepSundayRead(ctx context.Context, r editor.SundayRead) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -279,25 +286,6 @@ func (s *Store) SundayRead(ctx context.Context, day string) (editor.SundayRead, 
 		return r, false, fmt.Errorf("sunday read %s: %w", day, err)
 	}
 	return r, true, nil
-}
-
-// EarlierSundayRead is the day's Sunday read of the earlier shape, over
-// Stories of Facts, reporting whether one was written so: the text of its
-// statements and of its Assessments, in order, as written.
-func (s *Store) EarlierSundayRead(ctx context.Context, day string) (statements, assessments []string, found bool, err error) {
-	if statements, err = s.textsOf(ctx, `SELECT st.text FROM read_statements st JOIN sunday_reads r ON r.id = st.read_id
-		WHERE r.day = ? ORDER BY st.position`, day); err != nil {
-		return nil, nil, false, fmt.Errorf("earlier sunday read %s: %w", day, err)
-	}
-	if assessments, err = s.textsOf(ctx, `SELECT a.statement FROM assessments a JOIN sunday_reads r ON r.id = a.read_id
-		WHERE r.day = ? ORDER BY a.position`, day); err != nil {
-		return nil, nil, false, fmt.Errorf("earlier sunday read %s: %w", day, err)
-	}
-	if err := s.db.QueryRowContext(ctx, `SELECT EXISTS (SELECT 1 FROM sunday_reads r WHERE r.day = ?
-		AND NOT EXISTS (SELECT 1 FROM told_reads t WHERE t.day = r.day))`, day).Scan(&found); err != nil {
-		return nil, nil, false, fmt.Errorf("earlier sunday read %s: %w", day, err)
-	}
-	return statements, assessments, found, nil
 }
 
 // textsOf runs a query of one text column with args.

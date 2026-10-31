@@ -17,10 +17,12 @@ import (
 
 // teller writes the Briefing telling, in one statement saying text, the
 // Span shown with the words tell, its Story gathered of the Spans shown
-// with the words in story, finding each by the words the Briefing is shown.
+// with the words in story, finding each by the words the Briefing is shown;
+// the statement also cites the Span shown with the words also, if any.
 type teller struct {
 	text, tell string
 	story      []string
+	also       string
 }
 
 var shownSpan = regexp.MustCompile(`(?m)^([SE]\d+)(?: \(spoken by [^)]*\))?: (.*)$`)
@@ -46,8 +48,16 @@ func (f teller) Complete(_ context.Context, req editor.Request) (editor.Response
 		}
 		story = append(story, r)
 	}
+	spans := []string{told}
+	if f.also != "" {
+		also, err := ref(f.also)
+		if err != nil {
+			return editor.Response{}, err
+		}
+		spans = append(spans, also)
+	}
 	out, err := json.Marshal(map[string]any{
-		"statements": []any{map[string]any{"spans": []string{told},
+		"statements": []any{map[string]any{"spans": spans,
 			"stories": []any{map[string]any{"span": told, "story": story}}, "text": f.text}},
 	})
 	return editor.Response{Output: out, Model: "fake"}, err

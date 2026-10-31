@@ -7,14 +7,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
-	"slices"
 	"sync"
 	"testing"
 	"time"
 
 	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/cut"
-	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/polite"
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
@@ -122,7 +120,6 @@ func newFixture(t *testing.T, feed, etag string) *fixture {
 		Sources: []collect.Source{source},
 		Fetcher: client,
 		Store:   store,
-		Check:   interest.New(store),
 		Log:     slog.New(slog.DiscardHandler),
 	})
 	if err := store.SyncSources(t.Context(), []collect.Source{source}, now); err != nil {
@@ -207,33 +204,6 @@ func TestCollectionRunsAtStartAndOnEveryTickUntilStopped(t *testing.T) {
 	}
 }
 
-func TestACollectionRunTiesEachNewItemToTheTopicsTheCheckMatchesOrToNone(t *testing.T) {
-	f := newFixture(t, feedV1, "")
-	topics := interest.New(f.store)
-	if _, errs, err := topics.Add(t.Context(), interest.Draft{
-		Name: "The Budget", Terms: "Budget",
-	}); err != nil || errs != nil {
-		t.Fatalf("add Topic: %v %v", errs, err)
-	}
-
-	f.collector.Run(t.Context(), now)
-
-	items, err := f.store.ListItems(t.Context())
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(items) != 2 {
-		t.Fatalf("stored %d Items, want 2", len(items))
-	}
-	budget, call := items[0], items[1]
-	if !budget.Checked || !slices.Equal(budget.Topics, []string{"The Budget"}) {
-		t.Errorf("Budget statement: checked %v, Topics %v; want checked, awaiting reading for The Budget", budget.Checked, budget.Topics)
-	}
-	if !call.Checked || len(call.Topics) != 0 {
-		t.Errorf("PM call: checked %v, Topics %v; want checked, touching no Topic", call.Checked, call.Topics)
-	}
-}
-
 const feedWithText = `<?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Prime Minister's Office, 10 Downing Street - Activity on GOV.UK</title>
@@ -272,7 +242,7 @@ func (r *readAll) ReadWaiting(_ context.Context, now time.Time) error {
 	return nil
 }
 
-func TestACollectionRunReadsTheItemsAwaitingReadingAfterTheCheck(t *testing.T) {
+func TestACollectionRunReadsTheItemsAwaitingReading(t *testing.T) {
 	f := newFixture(t, feedV1, "")
 	reader := &readAll{}
 	f.collector.Read = reader

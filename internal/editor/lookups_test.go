@@ -209,7 +209,7 @@ func TestALookUpWikidataRefusesIsTriedAgainOnALaterRunAfterItsBackoff(t *testing
 	}
 }
 
-func TestAPositionWikidataSaysAPersonHoldsIsNoFact(t *testing.T) {
+func TestAPersonNamedByOfficeIsMatchedByThePositionWikidataSaysTheyHold(t *testing.T) {
 	it := releaseOn("then", speech.Published)
 	store := readRecord(t, naming("Andy Burnham", pm), it)
 	wd := primeMinisters()
@@ -224,10 +224,7 @@ func TestAPositionWikidataSaysAPersonHoldsIsNoFact(t *testing.T) {
 	}
 
 	if got := spanEntities(t, store, it, 1); len(got) != 1 || got[0].WikidataID != "Q269909" {
-		t.Fatalf("S1 mentions %+v, want Andy Burnham", got)
-	}
-	if e, _, err := store.Entity(t.Context(), "Andy Burnham"); err != nil || len(e.Facts) != 0 {
-		t.Errorf("a look-up drew the Facts %+v (%v), want none", e.Facts, err)
+		t.Errorf("S1 mentions %+v, want Andy Burnham", got)
 	}
 }
 

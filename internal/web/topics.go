@@ -1,7 +1,6 @@
 package web
 
 import (
-	"cmp"
 	"context"
 	"errors"
 	"net/http"
@@ -20,30 +19,21 @@ type Topics interface {
 // topicsPage is the view model for the Topics page: the Topics, and the
 // form that takes up a new one.
 type topicsPage struct {
-	Topics  []topicRow
-	Sources []sourceOption
-	Form    topicForm
+	Topics []topicRow
+	Form   topicForm
 }
 
 type topicRow struct {
-	ID      int64
-	Name    string
-	Sources []string
-	Terms   []string
-}
-
-type sourceOption struct {
-	ID      string
-	Name    string
-	Checked bool
+	ID    int64
+	Name  string
+	Terms []string
 }
 
 // topicForm is the add form: what was entered, and why it failed.
 type topicForm struct {
-	Name    string
-	Terms   string
-	Sources map[string]bool
-	Errors  interest.Errors
+	Name   string
+	Terms  string
+	Errors interest.Errors
 }
 
 func (a *app) topics(w http.ResponseWriter, r *http.Request) {
@@ -55,22 +45,14 @@ func (a *app) addTopic(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad form.", http.StatusBadRequest)
 		return
 	}
-	d := interest.Draft{
-		Name:    r.PostForm.Get("name"),
-		Sources: r.PostForm["source"],
-		Terms:   r.PostForm.Get("terms"),
-	}
+	d := interest.Draft{Name: r.PostForm.Get("name"), Terms: r.PostForm.Get("terms")}
 	_, errs, err := a.Topics.Add(r.Context(), d)
 	if err != nil {
 		a.serverError(w, r, err)
 		return
 	}
 	if len(errs) > 0 {
-		f := topicForm{Name: d.Name, Terms: d.Terms, Sources: map[string]bool{}, Errors: errs}
-		for _, id := range d.Sources {
-			f.Sources[id] = true
-		}
-		a.renderTopics(w, r, http.StatusUnprocessableEntity, f)
+		a.renderTopics(w, r, http.StatusUnprocessableEntity, topicForm{Name: d.Name, Terms: d.Terms, Errors: errs})
 		return
 	}
 	http.Redirect(w, r, "/topics", http.StatusSeeOther)
@@ -111,23 +93,9 @@ func (a *app) renderTopics(w http.ResponseWriter, r *http.Request, status int, f
 		a.serverError(w, r, err)
 		return
 	}
-	statuses, err := a.Items.SourceStatuses(r.Context())
-	if err != nil {
-		a.serverError(w, r, err)
-		return
-	}
-	names := map[string]string{}
 	p := topicsPage{Form: f}
-	for _, s := range statuses {
-		names[s.ID] = s.Name
-		p.Sources = append(p.Sources, sourceOption{ID: s.ID, Name: s.Name, Checked: f.Sources[s.ID]})
-	}
 	for _, t := range topics {
-		row := topicRow{ID: t.ID, Name: t.Name, Terms: t.Terms}
-		for _, id := range t.Sources {
-			row.Sources = append(row.Sources, cmp.Or(names[id], id))
-		}
-		p.Topics = append(p.Topics, row)
+		p.Topics = append(p.Topics, topicRow{ID: t.ID, Name: t.Name, Terms: t.Terms})
 	}
 	a.renderStatus(w, r, status, topicsTmpl, p)
 }

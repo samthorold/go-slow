@@ -6,31 +6,7 @@ import (
 	"github.com/samthorold/go-slow/internal/interest"
 )
 
-func TestTheCheckTiesAnItemToATopicByItsTerms(t *testing.T) {
-	reform := interest.Topic{Name: "Reform UK", Terms: []string{"Reform UK", "Farage"}}
-
-	cases := []struct {
-		name string
-		item interest.Item
-		want bool
-	}{
-		{"a term in the title", interest.Item{Title: "Statement on Reform UK councillors"}, true},
-		{"a term in the summary, in another case", interest.Item{Summary: "Mr FARAGE responded."}, true},
-		{"a term in the content", interest.Item{Content: "<p>Nigel Farage, leader of Reform UK.</p>"}, true},
-		{"a term split by punctuation", interest.Item{Title: "Reform-UK's response"}, true},
-		{"part of a longer word", interest.Item{Title: "Farageist politics"}, false},
-		{"no term", interest.Item{Title: "PM call with the President", Summary: "On reform of the NHS."}, false},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			if got := reform.Ties(c.item); got != c.want {
-				t.Errorf("Ties(%+v) = %v, want %v", c.item, got, c.want)
-			}
-		})
-	}
-}
-
-func TestTheCheckMatchesTheTextAReaderSeesNotTheMarkup(t *testing.T) {
+func TestATermOnlyInTheMarkupTouchesNothing(t *testing.T) {
 	content := `<div class="govspeak"><h3 id="background">Context</h3><p>See <a href="https://www.gov.uk/government/news/omagh-inquiry">the inquiry</a>.</p></div>`
 
 	cases := []struct {
@@ -46,14 +22,14 @@ func TestTheCheckMatchesTheTextAReaderSeesNotTheMarkup(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			topic := interest.Topic{Name: c.term, Terms: []string{c.term}}
-			if topic.Ties(interest.Item{Content: content}) {
-				t.Errorf("the term %q, only in the markup, ties the Item", c.term)
+			if topic.Touches(content) {
+				t.Errorf("the term %q, only in the markup, touches the Span", c.term)
 			}
 		})
 	}
 }
 
-func TestTheCheckTiesATermInTheVisibleText(t *testing.T) {
+func TestATermInTheVisibleTextTouches(t *testing.T) {
 	cases := []struct {
 		name    string
 		term    string
@@ -68,26 +44,14 @@ func TestTheCheckTiesATermInTheVisibleText(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			topic := interest.Topic{Name: c.term, Terms: []string{c.term}}
-			if !topic.Ties(interest.Item{Content: c.content}) {
-				t.Errorf("the term %q does not tie %q", c.term, c.content)
+			if !topic.Touches(c.content) {
+				t.Errorf("the term %q does not touch %q", c.term, c.content)
 			}
 		})
 	}
 }
 
-func TestTheCheckTiesEveryItemFromATopicsSources(t *testing.T) {
-	treasury := interest.Topic{Name: "The economy", Sources: []string{"govuk-hm-treasury"}}
-
-	if !treasury.Ties(interest.Item{SourceID: "govuk-hm-treasury", Title: "Anything at all"}) {
-		t.Error("an Item from the Topic's Source is not tied")
-	}
-	if treasury.Ties(interest.Item{SourceID: "govuk-number-10", Title: "Anything at all"}) {
-		t.Error("an Item from another Source is tied")
-	}
-}
-
-// A Span touches a Topic by the Topic's terms alone: its Sources tie Items
-// for the Sunday read, but say nothing of what a Span is about.
+// A Span touches a Topic by the Topic's terms alone.
 func TestASpanTouchesATopicByItsTermsAsWholeWordsOfTheTextAReaderSees(t *testing.T) {
 	reform := interest.Topic{Name: "Reform UK", Terms: []string{"Reform UK", "Farage"}}
 

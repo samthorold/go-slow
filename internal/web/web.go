@@ -44,7 +44,6 @@ type Deps struct {
 	// Relations answers a Span's relations, for its page.
 	Relations Relations
 	Topics    Topics
-	Stories   Stories
 	// Pieces is the Feedback commands on judgements and Spans, and Given
 	// the Feedback they keep, as events.
 	Pieces   Pieces
@@ -102,12 +101,6 @@ var (
 // topicsTmpl is the Topics page.
 var topicsTmpl = page("/topics", "topics.html")
 
-// storiesTmpl is the Stories page, and storyTmpl a Story's own page.
-var (
-	storiesTmpl = page("/stories", "stories.html")
-	storyTmpl   = page(noIndex, "story.html")
-)
-
 // feedbackTmpl is the Feedback page: every piece, as given.
 var feedbackTmpl = page("/feedback", "feedback_list.html")
 
@@ -126,7 +119,6 @@ type navLink struct {
 var indexes = []navLink{
 	{Href: "/", Name: "Briefing"},
 	{Href: "/briefings", Name: "Briefings"},
-	{Href: "/stories", Name: "Stories"},
 	{Href: "/items", Name: "Items"},
 	{Href: "/topics", Name: "Topics"},
 	{Href: "/feedback", Name: "Feedback"},
@@ -185,8 +177,6 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("POST /items/{source}/{entry}/spans/{span}/feedback", a.spanFeedback)
 	mux.HandleFunc("PUT /items/{source}/{entry}/spans/{span}/feedback/{feedback}/undone", a.undoOnSpan)
 	mux.HandleFunc("GET /register", a.register)
-	mux.HandleFunc("GET /stories", a.stories)
-	mux.HandleFunc("GET /stories/{id}", a.story)
 	mux.HandleFunc("GET /topics", a.topics)
 	mux.HandleFunc("POST /topics", a.addTopic)
 	mux.HandleFunc("DELETE /topics/{id}", a.removeTopic)

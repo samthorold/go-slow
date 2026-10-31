@@ -18,11 +18,14 @@ const (
 	rejectedShape = 1
 )
 
-// ItemsToRead are the Items awaiting reading: every Item a Cut lists the
-// Spans of and no reading has read, whatever it is about, each with its
-// newest Cut, oldest first. Work marked failed awaits nothing.
+// ItemsToRead are the Items awaiting reading: every Item collected after the
+// switch that a Cut lists the Spans of and no reading has read, whatever it
+// is about, each with its newest Cut, oldest first. Work marked failed
+// awaits nothing, and nor do the Items collected before the switch, which
+// only re-judging reads.
 func (s *Store) ItemsToRead(ctx context.Context) ([]editor.ToRead, error) {
 	return s.cutItems(ctx, "items to read", newestLiveReading("items.source_id", "items.entry_id")+` IS NULL
+			AND `+afterSwitch+`
 			AND `+notFailed("reading"))
 }
 

@@ -3,9 +3,7 @@ package interest_test
 import (
 	"path/filepath"
 	"testing"
-	"time"
 
-	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
@@ -20,51 +18,29 @@ func openStore(t *testing.T) *sqlite.Store {
 	return store
 }
 
-// The check makes no model call: the Service is built from the Record alone,
-// with no model adapter constructed or passed in, and still ties every Item.
-func TestTheCheckRunsWithNoModelAdapter(t *testing.T) {
-	ctx := t.Context()
-	store := openStore(t)
-	now := time.Date(2026, time.October, 24, 7, 0, 0, 0, time.UTC)
-	src := collect.Source{ID: "number-10", Name: "Number 10", FeedURL: "https://example.org/feed", UsualGap: time.Hour}
-	if err := store.SyncSources(ctx, []collect.Source{src}, now); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := store.AddItems(ctx, []collect.Item{
-		{SourceID: src.ID, EntryID: "a", Title: "PM statement on the Budget", Published: now, CollectedAt: now},
-		{SourceID: src.ID, EntryID: "b", Title: "PM call with the President", Published: now, CollectedAt: now},
-	}); err != nil {
-		t.Fatal(err)
-	}
+// A Topic taken up is kept with its terms, and nothing else.
+func TestATopicTakenUpIsKeptWithItsTerms(t *testing.T) {
+	topics := interest.New(openStore(t))
 
-	topics := interest.New(store)
-	if _, errs, err := topics.Add(ctx, interest.Draft{Name: "The Budget", Terms: "Budget"}); err != nil || errs != nil {
+	if _, errs, err := topics.Add(t.Context(), interest.Draft{Name: "The Budget", Terms: "Budget\nOBR\n"}); err != nil || errs != nil {
 		t.Fatalf("add Topic: %v %v", errs, err)
 	}
-	if err := topics.CheckNew(ctx); err != nil {
-		t.Fatal(err)
-	}
 
-	items, err := store.ListItems(ctx)
+	got, err := topics.Topics(t.Context())
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, it := range items {
-		if !it.Checked {
-			t.Errorf("%q was not checked", it.Title)
-		}
-	}
-	if len(items[0].Topics) != 1 || len(items[1].Topics) != 0 {
-		t.Errorf("ties = %v and %v; want the Budget statement alone tied", items[0].Topics, items[1].Topics)
+	if len(got) != 1 || got[0].Name != "The Budget" || len(got[0].Terms) != 2 || got[0].Terms[1] != "OBR" {
+		t.Errorf("Topics = %+v", got)
 	}
 }
 
-// A Span touches a Topic by its terms alone, so a Topic with none, even
-// with Sources, would touch nothing.
+// A Span touches a Topic by its terms alone, so a Topic with none would
+// touch nothing.
 func TestATopicIsTakenUpOnlyWithATerm(t *testing.T) {
 	topics := interest.New(openStore(t))
 
-	_, errs, err := topics.Add(t.Context(), interest.Draft{Name: "The economy", Sources: []string{"hm-treasury"}})
+	_, errs, err := topics.Add(t.Context(), interest.Draft{Name: "The economy"})
 
 	if err != nil || errs["terms"] == "" {
 		t.Errorf("a Topic with no term was taken up: %v %v", errs, err)

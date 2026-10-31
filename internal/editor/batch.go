@@ -48,7 +48,7 @@ type BatchPoll struct {
 
 // BatchAct is an editorial act as it runs in batches: what awaits it, each
 // piece of work with its request, and how a result is checked and written
-// back. Reading is one; placing and connecting are built the same way.
+// back. Reading and relating are two.
 type BatchAct struct {
 	// Name names the act, as its requests do.
 	Name string

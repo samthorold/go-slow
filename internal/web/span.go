@@ -136,7 +136,7 @@ func (a *app) spanWith(w http.ResponseWriter, r *http.Request, status int, errs 
 		http.NotFound(w, r)
 		return
 	}
-	it, found, err := a.Readings.ReadItem(ctx, sourceID, entryID)
+	it, found, err := a.Readings.KeptItem(ctx, sourceID, entryID)
 	if err != nil {
 		a.serverError(w, r, err)
 		return

@@ -152,10 +152,10 @@ func topicRow(body string, id int) string {
 	return regexp.MustCompile(`(?s)<tr id="topic-` + strconv.Itoa(id) + `"[^>]*>.*?</tr>`).FindString(body)
 }
 
-func TestFollowedTopicsRenderAsATableOfTopicTermsAndSources(t *testing.T) {
+func TestFollowedTopicsRenderAsATableOfTopicsAndTerms(t *testing.T) {
 	app := newApp(t, saturday)
 	addTopic(t, app, url.Values{
-		"name": {"Reform UK"}, "terms": {"Reform UK\nFarage"}, "source": {"govuk-number-10"},
+		"name": {"Reform UK"}, "terms": {"Reform UK\nFarage"},
 	})
 
 	res := get(t, app, "/topics")
@@ -166,7 +166,7 @@ func TestFollowedTopicsRenderAsATableOfTopicTermsAndSources(t *testing.T) {
 	for _, c := range cols {
 		got = append(got, c[1])
 	}
-	if want := []string{"Topic", "Terms", "Sources", ""}; !slices.Equal(got, want) {
+	if want := []string{"Topic", "Terms", ""}; !slices.Equal(got, want) {
 		t.Errorf("the Followed table's columns are %q, want %q:\n%s", got, want, res.body)
 	}
 	row := topicRow(res.body, 1)
@@ -174,13 +174,13 @@ func TestFollowedTopicsRenderAsATableOfTopicTermsAndSources(t *testing.T) {
 		t.Fatalf("no row for the Topic:\n%s", res.body)
 	}
 	cells := regexp.MustCompile(`(?s)<td([^>]*)>(.*?)</td>`).FindAllStringSubmatch(row, -1)
-	if len(cells) != 4 {
-		t.Fatalf("the row has %d cells, want 4:\n%s", len(cells), row)
+	if len(cells) != 3 {
+		t.Fatalf("the row has %d cells, want 3:\n%s", len(cells), row)
 	}
 	if !strings.Contains(cells[0][2], "Reform UK") {
 		t.Errorf("the Topic cell lacks the name:\n%s", cells[0][2])
 	}
-	for i, want := range map[int]string{1: "Reform UK, Farage", 2: "govuk-number-10"} {
+	for i, want := range map[int]string{1: "Reform UK, Farage"} {
 		if !strings.Contains(cells[i][2], want) {
 			t.Errorf("cell %d lacks %q:\n%s", i, want, cells[i][2])
 		}
@@ -245,7 +245,7 @@ func TestTakingUpATopicIsCollapsedAboveTheTable(t *testing.T) {
 func TestAFailedTakeUpReRendersItOpen(t *testing.T) {
 	app := newApp(t, saturday)
 
-	res := send(t, app, http.MethodPost, "/topics", url.Values{"name": {"Reform UK"}, "source": {"govuk-number-10"}})
+	res := send(t, app, http.MethodPost, "/topics", url.Values{"name": {"Reform UK"}})
 
 	if res.status != http.StatusUnprocessableEntity {
 		t.Fatalf("status = %d, want 422", res.status)
@@ -262,13 +262,12 @@ func TestAFailedTakeUpReRendersItOpen(t *testing.T) {
 	}
 }
 
-// A Span touches a Topic by its terms alone, so a Topic needs one, Sources
-// or not.
+// A Span touches a Topic by its terms alone, so a Topic needs one.
 func TestATopicMustHaveATerm(t *testing.T) {
 	app := newApp(t, saturday)
 
 	res := send(t, app, http.MethodPost, "/topics", url.Values{
-		"name": {"Standards in public life"}, "source": {"govuk-number-10"},
+		"name": {"Standards in public life"},
 	})
 
 	if res.status != http.StatusUnprocessableEntity {

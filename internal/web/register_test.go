@@ -18,8 +18,8 @@ import (
 func TestOpeningABriefingIsRecordedWithItsDateOncePerDay(t *testing.T) {
 	store := openStore(t)
 	thursday := saturday.AddDate(0, 0, -2)
-	writeStoryBriefing(t, store, thursday, `{}`)
-	writeStoryBriefing(t, store, saturday, `{}`)
+	tell(t, store, thursday, teller{})
+	tell(t, store, saturday, teller{})
 	app, _ := newAppWithLog(t, saturday, store)
 
 	first := get(t, app, "/")
@@ -73,9 +73,8 @@ func cells(r string) []string {
 func TestTheRegisterLeadsEachRowWithItsStatusInItsHue(t *testing.T) {
 	store := openStore(t)
 	thursday := saturday.AddDate(0, 0, -2)
-	speechStory(t, store, thursday)
-	writeStoryBriefing(t, store, thursday, spoke)
-	writeStoryBriefing(t, store, saturday, `{}`)
+	tell(t, store, thursday, teller{})
+	tell(t, store, saturday, teller{})
 	app, _ := newAppWithLog(t, saturday, store)
 
 	body := get(t, app, "/register").body
@@ -101,10 +100,9 @@ func TestTheRegisterLeadsEachRowWithItsStatusInItsHue(t *testing.T) {
 func TestTheRegisterReadsTheNecessaryConditionsFromTheRecord(t *testing.T) {
 	store := openStore(t)
 	thursday := saturday.AddDate(0, 0, -2)
-	speechStory(t, store, thursday)
-	writeStoryBriefing(t, store, thursday, spoke)
+	tell(t, store, thursday, teller{})
 	// Friday's was never written.
-	writeStoryBriefing(t, store, saturday, `{}`)
+	tell(t, store, saturday, teller{})
 	if err := store.SyncSources(t.Context(), collect.Sources(), saturday.AddDate(0, 0, -30)); err != nil {
 		t.Fatal(err)
 	}
@@ -127,7 +125,7 @@ func TestTheRegisterReadsTheNecessaryConditionsFromTheRecord(t *testing.T) {
 
 func TestTheRegistersReasonAndLastReadingAreQuiet(t *testing.T) {
 	store := openStore(t)
-	writeStoryBriefing(t, store, saturday, `{}`)
+	tell(t, store, saturday, teller{})
 	app, _ := newAppWithLog(t, saturday, store)
 
 	body := get(t, app, "/register").body
@@ -159,7 +157,7 @@ func (u untracedRecord) RegisterRecord(ctx context.Context, loc *time.Location) 
 
 func TestTheRegisterCollapsesALongListOfWhatWasFound(t *testing.T) {
 	store := openStore(t)
-	writeStoryBriefing(t, store, saturday, `{}`)
+	tell(t, store, saturday, teller{})
 	if err := store.SyncSources(t.Context(), collect.Sources(), saturday.AddDate(0, 0, -30)); err != nil {
 		t.Fatal(err)
 	}

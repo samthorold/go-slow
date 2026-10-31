@@ -58,7 +58,11 @@ repos:
         pass_filenames: false
       - id: go-test
         name: go test
-        entry: go test -race ./...
+        # -timeout 20m: under -race, the editor package's recorded replays
+        # run near Go's default 10m on CI's runner, and relating's replays
+        # dominate. Cutting them is #235, whose candidate search scans every
+        # name in the Record.
+        entry: go test -race -timeout 20m ./...
         language: system
         files: \.go$|\.html$|\.sql$|\.css$|\.js$|(^|/)go\.(mod|sum)$
         pass_filenames: false

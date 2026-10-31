@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log/slog"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -23,7 +24,7 @@ func (l lookThenSubmit) Turn(context.Context, editor.ConversationRequest) (edito
 	if *l.turns == 1 {
 		return editor.Turn{Model: "fake-agent", Text: `Looking at <b hx-get="/evil">S1</b>.`, StopReason: "tool_use",
 			Raw:   json.RawMessage(`{"content": [{"type": "thinking", "thinking": "<i hx-get=\"/evil\">hmm</i>"}]}`),
-			Calls: []editor.ToolCall{{ID: "1", Name: "story", Input: json.RawMessage(`{"story": "S1"}`)}},
+			Calls: []editor.ToolCall{{ID: "1", Name: "story", Input: json.RawMessage(`{"span": "P1"}`)}},
 			Usage: editor.Usage{InputTokens: 100, OutputTokens: 10}}, nil
 	}
 	return editor.Turn{Model: "fake-agent", Calls: []editor.ToolCall{{ID: "2", Name: "submit_read", Input: json.RawMessage(l.read)}},
@@ -31,8 +32,7 @@ func (l lookThenSubmit) Turn(context.Context, editor.ConversationRequest) (edito
 }
 
 func TestTheSundayReadAndItsAssessmentsLinkToTheConversationShownTurnByTurn(t *testing.T) {
-	store := openStore(t)
-	speechStory(t, store)
+	store := toldRecord(t)
 	var turns int
 	ed := editor.New(editor.Deps{Store: store, SundayReads: store, SundayReadModel: lookThenSubmit{assessed, &turns},
 		Wikidata: noWikidata{}, Log: slog.New(slog.DiscardHandler)})
@@ -46,7 +46,8 @@ func TestTheSundayReadAndItsAssessmentsLinkToTheConversationShownTurnByTurn(t *t
 		t.Errorf("the read does not link its conversation:\n%s", read.body)
 	}
 	// The Assessment links to the turn that reached it.
-	section := regexp.MustCompile(`(?s)<li class="block" id="assessment-1">.*?</li>`).FindString(read.body)
+	r, _, _ := store.SundayRead(t.Context(), "2026-10-25")
+	section := regexp.MustCompile(`(?s)<li class="block" id="assessment-` + strconv.FormatInt(r.Assessments[0].ID, 10) + `">.*?</li>`).FindString(read.body)
 	if !strings.Contains(section, `href="/conversations/1#turn-2"`) {
 		t.Errorf("the Assessment does not link the turn that reached it:\n%s", section)
 	}
@@ -57,9 +58,9 @@ func TestTheSundayReadAndItsAssessmentsLinkToTheConversationShownTurnByTurn(t *t
 	}
 	for _, want := range []string{
 		`href="/sunday-reads/2026-10-25"`, `id="turn-1"`, `id="turn-2"`,
-		"Andy Burnham in Scotland",          // the week, as the agent was first shown it
-		"Andy Burnham spoke in Motherwell.", // the Story tool's result, sent with turn 2
-		"submit_read", "The Prime Minister is courting Scottish voters.",
+		"Derby will host the GBR headquarters.", // the week, as the agent was first shown it
+		"This is fantastic news",                // the Story tool's result, sent with turn 2
+		"submit_read", "The government is courting Derby.",
 		"continued", "applied", "330 tokens",
 	} {
 		if !strings.Contains(res.body, want) {
@@ -89,8 +90,7 @@ func TestTheSundayReadAndItsAssessmentsLinkToTheConversationShownTurnByTurn(t *t
 // looks at a Story, then submits.
 func sundayConversation(t *testing.T) string {
 	t.Helper()
-	store := openStore(t)
-	speechStory(t, store)
+	store := toldRecord(t)
 	var turns int
 	ed := editor.New(editor.Deps{Store: store, SundayReads: store, SundayReadModel: lookThenSubmit{assessed, &turns},
 		Wikidata: noWikidata{}, Log: slog.New(slog.DiscardHandler)})
@@ -146,9 +146,12 @@ func TestAConversationsTurnsAreBlocksWithTheirNotesInAnOpenMargin(t *testing.T) 
 }
 
 func TestAFailedReadLinksTheConversationOfItsAttempt(t *testing.T) {
-	store := openStore(t)
-	speechStory(t, store)
-	writeSundayRead(t, store, sunday, `{"statements": []}`)
+	store := toldRecord(t)
+	ed := editor.New(editor.Deps{Store: store, SundayReads: store, SundayReadModel: submitter{`{"assessments": [], "statements": []}`},
+		Wikidata: noWikidata{}, Log: slog.New(slog.DiscardHandler)})
+	if err := ed.SundayRead(t.Context(), sunday); err != nil {
+		t.Fatal(err)
+	}
 	app, _ := newAppWithLog(t, sunday, store)
 
 	read := get(t, app, "/sunday-reads/2026-10-25")

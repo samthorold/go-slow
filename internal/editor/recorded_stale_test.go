@@ -154,11 +154,10 @@ func TestARecordedConversationKeepsEachTurnsRequestHash(t *testing.T) {
 // written through the recorder, on a fake conversation, keeps in the Record
 // the very hashes the recording keeps, turn by turn.
 func TestARecordedTurnsHashIsTheHashAKeptTurnCarries(t *testing.T) {
-	store := record(t)
-	readAndPlace(t, store, &fakeModel{output: startsAStory})
-	looking := calls("story", `{"story": "S1"}`)
+	store := toldWeek(t)
+	looking := calls("story", `{"span": "P1"}`)
 	looking.Raw = json.RawMessage(`{"role":"assistant","content":[{"type":"thinking","thinking":"","signature":"sig"}]}`)
-	submitting := submits(citesTheSpeech)
+	submitting := submits(citesTheTold)
 	submitting.Raw = json.RawMessage(`{"role":"assistant","content":[{"type":"tool_use","id":"call-1"}]}`)
 	var rec conversationRecording
 	agent := conversationRecorder{&fakeAgent{turns: []editor.Turn{looking, submitting}}, &rec, "claude-opus-5-5", ""}

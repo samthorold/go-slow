@@ -226,8 +226,7 @@ func TestATrailCountsEachCallOnceThoughSeveralDevelopmentsShareIt(t *testing.T) 
 }
 
 func TestASundayReadsTrailIsItsConversationTurnByTurnWithTokens(t *testing.T) {
-	store := openStore(t)
-	speechStory(t, store)
+	store := toldRecord(t)
 	var turns int
 	ed := editor.New(editor.Deps{Store: store, SundayReads: store, SundayReadModel: lookThenSubmit{assessed, &turns},
 		Wikidata: noWikidata{}, Log: slog.New(slog.DiscardHandler)})

@@ -188,7 +188,7 @@ func (s *Store) KeptPieces(ctx context.Context) ([]feedback.KeptPiece, error) {
 			k.What = "“" + at + "” " + k.What + " “" + to + "”"
 		case feedback.Gathering:
 			k.What = "the Story of “" + at + "”"
-		case feedback.Lookup, feedback.Statement:
+		case feedback.Lookup, feedback.Statement, feedback.Assessment, feedback.SundayRead:
 		default:
 			k.What = "“" + at + "”"
 		}
@@ -207,7 +207,7 @@ func (s *Store) keptPiece(ctx context.Context, p feedback.Piece) (feedback.KeptP
 	k := feedback.KeptPiece{Piece: p}
 	at, to := &k.At, &k.To
 	var readCall, relatedCall, writtenCall int64
-	var relation, statement, entity string
+	var relation, statement, entity, assessment string
 	err := s.db.QueryRowContext(ctx, `
 		SELECT
 			coalesce(rr.source_id, sr.source_id, rel.from_source_id, g.source_id, f.source_id, ''),
@@ -227,7 +227,9 @@ func (s *Store) keptPiece(ctx context.Context, p feedback.Piece) (feedback.KeptP
 					CASE WHEN f.kind = 'missed' THEN `+newestLiveReading("f.source_id", "f.entry_id")+` END)), 0),
 			coalesce((SELECT `+relatingCall("rl")+` FROM relatings rl WHERE rl.event_id = rel.relating_id), 0),
 			coalesce((SELECT `+briefingCall("t")+` FROM told_briefings t
-				WHERE t.event_id = coalesce(g.briefing_id, st.briefing_id, f.briefing_id)), 0)
+				WHERE t.event_id = coalesce(g.briefing_id, st.briefing_id, f.briefing_id)), 0),
+			coalesce(ta.statement, ''), coalesce(tr.day, ''),
+			coalesce((SELECT conversation_id FROM sunday_reads WHERE day = tr.day), 0)
 		FROM feedback_given f
 			LEFT JOIN refers_to rt ON rt.event_id = f.judgement_id
 			LEFT JOIN readings rr ON rr.event_id = rt.reading_id
@@ -240,10 +242,12 @@ func (s *Store) keptPiece(ctx context.Context, p feedback.Piece) (feedback.KeptP
 			LEFT JOIN told_statements st ON st.event_id = f.judgement_id
 			LEFT JOIN told_briefings stt ON stt.event_id = st.briefing_id
 			LEFT JOIN told_briefings ut ON ut.event_id = f.briefing_id
+			LEFT JOIN told_assessments ta ON ta.event_id = f.judgement_id
+			LEFT JOIN told_reads tr ON tr.event_id = coalesce(ta.read_id, g.read_id, f.judgement_id)
 		WHERE f.event_id = ?`, p.ID,
 	).Scan(&at.SourceID, &at.EntryID, &at.Start, &at.End, &to.SourceID, &to.EntryID, &to.Start, &to.End,
 		&relation, &statement, &k.Name, &k.NameKind, &k.Office, &k.On, &entity, &k.Day,
-		&readCall, &relatedCall, &writtenCall)
+		&readCall, &relatedCall, &writtenCall, &assessment, &k.Read, &k.Conversation)
 	if err != nil {
 		return k, fmt.Errorf("feedback %d: %w", p.ID, err)
 	}
@@ -254,6 +258,10 @@ func (s *Store) keptPiece(ctx context.Context, p feedback.Piece) (feedback.KeptP
 		k.What = statement
 	case feedback.Lookup:
 		k.What = "“" + k.Name + "” is " + entity
+	case feedback.Assessment:
+		k.What = assessment
+	case feedback.SundayRead:
+		k.What = "the Sunday read"
 	}
 	for _, c := range []feedback.Call{{Act: "read", ID: readCall}, {Act: "related", ID: relatedCall}, {Act: "written", ID: writtenCall}} {
 		if c.ID != 0 {

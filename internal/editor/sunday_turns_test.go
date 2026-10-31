@@ -15,12 +15,11 @@ import (
 )
 
 func TestAWrittenReadKeepsEveryTurnOfItsConversationInOrder(t *testing.T) {
-	store := record(t)
-	readAndPlace(t, store, &fakeModel{output: startsAStory})
-	looking := calls("story", `{"story": "S1"}`)
+	store := toldWeek(t)
+	looking := calls("story", `{"span": "P1"}`)
 	looking.Raw = json.RawMessage(`{"content": [{"type": "thinking", "thinking": "Look at S1 first."}]}`)
 	looking.StopReason = "tool_use"
-	agent := &fakeAgent{turns: []editor.Turn{looking, submits(uncited), submits(citesTheSpeech)}}
+	agent := &fakeAgent{turns: []editor.Turn{looking, submits(uncited), submits(citesTheTold)}}
 	ed, logs := reader(store, agent)
 
 	if err := ed.SundayRead(t.Context(), sundayMorning); err != nil {
@@ -46,7 +45,7 @@ func TestAWrittenReadKeepsEveryTurnOfItsConversationInOrder(t *testing.T) {
 	// then the tool results of the turn before.
 	first := c.Turns[0]
 	if len(first.Sent) != 1 || first.Sent[0].User != agent.sent[0].Messages[0].User {
-		t.Errorf("the first turn was sent %+v, want the week's Stories", first.Sent)
+		t.Errorf("the first turn was sent %+v, want what the week told", first.Sent)
 	}
 	if first.Response == nil || string(first.Response.Raw) != string(looking.Raw) ||
 		first.Response.StopReason != "tool_use" || first.Response.Usage.InputTokens != 1000 ||
@@ -57,7 +56,7 @@ func TestAWrittenReadKeepsEveryTurnOfItsConversationInOrder(t *testing.T) {
 		t.Errorf("the first turn's outcome = %q, want continued", first.Outcome)
 	}
 	second := c.Turns[1]
-	if len(second.Sent) != 1 || len(second.Sent[0].Results) != 1 || !strings.Contains(second.Sent[0].Results[0].Content, "Andy Burnham") {
+	if len(second.Sent) != 1 || len(second.Sent[0].Results) != 1 || !strings.Contains(second.Sent[0].Results[0].Content, "Scotland") {
 		t.Errorf("the second turn was sent %+v, want the first turn's tool result", second.Sent)
 	}
 	// A refused submission keeps the reason the agent was told.
@@ -76,9 +75,8 @@ func TestAWrittenReadKeepsEveryTurnOfItsConversationInOrder(t *testing.T) {
 }
 
 func TestEachKeptTurnCarriesTheHashOfTheRequestAsSent(t *testing.T) {
-	store := record(t)
-	readAndPlace(t, store, &fakeModel{output: startsAStory})
-	agent := &fakeAgent{turns: []editor.Turn{calls("story", `{"story": "S1"}`), submits(citesTheSpeech)}}
+	store := toldWeek(t)
+	agent := &fakeAgent{turns: []editor.Turn{calls("story", `{"span": "P1"}`), submits(citesTheTold)}}
 	var logs bytes.Buffer
 	ed := editor.New(editor.Deps{
 		Store: store, SundayReads: store, SundayReadModel: agent, Wikidata: &fakeWikidata{},
@@ -163,9 +161,8 @@ func (refusing) Turn(context.Context, editor.ConversationRequest) (editor.Turn, 
 }
 
 func TestEachFailedAttemptKeepsItsOwnTurns(t *testing.T) {
-	store := record(t)
-	readAndPlace(t, store, &fakeModel{output: startsAStory})
-	looking := calls("story", `{"story": "S1"}`)
+	store := toldWeek(t)
+	looking := calls("story", `{"span": "P1"}`)
 	ed, _ := reader(store, &fakeAgent{then: &looking})
 	if err := ed.SundayRead(t.Context(), sundayMorning); err != nil {
 		t.Fatal(err)

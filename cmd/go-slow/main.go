@@ -198,8 +198,6 @@ func run(log *slog.Logger) error {
 		Relations:   store,
 		Topics:      topics,
 		Stories:     store,
-		Feedback:    feedback.New(store),
-		Kept:        store,
 		Pieces:      feedback.NewPieces(store),
 		Given:       store,
 		Register:    store,

@@ -69,6 +69,7 @@ func (a *app) pieceRowOf(k feedback.KeptPiece, page string) pieceRow {
 	for _, c := range k.Calls {
 		row.Made = append(row.Made, made{Act: c.Act, Call: c.ID})
 	}
+	row.Written = k.Conversation
 	return row
 }
 
@@ -78,6 +79,10 @@ func aboutPath(k feedback.KeptPiece) string {
 	switch {
 	case k.Judged == feedback.Statement:
 		return briefingPath(k.Day)
+	case k.Judged == feedback.Assessment:
+		return assessmentPath(k.Judgement)
+	case k.Judged == feedback.SundayRead:
+		return sundayReadPath(k.Read)
 	case k.At.SourceID != "":
 		return spanPath(addressOf(k.At))
 	}

@@ -12,9 +12,12 @@ import (
 
 // SundayReads answers the queries the Sunday read's page needs.
 type SundayReads interface {
-	// SundayRead is the day's Sunday read (YYYY-MM-DD), reporting whether
-	// one was written.
+	// SundayRead is the day's Sunday read (YYYY-MM-DD) over Spans, reporting
+	// whether one was written.
 	SundayRead(ctx context.Context, day string) (editor.SundayRead, bool, error)
+	// EarlierSundayRead is the day's Sunday read of the earlier shape, over
+	// Stories of Facts: the text of its statements and Assessments.
+	EarlierSundayRead(ctx context.Context, day string) (statements, assessments []string, found bool, err error)
 	// SundayReadFailures are the failures to write the day's read.
 	SundayReadFailures(ctx context.Context, day string) ([]editor.SundayReadFailure, error)
 	// Assessment is one Assessment, reporting whether it is in the Record.
@@ -55,20 +58,27 @@ type sundayReadPage struct {
 	Date         string
 	BriefingPath string
 	Exists       bool
+	// Earlier is a read of the earlier shape, as written, with no Feedback.
+	Earlier *earlierRead
 	// Gives is the Feedback on the read as a whole.
 	Gives       gives
 	Statements  []readStatementRow
 	Assessments []assessmentRow
-	Stories     []startedStoryRow
 	// Failure is the latest failure to write the read, for a Sunday with
 	// none.
 	Failure *failureRow
 	// Feedback is the Feedback on the read and its Assessments, each to
 	// undo here.
-	Feedback []keptRow
+	Feedback []pieceRow
 	// Conversation is the page of the conversation that wrote the read; empty
 	// for one written with no model call.
 	Conversation string
+}
+
+// earlierRead is a Sunday read written over Stories of Facts, before the
+// read told Spans: its statements and Assessments as written.
+type earlierRead struct {
+	Statements, Assessments []string
 }
 
 type readStatementRow struct {
@@ -77,17 +87,17 @@ type readStatementRow struct {
 	Cites  []readCitationRow
 }
 
-// readCitationRow is one thing a statement cites, with where it can be
-// read: a Development on its Story's Timeline, a Fact on its Item's page, an
-// Assessment on this page or an earlier read's, or the Wikidata revision a
-// lookup saw.
+// readCitationRow is one thing a statement or Assessment cites, with where
+// it can be read: a Span on its own page, an Assessment on this page or an
+// earlier read's, or the Wikidata revision a lookup saw.
 type readCitationRow struct {
 	Kind string
 	Text string
 	Path string
 	AsAt string
-	// Item is the Item a cited Fact or Development was drawn from, cited at
-	// the Fact on its page; nil for anything else.
+	// Speaker is whose words a cited Span is, if its reading judged one.
+	Speaker string
+	// Item is the Item a cited Span is of, cited; nil for anything else.
 	Item *itemCitation
 }
 
@@ -98,14 +108,9 @@ type assessmentRow struct {
 	Statement  string
 	AsAt       string
 	Supersedes string
-	Facts      []readCitationRow
+	Rests      []readCitationRow
 	// Reached is the turn of the conversation that reached it.
 	Reached reached
-}
-
-type startedStoryRow struct {
-	Title string
-	Path  string
 }
 
 // sundayRead is a Sunday read's page, by date: any Sunday up to today.
@@ -116,26 +121,27 @@ func (a *app) sundayRead(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
+	ctx := r.Context()
 	key := day.Format(time.DateOnly)
-	read, exists, err := a.SundayReads.SundayRead(r.Context(), key)
+	read, exists, err := a.SundayReads.SundayRead(ctx, key)
 	if err != nil {
 		a.serverError(w, r, err)
 		return
 	}
 	p := sundayReadPage{Date: day.Format("Sunday 2 January 2006"), BriefingPath: briefingPath(key), Exists: exists}
-	page := sundayReadPath(key)
-	feedbackPath := page + "/feedback"
-	var kept []feedback.Kept
-	if exists {
-		a.opened(r, a.Register.OpenedSundayRead, key)
-		if kept, err = a.Kept.KeptFeedback(r.Context()); err != nil {
+	if !exists {
+		statements, assessments, earlier, err := a.SundayReads.EarlierSundayRead(ctx, key)
+		if err != nil {
 			a.serverError(w, r, err)
 			return
 		}
-		p.Gives = givenIn(readGives(feedbackPath, read.ID), kept, page)
-	}
-	if !exists {
-		fs, err := a.SundayReads.SundayReadFailures(r.Context(), key)
+		if earlier {
+			a.opened(r, a.Register.OpenedSundayRead, key)
+			p.Exists, p.Earlier = true, &earlierRead{Statements: statements, Assessments: assessments}
+			a.render(w, r, sundayReadTmpl, p)
+			return
+		}
+		fs, err := a.SundayReads.SundayReadFailures(ctx, key)
 		if err != nil {
 			a.serverError(w, r, err)
 			return
@@ -145,39 +151,75 @@ func (a *app) sundayRead(w http.ResponseWriter, r *http.Request) {
 			p.Failure = &failureRow{At: when(f.At, day.Location()), Reason: f.Reason,
 				Conversation: conversationPath(f.ConversationID, 0)}
 		}
+		a.render(w, r, sundayReadTmpl, p)
+		return
 	}
+	a.opened(r, a.Register.OpenedSundayRead, key)
+	pieces, err := a.Given.KeptPieces(ctx)
+	if err != nil {
+		a.serverError(w, r, err)
+		return
+	}
+	page := sundayReadPath(key)
+	path := page + "/feedback"
+	p.Gives = givesOn([]giveButton{{Path: path, Kind: string(feedback.NewToMe), Judgement: read.ID, Label: "New to me"}}, pieces, page)
 	p.Conversation = conversationPath(read.ConversationID, 0)
-	reached := reachedBy(read)
 	for _, st := range read.Statements {
+		if len(st.TakenOutBy) > 0 {
+			continue // cites an Assessment Feedback withdrew
+		}
 		row := readStatementRow{Anchor: statementAnchor(st.ID), Text: st.Text}
 		for _, c := range st.Cites {
 			row.Cites = append(row.Cites, a.citation(c, key))
 		}
 		p.Statements = append(p.Statements, row)
 	}
+	ids := map[int64]bool{read.ID: true}
 	for _, as := range read.Assessments {
+		ids[as.ID] = true
 		row := assessmentRow{Anchor: assessmentAnchor(as.ID), Statement: as.Statement, AsAt: as.AsAt.Format("2 January 2006"),
-			Withdrawn: as.Withdrawn, Reached: reached}
+			Withdrawn: as.Withdrawn, Reached: reachedBy(read)}
 		if !as.Withdrawn {
-			row.Gives = givenIn(assessmentGives(feedbackPath, as.ID), kept, page)
+			row.Gives = givesOn([]giveButton{
+				{Path: path, Kind: string(feedback.Wrong), Judgement: as.ID, Label: "Wrong",
+					Confirm: "Withdraw this Assessment, and the statements that cite it?"},
+				{Path: path, Kind: string(feedback.NewToMe), Judgement: as.ID, Label: "New to me"},
+			}, pieces, page)
 		}
 		if as.Supersedes != 0 {
 			row.Supersedes = assessmentPath(as.Supersedes)
 		}
-		for _, f := range as.Facts {
-			row.Facts = append(row.Facts, a.citation(editor.Citation{Kind: editor.CitesFact, Fact: f}, key))
+		for _, o := range as.Spans {
+			row.Rests = append(row.Rests, a.citation(editor.Citation{Kind: editor.CitesSpan, Span: o}, key))
+		}
+		for _, e := range as.Earlier {
+			row.Rests = append(row.Rests, a.citation(editor.Citation{Kind: editor.CitesAssessment, Assessment: e}, key))
 		}
 		p.Assessments = append(p.Assessments, row)
 	}
-	for _, s := range read.Stories {
-		p.Stories = append(p.Stories, startedStoryRow{Title: s.Title, Path: storyPath(s.ID)})
-	}
-	for _, k := range kept {
-		if (k.Level == feedback.SundayRead || k.Level == feedback.Assessment) && k.ReadDay == key {
-			p.Feedback = append(p.Feedback, a.keptRow(k, page))
-		}
-	}
+	p.Feedback = a.piecesOn(pieces, page, func(k feedback.KeptPiece) bool { return ids[k.Judgement] })
 	a.render(w, r, sundayReadTmpl, p)
+}
+
+// sundayReadFeedback is Feedback given on a Sunday read, about the read or
+// its Assessments. It lands back on the read, which re-renders with the
+// Record as Feedback left it.
+func (a *app) sundayReadFeedback(w http.ResponseWriter, r *http.Request) {
+	now := a.Now()
+	day, err := time.ParseInLocation(time.DateOnly, r.PathValue("day"), now.Location())
+	if err != nil || day.After(now) || day.Weekday() != time.Sunday {
+		http.NotFound(w, r)
+		return
+	}
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Bad form.", http.StatusBadRequest)
+		return
+	}
+	ask := askFrom(r, "", "", "")
+	// Every piece given here is a button the page offers.
+	a.givePiece(w, r, ask, sundayReadPath(day.Format(time.DateOnly)), func(feedback.Errors) {
+		http.Error(w, "That Feedback can't be given here.", http.StatusUnprocessableEntity)
+	})
 }
 
 // undoOnSundayRead is an undo from a Sunday read, which it lands back on.
@@ -188,20 +230,20 @@ func (a *app) undoOnSundayRead(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	a.undo(w, r, sundayReadPath(day.Format(time.DateOnly)))
+	a.undoPiece(w, r, sundayReadPath(day.Format(time.DateOnly)))
 }
 
-// citation is what a statement in the read for day cites, as the page
-// shows it.
+// citation is what a statement or Assessment in the read for day cites, as
+// the page shows it.
 func (a *app) citation(c editor.Citation, day string) readCitationRow {
 	switch c.Kind {
-	case editor.CitesDevelopment, editor.CitesFact:
-		item := itemPath(c.Fact.SourceID, c.Fact.EntryID)
-		fact := item + "#" + factAnchor(c.Fact.ID)
-		row := readCitationRow{Kind: "Fact", Text: c.Fact.Statement, Path: fact,
-			AsAt: factDate(c.Fact.Fact), Item: new(a.cite(c.Fact.SourceID, c.Fact.ItemTitle, fact))}
-		if c.Kind == editor.CitesDevelopment {
-			row.Kind, row.Path = "Development", storyPath(c.Story.ID)+"#"+developmentAnchor(c.Fact.ID)
+	case editor.CitesSpan:
+		o := c.Span
+		path := spanPath(o.At)
+		row := readCitationRow{Kind: "Span", Text: o.Words, Path: path, Speaker: o.Speaker,
+			Item: new(a.cite(o.Item.SourceID, o.Item.Title, itemPath(o.Item.SourceID, o.Item.EntryID)))}
+		if !o.Item.Published.IsZero() {
+			row.AsAt = o.Item.Published.Format(time.DateOnly)
 		}
 		return row
 	case editor.CitesAssessment:

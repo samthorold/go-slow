@@ -17,14 +17,10 @@ import (
 // The Sunday read's samples, recorded and replayed on a fake conversation
 // over a small Record: the harness around the act, with no model call.
 
-// placedRecord is a fresh Record for each try: the speech read and placed,
-// so citesTheSpeech is a read the act's checks take.
-func placedRecord(t *testing.T) func() *sqlite.Store {
-	return func() *sqlite.Store {
-		store := record(t)
-		readAndPlace(t, store, &fakeModel{output: startsAStory})
-		return store
-	}
+// toldRecord is a fresh Record for each try: the told week, so citesTheTold
+// is a read the act's checks take.
+func toldRecord(t *testing.T) func() *sqlite.Store {
+	return func() *sqlite.Store { return toldWeek(t) }
 }
 
 // tries is a fake conversation that runs one script per try, starting the
@@ -53,8 +49,8 @@ func withRaw(t editor.Turn, raw string) editor.Turn {
 
 // passingTry looks at a Story, then submits a read the checks take.
 var passingTry = []editor.Turn{
-	withRaw(calls("story", `{"story": "S1"}`), `{"content":[{"type":"thinking","signature":"a"}]}`),
-	withRaw(submits(citesTheSpeech), `{"content":[{"type":"thinking","signature":"b"}]}`),
+	withRaw(calls("story", `{"span": "P1"}`), `{"content":[{"type":"thinking","signature":"a"}]}`),
+	withRaw(submits(citesTheTold), `{"content":[{"type":"thinking","signature":"b"}]}`),
 }
 
 // failingTry submits a read the checks refuse, then stops.
@@ -70,14 +66,14 @@ func (noNetwork) RoundTrip(*http.Request) (*http.Response, error) {
 // recordSundaySamples records the Sunday read's samples under dir on live.
 func recordSundaySamples(t *testing.T, dir string, live editor.Conversation, maxTries int) []error {
 	t.Helper()
-	return sundaySampled(t, dir, placedRecord(t), &sundayLive{conv: live, model: "claude-opus-5-5", wikidata: noNetwork{}, maxTries: maxTries}, nil)
+	return sundaySampled(t, dir, toldRecord(t), &sundayLive{conv: live, model: "claude-opus-5-5", wikidata: noNetwork{}, maxTries: maxTries}, nil)
 }
 
 // replaySundaySamples replays the Sunday read's samples under dir, a stale
 // turn failing the test.
 func replaySundaySamples(t *testing.T, dir string) []error {
 	t.Helper()
-	return sundaySampled(t, dir, placedRecord(t), nil, func(err error) { t.Error(err) })
+	return sundaySampled(t, dir, toldRecord(t), nil, func(err error) { t.Error(err) })
 }
 
 // The Sunday read's samples are recorded a conversation at a time, each kept
@@ -210,7 +206,7 @@ func TestAStaleOrUnfinishedSundayReadTryIsRedrawn(t *testing.T) {
 	keepTry(t, path, rec)
 
 	var reported []error
-	errs := sundaySampled(t, dir, placedRecord(t), nil, func(err error) { reported = append(reported, err) })
+	errs := sundaySampled(t, dir, toldRecord(t), nil, func(err error) { reported = append(reported, err) })
 	if len(reported) == 0 || !strings.Contains(reported[0].Error(), "stale: re-record with") {
 		t.Errorf("reported %v; want the first sample stale", reported)
 	}

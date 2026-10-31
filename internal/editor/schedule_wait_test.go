@@ -45,8 +45,7 @@ func TestStartingLateWithBatchesPendingTheBriefingIsWrittenAtOnceOverSpansCutBut
 
 func TestOnSundayTheSundayReadFollowsTheBriefing(t *testing.T) {
 	store := record(t)
-	readAndPlace(t, store, &fakeModel{output: startsAStory})
-	s, happened := sundaySchedule(t, store, &fakeAgent{turns: []editor.Turn{submits(citesTheSpeech)}})
+	s, happened := sundaySchedule(t, store, &fakeAgent{turns: []editor.Turn{submits(citesTheTold)}})
 
 	s.Tick(t.Context(), lateStart.AddDate(0, 0, 1))
 

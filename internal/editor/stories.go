@@ -62,9 +62,6 @@ type ToPlace struct {
 	// Mentions are the Entities the Item mentions, as its reading gave
 	// them, which decide what it is weighed against.
 	Mentions []Mention
-	// Depth is the closest Depth of the Topics tying the Item now; zero if
-	// none does.
-	Depth interest.Depth
 	// Precedents are the Owner's past Feedback on Developments that share
 	// an Entity or a Topic with the Facts.
 	Precedents []Precedent

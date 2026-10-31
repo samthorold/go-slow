@@ -34,12 +34,16 @@
 {{- end}}
 
 {{/* The Sources, folded: with no exceptions, under one quiet line saying
-     so. */}}
+     so. Each with what the Owner steers by: the Stories it contributes to
+     that touch a Topic and those that don't, and its Spans Rejected. */}}
 <details id="sources" class="sources">
   <summary class="quiet">{{if .Exceptions}}Sources{{else}}All Sources current · no failed work{{end}}</summary>
+  <p class="quiet">Counted over the last {{.SteeringDays}} days: the Stories gathered that hold a Span of one of the Source's Items, and the Spans of its Items collected. Topics select nothing; they are counted here to steer by.</p>
   <ul>
   {{- range .Sources}}
-    <li>{{.Name}}{{if .Newest}}: newest Item {{.Newest}}{{end}}{{if .Quiet}} <strong>quiet: nothing new past its usual gap</strong>{{end}}</li>
+    <li>{{.Name}}{{if .Newest}}: newest Item {{.Newest}}{{end}}{{if .Quiet}} <strong>quiet: nothing new past its usual gap</strong>{{end}}
+
+      <span class="machine">Stories: {{.Counts.Touching}} touching a Topic, {{.Counts.Untouched}} not · Spans: {{.Counts.Rejected}} of {{.Counts.Spans}} rejected</span></li>
   {{- end}}
   </ul>
 </details>

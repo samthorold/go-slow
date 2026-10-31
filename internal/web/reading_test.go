@@ -44,8 +44,14 @@ func readSpeech(t *testing.T, store *sqlite.Store, output string) {
 	speech.EntryID = "tag:www.gov.uk,2005:/government/speeches/pm-speech-in-scotland?x=1#y"
 	seed(t, store, saturday.AddDate(0, 0, -7), speech)
 	topics := interest.New(store)
-	if _, errs, err := topics.Add(t.Context(), interest.Draft{Name: "Scotland", Depth: "close", Terms: "Scotland"}); err != nil || errs != nil {
+	topic, errs, err := topics.Add(t.Context(), interest.Draft{Name: "Scotland", Terms: "Scotland"})
+	if err != nil || errs != nil {
 		t.Fatalf("add Topic: %v %v", errs, err)
+	}
+	// Feedback still carries the Depth the Record keeps for a Topic,
+	// until it is replaced.
+	if _, err := store.SetDepth(t.Context(), topic.ID, interest.Close); err != nil {
+		t.Fatal(err)
 	}
 	drawFacts(t, store, speech, output, editor.Usage{})
 }

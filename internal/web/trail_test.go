@@ -43,7 +43,7 @@ func briefSpeech(t *testing.T, store *sqlite.Store, read, place, brief string) {
 	speech := item("speech", "PM speech in Scotland", saturday.Add(-48*time.Hour))
 	speech.Content = "<p>It’s good to be here in Motherwell.</p>"
 	seed(t, store, saturday.AddDate(0, 0, -7), speech)
-	if _, errs, err := interest.New(store).Add(t.Context(), interest.Draft{Name: "Scotland", Depth: "close", Terms: "Scotland"}); err != nil || errs != nil {
+	if _, errs, err := interest.New(store).Add(t.Context(), interest.Draft{Name: "Scotland", Terms: "Scotland"}); err != nil || errs != nil {
 		t.Fatalf("add Topic: %v %v", errs, err)
 	}
 	drawFacts(t, store, speech, read, editor.Usage{InputTokens: 1000, OutputTokens: 100})

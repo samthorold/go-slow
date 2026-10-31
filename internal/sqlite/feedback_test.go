@@ -37,7 +37,7 @@ func threeFacts(t *testing.T) *sqlite.Store {
 		Attribution: collect.OGL, CollectedAt: saturday.Add(-time.Hour)}}); err != nil {
 		t.Fatal(err)
 	}
-	if _, errs, err := interest.New(store).Add(t.Context(), interest.Draft{Name: "Burnham", Depth: "close", Terms: "Speech"}); err != nil || errs != nil {
+	if _, errs, err := interest.New(store).Add(t.Context(), interest.Draft{Name: "Burnham", Terms: "Speech"}); err != nil || errs != nil {
 		t.Fatalf("add Topic: %v %v", errs, err)
 	}
 	fact := func(s string) editor.Fact {

@@ -211,7 +211,7 @@ func TestACollectionRunTiesEachNewItemToTheTopicsTheCheckMatchesOrToNone(t *test
 	f := newFixture(t, feedV1, "")
 	topics := interest.New(f.store)
 	if _, errs, err := topics.Add(t.Context(), interest.Draft{
-		Name: "The Budget", Depth: "close", Terms: "Budget",
+		Name: "The Budget", Terms: "Budget",
 	}); err != nil || errs != nil {
 		t.Fatalf("add Topic: %v %v", errs, err)
 	}

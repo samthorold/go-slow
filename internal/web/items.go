@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/samthorold/go-slow/internal/collect"
+	"github.com/samthorold/go-slow/internal/interest"
 )
 
 // itemsPage is the view model for the Items page: what has been collected,
@@ -41,7 +42,18 @@ type sourceRow struct {
 	Name   string
 	Newest string
 	Quiet  bool
+	// Counts are what the Owner steers by, over steeringWindow.
+	Counts interest.SourceCounts
 }
+
+// steeringWindow is how far back the Items page counts, per Source, the
+// Stories gathered and the Spans of the Items collected: four weeks, long
+// enough for a Source that publishes weekly to show a few, short enough to
+// show a Source as it is now.
+const steeringWindow = 28 * 24 * time.Hour
+
+// SteeringDays is the window in days, as the page states it.
+func (itemsPage) SteeringDays() int { return int(steeringWindow / (24 * time.Hour)) }
 
 type itemRow struct {
 	Title       string
@@ -109,6 +121,15 @@ func (a *app) items(w http.ResponseWriter, r *http.Request) {
 		a.serverError(w, r, err)
 		return
 	}
+	counts, err := a.Items.SourceCounts(r.Context(), now.Add(-steeringWindow), now)
+	if err != nil {
+		a.serverError(w, r, err)
+		return
+	}
+	countsOf := map[string]interest.SourceCounts{}
+	for _, c := range counts {
+		countsOf[c.SourceID] = c
+	}
 
 	var p itemsPage
 	for _, f := range failed {
@@ -123,6 +144,7 @@ func (a *app) items(w http.ResponseWriter, r *http.Request) {
 			Name:   s.Name,
 			Newest: when(s.Newest, now.Location()),
 			Quiet:  s.Quiet(now),
+			Counts: countsOf[s.ID],
 		}
 		p.Sources = append(p.Sources, src)
 		if src.Quiet {

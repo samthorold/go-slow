@@ -54,7 +54,6 @@ func (s *Store) shownWith(ctx context.Context, id int64) ([]int64, error) {
 	return out, rows.Err()
 }
 
-
 // StandingWrongOnRelations is the wrong standing on relations, newest
 // first, each with the Spans at its two ends as their Items' newest readings
 // read them.

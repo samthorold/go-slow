@@ -173,4 +173,3 @@ func briefingLine(p Precedent) any {
 		Given     string `json:"given"`
 	}{said[p.Kind], s.Item, s.Published, s.Words, p.Day, p.GivenAt.UTC().Format(time.DateOnly)}
 }
-

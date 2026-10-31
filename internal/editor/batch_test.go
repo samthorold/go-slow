@@ -14,7 +14,6 @@ import (
 	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
-	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
 
@@ -85,9 +84,6 @@ const ferriesReading = `{"names": [{"at": {"span": 1, "words": "Scotland"}, "kin
 func withFerries(t *testing.T, store *sqlite.Store) {
 	t.Helper()
 	if _, err := store.AddItems(t.Context(), []collect.Item{ferries}); err != nil {
-		t.Fatal(err)
-	}
-	if err := interest.New(store).CheckNew(t.Context()); err != nil {
 		t.Fatal(err)
 	}
 	if err := cut.New(store).CutNew(t.Context(), saturday); err != nil {

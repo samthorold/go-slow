@@ -411,7 +411,7 @@ a.machine:focus-visible {
 }
 
 /* Body and margin: every page that shows the Editor's work lays each block
-   (a Fact, a Claim, a statement) out as its text in a body column and its
+   (a Span, a statement, an Assessment) out as its text in a body column and its
    notes in a margin beside it, aligned with it: the quote (quiet), a date,
    pills, the machine label and the block's Feedback actions, the margin's
    only buttons. The blocks sit in one region,
@@ -423,7 +423,7 @@ a.machine:focus-visible {
      </div>
    whose margin the one fold control (static/margin-fold.js) folds away and
    back. The state lives in data-margin; a page starts open (the Briefing,
-   a Story, an Item), except the Sunday read, a reading page, folded. A page holding a region widens to fit the margin;
+   a Span, an Item), except the Sunday read, a reading page, folded. A page holding a region widens to fit the margin;
    on a narrow window each block's notes drop below it. */
 body:has(.margined) main,
 body:has(.margined) nav,
@@ -516,49 +516,11 @@ body:has(.margined) #request-errors {
   }
 }
 
-/* What Feedback took out (a withdrawn or unwanted Development, a withdrawn
-   Connection) stays on the page, struck through in the quiet colour, with
-   the reason in its margin. */
+/* What is set aside (a Span Rejected) stays on the page, struck through in
+   the quiet colour, with the reason in its margin. */
 .struck {
   text-decoration: line-through;
   color: var(--muted);
-}
-
-/* A Story's Timeline: an entry is a run of Developments from one Item, its
-   head (.entry-head) giving the date and the Item once, its Developments
-   blocks under it, reading on from one another. */
-.timeline {
-  list-style: none;
-  padding-left: 0;
-}
-
-.entry + .entry {
-  margin-top: 1.5rem;
-}
-
-.entry-head {
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 0.8rem;
-  color: var(--muted);
-  margin-bottom: 0.4rem;
-}
-
-.entry .block {
-  margin-bottom: 0.75rem;
-}
-
-/* A Story's title is a block too, on its page and on the Briefing: its
-   notes and actions in the margin. */
-.block-body h1,
-.block-body h2 {
-  margin-top: 0;
-}
-
-/* A Story's foot: what the Owner does less often, collapsed. */
-.story-foot {
-  margin-top: 2.25rem;
-  border-top: 1px solid var(--rule);
-  padding-top: 1rem;
 }
 
 /* The status hues (see the top of this file): a verdict, small and set in
@@ -682,15 +644,8 @@ body:has(.margined) #request-errors {
   margin-bottom: 0.5rem;
 }
 
-/* What a group of controls or a given mark in a Briefing statement's
-   margin is on: its Development's Fact. */
-.about {
-  margin-right: 0.5rem;
-  font-style: italic;
-}
-
-/* What a statement cites, each in its margin: the Development, then its
-   Item. */
+/* What a statement cites, each in its margin: the Span, whose words it
+   is, then its Item. */
 .cited p {
   margin: 0;
 }
@@ -714,7 +669,7 @@ body:has(.margined) #request-errors {
   margin-top: 0.75rem;
 }
 
-/* The Topics page: a row per Topic, its name, terms and Sources. Remove is
+/* The Topics page: a row per Topic, its name and terms. Remove is
    in the row's .actions, hidden at rest the Briefing's way (in the tab
    order) and shown while the pointer or keyboard focus is in the row. */
 .topics {

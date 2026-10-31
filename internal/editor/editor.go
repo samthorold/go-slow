@@ -10,7 +10,9 @@ import (
 type Store interface {
 	// ItemsToRead are the Items awaiting reading: every Item cut and not
 	// yet read, whatever it is about, each with its newest Cut, oldest
-	// first. Work marked failed awaits nothing.
+	// first. Work marked failed awaits nothing, and nor do the Items
+	// collected before the Record kept only events, which only re-judging
+	// reads.
 	ItemsToRead(ctx context.Context) ([]ToRead, error)
 	// KeepReading keeps a reading, each of its judgements as its own event
 	// with the reading's Judge, all at once.
@@ -119,46 +121,10 @@ func (e *Editor) keepReading(ctx context.Context, r Reading, now time.Time) erro
 // entry, a line apart.
 func itemKey(it Item) string { return it.SourceID + "\n" + it.EntryID }
 
-// StoryListing is a Story as the Stories page lists it.
-type StoryListing struct {
-	ID    int64
-	Title string
-	// Developments is how many it has, and Latest the date of the latest.
-	Developments int
-	Latest       time.Time
-}
-
-// KnownEntity is an Entity as the Record holds it.
-type KnownEntity struct {
-	Name string
-	Kind string
-	// WikidataID is the Wikidata item it is, or empty for the Editor's own.
-	WikidataID string
-	// Aliases are the names the Record's Items have called it by.
-	Aliases []string
-	// Facts are the Facts about it drawn from Reference sources.
-	Facts []Fact
-}
-
-// ReadItem is an Item as its page shows it: what was collected, and what
-// reading drew from it.
-type ReadItem struct {
+// KeptItem is an Item as its page shows it: what was collected, with its
+// Source's name and attribution. What was judged of it is in its events.
+type KeptItem struct {
 	Item
 	SourceName  string
 	Attribution string
-	// Read is whether the Item has been read; ReadAt and Model say when and
-	// by which model.
-	Read   bool
-	ReadAt time.Time
-	Model  string
-	// ReadingCall is the kept call whose reading drew its Facts; zero if
-	// none was kept.
-	ReadingCall int64
-	// Topics are the names of the Topics the check tied the Item to.
-	Topics []string
-	// Mentions are the Entities the Item mentions, each once, by name.
-	Mentions []Entity
-	// Facts carry the Entities each involves (Fact.Involves).
-	Facts  []Fact
-	Claims []Claim
 }

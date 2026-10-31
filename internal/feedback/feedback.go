@@ -23,12 +23,13 @@ const (
 	NewToMe Kind = "new to me"
 )
 
-// Level is what a piece of the Feedback kept before the Record became
-// events is about. No Feedback is given so now, but the Record keeps what
-// was, and the register still reads it.
+// Level is what the register breaks Feedback down by. The first four are
+// the old design's, on which no Feedback is given and the Record keeps none
+// now; the register counts nothing at them until it is restated over the
+// events.
 type Level string
 
-// The levels that Feedback was given at.
+// The levels the register counts Feedback at.
 const (
 	Story       Level = "story"
 	Development Level = "development"

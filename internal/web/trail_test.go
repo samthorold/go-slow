@@ -1,104 +1,26 @@
 package web_test
 
 import (
-	"context"
-	"encoding/json"
+	"database/sql"
 	"log/slog"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/samthorold/go-slow/internal/editor"
-	"github.com/samthorold/go-slow/internal/editor/frozentest"
-	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
 
-// usageModel answers every call with the same output, reporting usage.
-type usageModel struct {
-	output string
-	usage  editor.Usage
-}
-
-func (u usageModel) Complete(context.Context, editor.Request) (editor.Response, error) {
-	return editor.Response{Output: json.RawMessage(u.output), Model: "fake", Usage: u.usage}, nil
-}
-
-// spokenBriefing is a Record whose Briefing cites one Development: the
-// speech read (1100 tokens), its Fact placed (550) and the Briefing written
-// (220), each call reporting its usage.
-func spokenBriefing(t *testing.T, store *sqlite.Store) {
+// toldBriefing is a Record whose Briefing for Saturday tells the later
+// Item's Span, related to the release's.
+func toldBriefing(t *testing.T) *sqlite.Store {
 	t.Helper()
-	briefSpeech(t, store, reading, `{"new_stories": [{"ref": "N1", "title": "Andy Burnham in Scotland"}],
-		"facts": [{"fact": "F1", "developments_in": ["N1"]}]}`, spoke)
-}
-
-// briefSpeech reads the speech, places its Facts and writes the Briefing,
-// with the outputs given, reading's call reporting 1100 tokens, placing's
-// 550 and the Briefing's 220.
-func briefSpeech(t *testing.T, store *sqlite.Store, read, place, brief string) {
-	t.Helper()
-	speech := item("speech", "PM speech in Scotland", saturday.Add(-48*time.Hour))
-	speech.Content = "<p>It’s good to be here in Motherwell.</p>"
-	seed(t, store, saturday.AddDate(0, 0, -7), speech)
-	if _, errs, err := interest.New(store).Add(t.Context(), interest.Draft{Name: "Scotland", Terms: "Scotland"}); err != nil || errs != nil {
-		t.Fatalf("add Topic: %v %v", errs, err)
-	}
-	drawFacts(t, store, speech, read, editor.Usage{InputTokens: 1000, OutputTokens: 100})
-	log := slog.New(slog.DiscardHandler)
-	if err := frozentest.PlaceWaiting(t.Context(), frozentest.Deps{Store: store, Log: log,
-		Model: usageModel{place, editor.Usage{InputTokens: 500, OutputTokens: 50}}}, saturday); err != nil {
-		t.Fatal(err)
-	}
-	// A Briefing over Stories, the earlier shape, whose trail still shows.
-	if err := frozentest.Brief(t.Context(), frozentest.BriefDeps{Store: store, Log: log,
-		Model: usageModel{brief, editor.Usage{InputTokens: 200, OutputTokens: 20}}}, saturday); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func TestABriefingsTrailListsItsCallAndThePlacingAndReadingCallsBehindEachDevelopment(t *testing.T) {
-	store := openStore(t)
-	spokenBriefing(t, store)
-	app, _ := newAppWithLog(t, saturday, store)
-
-	res := get(t, app, "/briefings/2026-10-24/trail")
-
-	if res.status != 200 || !strings.Contains(res.body, "<!doctype html>") {
-		t.Fatalf("status %d, not a full page:\n%s", res.status, res.body)
-	}
-	links := regexp.MustCompile(`href="(/calls/\d+)"`).FindAllStringSubmatch(res.body, -1)
-	var acts []string
-	for _, l := range links {
-		call := get(t, app, l[1]).body
-		for _, act := range []string{"briefing", "placing", "reading"} {
-			if strings.Contains(call, "<h1>A "+act+" call</h1>") {
-				acts = append(acts, act)
-			}
-		}
-	}
-	if strings.Join(acts, " ") != "briefing placing reading" {
-		t.Errorf("the trail links the calls %v, want the briefing's, then the Development's placing and reading:\n%s", acts, res.body)
-	}
-	_, rows := trailRows(t, res.body)
-	if len(rows) != 2 {
-		t.Fatalf("%d rows, want the writing call's and the one Development's:\n%s", len(rows), res.body)
-	}
-	cells := regexp.MustCompile(`(?s)<td[^>]*>(.*?)</td>`).FindAllStringSubmatch(rows[1], -1)
-	if len(cells) != 4 {
-		t.Fatalf("the Development's row has %d cells, want 4:\n%s", len(cells), rows[1])
-	}
-	for i, want := range []string{
-		`<a href="/stories/1#development-1"><span hx-disable>Andy Burnham spoke in Motherwell.</span></a>`,
-		`<a href="/stories/1"><span hx-disable>Andy Burnham in Scotland</span></a>`,
-		`<a class="machine" href="/calls/2">placed · call 2 · 550 tok</a>`,
-		`<a class="machine" href="/calls/1">read · call 1 · 1,100 tok</a>`,
-	} {
-		if got := strings.TrimSpace(cells[i][1]); got != want {
-			t.Errorf("cell %d is %s, want %s", i+1, got, want)
-		}
-	}
+	store := relatedRecord(t)
+	tell(t, store, saturday, teller{text: "Derby will host the headquarters.", tell: "Derby will host",
+		story: []string{"This is fantastic news"}})
+	return store
 }
 
 // trailRows is the trail's table: its head's cells, then each body row's.
@@ -117,31 +39,29 @@ func trailRows(t *testing.T, page string) (head []string, rows []string) {
 }
 
 func TestABriefingsTrailOpensWithItsTotalsThenATableWhoseFirstRowIsTheWritingCall(t *testing.T) {
-	store := openStore(t)
-	spokenBriefing(t, store)
-	app, _ := newAppWithLog(t, saturday, store)
+	app, _ := newAppWithLog(t, saturday, toldBriefing(t))
 
 	page := get(t, app, "/briefings/2026-10-24/trail").body
 
 	table := strings.Index(page, "<table")
-	if total := strings.Index(page, "1,870 tokens over 3 calls"); total < 0 || table < 0 || total > table {
+	if total := strings.Index(page, "tokens over 3 calls"); total < 0 || table < 0 || total > table {
 		t.Errorf("the trail does not open with its totals, then the table:\n%s", page)
 	}
 	head, rows := trailRows(t, page)
-	if strings.Join(head, "|") != "Development|Story|Placed|Read" {
-		t.Errorf("the table's head is %q, want Development|Story|Placed|Read", head)
+	if strings.Join(head, "|") != "Span|Item|Read|Related" {
+		t.Errorf("the table's head is %q, want Span|Item|Read|Related", head)
 	}
 	if len(rows) != 2 {
-		t.Fatalf("%d rows, want the writing call's and the one Development's:\n%s", len(rows), page)
+		t.Fatalf("%d rows, want the writing call's and the one Span's:\n%s", len(rows), page)
 	}
-	if !regexp.MustCompile(`<a class="machine" href="/calls/\d+">written · call \d+ · 220 tok</a>`).MatchString(rows[0]) {
+	if !regexp.MustCompile(`<a class="machine" href="/calls/\d+">written · call \d+ · \d+ tok</a>`).MatchString(rows[0]) {
 		t.Errorf("the first row is not the writing call, as a machine label with its tokens:\n%s", rows[0])
 	}
 }
 
 func TestATrailSaysABriefingWrittenEmptyMadeNoCall(t *testing.T) {
 	store := openStore(t)
-	writeStoryBriefing(t, store, saturday, spoke)
+	tell(t, store, saturday, teller{})
 	app, _ := newAppWithLog(t, saturday, store)
 
 	page := get(t, app, "/briefings/2026-10-24/trail").body
@@ -153,8 +73,7 @@ func TestATrailSaysABriefingWrittenEmptyMadeNoCall(t *testing.T) {
 }
 
 func TestTheBriefingLinksToItsTrailAndOpeningTheTrailRecordsNoOpen(t *testing.T) {
-	store := openStore(t)
-	spokenBriefing(t, store)
+	store := toldBriefing(t)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	page := get(t, app, "/briefings/2026-10-24").body
@@ -204,24 +123,69 @@ func TestADayWithNoBriefingHasNoTrail(t *testing.T) {
 	}
 }
 
-func TestATrailCountsEachCallOnceThoughSeveralDevelopmentsShareIt(t *testing.T) {
-	store := openStore(t)
-	// The speech read into two Facts, each made a Development by one placing
-	// call, and both cited by the Briefing.
-	twoFacts := strings.Replace(reading, `"facts": [`, `"facts": [{"statement": "Andy Burnham was in Motherwell.", "as_at": "2026-10-22",
-             "quote": "here in Motherwell"}, `, 1)
-	briefSpeech(t, store, twoFacts, `{"new_stories": [{"ref": "N1", "title": "Andy Burnham in Scotland"}],
-		"facts": [{"fact": "F1", "developments_in": ["N1"]}, {"fact": "F2", "developments_in": ["N1"]}]}`,
-		`{"stories": [{"story": "S1", "statements": [
-		  {"text": "The Prime Minister spoke in Motherwell.", "developments": ["D1", "D2"]}]}]}`)
+func TestATrailCountsEachCallOnceThoughSeveralSpansShareIt(t *testing.T) {
+	store := relatedRecord(t)
+	// Two Spans of the release, both behind its one reading call (it was
+	// related with no call: nothing was read before it).
+	tell(t, store, saturday, teller{text: "Andy Burnham called it fantastic news, long awaited.",
+		tell: "This is fantastic news", story: []string{"Derby will host"}, also: "Derby has waited long enough"})
 	app, _ := newAppWithLog(t, saturday, store)
 
 	res := get(t, app, "/briefings/2026-10-24/trail")
 
-	for _, want := range []string{"Andy Burnham was in Motherwell.", "Andy Burnham spoke in Motherwell.", "1,870 tokens over 3 calls"} {
-		if !strings.Contains(res.body, want) {
-			t.Errorf("the trail lacks %q:\n%s", want, res.body)
-		}
+	_, rows := trailRows(t, res.body)
+	if len(rows) != 3 {
+		t.Fatalf("%d rows, want the writing call's and the two Spans':\n%s", len(rows), res.body)
+	}
+	if !strings.Contains(res.body, "tokens over 2 calls") {
+		t.Errorf("the trail does not count each call once:\n%s", res.body)
+	}
+}
+
+// earlierBriefing is a Record holding, for Saturday, the day of a Briefing
+// written before the Record kept only its Items and its events: all the
+// Record keeps of one.
+func earlierBriefing(t *testing.T) *sqlite.Store {
+	t.Helper()
+	path := filepath.Join(t.TempDir(), "go-slow.db")
+	store, err := sqlite.Open(t.Context(), path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = store.Close() })
+	db, err := sql.Open("sqlite", "file:"+path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = db.Close() }()
+	if _, err := db.ExecContext(t.Context(), `
+		INSERT INTO briefings (day, written_at, model) VALUES ('2026-10-24', '2026-10-24T07:00:00.000000000Z', 'claude-test')`); err != nil {
+		t.Fatal(err)
+	}
+	return store
+}
+
+func TestABriefingWrittenBeforeTheRecordKeptOnlyEventsSaysWhatItSaidWentAndHasNoTrail(t *testing.T) {
+	store := earlierBriefing(t)
+	app, _ := newAppWithLog(t, saturday, store)
+
+	page := get(t, app, "/briefings/2026-10-24").body
+
+	if !strings.Contains(page, "what it said went with the old design") || strings.Contains(page, "Missed") {
+		t.Errorf("the page does not say the earlier Briefing's content went:\n%s", page)
+	}
+	if strings.Contains(page, `id="how-written"`) {
+		t.Errorf("the page links a trail for a Briefing whose content went:\n%s", page)
+	}
+	if res := get(t, app, "/briefings/2026-10-24/trail"); res.status != 404 {
+		t.Errorf("its trail: status %d, want 404", res.status)
+	}
+	rec, err := store.RegisterRecord(t.Context(), time.UTC)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rec.BriefingOpens) != 1 {
+		t.Errorf("opens = %v, want the earlier Briefing's opening kept", rec.BriefingOpens)
 	}
 }
 

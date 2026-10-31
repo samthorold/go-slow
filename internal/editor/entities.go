@@ -45,8 +45,8 @@ type Tenure struct {
 	StartToTheDay bool
 }
 
-// Lookup is one consultation of a Reference source, which a Fact drawn from
-// it traces to.
+// Lookup is one consultation of a Reference source, which a Sunday read's
+// statement citing it traces to.
 type Lookup struct {
 	// ID is the lookup's own, once the Record keeps it.
 	ID int64

@@ -15,7 +15,6 @@ import (
 	"time"
 
 	"github.com/samthorold/go-slow/internal/collect"
-	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/polite"
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
@@ -75,7 +74,7 @@ func TestANewGOVUKItemIsKeptWithItsDocumentsBodyAsItsText(t *testing.T) {
 
 	c.Run(t.Context(), now)
 
-	it, ok, err := store.ReadItem(t.Context(), src.ID, base+appointment+"#2026-10-15T11:00:00+01:00")
+	it, ok, err := store.KeptItem(t.Context(), src.ID, base+appointment+"#2026-10-15T11:00:00+01:00")
 	if err != nil || !ok {
 		t.Fatalf("Item not kept: %v %v", ok, err)
 	}
@@ -118,7 +117,7 @@ func TestTheTreasurysBudgetSpeechIsCollectedFromItsFeedWithItsText(t *testing.T)
 
 	c.Run(t.Context(), now)
 
-	it, ok, err := store.ReadItem(t.Context(), src.ID, base+budgetSpeech+"#2026-10-28T15:45:59Z")
+	it, ok, err := store.KeptItem(t.Context(), src.ID, base+budgetSpeech+"#2026-10-28T15:45:59Z")
 	if err != nil || !ok {
 		t.Fatalf("Budget speech not kept: %v %v", ok, err)
 	}
@@ -266,7 +265,7 @@ func TestAnEntryWhoseTextCannotBeFetchedIsLeftOutAndKeptOnTheNextRun(t *testing.
 	if got := entryIDs(t, store); !slices.Equal(got, []string{appointmentID, speechID}) {
 		t.Errorf("once the fetch succeeds the Record holds %v, want both", got)
 	}
-	it, _, err := store.ReadItem(t.Context(), govukAt(base).ID, speechID)
+	it, _, err := store.KeptItem(t.Context(), govukAt(base).ID, speechID)
 	if err != nil || it.Content != "<p>Motherwell.</p>" {
 		t.Errorf("speech kept with text %q (%v), want its body", it.Content, err)
 	}
@@ -320,7 +319,6 @@ func TestTextIsFetchedPolitely(t *testing.T) {
 			},
 		}),
 		Store: store,
-		Check: interest.New(store),
 		Log:   slog.New(slog.DiscardHandler),
 	})
 
@@ -342,32 +340,6 @@ func TestTextIsFetchedPolitely(t *testing.T) {
 	g.set(func(g *govuk) { most = g.maxFlight })
 	if most != 1 {
 		t.Errorf("GOV.UK saw %d requests at once, want one at a time", most)
-	}
-}
-
-func TestTheCheckTiesANewItemByATermFoundOnlyInItsFullText(t *testing.T) {
-	_, base := newGOVUK(t)
-	c, store := collectorFor(t, govukAt(base))
-	if _, errs, err := interest.New(store).Add(t.Context(), interest.Draft{
-		Name: "Omagh", Terms: "Omagh",
-	}); err != nil || errs != nil {
-		t.Fatalf("add Topic: %v %v", errs, err)
-	}
-
-	c.Run(t.Context(), now)
-
-	items, err := store.ListItems(t.Context())
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, it := range items {
-		want := []string(nil)
-		if strings.Contains(it.EntryID, appointment) {
-			want = []string{"Omagh"}
-		}
-		if !slices.Equal(it.Topics, want) {
-			t.Errorf("%s tied to %v, want %v", it.Title, it.Topics, want)
-		}
 	}
 }
 
@@ -397,7 +369,7 @@ func TestANewWrittenStatementItemIsKeptWithTheStatementsFullText(t *testing.T) {
 
 	c.Run(t.Context(), now)
 
-	it, ok, err := store.ReadItem(t.Context(), src.ID, "1952546")
+	it, ok, err := store.KeptItem(t.Context(), src.ID, "1952546")
 	if err != nil || !ok {
 		t.Fatalf("Item not kept: %v %v", ok, err)
 	}

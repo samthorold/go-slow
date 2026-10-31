@@ -138,9 +138,8 @@ func run(log *slog.Logger) error {
 		Store: store,
 		// Cutting is plain code: the start's run cuts the Items already in
 		// the Record, and every run those it collects.
-		Cut:   cut.New(store),
-		Check: topics,
-		Read:  batches,
+		Cut:  cut.New(store),
+		Read: batches,
 		// What the readings name is looked up in Wikidata after each run,
 		// in plain code, once per name.
 		LookUp: editor.NewLookups(editor.LookupDeps{Store: store, Wikidata: wd, Log: log}),
@@ -197,7 +196,6 @@ func run(log *slog.Logger) error {
 		Cuts:        store,
 		Relations:   store,
 		Topics:      topics,
-		Stories:     store,
 		Pieces:      feedback.NewPieces(store),
 		Given:       store,
 		Register:    store,

@@ -83,8 +83,7 @@ type Record struct {
 	Feedback []Given
 	// Commits are the commits to go-slow.
 	Commits []Commit
-	// Untraced names each Development in a Briefing, or Fact, that traces
-	// to nothing.
+	// Untraced names each statement or Assessment that traces to nothing.
 	Untraced []string
 	// Sources are the Sources' names, and QuietSources those gone quiet
 	// past their usual gap.

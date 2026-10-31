@@ -15,9 +15,10 @@ type SundayReads interface {
 	// SundayRead is the day's Sunday read (YYYY-MM-DD) over Spans, reporting
 	// whether one was written.
 	SundayRead(ctx context.Context, day string) (editor.SundayRead, bool, error)
-	// EarlierSundayRead is the day's Sunday read of the earlier shape, over
-	// Stories of Facts: the text of its statements and Assessments.
-	EarlierSundayRead(ctx context.Context, day string) (statements, assessments []string, found bool, err error)
+	// HasSundayRead reports whether the day's Sunday read was written: over
+	// Spans, or before the Record kept only events, when only its day is
+	// kept.
+	HasSundayRead(ctx context.Context, day string) (bool, error)
 	// SundayReadFailures are the failures to write the day's read.
 	SundayReadFailures(ctx context.Context, day string) ([]editor.SundayReadFailure, error)
 	// Assessment is one Assessment, reporting whether it is in the Record.
@@ -58,8 +59,9 @@ type sundayReadPage struct {
 	Date         string
 	BriefingPath string
 	Exists       bool
-	// Earlier is a read of the earlier shape, as written, with no Feedback.
-	Earlier *earlierRead
+	// Earlier is whether the read was written before the Record kept only
+	// events: of it, only its day is kept.
+	Earlier bool
 	// Gives is the Feedback on the read as a whole.
 	Gives       gives
 	Statements  []readStatementRow
@@ -73,12 +75,6 @@ type sundayReadPage struct {
 	// Conversation is the page of the conversation that wrote the read; empty
 	// for one written with no model call.
 	Conversation string
-}
-
-// earlierRead is a Sunday read written over Stories of Facts, before the
-// read told Spans: its statements and Assessments as written.
-type earlierRead struct {
-	Statements, Assessments []string
 }
 
 type readStatementRow struct {
@@ -130,14 +126,14 @@ func (a *app) sundayRead(w http.ResponseWriter, r *http.Request) {
 	}
 	p := sundayReadPage{Date: day.Format("Sunday 2 January 2006"), BriefingPath: briefingPath(key), Exists: exists}
 	if !exists {
-		statements, assessments, earlier, err := a.SundayReads.EarlierSundayRead(ctx, key)
+		earlier, err := a.SundayReads.HasSundayRead(ctx, key)
 		if err != nil {
 			a.serverError(w, r, err)
 			return
 		}
 		if earlier {
 			a.opened(r, a.Register.OpenedSundayRead, key)
-			p.Exists, p.Earlier = true, &earlierRead{Statements: statements, Assessments: assessments}
+			p.Exists, p.Earlier = true, true
 			a.render(w, r, sundayReadTmpl, p)
 			return
 		}

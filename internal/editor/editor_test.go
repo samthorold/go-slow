@@ -53,9 +53,6 @@ func record(t *testing.T) *sqlite.Store {
 	if _, errs, err := topics.Add(ctx, interest.Draft{Name: "Scotland", Terms: "Scotland"}); err != nil || errs != nil {
 		t.Fatalf("add Topic: %v %v", errs, err)
 	}
-	if err := topics.CheckNew(ctx); err != nil {
-		t.Fatal(err)
-	}
 	if err := cut.New(store).CutNew(ctx, saturday); err != nil {
 		t.Fatal(err)
 	}

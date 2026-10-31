@@ -15,13 +15,13 @@
 {{/* pills is a row of Entities, each a pill (template "pill"). */}}
 {{define "pills"}}{{if .}}<p class="pills">{{range .}}{{template "pill" .}} {{end}}</p>{{end}}{{end}}
 
-{{/* pill is one Entity: its name, then its Role or kind. The name is drawn
+{{/* pill is one Entity: its name, then its kind or office. The name is drawn
      from collected text: inert. */}}
 {{define "pill"}}{{if .Href}}<a class="pill" href="{{.Href}}" hx-boost="false">{{else}}<span class="pill">{{end}}<span hx-disable>{{.Name}}</span> · <span class="pill-tag">{{.Tag}}</span>{{if .Href}}</a>{{else}}</span>{{end}}{{end}}
 
 {{/* citation is an Item, cited (an itemCitation): its Source's short
      name, who is speaking, where given, then its title in italics, linking where it is read (the Item's
-     page, or a Fact on it). The title was collected: inert. */}}
+     page). The title was collected: inert. */}}
 {{define "citation"}}<span class="citation">{{with .Source}}<span hx-disable>{{.}}</span> {{end}}<a href="{{.Href}}"><cite hx-disable>{{.Title}}</cite></a></span>{{end}}
 
 {{/* made is a machine label: how a block was made, linking its call. */}}

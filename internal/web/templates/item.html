@@ -1,8 +1,7 @@
 {{define "title"}}Item{{end}}
 
 {{define "content"}}
-{{/* Collected text, and what reading drew from it, is inert: hx-disable on
-     the elements holding it. */}}
+{{/* Collected text is inert: hx-disable on the elements holding it. */}}
 <h1 hx-disable>{{.Title}}</h1>
 <p><small>{{.Source}}{{if .Published}}, {{.Published}}{{end}}</small></p>
 <p><a href="{{.Link}}" hx-boost="false" hx-disable>The original</a></p>
@@ -49,63 +48,4 @@
 </section>
 {{- end}}
 {{template "given" .Feedback}}
-
-{{- if .Read}}
-{{/* What the earlier reading act drew from the Item, before the Record's
-     unit was the Span: kept, and still what the Stories are built on. */}}
-<p><small>Facts drawn {{.ReadAt}} by {{.Model}}</small></p>
-
-<section aria-labelledby="mentions">
-  <h2 id="mentions">Mentions</h2>
-  {{- if not .Mentions}}
-  <p>Reading found no Entities mentioned in this Item.</p>
-  {{- end}}
-  {{template "pills" .Mentions}}
-</section>
-
-{{/* An Item's page is an inspect page: its margin starts open. */}}
-<div class="margined" data-margin="open">
-{{template "margin-fold" "open"}}
-
-<section aria-labelledby="facts">
-  <h2 id="facts">Facts</h2>
-  {{- if not .Facts}}
-  <p>Reading drew no Facts from this Item.</p>
-  {{- end}}
-  <ul class="blocks">
-  {{- range .Facts}}
-    <li class="block" id="{{.Anchor}}">
-      <div class="block-body" hx-disable><p>{{.Statement}}</p></div>
-      <div class="block-margin">
-        <blockquote class="quiet" hx-disable><p>{{.Quote}}</p></blockquote>
-        {{- if .AsAt}}
-        <p class="quiet">as at {{.AsAt}}</p>
-        {{- end}}
-        {{template "pills" .Entities}}
-        {{if .Made.Call}}<p>{{template "made" .Made}}</p>{{end}}
-      </div>
-    </li>
-  {{- end}}
-  </ul>
-</section>
-
-<section aria-labelledby="claims">
-  <h2 id="claims">Claims</h2>
-  {{- if not .Claims}}
-  <p>Reading found no Claims in this Item.</p>
-  {{- end}}
-  <ul class="blocks">
-  {{- range .Claims}}
-    <li class="block">
-      <div class="block-body" hx-disable><p>{{.Statement}} <small>claimed by {{.MadeBy}}</small></p></div>
-      <div class="block-margin">
-        <blockquote class="quiet" hx-disable><p>{{.Quote}}</p></blockquote>
-        {{if .Made.Call}}<p>{{template "made" .Made}}</p>{{end}}
-      </div>
-    </li>
-  {{- end}}
-  </ul>
-</section>
-</div>
-{{- end}}
 {{end}}

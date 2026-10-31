@@ -12,8 +12,8 @@ import (
 	"testing"
 
 	"github.com/samthorold/go-slow/internal/collect"
+	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
-	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
 
@@ -57,9 +57,9 @@ func (t to) RoundTrip(r *http.Request) (*http.Response, error) {
 }
 
 // summaryOnlyRecord is a Record at db holding three Items collected with
-// only their summaries: the appointment and a written statement, unread,
-// and a speech already read. A Topic follows Omagh, named only in the
-// appointment's text.
+// only their summaries: the appointment and a written statement, uncut, and
+// a speech a Cut already lists the Spans of (as one kept before Items were
+// collected only with their text might).
 func summaryOnlyRecord(t *testing.T, db string) {
 	t.Helper()
 	ctx := t.Context()
@@ -82,19 +82,13 @@ func summaryOnlyRecord(t *testing.T, db string) {
 	if _, err := store.AddItems(ctx, items); err != nil {
 		t.Fatal(err)
 	}
-	topics := interest.New(store)
-	if _, errs, err := topics.Add(ctx, interest.Draft{Name: "Omagh", Terms: "Omagh"}); err != nil || errs != nil {
-		t.Fatalf("add Topic: %v %v", errs, err)
-	}
-	if err := topics.CheckNew(ctx); err != nil {
-		t.Fatal(err)
-	}
-	if err := store.SaveFactReading(ctx, editor.FactReading{SourceID: "govuk-number-10", EntryID: items[1].EntryID}, saturday); err != nil {
+	if err := store.KeepCut(ctx, cut.Cut{SourceID: "govuk-number-10", EntryID: items[1].EntryID,
+		Judge: cut.SentenceCutter, At: saturday, Spans: []cut.Span{{Start: 0, End: 5}}}); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestTheBackfillCommandGivesUnreadSummaryOnlyItemsTheirTextAndChecksThemAgain(t *testing.T) {
+func TestTheBackfillCommandGivesUncutSummaryOnlyItemsTheirText(t *testing.T) {
 	db := filepath.Join(t.TempDir(), "go-slow.db")
 	summaryOnlyRecord(t, db)
 	pub := &publishers{routes: map[string]string{
@@ -119,8 +113,8 @@ func TestTheBackfillCommandGivesUnreadSummaryOnlyItemsTheirTextAndChecksThemAgai
 		t.Fatal(err)
 	}
 	defer func() { _ = store.Close() }()
-	text := func(sourceID, entryID string) editor.ReadItem {
-		it, ok, err := store.ReadItem(t.Context(), sourceID, entryID)
+	text := func(sourceID, entryID string) editor.KeptItem {
+		it, ok, err := store.KeptItem(t.Context(), sourceID, entryID)
 		if err != nil || !ok {
 			t.Fatalf("%s not in the Record: %v", entryID, err)
 		}
@@ -128,18 +122,16 @@ func TestTheBackfillCommandGivesUnreadSummaryOnlyItemsTheirTextAndChecksThemAgai
 	}
 	if it := text("govuk-number-10", "https://www.gov.uk"+appointmentPath+"#1"); it.Content != "<p>District Commander in Omagh.</p>" {
 		t.Errorf("appointment's text = %q, want its document's body", it.Content)
-	} else if !slices.Equal(it.Topics, []string{"Omagh"}) {
-		t.Errorf("appointment tied to %v, want Omagh, named in its text", it.Topics)
 	}
 	if it := text("parliament-written-statements", statementID); it.Content != "<p>Companies House and HMRC.</p>" {
 		t.Errorf("statement's text = %q, want the statement's", it.Content)
 	}
 	if it := text("govuk-number-10", "https://www.gov.uk"+speechPath+"#1"); it.Content != "" {
-		t.Errorf("the speech, already read, was given text %q", it.Content)
+		t.Errorf("the speech, already cut, was given text %q", it.Content)
 	}
 	pub.mu.Lock()
 	defer pub.mu.Unlock()
 	if slices.Contains(pub.requests, "www.gov.uk/api/content"+speechPath) {
-		t.Errorf("fetched the text of an Item already read: %v", pub.requests)
+		t.Errorf("fetched the text of an Item already cut: %v", pub.requests)
 	}
 }

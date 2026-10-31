@@ -97,12 +97,6 @@ type ListedItem struct {
 	Published   time.Time
 	Due         time.Time
 	Attribution string
-	// Checked is whether the lazy-reading check has looked at the Item yet.
-	Checked bool
-	// Topics are the names of the Topics the check tied the Item to: it
-	// awaits reading for each. None, once Checked, is an Item that touches
-	// no Topic.
-	Topics []string
 	// HasText is whether the Item has its text, and Cut whether a Cut lists
 	// its Spans.
 	HasText, Cut bool
@@ -110,12 +104,6 @@ type ListedItem struct {
 	// and Rejected are how many of each its newest reading judged.
 	Read                      bool
 	Names, Speakers, Rejected int
-}
-
-// Checker is the lazy-reading check, run over the Items Collection has just
-// brought in. It is plain code, not a model call.
-type Checker interface {
-	CheckNew(ctx context.Context) error
 }
 
 // Validators are what a server said about the feed last time, sent back to
@@ -156,13 +144,11 @@ type Deps struct {
 	Sources []Source
 	Fetcher Fetcher
 	Store   Store
-	// Cut, if set, runs after every run, before the check: it cuts the
+	// Cut, if set, runs after every run, before reading: it cuts the
 	// Items with text that have no Cut yet into Spans (system design: The
 	// grain belongs to the judgement, not to the Span).
 	Cut Cutter
-	// Check runs after every run, over the Items not yet checked.
-	Check Checker
-	// Read, if set, runs after the check: the Editor reads the Items
+	// Read, if set, runs after cutting: the Editor reads the Items
 	// awaiting reading (system design: The acts run as Items arrive), at
 	// once or by submitting them in a batch and applying the results of
 	// earlier ones (The daily acts run in batches).
@@ -227,8 +213,8 @@ func (c *Collector) RunEvery(ctx context.Context, ticks <-chan time.Time, now fu
 	}
 }
 
-// Run is one Collection run at now: each Source in turn, then the
-// lazy-reading check over what is new. A failing Source is logged and does
+// Run is one Collection run at now: each Source in turn, then the acts
+// over what is new. A failing Source is logged and does
 // not stop the others.
 func (c *Collector) Run(ctx context.Context, now time.Time) {
 	for _, s := range c.Sources {
@@ -247,10 +233,6 @@ func (c *Collector) Run(ctx context.Context, now time.Time) {
 		if err := c.Cut.CutNew(ctx, now); err != nil {
 			c.Log.ErrorContext(ctx, "cutting failed", "error", err)
 		}
-	}
-	// Items left unchecked by a failure here are checked after the next run.
-	if err := c.Check.CheckNew(ctx); err != nil {
-		c.Log.ErrorContext(ctx, "lazy-reading check failed", "error", err)
 	}
 	if c.Read != nil {
 		if err := c.Read.ReadWaiting(ctx, now); err != nil {

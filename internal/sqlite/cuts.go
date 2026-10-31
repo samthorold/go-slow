@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/samthorold/go-slow/internal/cut"
 )
@@ -16,13 +17,25 @@ const cutShape = 1
 // from scheduled events. An Item with no text yet is left uncut until it
 // is given its text, so no Cut addresses text that changes.
 func (s *Store) Uncut(ctx context.Context) ([]cut.Text, error) {
+	return s.uncut(ctx, `1`)
+}
+
+// UncutPublished lists the Items Uncut lists that were published from from
+// up to, not including, to.
+func (s *Store) UncutPublished(ctx context.Context, from, to time.Time) ([]cut.Text, error) {
+	return s.uncut(ctx, `items.published >= ? AND items.published < ?`, formatTime(from), formatTime(to))
+}
+
+// uncut lists the Items Uncut lists that meet the condition where.
+func (s *Store) uncut(ctx context.Context, where string, args ...any) ([]cut.Text, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT items.source_id, items.entry_id, items.content
 		FROM items
 		WHERE items.content != '' AND items.due = ''
 			AND NOT EXISTS (SELECT 1 FROM cuts
 				WHERE cuts.source_id = items.source_id AND cuts.entry_id = items.entry_id)
-		ORDER BY items.collected_at, items.source_id, items.entry_id`)
+			AND `+where+`
+		ORDER BY items.collected_at, items.source_id, items.entry_id`, args...)
 	if err != nil {
 		return nil, fmt.Errorf("uncut items: %w", err)
 	}

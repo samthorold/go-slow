@@ -20,8 +20,8 @@ const (
 	gatheringShape = 1
 )
 
-// SpansToTell are the Items first cut after after and up to upTo, in the
-// order they were published, each with the Spans the Briefing is shown: of
+// SpansToTell are the Items collected after the switch and first cut after
+// after and up to upTo, in the order they were published, each with the Spans the Briefing is shown: of
 // an Item read, those of the Cut its newest reading was shown that it did
 // not reject, as it reads them; of an Item only cut, every Span of its
 // newest Cut, as written. Each Span comes with the relations judged of it,
@@ -43,15 +43,18 @@ func (s *Store) SpansToTell(ctx context.Context, after, upTo time.Time) ([]edito
 	return out, nil
 }
 
-// itemsCutIn are the Source and entry of each Item first cut after after and
-// up to upTo, in the order they were published.
+// itemsCutIn are the Source and entry of each Item collected after the
+// switch and first cut after after and up to upTo, in the order they were
+// published. Items collected through the switch were all first cut after it,
+// and are told by no Briefing (system design: The Briefing tells only Items
+// collected after the switch).
 func (s *Store) itemsCutIn(ctx context.Context, after, upTo time.Time) ([][2]string, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT source_id, entry_id FROM (
 			SELECT items.source_id, items.entry_id, items.published,
 				(SELECT min(e.at) FROM cuts c JOIN events e ON e.id = c.event_id
 					WHERE c.source_id = items.source_id AND c.entry_id = items.entry_id) AS cut_at
-			FROM items)
+			FROM items WHERE `+afterSwitch+`)
 		WHERE cut_at > ? AND cut_at <= ?
 		ORDER BY published, source_id, entry_id`, formatTime(after), formatTime(upTo))
 	if err != nil {

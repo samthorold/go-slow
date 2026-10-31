@@ -38,6 +38,9 @@ type Cut struct {
 type Store interface {
 	// Uncut lists the Items with text that no Cut lists the Spans of.
 	Uncut(ctx context.Context) ([]Text, error)
+	// UncutPublished lists those Uncut lists published from from up to,
+	// not including, to.
+	UncutPublished(ctx context.Context, from, to time.Time) ([]Text, error)
 	// KeepCut keeps a Cut as an event.
 	KeepCut(ctx context.Context, c Cut) error
 }
@@ -64,6 +67,23 @@ func (c *Cutter) CutNew(ctx context.Context, now time.Time) error {
 	if err != nil {
 		return err
 	}
+	return c.keep(ctx, texts, now)
+}
+
+// CutPublished cuts, at now, as CutNew does, every Item with text that has
+// no Cut yet and was published from from up to, not including, to, and
+// reports how many it cut: re-judging a range reads only Items cut, and a
+// Record from before Cuts holds none.
+func (c *Cutter) CutPublished(ctx context.Context, from, to, now time.Time) (int, error) {
+	texts, err := c.store.UncutPublished(ctx, from, to)
+	if err != nil {
+		return 0, err
+	}
+	return len(texts), c.keep(ctx, texts, now)
+}
+
+// keep cuts each text at now and keeps its Cut.
+func (c *Cutter) keep(ctx context.Context, texts []Text, now time.Time) error {
 	for _, t := range texts {
 		cut := Cut{SourceID: t.SourceID, EntryID: t.EntryID, Judge: c.judge, At: now, Spans: c.cut(t.Text)}
 		if err := c.store.KeepCut(ctx, cut); err != nil {

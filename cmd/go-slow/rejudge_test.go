@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/config"
 	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/sqlite"
@@ -95,6 +96,63 @@ func TestARejudgingDryRunPricesItsRequestsAndCallsNoModel(t *testing.T) {
 	}
 	if !regexp.MustCompile(`\$\d+\.\d{4}`).MatchString(out) {
 		t.Errorf("the dry run printed no estimate in dollars:\n%s", out)
+	}
+	if got := viewed(t, db); got != "" {
+		t.Errorf("the dry run kept a reading by %s", got)
+	}
+}
+
+// A Record whose Items were never cut (an app built before Cuts) has
+// nothing to read again until they are: the dry run cuts those in its
+// range, as Collection would, and prices them.
+func TestARejudgingDryRunCutsTheItemsInItsRangeNotYetCutAndPricesThem(t *testing.T) {
+	ctx := t.Context()
+	db := filepath.Join(t.TempDir(), "go-slow.db")
+	store, err := sqlite.Open(ctx, db)
+	if err != nil {
+		t.Fatal(err)
+	}
+	src := collect.Source{ID: "number-10", Name: "Number 10", FeedURL: "https://example.org/feed",
+		Attribution: collect.OGL, UsualGap: time.Hour}
+	if err := store.SyncSources(ctx, []collect.Source{src}, saturday); err != nil {
+		t.Fatal(err)
+	}
+	item := func(entry, content string, published time.Time) collect.Item {
+		return collect.Item{SourceID: src.ID, EntryID: entry, Title: entry, Link: "https://example.org/" + entry,
+			Content: content, Published: published, Attribution: collect.OGL, CollectedAt: published}
+	}
+	if _, err := store.AddItems(ctx, []collect.Item{
+		item("speech", "<p>It is good to be in Scotland.</p>", saturday),
+		item("untold", "", saturday),
+		item("later", "<p>It is good to be in Wales.</p>", saturday.AddDate(0, 0, 2)),
+	}); err != nil {
+		t.Fatal(err)
+	}
+	_ = store.Close()
+	var calls int
+
+	out, err := rejudging(t, db, &calls, append([]string{"rejudge", "reading"}, range24...)...)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if calls != 0 {
+		t.Errorf("the dry run called a model %d times", calls)
+	}
+	for _, want := range []string{"cut: 1", "requests: 1"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("the dry run printed no %q:\n%s", want, out)
+		}
+	}
+	store, err = sqlite.Open(ctx, db)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = store.Close() }()
+	for entry, want := range map[string]bool{"speech": true, "untold": false, "later": false} {
+		if _, _, found, err := store.NewestCut(ctx, src.ID, entry); err != nil || found != want {
+			t.Errorf("%s cut: %v (%v), want %v", entry, found, err, want)
+		}
 	}
 	if got := viewed(t, db); got != "" {
 		t.Errorf("the dry run kept a reading by %s", got)

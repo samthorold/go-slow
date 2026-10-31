@@ -54,8 +54,6 @@ func appDeps(now time.Time, store *sqlite.Store, logs *bytes.Buffer) web.Deps {
 		Relations:   store,
 		Topics:      interest.New(store),
 		Stories:     store,
-		Feedback:    feedback.New(store),
-		Kept:        store,
 		Pieces:      feedback.NewPieces(store),
 		Given:       store,
 		Register:    store,

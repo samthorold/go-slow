@@ -8,13 +8,10 @@
 {{- else}}<form class="feedback" hx-post="{{.Path}}" hx-target="body" hx-swap="innerHTML"
   {{- with .Confirm}} hx-confirm="{{.}}"{{end}}>
   <input type="hidden" name="kind" value="{{.Kind}}">
-  {{- with .Level}}<input type="hidden" name="level" value="{{.}}">{{end}}
   {{- with .Judgement}}<input type="hidden" name="judgement" value="{{.}}">{{end}}
   {{- with .Source}}<input type="hidden" name="source" value="{{.}}">{{end}}
   {{- with .Entry}}<input type="hidden" name="entry" value="{{.}}">{{end}}
   {{- with .Span}}<input type="hidden" name="span" value="{{.}}">{{end}}
-  {{- with .Assessment}}<input type="hidden" name="assessment" value="{{.}}">{{end}}
-  {{- with .Read}}<input type="hidden" name="read" value="{{.}}">{{end}}
   <button>{{.Label}}</button>
 </form>{{end}}{{end}}
 
@@ -46,26 +43,3 @@
 </section>
 {{- end}}
 {{- end}}
-
-{{/* kept lists the Sunday read's pieces of Feedback as given, each undone
-     with a button, or marked undone with when. What a piece is about was
-     drawn from collected text: inert. */}}
-{{define "kept"}}
-<ol>
-{{- range .}}
-  <li>
-    <p><strong>{{.Kind}}</strong> on a {{.Level}}:
-      {{- if .About}} {{if .AboutPath}}<a href="{{.AboutPath}}">{{end}}<span hx-disable>{{.About}}</span>{{if .AboutPath}}</a>{{end}}{{end}}</p>
-    <p><small>Given {{.GivenAt}}.</small></p>
-    {{- if .Behind}}
-    <p><small>Behind it:{{range $i, $b := .Behind}}{{if $i}},{{end}} <a href="{{$b.Path}}">{{$b.Label}}</a>{{end}}.</small></p>
-    {{- end}}
-    {{- if .Undone}}
-    <p><strong>Undone {{.Undone}}:</strong> kept as given, it fixes the Record no more.</p>
-    {{- else}}
-    <form class="feedback" hx-put="{{.UndoPath}}" hx-target="body" hx-swap="innerHTML"><button>Undo</button></form>
-    {{- end}}
-  </li>
-{{- end}}
-</ol>
-{{end}}

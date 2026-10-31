@@ -39,7 +39,7 @@
 {{- with .Gathered}}
 <section aria-labelledby="story">
   <h2 id="story">Its Story</h2>
-  <p class="quiet">As <a href="{{.BriefingPath}}">the Briefing for {{.BriefingDate}}</a> gathered it {{template "made" .Made}}</p>
+  <p class="quiet">As <a href="{{.Path}}">{{.By}} for {{.Date}}</a> gathered it {{if .Conversation}}<a class="machine" href="{{.Conversation}}">gathered · conversation</a>{{else}}{{template "made" .Made}}{{end}}</p>
   {{- with .Gives.Given}}
   <div class="given-marks">{{template "gives" .}}</div>
   {{- end}}

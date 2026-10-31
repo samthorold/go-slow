@@ -3,15 +3,25 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"slices"
 	"time"
 
+	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
 )
 
-// LastSundayReadWritten is when the latest Sunday read was written, or zero.
+// The versions of the shapes of a Sunday read's events this build writes.
+const (
+	readShape          = 1
+	readStatementShape = 1
+	assessmentShape    = 1
+)
+
+// LastSundayReadWritten is when the latest Sunday read was written, in
+// either shape, or zero.
 func (s *Store) LastSundayReadWritten(ctx context.Context) (time.Time, error) {
 	var at string
 	if err := s.db.QueryRowContext(ctx, `SELECT coalesce(max(written_at), '') FROM sunday_reads`).Scan(&at); err != nil {
@@ -29,62 +39,97 @@ func (s *Store) HasSundayRead(ctx context.Context, day string) (bool, error) {
 	return n > 0, nil
 }
 
-// StoryToRead is one Story as the acts see it, without what Feedback
-// withdrew.
-func (s *Store) StoryToRead(ctx context.Context, id int64) (editor.Story, bool, error) {
-	return s.story(ctx, id, false)
+// BriefingsWritten are the Briefings over Spans written after after and up
+// to upTo, in the order written, as Briefing reads each.
+func (s *Store) BriefingsWritten(ctx context.Context, after, upTo time.Time) ([]editor.Briefing, error) {
+	days, err := s.textsOf(ctx, `
+		SELECT t.day FROM told_briefings t JOIN briefings b USING (day)
+		WHERE b.written_at > ? AND b.written_at <= ?
+		ORDER BY b.written_at`, formatTime(after), formatTime(upTo))
+	if err != nil {
+		return nil, fmt.Errorf("briefings written: %w", err)
+	}
+	out := make([]editor.Briefing, 0, len(days))
+	for _, day := range days {
+		b, _, err := s.Briefing(ctx, day)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, b)
+	}
+	return out, nil
 }
 
-// SaveSundayRead keeps a Sunday read:its statements in order, each with
-// what it cites, all at once.
-func (s *Store) SaveSundayRead(ctx context.Context, r editor.SundayRead) error {
+// KeepSundayRead keeps a Sunday read for its day as an event, with its
+// Judge, and each Assessment, statement and Story it gathered as an event
+// of its own, tied to it, all at once, with its conversation. The day and
+// the run's turns and tokens are kept in sunday_reads, beside the reads of
+// the earlier shape.
+func (s *Store) KeepSundayRead(ctx context.Context, r editor.SundayRead) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 	defer func() { _ = tx.Rollback() }()
+	fail := func(what string, err error) error { return fmt.Errorf("keep sunday read %s: %s: %w", r.Day, what, err) }
 	conversation, err := keepConversation(ctx, tx, r.Conversation)
 	if err != nil {
-		return fmt.Errorf("save sunday read %s: %w", r.Day, err)
+		return fail("conversation", err)
 	}
-	var readID int64
-	if err := tx.QueryRowContext(ctx, `
+	at := formatTime(r.WrittenAt)
+	if _, err := tx.ExecContext(ctx, `
 		INSERT INTO sunday_reads (day, written_at, model, turns, input_tokens, output_tokens, conversation_id)
-		VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id`,
-		r.Day, formatTime(r.WrittenAt), r.Model, r.Turns, r.Usage.InputTokens, r.Usage.OutputTokens, conversation).Scan(&readID); err != nil {
-		return fmt.Errorf("save sunday read %s: %w", r.Day, err)
+		VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		r.Day, at, r.Judge.Model, r.Turns, r.Usage.InputTokens, r.Usage.OutputTokens, conversation); err != nil {
+		return fail("day", err)
+	}
+	event := func(kind string, shape int) (int64, error) {
+		res, err := tx.ExecContext(ctx, `INSERT INTO events (kind, shape, at) VALUES (?, ?, ?)`, kind, shape, at)
+		if err != nil {
+			return 0, fail(kind, err)
+		}
+		return res.LastInsertId()
+	}
+	id, err := event("sunday_read", readShape)
+	if err != nil {
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, `INSERT INTO told_reads (event_id, day, act, version, model) VALUES (?, ?, ?, ?, ?)`,
+		id, r.Day, r.Judge.Act, r.Judge.Version, r.Judge.Model); err != nil {
+		return fail("read", err)
+	}
+	reading := func(o editor.OtherSpan) any {
+		if o.ReadingID == 0 {
+			return nil
+		}
+		return o.ReadingID
 	}
 	made := make([]int64, len(r.Assessments))
 	for i, a := range r.Assessments {
-		var supersedes any
-		if a.Supersedes != 0 {
-			supersedes = a.Supersedes
+		if made[i], err = event("assessment", assessmentShape); err != nil {
+			return err
 		}
-		if err := tx.QueryRowContext(ctx, `
-			INSERT INTO assessments (read_id, position, statement, as_at, supersedes_id) VALUES (?, ?, ?, ?, ?) RETURNING id`,
-			readID, i, a.Statement, a.AsAt.Format(time.DateOnly), supersedes).Scan(&made[i]); err != nil {
-			return fmt.Errorf("save sunday read %s: assessment: %w", r.Day, err)
+		if _, err := tx.ExecContext(ctx, `
+			INSERT INTO told_assessments (event_id, read_id, position, statement, as_at, supersedes_id) VALUES (?, ?, ?, ?, ?, ?)`,
+			made[i], id, i, a.Statement, a.AsAt.Format(time.DateOnly), nullID(a.Supersedes)); err != nil {
+			return fail("assessment", err)
 		}
-		for j, f := range a.Facts {
+		n := 0
+		for _, o := range a.Spans {
 			if _, err := tx.ExecContext(ctx, `
-				INSERT INTO assessment_facts (assessment_id, fact_id, position) VALUES (?, ?, ?)`, made[i], f.ID, j); err != nil {
-				return fmt.Errorf("save sunday read %s: assessment's fact %d: %w", r.Day, f.ID, err)
+				INSERT INTO assessment_grounds (assessment_id, position, source_id, entry_id, span_start, span_end, reading_id)
+				VALUES (?, ?, ?, ?, ?, ?, ?)`,
+				made[i], n, o.At.SourceID, o.At.EntryID, o.At.Span.Start, o.At.Span.End, reading(o)); err != nil {
+				return fail("assessment's Span", err)
 			}
+			n++
 		}
-	}
-	for _, st := range r.Stories {
-		var id int64
-		if err := tx.QueryRowContext(ctx, `INSERT INTO stories (title, started_at) VALUES (?, ?) RETURNING id`,
-			st.Title, formatTime(r.WrittenAt)).Scan(&id); err != nil {
-			return fmt.Errorf("save sunday read %s: start story %q: %w", r.Day, st.Title, err)
-		}
-		if _, err := tx.ExecContext(ctx, `INSERT INTO read_stories (read_id, story_id) VALUES (?, ?)`, readID, id); err != nil {
-			return fmt.Errorf("save sunday read %s: story %q: %w", r.Day, st.Title, err)
-		}
-		for _, d := range st.Timeline {
-			if _, err := tx.ExecContext(ctx, `INSERT INTO developments (story_id, fact_id) VALUES (?, ?)`, id, d.ID); err != nil {
-				return fmt.Errorf("save sunday read %s: gather fact %d into %q: %w", r.Day, d.ID, st.Title, err)
+		for _, e := range a.Earlier {
+			if _, err := tx.ExecContext(ctx, `INSERT INTO assessment_grounds (assessment_id, position, earlier_id) VALUES (?, ?, ?)`,
+				made[i], n, e.ID); err != nil {
+				return fail("assessment's earlier Assessment", err)
 			}
+			n++
 		}
 	}
 	// Each lookup the read cites is kept once, however many statements cite
@@ -102,38 +147,55 @@ func (s *Store) SaveSundayRead(ctx context.Context, r editor.SundayRead) error {
 		return id, err
 	}
 	for i, st := range r.Statements {
-		var id int64
-		if err := tx.QueryRowContext(ctx, `
-			INSERT INTO read_statements (read_id, position, text) VALUES (?, ?, ?) RETURNING id`,
-			readID, i, st.Text).Scan(&id); err != nil {
-			return fmt.Errorf("save sunday read %s: statement: %w", r.Day, err)
+		sid, err := event("read_statement", readStatementShape)
+		if err != nil {
+			return err
+		}
+		if _, err := tx.ExecContext(ctx, `INSERT INTO told_read_statements (event_id, read_id, position, text) VALUES (?, ?, ?, ?)`,
+			sid, id, i, st.Text); err != nil {
+			return fail("statement", err)
 		}
 		for j, c := range st.Cites {
-			var fact, story, assessment, lookupID any
+			var source, entry, start, end, readingID, assessment, lookupID any
 			switch c.Kind {
-			case editor.CitesLookup:
-				l := c.Lookup
-				l.At = l.At.UTC()
-				id, err := lookup(l)
-				if err != nil {
-					return fmt.Errorf("save sunday read %s: lookup: %w", r.Day, err)
-				}
-				lookupID = id
-			case editor.CitesFact:
-				fact = c.Fact.ID
-			case editor.CitesDevelopment:
-				fact, story = c.Fact.ID, c.Story.ID
+			case editor.CitesSpan:
+				source, entry, start, end, readingID = c.Span.At.SourceID, c.Span.At.EntryID, c.Span.At.Span.Start, c.Span.At.Span.End, reading(c.Span)
 			case editor.CitesAssessment:
 				assessment = c.Assessment.ID
 				if c.NewAssessment != 0 {
 					assessment = made[c.NewAssessment-1]
 				}
+			case editor.CitesLookup:
+				l := c.Lookup
+				l.At = l.At.UTC()
+				if lookupID, err = lookup(l); err != nil {
+					return fail("lookup", err)
+				}
 			}
 			if _, err := tx.ExecContext(ctx, `
-				INSERT INTO read_citations (statement_id, position, kind, fact_id, story_id, assessment_id, lookup_id)
-				VALUES (?, ?, ?, ?, ?, ?, ?)`,
-				id, j, string(c.Kind), fact, story, assessment, lookupID); err != nil {
-				return fmt.Errorf("save sunday read %s: citation: %w", r.Day, err)
+				INSERT INTO told_read_citations (statement_id, position, source_id, entry_id, span_start, span_end, reading_id, assessment_id, lookup_id)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+				sid, j, source, entry, start, end, readingID, assessment, lookupID); err != nil {
+				return fail("citation", err)
+			}
+		}
+	}
+	for _, g := range r.Gathered {
+		gid, err := event("gathering", gatheringShape)
+		if err != nil {
+			return err
+		}
+		if _, err := tx.ExecContext(ctx, `
+			INSERT INTO gatherings (event_id, read_id, source_id, entry_id, span_start, span_end) VALUES (?, ?, ?, ?, ?, ?)`,
+			gid, id, g.From.SourceID, g.From.EntryID, g.From.Span.Start, g.From.Span.End); err != nil {
+			return fail("gathering", err)
+		}
+		for j, a := range g.Story {
+			if _, err := tx.ExecContext(ctx, `
+				INSERT INTO gathered_spans (gathering_id, position, source_id, entry_id, span_start, span_end)
+				VALUES (?, ?, ?, ?, ?, ?)`,
+				gid, j, a.SourceID, a.EntryID, a.Span.Start, a.Span.End); err != nil {
+				return fail("gathered Span", err)
 			}
 		}
 	}
@@ -185,15 +247,20 @@ func (s *Store) SundayReadFailures(ctx context.Context, day string) ([]editor.Su
 	return out, nil
 }
 
-// SundayRead is the Sunday read for the day, reporting whether one was
-// written: its statements in order, each with what it cites, traced.
+// SundayRead is the day's Sunday read over Spans, reporting whether one was
+// written in that shape: its Judge, turns and tokens, its statements in
+// order, each with what it cites, its Assessments in order, each with what
+// it rests on, and the Stories it gathered, as it was written. The Spans are
+// as their Items' newest readings read them.
 func (s *Store) SundayRead(ctx context.Context, day string) (editor.SundayRead, bool, error) {
 	r := editor.SundayRead{Day: day}
 	var at string
 	err := s.db.QueryRowContext(ctx, `
-		SELECT id, written_at, model, turns, input_tokens, output_tokens, coalesce(conversation_id, 0)
-		FROM sunday_reads WHERE day = ?`, day).
-		Scan(&r.ID, &at, &r.Model, &r.Turns, &r.Usage.InputTokens, &r.Usage.OutputTokens, &r.ConversationID)
+		SELECT t.event_id, r.written_at, t.act, t.version, t.model, r.turns, r.input_tokens, r.output_tokens,
+			coalesce(r.conversation_id, 0)
+		FROM told_reads t JOIN sunday_reads r USING (day) WHERE t.day = ?`, day).
+		Scan(&r.ID, &at, &r.Judge.Act, &r.Judge.Version, &r.Judge.Model, &r.Turns, &r.Usage.InputTokens,
+			&r.Usage.OutputTokens, &r.ConversationID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return r, false, nil
 	}
@@ -201,180 +268,144 @@ func (s *Store) SundayRead(ctx context.Context, day string) (editor.SundayRead, 
 		return r, false, fmt.Errorf("sunday read %s: %w", day, err)
 	}
 	r.WrittenAt = parseTime(at)
+	if r.Assessments, err = s.assessments(ctx, `a.read_id = ?`, -1, r.ID); err != nil {
+		return r, false, fmt.Errorf("sunday read %s: %w", day, err)
+	}
+	slices.Reverse(r.Assessments) // one read's are all as at its day, the latest made first
 	if r.Statements, err = s.readStatements(ctx, r.ID); err != nil {
 		return r, false, fmt.Errorf("sunday read %s: %w", day, err)
 	}
-	if r.Assessments, err = s.readAssessments(ctx, r.ID); err != nil {
+	if r.Gathered, err = s.gatherings(ctx, `g.read_id = ?`, r.ID); err != nil {
 		return r, false, fmt.Errorf("sunday read %s: %w", day, err)
-	}
-	started, err := s.ids(ctx, `SELECT story_id FROM read_stories WHERE read_id = ? ORDER BY story_id`, r.ID)
-	if err != nil {
-		return r, false, fmt.Errorf("sunday read %s: %w", day, err)
-	}
-	for _, id := range started {
-		st, _, err := s.Story(ctx, id)
-		if err != nil {
-			return r, false, err
-		}
-		r.Stories = append(r.Stories, st)
 	}
 	return r, true, nil
 }
 
-func (s *Store) readStatements(ctx context.Context, readID int64) ([]editor.ReadStatement, error) {
-	rows, err := s.db.QueryContext(ctx, `
-		SELECT read_statements.id, read_statements.text, read_citations.kind,
-			coalesce(read_citations.story_id, 0), coalesce(stories.title, ''),
-			coalesce(read_citations.fact_id, 0), coalesce(read_citations.assessment_id, 0),
-			coalesce(l.id, 0), coalesce(l.reference, ''), coalesce(l.item_id, ''), coalesce(l.revision, 0),
-			coalesce(l.looked_up_at, ''), coalesce(l.licence, '')
-		FROM read_statements
-			JOIN read_citations ON read_citations.statement_id = read_statements.id
-			LEFT JOIN stories ON stories.id = read_citations.story_id
-			LEFT JOIN reference_lookups l ON l.id = read_citations.lookup_id
-		WHERE read_statements.read_id = ?
-			-- Feedback takes out of the read every statement that rests on
-			-- something it withdrew: a Fact, a Development or an Assessment,
-			-- or an Assessment resting on a withdrawn Fact.
-			AND NOT EXISTS (SELECT 1 FROM read_citations cited
-				LEFT JOIN facts f ON f.id = cited.fact_id
-				LEFT JOIN developments d ON d.story_id = cited.story_id AND d.fact_id = cited.fact_id
-				LEFT JOIN assessments a ON a.id = cited.assessment_id
-				WHERE cited.statement_id = read_statements.id
-					AND (f.withdrawn_by IS NOT NULL OR d.withdrawn_by IS NOT NULL OR a.withdrawn_by IS NOT NULL
-						OR EXISTS (SELECT 1 FROM assessment_facts af JOIN facts g ON g.id = af.fact_id
-							WHERE af.assessment_id = a.id AND g.withdrawn_by IS NOT NULL)))
-		ORDER BY read_statements.position, read_citations.position`, readID)
-	if err != nil {
-		return nil, err
+// EarlierSundayRead is the day's Sunday read of the earlier shape, over
+// Stories of Facts, reporting whether one was written so: the text of its
+// statements and of its Assessments, in order, as written.
+func (s *Store) EarlierSundayRead(ctx context.Context, day string) (statements, assessments []string, found bool, err error) {
+	if statements, err = s.textsOf(ctx, `SELECT st.text FROM read_statements st JOIN sunday_reads r ON r.id = st.read_id
+		WHERE r.day = ? ORDER BY st.position`, day); err != nil {
+		return nil, nil, false, fmt.Errorf("earlier sunday read %s: %w", day, err)
 	}
-	defer func() { _ = rows.Close() }()
-	type cited struct {
-		statement int
-		c         editor.Citation
+	if assessments, err = s.textsOf(ctx, `SELECT a.statement FROM assessments a JOIN sunday_reads r ON r.id = a.read_id
+		WHERE r.day = ? ORDER BY a.position`, day); err != nil {
+		return nil, nil, false, fmt.Errorf("earlier sunday read %s: %w", day, err)
 	}
-	var out []editor.ReadStatement
-	var facts []cited
-	for rows.Next() {
-		var id, storyID, factID, assessmentID int64
-		var text, kind, title, lookedUp string
-		var l editor.Lookup
-		if err := rows.Scan(&id, &text, &kind, &storyID, &title, &factID, &assessmentID,
-			&l.ID, &l.Reference, &l.ItemID, &l.Revision, &lookedUp, &l.Licence); err != nil {
-			return nil, err
-		}
-		if n := len(out); n == 0 || out[n-1].ID != id {
-			out = append(out, editor.ReadStatement{ID: id, Text: text})
-		}
-		l.At = parseTime(lookedUp)
-		c := editor.Citation{Kind: editor.CitationKind(kind), Story: editor.Story{ID: storyID, Title: title}, Lookup: l}
-		c.Fact.ID, c.Assessment.ID = factID, assessmentID
-		facts = append(facts, cited{len(out) - 1, c})
+	if err := s.db.QueryRowContext(ctx, `SELECT EXISTS (SELECT 1 FROM sunday_reads r WHERE r.day = ?
+		AND NOT EXISTS (SELECT 1 FROM told_reads t WHERE t.day = r.day))`, day).Scan(&found); err != nil {
+		return nil, nil, false, fmt.Errorf("earlier sunday read %s: %w", day, err)
 	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	_ = rows.Close()
-	for _, f := range facts {
-		if f.c.Fact.ID != 0 {
-			d, err := s.tracedFact(ctx, f.c.Fact.ID)
-			if err != nil {
-				return nil, err
-			}
-			f.c.Fact = d
-		}
-		if f.c.Assessment.ID != 0 {
-			as, err := s.assessments(ctx, `a.id = ?`, -1, f.c.Assessment.ID)
-			if err != nil {
-				return nil, err
-			}
-			if len(as) == 1 {
-				f.c.Assessment = as[0]
-			}
-		}
-		out[f.statement].Cites = append(out[f.statement].Cites, f.c)
-	}
-	return out, nil
+	return statements, assessments, found, nil
 }
 
-// FactsAbout are at most limit Facts involving the Entity called entity, by
-// its name or any it is called by, as at a date before before (any date if
-// zero), the latest first, each with the Stories it is a Development in. A
-// Fact involves an Entity only in a role connecting gave it; one its Item
-// merely mentions is not involved (system design: What finds work rests on
-// mentions; what links Stories rests on involvement).
-func (s *Store) FactsAbout(ctx context.Context, entity string, before time.Time, limit int) ([]editor.RecordFact, error) {
-	until := "9999-12-31"
-	if !before.IsZero() {
-		until = before.Format(time.DateOnly)
-	}
-	rows, err := s.db.QueryContext(ctx, `
-		SELECT `+traced("f", "i")+`
-		FROM facts f JOIN items i ON i.source_id = f.source_id AND i.entry_id = f.entry_id
-		WHERE f.as_at < ?2 AND f.withdrawn_by IS NULL AND EXISTS (
-			SELECT 1 FROM fact_entities fe JOIN entities e ON e.id = fe.entity_id
-			WHERE fe.fact_id = f.id AND fe.role IS NOT NULL AND (e.name = ?1 COLLATE NOCASE OR EXISTS (
-				SELECT 1 FROM entity_names n WHERE n.entity_id = e.id AND n.name = ?1 COLLATE NOCASE)))
-		ORDER BY f.as_at DESC, f.id DESC
-		LIMIT ?3`, entity, until, limit)
-	if err != nil {
-		return nil, fmt.Errorf("facts about %q: %w", entity, err)
-	}
-	defer func() { _ = rows.Close() }()
-	var out []editor.RecordFact
-	for rows.Next() {
-		var d editor.Development
-		var asAt string
-		if err := rows.Scan(&d.ID, &d.SourceID, &d.EntryID, &d.Statement, &asAt, &d.Quote, &d.ItemTitle); err != nil {
-			return nil, fmt.Errorf("facts about %q: %w", entity, err)
-		}
-		if err := scanFact(&d.Fact, asAt); err != nil {
-			return nil, fmt.Errorf("facts about %q: %w", entity, err)
-		}
-		out = append(out, editor.RecordFact{Fact: d})
-	}
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("facts about %q: %w", entity, err)
-	}
-	_ = rows.Close()
-	for i := range out {
-		if out[i].Stories, err = s.storiesOf(ctx, out[i].Fact.ID); err != nil {
-			return nil, fmt.Errorf("facts about %q: %w", entity, err)
-		}
-		if err := s.withInvolves(ctx, &out[i].Fact.Fact); err != nil {
-			return nil, fmt.Errorf("facts about %q: %w", entity, err)
-		}
-	}
-	return out, nil
-}
-
-// storiesOf are the Stories the Fact id is a Development in, by id.
-func (s *Store) storiesOf(ctx context.Context, factID int64) ([]editor.Story, error) {
-	rows, err := s.db.QueryContext(ctx, `
-		SELECT stories.id, stories.title FROM developments JOIN stories ON stories.id = developments.story_id
-		WHERE developments.fact_id = ? AND developments.withdrawn_by IS NULL ORDER BY stories.id`, factID)
+// textsOf runs a query of one text column with args.
+func (s *Store) textsOf(ctx context.Context, query string, args ...any) ([]string, error) {
+	rows, err := s.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
 	defer func() { _ = rows.Close() }()
-	var out []editor.Story
+	var out []string
 	for rows.Next() {
-		var st editor.Story
-		if err := rows.Scan(&st.ID, &st.Title); err != nil {
+		var v string
+		if err := rows.Scan(&v); err != nil {
 			return nil, err
 		}
-		out = append(out, st)
+		out = append(out, v)
 	}
 	return out, rows.Err()
 }
 
-// Assessments are at most limit Assessments, the latest first, each with the
-// Facts it cites and what supersedes it, without what Feedback withdrew.
+// readTakenOutBy is, for the read's statement aliased st, the JSON array of
+// the Feedback standing that takes it out of its read: wrong on an
+// Assessment it cites.
+var readTakenOutBy = `(SELECT json_group_array(id) FROM (
+		SELECT DISTINCT w.event_id AS id FROM told_read_citations wc JOIN feedback_given w ON w.judgement_id = wc.assessment_id
+		WHERE wc.statement_id = st.event_id AND w.kind = 'wrong' AND ` + standing("w.event_id") + `
+		ORDER BY id))`
+
+// readStatements are the read's statements in order, each with what it
+// cites: a Span as its Item's newest reading reads it, an Assessment, or a
+// lookup.
+func (s *Store) readStatements(ctx context.Context, readID int64) ([]editor.ReadStatement, error) {
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT st.event_id, st.text, `+readTakenOutBy+`,
+			coalesce(c.source_id, ''), coalesce(c.entry_id, ''), coalesce(c.span_start, 0), coalesce(c.span_end, 0),
+			coalesce(c.reading_id, 0), coalesce(c.assessment_id, 0),
+			coalesce(l.id, 0), coalesce(l.reference, ''), coalesce(l.item_id, ''), coalesce(l.revision, 0),
+			coalesce(l.looked_up_at, ''), coalesce(l.licence, '')
+		FROM told_read_statements st
+			JOIN told_read_citations c ON c.statement_id = st.event_id
+			LEFT JOIN reference_lookups l ON l.id = c.lookup_id
+		WHERE st.read_id = ?
+		ORDER BY st.position, c.position`, readID)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+	var out []editor.ReadStatement
+	for rows.Next() {
+		var id, assessment int64
+		var text, by, lookedUp string
+		var c editor.Citation
+		a := &c.Span.At
+		l := &c.Lookup
+		if err := rows.Scan(&id, &text, &by, &a.SourceID, &a.EntryID, &a.Span.Start, &a.Span.End, &c.Span.ReadingID, &assessment,
+			&l.ID, &l.Reference, &l.ItemID, &l.Revision, &lookedUp, &l.Licence); err != nil {
+			return nil, err
+		}
+		if n := len(out); n == 0 || out[n-1].ID != id {
+			st := editor.ReadStatement{ID: id, Text: text}
+			if err := json.Unmarshal([]byte(by), &st.TakenOutBy); err != nil {
+				return nil, err
+			}
+			out = append(out, st)
+		}
+		switch {
+		case a.SourceID != "":
+			c.Kind = editor.CitesSpan
+		case assessment != 0:
+			c.Kind, c.Assessment.ID = editor.CitesAssessment, assessment
+		default:
+			c.Kind, l.At = editor.CitesLookup, parseTime(lookedUp)
+		}
+		out[len(out)-1].Cites = append(out[len(out)-1].Cites, c)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	_ = rows.Close()
+	for i := range out {
+		for j, c := range out[i].Cites {
+			switch c.Kind {
+			case editor.CitesSpan:
+				sp, err := s.SpanAt(ctx, c.Span.At)
+				if err != nil {
+					return nil, err
+				}
+				sp.At, sp.ReadingID = c.Span.At, c.Span.ReadingID
+				out[i].Cites[j].Span = sp
+			case editor.CitesAssessment:
+				as, err := s.assessments(ctx, `a.event_id = ?`, -1, c.Assessment.ID)
+				if err != nil {
+					return nil, err
+				}
+				if len(as) == 1 {
+					out[i].Cites[j].Assessment = as[0]
+				}
+			}
+		}
+	}
+	return out, nil
+}
+
+// Assessments are at most limit Assessments, the latest first, each with
+// what it rests on and what supersedes it, as the acts see them: none under
+// wrong standing (system design: What Feedback took out is never shown).
 func (s *Store) Assessments(ctx context.Context, limit int) ([]editor.Assessment, error) {
-	// As the acts see them: none Feedback withdrew, or that rests on a Fact
-	// it withdrew.
-	out, err := s.assessments(ctx, `a.withdrawn_by IS NULL AND NOT EXISTS (SELECT 1 FROM assessment_facts af
-		JOIN facts g ON g.id = af.fact_id WHERE af.assessment_id = a.id AND g.withdrawn_by IS NOT NULL)`, limit)
+	out, err := s.assessments(ctx, `NOT `+wrongStanding("a.event_id"), limit)
 	if err != nil {
 		return nil, fmt.Errorf("assessments: %w", err)
 	}
@@ -383,7 +414,7 @@ func (s *Store) Assessments(ctx context.Context, limit int) ([]editor.Assessment
 
 // Assessment is one Assessment, reporting whether it is in the Record.
 func (s *Store) Assessment(ctx context.Context, id int64) (editor.Assessment, bool, error) {
-	as, err := s.assessments(ctx, `a.id = ?`, -1, id)
+	as, err := s.assessments(ctx, `a.event_id = ?`, -1, id)
 	if err != nil {
 		return editor.Assessment{}, false, fmt.Errorf("assessment %d: %w", id, err)
 	}
@@ -393,23 +424,32 @@ func (s *Store) Assessment(ctx context.Context, id int64) (editor.Assessment, bo
 	return as[0], true, nil
 }
 
-// ReadAssessments are the Assessments the Sunday read readID made, in order.
-func (s *Store) readAssessments(ctx context.Context, readID int64) ([]editor.Assessment, error) {
-	out, err := s.assessments(ctx, `a.read_id = ?`, -1, readID)
-	slices.Reverse(out) // one read's are all as at its day, latest made first
-	return out, err
+// assessments are the Assessments matching where (SQL over told_assessments
+// aliased a), the latest first (by as at, then the order they were made),
+// at most limit (all, if negative), each with what it rests on.
+func (s *Store) assessments(ctx context.Context, where string, limit int, args ...any) ([]editor.Assessment, error) {
+	out, err := s.assessmentsOnly(ctx, where, limit, args...)
+	if err != nil {
+		return nil, err
+	}
+	for i := range out {
+		if err := s.groundsOf(ctx, &out[i]); err != nil {
+			return nil, err
+		}
+	}
+	return out, nil
 }
 
-// assessments are the Assessments matching where, the latest first (by as
-// at, then the order they were made), at most limit (all, if negative).
-func (s *Store) assessments(ctx context.Context, where string, limit int, args ...any) ([]editor.Assessment, error) {
+// assessmentsOnly are the Assessments matching where, without what they
+// rest on.
+func (s *Store) assessmentsOnly(ctx context.Context, where string, limit int, args ...any) ([]editor.Assessment, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT a.id, a.statement, a.as_at, coalesce(a.supersedes_id, 0),
-			coalesce((SELECT later.id FROM assessments later WHERE later.supersedes_id = a.id), 0), r.day,
-			a.withdrawn_by IS NOT NULL
-		FROM assessments a JOIN sunday_reads r ON r.id = a.read_id
+		SELECT a.event_id, a.statement, a.as_at, coalesce(a.supersedes_id, 0),
+			coalesce((SELECT later.event_id FROM told_assessments later WHERE later.supersedes_id = a.event_id), 0), r.day,
+			`+wrongStanding("a.event_id")+`
+		FROM told_assessments a JOIN told_reads r ON r.event_id = a.read_id
 		WHERE `+where+`
-		ORDER BY a.as_at DESC, a.id DESC
+		ORDER BY a.as_at DESC, a.event_id DESC
 		LIMIT `+fmt.Sprint(limit), args...)
 	if err != nil {
 		return nil, err
@@ -427,56 +467,54 @@ func (s *Store) assessments(ctx context.Context, where string, limit int, args .
 		}
 		out = append(out, a)
 	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	_ = rows.Close()
-	for i := range out {
-		ids, err := s.ids(ctx, `SELECT fact_id FROM assessment_facts WHERE assessment_id = ? ORDER BY position`, out[i].ID)
-		if err != nil {
-			return nil, err
-		}
-		for _, id := range ids {
-			d, err := s.tracedFact(ctx, id)
-			if err != nil {
-				return nil, err
-			}
-			out[i].Facts = append(out[i].Facts, d)
-		}
-	}
-	return out, nil
-}
-
-// ids are the ids a query of one integer column gives.
-func (s *Store) ids(ctx context.Context, query string, args ...any) ([]int64, error) {
-	rows, err := s.db.QueryContext(ctx, query, args...)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = rows.Close() }()
-	var out []int64
-	for rows.Next() {
-		var id int64
-		if err := rows.Scan(&id); err != nil {
-			return nil, err
-		}
-		out = append(out, id)
-	}
 	return out, rows.Err()
 }
 
-// tracedFact is a Fact with the title of its Item and the Entities it
-// involves, in their roles.
-func (s *Store) tracedFact(ctx context.Context, id int64) (editor.Development, error) {
-	var d editor.Development
-	var asAt string
-	if err := s.db.QueryRowContext(ctx, `SELECT `+traced("f", "i")+`
-		FROM facts f JOIN items i ON i.source_id = f.source_id AND i.entry_id = f.entry_id
-		WHERE f.id = ?`, id).Scan(&d.ID, &d.SourceID, &d.EntryID, &d.Statement, &asAt, &d.Quote, &d.ItemTitle); err != nil {
-		return d, fmt.Errorf("fact %d: %w", id, err)
+// groundsOf fills in what a rests on: its Spans, as their Items' newest
+// readings read them, and its earlier Assessments.
+func (s *Store) groundsOf(ctx context.Context, a *editor.Assessment) error {
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT coalesce(source_id, ''), coalesce(entry_id, ''), coalesce(span_start, 0), coalesce(span_end, 0),
+			coalesce(reading_id, 0), coalesce(earlier_id, 0)
+		FROM assessment_grounds WHERE assessment_id = ? ORDER BY position`, a.ID)
+	if err != nil {
+		return err
 	}
-	if err := scanFact(&d.Fact, asAt); err != nil {
-		return d, err
+	defer func() { _ = rows.Close() }()
+	var spans []editor.OtherSpan
+	var earlier []int64
+	for rows.Next() {
+		var o editor.OtherSpan
+		var e int64
+		var start, end int
+		if err := rows.Scan(&o.At.SourceID, &o.At.EntryID, &start, &end, &o.ReadingID, &e); err != nil {
+			return err
+		}
+		o.At.Span = cut.Span{Start: start, End: end}
+		if e != 0 {
+			earlier = append(earlier, e)
+			continue
+		}
+		spans = append(spans, o)
 	}
-	return d, s.withInvolves(ctx, &d.Fact)
+	if err := rows.Err(); err != nil {
+		return err
+	}
+	_ = rows.Close()
+	for _, o := range spans {
+		sp, err := s.SpanAt(ctx, o.At)
+		if err != nil {
+			return err
+		}
+		sp.At, sp.ReadingID = o.At, o.ReadingID
+		a.Spans = append(a.Spans, sp)
+	}
+	for _, id := range earlier {
+		as, err := s.assessmentsOnly(ctx, `a.event_id = ?`, -1, id)
+		if err != nil {
+			return err
+		}
+		a.Earlier = append(a.Earlier, as...)
+	}
+	return nil
 }

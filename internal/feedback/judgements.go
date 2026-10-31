@@ -23,14 +23,19 @@ const (
 	Relation  Judged = "relation"
 	Gathering Judged = "gathering"
 	Statement Judged = "statement"
+	// Assessment is an Assessment a Sunday read reached, and SundayRead the
+	// read as a whole.
+	Assessment Judged = "assessment"
+	SundayRead Judged = "sunday_read"
 )
 
 // judgedTakes are the judgements each kind given on a judgement lands on:
-// wrong on any of them, new to me only on what is told (a statement, or a
-// Story gathered to tell it).
+// wrong on any of them but the Sunday read as a whole, new to me only on
+// what is told (a statement, a Story gathered to tell it, an Assessment or
+// the Sunday read).
 var judgedTakes = map[Kind][]Judged{
-	Wrong:   {RefersTo, Lookup, Speaker, Relation, Gathering, Statement},
-	NewToMe: {Gathering, Statement},
+	Wrong:   {RefersTo, Lookup, Speaker, Relation, Gathering, Statement, Assessment},
+	NewToMe: {Gathering, Statement, Assessment, SundayRead},
 }
 
 // Span is a Span of an Item, by its address: its Source and entry, and
@@ -78,6 +83,11 @@ type KeptPiece struct {
 	At, To Span
 	// Name, NameKind, Office and On are the key a look-up was made for.
 	Name, NameKind, Office, On string
+	// Read is the Sunday (YYYY-MM-DD) of the read a piece on a Sunday read,
+	// an Assessment or a Story the read gathered is about, and
+	// Conversation the kept conversation that wrote it (zero for none).
+	Read         string
+	Conversation int64
 	// Calls are the kept calls behind what it is about: the reading behind
 	// a reference, a speaker or a Span missed; the relating behind a
 	// relation; the Briefing behind a statement, a gathering or a Span told

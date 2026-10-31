@@ -123,9 +123,8 @@ func TestTheBriefingKeepsTheModelReportedNotTheOneAskedFor(t *testing.T) {
 }
 
 func TestTheSundayReadKeepsTheModelReportedNotTheOneAskedFor(t *testing.T) {
-	store := record(t)
-	readAndPlace(t, store, &fakeModel{output: startsAStory})
-	turn := submits(citesTheSpeech)
+	store := toldWeek(t)
+	turn := submits(citesTheTold)
 	turn.Model = "reported-sunday-read"
 	ed := askingFor(store, editor.Deps{SundayReads: store, SundayReadModel: &fakeAgent{turns: []editor.Turn{turn}}})
 
@@ -137,7 +136,7 @@ func TestTheSundayReadKeepsTheModelReportedNotTheOneAskedFor(t *testing.T) {
 	if err != nil || !found {
 		t.Fatalf("SundayRead: %v %v", found, err)
 	}
-	if r.Model != "reported-sunday-read" {
-		t.Errorf("written by %q, want the model reported", r.Model)
+	if r.Judge.Model != "reported-sunday-read" {
+		t.Errorf("written by %q, want the model reported", r.Judge.Model)
 	}
 }

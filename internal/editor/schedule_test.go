@@ -93,9 +93,7 @@ func sundaySchedule(t *testing.T, store *sqlite.Store, agent *fakeAgent) (*edito
 
 func TestTheSundayReadIsWrittenOnSundayAfterTheBriefing(t *testing.T) {
 	store := record(t)
-	// The Sunday read is shown the week's Stories, until it tells Spans.
-	readAndPlace(t, store, &fakeModel{output: startsAStory})
-	s, happened := sundaySchedule(t, store, &fakeAgent{turns: []editor.Turn{submits(citesTheSpeech)}})
+	s, happened := sundaySchedule(t, store, &fakeAgent{turns: []editor.Turn{submits(citesTheTold)}})
 	sunday := seven.AddDate(0, 0, 1)
 
 	s.Tick(t.Context(), seven) // Saturday: the Briefing only
@@ -113,10 +111,9 @@ func TestTheSundayReadIsWrittenOnSundayAfterTheBriefing(t *testing.T) {
 
 func TestASundayReadThatFailedIsTriedAgainAFewTimes(t *testing.T) {
 	store := record(t)
-	// The Sunday read is shown the week's Stories, until it tells Spans.
-	readAndPlace(t, store, &fakeModel{output: startsAStory})
 	s, happened := sundaySchedule(t, store, &fakeAgent{}) // never submits
 	sunday := seven.AddDate(0, 0, 1)
+	s.Tick(t.Context(), seven) // Saturday's Briefing tells the speech
 
 	for _, at := range []time.Duration{0, 30 * time.Minute, time.Hour, 2 * time.Hour, 3 * time.Hour, 4 * time.Hour} {
 		s.Tick(t.Context(), sunday.Add(at))

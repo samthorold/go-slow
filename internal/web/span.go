@@ -25,12 +25,14 @@ type Relations interface {
 }
 
 // gatheringRow is a Span's latest gathering, as its page shows it: the
-// Briefing that gathered it, linked, and the call that wrote it, and the
-// Spans it holds, each linking its page with its Item.
+// pass that gathered it (By, the Briefing or the Sunday read), linked, and
+// the call that wrote it or, for the read, its conversation, and the Spans
+// it holds, each linking its page with its Item.
 type gatheringRow struct {
-	BriefingPath, BriefingDate string
-	Made                       made
-	Spans                      []spanLink
+	By, Path, Date string
+	Made           made
+	Conversation   string
+	Spans          []spanLink
 	// Gives is the Feedback on the gathering: wrong, or new to me.
 	Gives gives
 }
@@ -187,9 +189,13 @@ func (a *app) spanWith(w http.ResponseWriter, r *http.Request, status int, errs 
 			a.serverError(w, r, err)
 			return
 		}
-		p.Gathered = &gatheringRow{BriefingPath: briefingPath(g.Day), BriefingDate: day.Format("Monday 2 January 2006"),
+		p.Gathered = &gatheringRow{By: "the Briefing", Path: briefingPath(g.Day), Date: day.Format("Monday 2 January 2006"),
 			Made:  made{Act: "gathered", Call: g.Call},
 			Gives: givesOn([]giveButton{wrongOn(path, g.ID, "this Story"), newToMeOn(path, g.ID, "this Story")}, j.pieces, page)}
+		if g.ByRead {
+			p.Gathered.By, p.Gathered.Path = "the Sunday read", sundayReadPath(g.Day)
+			p.Gathered.Conversation = conversationPath(g.Conversation, 0)
+		}
 		for _, o := range g.Spans {
 			p.Gathered.Spans = append(p.Gathered.Spans, a.linkTo(o))
 		}

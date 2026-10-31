@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"slices"
 	"strconv"
 	"strings"
@@ -13,9 +14,10 @@ import (
 )
 
 // The Sunday read's tools. Each reads the Record or a Reference source; none
-// writes, and none can make a Fact (system design: The Sunday read writes
-// Stories and Assessments, never Facts). Everything a tool shows is shown by
-// its ref and registered as seen, so a statement can cite it.
+// writes (system design: The read's citations are refs to what its agent
+// was shown). Everything a tool shows is shown by its ref and registered as
+// seen, so a statement can cite it: a Span as P1, P2 and so on, an
+// Assessment as A and its id, a lookup as L1, L2 and so on.
 
 // errTool is a call the agent got wrong (an unknown tool, a malformed input,
 // a ref to nothing): told to the agent as an error, so it can try again,
@@ -29,9 +31,10 @@ func toolError(format string, args ...any) error {
 // submitRead is the tool the agent submits its read with.
 const submitRead = "submit_read"
 
-// factsShownAbout is how many Facts about an Entity one call shows: the
-// latest first, and an earlier page by a date to go back before.
-const factsShownAbout = 25
+// spansShownNaming is how many Spans naming an Entity one call shows: those
+// of the latest Items first, and an earlier page by a date to go back
+// before.
+const spansShownNaming = 25
 
 // assessmentsShown is how many of the latest Assessments the agent is shown.
 const assessmentsShown = 50
@@ -40,26 +43,26 @@ func (r *sundayRun) tools() []Tool {
 	return []Tool{
 		{
 			Name: "story",
-			Description: "A Story's whole Timeline, back to its start, with the cause Connections to and from its " +
-				"Developments and the Stories connected to it: through the Developments they share, an Item both have " +
-				"Developments from, or Entities their Facts from different Items involve in the same role.",
-			Schema: object(map[string]any{"story": refSchema("The Story's ref, such as S3.")}),
+			Description: "A Span's Story: the Spans its latest gathering holds, that move on what it says or that it moves on, " +
+				"with the Briefing or Sunday read that gathered it, then its relations judged since (follows, followed by, " +
+				"same as, contradicts), each to a Span of another Item.",
+			Schema: object(map[string]any{"span": refSchema("The Span's ref, such as P3.")}),
 		},
 		{
-			Name: "facts_about",
-			Description: fmt.Sprintf("The Facts in the Record involving an Entity, by its name, the latest first, at most %d, "+
-				"each with the Stories it is a Development in. Give before (YYYY-MM-DD) to go further back, or an empty string "+
-				"for the latest.", factsShownAbout),
+			Name: "spans_naming",
+			Description: fmt.Sprintf("The Spans in the Record naming an Entity, by its name as a Span shown to you names it, "+
+				"those of the latest Items first, at most %d. Give before (YYYY-MM-DD) to go further back, or an empty string "+
+				"for the latest.", spansShownNaming),
 			Schema: object(map[string]any{
-				"entity": refSchema("The Entity's name, as the Record gives it."),
-				"before": refSchema("Only Facts as at a date before this one (YYYY-MM-DD), or an empty string."),
+				"entity": refSchema("The Entity's name, as a Span shown to you names it."),
+				"before": refSchema("Only Spans of Items published before this date (YYYY-MM-DD), or an empty string."),
 			}),
 		},
 		{
 			Name: "assessments",
 			Description: fmt.Sprintf("The Assessments earlier Sunday reads reached, the latest first, at most %d, current and "+
-				"superseded, each with the Facts it rests on. Start from them rather than from scratch; a new Assessment "+
-				"that revises a current one supersedes it.", assessmentsShown),
+				"superseded, each with the Spans and Assessments it rests on. Start from them rather than from scratch; a new "+
+				"Assessment that revises a current one supersedes it.", assessmentsShown),
 			Schema: object(map[string]any{}),
 		},
 		{
@@ -80,22 +83,23 @@ func (r *sundayRun) tools() []Tool {
 			Schema: map[string]any{
 				"type": "object",
 				"properties": map[string]any{
-					"statements": array(object(map[string]any{
-						"text":  str(),
-						"cites": array(str()),
-					})),
 					"assessments": array(object(map[string]any{
-						"ref":        str(),
-						"statement":  str(),
-						"facts":      array(str()),
-						"supersedes": str(),
+						"assessments": array(str()),
+						"ref":         str(),
+						"spans":       array(str()),
+						"statement":   str(),
+						"supersedes":  str(),
 					})),
-					"stories": array(object(map[string]any{
-						"title":        str(),
-						"developments": array(str()),
+					"statements": array(object(map[string]any{
+						"cites": array(str()),
+						"stories": array(object(map[string]any{
+							"span":  str(),
+							"story": array(str()),
+						})),
+						"text": str(),
 					})),
 				},
-				"required":             []string{"assessments", "statements", "stories"},
+				"required":             []string{"assessments", "statements"},
 				"additionalProperties": false,
 			},
 		},
@@ -111,13 +115,13 @@ func (r *sundayRun) call(ctx context.Context, c ToolCall) (string, error) {
 	switch c.Name {
 	case "story":
 		var in struct {
-			Story string `json:"story"`
+			Span string `json:"span"`
 		}
 		if err := decodeInput(c.Input, &in); err != nil {
 			return "", err
 		}
-		return r.storyTool(ctx, in.Story)
-	case "facts_about":
+		return r.storyTool(ctx, in.Span)
+	case "spans_naming":
 		var in struct {
 			Entity string `json:"entity"`
 			Before string `json:"before"`
@@ -125,7 +129,7 @@ func (r *sundayRun) call(ctx context.Context, c ToolCall) (string, error) {
 		if err := decodeInput(c.Input, &in); err != nil {
 			return "", err
 		}
-		return r.factsAboutTool(ctx, in.Entity, in.Before)
+		return r.spansNamingTool(ctx, in.Entity, in.Before)
 	case "assessments":
 		if err := decodeInput(c.Input, &struct{}{}); err != nil {
 			return "", err
@@ -161,57 +165,67 @@ func decodeInput(input json.RawMessage, v any) error {
 }
 
 func (r *sundayRun) storyTool(ctx context.Context, ref string) (string, error) {
-	id, ok := parseRef(ref, "S")
-	if !ok {
-		return "", toolError("%q is not a Story's ref, such as S3", ref)
+	c, ok := r.seen[ref]
+	if !ok || c.Kind != CitesSpan {
+		return "", toolError("%q is not the ref of a Span this run has been shown, such as P3", ref)
 	}
-	s, found, err := r.store.StoryToRead(ctx, id)
+	at := c.Span.At
+	g, gathered, err := r.store.LatestGathering(ctx, at)
 	if err != nil {
 		return "", err
 	}
-	if !found {
-		return "", toolError("there is no Story %s", ref)
-	}
-	connected, err := r.store.ConnectedStories(ctx, id)
+	rels, err := r.store.RelationsOf(ctx, at)
 	if err != nil {
 		return "", err
 	}
 	var b strings.Builder
-	fmt.Fprintf(&b, "%s: %s\n", ref, s.Title)
-	if len(s.Entities) > 0 {
-		fmt.Fprintf(&b, "Entities: %s\n", strings.Join(s.Entities, "; "))
-	}
-	b.WriteString("Timeline:\n")
-	for _, d := range s.Timeline {
-		fmt.Fprintf(&b, "  %s\n", r.showDevelopment(s, d))
-	}
-	if len(s.Causes) > 0 {
-		b.WriteString("Cause Connections:\n")
-		for _, c := range s.Causes {
-			fmt.Fprintf(&b, "  %s led to %s\n", r.showFact(c.Cause), r.showFact(c.Effect))
+	if gathered {
+		fmt.Fprintf(&b, "%s's Story, as %s gathered it:\n", ref, gatheredBy(g))
+		if len(g.Spans) == 0 {
+			b.WriteString("  nothing: no Span moves on what it says\n")
+		}
+		for _, o := range g.Spans {
+			fmt.Fprintf(&b, "  %s\n", r.showSpan(Citation{Kind: CitesSpan, Span: o}))
 		}
 	}
-	if len(connected) > 0 {
-		b.WriteString("Connected Stories:\n")
-		for _, c := range connected {
-			other := Story{ID: c.ID, Title: c.Title}
-			fmt.Fprintf(&b, "  %s: %s\n", storyRefOf(c.ID), c.Title)
-			for _, d := range c.Shared {
-				fmt.Fprintf(&b, "    shares %s\n", r.showDevelopment(other, d))
-			}
-			for _, it := range c.Items {
-				fmt.Fprintf(&b, "    announced together in %q\n", it.Title)
-			}
-			for _, e := range c.Entities {
-				fmt.Fprintf(&b, "    %s as %s here in %s and there in %s\n", e.Entity, e.Role,
-					r.showDevelopment(s, e.Here), r.showDevelopment(other, e.There))
-			}
+	var since []SpanRelation
+	for _, rel := range rels {
+		if gathered && rel.ID < g.ID {
+			continue // judged before the latest gathering, which weighed it
 		}
+		since = append(since, rel)
+	}
+	switch {
+	case len(since) > 0 && gathered:
+		b.WriteString("Its relations judged since:\n")
+	case len(since) > 0:
+		fmt.Fprintf(&b, "%s's Story has not been gathered. Its relations:\n", ref)
+	case !gathered:
+		fmt.Fprintf(&b, "%s's Story has not been gathered, and it relates to no Span.\n", ref)
+	}
+	for _, rel := range since {
+		how := howRelatedFrom(rel.Relation, at)
+		if rel.Relation.Corroborates() {
+			how += " (corroborated)"
+		}
+		fmt.Fprintf(&b, "  %s %s\n", how, r.showSpan(Citation{Kind: CitesSpan, Span: rel.Other}))
 	}
 	return b.String(), nil
 }
 
-func (r *sundayRun) factsAboutTool(ctx context.Context, entity, before string) (string, error) {
+// gatheredBy names the pass that gathered g.
+func gatheredBy(g GatheredStory) string {
+	if g.ByRead {
+		return "the Sunday read for " + g.Day
+	}
+	return "the Briefing for " + g.Day
+}
+
+func (r *sundayRun) spansNamingTool(ctx context.Context, entity, before string) (string, error) {
+	e, ok := r.entities[strings.ToLower(strings.TrimSpace(entity))]
+	if !ok {
+		return "", toolError("%q is not an Entity a Span shown to you names; give its name as a Span shows it", entity)
+	}
 	var until time.Time
 	if before != "" {
 		t, err := time.Parse(time.DateOnly, before)
@@ -220,20 +234,20 @@ func (r *sundayRun) factsAboutTool(ctx context.Context, entity, before string) (
 		}
 		until = t
 	}
-	facts, err := r.store.FactsAbout(ctx, entity, until, factsShownAbout)
+	spans, err := r.store.SpansMentioning(ctx, []NamedEntity{e}, math.MaxInt64)
 	if err != nil {
 		return "", err
 	}
-	if len(facts) == 0 {
-		return fmt.Sprintf("The Record holds no Facts involving %q%s.", entity, beforeText(before)), nil
+	spans = slices.DeleteFunc(spans, func(o OtherSpan) bool { return !until.IsZero() && !o.Item.Published.Before(until) })
+	slices.SortStableFunc(spans, func(a, b OtherSpan) int { return b.Item.Published.Compare(a.Item.Published) })
+	spans = spans[:min(len(spans), spansShownNaming)]
+	if len(spans) == 0 {
+		return fmt.Sprintf("The Record holds no Span naming %s%s.", e.Name, beforeText(before)), nil
 	}
 	var b strings.Builder
-	fmt.Fprintf(&b, "Facts involving %q%s, the latest first:\n", entity, beforeText(before))
-	for _, f := range facts {
-		fmt.Fprintf(&b, "  %s\n", r.showFact(f.Fact))
-		for _, s := range f.Stories {
-			fmt.Fprintf(&b, "    a Development in %s: %s, as %s\n", storyRefOf(s.ID), s.Title, r.registerDevelopment(s, f.Fact))
-		}
+	fmt.Fprintf(&b, "Spans naming %s%s, the latest Items first:\n", e.Name, beforeText(before))
+	for _, o := range spans {
+		fmt.Fprintf(&b, "  %s\n", r.showSpan(Citation{Kind: CitesSpan, Span: o}))
 	}
 	return b.String(), nil
 }
@@ -258,8 +272,11 @@ func (r *sundayRun) assessmentsTool(ctx context.Context) (string, error) {
 		if a.Supersedes != 0 {
 			fmt.Fprintf(&b, "    supersedes %s\n", assessmentRefOf(a.Supersedes))
 		}
-		for _, f := range a.Facts {
-			fmt.Fprintf(&b, "    rests on %s\n", r.showFact(f))
+		for _, e := range a.Earlier {
+			fmt.Fprintf(&b, "    rests on %s\n", assessmentRefOf(e.ID))
+		}
+		for _, o := range a.Spans {
+			fmt.Fprintf(&b, "    rests on %s\n", r.showSpan(Citation{Kind: CitesSpan, Span: o}))
 		}
 	}
 	return b.String(), nil
@@ -368,51 +385,48 @@ func beforeText(before string) string {
 	if before == "" {
 		return ""
 	}
-	return " as at a date before " + before
+	return " published before " + before
 }
 
-// showFact is a Fact as the agent is shown it, by its ref, registered as
-// seen.
-func (r *sundayRun) showFact(f Development) string {
-	ref := factRefOf(f.ID)
-	r.seen[ref] = Citation{Kind: CitesFact, Fact: f}
-	return fmt.Sprintf("%s (as at %s, from %q): %s%s", ref, f.AsAt.Format(time.DateOnly), f.ItemTitle, f.Statement, involvesText(f.Fact))
-}
-
-// registerDevelopment registers a Fact as a Development in its Story as
-// seen, and is its ref.
-func (r *sundayRun) registerDevelopment(s Story, d Development) string {
-	ref := storyRefOf(s.ID) + ":" + factRefOf(d.ID)
-	r.seen[ref] = Citation{Kind: CitesDevelopment, Fact: d, Story: Story{ID: s.ID, Title: s.Title}}
-	if _, ok := r.seen[factRefOf(d.ID)]; !ok {
-		r.seen[factRefOf(d.ID)] = Citation{Kind: CitesFact, Fact: d}
+// showSpan is a Span as the agent is shown it, by its ref, registered as
+// seen, and the Entities it names registered for spans_naming: its words,
+// whose they are, its Item and its date, and the Entities it names.
+func (r *sundayRun) showSpan(c Citation) string {
+	o := c.Span
+	if r.spans == nil {
+		r.spans, r.entities = map[Address]string{}, map[string]NamedEntity{}
 	}
-	return ref
-}
-
-// showDevelopment is a Development as the agent is shown it, by its ref,
-// registered as seen: as a Development, and as its Fact.
-func (r *sundayRun) showDevelopment(s Story, d Development) string {
-	ref := r.registerDevelopment(s, d)
-	return fmt.Sprintf("%s (as at %s, from %q): %s%s", ref, d.AsAt.Format(time.DateOnly), d.ItemTitle, d.Statement, involvesText(d.Fact))
-}
-
-// involvesText is the Entities a Fact involves, each with its role, by the
-// names facts_about takes: none its Item only mentions, which facts_about
-// would not find it by (system design: What finds work rests on mentions;
-// what links Stories rests on involvement).
-func involvesText(f Fact) string {
-	if len(f.Involves) == 0 {
-		return ""
+	ref, ok := r.spans[o.At]
+	if !ok {
+		ref = "P" + strconv.Itoa(len(r.spans)+1)
+		r.spans[o.At] = ref
+		r.seen[ref] = Citation{Kind: CitesSpan, Span: o}
 	}
-	shown := make([]string, len(f.Involves))
-	for i, r := range f.Involves {
-		shown[i] = r.Entity + ": " + r.Role
+	var note []string
+	note = append(note, fmt.Sprintf("from %q", o.Item.Title))
+	if !o.Item.Published.IsZero() {
+		note = append(note, "published "+o.Item.Published.UTC().Format(time.DateOnly))
 	}
-	return " [" + strings.Join(shown, "; ") + "]"
+	if o.Speaker != "" {
+		note = append(note, "spoken by "+o.Speaker)
+	}
+	if o.ReadingID == 0 {
+		note = append(note, "not yet read")
+	}
+	var names []string
+	for _, e := range o.Entities {
+		r.entities[strings.ToLower(e.Name)] = e
+		if !slices.Contains(names, e.Name) {
+			names = append(names, e.Name)
+		}
+	}
+	if len(names) > 0 {
+		note = append(note, "names "+strings.Join(names, "; "))
+	}
+	return fmt.Sprintf("%s (%s): %s", ref, strings.Join(note, "; "), o.Words)
 }
 
-// parseRef is the id in a ref such as S3, with its prefix.
+// parseRef is the id in a ref such as A3, with its prefix.
 func parseRef(ref, prefix string) (int64, bool) {
 	n, ok := strings.CutPrefix(ref, prefix)
 	if !ok {
@@ -421,9 +435,5 @@ func parseRef(ref, prefix string) (int64, bool) {
 	id, err := strconv.ParseInt(n, 10, 64)
 	return id, err == nil && id > 0
 }
-
-func storyRefOf(id int64) string { return "S" + strconv.FormatInt(id, 10) }
-
-func factRefOf(id int64) string { return "F" + strconv.FormatInt(id, 10) }
 
 func assessmentRefOf(id int64) string { return "A" + strconv.FormatInt(id, 10) }

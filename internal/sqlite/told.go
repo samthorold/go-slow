@@ -298,11 +298,18 @@ func (s *Store) LatestGathering(ctx context.Context, a editor.Address) (editor.G
 	}
 	g := editor.GatheredStory{Gathering: gs[0]}
 	var at string
+	// Gathered by the Briefing or by the Sunday read: one of t and r.
 	if err := s.db.QueryRowContext(ctx, `
-		SELECT t.day, e.at, t.act, t.version, t.model, t.request_hash, `+briefingCall("t")+`
-		FROM gatherings g JOIN told_briefings t ON t.event_id = g.briefing_id JOIN events e ON e.id = g.event_id
+		SELECT coalesce(t.day, r.day), r.event_id IS NOT NULL, e.at, coalesce(t.act, r.act), coalesce(t.version, r.version),
+			coalesce(t.model, r.model), coalesce(t.request_hash, ''),
+			CASE WHEN t.event_id IS NULL THEN 0 ELSE `+briefingCall("t")+` END,
+			coalesce((SELECT conversation_id FROM sunday_reads WHERE day = r.day), 0)
+		FROM gatherings g JOIN events e ON e.id = g.event_id
+			LEFT JOIN told_briefings t ON t.event_id = g.briefing_id
+			LEFT JOIN told_reads r ON r.event_id = g.read_id
 		WHERE g.event_id = ?`, g.ID,
-	).Scan(&g.Day, &at, &g.Judge.Act, &g.Judge.Version, &g.Judge.Model, &g.Judge.RequestHash, &g.Call); err != nil {
+	).Scan(&g.Day, &g.ByRead, &at, &g.Judge.Act, &g.Judge.Version, &g.Judge.Model, &g.Judge.RequestHash, &g.Call,
+		&g.Conversation); err != nil {
 		return g, false, fmt.Errorf("latest gathering: %w", err)
 	}
 	g.At = parseTime(at)

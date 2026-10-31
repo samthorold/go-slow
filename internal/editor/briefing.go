@@ -81,15 +81,19 @@ type Gathering struct {
 }
 
 // GatheredStory is a Story as a Span's page shows its latest gathering:
-// the gathering, the day of the Briefing that gathered it, when, its Judge
-// and the call that wrote it (zero if none was kept), and the Spans it holds.
+// the gathering, the day of the Briefing or Sunday read that gathered it
+// (ByRead for the read), when, its Judge and the call that wrote it (zero if
+// none was kept) or, for the read, its conversation, and the Spans it
+// holds.
 type GatheredStory struct {
 	Gathering
-	Day   string
-	At    time.Time
-	Judge Judge
-	Call  int64
-	Spans []OtherSpan
+	Day          string
+	ByRead       bool
+	At           time.Time
+	Judge        Judge
+	Call         int64
+	Conversation int64
+	Spans        []OtherSpan
 }
 
 // CitedSpan is a Span a Briefing cites, as it was written, with the kept

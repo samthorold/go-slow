@@ -23,8 +23,21 @@
 <p>Writing the Sunday read failed at {{.At}}; it is tried again later.{{with .Conversation}} <a href="{{.}}">How the attempt went</a>.{{end}}</p>
 <pre hx-disable>{{.Reason}}</pre>
 {{- end}}
-{{- else if not .Statements}}
-<p>Nothing moved on this week in the Stories your Topics follow.</p>
+{{- else if .Earlier}}
+{{/* A read written over Stories of Facts, before the read told Spans: as
+     written, with no Feedback. */}}
+<p class="quiet">This read was written over Stories, before the Sunday read told Spans; it is shown as written.</p>
+{{- range .Earlier.Statements}}
+<p hx-disable>{{.}}</p>
+{{- end}}
+{{- with .Earlier.Assessments}}
+<h2>Assessments</h2>
+{{- range .}}
+<p class="assessment" hx-disable>{{.}}</p>
+{{- end}}
+{{- end}}
+{{- else if not (or .Statements .Assessments)}}
+<p>Nothing was told in this week's Briefings, or Feedback took out all the read said.</p>
 {{- end}}
 {{- if or .Statements .Assessments}}
 {{/* A reading page: its margin starts folded, and the one control unfolds
@@ -69,7 +82,7 @@
     </div>
     <div class="block-margin">
       <p>as at <time>{{.AsAt}}</time></p>
-      {{- range .Facts}}
+      {{- range .Rests}}
       <p>Rests on</p>
       {{template "readCite" .}}
       {{- end}}
@@ -86,28 +99,16 @@
 {{- end}}
 </div>
 {{- end}}
-{{- if .Stories}}
-<section class="quiet" aria-labelledby="stories-started">
-  <h2 id="stories-started">Stories started</h2>
-  <ul>
-    {{- range .Stories}}
-    <li><a href="{{.Path}}"><span hx-disable>{{.Title}}</span></a></li>
-    {{- end}}
-  </ul>
-</section>
-{{- end}}
-{{- if .Feedback}}
-<section aria-labelledby="your-feedback">
-  <h2 id="your-feedback">Your Feedback on this read</h2>
-  {{- template "kept" .Feedback}}
-</section>
-{{- end}}
+{{- template "given" .Feedback}}
 {{end}}
 
 {{/* readCite is one thing cited, in a margin: what it is, linked where it
-     is read, then its Item, cited, if it has one. */}}
+     is read, whose words a Span is, then its Item, cited, if it has one. */}}
 {{define "readCite"}}<div class="cited">
   <p><a href="{{.Path}}">{{.Kind}}</a>{{with .AsAt}} of <time>{{.}}</time>{{end}}: <span hx-disable>{{.Text}}</span></p>
+  {{- with .Speaker}}
+  <p class="quiet">spoken by <span hx-disable>{{.}}</span></p>
+  {{- end}}
   {{- with .Item}}
   <p>{{template "citation" .}}</p>
   {{- end}}

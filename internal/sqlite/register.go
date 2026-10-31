@@ -125,6 +125,22 @@ const untraced = `
 		JOIN items i ON i.source_id = c.source_id AND i.entry_id = c.entry_id
 	WHERE c.span_end > length(CAST(i.content AS BLOB))
 	UNION ALL
+	SELECT 'Statement ' || (st.position + 1) || ' of the Sunday read of ' || r.day || ' cites nothing.'
+	FROM told_read_statements st JOIN told_reads r ON r.event_id = st.read_id
+	WHERE NOT EXISTS (SELECT 1 FROM told_read_citations c WHERE c.statement_id = st.event_id)
+	UNION ALL
+	SELECT 'Assessment ' || (a.position + 1) || ' of the Sunday read of ' || r.day || ' rests on no Span.'
+	FROM told_assessments a JOIN told_reads r ON r.event_id = a.read_id
+	WHERE NOT EXISTS (SELECT 1 FROM assessment_grounds g WHERE g.assessment_id = a.event_id AND g.source_id IS NOT NULL)
+	UNION ALL
+	SELECT 'The Sunday read of ' || r.day || ' cites a Span outside its Item''s text.'
+	FROM (SELECT c.statement_id AS id, c.source_id, c.entry_id, c.span_end FROM told_read_citations c WHERE c.source_id IS NOT NULL
+		UNION ALL SELECT g.assessment_id, g.source_id, g.entry_id, g.span_end FROM assessment_grounds g WHERE g.source_id IS NOT NULL) c
+		JOIN items i ON i.source_id = c.source_id AND i.entry_id = c.entry_id
+		JOIN told_reads r ON r.event_id = coalesce((SELECT read_id FROM told_read_statements WHERE event_id = c.id),
+			(SELECT read_id FROM told_assessments WHERE event_id = c.id))
+	WHERE c.span_end > length(CAST(i.content AS BLOB))
+	UNION ALL
 	SELECT 'The Development of Fact ' || sd.fact_id || ' in the Briefing of ' || bs.day || ' traces to no Item.'
 	FROM statement_developments sd
 		JOIN briefing_statements bs ON bs.id = sd.statement_id
@@ -164,14 +180,23 @@ func (s *Store) strings(ctx context.Context, query string) ([]string, error) {
 func (s *Store) givenFeedback(ctx context.Context) ([]register.Given, error) {
 	// Feedback on a Sunday read or one of its Assessments was given on that
 	// read, for foresight.
+	// Kept before the Record became events, or since, as events, on a read
+	// over Spans and its Assessments, counted at the same levels.
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT f.kind, f.level, f.given_at, coalesce(ar.day, r.day, '')
-		FROM feedback f
-			LEFT JOIN assessments a ON a.id = f.assessment_id
-			LEFT JOIN sunday_reads ar ON ar.id = a.read_id
-			LEFT JOIN sunday_reads r ON r.id = f.read_id
-		WHERE f.undone_at IS NULL
-		ORDER BY f.given_at, f.id`)
+		SELECT kind, level, given_at, day FROM (
+			SELECT f.kind, f.level, f.given_at, coalesce(ar.day, r.day, '') AS day, 0 AS events, f.id
+			FROM feedback f
+				LEFT JOIN assessments a ON a.id = f.assessment_id
+				LEFT JOIN sunday_reads ar ON ar.id = a.read_id
+				LEFT JOIN sunday_reads r ON r.id = f.read_id
+			WHERE f.undone_at IS NULL
+			UNION ALL
+			SELECT g.kind, CASE WHEN ta.event_id IS NULL THEN 'sunday read' ELSE 'assessment' END, e.at, tr.day, 1, g.event_id
+			FROM feedback_given g JOIN events e ON e.id = g.event_id
+				LEFT JOIN told_assessments ta ON ta.event_id = g.judgement_id
+				JOIN told_reads tr ON tr.event_id = coalesce(ta.read_id, g.judgement_id)
+			WHERE `+standing("g.event_id")+`)
+		ORDER BY given_at, events, id`)
 	if err != nil {
 		return nil, fmt.Errorf("register: feedback: %w", err)
 	}

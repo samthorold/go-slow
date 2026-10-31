@@ -17,7 +17,6 @@ import (
 	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
-	"github.com/samthorold/go-slow/internal/editor/frozentest"
 	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
@@ -94,12 +93,9 @@ func newRecordAt(t *testing.T, path string, topics []interest.Draft) (*sqlite.St
 type actModel func(name string) (editor.Model, error)
 
 // chain is the models the daily acts run on, each only when set: reading
-// (of Spans) and relating; and, for the old Briefing and the Sunday read,
-// whose frozen copies still carry them, the earlier reading act's Facts
-// (factReading) and the retired placing and connecting acts.
+// (of Spans) and relating.
 type chain struct {
-	reading, relating                actModel
-	factReading, placing, connecting actModel
+	reading, relating actModel
 }
 
 // noMatch is a Wikidata that finds nothing: relating's recordings find
@@ -205,21 +201,6 @@ func (c chain) run(ctx context.Context, store *sqlite.Store, topics *interest.Se
 			}},
 			{"relating", c.relating, func(m editor.Model, log *slog.Logger) error {
 				return editor.New(editor.Deps{Store: store, RelatingModel: m, Log: log}).RelateWaiting(ctx, saturday)
-			}},
-			{"reading", c.factReading, func(m editor.Model, _ *slog.Logger) error {
-				// What the earlier reading act drew, frozen: the acts built on
-				// Facts rest on it.
-				reading, err := replayFactReading(ctx, m, it)
-				if err != nil {
-					return err
-				}
-				return store.SaveFactReading(ctx, reading, saturday)
-			}},
-			{"placing", c.placing, func(m editor.Model, log *slog.Logger) error {
-				return frozentest.PlaceWaiting(ctx, frozentest.Deps{Store: store, Model: m, Log: log}, saturday)
-			}},
-			{"connecting", c.connecting, func(m editor.Model, log *slog.Logger) error {
-				return frozentest.ConnectWaiting(ctx, frozentest.Deps{Store: store, Model: m, Log: log}, saturday)
 			}},
 		}
 		for _, s := range steps {
@@ -362,61 +343,6 @@ func sampleNumber(path string) int {
 	var k int
 	_, _ = fmt.Sscanf(filepath.Base(path), "%d.json", &k)
 	return k
-}
-
-// sundayTopics are the fixed Topics the recorded Sunday read's Record is
-// built with (they were the earlier Briefing's): until the Sunday read tells
-// Spans (#218), it is shown the Stories they select. No Topic follows the
-// Lord-Lieutenancy of County Tyrone.
-var sundayTopics = []interest.Draft{
-	{Name: "Ukraine", Terms: "Ukraine\nZelenskyy\nRussia"},
-	{Name: "Railways", Terms: "Great British Railways"},
-	{Name: "Scotland", Terms: "Scotland\nScottish\nHolyrood"},
-}
-
-// sundayDepths are the Depths the Record keeps for the sundayTopics, which
-// the Sunday read is still shown with their Stories until #218, though
-// Topics no longer have one: its recordings answer a request carrying them.
-var sundayDepths = map[string]interest.Depth{
-	"Ukraine": interest.Close, "Railways": interest.Following, "Scotland": interest.Passing,
-}
-
-// frozenRecordAt is a Record kept at path holding the fixture Items, tied to
-// the sundayTopics at their sundayDepths, with the recordings of the earlier
-// reading of Facts, placing and connecting under dir replayed into it: the
-// Sunday read's frozen copies, which rest on all three.
-func frozenRecordAt(t *testing.T, path, dir string) *sqlite.Store {
-	t.Helper()
-	store, topics := newRecordAt(t, path, sundayTopics)
-	followed, err := store.Topics(t.Context())
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, tp := range followed {
-		if _, err := store.SetDepth(t.Context(), tp.ID, sundayDepths[tp.Name]); err != nil {
-			t.Fatal(err)
-		}
-	}
-	c := chain{
-		factReading: replayed(filepath.Join(dir, "reading")),
-		placing:     replayed(filepath.Join(dir, "placing")),
-		connecting:  replayed(filepath.Join(dir, "connecting")),
-	}
-	if err := c.run(t.Context(), store, topics, fixtureItems(t)); err != nil {
-		t.Fatal(err)
-	}
-	return store
-}
-
-// frozenRecordFile is the file of a closed frozenRecord, to be copied by
-// copyOfRecord: one for each sample of an act that rests on it.
-func frozenRecordFile(t *testing.T, dir string) string {
-	t.Helper()
-	path := filepath.Join(t.TempDir(), "frozen.db")
-	if err := frozenRecordAt(t, path, dir).Close(); err != nil {
-		t.Fatal(err)
-	}
-	return path
 }
 
 // Each recorded act downstream of another replays over its own directory

@@ -183,38 +183,44 @@ const testContact = "go-slow-tests@example.org"
 // the retries its brief allows.
 var maxTriesFlag = flag.Int("max-tries", 0, "recording the Sunday read, the most tries each sample is given (0: the act's own)")
 
-// The recorded runs of the Sunday read. The fixtures' recorded readings,
-// placings and connectings are replayed into a Record with the Briefing's
-// Topics, and the agent writes the Sunday read over it, the day after,
-// querying the Record and Wikidata. It is sampled three times (the
-// sundayReadRule), each sample run as in use: up to SundayReadTries tries,
-// each a whole conversation over a fresh copy of that Record. Each try is
-// kept, written turn by turn as it runs, at
-// testdata/recorded/sunday/<k>/try-<n>/conversation.json, with Wikidata's
-// answers to its lookups beside it (wikidata/), and replayed with no network
-// call; every turn keeps the hash of its request. The readings, placings and
-// connectings it rests on are its own copies, under
-// testdata/recorded/sunday/inputs, so re-recording an earlier act leaves it
-// valid. Re-recording runs the agent on the real model, which costs a few
-// dollars on Claude Opus 5.5:
+// maxSamplesFlag bounds the samples recording draws of the Sunday read, to
+// probe a changed act on one before paying for the rule's: a recording with
+// fewer samples than the rule fails, as any does.
+var maxSamplesFlag = flag.Int("max-samples", 0, "recording the Sunday read, the most samples drawn (0: the rule's)")
+
+// The recorded runs of the Sunday read. Its own frozen copies of the
+// readings, relatings and the Briefing (testdata/recorded/sunday/inputs)
+// are replayed into a Record: the fixtures read and related, and Saturday's
+// Briefing written over them; and the agent writes the Sunday read over it,
+// the day after, from what that Briefing told, querying the Record and
+// Wikidata. It is sampled three times (the sundayReadRule), each sample run
+// as in use: up to SundayReadTries tries, each a whole conversation over a
+// fresh copy of that Record. Each try is kept, written turn by turn as it
+// runs, at testdata/recorded/sunday/<k>/try-<n>/conversation.json, with
+// Wikidata's answers to its lookups beside it (wikidata/), and replayed with
+// no network call; every turn keeps the hash of its request. Re-recording
+// runs the agent on the real model, which costs about a dollar on Claude
+// Opus 5.5:
 //
-//	go test -count=1 -timeout 90m ./internal/editor -run TestRecordedSundayRead -record
+//	go test -count=1 -timeout 90m ./internal/editor -run '^TestRecordedSundayRead$' -record
 //
 // with GOSLOW_ANTHROPIC_API_KEY and SUNDAY_READ_MODEL set in the
 // environment; -max-tries bounds the tries each sample is given. It keeps
 // the tries already kept that replay as the act runs now, so it resumes a
 // stopped recording; fresh samples are drawn by deleting them first. Before
-// re-recording it as a refresh, copy each fixture's first sample of reading,
-// placing and connecting over its inputs, all three together. Re-record it
-// after the act's instructions, tools or checks change, or to bring it onto
-// the earlier acts' recordings, and only on the Owner's say.
+// re-recording it as a refresh, copy each fixture's first sample of reading
+// and relating, and the Briefing's first sample, over its inputs, all
+// together. Re-record it after the act's instructions, tools or checks
+// change, or to bring it onto the earlier acts' recordings, and only on the
+// Owner's say.
 func TestRecordedSundayRead(t *testing.T) { recordedSundayRead(t, recordedDir) }
 
 // recordedSundayRead replays (or records) the Sunday read from the
 // recordings under root.
 func recordedSundayRead(t *testing.T, root string) {
 	dir := filepath.Join(root, "sunday")
-	frozen := frozenRecordFile(t, filepath.Join(dir, "inputs"))
+	frozen := toldRecordFile(t, filepath.Join(dir, "inputs"))
+	casesPresentForSundayRead(t, copyOfRecord(t, frozen))
 	fresh := func() *sqlite.Store { return copyOfRecord(t, frozen) }
 	var live *sundayLive
 	if *rerecordFlag {
@@ -222,26 +228,79 @@ func recordedSundayRead(t *testing.T, root string) {
 		if key == "" || name == "" {
 			t.Fatalf("recording needs GOSLOW_ANTHROPIC_API_KEY and %s", sundayReadCommand.modelVar)
 		}
-		live = &sundayLive{conv: claude.New(claude.Options{APIKey: key, Model: name}), model: name, maxTries: *maxTriesFlag}
+		live = &sundayLive{conv: claude.New(claude.Options{APIKey: key, Model: name}), model: name, maxTries: *maxTriesFlag,
+			maxSamples: *maxSamplesFlag}
 	}
 	for _, err := range sundaySampled(t, dir, fresh, live, func(err error) { t.Error(err) }) {
 		t.Error(err)
 	}
 }
 
+// toldRecordFile is the file of a closed Record holding the fixture Items,
+// with the readings and relatings under dir replayed into it and Saturday's
+// Briefing written over them by the one kept under dir/briefing: the
+// Sunday read's frozen copies.
+func toldRecordFile(t *testing.T, dir string) string {
+	t.Helper()
+	path := spanRecordFile(t, dir)
+	store, err := sqlite.Open(t.Context(), path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s, err := sampleAt(filepath.Join(dir, "briefing", "saturday.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !briefingSample(t, store, &sampleModel{attempts: s.attempts(), unchecked: true}) {
+		t.Fatal("the frozen Briefing fails the act's checks")
+	}
+	if err := store.Close(); err != nil {
+		t.Fatal(err)
+	}
+	return path
+}
+
+// casesPresentForSundayRead fails unless what the week's Briefing told
+// carries what the read's tools work on: a Span told with relations (a
+// Story to look into) and a Span told naming an Entity (Spans to find by
+// it).
+func casesPresentForSundayRead(t *testing.T, store *sqlite.Store) {
+	t.Helper()
+	told, err := store.BriefingsWritten(t.Context(), sundayAt.Add(-7*24*time.Hour), sundayAt)
+	if err != nil || len(told) != 1 || len(told[0].Statements) == 0 {
+		t.Fatalf("the week told nothing: %+v %v", told, err)
+	}
+	related, naming := false, false
+	for _, st := range told[0].Statements {
+		for _, c := range st.Cites {
+			rels, err := store.RelationsOf(t.Context(), c.At)
+			if err != nil {
+				t.Fatal(err)
+			}
+			related = related || len(rels) > 0
+			naming = naming || len(c.Entities) > 0
+		}
+	}
+	if !related || !naming {
+		t.Fatalf("no Span told has relations (%v) or names an Entity (%v)", related, naming)
+	}
+}
+
 // sundayLive is the model the Sunday read is recorded on: the conversation,
 // the model it is asked for, Wikidata as fetched (the network, if nil), and
-// the most tries a sample is given (0: the act's own).
+// the most tries a sample is given (0: the act's own) and the most samples
+// drawn (0: the rule's).
 type sundayLive struct {
-	conv     editor.Conversation
-	model    string
-	wikidata http.RoundTripper
-	maxTries int
+	conv       editor.Conversation
+	model      string
+	wikidata   http.RoundTripper
+	maxTries   int
+	maxSamples int
 }
 
 // sundayAt is when the recorded Sunday read is written: the morning after
 // the recorded Briefing.
-var sundayAt = saturday.AddDate(0, 0, 1).Add(time.Hour)
+var sundayAt = briefingAt.AddDate(0, 0, 1)
 
 // tryPath is where try n of sample k is kept under dir.
 func tryPath(dir string, k, n int) string {
@@ -254,11 +313,14 @@ func tryPath(dir string, k, n int) string {
 // try kept that is stale or unfinished is drawn afresh.
 func sundaySampled(t *testing.T, dir string, fresh func() *sqlite.Store, live *sundayLive, report func(error)) []error {
 	t.Helper()
-	tries, model := editor.SundayReadTries, ""
+	tries, samples, model := editor.SundayReadTries, sundayReadRule.samples, ""
 	if live != nil {
 		model = live.model
 		if live.maxTries > 0 {
 			tries = min(tries, live.maxTries)
+		}
+		if live.maxSamples > 0 {
+			samples = min(samples, live.maxSamples)
 		}
 	} else {
 		model = pinnedModel(t, sundayReadCommand.modelVar)
@@ -274,7 +336,7 @@ func sundaySampled(t *testing.T, dir string, fresh func() *sqlite.Store, live *s
 	results := make([]sampleResult, 0, sundayReadRule.samples)
 	var total editor.Usage
 	conversations := 0
-	for k := 1; k <= sundayReadRule.samples; k++ {
+	for k := 1; k <= samples; k++ {
 		var res sampleResult
 		for n := 1; n <= tries; n++ {
 			path := tryPath(dir, k, n)
@@ -402,29 +464,36 @@ func sundayProperties(t *testing.T, store *sqlite.Store) sampleResult {
 	}
 	p := properties{}
 	p.holds("the read says something", len(r.Statements) > 0, "the Sunday read says nothing")
-	// Every statement cites things that exist: Facts and Developments
-	// traced to their Items, Assessments the read made with the Facts they
-	// rest on, and the Wikidata revisions its lookups saw.
+	// Every statement cites things that exist: Spans within their Items'
+	// text that reading did not reject, Assessments resting on Spans, and
+	// the Wikidata revisions its lookups saw.
 	cites := p.property("every statement cites what exists, traced to its source")
+	spanExists := func(o editor.OtherSpan) string {
+		if o.Item.Title == "" || o.At.Span.End > len(o.Item.Content) {
+			return "a Span outside its Item's text"
+		}
+		rd, read, err := store.NewestReading(ctx, o.At.SourceID, o.At.EntryID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if read && slices.Contains(rd.Rejected, o.At) {
+			return "a Span reading rejected"
+		}
+		return ""
+	}
 	for _, st := range r.Statements {
 		if len(st.Cites) == 0 {
 			cites("an uncited statement: %q", st.Text)
 		}
 		for _, c := range st.Cites {
 			switch c.Kind {
-			case editor.CitesFact, editor.CitesDevelopment:
-				if c.Fact.ID == 0 || c.Fact.EntryID == "" || c.Fact.ItemTitle == "" {
-					cites("%q cites a Fact that does not trace to an Item: %+v", st.Text, c.Fact)
-				}
-				if c.Kind == editor.CitesDevelopment {
-					s, found, err := store.Story(ctx, c.Story.ID)
-					if err != nil || !found || !containsFact(s.Timeline, c.Fact.ID) {
-						cites("%q cites a Development not on its Story's Timeline: %+v", st.Text, c)
-					}
+			case editor.CitesSpan:
+				if why := spanExists(c.Span); why != "" {
+					cites("%q cites %s: %+v", st.Text, why, c.Span.At)
 				}
 			case editor.CitesAssessment:
-				if c.Assessment.ID == 0 || len(c.Assessment.Facts) == 0 {
-					cites("%q cites an Assessment resting on no Fact: %+v", st.Text, c.Assessment)
+				if c.Assessment.ID == 0 || len(c.Assessment.Spans) == 0 {
+					cites("%q cites an Assessment resting on no Span: %+v", st.Text, c.Assessment)
 				}
 			case editor.CitesLookup:
 				if c.Lookup.ID == 0 || c.Lookup.ItemID == "" || c.Lookup.Revision == 0 || c.Lookup.Licence != editor.WikidataLicence {
@@ -436,15 +505,20 @@ func sundayProperties(t *testing.T, store *sqlite.Store) sampleResult {
 		}
 		t.Logf("%s (%d cited)", st.Text, len(st.Cites))
 	}
-	assessments := p.property("every Assessment rests on Facts, as at the read's day")
+	assessments := p.property("every Assessment rests on Spans that exist, as at the read's day")
 	for _, a := range r.Assessments {
-		if len(a.Facts) == 0 || a.AsAt.Format(time.DateOnly) != r.Day {
-			assessments("an Assessment not resting on Facts as at the read's day: %+v", a)
+		if len(a.Spans) == 0 || a.AsAt.Format(time.DateOnly) != r.Day {
+			assessments("an Assessment not resting on Spans as at the read's day: %+v", a)
 		}
-		t.Logf("Assessment: %s (%d Facts)", a.Statement, len(a.Facts))
+		for _, o := range a.Spans {
+			if why := spanExists(o); why != "" {
+				assessments("%q rests on %s: %+v", a.Statement, why, o.At)
+			}
+		}
+		t.Logf("Assessment: %s (%d Spans)", a.Statement, len(a.Spans))
 	}
-	for _, s := range r.Stories {
-		t.Logf("Story started: %s (%d Developments)", s.Title, len(s.Timeline))
+	for _, g := range r.Gathered {
+		t.Logf("Story gathered from %+v: %d Spans", g.From, len(g.Story))
 	}
 	return sampleResult{passed: true, held: p}
 }
@@ -453,13 +527,4 @@ func sundayProperties(t *testing.T, store *sqlite.Store) sampleResult {
 func plus(a, b editor.Usage) editor.Usage {
 	return editor.Usage{InputTokens: a.InputTokens + b.InputTokens, OutputTokens: a.OutputTokens + b.OutputTokens,
 		CacheReadTokens: a.CacheReadTokens + b.CacheReadTokens}
-}
-
-func containsFact(timeline []editor.Development, id int64) bool {
-	for _, d := range timeline {
-		if d.ID == id {
-			return true
-		}
-	}
-	return false
 }

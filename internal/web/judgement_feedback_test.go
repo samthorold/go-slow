@@ -237,27 +237,6 @@ func TestTheFeedbackPageListsEveryPieceNewestFirstWithTheCallsBehindAndUndonePie
 	}
 }
 
-func TestTheSundayReadsFeedbackIsListedAndUndoneFromTheFeedbackPageByItsOwnRoute(t *testing.T) {
-	store := openStore(t)
-	speechStory(t, store)
-	writeSundayRead(t, store, sunday, assessed)
-	app, _ := newAppWithLog(t, sunday, store)
-	send(t, app, http.MethodPost, readFeedback, url.Values{"kind": {"new to me"}, "level": {"sunday read"}, "read": {"1"}})
-
-	m := regexp.MustCompile(`hx-put="(/feedback/sunday-read/\d+/undone)"`).FindStringSubmatch(get(t, app, "/feedback").body)
-	if m == nil {
-		t.Fatalf("the Feedback page offers no undo of the read's Feedback:\n%s", get(t, app, "/feedback").body)
-	}
-	res := send(t, app, http.MethodPut, m[1], nil)
-
-	if res.status != http.StatusSeeOther || res.header.Get("Location") != "/feedback" {
-		t.Fatalf("status %d to %q, want 303 back to the Feedback page", res.status, res.header.Get("Location"))
-	}
-	if kept, err := store.KeptFeedback(t.Context()); err != nil || len(kept) != 1 || !kept[0].Undone() {
-		t.Errorf("kept %+v (%v), want the piece undone", kept, err)
-	}
-}
-
 func TestFeedbackTheDesignDoesNotGiveWhereItIsAskedForIsRefusedWith422AndThePageReRendered(t *testing.T) {
 	store := openStore(t)
 	readRelease(t, store, releaseReading)

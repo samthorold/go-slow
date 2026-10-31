@@ -45,8 +45,6 @@ type Deps struct {
 	Relations Relations
 	Topics    Topics
 	Stories   Stories
-	Feedback  Feedback
-	Kept      Kept
 	// Pieces is the Feedback commands on judgements and Spans, and Given
 	// the Feedback they keep, as events.
 	Pieces   Pieces
@@ -179,7 +177,6 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("GET /conversations/{id}", a.conversation)
 	mux.HandleFunc("GET /feedback", a.feedback)
 	mux.HandleFunc("PUT /feedback/{feedback}/undone", a.undoOnFeedbackPage)
-	mux.HandleFunc("PUT /feedback/sunday-read/{feedback}/undone", a.undoReadOnFeedbackPage)
 	mux.HandleFunc("GET /items", a.items)
 	mux.HandleFunc("GET /items/{source}/{entry}", a.item)
 	mux.HandleFunc("POST /items/{source}/{entry}/feedback", a.itemFeedback)

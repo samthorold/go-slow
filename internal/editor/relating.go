@@ -46,6 +46,9 @@ type ToRelate struct {
 	ReadOrder int64
 	// Spans are the Spans to relate, in order.
 	Spans []SpanToRelate
+	// Precedents are the standing Feedback it is shown as precedent, after
+	// its candidates; none for a case with none.
+	Precedents []Precedent
 }
 
 // SpanToRelate is one Span of an Item awaiting relating.
@@ -120,6 +123,9 @@ type Relating struct {
 	// At is when it was judged.
 	At        time.Time
 	Relations []Relation
+	// Precedents are the ids of the Feedback it was shown as precedent, in
+	// the order shown, kept with it.
+	Precedents []int64
 	// Usage is what the call cost, for the logs; not kept with the relating.
 	Usage Usage
 }
@@ -267,7 +273,8 @@ func relatingRequest(tr ToRelate) Request {
 		refs = append(refs, ref)
 		fmt.Fprintf(&b, "%s%s: %s\n", ref, spokenBy(c.Speaker), c.Words)
 	}
-	return Request{Act: "relating", Instructions: relatingInstructions, Input: b.String(), Schema: relatingSchema(spans, refs)}
+	return Request{Act: "relating", Instructions: relatingInstructions, Input: withPrecedents(b.String(), tr.Precedents, relatingLine),
+		Schema: relatingSchema(spans, refs)}
 }
 
 // spokenBy is how a Span's speaker is shown beside its number.
@@ -318,7 +325,7 @@ func checkRelating(tr ToRelate, req Request, asked string, res Response) (Relati
 	}
 	s := shownAs(tr)
 	r := unshownRelating(tr)
-	r.Usage = res.Usage
+	r.Usage, r.Precedents = res.Usage, precedentIDs(tr.Precedents)
 	r.Judge.Model, r.Judge.RequestHash = res.Model, RequestHash(req, asked)
 	verdicts := map[[2]Address]string{}
 	for _, rel := range *out.Relations {

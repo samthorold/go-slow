@@ -9,7 +9,6 @@ import (
 	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
-	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
 
@@ -44,18 +43,11 @@ func failedRecord(t *testing.T, db string) {
 		Link: "https://example.org/speech", Content: "<p>It is good to be in Scotland.</p>", Published: saturday, Attribution: collect.OGL, CollectedAt: saturday}}); err != nil {
 		t.Fatal(err)
 	}
-	topics := interest.New(store)
-	if _, errs, err := topics.Add(ctx, interest.Draft{Name: "Scotland", Terms: "Scotland"}); err != nil || errs != nil {
-		t.Fatalf("add Topic: %v %v", errs, err)
-	}
-	if err := topics.CheckNew(ctx); err != nil {
-		t.Fatal(err)
-	}
 	if err := cut.New(store).CutNew(ctx, saturday); err != nil {
 		t.Fatal(err)
 	}
 	var failures []editor.WorkFailure
-	for _, act := range []string{"reading", "placing"} {
+	for _, act := range []string{"reading", "relating"} {
 		failures = append(failures, editor.WorkFailure{Act: act, Key: src.ID + "\nspeech", At: saturday,
 			Why: "the result fails the act's checks", Failed: true})
 	}
@@ -95,8 +87,8 @@ func TestTheRetryCommandTakesAnActsFailedWorkUpAgain(t *testing.T) {
 	if len(toRead) != 1 {
 		t.Errorf("awaiting reading %+v, want the speech taken up again", toRead)
 	}
-	if len(failed) != 1 || failed[0].Act != "placing" {
-		t.Errorf("failed work %+v, want only placing's left", failed)
+	if len(failed) != 1 || failed[0].Act != "relating" {
+		t.Errorf("failed work %+v, want only relating's left", failed)
 	}
 
 	if err := admin(t.Context(), log, []string{"retry"}, adminDeps{Lookup: env(db)}); err != nil {

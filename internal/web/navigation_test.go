@@ -10,7 +10,7 @@ import (
 
 // indexes are the pages with an index of their own, in the navigation's
 // order.
-var indexes = []string{"/", "/briefings", "/stories", "/items", "/topics", "/feedback", "/register"}
+var indexes = []string{"/", "/briefings", "/items", "/topics", "/feedback", "/register"}
 
 var (
 	navigation = regexp.MustCompile(`(?s)<nav aria-label="Pages">(.*?)</nav>`)
@@ -66,14 +66,13 @@ func current(t *testing.T, path, body string) []string {
 }
 
 func TestAPageThatIsNoIndexCarriesTheNavigationWithNoLinkMarkedCurrent(t *testing.T) {
-	store := openStore(t)
-	spokenBriefing(t, store)
+	store := toldBriefing(t)
 	app, _ := newAppWithLog(t, saturday.AddDate(0, 0, 1), store) // Saturday's Briefing is past
 
 	briefing := get(t, app, "/briefings/2026-10-24").body
 	paths := []string{"/briefings/2026-10-24", "/briefings/2026-10-24/trail"}
-	// An Item is cited at a Fact on its page: the path is up to the anchor.
-	for _, link := range []string{`/stories/\d+`, `/items/[^"#]+`} {
+	// A Span is cited on its own page, and its Item on its own.
+	for _, link := range []string{`/items/[^"#]+/spans/[^"#]+`, `/items/[^"#/]+/[^"#/]+`} {
 		m := regexp.MustCompile(`href="(` + link + `)["#]`).FindStringSubmatch(briefing)
 		if m == nil {
 			t.Fatalf("the Briefing links no %s:\n%s", link, briefing)
@@ -138,13 +137,12 @@ func TestAFormReRenderedAfterFailingValidationKeepsItsPagesNavigation(t *testing
 var top = regexp.MustCompile(`(?s)<main>(.*?<h1[^>]*>.*?</h1>\s*(?:<p>.*?</p>)?)`)
 
 func TestNoPageRepeatsTheNavigationAboveItsContent(t *testing.T) {
-	store := openStore(t)
-	spokenBriefing(t, store)
+	store := toldBriefing(t)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	paths := append([]string{"/briefings/2026-10-24/trail"}, indexes...)
 	for page, link := range map[string]string{
-		"/":                           `/stories/\d+`,
+		"/":                           `/items/[^"#]+/spans/[^"#]+`,
 		"/briefings/2026-10-24":       `/items/[^"#]+`,
 		"/briefings/2026-10-24/trail": `/calls/\d+`,
 	} {

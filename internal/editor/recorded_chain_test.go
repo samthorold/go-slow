@@ -179,9 +179,6 @@ func (c chain) run(ctx context.Context, store *sqlite.Store, topics *interest.Se
 		}}); err != nil {
 			return err
 		}
-		if err := topics.CheckNew(ctx); err != nil {
-			return err
-		}
 		var why string
 		steps := []struct {
 			act   string

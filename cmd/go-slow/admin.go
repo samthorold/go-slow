@@ -46,15 +46,15 @@ type adminDeps struct {
 //	each time.
 //
 //	retry [act]: clears the failed marks on the work of one act run in
-//	batches (reading, placing or connecting), or of every act, resetting
-//	its attempts, so the next run takes that work up again:
+//	batches (reading or relating), or of every act, resetting its
+//	attempts, so the next run takes that work up again:
 //
-//	  docker compose run --rm app retry placing
+//	  docker compose run --rm app retry relating
 //
 //	backfill: gives their text to the Items of the Sources whose text is
-//	fetched that were collected with only a summary and are still unread,
-//	fetching it politely through web, then runs the lazy-reading check over
-//	them again. Items already read are left as they are:
+//	fetched that were collected with only a summary and are still uncut,
+//	fetching it politely through web; the next Collection run cuts them.
+//	Items already cut are left as they are:
 //
 //	  docker compose run --rm app backfill
 //

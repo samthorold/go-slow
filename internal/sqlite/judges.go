@@ -92,9 +92,7 @@ func (s *Store) ChooseCandidate(ctx context.Context, id int64, at time.Time) err
 // PastUsage is what the act's applied calls answering one of its
 // judgements in the Record cost: their count, their requests' size in bytes
 // (instructions, schema and input) and their tokens in and out. Only
-// reading keeps its judgements as events today, so only reading has any; a
-// call of the earlier reading act, which drew Facts, answered no reading
-// and is not counted.
+// reading keeps its judgements as events today, so only reading has any.
 func (s *Store) PastUsage(ctx context.Context, act string) (editor.PastUsage, error) {
 	var u editor.PastUsage
 	if act != "reading" {

@@ -13,7 +13,7 @@ var requestErrors = regexp.MustCompile(`<div id="request-errors" role="alert"[^>
 func TestEveryPageHasAnEmptyRegionForRequestErrors(t *testing.T) {
 	app := newApp(t, saturday)
 
-	for _, path := range []string{"/", "/briefings", "/stories", "/items", "/topics", "/feedback", "/register"} {
+	for _, path := range []string{"/", "/briefings", "/items", "/topics", "/feedback", "/register"} {
 		res := get(t, app, path)
 		if res.status != http.StatusOK {
 			t.Fatalf("GET %s: status = %d, want 200", path, res.status)

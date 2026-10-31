@@ -59,18 +59,12 @@ func (s *fakeStore) Known(_ context.Context, sourceID string, _ []string) (map[s
 	return known, nil
 }
 
-// noCheck is a lazy-reading check that does nothing.
-type noCheck struct{}
-
-func (noCheck) CheckNew(context.Context) error { return nil }
-
 func runOnce(sources []collect.Source, body string) (*fakeFetcher, *fakeStore) {
 	f, s := &fakeFetcher{body: body}, &fakeStore{}
 	collect.New(collect.Deps{
 		Sources: sources,
 		Fetcher: f,
 		Store:   s,
-		Check:   noCheck{},
 		Log:     slog.New(slog.DiscardHandler),
 	}).Run(context.Background(), now)
 	return f, s
@@ -243,7 +237,6 @@ func TestASourceIsFetchedNoMoreOftenThanItsOwnRateLimit(t *testing.T) {
 		Sources: []collect.Source{hourly, every},
 		Fetcher: f,
 		Store:   &fakeStore{},
-		Check:   noCheck{},
 		Log:     slog.New(slog.DiscardHandler),
 	})
 

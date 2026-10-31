@@ -27,23 +27,23 @@ func callLink(t *testing.T, body, within string) string {
 	return html.UnescapeString(m[1])
 }
 
-func TestAFactLinksToTheReadingCallThatDrewIt(t *testing.T) {
+func TestAnItemsReadingLinksToTheCallThatMadeIt(t *testing.T) {
 	store := openStore(t)
-	readSpeech(t, store, reading)
+	readSpeech(t, store, speechReading)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	page := itemPage(t, app, "PM speech in Scotland")
-	res := get(t, app, callLink(t, page.body, "Andy Burnham spoke in Motherwell."))
+	res := get(t, app, callLink(t, page.body, `id="text"`))
 
 	if res.status != 200 || !strings.Contains(res.body, "<!doctype html>") {
 		t.Fatalf("status %d, not a full page:\n%s", res.status, res.body)
 	}
 	for _, want := range []string{
 		"reading", "applied",
-		// The request: instructions, input, schema.
-		"You are the Editor of a private slow-news briefing.", "Title: PM speech in Scotland", "&#34;additionalProperties&#34;",
+		// The request: input and schema.
+		"Title: PM speech in Scotland", "S1: It’s good to be here in Motherwell.", "&#34;additionalProperties&#34;",
 		// The response, and the model that answered.
-		"Andy Burnham spoke in Motherwell.", "fake",
+		"&#34;refers_to&#34;", "fake",
 	} {
 		if !strings.Contains(res.body, want) {
 			t.Errorf("the call's page lacks %q:\n%s", want, res.body)
@@ -54,70 +54,8 @@ func TestAFactLinksToTheReadingCallThatDrewIt(t *testing.T) {
 	}
 }
 
-func TestADevelopmentLinksToThePlacingCallThatMadeIt(t *testing.T) {
-	store := openStore(t)
-	readSpeech(t, store, reading)
-	placeWaiting(t, store, `{"new_stories": [{"ref": "N1", "title": "Andy Burnham in Scotland"}],
-		"facts": [{"fact": "F1", "developments_in": ["N1"]}]}`)
-	app, _ := newAppWithLog(t, saturday, store)
-
-	story := get(t, app, "/stories/1")
-	timeline := story.body[strings.Index(story.body, `id="timeline"`):]
-	res := get(t, app, callLink(t, timeline, "Andy Burnham spoke in Motherwell."))
-
-	if res.status != 200 {
-		t.Fatalf("status %d", res.status)
-	}
-	for _, want := range []string{"placing", "applied", "You are placing the Facts drawn from one Item.",
-		"Facts to place:", "Andy Burnham spoke in Motherwell.", `id="attempts"`} {
-		if !strings.Contains(res.body, want) {
-			t.Errorf("the placing call's page lacks %q:\n%s", want, res.body)
-		}
-	}
-}
-
-func TestAConnectionLinksToTheConnectingCallThatMadeIt(t *testing.T) {
-	store := openStore(t)
-	offer := item("offer", "Offer to Holyrood", saturday.Add(-72*time.Hour))
-	seed(t, store, saturday.AddDate(0, 0, -7), offer)
-	if err := store.SaveFactReading(t.Context(), editor.FactReading{
-		SourceID: offer.SourceID, EntryID: offer.EntryID, Model: "fake",
-		Entities: []editor.Entity{{Name: "Andy Burnham", Kind: "person"}},
-		Facts: []editor.Fact{{Statement: "Andy Burnham made an offer to Holyrood.",
-			AsAt: time.Date(2026, time.October, 21, 0, 0, 0, 0, time.UTC), Quote: "offer"}},
-	}, saturday); err != nil {
-		t.Fatal(err)
-	}
-	placeWaiting(t, store, `{"new_stories": [{"ref": "N1", "title": "Scottish devolution"}],
-		"facts": [{"fact": "F1", "developments_in": ["N1"]}]}`)
-	connectWaiting(t, store, `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "actor"}]}], "causes": []}`)
-	readSpeech(t, store, reading)
-	placeWaiting(t, store, `{"new_stories": [], "facts": [{"fact": "F1", "developments_in": ["S1"]}]}`)
-	connectWaiting(t, store, `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "actor"}, {"entity": "Motherwell", "role": "place"}]}],
-		  "causes": [{"cause": "C1", "effect": "F1"}]}`)
-	app, _ := newAppWithLog(t, saturday, store)
-
-	story := get(t, app, "/stories/1")
-	causes := story.body[strings.Index(story.body, `id="causes"`):]
-	res := get(t, app, callLink(t, causes, "led to"))
-
-	if res.status != 200 {
-		t.Fatalf("status %d", res.status)
-	}
-	// The call that made it is the speech's, which weighed the offer.
-	for _, want := range []string{"connecting", "applied", "Facts to connect:", "Item: PM speech in Scotland",
-		"C1 (as at 2026-10-21): Andy Burnham made an offer to Holyrood."} {
-		if !strings.Contains(res.body, want) {
-			t.Errorf("the connecting call's page lacks %q:\n%s", want, res.body)
-		}
-	}
-}
-
 func TestTheBriefingLinksToTheCallThatWroteIt(t *testing.T) {
-	store := openStore(t)
-	speechStory(t, store)
-	writeStoryBriefing(t, store, saturday, spoke)
-	app, _ := newAppWithLog(t, saturday, store)
+	app, _ := newAppWithLog(t, saturday, toldBriefing(t))
 
 	trail := get(t, app, regexp.MustCompile(`id="how-written".*?href="([^"]+)"`).FindStringSubmatch(get(t, app, "/briefings/2026-10-24").body)[1])
 	res := get(t, app, callLink(t, trail.body, `id="writing"`))
@@ -125,7 +63,7 @@ func TestTheBriefingLinksToTheCallThatWroteIt(t *testing.T) {
 	if res.status != 200 {
 		t.Fatalf("status %d", res.status)
 	}
-	for _, want := range []string{"briefing", "applied", "The Prime Minister spoke in Motherwell.", `href="/briefings/2026-10-24"`} {
+	for _, want := range []string{"briefing", "applied", "Derby will host the headquarters.", `href="/briefings/2026-10-24"`} {
 		if !strings.Contains(res.body, want) {
 			t.Errorf("the call's page lacks %q:\n%s", want, res.body)
 		}
@@ -134,10 +72,10 @@ func TestTheBriefingLinksToTheCallThatWroteIt(t *testing.T) {
 
 func TestADayWhoseBriefingFailedLinksToEachFailedAttempt(t *testing.T) {
 	store := openStore(t)
-	speechStory(t, store)
-	untraced := `{"stories": [{"story": "S1", "statements": [{"text": "Scotland is the true north.", "developments": []}]}]}`
-	writeStoryBriefing(t, store, saturday, untraced)
-	writeStoryBriefing(t, store, saturday.Add(editor.RetryBriefing), untraced)
+	readRelease(t, store, releaseReading)
+	untraced := fakeModel{`{"statements": [{"spans": [], "text": "Scotland is the true north."}]}`}
+	tell(t, store, saturday, untraced)
+	tell(t, store, saturday.Add(editor.RetryBriefing), untraced)
 	app, _ := newAppWithLog(t, saturday.Add(time.Hour), store)
 
 	page := get(t, app, "/briefings/2026-10-24").body
@@ -159,7 +97,7 @@ func TestADayWhoseBriefingFailedLinksToEachFailedAttempt(t *testing.T) {
 
 func TestABriefingWrittenEmptySaysItWasWrittenWithoutAModelCall(t *testing.T) {
 	store := openStore(t)
-	writeStoryBriefing(t, store, saturday, spoke)
+	tell(t, store, saturday, teller{})
 	app, _ := newAppWithLog(t, saturday, store)
 
 	page := get(t, app, "/briefings/2026-10-24").body
@@ -249,7 +187,7 @@ func TestOpeningACallsPageRecordsNoOpen(t *testing.T) {
 
 func TestWhatACallSentAndGotIsInertOnItsPage(t *testing.T) {
 	store := openStore(t)
-	readSpeech(t, store, strings.Replace(reading, "Andy Burnham spoke in Motherwell.", `<span hx-get=\"/evil\">Andy</span>`, 1))
+	readSpeech(t, store, strings.Replace(speechReading, `"name": "Motherwell"`, `"name": "<span hx-get=\"/evil\">Andy</span>"`, 1))
 	app, _ := newAppWithLog(t, saturday, store)
 
 	res := get(t, app, "/calls/1")
@@ -298,7 +236,7 @@ func TestACallsPageOpensWithAOneLineSummaryHeadItsOutcomeHued(t *testing.T) {
 
 func TestACallsOutcomeTakesTheStatusHueOfItsVerdict(t *testing.T) {
 	store := openStore(t)
-	readSpeech(t, store, reading)
+	readSpeech(t, store, speechReading)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	head := summaryHead(t, get(t, app, "/calls/1").body)
@@ -346,7 +284,7 @@ func TestACallsInputAndOutputAreOpenAndItsBulkCollapsed(t *testing.T) {
 func TestACallsAttemptsAreCollapsedWhenThereIsOneAndOpenWhenThereAreMore(t *testing.T) {
 	store := openStore(t)
 	failThrice(t, store)
-	readSpeech(t, store, reading)
+	readSpeech(t, store, speechReading)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	// Call 4 is the speech's one reading; calls 1 to 3 the failed attempts.

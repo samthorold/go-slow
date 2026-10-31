@@ -1,16 +1,18 @@
 {{/* give is one piece of Feedback the Owner can give with a button. It
      re-renders the whole page, since Feedback can change several regions
-     of it (a withdrawn Fact takes statements and Connections with it).
+     of it (wrong on a reference changes what its Span mentions).
      Feedback of its kind already standing on its target shows as given,
      with the undo of that piece, instead of a fresh button. */}}
 {{define "give"}}{{if .UndoPath}}<span class="feedback given">{{.Label}} ✓, given
   <form class="feedback" hx-put="{{.UndoPath}}" hx-target="body" hx-swap="innerHTML"><button>Undo</button></form></span>
 {{- else}}<form class="feedback" hx-post="{{.Path}}" hx-target="body" hx-swap="innerHTML"
   {{- with .Confirm}} hx-confirm="{{.}}"{{end}}>
-  <input type="hidden" name="kind" value="{{.Kind}}"><input type="hidden" name="level" value="{{.Level}}">
-  {{- with .Story}}<input type="hidden" name="story" value="{{.}}">{{end}}
-  {{- with .Fact}}<input type="hidden" name="fact" value="{{.}}">{{end}}
-  {{- with .ToFact}}<input type="hidden" name="to_fact" value="{{.}}">{{end}}
+  <input type="hidden" name="kind" value="{{.Kind}}">
+  {{- with .Level}}<input type="hidden" name="level" value="{{.}}">{{end}}
+  {{- with .Judgement}}<input type="hidden" name="judgement" value="{{.}}">{{end}}
+  {{- with .Source}}<input type="hidden" name="source" value="{{.}}">{{end}}
+  {{- with .Entry}}<input type="hidden" name="entry" value="{{.}}">{{end}}
+  {{- with .Span}}<input type="hidden" name="span" value="{{.}}">{{end}}
   {{- with .Assessment}}<input type="hidden" name="assessment" value="{{.}}">{{end}}
   {{- with .Read}}<input type="hidden" name="read" value="{{.}}">{{end}}
   <button>{{.Label}}</button>
@@ -18,24 +20,44 @@
 
 {{define "gives"}}{{range .}}{{template "give" .}}{{end}}{{end}}
 
-{{/* kept lists pieces of Feedback as given, each undone with a button, or
-     marked undone with when. An undo re-renders the whole page, since
-     lifting a mark can change several regions of it. What a piece is about
-     was drawn from collected text, and a missed Story's title typed by the
-     Owner: inert. */}}
+{{/* given lists pieces of Feedback on judgements and Spans (pieceRows),
+     each undone with a button, or marked undone with when: what wrong took
+     out of a page is shown nowhere else on it. What a piece is about was
+     drawn from collected text, or is the Editor's words: inert. */}}
+{{define "given"}}
+{{- if .}}
+<section aria-labelledby="your-feedback">
+  <h2 id="your-feedback">Your Feedback here</h2>
+  <ol>
+  {{- range .}}
+    <li{{if .Undone}} class="undone"{{end}}>
+      <span class="kind kind-{{.KindClass}}">{{.Kind}}</span>
+      {{if .AboutPath}}<a href="{{.AboutPath}}">{{end}}<span hx-disable>{{.What}}</span>{{if .AboutPath}}</a>{{end}}
+      <small class="quiet">given {{.GivenAt}}</small>
+      {{- range .Made}} {{template "made" .}}{{end}}
+      {{- if .Undone}}
+      <small class="quiet">Undone {{.Undone}}</small>
+      {{- else}}
+      <form class="feedback" hx-put="{{.UndoPath}}" hx-target="body" hx-swap="innerHTML"><button>Undo</button></form>
+      {{- end}}
+    </li>
+  {{- end}}
+  </ol>
+</section>
+{{- end}}
+{{- end}}
+
+{{/* kept lists the Sunday read's pieces of Feedback as given, each undone
+     with a button, or marked undone with when. What a piece is about was
+     drawn from collected text: inert. */}}
 {{define "kept"}}
 <ol>
 {{- range .}}
   <li>
     <p><strong>{{.Kind}}</strong> on a {{.Level}}:
-      {{- if .About}} {{if .AboutPath}}<a href="{{.AboutPath}}">{{end}}<span hx-disable>{{.About}}</span>{{if .AboutPath}}</a>{{end}}{{end}}
-      {{- if .Typed}} <q hx-disable>{{.Typed}}</q>{{end}}</p>
-    <p><small>Given {{.GivenAt}}
-      {{- if .Briefing}}, on the <a href="{{.BriefPath}}">Briefing for {{.Briefing}}</a>{{end}}
-      {{- if .Depth}}, at {{.Depth}} Depth{{else}}, on nothing a Topic follows{{end}}.</small></p>
-    {{- if .ByOwner}}
-    <p><small>You made what it is about, not an act: no call is behind it.</small></p>
-    {{- else if .Behind}}
+      {{- if .About}} {{if .AboutPath}}<a href="{{.AboutPath}}">{{end}}<span hx-disable>{{.About}}</span>{{if .AboutPath}}</a>{{end}}{{end}}</p>
+    <p><small>Given {{.GivenAt}}.</small></p>
+    {{- if .Behind}}
     <p><small>Behind it:{{range $i, $b := .Behind}}{{if $i}},{{end}} <a href="{{$b.Path}}">{{$b.Label}}</a>{{end}}.</small></p>
     {{- end}}
     {{- if .Undone}}
@@ -46,56 +68,4 @@
   </li>
 {{- end}}
 </ol>
-{{end}}
-
-{{/* missedDevelopment is the form for a Development the Owner says a Story
-     missed, chosen from the Facts that share an Entity with it. */}}
-{{define "missedDevelopment"}}
-{{- if or .Facts .Error}}
-<details{{if .Error}} open{{end}}>
-  <summary>Is a Development missing?</summary>
-  <form hx-post="{{.Path}}" hx-target="body" hx-swap="innerHTML">
-    <input type="hidden" name="kind" value="missed"><input type="hidden" name="level" value="development"><input type="hidden" name="story" value="{{.Story}}">
-    {{- if .Facts}}
-    <label>The Fact that moved it on
-      <select name="fact">
-      {{- range .Facts}}
-        <option value="{{.ID}}">{{.Statement}}</option>
-      {{- end}}
-      </select>
-    </label>
-    <button>Add the missed Development</button>
-    {{- end}}
-    {{- with .Error}} <span role="alert">{{.}}</span>{{end}}
-  </form>
-</details>
-{{- end}}
-{{end}}
-
-{{/* missedStory is the form for a Story the Owner says was missed: a
-     title, and the Facts on the page it gathers. A failed one comes back
-     422, open, with what was entered and why it failed. The Facts were drawn
-     from collected text and the title typed by the Owner: inert. */}}
-{{define "missedStory"}}
-<details{{if .Errors}} open{{end}}>
-  <summary>Is a Story missing?</summary>
-  <form hx-post="{{.Path}}" hx-target="body" hx-swap="innerHTML">
-    <input type="hidden" name="kind" value="missed"><input type="hidden" name="level" value="story">
-    {{- with index .Errors ""}}<p role="alert">{{.}}</p>{{end}}
-    <p>
-      <label>Title <input name="title" value="{{.Title}}" required></label>
-      {{- with index .Errors "title"}} <span role="alert">{{.}}</span>{{end}}
-    </p>
-    {{- if .Facts}}
-    <fieldset>
-      <legend>The Facts it gathers, as its Developments</legend>
-      {{- range .Facts}}
-      <label><input type="checkbox" name="facts" value="{{.ID}}"{{if .Checked}} checked{{end}}> <span hx-disable>{{.Statement}}</span></label>
-      {{- end}}
-      {{- with index .Errors "facts"}} <span role="alert">{{.}}</span>{{end}}
-    </fieldset>
-    {{- end}}
-    <button>Start the missed Story</button>
-  </form>
-</details>
 {{end}}

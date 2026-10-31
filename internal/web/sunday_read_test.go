@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -16,6 +17,30 @@ import (
 
 // sunday is the Sunday after saturday, past the Briefing's time.
 var sunday = saturday.AddDate(0, 0, 1)
+
+// offers reports whether the page offers a fresh button giving kind at level
+// on the target, its hidden fields as the form sends them (name, value...).
+func offers(body, kind, level string, target ...string) bool {
+	fields := `<input type="hidden" name="kind" value="` + kind + `"><input type="hidden" name="level" value="` + level + `">`
+	for i := 0; i+1 < len(target); i += 2 {
+		fields += `<input type="hidden" name="` + target[i] + `" value="` + target[i+1] + `">`
+	}
+	return strings.Contains(body, fields+"\n  <button>")
+}
+
+// undoForm is the path the page's undo of the piece of Feedback goes to, or
+// "" if the page offers none.
+func undoForm(body string, id int) string {
+	m := regexp.MustCompile(`<form[^>]*hx-put="([^"]*/feedback/` + strconv.Itoa(id) + `/undone)"[^>]*hx-target="body"`).FindStringSubmatch(body)
+	if m == nil {
+		return ""
+	}
+	return m[1]
+}
+
+// actionGroups matches every group of Feedback controls that is shown only
+// on hover or focus of what it acts on.
+var actionGroups = regexp.MustCompile(`(?s)<div class="actions[^"]*" role="group" aria-label="([^"]*)">(.*?)</div>`)
 
 // foldedRegion asserts page holds its blocks in one margined region,
 // starting folded, with the one control that unfolds it, and returns the

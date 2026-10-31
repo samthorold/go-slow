@@ -12,6 +12,8 @@ import (
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
 
+var saturday = time.Date(2026, time.October, 24, 7, 30, 0, 0, time.UTC)
+
 // stories is a constructed Record of Items, each read with the Entities it
 // mentions and one Fact tied to none of them, so what finds a Story can only
 // be what its Items mention.

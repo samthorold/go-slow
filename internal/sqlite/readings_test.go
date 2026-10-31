@@ -77,13 +77,14 @@ func TestEachJudgementOfAReadingIsKeptAsItsOwnEventWithItsJudge(t *testing.T) {
 	if got.ID == 0 || got.Judge != r.Judge || got.CutID != c.ID || !got.At.Equal(r.At) {
 		t.Errorf("reading = %+v, judged by %+v", got, got.Judge)
 	}
-	if len(got.RefersTo) != 1 || got.RefersTo[0] != r.RefersTo[0] {
+	// Each judgement is read with its own event's id, which Feedback names.
+	if len(got.RefersTo) != 1 || got.RefersTo[0].ID == 0 || got.RefersTo[0].From != r.RefersTo[0].From || got.RefersTo[0].To != r.RefersTo[0].To {
 		t.Errorf("refers to = %+v, want %+v", got.RefersTo, r.RefersTo)
 	}
 	if len(got.Names) != 2 || got.Names[0] != r.Names[0] || got.Names[1] != r.Names[1] {
 		t.Errorf("names = %+v", got.Names)
 	}
-	if len(got.Speakers) != 1 || got.Speakers[0] != r.Speakers[0] {
+	if len(got.Speakers) != 1 || got.Speakers[0].ID == 0 || got.Speakers[0].Of != r.Speakers[0].Of || got.Speakers[0].By != r.Speakers[0].By {
 		t.Errorf("speakers = %+v", got.Speakers)
 	}
 	if len(got.Rejected) != 1 || got.Rejected[0] != r.Rejected[0] {

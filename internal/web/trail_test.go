@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"log/slog"
-	"net/url"
 	"regexp"
 	"strings"
 	"testing"
@@ -153,42 +152,6 @@ func TestATrailSaysABriefingWrittenEmptyMadeNoCall(t *testing.T) {
 	}
 }
 
-func TestATrailSaysTheOwnerAddedAMissedDevelopment(t *testing.T) {
-	store := openStore(t)
-	// The speech read into two Facts, placing making the second a
-	// Development and leaving the first out, which the Owner then adds as
-	// missed.
-	twoFacts := strings.Replace(reading, `"facts": [`, `"facts": [{"statement": "Andy Burnham was in Motherwell.", "as_at": "2026-10-22",
-             "quote": "here in Motherwell"}, `, 1)
-	readSpeech(t, store, twoFacts)
-	if err := frozentest.PlaceWaiting(t.Context(), frozentest.Deps{Store: store, Log: slog.New(slog.DiscardHandler), Model: fakeModel{
-		`{"new_stories": [{"ref": "N1", "title": "Andy Burnham in Scotland"}],
-		  "facts": [{"fact": "F1", "developments_in": []}, {"fact": "F2", "developments_in": ["N1"]}]}`}}, saturday); err != nil {
-		t.Fatal(err)
-	}
-	app, _ := newAppWithLog(t, saturday, store)
-	if res := send(t, app, "POST", "/stories/1/feedback", url.Values{"kind": {"missed"}, "level": {"development"},
-		"story": {"1"}, "fact": {"1"}}); res.status != 303 {
-		t.Fatalf("status %d:\n%s", res.status, res.body)
-	}
-	writeStoryBriefing(t, store, saturday, `{"stories": [{"story": "S1", "statements": [
-		{"text": "The Prime Minister spoke in Motherwell.", "developments": ["D1", "D2"]}]}]}`)
-
-	page := get(t, app, "/briefings/2026-10-24/trail").body
-
-	_, rows := trailRows(t, page)
-	var missed string
-	for _, r := range rows {
-		if strings.Contains(r, "Andy Burnham was in Motherwell.") {
-			missed = r
-		}
-	}
-	if !strings.Contains(missed, "you added it as missed") || strings.Contains(missed, "placed · call") ||
-		!strings.Contains(missed, "read · call 1 · ") {
-		t.Errorf("the missed Development's row does not say the Owner added it, beside its reading call:\n%s", page)
-	}
-}
-
 func TestTheBriefingLinksToItsTrailAndOpeningTheTrailRecordsNoOpen(t *testing.T) {
 	store := openStore(t)
 	spokenBriefing(t, store)
@@ -216,16 +179,17 @@ func TestTheBriefingLinksToItsTrailAndOpeningTheTrailRecordsNoOpen(t *testing.T)
 }
 
 func TestABriefingsTrailFollowsItAsWrittenThoughFeedbackTookAStatementOut(t *testing.T) {
-	store := openStore(t)
-	spokenBriefing(t, store)
+	store := relatedRecord(t)
+	tell(t, store, saturday, teller{text: "Derby will host the headquarters, it said.", tell: "Derby will host"})
 	app, _ := newAppWithLog(t, saturday, store)
-	if res := send(t, app, "POST", today, url.Values{"kind": {"wrong"}, "level": {"fact"}, "fact": {"1"}}); res.status != 303 {
+	path, form := giveForm(t, get(t, app, "/").body, "Wrong: this statement")
+	if res := send(t, app, "POST", path, form); res.status != 303 {
 		t.Fatalf("status %d:\n%s", res.status, res.body)
 	}
 
 	res := get(t, app, "/briefings/2026-10-24/trail")
 
-	if !strings.Contains(res.body, "Andy Burnham spoke in Motherwell.") || !strings.Contains(res.body, "1,870 tokens") {
+	if !strings.Contains(res.body, "Derby will host the headquarters.") {
 		t.Errorf("the trail drops what the Briefing was written from:\n%s", res.body)
 	}
 }

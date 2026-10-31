@@ -84,25 +84,23 @@ func TestAServerErrorLogsTheErrorBehindItOnItsRequestLine(t *testing.T) {
 
 func TestAPostOfFeedbackLogsItsStatusAndNeverItsFormValues(t *testing.T) {
 	store := openStore(t)
-	speechStory(t, store)
-	writeStoryBriefing(t, store, saturday, spoke)
+	readRelease(t, store, releaseReading)
 	app, logs := newAppWithLog(t, saturday, store)
+	path := "/items/" + number10.ID + "/release/feedback"
 
-	send(t, app, http.MethodPost, today, url.Values{"kind": {"missed"}, "level": {"story"},
-		"title": {"Scottish politics"}, "facts": {"1"}})
-	send(t, app, http.MethodPost, today, url.Values{"kind": {"missed"}, "level": {"story"},
-		"title": {" "}, "facts": {"1"}})
+	send(t, app, http.MethodPost, path, url.Values{"kind": {"missed"}, "span": {"3-23"}})
+	send(t, app, http.MethodPost, path, url.Values{"kind": {"unwanted"}, "span": {"3-23"}})
 
 	lines := requestLines(t, logs)
 	if len(lines) != 2 {
 		t.Fatalf("logged %d request lines, want 2:\n%s", len(lines), logs)
 	}
 	for i, want := range []int{http.StatusSeeOther, http.StatusUnprocessableEntity} {
-		if lines[i]["method"] != http.MethodPost || lines[i]["path"] != today || lines[i]["status"] != float64(want) {
-			t.Errorf("request line %d = %v, want POST %s %d", i, lines[i], today, want)
+		if lines[i]["method"] != http.MethodPost || lines[i]["path"] != path || lines[i]["status"] != float64(want) {
+			t.Errorf("request line %d = %v, want POST %s %d", i, lines[i], path, want)
 		}
 	}
-	for _, typed := range []string{"Scottish politics", "missed"} {
+	for _, typed := range []string{"3-23", "missed"} {
 		if strings.Contains(logs.String(), typed) {
 			t.Errorf("the log holds the form value %q:\n%s", typed, logs)
 		}

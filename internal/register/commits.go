@@ -17,8 +17,10 @@ const GitLogFormat = "commit %H %cI"
 
 // editorPaths are the paths whose change is a change to the Editor: its
 // acts, the model adapter they call, and how Feedback is applied (its
-// effects, and the storage that marks the Record with them).
-var editorPaths = []string{"internal/editor/", "internal/claude/", "internal/feedback/", "internal/sqlite/feedback.go"}
+// effects, the storage that marks the Record with them, and the storage
+// that keeps Feedback as events, which says what each view reads under it).
+var editorPaths = []string{"internal/editor/", "internal/claude/", "internal/feedback/", "internal/sqlite/feedback.go",
+	"internal/sqlite/pieces.go"}
 
 // ParseGitLog reads commits from a git log in GitLogFormat with
 // --name-only, each marked as changing the Editor if it touches any of its

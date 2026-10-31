@@ -17,7 +17,6 @@
       {{- if .Unwanted}}
       <p><strong>Unwanted in the Briefing:</strong> you said this Story should not be in it.</p>
       {{- end}}
-      {{- template "block-gives" .Gives}}
     </div>
   </li>
 </ul>
@@ -47,7 +46,6 @@
             <blockquote class="quiet" hx-disable><p>{{.Quote}}</p></blockquote>
             {{template "pills" .Pills}}
             {{if .Made.Call}}<p>{{template "made" .Made}}</p>{{end}}
-            {{- template "block-gives" .Gives}}
           </div>
         </li>
       {{- end}}
@@ -72,7 +70,6 @@
         <p>{{template "citation" .CauseItem}}</p>
         <p>led to {{template "citation" .EffectItem}}</p>
         {{if .Made.Call}}<p>{{template "made" .Made}}</p>{{end}}
-        {{- template "block-gives" .Gives}}
       </div>
     </li>
   {{- end}}
@@ -104,19 +101,6 @@
   {{- end}}
   </ul>
 </section>
-{{- end}}
-</div>
-
-{{/* At the foot, collapsed: what the Owner does less often. A missed form
-     that failed comes back open, with why. */}}
-<div class="story-foot">
-{{- template "missedDevelopment" .MissedDevelopment}}
-{{template "missedStory" .MissedStory}}
-{{- if .Feedback}}
-<details>
-  <summary>Your Feedback on this Story</summary>
-  {{- template "kept" .Feedback}}
-</details>
 {{- end}}
 </div>
 {{end}}

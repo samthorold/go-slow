@@ -25,6 +25,9 @@ commit 4444 2026-10-24T21:00:00Z
 commit 5555 2026-10-24T20:00:00Z
 
 internal/sqlite/feedback.go
+commit 6666 2026-10-24T19:00:00Z
+
+internal/sqlite/pieces.go
 `
 	got, err := register.ParseGitLog(strings.NewReader(log))
 	if err != nil {
@@ -37,6 +40,8 @@ internal/sqlite/feedback.go
 		{Hash: "3333", At: time.Date(2026, time.October, 24, 22, 0, 0, 0, time.UTC), Editor: true},
 		{Hash: "4444", At: time.Date(2026, time.October, 24, 21, 0, 0, 0, time.UTC)},
 		{Hash: "5555", At: time.Date(2026, time.October, 24, 20, 0, 0, 0, time.UTC), Editor: true},
+		// How views read the Feedback standing is how Feedback is applied.
+		{Hash: "6666", At: time.Date(2026, time.October, 24, 19, 0, 0, 0, time.UTC), Editor: true},
 	}
 	if !slices.EqualFunc(got, want, func(a, b register.Commit) bool {
 		return a.Hash == b.Hash && a.At.Equal(b.At) && a.Editor == b.Editor

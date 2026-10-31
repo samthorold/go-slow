@@ -64,6 +64,11 @@ type Statement struct {
 	ID    int64
 	Text  string
 	Cites []OtherSpan
+	// TakenOutBy are the ids of the Feedback standing that takes it out of
+	// its Briefing, as the Record reads it: wrong on it, or unwanted on a
+	// Span it cites. A Briefing is never rewritten; a view leaves out what
+	// Feedback took out.
+	TakenOutBy []int64 `json:"-"`
 }
 
 // Gathering is the Story the Briefing gathered from a Span it told (system

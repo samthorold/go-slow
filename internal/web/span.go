@@ -11,6 +11,7 @@ import (
 
 	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
+	"github.com/samthorold/go-slow/internal/feedback"
 )
 
 // Relations answers what a Span's page shows of its relations.
@@ -30,6 +31,8 @@ type gatheringRow struct {
 	BriefingPath, BriefingDate string
 	Made                       made
 	Spans                      []spanLink
+	// Gives is the Feedback on the gathering: wrong, or new to me.
+	Gives gives
 }
 
 // spanLink is a Span linking its page, with its Item.
@@ -54,6 +57,12 @@ type spanPage struct {
 	// the pass that tells it).
 	Gathered  *gatheringRow
 	Relations []relationRow
+	// FeedbackError is why Feedback last given on the page was refused, if
+	// it was.
+	FeedbackError string
+	// Feedback is the Feedback given on the Span and the judgements made of
+	// it, each to undo here.
+	Feedback []pieceRow
 }
 
 // relationRow is one relation of a Span, as its page shows it: how it
@@ -66,6 +75,8 @@ type relationRow struct {
 	Href  string
 	Item  itemCitation
 	Made  made
+	// Gives is the Feedback on the relation: wrong.
+	Gives gives
 }
 
 // linkTo is the Span o, linking its page, with its Item.
@@ -110,6 +121,12 @@ func howRelated(rel editor.Relation, a editor.Address) string {
 // span is a Span's page: a real, bookmarkable URL for a Span of an Item,
 // which needs no Cut to list it, only to lie within the Item's text.
 func (a *app) span(w http.ResponseWriter, r *http.Request) {
+	a.spanWith(w, r, http.StatusOK, nil)
+}
+
+// spanWith renders the Span's page the path names, with status, and why
+// Feedback given on it was refused, if it was.
+func (a *app) spanWith(w http.ResponseWriter, r *http.Request, status int, errs feedback.Errors) {
 	ctx := r.Context()
 	sourceID, entryID := r.PathValue("source"), r.PathValue("entry")
 	sp, ok := spanOfPath(r.PathValue("span"))
@@ -127,12 +144,9 @@ func (a *app) span(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	at := editor.Address{SourceID: sourceID, EntryID: entryID, Span: sp}
-	reading, read, err := a.Readings.NewestReading(ctx, sourceID, entryID)
-	if err != nil {
-		a.serverError(w, r, err)
-		return
-	}
-	is, err := a.Readings.EntitiesNamed(ctx, reading.Keys(it.Published))
+	page := spanPath(at)
+	path := page + "/feedback"
+	j, err := a.judgementsOf(ctx, sourceID, entryID, it.Published)
 	if err != nil {
 		a.serverError(w, r, err)
 		return
@@ -143,13 +157,20 @@ func (a *app) span(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	p := spanPage{
-		Span:      spanOf(slices.Index(c.Spans, sp)+1, it.Content, sp, reading, it.Published, is),
-		Item:      a.cite(sourceID, it.Title, itemPath(sourceID, entryID)),
-		Published: when(it.Published, a.Now().Location()),
+		Span:          spanOf(slices.Index(c.Spans, sp)+1, it.Content, at, it.Published, j, page),
+		Item:          a.cite(sourceID, it.Title, itemPath(sourceID, entryID)),
+		Published:     when(it.Published, a.Now().Location()),
+		FeedbackError: errs[""],
 	}
-	if read {
-		p.ReadBy = &made{Act: "read", Call: reading.Call}
+	if j.read {
+		p.ReadBy = &made{Act: "read", Call: j.reading.Call}
 	}
+	p.Feedback = a.piecesOn(j.pieces, page, func(k feedback.KeptPiece) bool {
+		if k.Judged == feedback.Relation {
+			return k.At == spanOfAddress(at) || k.To == spanOfAddress(at)
+		}
+		return within(k.At, at)
+	})
 	rels, err := a.Relations.RelationsOf(ctx, at)
 	if err != nil {
 		a.serverError(w, r, err)
@@ -167,7 +188,8 @@ func (a *app) span(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		p.Gathered = &gatheringRow{BriefingPath: briefingPath(g.Day), BriefingDate: day.Format("Monday 2 January 2006"),
-			Made: made{Act: "gathered", Call: g.Call}}
+			Made:  made{Act: "gathered", Call: g.Call},
+			Gives: givesOn([]giveButton{wrongOn(path, g.ID, "this Story"), newToMeOn(path, g.ID, "this Story")}, j.pieces, page)}
 		for _, o := range g.Spans {
 			p.Gathered.Spans = append(p.Gathered.Spans, a.linkTo(o))
 		}
@@ -183,9 +205,45 @@ func (a *app) span(w http.ResponseWriter, r *http.Request) {
 			Href:  spanPath(o.At),
 			Item:  a.cite(o.Item.SourceID, o.Item.Title, itemPath(o.Item.SourceID, o.Item.EntryID)),
 			Made:  made{Act: "related", Call: rel.Call},
+			Gives: givesOn([]giveButton{wrongOn(path, rel.ID, howRelated(rel.Relation, at)+" “"+shorten(o.Words)+"”")},
+				j.pieces, page),
 		})
 	}
-	a.render(w, r, spanTmpl, p)
+	a.renderStatus(w, r, status, spanTmpl, p)
+}
+
+// spanFeedback is Feedback given on a Span's page, about the Span or the
+// judgements shown of it. It lands back on the page.
+func (a *app) spanFeedback(w http.ResponseWriter, r *http.Request) {
+	sourceID, entryID := r.PathValue("source"), r.PathValue("entry")
+	sp, ok := spanOfPath(r.PathValue("span"))
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Bad form.", http.StatusBadRequest)
+		return
+	}
+	at := editor.Address{SourceID: sourceID, EntryID: entryID, Span: sp}
+	ask := askFrom(r, sourceID, entryID, "")
+	if ask.Kind == string(feedback.Missed) {
+		// Missed on a Span's page is on the Span the page shows.
+		ask.Span = spanField(at)
+	}
+	a.givePiece(w, r, ask, spanPath(at), func(errs feedback.Errors) {
+		a.spanWith(w, r, http.StatusUnprocessableEntity, errs)
+	})
+}
+
+// undoOnSpan is an undo from a Span's page, which it lands back on.
+func (a *app) undoOnSpan(w http.ResponseWriter, r *http.Request) {
+	sp, ok := spanOfPath(r.PathValue("span"))
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+	a.undoPiece(w, r, spanPath(editor.Address{SourceID: r.PathValue("source"), EntryID: r.PathValue("entry"), Span: sp}))
 }
 
 // Title is how the page titles the Span: its number in its Item's

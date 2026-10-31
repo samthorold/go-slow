@@ -2,6 +2,7 @@ package web_test
 
 import (
 	"log/slog"
+	"net/http"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -407,20 +408,12 @@ func TestALaterItemBetweenTwoRunsOfOneItemSplitsThemIntoTwoEntries(t *testing.T)
 	}
 }
 
-func TestAStorysTitleHasItsNotesAndFeedbackInItsMarginWhichStartsOpen(t *testing.T) {
+func TestAStorysTitleIsABlockInAMarginedRegionWhichStartsOpenAndOffersNoFeedback(t *testing.T) {
 	store := openStore(t)
 	speechStory(t, store)
 	app, _ := newAppWithLog(t, saturday, store)
-	for _, form := range []url.Values{
-		{"kind": {"missed"}, "level": {"story"}, "title": {"Scottish politics"}, "facts": {"1"}},
-		{"kind": {"unwanted"}, "level": {"story"}, "story": {"2"}},
-	} {
-		if res := send(t, app, "POST", "/stories/1/feedback", form); res.status != 303 {
-			t.Fatalf("status %d:\n%s", res.status, res.body)
-		}
-	}
 
-	page := get(t, app, "/stories/2").body
+	page := get(t, app, "/stories/1").body
 
 	regions := regexp.MustCompile(`<div class="margined" data-margin="(open|folded)">`).FindAllStringSubmatch(page, -1)
 	if len(regions) != 1 || regions[0][1] != "open" {
@@ -429,14 +422,14 @@ func TestAStorysTitleHasItsNotesAndFeedbackInItsMarginWhichStartsOpen(t *testing
 	if !strings.Contains(page, `aria-expanded="true"`) {
 		t.Errorf("the page has no fold control, expanded:\n%s", page)
 	}
-	title := blockOf(t, page, "<h1 hx-disable>Scottish politics</h1>")
-	for _, note := range []string{"You started this Story", "Unwanted in the Briefing", `name="kind" value="new to me"`} {
-		if !strings.Contains(title.margin, note) {
-			t.Errorf("the title's margin lacks %q:\n%s", note, title.margin)
-		}
+	blockOf(t, page, "<h1 hx-disable>Andy Burnham in Scotland</h1>")
+	// Feedback lands on judgements of Spans now: a Story of Facts takes
+	// none.
+	if strings.Contains(page, `class="feedback"`) || strings.Contains(page, "/stories/1/feedback") {
+		t.Errorf("a Story of Facts still offers Feedback:\n%s", page)
 	}
-	if !givenWithUndo(title.margin, "Unwanted", 2, "/stories/2") {
-		t.Errorf("the title's margin does not show Unwanted as given, with its undo:\n%s", title.margin)
+	if res := send(t, app, "POST", "/stories/1/feedback", url.Values{"kind": {"unwanted"}, "level": {"story"}, "story": {"1"}}); res.status != http.StatusMethodNotAllowed && res.status != http.StatusNotFound {
+		t.Errorf("Feedback on a Story was answered %d, want no route", res.status)
 	}
 }
 
@@ -451,8 +444,7 @@ func TestACauseIsABlockReadingCauseLedToEffectWithItsItemsCallAndActionsInItsMar
 	if !regexp.MustCompile(`Andy Burnham made an offer to Holyrood\.</span> led to <span hx-disable>Andy Burnham spoke in Motherwell\.`).MatchString(c.body) {
 		t.Errorf("the body does not read cause led to effect:\n%s", c.body)
 	}
-	for _, want := range []string{`<cite hx-disable>Offer to Holyrood</cite>`, `<cite hx-disable>PM speech in Scotland</cite>`,
-		`name="level" value="connection"`} {
+	for _, want := range []string{`<cite hx-disable>Offer to Holyrood</cite>`, `<cite hx-disable>PM speech in Scotland</cite>`} {
 		if !strings.Contains(c.margin, want) || strings.Contains(c.body, want) {
 			t.Errorf("%q is not in the margin alone:\n%s%s", want, c.body, c.margin)
 		}
@@ -460,13 +452,33 @@ func TestACauseIsABlockReadingCauseLedToEffectWithItsItemsCallAndActionsInItsMar
 	if !regexp.MustCompile(`<a class="machine" href="/calls/\d+">connected · call \d+</a>`).MatchString(c.margin) {
 		t.Errorf("the margin has no machine label \"connected · call N\":\n%s", c.margin)
 	}
+}
 
-	// Withdrawn, it stays, struck through with the reason in its margin.
-	send(t, app, "POST", "/stories/2/feedback", url.Values{"kind": {"wrong"}, "level": {"connection"}, "fact": {"1"}, "to_fact": {"2"}})
-	withdrawn := blockOf(t, section(t, get(t, app, "/stories/2").body, "causes"), "led to")
-	if !strings.Contains(withdrawn.body, `class="struck"`) || !strings.Contains(withdrawn.margin, "Withdrawn") {
-		t.Errorf("the withdrawn Connection is not struck through with the reason in its margin:\n%s%s", withdrawn.body, withdrawn.margin)
+// connectedStories makes two Stories: Scottish devolution (Story 1), whose
+// Development is the offer (Fact 1), and Burnham in Motherwell (Story 2),
+// whose Development is the speech (Fact 2), which the offer caused. Andy
+// Burnham is the actor in both. Two other Stories share nothing with them.
+func connectedStories(t *testing.T, store *sqlite.Store) {
+	t.Helper()
+	offer := item("offer", "Offer to Holyrood", saturday.Add(-72*time.Hour))
+	seed(t, store, saturday.AddDate(0, 0, -7), offer)
+	if err := store.SaveFactReading(t.Context(), editor.FactReading{
+		SourceID: offer.SourceID, EntryID: offer.EntryID, Model: "fake",
+		Entities: []editor.Entity{{Name: "Andy Burnham", Kind: "person"}},
+		Facts: []editor.Fact{{Statement: "Andy Burnham made an offer to Holyrood.",
+			AsAt: time.Date(2026, time.October, 21, 0, 0, 0, 0, time.UTC), Quote: "offer"}},
+	}, saturday); err != nil {
+		t.Fatal(err)
 	}
+	placeWaiting(t, store, `{"new_stories": [{"ref": "N1", "title": "Scottish devolution"}],
+		"facts": [{"fact": "F1", "developments_in": ["N1"]}]}`)
+	connectWaiting(t, store, `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "actor"}]}], "causes": []}`)
+	readSpeech(t, store, reading)
+	placeWaiting(t, store, `{"new_stories": [{"ref": "N1", "title": "Burnham in Motherwell"}],
+		"facts": [{"fact": "F1", "developments_in": ["N1"]}]}`)
+	connectWaiting(t, store, `{"facts": [{"fact": "F1", "roles": [{"entity": "Andy Burnham", "role": "actor"}, {"entity": "Motherwell", "role": "place"}]}],
+		  "causes": [{"cause": "C1", "effect": "F1"}]}`)
+	otherStories(t, store, 2)
 }
 
 func TestAConnectedStoryIsItsTitleInTheBodyWithItsReasonsInTheMargin(t *testing.T) {
@@ -482,62 +494,6 @@ func TestAConnectedStoryIsItsTitleInTheBodyWithItsReasonsInTheMargin(t *testing.
 	}
 	if strings.Contains(s.body, "Andy Burnham") {
 		t.Errorf("the reason is in the body:\n%s", s.body)
-	}
-}
-
-func TestTheMissedFormsAndTheOwnersFeedbackAreCollapsedAtTheFoot(t *testing.T) {
-	store := openStore(t)
-	connectedStories(t, store)
-	app, _ := newAppWithLog(t, saturday, store)
-	send(t, app, "POST", "/stories/2/feedback", url.Values{"kind": {"new to me"}, "level": {"story"}, "story": {"2"}})
-
-	page := get(t, app, "/stories/2").body
-
-	connected := strings.Index(page, `id="connected"`)
-	if connected < 0 {
-		t.Fatalf("no connected Stories:\n%s", page)
-	}
-	var last int
-	for _, summary := range []string{"<summary>Is a Development missing?</summary>", "<summary>Is a Story missing?</summary>",
-		"<summary>Your Feedback on this Story</summary>"} {
-		at := strings.Index(page, summary)
-		if at < connected || at < last {
-			t.Errorf("%s is not at the foot, in order:\n%s", summary, page)
-			continue
-		}
-		last = at
-		if open := strings.LastIndex(page[:at], "<details"); open < 0 || !strings.HasPrefix(page[open:], "<details>") {
-			t.Errorf("%s is not collapsed:\n%s", summary, page[open:at])
-		}
-	}
-}
-
-func TestWithdrawnAndUnwantedDevelopmentsStayStruckThroughWithTheReasonInTheirMargin(t *testing.T) {
-	for _, tc := range []struct {
-		name   string
-		form   url.Values
-		reason string
-	}{
-		{"withdrawn", url.Values{"kind": {"wrong"}, "level": {"fact"}, "fact": {"1"}}, "Withdrawn"},
-		{"unwanted", url.Values{"kind": {"unwanted"}, "level": {"development"}, "story": {"1"}, "fact": {"1"}}, "Unwanted in the Briefing"},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			store := openStore(t)
-			speechStory(t, store)
-			app, _ := newAppWithLog(t, saturday, store)
-			if res := send(t, app, "POST", "/stories/1/feedback", tc.form); res.status != 303 {
-				t.Fatalf("status %d:\n%s", res.status, res.body)
-			}
-
-			d := blockOf(t, section(t, get(t, app, "/stories/1").body, "timeline"), "Andy Burnham spoke in Motherwell.")
-
-			if !strings.Contains(d.body, `<p class="struck">`) {
-				t.Errorf("the %s Development is not struck through:\n%s", tc.name, d.body)
-			}
-			if !strings.Contains(d.margin, tc.reason) || strings.Contains(d.body, tc.reason) {
-				t.Errorf("the reason %q is not in the margin alone:\n%s%s", tc.reason, d.body, d.margin)
-			}
-		})
 	}
 }
 

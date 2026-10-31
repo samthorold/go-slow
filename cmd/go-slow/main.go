@@ -200,6 +200,8 @@ func run(log *slog.Logger) error {
 		Stories:     store,
 		Feedback:    feedback.New(store),
 		Kept:        store,
+		Pieces:      feedback.NewPieces(store),
+		Given:       store,
 		Register:    store,
 		SundayReads: store,
 		Calls:       store,

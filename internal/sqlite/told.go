@@ -236,11 +236,27 @@ func (s *Store) toldStatements(ctx context.Context, briefingID int64) ([]editor.
 	return out, nil
 }
 
+// takenOutBy is, for the told statement aliased st, the JSON array of the
+// Feedback standing that takes it out of its Briefing: wrong on it, and
+// unwanted on a Span it cites, as told in its Briefing (system design: A
+// written Briefing re-renders without what Feedback took out).
+var takenOutBy = `(SELECT json_group_array(id) FROM (
+		SELECT w.event_id AS id FROM feedback_given w
+		WHERE w.kind = 'wrong' AND w.judgement_id = st.event_id AND ` + standing("w.event_id") + `
+		UNION
+		SELECT u.event_id FROM feedback_given u JOIN told_citations uc ON uc.statement_id = st.event_id
+			AND uc.source_id = u.source_id AND uc.entry_id = u.entry_id
+			AND uc.span_start = u.span_start AND uc.span_end = u.span_end
+		WHERE u.kind = 'unwanted' AND u.briefing_id = st.briefing_id AND ` + standing("u.event_id") + `
+		ORDER BY id))`
+
 // statementsCiting are the Briefing's statements in order, each citing its
-// Spans by address and the reading each was shown as, and nothing more.
+// Spans by address and the reading each was shown as, with the Feedback
+// standing that takes it out, and nothing more.
 func (s *Store) statementsCiting(ctx context.Context, briefingID int64) ([]editor.Statement, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT st.event_id, st.text, c.source_id, c.entry_id, c.span_start, c.span_end, coalesce(c.reading_id, 0)
+		SELECT st.event_id, st.text, c.source_id, c.entry_id, c.span_start, c.span_end, coalesce(c.reading_id, 0),
+			`+takenOutBy+`
 		FROM told_statements st JOIN told_citations c ON c.statement_id = st.event_id
 		WHERE st.briefing_id = ?
 		ORDER BY st.position, c.position`, briefingID)
@@ -251,26 +267,31 @@ func (s *Store) statementsCiting(ctx context.Context, briefingID int64) ([]edito
 	var out []editor.Statement
 	for rows.Next() {
 		var id int64
-		var text string
+		var text, by string
 		var c editor.OtherSpan
 		a := &c.At
-		if err := rows.Scan(&id, &text, &a.SourceID, &a.EntryID, &a.Span.Start, &a.Span.End, &c.ReadingID); err != nil {
+		if err := rows.Scan(&id, &text, &a.SourceID, &a.EntryID, &a.Span.Start, &a.Span.End, &c.ReadingID, &by); err != nil {
 			return nil, err
 		}
 		if n := len(out); n == 0 || out[n-1].ID != id {
-			out = append(out, editor.Statement{ID: id, Text: text})
+			st := editor.Statement{ID: id, Text: text}
+			if err := json.Unmarshal([]byte(by), &st.TakenOutBy); err != nil {
+				return nil, err
+			}
+			out = append(out, st)
 		}
 		out[len(out)-1].Cites = append(out[len(out)-1].Cites, c)
 	}
 	return out, rows.Err()
 }
 
-// LatestGathering is the latest Story gathered from the Span at a, reporting
-// whether one was: with the Briefing that gathered it, its Judge and call,
+// LatestGathering is the latest Story gathered from the Span at a and not
+// under standing wrong, reporting whether one was: with the Briefing that gathered it, its Judge and call,
 // and the Spans it holds as their Items' newest readings read them.
 func (s *Store) LatestGathering(ctx context.Context, a editor.Address) (editor.GatheredStory, bool, error) {
 	gs, err := s.gatherings(ctx, `g.event_id = (SELECT max(event_id) FROM gatherings
-		WHERE source_id = ? AND entry_id = ? AND span_start = ? AND span_end = ?)`,
+		WHERE source_id = ? AND entry_id = ? AND span_start = ? AND span_end = ?
+			AND NOT `+wrongStanding("gatherings.event_id")+`)`,
 		a.SourceID, a.EntryID, a.Span.Start, a.Span.End)
 	if err != nil || len(gs) == 0 {
 		return editor.GatheredStory{}, false, err

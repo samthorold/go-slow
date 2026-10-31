@@ -1,13 +1,16 @@
 {{define "title"}}Briefing for {{.Date}}{{end}}
 
 {{define "content"}}
-{{/* The statements are the Editor's words, and the Stories and Facts they
-     cite were drawn from collected text: inert, with hx-disable on the
-     elements holding them, so the boosted links still work. */}}
+{{/* The statements are the Editor's words, and the Spans, Stories and
+     Facts they cite were drawn from collected text: inert, with hx-disable
+     on the elements holding them, so the boosted links still work. */}}
 <h1>Briefing</h1>
 <p>{{.Date}}</p>
 {{- with .SundayReadPath}}
 <p><a href="{{.}}">The Sunday read</a>, putting the week into wider context.</p>
+{{- end}}
+{{- with .FeedbackError}}
+<p role="alert">{{.}}</p>
 {{- end}}
 {{- if not .Exists}}
 {{template "briefingStatus" .Status}}
@@ -27,12 +30,17 @@
 </ol>
 {{- end}}
 {{- else if .Told}}
-{{- if not .Statements}}
+{{- if .Emptied}}
+<p>Your Feedback took everything this Briefing told out of it. Something was told; the Feedback that took it out is below, to undo.</p>
+{{- else if not .Statements}}
 <p>{{if .WithoutCall}}Nothing was read since the last Briefing.{{else}}Nothing read since the last Briefing was worth telling.{{end}}</p>
 {{- else}}
 {{/* The Briefing over Spans: each statement a block, the Spans it cites
      in its margin, each linking its page, with whose words it is and its
-     Item. The margin starts open; the one control folds it away. */}}
+     Item. The margin starts open; the one control folds it away. Each
+     block's Feedback is in its margin: what is already given is state and
+     shows at rest; what is offered is its actions (.actions), shown only
+     while the pointer or keyboard focus is in the block. */}}
 <div class="margined" data-margin="open">
 {{template "margin-fold" "open"}}
 <ul class="blocks">
@@ -49,41 +57,28 @@
         <p>{{template "citation" .Item}}</p>
       </div>
       {{- end}}
+      {{- template "block-gives" .Gives}}
     </div>
   </li>
 {{- end}}
 </ul>
 </div>
 {{- end}}
-{{- else if .Emptied}}
-<p>Your Feedback took every Story out of this Briefing. Something did move on; this is the Feedback that took it out, which you can undo:</p>
-{{template "kept" .TakenOut}}
 {{- else if not .Stories}}
 <p>Nothing moved on in the Stories your Topics follow.</p>
 {{- end}}
 {{- with .Stories}}
-{{/* The Briefing looks as a Story's page does: its margin starts open,
-     and the one control folds it away to read the text alone. */}}
+{{/* A Briefing written over Stories, before the Briefing told Spans, is
+     shown as it was written. It looks as a Story's page does: its margin
+     starts open, and the one control folds it away. */}}
 <div class="margined" data-margin="open">
 {{template "margin-fold" "open"}}
 {{- range .}}
-{{/* A Story reads as its title and statements, each a block. Each block's
-     Feedback is in its margin, as on a Story's page: what is already given
-     is state and shows at rest; what is offered is its actions (.actions),
-     shown only while the pointer or keyboard focus is in the block, and
-     folded away with the margin. */}}
 <section class="briefed-story">
   <ul class="blocks">
     <li class="block">
       <div class="block-body"><h2><a href="{{.Path}}"><span hx-disable>{{.Title}}</span></a></h2></div>
-      <div class="block-margin">
-        {{- with .Gives.Given}}
-        <div class="given-marks">{{template "gives" .}}</div>
-        {{- end}}
-        {{- with .Gives.Offered}}
-        <div class="actions" role="group" aria-label="Feedback on this Story">{{template "gives" .}}</div>
-        {{- end}}
-      </div>
+      <div class="block-margin"></div>
     </li>
   {{- range .Statements}}
     <li class="block">
@@ -95,24 +90,10 @@
           <p>{{template "citation" .Item}}</p>
         </div>
         {{- end}}
-        {{- range $c := .Cites}}
-        {{- with $c.Gives.Given}}
-        <div class="given-marks"><span class="about" hx-disable>{{$c.Short}}</span> {{template "gives" .}}</div>
-        {{- end}}
-        {{- end}}
-        {{- range $c := .Cites}}
-        {{- with $c.Gives.Offered}}
-        <div class="actions" role="group" aria-label="Feedback on: {{$c.Short}}"><span class="about" hx-disable>{{$c.Short}}</span>
-          {{- template "gives" .}}</div>
-        {{- end}}
-        {{- end}}
       </div>
     </li>
   {{- end}}
   </ul>
-  <div class="missed quiet">
-  {{- template "missedDevelopment" .MissedDevelopment}}
-  </div>
 </section>
 {{- end}}
 </div>
@@ -120,15 +101,5 @@
 {{- with .TrailPath}}
 <p id="how-written"><small>{{if $.WithoutCall}}With nothing to tell, it was written without a model call. {{end}}<a href="{{.}}">How this was written</a></small></p>
 {{- end}}
-{{- if and .Exists (not .Told)}}
-<div class="missed quiet">
-{{template "missedStory" .MissedStory}}
-</div>
-{{- end}}
-{{- if .Feedback}}
-<section aria-labelledby="your-feedback">
-  <h2 id="your-feedback">Your Feedback on this Briefing</h2>
-  {{- template "kept" .Feedback}}
-</section>
-{{- end}}
+{{template "given" .Feedback}}
 {{end}}

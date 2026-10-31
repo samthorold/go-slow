@@ -1,0 +1,554 @@
+{
+  "act": "reading",
+  "model": "claude-haiku-5-5",
+  "request_hash": "f8341f220a63311f607aee1348077c8ec21ad9b88b4f71cdb58c48feed673713",
+  "recorded_at": "2026-10-31T01:32:54.604732Z",
+  "usage": {
+    "input_tokens": 4175,
+    "output_tokens": 7260
+  },
+  "output": {
+    "names": [
+      {
+        "at": {
+          "span": 4,
+          "words": "Great British Railways"
+        },
+        "kind": "organisation",
+        "name": "Great British Railways",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 16,
+          "words": "Great British Railways"
+        },
+        "kind": "organisation",
+        "name": "Great British Railways",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 22,
+          "words": "Great British Railways"
+        },
+        "kind": "organisation",
+        "name": "Great British Railways",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 23,
+          "words": "GBR’s"
+        },
+        "kind": "organisation",
+        "name": "Great British Railways",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 26,
+          "words": "GBR"
+        },
+        "kind": "organisation",
+        "name": "Great British Railways",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 1,
+          "words": "Derby"
+        },
+        "kind": "place",
+        "name": "Derby",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "Derby"
+        },
+        "kind": "place",
+        "name": "Derby",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 8,
+          "words": "Derby"
+        },
+        "kind": "place",
+        "name": "Derby",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 11,
+          "words": "Derby"
+        },
+        "kind": "place",
+        "name": "Derby",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 16,
+          "words": "Derby"
+        },
+        "kind": "place",
+        "name": "Derby",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 23,
+          "words": "Derby’s"
+        },
+        "kind": "place",
+        "name": "Derby",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 25,
+          "words": "Derby"
+        },
+        "kind": "place",
+        "name": "Derby",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 28,
+          "words": "Derby"
+        },
+        "kind": "place",
+        "name": "Derby",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 8,
+          "words": "Becketwell"
+        },
+        "kind": "place",
+        "name": "Becketwell",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 23,
+          "words": "Becketwell"
+        },
+        "kind": "place",
+        "name": "Becketwell",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 12,
+          "words": "Prime Minister Andy Burnham"
+        },
+        "kind": "person",
+        "name": "Andy Burnham",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 20,
+          "words": "Transport Secretary Heidi Alexander"
+        },
+        "kind": "person",
+        "name": "Heidi Alexander",
+        "office": "Transport Secretary"
+      },
+      {
+        "at": {
+          "span": 30,
+          "words": "Work and Pensions Secretary Pat McFadden"
+        },
+        "kind": "person",
+        "name": "Pat McFadden",
+        "office": "Work and Pensions Secretary"
+      },
+      {
+        "at": {
+          "span": 34,
+          "words": "Mayor of the East Midlands, Claire Ward"
+        },
+        "kind": "person",
+        "name": "Claire Ward",
+        "office": "Mayor of the East Midlands"
+      },
+      {
+        "at": {
+          "span": 26,
+          "words": "Department for Transport"
+        },
+        "kind": "organisation",
+        "name": "Department for Transport",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 26,
+          "words": "Derby City Council"
+        },
+        "kind": "organisation",
+        "name": "Derby City Council",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 26,
+          "words": "East Midlands Combined Authority"
+        },
+        "kind": "organisation",
+        "name": "East Midlands Combined Authority",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 27,
+          "words": "Alstom’s"
+        },
+        "kind": "organisation",
+        "name": "Alstom",
+        "office": ""
+      }
+    ],
+    "refers_to": [
+      {
+        "from": {
+          "span": 8,
+          "words": "the brand-new development"
+        },
+        "to": {
+          "span": 4,
+          "words": "Great British Railways’ (GBR) headquarters"
+        }
+      },
+      {
+        "from": {
+          "span": 9,
+          "words": "the city"
+        },
+        "to": {
+          "span": 4,
+          "words": "Derby"
+        }
+      },
+      {
+        "from": {
+          "span": 11,
+          "words": "the city’s"
+        },
+        "to": {
+          "span": 4,
+          "words": "Derby"
+        }
+      },
+      {
+        "from": {
+          "span": 16,
+          "words": "a city"
+        },
+        "to": {
+          "span": 4,
+          "words": "Derby"
+        }
+      },
+      {
+        "from": {
+          "span": 16,
+          "words": "its"
+        },
+        "to": {
+          "span": 4,
+          "words": "Great British Railways"
+        }
+      },
+      {
+        "from": {
+          "span": 22,
+          "words": "its"
+        },
+        "to": {
+          "span": 4,
+          "words": "Great British Railways"
+        }
+      },
+      {
+        "from": {
+          "span": 23,
+          "words": "the city"
+        },
+        "to": {
+          "span": 4,
+          "words": "Derby"
+        }
+      },
+      {
+        "from": {
+          "span": 25,
+          "words": "The modern fit-for-purpose headquarters"
+        },
+        "to": {
+          "span": 4,
+          "words": "Great British Railways’ (GBR) headquarters"
+        }
+      },
+      {
+        "from": {
+          "span": 25,
+          "words": "the organisation’s"
+        },
+        "to": {
+          "span": 4,
+          "words": "Great British Railways"
+        }
+      },
+      {
+        "from": {
+          "span": 26,
+          "words": "The site"
+        },
+        "to": {
+          "span": 8,
+          "words": "Becketwell"
+        }
+      },
+      {
+        "from": {
+          "span": 36,
+          "words": "here"
+        },
+        "to": {
+          "span": 4,
+          "words": "Derby"
+        }
+      },
+      {
+        "from": {
+          "span": 38,
+          "words": "here"
+        },
+        "to": {
+          "span": 4,
+          "words": "Derby"
+        }
+      }
+    ],
+    "rejected": [
+      12,
+      20,
+      30,
+      34,
+      41,
+      42,
+      43
+    ],
+    "speakers": [
+      {
+        "span": {
+          "span": 13,
+          "words": ""
+        },
+        "speaker": {
+          "span": 12,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "span": {
+          "span": 14,
+          "words": ""
+        },
+        "speaker": {
+          "span": 12,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "span": {
+          "span": 15,
+          "words": ""
+        },
+        "speaker": {
+          "span": 12,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "span": {
+          "span": 16,
+          "words": ""
+        },
+        "speaker": {
+          "span": 12,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "span": {
+          "span": 17,
+          "words": ""
+        },
+        "speaker": {
+          "span": 12,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "span": {
+          "span": 18,
+          "words": ""
+        },
+        "speaker": {
+          "span": 12,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "span": {
+          "span": 19,
+          "words": ""
+        },
+        "speaker": {
+          "span": 12,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "span": {
+          "span": 21,
+          "words": ""
+        },
+        "speaker": {
+          "span": 20,
+          "words": "Heidi Alexander"
+        }
+      },
+      {
+        "span": {
+          "span": 22,
+          "words": ""
+        },
+        "speaker": {
+          "span": 20,
+          "words": "Heidi Alexander"
+        }
+      },
+      {
+        "span": {
+          "span": 23,
+          "words": ""
+        },
+        "speaker": {
+          "span": 20,
+          "words": "Heidi Alexander"
+        }
+      },
+      {
+        "span": {
+          "span": 24,
+          "words": ""
+        },
+        "speaker": {
+          "span": 20,
+          "words": "Heidi Alexander"
+        }
+      },
+      {
+        "span": {
+          "span": 31,
+          "words": ""
+        },
+        "speaker": {
+          "span": 30,
+          "words": "Pat McFadden"
+        }
+      },
+      {
+        "span": {
+          "span": 32,
+          "words": ""
+        },
+        "speaker": {
+          "span": 30,
+          "words": "Pat McFadden"
+        }
+      },
+      {
+        "span": {
+          "span": 33,
+          "words": ""
+        },
+        "speaker": {
+          "span": 30,
+          "words": "Pat McFadden"
+        }
+      },
+      {
+        "span": {
+          "span": 35,
+          "words": ""
+        },
+        "speaker": {
+          "span": 34,
+          "words": "Claire Ward"
+        }
+      },
+      {
+        "span": {
+          "span": 36,
+          "words": ""
+        },
+        "speaker": {
+          "span": 34,
+          "words": "Claire Ward"
+        }
+      },
+      {
+        "span": {
+          "span": 37,
+          "words": ""
+        },
+        "speaker": {
+          "span": 34,
+          "words": "Claire Ward"
+        }
+      },
+      {
+        "span": {
+          "span": 38,
+          "words": ""
+        },
+        "speaker": {
+          "span": 34,
+          "words": "Claire Ward"
+        }
+      },
+      {
+        "span": {
+          "span": 39,
+          "words": ""
+        },
+        "speaker": {
+          "span": 34,
+          "words": "Claire Ward"
+        }
+      },
+      {
+        "span": {
+          "span": 40,
+          "words": ""
+        },
+        "speaker": {
+          "span": 34,
+          "words": "Claire Ward"
+        }
+      }
+    ]
+  }
+}

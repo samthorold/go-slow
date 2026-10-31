@@ -150,7 +150,7 @@ func TestReadingIsShownStandingWrongOnReadingsJudgementsNamingWhatTheItemNamesAf
 	if err := json.Unmarshal([]byte(lines[1]), &p); err != nil {
 		t.Fatalf("a precedent is not a JSON object: %v: %s", err, lines[1])
 	}
-	want := map[string]string{"feedback": "wrong", "judgement": "refers_to", "item": release.Title,
+	want := map[string]string{"feedback": "wrong: the Owner said this judgement was mistaken", "judgement": "refers_to", "item": release.Title,
 		"in": "“This is fantastic news for the city.", "words": "the city", "refers_to": "Derby",
 		"given": given.Format(time.DateOnly)}
 	for k, v := range want {
@@ -230,7 +230,7 @@ func TestRelatingIsShownStandingWrongOnRelationsBetweenSpansMentioningWhatItsSpa
 	if err := json.Unmarshal([]byte(lines[1]), &p); err != nil {
 		t.Fatalf("a precedent is not a JSON object: %v: %s", err, lines[1])
 	}
-	if p.Feedback != "wrong" || p.Judgement != "same_as" || p.Span.Item != holyrood.Title ||
+	if !strings.HasPrefix(p.Feedback, "wrong: ") || p.Judgement != "same_as" || p.Span.Item != holyrood.Title ||
 		p.Span.Words != "Scotland is one of the most centralised nations in Europe." || p.To.Item != pressRelease.Title ||
 		p.Span.Published != "2026-10-16" || p.Given != "2026-10-24" {
 		t.Errorf("precedent shown as %s", lines[1])
@@ -292,11 +292,11 @@ func TestTheBriefingIsShownStandingUnwantedAndMissedNewestFirstAndKeepsThem(t *t
 	if err := json.Unmarshal([]byte(lines[2]), &second); err != nil {
 		t.Fatal(err)
 	}
-	if first["feedback"] != "missed" || first["span"] != "Scotland will get £2 billion." || first["item"] != speech.Title ||
+	if !strings.HasPrefix(first["feedback"], "missed: ") || first["span"] != "Scotland will get £2 billion." || first["item"] != speech.Title ||
 		first["given"] != "2026-10-24" {
 		t.Errorf("the newest precedent is shown as %s, want the missed", lines[1])
 	}
-	if second["feedback"] != "unwanted" || second["told"] != "2026-10-24" ||
+	if !strings.HasPrefix(second["feedback"], "unwanted: ") || second["told"] != "2026-10-24" ||
 		second["span"] != "It’s good to be back in Scotland, to be here in Motherwell." {
 		t.Errorf("the older precedent is shown as %s, want the unwanted", lines[2])
 	}

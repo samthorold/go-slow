@@ -3,7 +3,6 @@ package sqlite
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"slices"
 	"strings"
@@ -90,30 +89,23 @@ func (s *Store) StandingWrong(ctx context.Context, judged []string) ([]editor.Pr
 			AND (rt.event_id IS NOT NULL OR sk.event_id IS NOT NULL OR rel.event_id IS NOT NULL)
 			AND `+standing("f.event_id")+`
 		ORDER BY f.event_id DESC`, anys(judged)...)
-	if err != nil {
-		return nil, fmt.Errorf("standing wrong: %w", err)
-	}
 	type found struct {
 		p         editor.Precedent
 		at, to    editor.Address
 		readingID int64
 	}
-	var all []found
-	for rows.Next() {
+	all, err := scanned(rows, err, func(rows *sql.Rows) (found, error) {
 		var f found
 		var at string
-		if err := rows.Scan(&f.p.FeedbackID, &f.p.Judged, &at,
+		err := rows.Scan(&f.p.FeedbackID, &f.p.Judged, &at,
 			&f.at.SourceID, &f.at.EntryID, &f.at.Span.Start, &f.at.Span.End,
 			&f.to.SourceID, &f.to.EntryID, &f.to.Span.Start, &f.to.Span.End,
-			&f.p.Relation, &f.readingID); err != nil {
-			_ = rows.Close()
-			return nil, fmt.Errorf("standing wrong: %w", err)
-		}
+			&f.p.Relation, &f.readingID)
 		f.p.Kind, f.p.GivenAt = "wrong", parseTime(at)
-		all = append(all, f)
-	}
-	if err := errors.Join(rows.Err(), rows.Close()); err != nil {
-		return nil, err
+		return f, err
+	})
+	if err != nil {
+		return nil, fmt.Errorf("standing wrong: %w", err)
 	}
 	out := make([]editor.Precedent, 0, len(all))
 	for _, f := range all {
@@ -145,27 +137,20 @@ func (s *Store) StandingTaste(ctx context.Context) ([]editor.Precedent, error) {
 			LEFT JOIN told_briefings t ON t.event_id = f.briefing_id
 		WHERE f.kind IN ('unwanted', 'missed') AND `+standing("f.event_id")+`
 		ORDER BY e.at DESC, f.event_id DESC`)
-	if err != nil {
-		return nil, fmt.Errorf("standing unwanted and missed: %w", err)
-	}
 	type found struct {
 		p  editor.Precedent
 		at editor.Address
 	}
-	var all []found
-	for rows.Next() {
+	all, err := scanned(rows, err, func(rows *sql.Rows) (found, error) {
 		var f found
 		var at string
-		if err := rows.Scan(&f.p.FeedbackID, &f.p.Kind, &at, &f.at.SourceID, &f.at.EntryID,
-			&f.at.Span.Start, &f.at.Span.End, &f.p.Day); err != nil {
-			_ = rows.Close()
-			return nil, fmt.Errorf("standing unwanted and missed: %w", err)
-		}
+		err := rows.Scan(&f.p.FeedbackID, &f.p.Kind, &at, &f.at.SourceID, &f.at.EntryID,
+			&f.at.Span.Start, &f.at.Span.End, &f.p.Day)
 		f.p.GivenAt = parseTime(at)
-		all = append(all, f)
-	}
-	if err := errors.Join(rows.Err(), rows.Close()); err != nil {
-		return nil, err
+		return f, err
+	})
+	if err != nil {
+		return nil, fmt.Errorf("standing unwanted and missed: %w", err)
 	}
 	out := make([]editor.Precedent, 0, len(all))
 	for _, f := range all {
@@ -206,6 +191,25 @@ func (s *Store) namedAround(ctx context.Context, id int64, text string, at, to e
 		}
 	}
 	return cut.Words(text, within[0]), names, nil
+}
+
+// scanned is every row of a query's result (rows, or the query's error err)
+// as scan reads it, the rows closed before it returns, so what the rows were
+// read for can query again.
+func scanned[T any](rows *sql.Rows, err error, scan func(*sql.Rows) (T, error)) ([]T, error) {
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+	var out []T
+	for rows.Next() {
+		v, err := scan(rows)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, v)
+	}
+	return out, rows.Err()
 }
 
 // anys is ss as arguments to a query.

@@ -714,45 +714,15 @@ body:has(.margined) #request-errors {
   margin-top: 0.75rem;
 }
 
-/* The Topics page: a row per Topic. Its Depth, the page's frequent act, is a
-   segmented control (.segmented: a button per Depth, the current one
-   aria-pressed) shown at rest; Remove is in the row's .actions, hidden at
-   rest the Briefing's way (in the tab order) and shown while the pointer or
-   keyboard focus is in the row. */
+/* The Topics page: a row per Topic, its name, terms and Sources. Remove is
+   in the row's .actions, hidden at rest the Briefing's way (in the tab
+   order) and shown while the pointer or keyboard focus is in the row. */
 .topics {
   width: 100%;
 }
 
 .topics td {
   vertical-align: middle;
-}
-
-.segmented {
-  display: inline-flex;
-  margin: 0;
-  white-space: nowrap;
-}
-
-.segmented button {
-  border-radius: 0;
-}
-
-.segmented button + button {
-  margin-left: -1px;
-}
-
-.segmented button:first-child {
-  border-radius: 3px 0 0 3px;
-}
-
-.segmented button:last-of-type {
-  border-radius: 0 3px 3px 0;
-}
-
-.segmented button[aria-pressed="true"] {
-  color: var(--bg);
-  background: var(--text);
-  border-color: var(--text);
 }
 
 /* Row actions: a table row's controls (.actions in a cell of a row of

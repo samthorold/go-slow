@@ -139,7 +139,7 @@ func placeTheCall(t *testing.T, store *sqlite.Store, placedAt time.Time) {
 	t.Helper()
 	ctx := t.Context()
 	// A Topic on Finland ties the readout, so its Story is selected.
-	if _, errs, err := interest.New(store).Add(ctx, interest.Draft{Name: "Finland", Depth: "following", Terms: "Finland"}); err != nil || errs != nil {
+	if _, errs, err := interest.New(store).Add(ctx, interest.Draft{Name: "Finland", Terms: "Finland"}); err != nil || errs != nil {
 		t.Fatalf("add Topic: %v %v", errs, err)
 	}
 	if err := store.SaveFactReading(ctx, editor.FactReading{

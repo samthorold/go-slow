@@ -13,6 +13,7 @@ import (
 
 	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/editor"
+	"github.com/samthorold/go-slow/internal/interest"
 )
 
 // Items answers the queries the Items page needs.
@@ -27,6 +28,9 @@ type Items interface {
 	// FailedWork is the acts' work marked failed, most recently failed
 	// first.
 	FailedWork(ctx context.Context) ([]editor.FailedWork, error)
+	// SourceCounts are, per Source, what the Owner steers by over the
+	// window (from, to].
+	SourceCounts(ctx context.Context, from, to time.Time) ([]interest.SourceCounts, error)
 }
 
 // Deps are the app's dependencies. The app reads nothing from the
@@ -188,7 +192,6 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("GET /stories/{id}", a.story)
 	mux.HandleFunc("GET /topics", a.topics)
 	mux.HandleFunc("POST /topics", a.addTopic)
-	mux.HandleFunc("PUT /topics/{id}", a.setDepth)
 	mux.HandleFunc("DELETE /topics/{id}", a.removeTopic)
 	return a.logRequests(mux)
 }

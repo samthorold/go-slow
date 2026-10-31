@@ -8,7 +8,7 @@ import (
 	"unicode"
 )
 
-// Item is what the lazy-reading check looks at of a collected Item: where it
+// Item is what the check tying Items to Topics looks at of a collected Item: where it
 // came from and its text.
 type Item struct {
 	SourceID string
@@ -18,7 +18,8 @@ type Item struct {
 	Content  string
 }
 
-// Ties is the lazy-reading check for one Topic: whether the Item comes from
+// Ties is the check for one Topic, which the Sunday read selects Stories
+// by until it tells Spans: whether the Item comes from
 // one of the Topic's Sources or names one of its terms. A term matches as
 // whole words of the text a reader sees (markup stripped, entities decoded),
 // ignoring case and punctuation, so "Farage" ties "Mr Farage's
@@ -28,16 +29,40 @@ func (t Topic) Ties(it Item) bool {
 	if slices.Contains(t.Sources, it.SourceID) {
 		return true
 	}
-	if len(t.Terms) == 0 {
-		return false
-	}
-	text := words(visible(it.Title) + " " + visible(it.Summary) + " " + visible(it.Content))
+	return t.matches(words(visible(it.Title) + " " + visible(it.Summary) + " " + visible(it.Content)))
+}
+
+// Touches is whether a Span, given as its Item's text holds it (which may be
+// the publisher's HTML), touches the Topic: whether it names one of the
+// Topic's terms, matched as Ties matches them, as whole words of the text a
+// reader sees. The Topic's Sources play no part: they say where an Item
+// came from, not what a Span is about. Touching counts and selects nothing
+// (system design: Every Item is read, and Topics select nothing).
+func (t Topic) Touches(span string) bool {
+	return t.matches(words(visible(span)))
+}
+
+// matches is whether text, as words gives it, holds one of the Topic's
+// terms as whole words.
+func (t Topic) matches(text string) bool {
 	for _, term := range t.Terms {
 		if w := words(term); w != "  " && strings.Contains(text, w) {
 			return true
 		}
 	}
 	return false
+}
+
+// SourceCounts is how one Source stands over a window, for the Owner to
+// steer by (system design: Every Item is read, and Topics select nothing):
+// the Stories gathered in it that it contributes to (those holding a Span
+// of one of its Items), as many as touch a Topic and as many as don't, and
+// the Spans of its Items collected in it, as their newest readings read
+// them, and how many of those are Rejected. It counts and selects nothing.
+type SourceCounts struct {
+	SourceID            string
+	Touching, Untouched int
+	Spans, Rejected     int
 }
 
 // Checked is the check's result for one Item: the Topics it ties the Item
@@ -48,7 +73,7 @@ type Checked struct {
 	TopicIDs []int64
 }
 
-// CheckNew runs the lazy-reading check over the Items not yet checked,
+// CheckNew runs the check over the Items not yet checked,
 // marking each as tied to the Topics it matches, or to none.
 func (s *Service) CheckNew(ctx context.Context) error {
 	items, err := s.store.UncheckedItems(ctx)
@@ -72,7 +97,7 @@ func (s *Service) CheckNew(ctx context.Context) error {
 	return s.store.RecordChecks(ctx, results)
 }
 
-// recheck runs the check for one Topic, just taken up or deepened, over the
+// recheck runs the check for one Topic, just taken up, over the
 // Items waiting unread, and ties those it matches to it. Keeping every Item
 // is what makes this possible: interest that changes reaches back over what
 // was collected before it.

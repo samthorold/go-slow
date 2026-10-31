@@ -364,23 +364,39 @@ func sampleNumber(path string) int {
 	return k
 }
 
-// sundayTopics are the fixed Topics and Depths the recorded Sunday read's
-// Record is built with (they were the earlier Briefing's): until the Sunday
-// read tells Spans (#218), it is shown the Stories they select. No Topic
-// follows the Lord-Lieutenancy of County Tyrone.
+// sundayTopics are the fixed Topics the recorded Sunday read's Record is
+// built with (they were the earlier Briefing's): until the Sunday read tells
+// Spans (#218), it is shown the Stories they select. No Topic follows the
+// Lord-Lieutenancy of County Tyrone.
 var sundayTopics = []interest.Draft{
-	{Name: "Ukraine", Depth: "close", Terms: "Ukraine\nZelenskyy\nRussia"},
-	{Name: "Railways", Depth: "following", Terms: "Great British Railways"},
-	{Name: "Scotland", Depth: "passing", Terms: "Scotland\nScottish\nHolyrood"},
+	{Name: "Ukraine", Terms: "Ukraine\nZelenskyy\nRussia"},
+	{Name: "Railways", Terms: "Great British Railways"},
+	{Name: "Scotland", Terms: "Scotland\nScottish\nHolyrood"},
+}
+
+// sundayDepths are the Depths the Record keeps for the sundayTopics, which
+// the Sunday read is still shown with their Stories until #218, though
+// Topics no longer have one: its recordings answer a request carrying them.
+var sundayDepths = map[string]interest.Depth{
+	"Ukraine": interest.Close, "Railways": interest.Following, "Scotland": interest.Passing,
 }
 
 // frozenRecordAt is a Record kept at path holding the fixture Items, tied to
-// the sundayTopics, with the recordings of the earlier reading of Facts,
-// placing and connecting under dir replayed into it: the Sunday read's
-// frozen copies, which rest on all three.
+// the sundayTopics at their sundayDepths, with the recordings of the earlier
+// reading of Facts, placing and connecting under dir replayed into it: the
+// Sunday read's frozen copies, which rest on all three.
 func frozenRecordAt(t *testing.T, path, dir string) *sqlite.Store {
 	t.Helper()
 	store, topics := newRecordAt(t, path, sundayTopics)
+	followed, err := store.Topics(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tp := range followed {
+		if _, err := store.SetDepth(t.Context(), tp.ID, sundayDepths[tp.Name]); err != nil {
+			t.Fatal(err)
+		}
+	}
 	c := chain{
 		factReading: replayed(filepath.Join(dir, "reading")),
 		placing:     replayed(filepath.Join(dir, "placing")),

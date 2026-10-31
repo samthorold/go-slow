@@ -7,7 +7,7 @@ import (
 )
 
 func TestTheCheckTiesAnItemToATopicByItsTerms(t *testing.T) {
-	reform := interest.Topic{Name: "Reform UK", Depth: interest.Close, Terms: []string{"Reform UK", "Farage"}}
+	reform := interest.Topic{Name: "Reform UK", Terms: []string{"Reform UK", "Farage"}}
 
 	cases := []struct {
 		name string
@@ -76,12 +76,39 @@ func TestTheCheckTiesATermInTheVisibleText(t *testing.T) {
 }
 
 func TestTheCheckTiesEveryItemFromATopicsSources(t *testing.T) {
-	treasury := interest.Topic{Name: "The economy", Depth: interest.Passing, Sources: []string{"govuk-hm-treasury"}}
+	treasury := interest.Topic{Name: "The economy", Sources: []string{"govuk-hm-treasury"}}
 
 	if !treasury.Ties(interest.Item{SourceID: "govuk-hm-treasury", Title: "Anything at all"}) {
 		t.Error("an Item from the Topic's Source is not tied")
 	}
 	if treasury.Ties(interest.Item{SourceID: "govuk-number-10", Title: "Anything at all"}) {
 		t.Error("an Item from another Source is tied")
+	}
+}
+
+// A Span touches a Topic by the Topic's terms alone: its Sources tie Items
+// for the Sunday read, but say nothing of what a Span is about.
+func TestASpanTouchesATopicByItsTermsAsWholeWordsOfTheTextAReaderSees(t *testing.T) {
+	reform := interest.Topic{Name: "Reform UK", Terms: []string{"Reform UK", "Farage"}}
+
+	cases := []struct {
+		name string
+		span string
+		want bool
+	}{
+		{"a term", "Nigel Farage, leader of Reform UK.", true},
+		{"a term in another case, split by punctuation", "Reform-UK's response, said Mr FARAGE.", true},
+		{"a term in markup", `Said <b>Farage</b>.`, true},
+		{"a term only in the markup", `See <a href="https://example.org/farage">the statement</a>.`, false},
+		{"a term with an entity decoded", "Nigel&#160;Farage spoke.", true},
+		{"part of a longer word", "Farageist politics.", false},
+		{"no term", "On reform of the NHS.", false},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if got := reform.Touches(c.span); got != c.want {
+				t.Errorf("Touches(%q) = %v, want %v", c.span, got, c.want)
+			}
+		})
 	}
 }

@@ -424,7 +424,7 @@ func (e *Editor) Reading() BatchAct {
 	return BatchAct{
 		Name: "reading",
 		Waiting: func(ctx context.Context) ([]Job, error) {
-			waiting, err := e.toRead(ctx)
+			waiting, err := e.Store.ItemsToRead(ctx)
 			if err != nil {
 				return nil, err
 			}
@@ -432,9 +432,8 @@ func (e *Editor) Reading() BatchAct {
 			for _, tr := range waiting {
 				req := readingRequest(tr)
 				jobs = append(jobs, Job{
-					Key:        itemKey(tr.Item),
-					Request:    req,
-					Precedents: precedentIDs(tr.Precedents),
+					Key:     itemKey(tr.Item),
+					Request: req,
 					Apply: func(ctx context.Context, res Response, now time.Time) error {
 						r, err := checkReading(tr, req, modelOf(e.ModelFor, req.Act), res)
 						if err != nil {

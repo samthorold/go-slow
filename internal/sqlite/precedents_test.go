@@ -35,7 +35,7 @@ func TestWrongOnARelationIsPrecedentWhileItStandsAndARelatingKeepsThePrecedentsI
 		t.Fatalf("give: %v %v", errs, err)
 	}
 
-	ps, err := s.StandingWrong(t.Context(), []string{"relation"})
+	ps, err := s.StandingWrongOnRelations(t.Context())
 	if err != nil || len(ps) != 1 {
 		t.Fatalf("standing wrong %+v, %v", ps, err)
 	}
@@ -47,9 +47,6 @@ func TestWrongOnARelationIsPrecedentWhileItStandsAndARelatingKeepsThePrecedentsI
 	}
 	if !slices.ContainsFunc(got.At.Entities, func(e editor.NamedEntity) bool { return e.Name == "Scotland" }) {
 		t.Errorf("its Span mentions %+v, want Scotland", got.At.Entities)
-	}
-	if ps, _ := s.StandingWrong(t.Context(), []string{"refers_to", "speaker"}); len(ps) != 0 {
-		t.Errorf("wrong on a relation is precedent for reading: %+v", ps)
 	}
 
 	r := editor.Relating{SourceID: "number-10", EntryID: "monday", ReadingID: mr.ID, At: given.Add(time.Hour), Judge: judge,
@@ -68,7 +65,7 @@ func TestWrongOnARelationIsPrecedentWhileItStandsAndARelatingKeepsThePrecedentsI
 	if _, err := pieces.Undo(t.Context(), p.ID, given.Add(2*time.Hour)); err != nil {
 		t.Fatal(err)
 	}
-	if ps, err := s.StandingWrong(t.Context(), []string{"relation"}); err != nil || len(ps) != 0 {
+	if ps, err := s.StandingWrongOnRelations(t.Context()); err != nil || len(ps) != 0 {
 		t.Errorf("undone wrong is precedent: %+v, %v", ps, err)
 	}
 }

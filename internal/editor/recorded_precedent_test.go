@@ -15,7 +15,7 @@ import (
 )
 
 // The recorded runs of precedent (system design: Feedback becomes
-// precedent, shown as cases): for reading, relating and the Briefing, a case
+// precedent, shown as cases): for relating and the Briefing, a case
 // recorded with one piece of hand-made Feedback standing, on the fixtures,
 // over the precedents' own frozen copies of the readings and relatings
 // (testdata/recorded/precedent/inputs/{reading,relating}, copied from the
@@ -23,16 +23,16 @@ import (
 // on and fails unless the act is shown it, and asserts a property the
 // precedent calls for: that the judge doesn't repeat what the Owner said
 // was wrong or unwanted, on a case like it, and still judges what is sound.
-// Each is sampled five times and kept under
-// testdata/recorded/precedent/<case>/:
+// Reading is shown no precedents: its case, the railways release read again
+// with wrong on its "the place they call home" refers to Derby, was refuted
+// (the reference recurred in 2 of 5 samples). Each is sampled five times and
+// kept under testdata/recorded/precedent/<case>/:
 //
-//	go test -count=1 ./internal/editor -run TestRecordedPrecedentReading -record   (READING_MODEL set)
 //	go test -count=1 ./internal/editor -run TestRecordedPrecedentRelating -record  (RELATING_MODEL set)
 //	go test -count=1 ./internal/editor -run TestRecordedPrecedentBriefing -record  (BRIEFING_MODEL set)
 //
 // with GOSLOW_ANTHROPIC_API_KEY set too.
 var (
-	readingPrecedentCommand  = rerecordCmd{"TestRecordedPrecedentReading", "READING_MODEL"}
 	relatingPrecedentCommand = rerecordCmd{"TestRecordedPrecedentRelating", "RELATING_MODEL"}
 	briefingPrecedentCommand = rerecordCmd{"TestRecordedPrecedentBriefing", "BRIEFING_MODEL"}
 	// precedentRule is the daily acts' own.
@@ -41,10 +41,8 @@ var (
 
 // The fixtures the precedents' cases are on.
 const (
-	railways        = "great-british-railways-takes-shape-as-hq-and-apprenticeship-scheme-confirmed"
 	commons         = "pm-statement-to-the-house-of-commons-12-october-2026"
 	countyTyrone    = "appointment-of-lord-lieutenant-of-county-tyrone-15-october-2026"
-	homeWords       = "the place they call home"
 	seriousAbout    = "Ukraine has repeatedly demonstrated it is serious about peace"
 	threeWeeks      = "In the three weeks since that meeting"
 	rejecting       = "Rejecting aggression wherever we see it"
@@ -67,75 +65,6 @@ func fixtureNamed(t *testing.T, name string) (namedItem, int) {
 		t.Fatalf("no fixture %s", name)
 	}
 	return fs[i], i
-}
-
-// The case for reading: the Owner said the railways release's "the place
-// they call home" does not refer to Derby (the release never says where the
-// young people's home is), and the release is read again, as re-judging
-// reads it: the case most like the one the Feedback was given on.
-func TestRecordedPrecedentReading(t *testing.T) {
-	t.Parallel()
-	ctx := t.Context()
-	root := ownDirectory(t, "precedent")
-	f, _ := fixtureNamed(t, railways)
-	it := f.item
-	store, topics := newRecord(t, nil)
-	if err := (chain{reading: replayed(precedentInputs(root, "reading"))}).run(ctx, store, topics, []namedItem{f}); err != nil {
-		t.Fatal(err)
-	}
-	r, _, err := store.NewestReading(ctx, it.SourceID, it.EntryID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	i := slices.IndexFunc(r.RefersTo, func(ref editor.RefersTo) bool {
-		return cut.Words(it.Content, ref.From.Span) == homeWords && strings.Contains(cut.Words(it.Content, ref.To.Span), "Derby")
-	})
-	if i < 0 {
-		t.Fatalf("the frozen reading no longer refers %q to Derby, the case the Feedback is given on", homeWords)
-	}
-	wrong := giveWrong(t, store, r.RefersTo[i].ID, saturday.Add(time.Hour))
-	standing, err := store.StandingWrong(ctx, []string{"refers_to", "speaker"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	c, _, _, err := store.NewestCut(ctx, it.SourceID, it.EntryID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	tr := editor.ToRead{Item: it, Cut: c, Precedents: editor.ReadingPrecedents(standing, it)}
-	if got := ids(tr.Precedents); !slices.Equal(got, []int64{wrong.ID}) {
-		t.Fatalf("reading is shown the precedents %v, want the case's wrong, %d", got, wrong.ID)
-	}
-
-	for _, err := range sampled(t, filepath.Join(root, "precedent"), "reading-railways", precedentRule, readingPrecedentCommand,
-		func(m *sampleModel) sampleResult {
-			var r editor.Reading
-			passed, err := runSample(m, func(model editor.Model) (bool, error) {
-				var err error
-				r, err = editor.Read(ctx, model, m.model, tr)
-				return err == nil, nil
-			})
-			if err != nil {
-				t.Fatal(err)
-			}
-			if !passed {
-				return sampleResult{}
-			}
-			p := properties{}
-			again := p.property("a reference the Owner said was wrong is not judged again")
-			for _, ref := range r.RefersTo {
-				if strings.Contains(cut.Words(it.Content, ref.From.Span), "place they call home") &&
-					strings.Contains(cut.Words(it.Content, ref.To.Span), "Derby") {
-					again("%q refers to %q", cut.Words(it.Content, ref.From.Span), cut.Words(it.Content, ref.To.Span))
-				}
-			}
-			for _, ref := range references[railways] {
-				referenceFollowed(p, readingOf{it: it, r: r, spans: c.Spans}, ref)
-			}
-			return sampleResult{passed: true, held: p}
-		}) {
-		t.Error(err)
-	}
 }
 
 // The case for relating: the Owner said the Commons statement's "In the
@@ -202,7 +131,7 @@ func TestRecordedPrecedentRelating(t *testing.T) {
 		t.Fatalf("the frozen relatings no longer judge %q the same as %q, the case the Feedback is given on", threeWeeks, seriousAbout)
 	}
 	wrong := giveWrong(t, store, wrongOn, saturday.Add(time.Hour))
-	standing, err := store.StandingWrong(ctx, []string{"relation"})
+	standing, err := store.StandingWrongOnRelations(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -6,7 +6,6 @@ import "context"
 // which no request shows past its cap.
 var (
 	BriefingPrecedents = briefingPrecedents
-	ReadingPrecedents  = readingPrecedents
 	RelatingPrecedents = relatingPrecedents
 	PrecedentsShown    = precedentsShown
 )

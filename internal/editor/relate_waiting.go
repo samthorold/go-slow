@@ -190,7 +190,7 @@ func (e *Editor) toRelate(ctx context.Context) ([]ToRelate, error) {
 		}
 		if tr.hasCandidates() {
 			if !fetched {
-				if wrong, err = e.Store.StandingWrong(ctx, relatingJudged); err != nil {
+				if wrong, err = e.Store.StandingWrongOnRelations(ctx); err != nil {
 					return nil, err
 				}
 				fetched = true

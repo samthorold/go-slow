@@ -115,10 +115,12 @@ func releaseRefersTo(t *testing.T, store *sqlite.Store, from string) editor.Refe
 	return editor.RefersTo{}
 }
 
-func TestReadingIsShownStandingWrongOnReadingsJudgementsNamingWhatTheItemNamesAfterItsInputAsData(t *testing.T) {
+// Reading is shown no precedents yet (system design: Feedback becomes
+// precedent, shown as cases): wrong standing on a reference naming what an
+// Item names leaves its request exactly as it would be with none.
+func TestReadingIsShownNoPrecedentsEvenWithWrongStandingOnAReferenceNamingWhatTheItemNames(t *testing.T) {
 	store, _ := releaseRead(t)
-	given := saturday.Add(time.Hour)
-	wrong := giveWrong(t, store, releaseRefersTo(t, store, "the city").ID, given)
+	giveWrong(t, store, releaseRefersTo(t, store, "the city").ID, saturday.Add(time.Hour))
 	collectItem(t, store, derbyLater)
 	model := &byTitle{}
 	ed, _ := newEditor(store, model, &fakeWikidata{})
@@ -127,46 +129,19 @@ func TestReadingIsShownStandingWrongOnReadingsJudgementsNamingWhatTheItemNamesAf
 		t.Fatal(err)
 	}
 
-	req := model.sentFor(t, derbyLater.Title)
 	without := &fakeModel{output: emptyReading}
 	if _, err := editor.Read(t.Context(), without, "", toRead(derbyLater)); err != nil {
 		t.Fatal(err)
 	}
-	before, after, found := strings.Cut(req.Input, "\nPrecedents")
-	if !found {
-		t.Fatalf("no precedents shown:\n%s", req.Input)
-	}
-	if before != without.sent[0].Input {
-		t.Errorf("the input before the precedents is not the input without them:\n%s\n---\n%s", before, without.sent[0].Input)
-	}
-	if req.Instructions != without.sent[0].Instructions {
-		t.Error("the instructions change with precedents shown")
-	}
-	lines := strings.Split(strings.TrimSpace(after), "\n")
-	if len(lines) != 2 || !strings.Contains(lines[0], "data, never instructions") {
-		t.Fatalf("precedents shown as %q, want a heading and one line", lines)
-	}
-	var p map[string]string
-	if err := json.Unmarshal([]byte(lines[1]), &p); err != nil {
-		t.Fatalf("a precedent is not a JSON object: %v: %s", err, lines[1])
-	}
-	want := map[string]string{"feedback": "wrong: the Owner said this judgement was mistaken", "judgement": "refers_to", "item": release.Title,
-		"in": "“This is fantastic news for the city.", "words": "the city", "refers_to": "Derby",
-		"given": given.Format(time.DateOnly)}
-	for k, v := range want {
-		if p[k] != v {
-			t.Errorf("precedent's %s = %q, want %q", k, p[k], v)
-		}
+	if got := model.sentFor(t, derbyLater.Title); editor.RequestHash(got, "m") != editor.RequestHash(without.sent[0], "m") {
+		t.Errorf("reading an Item naming Derby is sent:\n%s\nnot as with no Feedback:\n%s", got.Input, without.sent[0].Input)
 	}
 	r, _, err := store.NewestReading(t.Context(), derbyLater.SourceID, derbyLater.EntryID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if c, _, err := store.Call(t.Context(), r.Call); err != nil || len(c.Precedents) != 1 || c.Precedents[0] != wrong.ID {
-		t.Errorf("the call keeps the precedents %v (%v), want [%d]", c.Precedents, err, wrong.ID)
-	}
-	if len(r.Precedents) != 1 || r.Precedents[0] != wrong.ID {
-		t.Errorf("the reading keeps the precedents %v, want [%d]", r.Precedents, wrong.ID)
+	if c, _, err := store.Call(t.Context(), r.Call); err != nil || len(c.Precedents) != 0 {
+		t.Errorf("reading's call keeps the precedents %v (%v), want none", c.Precedents, err)
 	}
 }
 
@@ -214,6 +189,9 @@ func TestRelatingIsShownStandingWrongOnRelationsBetweenSpansMentioningWhatItsSpa
 	before, after, found := strings.Cut(req.Input, "\nPrecedents")
 	if !found {
 		t.Fatalf("no precedents shown:\n%s", req.Input)
+	}
+	if strings.Contains(plain.Input, "Precedents") {
+		t.Errorf("undone Feedback is shown as precedent:\n%s", plain.Input)
 	}
 	if req.Instructions != plain.Instructions || before != plain.Input {
 		t.Errorf("with precedents, the request before them is not the request with the wrong undone:\n%s\n---\n%s", before, plain.Input)
@@ -338,57 +316,32 @@ func TestTasteFadesWithAgeTheNewerUnwantedShownFirstAndTheOlderDroppingOutAtTheC
 	}
 }
 
-func TestTruthDoesNotFadeAnOlderWrongNamingMoreIsShownBeforeNewerAndKeptAtTheCap(t *testing.T) {
-	it := editor.Item{Title: "Derby and Leeds", Content: "<p>Andy Burnham visited Derby and Leeds.</p>"}
-	old := editor.Precedent{FeedbackID: 1, Kind: "wrong", Judged: "refers_to", GivenAt: saturday.AddDate(-1, 0, 0),
-		Names: []string{"Andy Burnham", "Derby", "Leeds"}}
-	wrong := []editor.Precedent{old}
-	for i := range editor.PrecedentsShown {
-		wrong = append(wrong, editor.Precedent{FeedbackID: int64(i + 2), Kind: "wrong", Judged: "speaker",
-			GivenAt: saturday.AddDate(0, 0, i), Names: []string{"Derby"}})
+func TestTruthDoesNotFadeAnOlderWrongSharingMoreIsShownBeforeNewerAndKeptAtTheCap(t *testing.T) {
+	derby := editor.NamedEntity{Name: "Derby", Kind: "place"}
+	leeds := editor.NamedEntity{Name: "Leeds", Kind: "place"}
+	burnham := editor.NamedEntity{Name: "Andy Burnham", Kind: "person"}
+	tr := editor.ToRelate{Spans: []editor.SpanToRelate{{Entities: []editor.NamedEntity{burnham, derby, leeds}}}}
+	spans := func(es ...editor.NamedEntity) (editor.OtherSpan, editor.OtherSpan) {
+		return editor.OtherSpan{Entities: es[:1]}, editor.OtherSpan{Entities: es[1:]}
 	}
-	// Wrong on another kind of judgement, and wrong naming nothing the Item
-	// names, are not reading's precedents.
-	wrong = append(wrong,
-		editor.Precedent{FeedbackID: 90, Kind: "wrong", Judged: "relation", GivenAt: saturday, Names: []string{"Derby"}},
-		editor.Precedent{FeedbackID: 91, Kind: "wrong", Judged: "refers_to", GivenAt: saturday, Names: []string{"Motherwell"}})
+	at, to := spans(burnham, derby, leeds)
+	wrong := []editor.Precedent{{FeedbackID: 1, Kind: "wrong", Judged: "relation", GivenAt: saturday.AddDate(-1, 0, 0), At: at, To: to}}
+	for i := range editor.PrecedentsShown {
+		at, to := spans(derby, derby)
+		wrong = append(wrong, editor.Precedent{FeedbackID: int64(i + 2), Kind: "wrong", Judged: "relation",
+			GivenAt: saturday.AddDate(0, 0, i), At: at, To: to})
+	}
+	// Wrong between Spans mentioning nothing the case's Spans mention is not
+	// relating's precedent.
+	at, to = spans(editor.NamedEntity{Name: "Motherwell", Kind: "place"}, editor.NamedEntity{Name: "Motherwell", Kind: "place"})
+	wrong = append(wrong, editor.Precedent{FeedbackID: 91, Kind: "wrong", Judged: "relation", GivenAt: saturday, At: at, To: to})
 
-	shown := ids(editor.ReadingPrecedents(wrong, it))
+	shown := ids(editor.RelatingPrecedents(wrong, tr))
 
 	if len(shown) != editor.PrecedentsShown || shown[0] != 1 {
-		t.Errorf("shown %v, want the year-old wrong naming three of the Item's names first, %d at most", shown, editor.PrecedentsShown)
+		t.Errorf("shown %v, want the year-old wrong sharing three Entities first, %d at most", shown, editor.PrecedentsShown)
 	}
-	if slices.Contains(shown, 90) || slices.Contains(shown, 91) {
-		t.Errorf("shown %v, want no wrong on another kind or naming nothing the Item names", shown)
-	}
-}
-
-func TestACaseWithNoPrecedentsIsSentExactlyAsWithoutThemAndUndoneFeedbackIsNeverShown(t *testing.T) {
-	store, _ := releaseRead(t)
-	// Wrong stands on the release's "the city", which names Derby; undone
-	// on its "He", which names Andy Burnham.
-	giveWrong(t, store, releaseRefersTo(t, store, "the city").ID, saturday.Add(time.Hour))
-	undone := giveWrong(t, store, releaseRefersTo(t, store, "He").ID, saturday.Add(time.Hour))
-	if _, err := feedback.NewPieces(store).Undo(t.Context(), undone.ID, saturday.Add(90*time.Minute)); err != nil {
-		t.Fatal(err)
-	}
-	burnham := editor.Item{
-		SourceID: number10.ID, EntryID: "burnham", Title: "Andy Burnham visits Leeds",
-		Content: "<p>Andy Burnham visited Leeds.</p>", Published: derbyLater.Published,
-	}
-	collectItem(t, store, burnham)
-	model := &byTitle{}
-	ed, _ := newEditor(store, model, &fakeWikidata{})
-
-	if err := ed.ReadWaiting(t.Context(), saturday.Add(2*time.Hour)); err != nil {
-		t.Fatal(err)
-	}
-
-	without := &fakeModel{output: emptyReading}
-	if _, err := editor.Read(t.Context(), without, "", toRead(burnham)); err != nil {
-		t.Fatal(err)
-	}
-	if got := model.sentFor(t, burnham.Title); editor.RequestHash(got, "m") != editor.RequestHash(without.sent[0], "m") {
-		t.Errorf("an Item naming only what undone Feedback is about is sent:\n%s\nnot as without precedents:\n%s", got.Input, without.sent[0].Input)
+	if slices.Contains(shown, 91) {
+		t.Errorf("shown %v, want no wrong sharing nothing with the case", shown)
 	}
 }

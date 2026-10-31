@@ -1,5 +1,5 @@
 -- The Feedback a judgement's judge was shown as precedent, kept with the
--- judgement (a reading, a relating, a Briefing), in the order shown (system
+-- judgement (a relating, a Briefing), in the order shown (system
 -- design: Feedback becomes precedent, shown as cases), so why a judge judged
 -- as it did can be read later from what it was shown. Part of the
 -- judgement's event: never rewritten or removed.

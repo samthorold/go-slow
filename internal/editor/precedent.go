@@ -10,32 +10,24 @@ import (
 
 // Precedent is a piece of the Owner's standing Feedback, shown to a judge as
 // a case when it judges one like it (system design: Feedback becomes
-// precedent, shown as cases).
+// precedent, shown as cases). Relating and the Briefing are shown
+// precedents; reading is shown none yet.
 type Precedent struct {
 	// FeedbackID is the piece's event in the Record.
 	FeedbackID int64
 	// Kind is what the Owner said: wrong, unwanted or missed.
 	Kind string
-	// Judged is the kind of judgement wrong was given on (refers_to,
-	// speaker, relation); empty for unwanted and missed, which land on a
-	// Span.
+	// Judged is the kind of judgement wrong was given on (relation); empty
+	// for unwanted and missed, which land on a Span.
 	Judged  string
 	GivenAt time.Time
-	// At is the Span it lands on: a refers to's from, the Span a speaker
-	// speaks, a relation's from, or the Span told unwanted or missed. To is
-	// the other end of a judgement: what a refers to refers to, the stretch
-	// naming the speaker, the Span a relation is to.
+	// At is the Span it lands on: a relation's from, or the Span told
+	// unwanted or missed. To is a relation's other end, the Span it is to.
 	At, To OtherSpan
-	// Within are the words of the Span of its Item's Cut that At lies in.
-	Within string
 	// Relation is the kind of relation wrong was given on.
 	Relation string
 	// Day is the day of the Briefing unwanted was given on.
 	Day string
-	// Names are the names its Item's reading gives in the Spans of its Cut
-	// that At and To lie in, as the Item gives them: what reading finds it
-	// by.
-	Names []string
 }
 
 // precedentsShown is the most precedents a judge is shown in one call: a
@@ -84,44 +76,6 @@ func withPrecedents(input string, ps []Precedent, line func(Precedent) any) stri
 		b.WriteString("\n")
 	}
 	return b.String()
-}
-
-// readingJudged are the kinds of reading's judgements a model makes, which
-// wrong on is precedent for reading.
-var readingJudged = []string{"refers_to", "speaker"}
-
-// readingPrecedents are the precedents reading an Item is shown, of the
-// standing wrong given: on reading's own kinds of judgement, naming a name
-// the Item's text has, those naming the most first, then the newest; a few
-// at most. Wrong holds at any age, so age orders only among equals.
-func readingPrecedents(wrong []Precedent, it Item) []Precedent {
-	type scored struct {
-		p     Precedent
-		names int
-	}
-	var ranked []scored
-	for _, p := range wrong {
-		if p.Kind != "wrong" || !slices.Contains(readingJudged, p.Judged) {
-			continue
-		}
-		n := 0
-		for _, name := range p.Names {
-			if strings.Contains(it.Content, name) || strings.Contains(it.Title, name) {
-				n++
-			}
-		}
-		if n > 0 {
-			ranked = append(ranked, scored{p, n})
-		}
-	}
-	slices.SortStableFunc(ranked, func(a, b scored) int {
-		return cmp.Or(cmp.Compare(b.names, a.names), b.p.GivenAt.Compare(a.p.GivenAt))
-	})
-	var out []Precedent
-	for _, r := range ranked[:min(len(ranked), precedentsShown)] {
-		out = append(out, r.p)
-	}
-	return out
 }
 
 // relatingJudged are the kinds of relating's judgements, which wrong on is
@@ -220,23 +174,3 @@ func briefingLine(p Precedent) any {
 	}{said[p.Kind], s.Item, s.Published, s.Words, p.Day, p.GivenAt.UTC().Format(time.DateOnly)}
 }
 
-// readingLine is a precedent as reading is shown it.
-func readingLine(p Precedent) any {
-	l := struct {
-		Feedback  string `json:"feedback"`
-		Judgement string `json:"judgement"`
-		Item      string `json:"item"`
-		In        string `json:"in"`
-		Words     string `json:"words,omitempty"`
-		RefersTo  string `json:"refers_to,omitempty"`
-		Speaker   string `json:"speaker,omitempty"`
-		Given     string `json:"given"`
-	}{Feedback: said[p.Kind], Judgement: p.Judged, Item: p.At.Item.Title, In: p.Within, Given: p.GivenAt.UTC().Format(time.DateOnly)}
-	switch p.Judged {
-	case "refers_to":
-		l.Words, l.RefersTo = p.At.Words, p.To.Words
-	case "speaker":
-		l.Speaker = p.To.Words
-	}
-	return l
-}

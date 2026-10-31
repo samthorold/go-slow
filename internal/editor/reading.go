@@ -24,9 +24,6 @@ const ReadingVersion = 1
 type ToRead struct {
 	Item Item
 	Cut  cut.Cut
-	// Precedents are the standing Feedback it is shown as precedent, after
-	// its Spans; none for a case with none.
-	Precedents []Precedent
 }
 
 // Address is a Span of an Item: where it starts and ends in the Item's text
@@ -91,9 +88,6 @@ type Reading struct {
 	Speakers []Speaker
 	// Rejected are the Spans judged not useful for editorial work.
 	Rejected []Address
-	// Precedents are the ids of the Feedback it was shown as precedent, in
-	// the order shown, kept with it.
-	Precedents []int64
 	// Usage is what the call cost, for the logs; not kept with the reading.
 	Usage Usage
 	// Call is the kept call that made it, as a view finds it by its Judge's
@@ -207,8 +201,7 @@ func readingRequest(tr ToRead) Request {
 	for i, s := range tr.Cut.Spans {
 		fmt.Fprintf(&b, "S%d: %s\n", i+1, cut.Words(it.Content, s))
 	}
-	return Request{Act: "reading", Instructions: readingInstructions, Input: withPrecedents(b.String(), tr.Precedents, readingLine),
-		Schema: readingSchema}
+	return Request{Act: "reading", Instructions: readingInstructions, Input: b.String(), Schema: readingSchema}
 }
 
 // checkReading decodes the model's answer to req, asked of the model named
@@ -229,7 +222,7 @@ func checkReading(tr ToRead, req Request, asked string, res Response) (Reading, 
 		return refuse("output does not match the schema: a kind of judgement is missing")
 	}
 	r := Reading{
-		SourceID: it.SourceID, EntryID: it.EntryID, CutID: tr.Cut.ID, Usage: res.Usage, Precedents: precedentIDs(tr.Precedents),
+		SourceID: it.SourceID, EntryID: it.EntryID, CutID: tr.Cut.ID, Usage: res.Usage,
 		Judge: Judge{Act: req.Act, Version: ReadingVersion, Model: res.Model, RequestHash: RequestHash(req, asked)},
 	}
 	// address is the Address the model's citation stands for: the Span of

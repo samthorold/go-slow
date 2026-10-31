@@ -4,11 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"slices"
-	"strings"
 	"time"
 
-	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
 )
 
@@ -57,55 +54,34 @@ func (s *Store) shownWith(ctx context.Context, id int64) ([]int64, error) {
 	return out, rows.Err()
 }
 
-// StandingWrong is the wrong standing on judgements of the kinds judged,
-// newest first, each with the Spans at its two ends as their Items' newest
-// readings read them; for reading's kinds, with the Span of the Cut its
-// first end lies in and the names its reading gives in the Spans its ends
-// lie in.
-func (s *Store) StandingWrong(ctx context.Context, judged []string) ([]editor.Precedent, error) {
-	if len(judged) == 0 {
-		return nil, nil
-	}
+
+// StandingWrongOnRelations is the wrong standing on relations, newest
+// first, each with the Spans at its two ends as their Items' newest readings
+// read them.
+func (s *Store) StandingWrongOnRelations(ctx context.Context) ([]editor.Precedent, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT f.event_id, je.kind, e.at,
-			coalesce(rr.source_id, sr.source_id, rel.from_source_id),
-			coalesce(rr.entry_id, sr.entry_id, rel.from_entry_id),
-			coalesce(rt.from_start, sk.span_start, rel.from_start),
-			coalesce(rt.from_end, sk.span_end, rel.from_end),
-			coalesce(rr.source_id, sr.source_id, rel.to_source_id),
-			coalesce(rr.entry_id, sr.entry_id, rel.to_entry_id),
-			coalesce(rt.to_start, sk.speaker_start, rel.to_start),
-			coalesce(rt.to_end, sk.speaker_end, rel.to_end),
-			coalesce(rel.kind, ''), coalesce(rt.reading_id, sk.reading_id, 0)
+		SELECT f.event_id, e.at, rel.from_source_id, rel.from_entry_id, rel.from_start, rel.from_end,
+			rel.to_source_id, rel.to_entry_id, rel.to_start, rel.to_end, rel.kind
 		FROM feedback_given f
 			JOIN events e ON e.id = f.event_id
-			JOIN events je ON je.id = f.judgement_id
-			LEFT JOIN refers_to rt ON rt.event_id = f.judgement_id
-			LEFT JOIN readings rr ON rr.event_id = rt.reading_id
-			LEFT JOIN speakers sk ON sk.event_id = f.judgement_id
-			LEFT JOIN readings sr ON sr.event_id = sk.reading_id
-			LEFT JOIN relations rel ON rel.event_id = f.judgement_id
-		WHERE f.kind = 'wrong' AND je.kind IN (?`+strings.Repeat(", ?", len(judged)-1)+`)
-			AND (rt.event_id IS NOT NULL OR sk.event_id IS NOT NULL OR rel.event_id IS NOT NULL)
-			AND `+standing("f.event_id")+`
-		ORDER BY f.event_id DESC`, anys(judged)...)
+			JOIN relations rel ON rel.event_id = f.judgement_id
+		WHERE f.kind = 'wrong' AND `+standing("f.event_id")+`
+		ORDER BY f.event_id DESC`)
 	type found struct {
-		p         editor.Precedent
-		at, to    editor.Address
-		readingID int64
+		p      editor.Precedent
+		at, to editor.Address
 	}
 	all, err := scanned(rows, err, func(rows *sql.Rows) (found, error) {
 		var f found
 		var at string
-		err := rows.Scan(&f.p.FeedbackID, &f.p.Judged, &at,
+		err := rows.Scan(&f.p.FeedbackID, &at,
 			&f.at.SourceID, &f.at.EntryID, &f.at.Span.Start, &f.at.Span.End,
-			&f.to.SourceID, &f.to.EntryID, &f.to.Span.Start, &f.to.Span.End,
-			&f.p.Relation, &f.readingID)
-		f.p.Kind, f.p.GivenAt = "wrong", parseTime(at)
+			&f.to.SourceID, &f.to.EntryID, &f.to.Span.Start, &f.to.Span.End, &f.p.Relation)
+		f.p.Kind, f.p.Judged, f.p.GivenAt = "wrong", "relation", parseTime(at)
 		return f, err
 	})
 	if err != nil {
-		return nil, fmt.Errorf("standing wrong: %w", err)
+		return nil, fmt.Errorf("standing wrong on relations: %w", err)
 	}
 	out := make([]editor.Precedent, 0, len(all))
 	for _, f := range all {
@@ -115,11 +91,6 @@ func (s *Store) StandingWrong(ctx context.Context, judged []string) ([]editor.Pr
 		}
 		if p.To, err = s.SpanAt(ctx, f.to); err != nil {
 			return nil, err
-		}
-		if f.readingID != 0 {
-			if p.Within, p.Names, err = s.namedAround(ctx, f.readingID, p.At.Item.Content, f.at, f.to); err != nil {
-				return nil, err
-			}
 		}
 		out = append(out, p)
 	}
@@ -162,37 +133,6 @@ func (s *Store) StandingTaste(ctx context.Context) ([]editor.Precedent, error) {
 	return out, nil
 }
 
-// namedAround is, by the reading id, the words of the Span of its Cut that
-// at lies in, and the names it gives in the Spans of its Cut that at and to
-// lie in, each once, as the Item's text gives them.
-func (s *Store) namedAround(ctx context.Context, id int64, text string, at, to editor.Address) (string, []string, error) {
-	r, err := s.readingByID(ctx, id)
-	if err != nil {
-		return "", nil, err
-	}
-	spans, err := s.cutSpans(ctx, r.CutID)
-	if err != nil {
-		return "", nil, err
-	}
-	around := func(a editor.Address) cut.Span {
-		for _, sp := range spans {
-			if sp.Start <= a.Span.Start && a.Span.End <= sp.End {
-				return sp
-			}
-		}
-		return a.Span
-	}
-	within := []cut.Span{around(at), around(to)}
-	var names []string
-	for _, n := range r.Names {
-		in := slices.ContainsFunc(within, func(sp cut.Span) bool { return sp.Start <= n.At.Span.Start && n.At.Span.End <= sp.End })
-		if w := cut.Words(text, n.At.Span); in && !slices.Contains(names, w) {
-			names = append(names, w)
-		}
-	}
-	return cut.Words(text, within[0]), names, nil
-}
-
 // scanned is every row of a query's result (rows, or the query's error err)
 // as scan reads it, the rows closed before it returns, so what the rows were
 // read for can query again.
@@ -210,13 +150,4 @@ func scanned[T any](rows *sql.Rows, err error, scan func(*sql.Rows) (T, error)) 
 		out = append(out, v)
 	}
 	return out, rows.Err()
-}
-
-// anys is ss as arguments to a query.
-func anys(ss []string) []any {
-	out := make([]any, len(ss))
-	for i, s := range ss {
-		out[i] = s
-	}
-	return out
 }

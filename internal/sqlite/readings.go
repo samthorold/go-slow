@@ -116,9 +116,6 @@ func (s *Store) KeepReading(ctx context.Context, r editor.Reading) error {
 		id, r.SourceID, r.EntryID, r.CutID, r.Judge.Act, r.Judge.Version, r.Judge.Model, r.Judge.RequestHash); err != nil {
 		return fmt.Errorf("keep reading of %s: %w", r.EntryID, err)
 	}
-	if err := keepShown(ctx, tx, id, r.Precedents); err != nil {
-		return fmt.Errorf("keep reading of %s: %w", r.EntryID, err)
-	}
 	if r.Candidate != 0 {
 		if _, err := tx.ExecContext(ctx, `INSERT INTO candidate_readings (reading_id, candidate_id) VALUES (?, ?)`,
 			id, r.Candidate); err != nil {
@@ -255,9 +252,6 @@ func (s *Store) readingByID(ctx context.Context, id int64) (editor.Reading, erro
 	}
 	sourceID, entryID := r.SourceID, r.EntryID
 	r.At = parseTime(at)
-	if r.Precedents, err = s.shownWith(ctx, r.ID); err != nil {
-		return editor.Reading{}, err
-	}
 	addr := func(start, end int) editor.Address {
 		return editor.Address{SourceID: sourceID, EntryID: entryID, Span: cut.Span{Start: start, End: end}}
 	}

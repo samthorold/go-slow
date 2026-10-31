@@ -305,6 +305,9 @@ func (s *Store) KeepRelating(ctx context.Context, r editor.Relating) error {
 		id, r.SourceID, r.EntryID, r.ReadingID, r.Judge.Act, r.Judge.Version, r.Judge.Model, r.Judge.RequestHash); err != nil {
 		return fmt.Errorf("keep relating of %s: %w", r.EntryID, err)
 	}
+	if err := keepShown(ctx, tx, id, r.Precedents); err != nil {
+		return fmt.Errorf("keep relating of %s: %w", r.EntryID, err)
+	}
 	for _, rel := range r.Relations {
 		eid, err := event("relation", relationShape)
 		if err != nil {

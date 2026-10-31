@@ -52,6 +52,9 @@ type Briefing struct {
 	Judge      Judge
 	Statements []Statement
 	Gathered   []Gathering
+	// Precedents are the ids of the Feedback it was shown as precedent, in
+	// the order shown, kept with it.
+	Precedents []int64
 	// Usage is what the call cost, for the logs; not kept with it.
 	Usage Usage
 	// Call is the kept call that wrote it, as a view finds it; zero if none.
@@ -127,6 +130,9 @@ type BriefingStore interface {
 	KeepBriefing(ctx context.Context, b Briefing) error
 	// SaveBriefingFailure keeps a failure to write a day's Briefing.
 	SaveBriefingFailure(ctx context.Context, f BriefingFailure) error
+	// StandingTaste is the unwanted and missed standing, each with the Span
+	// it lands on: what the Briefing is shown as precedent.
+	StandingTaste(ctx context.Context) ([]Precedent, error)
 	CallKeeper
 }
 
@@ -154,7 +160,11 @@ func (e *Editor) Brief(ctx context.Context, now time.Time) error {
 	if err != nil {
 		return err
 	}
-	b, call, err := writeBriefing(ctx, e.BriefingModel, modelOf(e.ModelFor, briefingAct), now, items)
+	taste, err := e.Briefings.StandingTaste(ctx)
+	if err != nil {
+		return err
+	}
+	b, call, err := writeBriefing(ctx, e.BriefingModel, modelOf(e.ModelFor, briefingAct), now, items, briefingPrecedents(taste))
 	if err != nil {
 		day := now.Format(time.DateOnly)
 		e.Log.ErrorContext(ctx, "writing the Briefing failed", "day", day, "error", err)
@@ -314,19 +324,19 @@ func (s briefingShown) refs() (today, shown []string) {
 
 // WriteBriefing is the act of writing the Briefing for the day that holds
 // day, in day's location, on the model m, asked for as the model named
-// asked, from the Items with Spans to tell. With none, the Briefing is
-// written empty, and no model is called. A result that fails the act's
-// checks, such as a statement that cites no Span, is ErrFailedChecks, and
-// none of it is returned.
-func WriteBriefing(ctx context.Context, m Model, asked string, day time.Time, items []ItemToTell) (Briefing, error) {
-	b, _, err := writeBriefing(ctx, m, asked, day, items)
+// asked, from the Items with Spans to tell, shown the precedents after them.
+// With none, the Briefing is written empty, and no model is called. A
+// result that fails the act's checks, such as a statement that cites no
+// Span, is ErrFailedChecks, and none of it is returned.
+func WriteBriefing(ctx context.Context, m Model, asked string, day time.Time, items []ItemToTell, precedents ...Precedent) (Briefing, error) {
+	b, _, err := writeBriefing(ctx, m, asked, day, items, precedents)
 	return b, err
 }
 
 // writeBriefing is WriteBriefing with its call, keyed by the day and ended
 // as it came out. A Briefing written empty has no call; any other has one,
 // whether it was written or failed.
-func writeBriefing(ctx context.Context, m Model, asked string, day time.Time, items []ItemToTell) (Briefing, *Call, error) {
+func writeBriefing(ctx context.Context, m Model, asked string, day time.Time, items []ItemToTell, ps []Precedent) (Briefing, *Call, error) {
 	b := Briefing{Day: day.Format(time.DateOnly), Judge: Judge{Act: briefingAct, Version: BriefingVersion}}
 	s := shownToTell(items)
 	if len(s.today) == 0 {
@@ -336,12 +346,12 @@ func writeBriefing(ctx context.Context, m Model, asked string, day time.Time, it
 	req := Request{
 		Act:          briefingAct,
 		Instructions: briefingInstructions,
-		Input:        briefingInput(day, items, s),
+		Input:        withPrecedents(briefingInput(day, items, s), ps, briefingLine),
 		Schema:       briefingSchema(today, shown),
 	}
-	call, err := callModel(ctx, m, asked, b.Day, "writing the Briefing for "+b.Day, req, nil, day,
+	call, err := callModel(ctx, m, asked, b.Day, "writing the Briefing for "+b.Day, req, precedentIDs(ps), day,
 		func(res Response) (err error) {
-			b.Usage = res.Usage
+			b.Usage, b.Precedents = res.Usage, precedentIDs(ps)
 			b.Judge.Model, b.Judge.RequestHash = res.Model, RequestHash(req, asked)
 			b, err = checkBriefing(b, s, res)
 			return err

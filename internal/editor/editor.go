@@ -29,6 +29,10 @@ type Store interface {
 	// KeepRelating keeps a relating, each of its relations as its own event
 	// with the relating's Judge, all at once.
 	KeepRelating(ctx context.Context, r Relating) error
+	// StandingWrongOnRelations is the wrong standing on relations, each with
+	// the Spans at its two ends, newest first: what relating is shown as
+	// precedent.
+	StandingWrongOnRelations(ctx context.Context) ([]Precedent, error)
 	CallKeeper
 }
 

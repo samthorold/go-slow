@@ -190,6 +190,24 @@ func failThrice(t *testing.T, store *sqlite.Store) {
 	}
 }
 
+func TestACallsPageShowsThePrecedentsItsRequestShowed(t *testing.T) {
+	store := openStore(t)
+	seed(t, store, saturday.AddDate(0, 0, -7), item("speech", "PM speech in Scotland", saturday.Add(-2*time.Hour)))
+	req := editor.Request{Act: "reading", Instructions: "Read.", Input: "S1: Scotland.", Schema: map[string]any{}}
+	if err := store.KeepCall(t.Context(), editor.Call{Act: "reading", Key: number10.ID + "\nspeech", At: saturday, Model: "m",
+		Request: req, RequestHash: editor.RequestHash(req, "m"), Precedents: []int64{9, 7}, Outcome: editor.Applied,
+		Response: &editor.Response{Output: json.RawMessage(`{}`), Model: "m"}}); err != nil {
+		t.Fatal(err)
+	}
+	app, _ := newAppWithLog(t, saturday, store)
+
+	res := get(t, app, "/calls/1")
+
+	if !strings.Contains(res.body, "Shown as precedent the Feedback 9, 7.") {
+		t.Errorf("the call's page does not show its precedents in order:\n%s", res.body)
+	}
+}
+
 func TestFailedWorkLinksToEveryAttemptAtIt(t *testing.T) {
 	store := openStore(t)
 	failThrice(t, store)

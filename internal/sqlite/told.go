@@ -137,6 +137,9 @@ func (s *Store) KeepBriefing(ctx context.Context, b editor.Briefing) error {
 		id, b.Day, b.Judge.Act, b.Judge.Version, b.Judge.Model, b.Judge.RequestHash); err != nil {
 		return fail("briefing", err)
 	}
+	if err := keepShown(ctx, tx, id, b.Precedents); err != nil {
+		return fail("precedents", err)
+	}
 	for i, st := range b.Statements {
 		sid, err := event("statement", statementShape)
 		if err != nil {
@@ -211,6 +214,9 @@ func (s *Store) Briefing(ctx context.Context, day string) (editor.Briefing, bool
 		return b, false, fmt.Errorf("briefing %s: %w", day, err)
 	}
 	if b.Gathered, err = s.gatherings(ctx, `g.briefing_id = ?`, b.ID); err != nil {
+		return b, false, fmt.Errorf("briefing %s: %w", day, err)
+	}
+	if b.Precedents, err = s.shownWith(ctx, b.ID); err != nil {
 		return b, false, fmt.Errorf("briefing %s: %w", day, err)
 	}
 	return b, true, nil

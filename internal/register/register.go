@@ -5,6 +5,7 @@
 package register
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/samthorold/go-slow/internal/feedback"
@@ -70,6 +71,10 @@ type Record struct {
 	// the Briefing runs daily and the windows are counted; empty if none
 	// ever was.
 	First string
+	// Switch is when the Record became events with the Span as its unit;
+	// zero if it always was. The parts that should fall compare only
+	// windows lying wholly after it.
+	Switch time.Time
 	// BriefingOpens are the days a Briefing was opened on.
 	BriefingOpens []string
 	// SundayReadOpens are the Sunday reads opened, and the days they were
@@ -79,10 +84,15 @@ type Record struct {
 	Briefings []string
 	// SundayReads are the days a Sunday read was written for.
 	SundayReads []string
-	// Feedback is every piece of Feedback, as given.
+	// Feedback is every piece of Feedback standing, as given: what the
+	// Owner undid is left out.
 	Feedback []Given
 	// Commits are the commits to go-slow.
 	Commits []Commit
+	// Judges are the live Judges, each as it began judging for its act, in
+	// the order they did: a Judge that judges again after another begins
+	// again.
+	Judges []Judge
 	// Untraced names each statement or Assessment that traces to nothing.
 	Untraced []string
 	// Sources are the Sources' names, and QuietSources those gone quiet
@@ -97,9 +107,12 @@ type Open struct {
 
 // Given is a piece of Feedback as the register counts it.
 type Given struct {
-	Kind  feedback.Kind
-	Level feedback.Level
-	At    time.Time
+	Kind feedback.Kind
+	// On is what it was given on, as its count is broken down: the act of
+	// the judgement it is about, for wrong and new to me, or the Source of
+	// the Span it is about, for unwanted and missed.
+	On string
+	At time.Time
 	// SundayRead is the day of the Sunday read it was given on, if it was.
 	SundayRead string
 }
@@ -112,6 +125,19 @@ type Commit struct {
 	// applied.
 	Editor bool
 }
+
+// Judge is a live Judge of one of the Editor's acts: its act, its
+// instructions' version and the model, and when it began judging. A new one
+// is a change to the Editor, which a change of model made through config
+// shows where no commit does.
+type Judge struct {
+	Act     string
+	Version int
+	Model   string
+	From    time.Time
+}
+
+func (j Judge) String() string { return fmt.Sprintf("%s v%d on %s", j.Act, j.Version, j.Model) }
 
 // The hypotheses, as the system design names them.
 const (

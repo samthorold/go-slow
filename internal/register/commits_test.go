@@ -28,6 +28,9 @@ internal/sqlite/feedback.go
 commit 6666 2026-10-24T19:00:00Z
 
 internal/sqlite/pieces.go
+commit 7777 2026-10-24T18:00:00Z
+
+internal/sqlite/precedents.go
 `
 	got, err := register.ParseGitLog(strings.NewReader(log))
 	if err != nil {
@@ -42,6 +45,8 @@ internal/sqlite/pieces.go
 		{Hash: "5555", At: time.Date(2026, time.October, 24, 20, 0, 0, 0, time.UTC), Editor: true},
 		// How views read the Feedback standing is how Feedback is applied.
 		{Hash: "6666", At: time.Date(2026, time.October, 24, 19, 0, 0, 0, time.UTC), Editor: true},
+		// Which Feedback a judge is shown as precedent is too.
+		{Hash: "7777", At: time.Date(2026, time.October, 24, 18, 0, 0, 0, time.UTC), Editor: true},
 	}
 	if !slices.EqualFunc(got, want, func(a, b register.Commit) bool {
 		return a.Hash == b.Hash && a.At.Equal(b.At) && a.Editor == b.Editor

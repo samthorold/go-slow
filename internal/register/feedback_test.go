@@ -9,13 +9,13 @@ import (
 	"github.com/samthorold/go-slow/internal/register"
 )
 
-// given is n pieces of Feedback of the kind, at the level, on day d (at
-// noon).
-func given(n int, kind feedback.Kind, level feedback.Level, d string) []register.Given {
+// given is n pieces of Feedback of the kind, given on on (the judgement's
+// act, or the Span's Source), on day d (at noon).
+func given(n int, kind feedback.Kind, on, d string) []register.Given {
 	at, _ := time.Parse(time.DateOnly, d)
 	var out []register.Given
 	for range n {
-		out = append(out, register.Given{Kind: kind, Level: level, At: at.Add(12 * time.Hour)})
+		out = append(out, register.Given{Kind: kind, On: on, At: at.Add(12 * time.Hour)})
 	}
 	return out
 }
@@ -51,10 +51,10 @@ func TestTheFeedbackPartsThatShouldFallAreReadByTheSharedRule(t *testing.T) {
 			t.Run(c.name+"/"+part.name, func(t *testing.T) {
 				r := feedbackRecord()
 				r.Briefings = append(days(0, 28), days(28, c.afterBriefings)...)
-				r.Feedback = append(given(c.before, part.kind, feedback.Development, day(10)),
-					given(c.after, part.kind, feedback.Development, day(40))...)
+				r.Feedback = append(given(c.before, part.kind, "reading", day(10)),
+					given(c.after, part.kind, "reading", day(40))...)
 				// Feedback of the other kinds counts for none of this part.
-				r.Feedback = append(r.Feedback, given(9, feedback.NewToMe, feedback.Story, day(40))...)
+				r.Feedback = append(r.Feedback, given(9, feedback.NewToMe, "briefing", day(40))...)
 
 				h := hypothesis(t, register.Read(r), part.name)
 
@@ -70,15 +70,20 @@ func TestTheFeedbackPartsThatShouldFallAreReadByTheSharedRule(t *testing.T) {
 	}
 }
 
-func TestEachFeedbackCountIsBrokenDownByLevel(t *testing.T) {
+func TestEachFeedbackCountIsBrokenDownByWhatItWasGivenOn(t *testing.T) {
 	r := feedbackRecord()
-	r.Feedback = append(given(2, feedback.Missed, feedback.Story, day(30)), given(1, feedback.Missed, feedback.Development, day(31))...)
+	r.Feedback = append(given(1, feedback.Wrong, "relating", day(30)), given(2, feedback.Wrong, "reading", day(31))...)
+	r.Feedback = append(r.Feedback, given(1, feedback.Missed, "parliament", day(30))...)
+	r.Feedback = append(r.Feedback, given(2, feedback.Missed, "gov-uk", day(31))...)
 
-	h := hypothesis(t, register.Read(r), register.Coverage)
-
-	found := strings.Join(h.Last.Found, "\n")
-	if !strings.Contains(found, "story 2") || !strings.Contains(found, "development 1") {
-		t.Errorf("the count is not broken down by level:\n%s", found)
+	for _, c := range []struct{ part, want string }{
+		{register.Accuracy, "3 (reading 2, relating 1)"},
+		{register.Coverage, "3 (gov-uk 2, parliament 1)"},
+	} {
+		h := hypothesis(t, register.Read(r), c.part)
+		if found := strings.Join(h.Last.Found, "\n"); !strings.Contains(found, c.want) {
+			t.Errorf("%s: want the count broken down as %q:\n%s", c.part, c.want, found)
+		}
 	}
 }
 
@@ -146,6 +151,34 @@ func TestTheSharedRuleIsDueOnAChangeToTheEditorSinceItsReading(t *testing.T) {
 	}
 }
 
+func TestTheSharedRuleIsDueOnANewJudgeSinceItsReading(t *testing.T) {
+	r := feedbackRecord()
+	at := func(n int) time.Time { d, _ := time.Parse(time.DateOnly, day(n)); return d.Add(9 * time.Hour) }
+	// Judges that began before the reading's last day leave it standing.
+	r.Judges = []register.Judge{
+		{Act: "reading", Version: 1, Model: "m1", From: at(0)},
+		{Act: "reading", Version: 2, Model: "m1", From: at(55)},
+	}
+	for _, name := range fallingParts {
+		if h := hypothesis(t, register.Read(r), name); h.Status == register.Due {
+			t.Errorf("%s is Due (%s) with no new Judge since its reading", name, h.Why)
+		}
+	}
+
+	// A new model, made only through config, shows in no commit.
+	r.Judges = append(r.Judges, register.Judge{Act: "reading", Version: 2, Model: "m2", From: at(56)})
+	for _, name := range fallingParts {
+		h := hypothesis(t, register.Read(r), name)
+		if h.Status != register.Due || h.Last == nil || !strings.Contains(h.Why, "m2") {
+			t.Errorf("%s: status %s (%s), last %+v; want Due on the new Judge, naming it, its reading kept",
+				name, h.Status, h.Why, h.Last)
+		}
+	}
+	if h := hypothesis(t, register.Read(r), register.Foresight); strings.Contains(h.Why, "Judge") {
+		t.Errorf("foresight is Due on a new Judge, which its rule does not declare: %s", h.Why)
+	}
+}
+
 func TestTheSharedRuleIsDueWithNoBriefingsToCountPer(t *testing.T) {
 	r := feedbackRecord()
 	r.Briefings = days(0, 28)
@@ -158,7 +191,7 @@ func TestTheSharedRuleIsDueWithNoBriefingsToCountPer(t *testing.T) {
 // onSundayRead is a piece of new to me Feedback given on the Sunday read of
 // day d, that day.
 func onSundayRead(d string) register.Given {
-	g := given(1, feedback.NewToMe, feedback.Story, d)[0]
+	g := given(1, feedback.NewToMe, "briefing", d)[0]
 	g.SundayRead = d
 	return g
 }
@@ -172,14 +205,14 @@ func TestForesightIsReadOverEachFourWeekWindowByItsRule(t *testing.T) {
 		feedback []register.Given
 		want     register.Status
 	}{
-		{"no new to me refutes", given(5, feedback.Missed, feedback.Story, day(3)), register.Refuted},
+		{"no new to me refutes", given(5, feedback.Missed, "briefing", day(3)), register.Refuted},
 		{"some in 3 of the 4 Sunday reads supports",
 			[]register.Given{onSundayRead(day(6)), onSundayRead(day(13)), onSundayRead(day(27))}, register.Supported},
 		{"some in only 2 is undecided",
 			append([]register.Given{onSundayRead(day(6)), onSundayRead(day(13)), onSundayRead(day(13))},
-				given(3, feedback.NewToMe, feedback.Connection, day(15))...), register.Undecided},
+				given(3, feedback.NewToMe, "relating", day(15))...), register.Undecided},
 		{"new to me in the window but on no Sunday read is undecided",
-			given(1, feedback.NewToMe, feedback.Connection, day(27)), register.Undecided},
+			given(1, feedback.NewToMe, "relating", day(27)), register.Undecided},
 		{"new to me only outside the window refutes",
 			[]register.Given{onSundayRead(day(34))}, register.Refuted},
 	} {
@@ -217,6 +250,32 @@ func TestForesightIsNotReadWhileTheTopIsRefuted(t *testing.T) {
 
 	if h.Status != register.Due || !strings.Contains(h.Why, "refuted") || h.Last == nil || h.Last.To != day(27) {
 		t.Errorf("status %s (%s), last %+v; want Due, keeping the reading of days 0 to 27", h.Status, h.Why, h.Last)
+	}
+}
+
+func TestTheFallingPartsReadOnlyWindowsWhollyAfterTheSwitch(t *testing.T) {
+	// The Record became events at noon on day 10: the first window wholly
+	// after it starts on day 11, and the first reading comes 8 weeks on.
+	r := feedbackRecord()
+	r.Briefings = days(0, 80)
+	opened(&r, 56, 24)
+	switched, _ := time.Parse(time.DateOnly, day(10))
+	r.Switch = switched.Add(12 * time.Hour)
+
+	r.Today = day(66)
+	for _, name := range fallingParts {
+		if h := hypothesis(t, register.Read(r), name); h.Status != register.Due || h.Last != nil || !strings.Contains(h.Why, "switch") {
+			t.Errorf("%s on day 66: status %s (%s), last %+v; want Due with no reading until 8 weeks after the switch",
+				name, h.Status, h.Why, h.Last)
+		}
+	}
+
+	r.Today = day(67)
+	for _, name := range fallingParts {
+		h := hypothesis(t, register.Read(r), name)
+		if h.Last == nil || h.Last.From != day(11) || h.Last.To != day(66) {
+			t.Errorf("%s on day 67: last %+v; want a reading over days 11 to 66", name, h.Last)
+		}
 	}
 }
 

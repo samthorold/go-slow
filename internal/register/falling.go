@@ -1,7 +1,10 @@
 package register
 
 import (
+	"cmp"
 	"fmt"
+	"maps"
+	"slices"
 	"strings"
 
 	"github.com/samthorold/go-slow/internal/feedback"
@@ -15,16 +18,15 @@ const (
 	feedbackDays  = 7 * feedbackWeeks
 )
 
-// levels are the levels each count is broken down by, in the design's
-// order.
-var levels = []feedback.Level{feedback.Story, feedback.Development, feedback.Fact, feedback.Connection}
-
 // readFalling reads a part whose Feedback of kind should fall.
 func readFalling(r Record, name string, kind feedback.Kind) Hypothesis {
 	h := Hypothesis{Name: name, Part: FromFeedback, Status: Due}
-	ws := windows(r.First, r.Today, feedbackDays)
+	ws := windows(fallingFrom(r), r.Today, feedbackDays)
 	if len(ws) < 2 {
 		h.Why = "No reading yet: the first 8 weeks since the Briefing began have not ended."
+		if !r.Switch.IsZero() {
+			h.Why = "No reading yet: the first 8 weeks wholly after the switch to the event-based Record have not ended."
+		}
 		return h
 	}
 	// Each review point is read unless the top stands refuted there; the
@@ -42,10 +44,37 @@ func readFalling(r Record, name string, kind feedback.Kind) Hypothesis {
 			h.Last, h.Status = &last, last.Status
 		}
 	}
-	if h.Last != nil && h.Status != Due && editorChangedOn(r, h.Last.To) {
-		h.Status, h.Why = Due, "The Editor has changed since its last reading."
+	if h.Last != nil && h.Status != Due {
+		if editorChangedOn(r, h.Last.To) {
+			h.Status, h.Why = Due, "The Editor has changed since its last reading."
+		} else if j, ok := newJudgeOn(r, h.Last.To); ok {
+			h.Status, h.Why = Due, "A new Judge, "+j.String()+", has judged since its last reading."
+		}
 	}
 	return h
+}
+
+// newJudgeOn is the first Judge that began judging after the day last, if
+// one has.
+func newJudgeOn(r Record, last string) (Judge, bool) {
+	for _, j := range r.Judges {
+		if dayIn(j.From, r.Location) > last {
+			return j, true
+		}
+	}
+	return Judge{}, false
+}
+
+// fallingFrom is the first day of the falling parts' windows: the first
+// Briefing's, or the first whole day after the switch if that is later,
+// since each kind of Feedback lands on different things either side of it.
+func fallingFrom(r Record) string {
+	if r.Switch.IsZero() || r.First == "" {
+		return r.First
+	}
+	d, _ := date(dayIn(r.Switch, r.Location))
+	after := dayString(d.AddDate(0, 0, 1))
+	return max(after, r.First)
 }
 
 // editorChangedOn reports whether a commit changed the Editor after the day
@@ -78,32 +107,35 @@ func fallingReading(r Record, kind feedback.Kind, before, after window) Reading 
 	return rd
 }
 
-// counted is Feedback counted, in all and by level.
+// counted is Feedback counted, in all and by what it was given on.
 type counted struct {
-	total   int
-	byLevel map[feedback.Level]int
+	total int
+	byOn  map[string]int
 }
 
+// String is the count, then each part of it, the largest first.
 func (c counted) String() string {
-	var parts []string
-	for _, l := range levels {
-		if n := c.byLevel[l]; n > 0 {
-			parts = append(parts, fmt.Sprintf("%s %d", l, n))
-		}
-	}
-	if len(parts) == 0 {
+	if c.total == 0 {
 		return "none"
+	}
+	ons := slices.Collect(maps.Keys(c.byOn))
+	slices.SortFunc(ons, func(a, b string) int {
+		return cmp.Or(cmp.Compare(c.byOn[b], c.byOn[a]), cmp.Compare(a, b))
+	})
+	parts := make([]string, len(ons))
+	for i, on := range ons {
+		parts[i] = fmt.Sprintf("%s %d", on, c.byOn[on])
 	}
 	return fmt.Sprintf("%d (%s)", c.total, strings.Join(parts, ", "))
 }
 
 // countFeedback counts the Feedback of kind given in w.
 func countFeedback(r Record, kind feedback.Kind, w window) counted {
-	c := counted{byLevel: map[feedback.Level]int{}}
+	c := counted{byOn: map[string]int{}}
 	for _, g := range r.Feedback {
 		if g.Kind == kind && w.holds(dayIn(g.At, r.Location)) {
 			c.total++
-			c.byLevel[g.Level]++
+			c.byOn[g.On]++
 		}
 	}
 	return c

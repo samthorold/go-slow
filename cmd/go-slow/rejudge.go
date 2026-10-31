@@ -13,6 +13,7 @@ import (
 
 	"github.com/samthorold/go-slow/internal/claude"
 	"github.com/samthorold/go-slow/internal/config"
+	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
@@ -24,6 +25,9 @@ type rejudgeAct struct {
 	model func(cfg config.Config) string
 	// variable names the configuration variable of its model.
 	variable string
+	// cutsFirst is whether the act reads Cuts, so the Items in the range
+	// not yet cut are cut before it is priced.
+	cutsFirst bool
 }
 
 // rejudgeActs are the acts that judge Spans by a model call and keep each
@@ -31,9 +35,10 @@ type rejudgeAct struct {
 // Briefing are added here as they come, each with its RejudgeAct.
 var rejudgeActs = map[string]rejudgeAct{
 	"reading": {
-		act:      func(store *sqlite.Store) editor.RejudgeAct { return editor.Rereading(store) },
-		model:    func(cfg config.Config) string { return cfg.ReadingModel },
-		variable: "READING_MODEL",
+		act:       func(store *sqlite.Store) editor.RejudgeAct { return editor.Rereading(store) },
+		model:     func(cfg config.Config) string { return cfg.ReadingModel },
+		variable:  "READING_MODEL",
+		cutsFirst: true,
 	},
 }
 
@@ -49,7 +54,11 @@ const dateLayout = time.DateOnly
 // judges again the Items published on the days from --from to --to, both
 // included, in the time zone TZ. Without --confirm it is a dry run: it prints
 // the requests it would send, the tokens and their price in dollars, and
-// calls no model and writes nothing. With --confirm it runs, in real time,
+// calls no model and writes no judgement. Either way it first cuts the
+// Items in the range with text and no Cut, as Collection does, since
+// reading reads only Items cut: the Cuts are its only write, plain code
+// with no model call (a Record from before Cuts holds none until its first
+// Collection run). With --confirm it runs, in real time,
 // stopping before a call that could take it over --max-usd. It judges as the
 // live judge, on the act's configured model, so views read its judgements as
 // the newest; or, with --candidate, as a candidate on --model (by default the
@@ -136,13 +145,20 @@ func rejudge(ctx context.Context, log *slog.Logger, args []string, d adminDeps) 
 		p := &printer{w: d.Stdout}
 		p.f("rejudge %s as %s: version %d on %s, Items published %s to %s (%s)\n",
 			act.Name, as, act.Version, judgeModel, *from, *to, time.Local)
+		if a.cutsFirst {
+			n, err := cut.New(store).CutPublished(ctx, rng.From, rng.To, d.Now())
+			if err != nil {
+				return err
+			}
+			p.f("cut: %d Items in the range not yet cut (no model call)\n", n)
+		}
 		if !*confirm {
 			est, err := run.Price(ctx, act, rng)
 			if err != nil {
 				return err
 			}
 			printEstimate(p, est)
-			p.f("dry run: nothing was called or written. Run again with --confirm --max-usd N to run it.\n")
+			p.f("dry run: no model was called and no judgement written. Run again with --confirm --max-usd N to run it.\n")
 			return p.err
 		}
 		out, err := run.Run(ctx, act, rng, editor.RunOptions{Candidate: *asCandidate, MaxUSD: *maxUSD})

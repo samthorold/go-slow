@@ -123,8 +123,9 @@ type BriefingStore interface {
 	// LastBriefingWritten is when the latest Briefing was written, or zero
 	// if none has been.
 	LastBriefingWritten(ctx context.Context) (time.Time, error)
-	// SpansToTell are the Items first cut after after and up to upTo, each
-	// with its Spans not Rejected and their relations.
+	// SpansToTell are the Items collected after the switch and first cut
+	// after after and up to upTo, each with its Spans not Rejected and their
+	// relations.
 	SpansToTell(ctx context.Context, after, upTo time.Time) ([]ItemToTell, error)
 	// KeepBriefing keeps a Briefing, all at once.
 	KeepBriefing(ctx context.Context, b Briefing) error

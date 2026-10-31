@@ -20,12 +20,6 @@
         <textarea name="terms" rows="4">{{.Terms}}</textarea></label>
       {{- with index .Errors "terms"}} <span role="alert">{{.}}</span>{{end}}
     </p>
-    <fieldset>
-      <legend>Every Item from these Sources, for the Sunday read</legend>
-      {{- range $.Sources}}
-      <label><input type="checkbox" name="source" value="{{.ID}}"{{if .Checked}} checked{{end}}> {{.Name}}</label>
-      {{- end}}
-    </fieldset>
     <button>Take up</button>
   </form>
 </details>
@@ -38,7 +32,7 @@
   {{- else}}
   <table class="topics">
     <thead>
-      <tr><th>Topic</th><th>Terms</th><th>Sources</th><th></th></tr>
+      <tr><th>Topic</th><th>Terms</th><th></th></tr>
     </thead>
     <tbody>
     {{- range .Topics}}
@@ -46,7 +40,6 @@
       <tr id="topic-{{.ID}}">
         <td><strong hx-disable>{{.Name}}</strong></td>
         <td class="quiet"><span hx-disable>{{range $i, $t := .Terms}}{{if $i}}, {{end}}{{$t}}{{end}}</span></td>
-        <td class="quiet">{{range $i, $s := .Sources}}{{if $i}}, {{end}}{{$s}}{{end}}</td>
         <td>
           {{/* Shown while the pointer or keyboard focus is in the row (.actions, in the stylesheet). */}}
           <div class="actions quiet">

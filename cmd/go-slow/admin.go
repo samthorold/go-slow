@@ -13,7 +13,6 @@ import (
 	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/config"
 	"github.com/samthorold/go-slow/internal/editor"
-	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/polite"
 	"github.com/samthorold/go-slow/internal/register"
 	"github.com/samthorold/go-slow/internal/sqlite"
@@ -86,7 +85,6 @@ func admin(ctx context.Context, log *slog.Logger, args []string, d adminDeps) er
 				Sleep:     polite.Sleep,
 			}),
 			Store: store,
-			Check: interest.New(store),
 			Log:   log,
 		})
 		if err != nil {

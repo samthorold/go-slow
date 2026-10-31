@@ -7,37 +7,21 @@ import (
 	"github.com/samthorold/go-slow/internal/editor"
 )
 
-// pill is an Entity as every page shows it: its name and, as its tag, its
-// Role where it has one, otherwise its kind; linked where it has a page
-// (its Wikidata item).
+// pill is an Entity as every page shows it: its name and, as its tag, a
+// person's office where the name is read so, otherwise its kind; linked
+// where it has a page (its Wikidata item).
 type pill struct {
 	Name, Tag, Href string
-}
-
-// pillsInvolved is the Entities f involves, each tagged with the Role
-// connecting gave it.
-func pillsInvolved(f editor.Fact) []pill {
-	out := make([]pill, 0, len(f.Involves))
-	for _, r := range f.Involves {
-		out = append(out, pill{Name: r.Entity, Tag: r.Role})
-	}
-	return out
-}
-
-// pillMentioned is an Entity an Item mentions, tagged with its kind and
-// linked to the Wikidata item it matched, if any.
-func pillMentioned(e editor.Entity) pill {
-	p := pill{Name: e.Name, Tag: e.Kind}
-	if e.WikidataID != "" {
-		p.Href = "https://www.wikidata.org/wiki/" + url.PathEscape(e.WikidataID)
-	}
-	return p
 }
 
 // pillOf is an Entity as the Record's look-ups have it, tagged with its kind
 // and linked to its Wikidata item, if it is one.
 func pillOf(e editor.NamedEntity) pill {
-	return pillMentioned(editor.Entity{Name: e.Name, Kind: e.Kind, WikidataID: e.WikidataID})
+	p := pill{Name: e.Name, Tag: e.Kind}
+	if e.WikidataID != "" {
+		p.Href = "https://www.wikidata.org/wiki/" + url.PathEscape(e.WikidataID)
+	}
+	return p
 }
 
 // itemCitation is an Item as every page cites it (template "citation"): its

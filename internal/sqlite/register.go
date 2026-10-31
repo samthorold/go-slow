@@ -110,10 +110,9 @@ func (s *Store) commits(ctx context.Context) ([]register.Commit, error) {
 	return out, rows.Err()
 }
 
-// untraced names every statement of a Briefing over Spans that cites no
-// Span, or a Span outside its Item's text; every Development in a Briefing
-// over Stories that traces to no Item, every Fact that traces to no Item,
-// and every Fact from a Reference source that traces to no lookup of it.
+// untraced names every statement of a Briefing or a Sunday read that cites
+// nothing, every Assessment that rests on no Span, and every citation of a
+// Span outside its Item's text.
 const untraced = `
 	SELECT 'Statement ' || (st.position + 1) || ' of the Briefing of ' || t.day || ' cites no Span.'
 	FROM told_statements st JOIN told_briefings t ON t.event_id = st.briefing_id
@@ -139,22 +138,7 @@ const untraced = `
 		JOIN items i ON i.source_id = c.source_id AND i.entry_id = c.entry_id
 		JOIN told_reads r ON r.event_id = coalesce((SELECT read_id FROM told_read_statements WHERE event_id = c.id),
 			(SELECT read_id FROM told_assessments WHERE event_id = c.id))
-	WHERE c.span_end > length(CAST(i.content AS BLOB))
-	UNION ALL
-	SELECT 'The Development of Fact ' || sd.fact_id || ' in the Briefing of ' || bs.day || ' traces to no Item.'
-	FROM statement_developments sd
-		JOIN briefing_statements bs ON bs.id = sd.statement_id
-		LEFT JOIN facts ON facts.id = sd.fact_id
-		LEFT JOIN items ON items.source_id = facts.source_id AND items.entry_id = facts.entry_id
-	WHERE items.source_id IS NULL
-	UNION ALL
-	SELECT 'Fact ' || facts.id || ' traces to no Item.'
-	FROM facts LEFT JOIN items ON items.source_id = facts.source_id AND items.entry_id = facts.entry_id
-	WHERE items.source_id IS NULL
-	UNION ALL
-	SELECT 'Reference Fact ' || rf.id || ' traces to no lookup.'
-	FROM reference_facts rf LEFT JOIN reference_lookups l ON l.id = rf.lookup_id
-	WHERE l.id IS NULL`
+	WHERE c.span_end > length(CAST(i.content AS BLOB))`
 
 // strings runs a query of one text column.
 func (s *Store) strings(ctx context.Context, query string) ([]string, error) {
@@ -176,27 +160,19 @@ func (s *Store) strings(ctx context.Context, query string) ([]string, error) {
 
 // givenFeedback is every piece of Feedback standing, as the register counts
 // it. A piece the Owner undid was a mistake in giving, not a reading of the
-// Editor, so it is not counted.
+// Editor, so it is not counted. It counts only the Feedback on a Sunday read
+// or one of its Assessments, given on that read, for foresight: the
+// Feedback kept before the Record kept only events went with the old
+// design's judgements, and counting the rest by the parts' kinds is the
+// register's to restate over the events (#221).
 func (s *Store) givenFeedback(ctx context.Context) ([]register.Given, error) {
-	// Feedback on a Sunday read or one of its Assessments was given on that
-	// read, for foresight.
-	// Kept before the Record became events, or since, as events, on a read
-	// over Spans and its Assessments, counted at the same levels.
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT kind, level, given_at, day FROM (
-			SELECT f.kind, f.level, f.given_at, coalesce(ar.day, r.day, '') AS day, 0 AS events, f.id
-			FROM feedback f
-				LEFT JOIN assessments a ON a.id = f.assessment_id
-				LEFT JOIN sunday_reads ar ON ar.id = a.read_id
-				LEFT JOIN sunday_reads r ON r.id = f.read_id
-			WHERE f.undone_at IS NULL
-			UNION ALL
-			SELECT g.kind, CASE WHEN ta.event_id IS NULL THEN 'sunday read' ELSE 'assessment' END, e.at, tr.day, 1, g.event_id
-			FROM feedback_given g JOIN events e ON e.id = g.event_id
-				LEFT JOIN told_assessments ta ON ta.event_id = g.judgement_id
-				JOIN told_reads tr ON tr.event_id = coalesce(ta.read_id, g.judgement_id)
-			WHERE `+standing("g.event_id")+`)
-		ORDER BY given_at, events, id`)
+		SELECT g.kind, CASE WHEN ta.event_id IS NULL THEN 'sunday read' ELSE 'assessment' END, e.at, tr.day
+		FROM feedback_given g JOIN events e ON e.id = g.event_id
+			LEFT JOIN told_assessments ta ON ta.event_id = g.judgement_id
+			JOIN told_reads tr ON tr.event_id = coalesce(ta.read_id, g.judgement_id)
+		WHERE `+standing("g.event_id")+`
+		ORDER BY e.at, g.event_id`)
 	if err != nil {
 		return nil, fmt.Errorf("register: feedback: %w", err)
 	}

@@ -1,14 +1,13 @@
 {{define "title"}}How the Briefing for {{.Date}} was written{{end}}
 
 {{define "content"}}
-{{/* The Stories and Facts were drawn from collected text by the Editor:
-     inert, with hx-disable on the elements holding them. */}}
+{{/* The Spans were collected text: inert, with hx-disable on the
+     elements holding them. */}}
 <p><a href="{{.BriefingPath}}">The Briefing for {{.Date}}</a></p>
 <h1>How this was written</h1>
 <p>{{grouped .Tokens.Total}} tokens over {{.Calls}} {{if eq .Calls 1}}call{{else}}calls{{end}}:
   {{grouped .Tokens.Input}} input, {{grouped .Tokens.Output}} output{{if .Tokens.CacheRead}}, {{grouped .Tokens.CacheRead}} read from the cache{{end}}.</p>
 
-{{- if .Told}}
 {{/* The calls, the writing call first, then each Span the Briefing cites
      as written, with the reading and relating calls behind it, each a
      machine label with its tokens (template "made"). */}}
@@ -37,36 +36,5 @@
 </table>
 {{- if not .Spans}}
 <p>It cites no Span.</p>
-{{- end}}
-{{- else}}
-{{/* The calls, the writing call first, then each Development the Briefing
-     cites as written, with the calls behind it, each a machine label with
-     its tokens (template "made"). */}}
-<table class="trail">
-  <thead>
-    <tr><th scope="col">Development</th><th scope="col">Story</th><th scope="col">Placed</th><th scope="col">Read</th></tr>
-  </thead>
-  <tbody>
-    <tr id="writing">
-      <th scope="row">Writing the Briefing</th>
-      <td></td>
-      <td colspan="2">
-        {{- with .Writing}}{{template "made" .}}
-        {{- else}}<span class="quiet">{{if $.WithoutCall}}with nothing to tell, it was written without a model call{{else}}no call was kept{{end}}</span>
-        {{- end}}</td>
-    </tr>
-  {{- range .Citations}}
-    <tr>
-      <td><a href="{{.DevelopmentPath}}"><span hx-disable>{{.Statement}}</span></a></td>
-      <td><a href="{{.StoryPath}}"><span hx-disable>{{.Story}}</span></a></td>
-      <td>{{with .Placing}}{{template "made" .}}{{else}}<span class="quiet">{{if .Missed}}you added it as missed{{else}}no call was kept{{end}}</span>{{end}}</td>
-      <td>{{with .Reading}}{{template "made" .}}{{else}}<span class="quiet">no call was kept</span>{{end}}</td>
-    </tr>
-  {{- end}}
-  </tbody>
-</table>
-{{- if not .Citations}}
-<p>It cites no Development.</p>
-{{- end}}
 {{- end}}
 {{end}}

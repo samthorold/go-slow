@@ -1,8 +1,8 @@
 {{define "title"}}Briefing for {{.Date}}{{end}}
 
 {{define "content"}}
-{{/* The statements are the Editor's words, and the Spans, Stories and
-     Facts they cite were drawn from collected text: inert, with hx-disable
+{{/* The statements are the Editor's words, and the Spans they cite were
+     drawn from collected text: inert, with hx-disable
      on the elements holding them, so the boosted links still work. */}}
 <h1>Briefing</h1>
 <p>{{.Date}}</p>
@@ -64,39 +64,8 @@
 </ul>
 </div>
 {{- end}}
-{{- else if not .Stories}}
-<p>Nothing moved on in the Stories your Topics follow.</p>
-{{- end}}
-{{- with .Stories}}
-{{/* A Briefing written over Stories, before the Briefing told Spans, is
-     shown as it was written. It looks as a Story's page does: its margin
-     starts open, and the one control folds it away. */}}
-<div class="margined" data-margin="open">
-{{template "margin-fold" "open"}}
-{{- range .}}
-<section class="briefed-story">
-  <ul class="blocks">
-    <li class="block">
-      <div class="block-body"><h2><a href="{{.Path}}"><span hx-disable>{{.Title}}</span></a></h2></div>
-      <div class="block-margin"></div>
-    </li>
-  {{- range .Statements}}
-    <li class="block">
-      <div class="block-body"><p hx-disable>{{.Text}}</p></div>
-      <div class="block-margin">
-        {{- range .Cites}}
-        <div class="cited">
-          <p><a href="{{.DevelopmentPath}}"><span hx-disable>{{.Statement}}</span></a>{{with .AsAt}} <time>{{.}}</time>{{end}}</p>
-          <p>{{template "citation" .Item}}</p>
-        </div>
-        {{- end}}
-      </div>
-    </li>
-  {{- end}}
-  </ul>
-</section>
-{{- end}}
-</div>
+{{- else}}
+<p>This Briefing was written before the Record kept only its Items and its events, and what it said went with the old design.</p>
 {{- end}}
 {{- with .TrailPath}}
 <p id="how-written"><small>{{if $.WithoutCall}}With nothing to tell, it was written without a model call. {{end}}<a href="{{.}}">How this was written</a></small></p>

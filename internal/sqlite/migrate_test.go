@@ -165,7 +165,7 @@ func TestTheTiesReadingMadeWithNoRoleAreRemovedAndTheMentionsKept(t *testing.T) 
 		}
 	}
 
-	if err := migrateTo(ctx, db, -1); err != nil {
+	if err := migrateTo(ctx, db, 22); err != nil {
 		t.Fatal(err)
 	}
 
@@ -231,7 +231,7 @@ func TestTheFeedbackKeptBeforeTheSundayReadSurvivesItsMigration(t *testing.T) {
 		}
 	}
 
-	if err := migrateTo(ctx, db, -1); err != nil {
+	if err := migrateTo(ctx, db, 22); err != nil {
 		t.Fatal(err)
 	}
 

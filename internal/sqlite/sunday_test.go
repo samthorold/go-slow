@@ -39,25 +39,3 @@ func TestASundayReadStatementCitingNothingOrAnAssessmentRestingOnNoSpanIsUntrace
 		t.Errorf("Sunday reads written = %v", r.SundayReads)
 	}
 }
-
-func TestASundayReadOfTheEarlierShapeIsReadAsWritten(t *testing.T) {
-	s := openTestStore(t)
-	if _, err := s.db.ExecContext(t.Context(), `
-		INSERT INTO sunday_reads (id, day, written_at, model, turns, input_tokens, output_tokens) VALUES (1, '2026-10-18', ?, 'm', 1, 1, 1);
-		INSERT INTO read_statements (read_id, position, text) VALUES (1, 0, 'Said before.');
-		INSERT INTO assessments (read_id, position, statement, as_at) VALUES (1, 0, 'Judged before.', '2026-10-18')`,
-		formatTime(cutAt)); err != nil {
-		t.Fatal(err)
-	}
-
-	statements, assessments, found, err := s.EarlierSundayRead(t.Context(), "2026-10-18")
-	if err != nil || !found || !slices.Equal(statements, []string{"Said before."}) || !slices.Equal(assessments, []string{"Judged before."}) {
-		t.Errorf("earlier read = %v %v %v %v", statements, assessments, found, err)
-	}
-	if _, found, err := s.SundayRead(t.Context(), "2026-10-18"); err != nil || found {
-		t.Errorf("an earlier read is read as one over Spans: %v %v", found, err)
-	}
-	if _, _, found, _ := s.EarlierSundayRead(t.Context(), "2026-10-25"); found {
-		t.Error("a Sunday with no read has an earlier one")
-	}
-}

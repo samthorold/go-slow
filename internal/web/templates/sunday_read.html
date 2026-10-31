@@ -24,18 +24,7 @@
 <pre hx-disable>{{.Reason}}</pre>
 {{- end}}
 {{- else if .Earlier}}
-{{/* A read written over Stories of Facts, before the read told Spans: as
-     written, with no Feedback. */}}
-<p class="quiet">This read was written over Stories, before the Sunday read told Spans; it is shown as written.</p>
-{{- range .Earlier.Statements}}
-<p hx-disable>{{.}}</p>
-{{- end}}
-{{- with .Earlier.Assessments}}
-<h2>Assessments</h2>
-{{- range .}}
-<p class="assessment" hx-disable>{{.}}</p>
-{{- end}}
-{{- end}}
+<p>This read was written before the Record kept only its Items and its events, and what it said went with the old design.</p>
 {{- else if not (or .Statements .Assessments)}}
 <p>Nothing was told in this week's Briefings, or Feedback took out all the read said.</p>
 {{- end}}

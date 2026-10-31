@@ -10,7 +10,9 @@ import (
 type Store interface {
 	// ItemsToRead are the Items awaiting reading: every Item cut and not
 	// yet read, whatever it is about, each with its newest Cut, oldest
-	// first. Work marked failed awaits nothing.
+	// first. Work marked failed awaits nothing, and nor do the Items
+	// collected before the Record kept only events, which only re-judging
+	// reads.
 	ItemsToRead(ctx context.Context) ([]ToRead, error)
 	// KeepReading keeps a reading, each of its judgements as its own event
 	// with the reading's Judge, all at once.

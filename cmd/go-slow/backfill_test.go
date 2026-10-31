@@ -12,8 +12,8 @@ import (
 	"testing"
 
 	"github.com/samthorold/go-slow/internal/collect"
-	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/cut"
+	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
 

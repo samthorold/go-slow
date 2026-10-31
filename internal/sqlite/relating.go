@@ -361,8 +361,9 @@ func (s *Store) relationsAt(ctx context.Context, a editor.Address) ([]editor.Spa
 			rel.to_source_id, rel.to_entry_id, rel.to_start, rel.to_end,
 			rl.event_id, rl.act, rl.version, rl.model, rl.request_hash, `+relatingCall("rl")+`
 		FROM relations rel JOIN relatings rl ON rl.event_id = rel.relating_id
-		WHERE (rel.from_source_id = ? AND rel.from_entry_id = ? AND rel.from_start = ? AND rel.from_end = ?)
-			OR (rel.to_source_id = ? AND rel.to_entry_id = ? AND rel.to_start = ? AND rel.to_end = ?)
+		WHERE ((rel.from_source_id = ? AND rel.from_entry_id = ? AND rel.from_start = ? AND rel.from_end = ?)
+			OR (rel.to_source_id = ? AND rel.to_entry_id = ? AND rel.to_start = ? AND rel.to_end = ?))
+			AND NOT `+wrongStanding("rel.event_id")+`
 		ORDER BY rel.event_id`,
 		a.SourceID, a.EntryID, a.Span.Start, a.Span.End, a.SourceID, a.EntryID, a.Span.Start, a.Span.End)
 	if err != nil {

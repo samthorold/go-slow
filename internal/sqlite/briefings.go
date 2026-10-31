@@ -201,41 +201,6 @@ func (s *Store) BriefingFailure(ctx context.Context, day string) (editor.Briefin
 	return f, true, nil
 }
 
-// TakenOutBy are the ids of the Feedback that takes something of the day's
-// written Briefing out of it: an unwanted Story it tells, or a Development
-// one of its statements cites, withdrawn or unwanted. In id order.
-func (s *Store) TakenOutBy(ctx context.Context, day string) ([]int64, error) {
-	rows, err := s.db.QueryContext(ctx, `
-		SELECT stories.unwanted_by FROM briefing_stories JOIN stories ON stories.id = briefing_stories.story_id
-		WHERE briefing_stories.day = ?1 AND stories.unwanted_by IS NOT NULL
-		UNION
-		SELECT d.withdrawn_by
-		FROM briefing_statements st
-			JOIN statement_developments cited ON cited.statement_id = st.id
-			JOIN developments d ON d.story_id = cited.story_id AND d.fact_id = cited.fact_id
-		WHERE st.day = ?1 AND d.withdrawn_by IS NOT NULL
-		UNION
-		SELECT d.unwanted_by
-		FROM briefing_statements st
-			JOIN statement_developments cited ON cited.statement_id = st.id
-			JOIN developments d ON d.story_id = cited.story_id AND d.fact_id = cited.fact_id
-		WHERE st.day = ?1 AND d.unwanted_by IS NOT NULL
-		ORDER BY 1`, day)
-	if err != nil {
-		return nil, fmt.Errorf("taken out of briefing %s: %w", day, err)
-	}
-	defer func() { _ = rows.Close() }()
-	var ids []int64
-	for rows.Next() {
-		var id int64
-		if err := rows.Scan(&id); err != nil {
-			return nil, fmt.Errorf("taken out of briefing %s: %w", day, err)
-		}
-		ids = append(ids, id)
-	}
-	return ids, rows.Err()
-}
-
 // StoryBriefing is the day's Briefing over Stories, reporting whether one
 // was written in that shape (the earlier shape, before the Briefing told
 // Spans): its Stories in order, and each statement with the Developments it

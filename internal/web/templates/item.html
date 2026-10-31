@@ -19,6 +19,9 @@
 <section aria-labelledby="text">
   <h2 id="text">Text</h2>
   <p><span class="machine">{{.CutBy}}</span>{{with .ReadBy}} {{template "made" .}}{{end}}</p>
+  {{- with .FeedbackError}}
+  <p role="alert">{{.}}</p>
+  {{- end}}
   {{- if not .ReadBy}}
   <p>Awaiting reading.</p>
   {{- end}}
@@ -37,6 +40,7 @@
         <p class="quiet">spoken by <span hx-disable>{{.}}</span></p>
         {{- end}}
         {{template "pills" .Names}}
+        {{- template "block-gives" .Gives}}
       </div>
     </li>
   {{- end}}
@@ -44,6 +48,7 @@
   </div>
 </section>
 {{- end}}
+{{template "given" .Feedback}}
 
 {{- if .Read}}
 {{/* What the earlier reading act drew from the Item, before the Record's
@@ -64,9 +69,6 @@
 
 <section aria-labelledby="facts">
   <h2 id="facts">Facts</h2>
-  {{- with .FeedbackError}}
-  <p role="alert">{{.}}</p>
-  {{- end}}
   {{- if not .Facts}}
   <p>Reading drew no Facts from this Item.</p>
   {{- end}}
@@ -81,7 +83,6 @@
         {{- end}}
         {{template "pills" .Entities}}
         {{if .Made.Call}}<p>{{template "made" .Made}}</p>{{end}}
-        {{- template "block-gives" .Gives}}
       </div>
     </li>
   {{- end}}

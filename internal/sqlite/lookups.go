@@ -157,27 +157,46 @@ func unmerged(ctx context.Context, tx *sql.Tx, kind, name, other string) ([]int6
 // EntitiesNamed is the Entity each key names, as the Record's look-ups have
 // it now: the item its newest look-up matched; or, with no match, the
 // Editor's Entity for its name and kind, or the item a later look-up merged
-// that into. A key not yet looked up is left out.
+// that into. A key not yet looked up is left out. A look-up under standing
+// wrong is read by no view: the key names what an older look-up matched, or
+// nothing, and is not looked up again for it.
 func (s *Store) EntitiesNamed(ctx context.Context, keys []editor.LookupKey) (map[editor.LookupKey]editor.NamedEntity, error) {
+	out, _, err := s.entitiesNamed(ctx, keys)
+	return out, err
+}
+
+// LookupsNamed is the look-up each key's Entity is read from, as
+// EntitiesNamed reads it: what Feedback on the match names.
+func (s *Store) LookupsNamed(ctx context.Context, keys []editor.LookupKey) (map[editor.LookupKey]int64, error) {
+	_, out, err := s.entitiesNamed(ctx, keys)
+	return out, err
+}
+
+// entitiesNamed is the Entity each key names, and the look-up it is read
+// from.
+func (s *Store) entitiesNamed(ctx context.Context, keys []editor.LookupKey) (map[editor.LookupKey]editor.NamedEntity, map[editor.LookupKey]int64, error) {
 	out := map[editor.LookupKey]editor.NamedEntity{}
+	from := map[editor.LookupKey]int64{}
 	for _, k := range keys {
 		e := editor.NamedEntity{Kind: k.Kind}
+		var lookup int64
 		var editorID sql.NullInt64
 		var editorName, mergedID, mergedLabel sql.NullString
 		err := s.db.QueryRowContext(ctx, `
-			SELECT l.wikidata_id, l.label, e.event_id, e.name, ml.wikidata_id, ml.label
+			SELECT l.event_id, l.wikidata_id, l.label, e.event_id, e.name, ml.wikidata_id, ml.label
 			FROM lookups l
 				LEFT JOIN editor_entities e ON l.wikidata_id = '' AND e.name = l.name AND e.kind = l.kind
 				LEFT JOIN entity_merges m ON m.event_id = (SELECT max(event_id) FROM entity_merges WHERE entity_id = e.event_id)
 				LEFT JOIN lookups ml ON ml.event_id = m.lookup_id
 			WHERE l.name = ? AND l.kind = ? AND l.office = ? AND l.on_date = ?
+				AND NOT `+wrongStanding("l.event_id")+`
 			ORDER BY l.event_id DESC LIMIT 1`, k.Name, k.Kind, k.Office, k.On,
-		).Scan(&e.WikidataID, &e.Name, &editorID, &editorName, &mergedID, &mergedLabel)
+		).Scan(&lookup, &e.WikidataID, &e.Name, &editorID, &editorName, &mergedID, &mergedLabel)
 		if errors.Is(err, sql.ErrNoRows) {
 			continue
 		}
 		if err != nil {
-			return nil, fmt.Errorf("entities named: %w", err)
+			return nil, nil, fmt.Errorf("entities named: %w", err)
 		}
 		switch {
 		case e.WikidataID != "":
@@ -190,7 +209,7 @@ func (s *Store) EntitiesNamed(ctx context.Context, keys []editor.LookupKey) (map
 			// without the other, so this is a Record kept by hand.
 			continue
 		}
-		out[k] = e
+		out[k], from[k] = e, lookup
 	}
-	return out, nil
+	return out, from, nil
 }

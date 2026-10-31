@@ -43,7 +43,11 @@ type Deps struct {
 	Stories   Stories
 	Feedback  Feedback
 	Kept      Kept
-	Register  Register
+	// Pieces is the Feedback commands on judgements and Spans, and Given
+	// the Feedback they keep, as events.
+	Pieces   Pieces
+	Given    Given
+	Register Register
 	// SundayReads answers the Sunday read's page.
 	SundayReads SundayReads
 	// Calls answers the kept calls' pages.
@@ -171,16 +175,17 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("GET /conversations/{id}", a.conversation)
 	mux.HandleFunc("GET /feedback", a.feedback)
 	mux.HandleFunc("PUT /feedback/{feedback}/undone", a.undoOnFeedbackPage)
+	mux.HandleFunc("PUT /feedback/sunday-read/{feedback}/undone", a.undoReadOnFeedbackPage)
 	mux.HandleFunc("GET /items", a.items)
 	mux.HandleFunc("GET /items/{source}/{entry}", a.item)
 	mux.HandleFunc("POST /items/{source}/{entry}/feedback", a.itemFeedback)
 	mux.HandleFunc("PUT /items/{source}/{entry}/feedback/{feedback}/undone", a.undoOnItem)
 	mux.HandleFunc("GET /items/{source}/{entry}/spans/{span}", a.span)
+	mux.HandleFunc("POST /items/{source}/{entry}/spans/{span}/feedback", a.spanFeedback)
+	mux.HandleFunc("PUT /items/{source}/{entry}/spans/{span}/feedback/{feedback}/undone", a.undoOnSpan)
 	mux.HandleFunc("GET /register", a.register)
 	mux.HandleFunc("GET /stories", a.stories)
 	mux.HandleFunc("GET /stories/{id}", a.story)
-	mux.HandleFunc("POST /stories/{id}/feedback", a.storyFeedback)
-	mux.HandleFunc("PUT /stories/{id}/feedback/{feedback}/undone", a.undoOnStory)
 	mux.HandleFunc("GET /topics", a.topics)
 	mux.HandleFunc("POST /topics", a.addTopic)
 	mux.HandleFunc("PUT /topics/{id}", a.setDepth)

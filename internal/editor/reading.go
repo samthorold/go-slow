@@ -46,6 +46,9 @@ type Judge struct {
 // RefersTo is the judgement that the Span From names the same thing as the
 // Span To, of the same Item, in other words: "the city" refers to "Derby".
 type RefersTo struct {
+	// ID is its event's in the Record, once it is kept there: what
+	// Feedback on it names.
+	ID       int64
 	From, To Address
 }
 
@@ -60,6 +63,8 @@ type Name struct {
 // Speaker is the judgement that the Span Of is the words of whoever the
 // Span By names. A Span with no Speaker is the publisher's own.
 type Speaker struct {
+	// ID is its event's in the Record, once it is kept there.
+	ID     int64
 	Of, By Address
 }
 

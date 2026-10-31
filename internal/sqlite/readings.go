@@ -268,13 +268,17 @@ func (s *Store) readingByID(ctx context.Context, id int64) (editor.Reading, erro
 		}
 		return rows.Err()
 	}
-	if err := each(`SELECT from_start, from_end, to_start, to_end FROM refers_to WHERE reading_id = ? ORDER BY event_id`,
+	// A judgement under standing wrong is read by no view, and shown to no
+	// act (system design: Feedback lands on a judgement).
+	if err := each(`SELECT event_id, from_start, from_end, to_start, to_end FROM refers_to
+		WHERE reading_id = ? AND NOT `+wrongStanding("refers_to.event_id")+` ORDER BY event_id`,
 		func(rows *sql.Rows) error {
+			var id int64
 			var fs, fe, ts, te int
-			if err := rows.Scan(&fs, &fe, &ts, &te); err != nil {
+			if err := rows.Scan(&id, &fs, &fe, &ts, &te); err != nil {
 				return err
 			}
-			r.RefersTo = append(r.RefersTo, editor.RefersTo{From: addr(fs, fe), To: addr(ts, te)})
+			r.RefersTo = append(r.RefersTo, editor.RefersTo{ID: id, From: addr(fs, fe), To: addr(ts, te)})
 			return nil
 		}); err != nil {
 		return editor.Reading{}, err
@@ -292,13 +296,15 @@ func (s *Store) readingByID(ctx context.Context, id int64) (editor.Reading, erro
 		}); err != nil {
 		return editor.Reading{}, err
 	}
-	if err := each(`SELECT span_start, span_end, speaker_start, speaker_end FROM speakers WHERE reading_id = ? ORDER BY event_id`,
+	if err := each(`SELECT event_id, span_start, span_end, speaker_start, speaker_end FROM speakers
+		WHERE reading_id = ? AND NOT `+wrongStanding("speakers.event_id")+` ORDER BY event_id`,
 		func(rows *sql.Rows) error {
+			var id int64
 			var s0, s1, b0, b1 int
-			if err := rows.Scan(&s0, &s1, &b0, &b1); err != nil {
+			if err := rows.Scan(&id, &s0, &s1, &b0, &b1); err != nil {
 				return err
 			}
-			r.Speakers = append(r.Speakers, editor.Speaker{Of: addr(s0, s1), By: addr(b0, b1)})
+			r.Speakers = append(r.Speakers, editor.Speaker{ID: id, Of: addr(s0, s1), By: addr(b0, b1)})
 			return nil
 		}); err != nil {
 		return editor.Reading{}, err

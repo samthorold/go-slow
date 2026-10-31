@@ -3,7 +3,6 @@ package web_test
 import (
 	"encoding/json"
 	"html"
-	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -74,25 +73,6 @@ func TestADevelopmentLinksToThePlacingCallThatMadeIt(t *testing.T) {
 		if !strings.Contains(res.body, want) {
 			t.Errorf("the placing call's page lacks %q:\n%s", want, res.body)
 		}
-	}
-}
-
-func TestADevelopmentTheOwnerAddedLinksToNoPlacingCall(t *testing.T) {
-	store := openStore(t)
-	speechStory(t, store)
-	app, _ := newAppWithLog(t, saturday, store)
-	if res := send(t, app, "POST", "/stories/1/feedback", url.Values{"kind": {"missed"}, "level": {"story"},
-		"title": {"Scottish politics"}, "facts": {"1"}}); res.status != 303 {
-		t.Fatalf("status %d:\n%s", res.status, res.body)
-	}
-
-	missed := get(t, app, "/stories/2")
-
-	if !strings.Contains(missed.body, "Andy Burnham spoke in Motherwell.") || strings.Contains(missed.body, "placed · call") {
-		t.Errorf("the Development the Owner added links to a placing call, or is not shown:\n%s", missed.body)
-	}
-	if placed := get(t, app, "/stories/1"); !strings.Contains(placed.body, "placed · call") {
-		t.Errorf("the Development placing made does not link to its call:\n%s", placed.body)
 	}
 }
 

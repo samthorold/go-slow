@@ -27,9 +27,6 @@ type Briefings interface {
 	// day one was written or tried, from which a Briefing is owed every day
 	// (empty if none ever was).
 	BriefingDays(ctx context.Context) (written []string, first string, err error)
-	// TakenOutBy are the ids of the Feedback that takes something of the
-	// day's written Briefing out of it.
-	TakenOutBy(ctx context.Context, day string) ([]int64, error)
 }
 
 // briefingsPage is the view model for the list of Briefings: every day
@@ -121,25 +118,25 @@ type briefingPage struct {
 	// FailedAttempts are the kept calls of the day's failed attempts to
 	// write it, for a day with no Briefing.
 	FailedAttempts []attemptRow
-	// FeedbackPath is where Feedback given on the Briefing goes.
-	FeedbackPath string
-	// MissedStory is the form for a missed Story: what was entered, and why
-	// it failed.
-	MissedStory missedStoryForm
-	// Emptied is whether Feedback took every Story out of the written
-	// Briefing, and TakenOut the Feedback that did.
-	Emptied  bool
-	TakenOut []keptRow
-	// Feedback is the rest of the Feedback given on the Briefing.
-	Feedback []keptRow
+	// FeedbackError is why Feedback last given on the Briefing was refused,
+	// if it was.
+	FeedbackError string
+	// Emptied is whether Feedback took every statement out of the written
+	// Briefing: it says so, rather than reading as a quiet day.
+	Emptied bool
+	// Feedback is the Feedback given on the Briefing, each to undo here.
+	Feedback []pieceRow
 }
 
 // toldRow is one statement of a Briefing over Spans, with the Spans it
 // cites: each its words, linking its page, whose words they are, and its
-// Item.
+// Item; and the Feedback on it.
 type toldRow struct {
 	Text  string
 	Cites []toldCite
+	// Gives is the Feedback on the statement (wrong, new to me) and on each
+	// Span it cites as told (unwanted).
+	Gives gives
 }
 
 type toldCite struct {
@@ -147,14 +144,24 @@ type toldCite struct {
 	Speaker string
 }
 
-// toldRows are the statements of b as the page shows them.
-func (a *app) toldRows(b editor.Briefing) []toldRow {
+// toldRows are the statements of b as the page at page shows them, each
+// with the Feedback it offers: those Feedback took out are left out
+// (system design: A written Briefing re-renders without what Feedback took
+// out).
+func (a *app) toldRows(b editor.Briefing, page string, pieces []feedback.KeptPiece) []toldRow {
+	path := page + "/feedback"
 	var out []toldRow
 	for _, st := range b.Statements {
+		if len(st.TakenOutBy) > 0 {
+			continue
+		}
 		row := toldRow{Text: st.Text}
+		offer := []giveButton{wrongOn(path, st.ID, "this statement"), newToMeOn(path, st.ID, "this statement")}
 		for _, c := range st.Cites {
 			row.Cites = append(row.Cites, toldCite{spanLink: a.linkTo(c), Speaker: c.Speaker})
+			offer = append(offer, unwantedOn(path, b.Day, c.At, c.Words))
 		}
+		row.Gives = givesOn(offer, pieces, page)
 		out = append(out, row)
 	}
 	return out
@@ -168,14 +175,13 @@ type failureRow struct {
 	Conversation string
 }
 
+// briefedStoryRow is a Story of a Briefing written over Stories, as it was
+// written: Feedback is no longer given on one.
 type briefedStoryRow struct {
-	ID    int64
-	Gives gives
-	// MissedDevelopment is the form for a Development the Story missed.
-	MissedDevelopment missedDevelopmentForm
-	Title             string
-	Path              string
-	Statements        []statementRow
+	ID         int64
+	Title      string
+	Path       string
+	Statements []statementRow
 }
 
 // statementRow is one statement, with what it cites: each Development, on
@@ -186,21 +192,16 @@ type statementRow struct {
 }
 
 type citationRow struct {
-	Gives     gives
-	AsAt      string
-	Statement string
-	// Short is the Fact's statement, shortened if need be, labelling the
-	// Feedback on the Development beside the statement that cites it.
-	Short           string
+	AsAt            string
+	Statement       string
 	DevelopmentPath string
 	// Item is the Item the Development's Fact was drawn from, linking the
 	// Fact on its page.
 	Item itemCitation
 }
 
-// labelLength is the most of a Fact's statement, in runes, that labels the
-// Feedback on its Development: enough to tell a statement's Developments
-// apart.
+// labelLength is the most of a Span's words, in runes, that labels the
+// Feedback on it: enough to tell a statement's Spans apart.
 const labelLength = 60
 
 // shorten is s, cut at the last word that fits within labelLength and marked
@@ -227,12 +228,12 @@ func (a *app) todaysBriefing(w http.ResponseWriter, r *http.Request) {
 
 // briefing renders the Briefing page for the day that holds day.
 func (a *app) briefing(w http.ResponseWriter, r *http.Request, day time.Time) {
-	a.briefingWith(w, r, day, http.StatusOK, feedback.Draft{}, nil)
+	a.briefingWith(w, r, day, http.StatusOK, nil)
 }
 
-// briefingWith renders the Briefing page with the Feedback last entered on
-// it and why it failed, if it did.
-func (a *app) briefingWith(w http.ResponseWriter, r *http.Request, day time.Time, status int, d feedback.Draft, errs feedback.Errors) {
+// briefingWith renders the Briefing page, with why Feedback given on it was
+// refused, if it was.
+func (a *app) briefingWith(w http.ResponseWriter, r *http.Request, day time.Time, status int, errs feedback.Errors) {
 	key := day.Format(time.DateOnly)
 	told, isTold, err := a.Briefings.Briefing(r.Context(), key)
 	if err != nil {
@@ -251,10 +252,20 @@ func (a *app) briefingWith(w http.ResponseWriter, r *http.Request, day time.Time
 	}
 	p := briefingPage{
 		Date: day.Format("Monday 2 January 2006"), Exists: exists || isTold, Told: isTold,
-		FeedbackPath: briefingPath(key) + "/feedback",
+		FeedbackError: errs[""],
 	}
+	page := briefingPath(key)
 	if isTold {
-		p.Statements = a.toldRows(told)
+		pieces, err := a.Given.KeptPieces(r.Context())
+		if err != nil {
+			a.serverError(w, r, err)
+			return
+		}
+		p.Statements = a.toldRows(told, page, pieces)
+		p.Emptied = len(p.Statements) == 0 && len(told.Statements) > 0
+		p.Feedback = a.piecesOn(pieces, page, func(k feedback.KeptPiece) bool {
+			return k.Day == key && (k.Kind == feedback.Unwanted || k.Judged == feedback.Statement)
+		})
 		b.Model = told.Judge.Model
 	}
 	if day.Weekday() == time.Sunday {
@@ -282,30 +293,15 @@ func (a *app) briefingWith(w http.ResponseWriter, r *http.Request, day time.Time
 		a.serverError(w, r, err)
 		return
 	}
-	var kept []feedback.Kept
-	if exists {
-		if kept, err = a.Kept.KeptFeedback(r.Context()); err != nil {
-			a.serverError(w, r, err)
-			return
-		}
-	}
-	page := briefingPath(day.Format(time.DateOnly))
+	// A Briefing written over Stories is shown as it was written.
 	for _, bs := range b.Stories {
-		row := briefedStoryRow{
-			ID: bs.Story.ID, Title: bs.Story.Title, Path: storyPath(bs.Story.ID),
-			Gives: givenIn(storyGives(p.FeedbackPath, bs.Story.ID), kept, page),
-		}
-		if row.MissedDevelopment, err = a.missedDevelopment(r, p.FeedbackPath, bs.Story.ID, d, errs); err != nil {
-			a.serverError(w, r, err)
-			return
-		}
+		row := briefedStoryRow{ID: bs.Story.ID, Title: bs.Story.Title, Path: storyPath(bs.Story.ID)}
 		for _, st := range bs.Statements {
 			sr := statementRow{Text: st.Text}
 			for _, d := range st.Developments {
 				item := itemPath(d.SourceID, d.EntryID)
 				sr.Cites = append(sr.Cites, citationRow{
-					Gives: givenIn(developmentGives(p.FeedbackPath, bs.Story.ID, d.ID), kept, page),
-					AsAt:  factDate(d.Fact), Statement: d.Statement, Short: shorten(d.Statement),
+					AsAt: factDate(d.Fact), Statement: d.Statement,
 					DevelopmentPath: storyPath(bs.Story.ID) + "#" + developmentAnchor(d.ID),
 					Item:            a.cite(d.SourceID, d.ItemTitle, item+"#"+factAnchor(d.ID)),
 				})
@@ -313,19 +309,6 @@ func (a *app) briefingWith(w http.ResponseWriter, r *http.Request, day time.Time
 			row.Statements = append(row.Statements, sr)
 		}
 		p.Stories = append(p.Stories, row)
-	}
-	var facts []editor.Development
-	for _, bs := range b.Stories {
-		for _, st := range bs.Statements {
-			facts = append(facts, st.Developments...)
-		}
-	}
-	if exists {
-		p.MissedStory = missedStory(p.FeedbackPath, facts, d, errs)
-		if err := a.briefingFeedbackRows(r, &p, b, kept); err != nil {
-			a.serverError(w, r, err)
-			return
-		}
 	}
 	t := briefingTmpl
 	if dayOf(day).Equal(dayOf(a.Now())) {
@@ -412,38 +395,46 @@ func (a *app) briefingCalls(r *http.Request, p *briefingPage, day, model string,
 	return nil
 }
 
-// briefingFeedbackRows lists, on the written Briefing, the Feedback given on
-// it, each to undo there; and, when Feedback took every Story out, says so,
-// listing the Feedback that did. kept is every piece of Feedback.
-func (a *app) briefingFeedbackRows(r *http.Request, p *briefingPage, b editor.StoryBriefing, kept []feedback.Kept) error {
-	takenOut, err := a.Briefings.TakenOutBy(r.Context(), b.Day)
-	if err != nil {
-		return err
-	}
-	p.Emptied = len(b.Stories) == 0 && len(takenOut) > 0
-	page := briefingPath(b.Day)
-	for _, k := range kept {
-		switch day, onBriefing := briefingGivenOn(k.Feedback); {
-		case p.Emptied && slices.Contains(takenOut, k.ID):
-			p.TakenOut = append(p.TakenOut, a.keptRow(k, page))
-		case onBriefing && day == b.Day:
-			p.Feedback = append(p.Feedback, a.keptRow(k, page))
-		}
-	}
-	return nil
-}
-
-// undoOnBriefing is an undo from a day's Briefing, which it lands back on.
-func (a *app) undoOnBriefing(w http.ResponseWriter, r *http.Request) {
+// briefingDay is the day of the Briefing the path names, and the page an
+// answer lands back on (today's is "/"), reporting whether it is a day up
+// to today.
+func (a *app) briefingDay(r *http.Request) (time.Time, string, bool) {
 	now := a.Now()
 	day, err := time.ParseInLocation(time.DateOnly, r.PathValue("day"), now.Location())
 	if err != nil || day.After(now) {
-		http.NotFound(w, r)
-		return
+		return day, "", false
 	}
 	to := briefingPath(r.PathValue("day"))
 	if r.PathValue("day") == now.Format(time.DateOnly) {
 		to = "/"
 	}
-	a.undo(w, r, to)
+	return day, to, true
+}
+
+// briefingFeedback is Feedback given on a day's Briefing: on its statements,
+// or the Spans they cite as told that day. It lands back on the Briefing,
+// which re-renders without what Feedback took out.
+func (a *app) briefingFeedback(w http.ResponseWriter, r *http.Request) {
+	day, to, ok := a.briefingDay(r)
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Bad form.", http.StatusBadRequest)
+		return
+	}
+	a.givePiece(w, r, askFrom(r, "", "", day.Format(time.DateOnly)), to, func(errs feedback.Errors) {
+		a.briefingWith(w, r, day, http.StatusUnprocessableEntity, errs)
+	})
+}
+
+// undoOnBriefing is an undo from a day's Briefing, which it lands back on.
+func (a *app) undoOnBriefing(w http.ResponseWriter, r *http.Request) {
+	_, to, ok := a.briefingDay(r)
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+	a.undoPiece(w, r, to)
 }

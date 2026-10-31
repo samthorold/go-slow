@@ -490,36 +490,6 @@ func TestTheAgentLooksThingsUpInWikidataAndCitesTheLookup(t *testing.T) {
 	}
 }
 
-func TestTheAgentIsNeverShownWhatFeedbackWithdrew(t *testing.T) {
-	store := record(t)
-	readAndPlace(t, store, &fakeModel{output: startsAStory})
-	withAnEarlierCall(t, store)
-	connect(t, store, "call", 2, editor.Role{Entity: "Andy Burnham", Role: "actor"})
-	if _, errs, err := feedback.New(store).Give(t.Context(), feedback.Draft{Kind: "wrong", Level: "fact", Fact: "2"}, saturday); err != nil || errs != nil {
-		t.Fatalf("give Feedback: %v %v", errs, err)
-	}
-	agent := &fakeAgent{turns: []editor.Turn{
-		calls("story", `{"story": "S1"}`, "facts_about", `{"entity": "Andy Burnham", "before": ""}`),
-		submits(`{"statements": [{"text": "The Prime Minister called Finland.", "cites": ["F2"]}], "assessments": [], "stories": []}`),
-	}}
-	ed, _ := reader(store, agent)
-
-	if err := ed.SundayRead(t.Context(), sundayMorning); err != nil {
-		t.Fatal(err)
-	}
-
-	msgs := agent.sent[1].Messages
-	for _, res := range msgs[len(msgs)-1].Results {
-		if strings.Contains(res.Content, "Finland") {
-			t.Errorf("a withdrawn Fact is shown:\n%s", res.Content)
-		}
-	}
-	// So it can't be cited either.
-	if _, found, _ := store.SundayRead(t.Context(), "2026-10-25"); found {
-		t.Error("a read citing a withdrawn Fact was published")
-	}
-}
-
 func TestTheAgentHasNoToolThatWritesAFact(t *testing.T) {
 	store := record(t)
 	readAndPlace(t, store, &fakeModel{output: startsAStory})

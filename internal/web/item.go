@@ -3,7 +3,6 @@ package web
 import (
 	"cmp"
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -26,6 +25,9 @@ type Readings interface {
 	// EntitiesNamed is the Entity each key names, as the Record's look-ups
 	// have it now; a key not yet looked up is left out.
 	EntitiesNamed(ctx context.Context, keys []editor.LookupKey) (map[editor.LookupKey]editor.NamedEntity, error)
+	// LookupsNamed is the look-up each key's Entity is read from, as
+	// EntitiesNamed reads it.
+	LookupsNamed(ctx context.Context, keys []editor.LookupKey) (map[editor.LookupKey]int64, error)
 }
 
 // Cuts answers the Spans an Item's page shows.
@@ -48,6 +50,10 @@ type spanRow struct {
 	// Href is the Span's own page, where its relations are; empty where it
 	// is shown on that page.
 	Href string
+	// Gives is the Feedback the Owner can give on it here: missed on the
+	// Span, and wrong on each judgement shown with it (what a stretch in it
+	// refers to, whose words it is, which Entity a name in it is).
+	Gives gives
 }
 
 // itemPage is the view model for an Item's page: the Item as collected, its
@@ -73,9 +79,12 @@ type itemPage struct {
 	Mentions    []pill
 	Facts       []factRow
 	Claims      []claimRow
-	// FeedbackError is why Feedback last given on the page failed, if it
-	// did.
+	// FeedbackError is why Feedback last given on the page was refused, if
+	// it was.
 	FeedbackError string
+	// Feedback is the Feedback given on its Spans and the judgements made
+	// of them, each to undo here: what wrong took out shows nowhere else.
+	Feedback []pieceRow
 }
 
 type factRow struct {
@@ -91,8 +100,6 @@ type factRow struct {
 	Entities []pill
 	// Made is the reading call that drew it.
 	Made made
-	// Gives is the Feedback the Owner can give on it here: wrong.
-	Gives gives
 }
 
 type claimRow struct {
@@ -113,8 +120,37 @@ func (a *app) item(w http.ResponseWriter, r *http.Request) {
 	a.itemWith(w, r, http.StatusOK, nil)
 }
 
+// spanJudgements is what an Item's page and a Span's need to show its
+// Spans as read: the Item's newest reading, the Entities its names are and
+// the look-ups they are read from, and the Feedback kept as events.
+type spanJudgements struct {
+	reading editor.Reading
+	read    bool
+	is      map[editor.LookupKey]editor.NamedEntity
+	lookups map[editor.LookupKey]int64
+	pieces  []feedback.KeptPiece
+}
+
+// judgementsOf is what the pages need to show the Spans of the Item.
+func (a *app) judgementsOf(ctx context.Context, sourceID, entryID string, published time.Time) (spanJudgements, error) {
+	var j spanJudgements
+	var err error
+	if j.reading, j.read, err = a.Readings.NewestReading(ctx, sourceID, entryID); err != nil {
+		return j, err
+	}
+	keys := j.reading.Keys(published)
+	if j.is, err = a.Readings.EntitiesNamed(ctx, keys); err != nil {
+		return j, err
+	}
+	if j.lookups, err = a.Readings.LookupsNamed(ctx, keys); err != nil {
+		return j, err
+	}
+	j.pieces, err = a.Given.KeptPieces(ctx)
+	return j, err
+}
+
 // itemWith renders the Item's page the path names, with status, and why
-// Feedback given on it failed, if it did.
+// Feedback given on it was refused, if it was.
 func (a *app) itemWith(w http.ResponseWriter, r *http.Request, status int, errs feedback.Errors) {
 	sourceID, entryID := r.PathValue("source"), r.PathValue("entry")
 	it, found, err := a.Readings.ReadItem(r.Context(), sourceID, entryID)
@@ -126,57 +162,49 @@ func (a *app) itemWith(w http.ResponseWriter, r *http.Request, status int, errs 
 		http.NotFound(w, r)
 		return
 	}
-	kept, err := a.Kept.KeptFeedback(r.Context())
-	if err != nil {
-		a.serverError(w, r, err)
-		return
-	}
 	page := itemPath(sourceID, entryID)
 	loc := a.Now().Location()
 	p := itemPage{
-		Title:       it.Title,
-		Link:        it.Link,
-		Summary:     it.Summary,
-		Source:      it.SourceName,
-		Published:   when(it.Published, loc),
-		Attribution: it.Attribution,
-		Read:        it.Read,
-		ReadAt:      when(it.ReadAt, loc),
-		Model:       it.Model,
-		Topics:      it.Topics,
-		// The page's one form is a button naming its Fact: a failure is
-		// the form's, or that Fact's.
+		Title:         it.Title,
+		Link:          it.Link,
+		Summary:       it.Summary,
+		Source:        it.SourceName,
+		Published:     when(it.Published, loc),
+		Attribution:   it.Attribution,
+		Read:          it.Read,
+		ReadAt:        when(it.ReadAt, loc),
+		Model:         it.Model,
+		Topics:        it.Topics,
 		FeedbackError: errs[""],
-	}
-	if p.FeedbackError == "" {
-		p.FeedbackError = errs["fact"]
 	}
 	c, text, cutYet, err := a.Cuts.NewestCut(r.Context(), sourceID, entryID)
 	if err != nil {
 		a.serverError(w, r, err)
 		return
 	}
-	reading, read, err := a.Readings.NewestReading(r.Context(), sourceID, entryID)
+	j, err := a.judgementsOf(r.Context(), sourceID, entryID, it.Published)
 	if err != nil {
 		a.serverError(w, r, err)
 		return
 	}
-	if read {
-		p.ReadBy = &made{Act: "read", Call: reading.Call}
-	}
-	is, err := a.Readings.EntitiesNamed(r.Context(), reading.Keys(it.Published))
-	if err != nil {
-		a.serverError(w, r, err)
-		return
+	if j.read {
+		p.ReadBy = &made{Act: "read", Call: j.reading.Call}
 	}
 	if cutYet {
 		p.CutBy = fmt.Sprintf("cut · %s v%d", c.Judge.Cutter, c.Judge.Version)
 		for i, s := range c.Spans {
-			row := spanOf(i+1, text, s, reading, it.Published, is)
-			row.Href = spanPath(editor.Address{SourceID: sourceID, EntryID: entryID, Span: s})
+			at := editor.Address{SourceID: sourceID, EntryID: entryID, Span: s}
+			row := spanOf(i+1, text, at, it.Published, j, page)
+			row.Href = spanPath(at)
 			p.Spans = append(p.Spans, row)
 		}
 	}
+	keys := j.reading.Keys(it.Published)
+	p.Feedback = a.piecesOn(j.pieces, page, func(k feedback.KeptPiece) bool {
+		inItem := func(s feedback.Span) bool { return s.SourceID == sourceID && s.EntryID == entryID }
+		key := editor.LookupKey{Name: k.Name, Kind: k.NameKind, Office: k.Office, On: k.On}
+		return inItem(k.At) || inItem(k.To) || (k.Judged == feedback.Lookup && slices.Contains(keys, key))
+	})
 	for _, e := range it.Mentions {
 		p.Mentions = append(p.Mentions, pillMentioned(e))
 	}
@@ -199,7 +227,6 @@ func (a *app) itemWith(w http.ResponseWriter, r *http.Request, status int, errs 
 			Quote:     f.Quote,
 			Entities:  pillsInvolved(f),
 			Made:      made{Act: "read", Call: it.ReadingCall},
-			Gives:     givenIn(factGives(page+"/feedback", f.ID), kept, page),
 		})
 	}
 	// A Claim shows no Entities: a reading gives a Claim none, and who made
@@ -210,43 +237,58 @@ func (a *app) itemWith(w http.ResponseWriter, r *http.Request, status int, errs 
 	a.renderStatus(w, r, status, itemTmpl, p)
 }
 
-// spanOf is the Span s of text, numbered n in its Cut, as the reading r
-// judged it, in an Item published on published: what r judged of a stretch
-// within it is shown with it, and the Entities it mentions as is has them.
-// A Span no reading judged reads as its words.
-func spanOf(n int, text string, s cut.Span, r editor.Reading, published time.Time, is map[editor.LookupKey]editor.NamedEntity) spanRow {
+// spanOf is the Span at, numbered n in its Cut, of text, as j's reading
+// judged it, in an Item published on published: what the reading judged of
+// a stretch within it is shown with it, and the Entities it mentions as j
+// has them, each with the Feedback the page at page offers on it. A Span no
+// reading judged reads as its words.
+func spanOf(n int, text string, at editor.Address, published time.Time, j spanJudgements, page string) spanRow {
+	s, r := at.Span, j.reading
 	in := func(a editor.Address) bool { return a.Span.Start >= s.Start && a.Span.End <= s.End }
+	path := page + "/feedback"
 	row := spanRow{N: n, Pieces: r.Hydrated(text, s)}
+	offer := []giveButton{missedOn(path, at)}
 	for _, a := range r.Rejected {
 		if a.Span == s {
 			row.Rejected = true
 		}
 	}
+	for _, ref := range r.RefersTo {
+		if in(ref.From) {
+			offer = append(offer, wrongOn(path, ref.ID,
+				"“"+cut.Words(text, ref.From.Span)+"” refers to “"+r.Words(text, ref.To)+"”"))
+		}
+	}
 	for _, sp := range r.Speakers {
 		if in(sp.Of) {
-			if who := r.Words(text, sp.By); !slices.Contains(row.Speakers, who) {
+			who := r.Words(text, sp.By)
+			if !slices.Contains(row.Speakers, who) {
 				row.Speakers = append(row.Speakers, who)
 			}
+			offer = append(offer, wrongOn(path, sp.ID, "spoken by “"+who+"”"))
 		}
 	}
 	// What it mentions: each Entity its names are, or, for a name not yet
 	// looked up, the name as read, a person by their office.
 	var shown []editor.NamedEntity
 	for _, nm := range r.Mentions(s) {
-		e, ok := is[editor.KeyOf(nm, published)]
+		k := editor.KeyOf(nm, published)
+		e, ok := j.is[k]
 		switch {
 		case !ok:
 			row.Names = append(row.Names, pill{Name: nm.Name, Tag: cmp.Or(nm.Office, nm.Kind)})
 		case !slices.Contains(shown, e):
 			shown = append(shown, e)
 			row.Names = append(row.Names, pillOf(e))
+			offer = append(offer, wrongOn(path, j.lookups[k], "“"+nm.Name+"” is "+e.Name))
 		}
 	}
+	row.Gives = givesOn(offer, j.pieces, page)
 	return row
 }
 
-// itemFeedback is Feedback given on an Item's page, about one of its Facts.
-// It lands back on the page.
+// itemFeedback is Feedback given on an Item's page, about one of its Spans
+// or the judgements shown with them. It lands back on the page.
 func (a *app) itemFeedback(w http.ResponseWriter, r *http.Request) {
 	sourceID, entryID := r.PathValue("source"), r.PathValue("entry")
 	if _, found, err := a.Readings.ReadItem(r.Context(), sourceID, entryID); err != nil || !found {
@@ -261,20 +303,12 @@ func (a *app) itemFeedback(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad form.", http.StatusBadRequest)
 		return
 	}
-	_, errs, err := a.Feedback.Give(r.Context(), draftFrom(r), a.Now())
-	switch {
-	case errors.Is(err, feedback.ErrNotInRecord):
-		http.NotFound(w, r)
-	case err != nil:
-		a.serverError(w, r, err)
-	case len(errs) > 0:
+	a.givePiece(w, r, askFrom(r, sourceID, entryID, ""), itemPath(sourceID, entryID), func(errs feedback.Errors) {
 		a.itemWith(w, r, http.StatusUnprocessableEntity, errs)
-	default:
-		http.Redirect(w, r, itemPath(sourceID, entryID), http.StatusSeeOther)
-	}
+	})
 }
 
 // undoOnItem is an undo from an Item's page, which it lands back on.
 func (a *app) undoOnItem(w http.ResponseWriter, r *http.Request) {
-	a.undo(w, r, itemPath(r.PathValue("source"), r.PathValue("entry")))
+	a.undoPiece(w, r, itemPath(r.PathValue("source"), r.PathValue("entry")))
 }

@@ -6,6 +6,9 @@
      it. Collected text is inert: hx-disable on the elements holding it. */}}
 <p>{{template "citation" .Item}}{{with .Published}} <small>{{.}}</small>{{end}}</p>
 <h1>{{.Title}}</h1>
+{{- with .FeedbackError}}
+<p role="alert">{{.}}</p>
+{{- end}}
 
 <div class="margined" data-margin="open">
 {{template "margin-fold" "open"}}
@@ -24,6 +27,7 @@
       {{- with $.ReadBy}}
       <p>{{template "made" .}}</p>
       {{- end}}
+      {{- template "block-gives" .Gives}}
     </div>
   </li>
   {{- end}}
@@ -36,6 +40,12 @@
 <section aria-labelledby="story">
   <h2 id="story">Its Story</h2>
   <p class="quiet">As <a href="{{.BriefingPath}}">the Briefing for {{.BriefingDate}}</a> gathered it {{template "made" .Made}}</p>
+  {{- with .Gives.Given}}
+  <div class="given-marks">{{template "gives" .}}</div>
+  {{- end}}
+  {{- with .Gives.Offered}}
+  <div role="group" aria-label="Feedback on this Story">{{template "gives" .}}</div>
+  {{- end}}
   {{- if not .Spans}}
   <p>Nothing moved on what it says, or was moved on by it.</p>
   {{- end}}
@@ -63,10 +73,12 @@
         <p>{{template "citation" .Item}}</p>
         <p>{{template "made" .Made}}</p>
         <p class="quiet">not yet gathered</p>
+        {{- template "block-gives" .Gives}}
       </div>
     </li>
   {{- end}}
   </ul>
 </section>
 </div>
+{{template "given" .Feedback}}
 {{end}}

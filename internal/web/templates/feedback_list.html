@@ -27,7 +27,7 @@
       <td>
         {{- if .Undone}}<span class="quiet">Undone {{.Undone}}</span>
         {{- else}}
-        {{/* Shown while the pointer or keyboard focus is in the row (.actions, in the stylesheet). */}}
+        {{/* Shown at rest, quiet (.actions, in the stylesheet). */}}
         <div class="actions quiet"><form class="feedback" hx-put="{{.UndoPath}}" hx-target="body" hx-swap="innerHTML"><button>Undo</button></form></div>
         {{- end}}</td>
     </tr>

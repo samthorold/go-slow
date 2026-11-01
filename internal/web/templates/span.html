@@ -20,14 +20,11 @@
       {{- if .Rejected}}
       <p class="quiet">rejected</p>
       {{- end}}
-      {{- range .Speakers}}
-      <p class="quiet">spoken by <span hx-disable>{{.}}</span></p>
-      {{- end}}
-      {{template "pills" .Names}}
+      {{- template "span-judged" .}}
       {{- with $.ReadBy}}
       <p>{{template "made" .}}</p>
       {{- end}}
-      {{- template "block-gives" .Gives}}
+      <div>{{template "gives" .Missed}}</div>
     </div>
   </li>
   {{- end}}
@@ -40,12 +37,7 @@
 <section aria-labelledby="story">
   <h2 id="story">Its Story</h2>
   <p class="quiet">As <a href="{{.Path}}">{{.By}} for {{.Date}}</a> gathered it {{if .Conversation}}<a class="machine" href="{{.Conversation}}">gathered · conversation</a>{{else}}{{template "made" .Made}}{{end}}</p>
-  {{- with .Gives.Given}}
-  <div class="given-marks">{{template "gives" .}}</div>
-  {{- end}}
-  {{- with .Gives.Offered}}
-  <div role="group" aria-label="Feedback on this Story">{{template "gives" .}}</div>
-  {{- end}}
+  <div class="actions" role="group" aria-label="Feedback on this Story">{{template "gives" .Gives}}</div>
   {{- if not .Spans}}
   <p>Nothing moved on what it says, or was moved on by it.</p>
   {{- end}}

@@ -1,10 +1,12 @@
-{{/* give is one piece of Feedback the Owner can give with a button. It
-     re-renders the whole page, since Feedback can change several regions
-     of it (wrong on a reference changes what its Span mentions).
-     Feedback of its kind already standing on its target shows as given,
-     with the undo of that piece, instead of a fresh button. */}}
-{{define "give"}}{{if .UndoPath}}<span class="feedback given">{{.Label}} ✓, given
-  <form class="feedback" hx-put="{{.UndoPath}}" hx-target="body" hx-swap="innerHTML"><button>Undo</button></form></span>
+{{/* give is one piece of Feedback the Owner can give with a button: a
+     small icon of its kind, shown at rest, its full label its accessible
+     name and title. It re-renders the whole page, since Feedback can change
+     several regions of it (wrong on a reference changes what its Span
+     mentions). Feedback of its kind already standing on its target shows as
+     given in its place, its icon in its kind's hue, with the undo of that
+     piece, instead of a fresh button. */}}
+{{define "give"}}{{if .UndoPath}}<span class="feedback given given-{{.KindClass}}" title="{{.Label}} ✓, given"><span aria-hidden="true">{{.Icon}}</span><span class="visually-hidden">{{.Label}} ✓, given</span>
+  <form class="feedback" hx-put="{{.UndoPath}}" hx-target="body" hx-swap="innerHTML"><button aria-label="Undo: {{.Label}}" title="Undo: {{.Label}}">Undo</button></form></span>
 {{- else}}<form class="feedback" hx-post="{{.Path}}" hx-target="body" hx-swap="innerHTML"
   {{- with .Confirm}} hx-confirm="{{.}}"{{end}}>
   <input type="hidden" name="kind" value="{{.Kind}}">
@@ -12,7 +14,7 @@
   {{- with .Source}}<input type="hidden" name="source" value="{{.}}">{{end}}
   {{- with .Entry}}<input type="hidden" name="entry" value="{{.}}">{{end}}
   {{- with .Span}}<input type="hidden" name="span" value="{{.}}">{{end}}
-  <button>{{.Label}}</button>
+  <button class="give give-{{.KindClass}}" aria-label="{{.Label}}" title="{{.Label}}"><span aria-hidden="true">{{.Icon}}</span></button>
 </form>{{end}}{{end}}
 
 {{define "gives"}}{{range .}}{{template "give" .}}{{end}}{{end}}

@@ -41,7 +41,7 @@
         <td><strong hx-disable>{{.Name}}</strong></td>
         <td class="quiet"><span hx-disable>{{range $i, $t := .Terms}}{{if $i}}, {{end}}{{$t}}{{end}}</span></td>
         <td>
-          {{/* Shown while the pointer or keyboard focus is in the row (.actions, in the stylesheet). */}}
+          {{/* Shown at rest, quiet (.actions, in the stylesheet). */}}
           <div class="actions quiet">
             <button hx-delete="/topics/{{.ID}}" hx-target="#topic-{{.ID}}" hx-swap="outerHTML"
               hx-confirm="Stop following this Topic?">Remove</button>

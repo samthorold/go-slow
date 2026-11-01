@@ -190,10 +190,9 @@ func TestFollowedTopicsRenderAsATableOfTopicsAndTerms(t *testing.T) {
 	}
 }
 
-// Remove is in the row's actions, hidden at rest in a way that keeps it in
-// the tab order and shown while the pointer or keyboard focus is in the row,
-// as the Briefing's controls are.
-func TestRemoveIsInTheRowsActionsShownOnHoverOrFocus(t *testing.T) {
+// Remove is in the row's actions, shown at rest like every control (no rule
+// hides it: TestNoControlIsHiddenAtRestAndTheIconsAreQuietUntilHoveredOrFocused).
+func TestRemoveIsInTheRowsActions(t *testing.T) {
 	app := newApp(t, saturday)
 	addTopic(t, app, url.Values{"name": {"Reform UK"}, "terms": {"Reform UK"}})
 
@@ -202,19 +201,6 @@ func TestRemoveIsInTheRowsActionsShownOnHoverOrFocus(t *testing.T) {
 	actions := regexp.MustCompile(`(?s)<div class="actions[^"]*"[^>]*>(.*?)</div>`).FindStringSubmatch(row)
 	if actions == nil || !strings.Contains(actions[1], `hx-delete="/topics/1"`) || !strings.Contains(actions[1], "hx-confirm=") {
 		t.Fatalf("the row's actions hold no confirmed Remove:\n%s", row)
-	}
-	css := get(t, app, "/static/go-slow.css").body
-	rest := regexp.MustCompile(`(?m)^\.topics \.actions\s*\{([^}]*)\}`).FindStringSubmatch(css)
-	if rest == nil {
-		t.Fatalf("no rule hides the Topics' actions at rest:\n%s", css)
-	}
-	if strings.Contains(rest[1], "display: none") || strings.Contains(rest[1], "visibility: hidden") {
-		t.Errorf("the actions are hidden at rest so the keyboard cannot reach them:\n%s", rest[0])
-	}
-	for _, sel := range []string{".topics tr:hover .actions", ".topics tr:focus-within .actions"} {
-		if !strings.Contains(css, sel) {
-			t.Errorf("no rule reveals the actions on %s", sel)
-		}
 	}
 }
 

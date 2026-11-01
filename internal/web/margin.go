@@ -12,6 +12,20 @@ import (
 // where it has a page (its Wikidata item).
 type pill struct {
 	Name, Tag, Href string
+	// Gives is the Feedback on the look-up that made it this Entity, shown
+	// beside it, where the page offers it.
+	Gives gives
+}
+
+// judged is a judgement as a margin line names it, with its Feedback beside
+// it: whose words a Span is ("spoken by …"), or what a stretch of it refers
+// to.
+type judged struct {
+	// Words are what the line names: the speaker, or the stretch.
+	Words string
+	// To is what the stretch refers to, for a refers to.
+	To    string
+	Gives gives
 }
 
 // pillOf is an Entity as the Record's look-ups have it, tagged with its kind

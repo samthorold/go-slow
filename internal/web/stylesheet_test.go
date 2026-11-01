@@ -76,8 +76,8 @@ func TestTheStylesheetCarriesFocusTheQuietStyleRequestErrorsAndStatusHues(t *tes
 // Likewise for the body-and-margin layout and its visual vocabulary, which
 // every page showing the Editor's work shares: a block's margin beside its
 // body, folded away in a folded region, dropped below the block on a narrow
-// window; Feedback actions in the margin revealed on hover and focus; and
-// the pill, citation and machine label as classes any page can take.
+// window; and the pill, citation and machine label as classes any page can
+// take.
 func TestTheStylesheetCarriesTheBodyAndMarginLayoutAndItsVocabulary(t *testing.T) {
 	app := newApp(t, saturday)
 	link := stylesheetLink.FindStringSubmatch(get(t, app, "/").body)
@@ -90,8 +90,6 @@ func TestTheStylesheetCarriesTheBodyAndMarginLayoutAndItsVocabulary(t *testing.T
 		"a block's body and margin side by side": regexp.MustCompile(`(?m)^\.block\s*\{[^}]*grid-template-columns:`),
 		"a folded region's margin hidden":        regexp.MustCompile(`\[data-margin="folded"\] \.block-margin\s*\{[^}]*display:\s*none`),
 		"the margin below the block when narrow": regexp.MustCompile(`@media \(max-width: [^)]+\)\s*\{\s*\.block\s*\{[^}]*grid-template-columns:\s*1fr`),
-		"actions hidden at rest":                 regexp.MustCompile(`(?m)^\.block-margin \.actions\s*\{[^}]*clip-path:`),
-		"actions shown on hover and focus":       regexp.MustCompile(`\.block:hover \.block-margin \.actions,\s*\.block:focus-within \.block-margin \.actions\s*\{`),
 		"the pill":                               regexp.MustCompile(`(?m)^\.pill\s*\{[^}]*border:`),
 		"the pill's tag in small caps":           regexp.MustCompile(`(?m)^\.pill-tag\s*\{[^}]*small-caps`),
 		"the citation's title in italics":        regexp.MustCompile(`(?m)^\.citation cite\s*\{[^}]*font-style:\s*italic`),

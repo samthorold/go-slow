@@ -14,7 +14,7 @@ func giveForm(t *testing.T, html, label string) (string, url.Values) {
 	t.Helper()
 	forms := regexp.MustCompile(`(?s)<form class="feedback" hx-post="([^"]+)"[^>]*>(.*?)</form>`).FindAllStringSubmatch(html, -1)
 	for _, f := range forms {
-		if !strings.Contains(f[2], "<button>"+label+"</button>") {
+		if !strings.Contains(f[2], `aria-label="`+label+`"`) {
 			continue
 		}
 		v := url.Values{}
@@ -116,11 +116,17 @@ func TestNewToMeOnAStatementShowsGivenAtRestInItsMarginWithItsUndoAndTakesNothin
 
 	page := get(t, app, "/").body
 	statement := blockOf(t, page, "Derby will host the headquarters, it said.")
-	if !regexp.MustCompile(`<div class="given-marks"><span class="feedback given">New to me: this statement ✓, given\s*<form class="feedback" hx-put="/briefings/2026-10-24/feedback/\d+/undone"`).MatchString(statement.margin) {
-		t.Errorf("new to me does not show given at rest in the statement's margin, with its undo:\n%s", statement.margin)
+	actions := regexp.MustCompile(`(?s)<div class="actions" role="group" aria-label="Feedback">(.*?)</div>`).FindStringSubmatch(statement.margin)
+	if actions == nil {
+		t.Fatalf("the statement's block has no Feedback:\n%s", statement.margin)
 	}
-	if actions := regexp.MustCompile(`(?s)<div class="actions" role="group" aria-label="Feedback">(.*?)</div>`).FindStringSubmatch(statement.margin); actions == nil ||
-		strings.Contains(actions[1], "New to me") || !strings.Contains(actions[1], "Wrong: this statement") {
+	given := regexp.MustCompile(`<span class="feedback given given-new-to-me" title="New to me: this statement ✓, given"><span aria-hidden="true">✦</span>` +
+		`<span class="visually-hidden">New to me: this statement ✓, given</span>\s*<form class="feedback" hx-put="/briefings/2026-10-24/feedback/\d+/undone"[^>]*>` +
+		`<button aria-label="Undo: New to me: this statement"`)
+	if !given.MatchString(actions[1]) {
+		t.Errorf("new to me does not show given at rest at the statement's block, its label read out, with its undo:\n%s", statement.margin)
+	}
+	if strings.Contains(actions[1], `aria-label="New to me: this statement"`) || !strings.Contains(actions[1], `aria-label="Wrong: this statement"`) {
 		t.Errorf("the statement's actions do not offer just what is not given:\n%s", statement.margin)
 	}
 }

@@ -503,7 +503,9 @@ body:has(.margined) #request-errors {
 }
 
 /* What is set aside (a Span Rejected) stays on the page, struck through in
-   the quiet colour, with the reason in its margin. */
+   the quiet colour, with the reason in its margin. In a block it goes on the
+   .block-body only, never the block: the margin (the reason, the pills, the
+   Feedback controls) reads plainly. */
 .struck {
   text-decoration: line-through;
   color: var(--muted);

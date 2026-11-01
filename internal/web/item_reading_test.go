@@ -91,10 +91,14 @@ func TestAnItemsPageShowsItsSpansHydratedWithTheirSpeakersNamesAndRejections(t *
 	if !strings.Contains(visit.body, `<ins title="He">Andy Burnham</ins> visited the site on Monday.`) || strings.Contains(visit.margin, "spoken by") {
 		t.Errorf("S4, the publisher's own, is not read hydrated:\n%s\n%s", visit.body, visit.margin)
 	}
-	// A Rejected Span stays, struck through, saying so.
-	said := regexp.MustCompile(`<li id="span-1"[^>]*class="block struck"`)
-	if !said.MatchString(page) || !strings.Contains(spanBlock(t, page, 1).margin, "rejected") {
-		t.Errorf("S1 is not shown Rejected:\n%s", page)
+	// A Rejected Span stays, its text struck through, its margin saying so
+	// plainly: only the body is struck.
+	rejected := spanBlock(t, page, 1)
+	if !strings.HasPrefix(rejected.body, `class="block-body struck"`) || !strings.Contains(rejected.margin, "rejected") {
+		t.Errorf("S1 is not shown Rejected, its body struck:\n%s", page)
+	}
+	if regexp.MustCompile(`<li id="span-1"[^>]*struck`).MatchString(page) || strings.Contains(rejected.margin, "struck") {
+		t.Errorf("S1's margin is struck through with its body:\n%s", page)
 	}
 	// What a Span names is a pill: a person by their office, else its kind.
 	if !strings.Contains(spanBlock(t, page, 1).margin,

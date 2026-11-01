@@ -132,14 +132,15 @@ type briefingPage struct {
 type toldRow struct {
 	Text  string
 	Cites []toldCite
-	// Gives is the Feedback on the statement (wrong, new to me) and on each
-	// Span it cites as told (unwanted).
+	// Gives is the Feedback on the statement: wrong, new to me.
 	Gives gives
 }
 
 type toldCite struct {
 	spanLink
 	Speaker string
+	// Gives is unwanted on the Span as told, beside it.
+	Gives gives
 }
 
 // toldRows are the statements of b as the page at page shows them, each
@@ -154,12 +155,12 @@ func (a *app) toldRows(b editor.Briefing, page string, pieces []feedback.KeptPie
 			continue
 		}
 		row := toldRow{Text: st.Text}
-		offer := []giveButton{wrongOn(path, st.ID, "this statement"), newToMeOn(path, st.ID, "this statement")}
+		row.Gives = givesOn([]giveButton{wrongOn(path, st.ID, "this statement"), newToMeOn(path, st.ID, "this statement")},
+			pieces, page)
 		for _, c := range st.Cites {
-			row.Cites = append(row.Cites, toldCite{spanLink: a.linkTo(c), Speaker: c.Speaker})
-			offer = append(offer, unwantedOn(path, b.Day, c.At, c.Words))
+			row.Cites = append(row.Cites, toldCite{spanLink: a.linkTo(c), Speaker: c.Speaker,
+				Gives: givesOn([]giveButton{unwantedOn(path, b.Day, c.At, c.Words)}, pieces, page)})
 		}
-		row.Gives = givesOn(offer, pieces, page)
 		out = append(out, row)
 	}
 	return out

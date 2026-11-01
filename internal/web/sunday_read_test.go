@@ -24,7 +24,7 @@ var sunday = saturday.AddDate(0, 0, 1)
 func offers(body, kind string, id int64) bool {
 	fields := `<input type="hidden" name="kind" value="` + kind + `"><input type="hidden" name="judgement" value="` +
 		strconv.FormatInt(id, 10) + `">`
-	return strings.Contains(body, fields+"\n  <button>")
+	return strings.Contains(body, fields+"\n  <button class=\"give ")
 }
 
 // undoForm is the path the page's undo of the piece of Feedback goes to, or
@@ -37,8 +37,8 @@ func undoForm(body string, id int64) string {
 	return m[1]
 }
 
-// actionGroups matches every group of Feedback controls that is shown only
-// on hover or focus of what it acts on.
+// actionGroups matches every group of a block's or a title's own Feedback
+// controls, shown at rest beside what they act on.
 var actionGroups = regexp.MustCompile(`(?s)<div class="actions[^"]*" role="group" aria-label="([^"]*)">(.*?)</div>`)
 
 // foldedRegion asserts page holds its blocks in one margined region,
@@ -151,14 +151,14 @@ func TestTheSundayReadsStatementsHaveWhatTheyCiteBesideThemInAFoldedMargin(t *te
 			t.Errorf("the statement's margin lacks %q:\n%s", want, statement.margin)
 		}
 	}
-	// New to me on the read is its title's action, shown on hover or focus.
+	// New to me on the read is its title's action, beside it.
 	title := regexp.MustCompile(`(?s)<div class="title-row">\s*<h1>Sunday read</h1>(.*?)</div>\s*</div>`).FindStringSubmatch(page)
 	if title == nil || !actionGroups.MatchString(title[0]) || !offers(title[1], "new to me", r.ID) {
 		t.Errorf("the read's title carries no New to me among its actions:\n%s", page)
 	}
 }
 
-func TestAssessmentsAreSetApartAsJudgementWithTheirNotesInTheMarginAndActionsOnHover(t *testing.T) {
+func TestAssessmentsAreSetApartAsJudgementWithTheirNotesInTheMarginAndActionsWithTheirText(t *testing.T) {
 	store := toldRecord(t)
 	r := writeSundayRead(t, store, sunday, assessed)
 	app, _ := newAppWithLog(t, sunday, store)

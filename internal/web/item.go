@@ -45,15 +45,21 @@ type spanRow struct {
 	N        int
 	Pieces   []editor.Piece
 	Rejected bool
-	Speakers []string
-	Names    []pill
+	// Speakers are whose words it is, each with wrong on the judgements
+	// that say so beside it.
+	Speakers []judged
+	// RefersTo are what each stretch in it refers to, each with wrong on
+	// it beside it: a margin line, since the body is collected text, inert
+	// (hx-disable), where a control would do nothing.
+	RefersTo []judged
+	// Names are the Entities it mentions, each with wrong on the look-up
+	// that made it so beside its pill.
+	Names []pill
 	// Href is the Span's own page, where its relations are; empty where it
 	// is shown on that page.
 	Href string
-	// Gives is the Feedback the Owner can give on it here: missed on the
-	// Span, and wrong on each judgement shown with it (what a stretch in it
-	// refers to, whose words it is, which Entity a name in it is).
-	Gives gives
+	// Missed is missed on the Span, offered once.
+	Missed gives
 }
 
 // itemPage is the view model for an Item's page: the Item as collected, and
@@ -183,8 +189,8 @@ func spanOf(n int, text string, at editor.Address, published time.Time, j spanJu
 	s, r := at.Span, j.reading
 	in := func(a editor.Address) bool { return a.Span.Start >= s.Start && a.Span.End <= s.End }
 	path := page + "/feedback"
-	row := spanRow{N: n, Pieces: inPlace(r.Hydrated(text, s))}
-	offer := []giveButton{missedOn(path, at)}
+	on := func(g ...giveButton) gives { return givesOn(g, j.pieces, page) }
+	row := spanRow{N: n, Pieces: inPlace(r.Hydrated(text, s)), Missed: on(missedOn(path, at))}
 	for _, a := range r.Rejected {
 		if a.Span == s {
 			row.Rejected = true
@@ -192,17 +198,20 @@ func spanOf(n int, text string, at editor.Address, published time.Time, j spanJu
 	}
 	for _, ref := range r.RefersTo {
 		if in(ref.From) {
-			offer = append(offer, wrongOn(path, ref.ID,
-				"“"+cut.Words(text, ref.From.Span)+"” refers to “"+r.Words(text, ref.To)+"”"))
+			from, to := cut.Words(text, ref.From.Span), r.Words(text, ref.To)
+			row.RefersTo = append(row.RefersTo, judged{Words: from, To: to,
+				Gives: on(wrongOn(path, ref.ID, "“"+from+"” refers to “"+to+"”"))})
 		}
 	}
 	for _, sp := range r.Speakers {
 		if in(sp.Of) {
 			who := r.Words(text, sp.By)
-			if !slices.Contains(row.Speakers, who) {
-				row.Speakers = append(row.Speakers, who)
+			g := on(wrongOn(path, sp.ID, "spoken by “"+who+"”"))
+			if i := slices.IndexFunc(row.Speakers, func(j judged) bool { return j.Words == who }); i >= 0 {
+				row.Speakers[i].Gives = append(row.Speakers[i].Gives, g...)
+			} else {
+				row.Speakers = append(row.Speakers, judged{Words: who, Gives: g})
 			}
-			offer = append(offer, wrongOn(path, sp.ID, "spoken by “"+who+"”"))
 		}
 	}
 	// What it mentions: each Entity its names are, or, for a name not yet
@@ -216,11 +225,11 @@ func spanOf(n int, text string, at editor.Address, published time.Time, j spanJu
 			row.Names = append(row.Names, pill{Name: nm.Name, Tag: cmp.Or(nm.Office, nm.Kind)})
 		case !slices.Contains(shown, e):
 			shown = append(shown, e)
-			row.Names = append(row.Names, pillOf(e))
-			offer = append(offer, wrongOn(path, j.lookups[k], "“"+nm.Name+"” is "+e.Name))
+			p := pillOf(e)
+			p.Gives = on(wrongOn(path, j.lookups[k], "“"+nm.Name+"” is "+e.Name))
+			row.Names = append(row.Names, p)
 		}
 	}
-	row.Gives = givesOn(offer, j.pieces, page)
 	return row
 }
 

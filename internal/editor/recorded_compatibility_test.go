@@ -38,14 +38,21 @@ func TestEachActsCurrentRecordingsAreTakenByTheActsDownstream(t *testing.T) {
 	}
 }
 
-// feedBriefing replays the current readings and relatings under root (each
-// fixture's first sample) and writes the Briefing over them on a fake
-// model. It is an error if the Briefing's request fails to build, or the
-// fake's answer fails its checks.
+// feedBriefing replays the current readings under root (each fixture's
+// first sample), relates them on a fake model and writes the Briefing over
+// them on another. Relating's own recordings are not replayed: their
+// answers name candidates by number, as the one reading they were recorded
+// over offered them, and a fresh reading may offer others. It is an error
+// if relating's or the Briefing's request fails to build, or a fake's
+// answer fails its checks.
 func feedBriefing(t *testing.T, root string) error {
 	t.Helper()
 	store, topics := newRecord(t, nil)
-	c := chain{reading: firstSamples(filepath.Join(root, "reading")), relating: firstSamples(filepath.Join(root, "relating"))}
+	relating := &fakeAct{act: "relating"}
+	c := chain{
+		reading:  firstSamples(filepath.Join(root, "reading")),
+		relating: func(string) (editor.Model, error) { return relating, nil },
+	}
 	if err := c.run(t.Context(), store, topics, fixtureItems(t)); err != nil {
 		return err
 	}
@@ -60,17 +67,50 @@ func feedBriefing(t *testing.T, root string) error {
 	return nil
 }
 
+// The Briefing takes reading's current recordings whatever candidates they
+// offer relating: a reading of the Holyrood press release that names
+// nothing offers the speech's Spans none of the release's, so relating's
+// recorded answer, which relates the speech to candidates by their numbers
+// as one reading offered them, no longer fits what it would be shown.
+func TestTheCompatibilityCheckTakesReadingsOfferingOtherCandidates(t *testing.T) {
+	t.Parallel()
+	root := copyRecordings(t)
+	namingNothing(t, root, "prime-minister-makes-offer-to-holyrood-to-work-together-to-empower-scottish-regions")
+	if err := feedBriefing(t, root); err != nil {
+		t.Fatal(err)
+	}
+}
+
 // A reading relating can't take fails the check: one that names nothing
 // gives relating no candidates to weigh the speech's Spans against.
 func TestTheCompatibilityCheckFailsOnAReadingRelatingCannotTake(t *testing.T) {
 	t.Parallel()
+	root := copyRecordings(t)
+	name := "pm-speech-in-scotland-16-october-2026"
+	namingNothing(t, root, name)
+	err := feedDownstream(t, root, "reading")
+	if err == nil || !strings.Contains(err.Error(), "relating was never asked about "+name) {
+		t.Fatalf("feedDownstream = %v; want relating never asked about %s", err, name)
+	}
+}
+
+// copyRecordings is a root holding a copy of reading's and relating's
+// current recordings, to change in a test.
+func copyRecordings(t *testing.T) string {
+	t.Helper()
 	root := t.TempDir()
 	for _, act := range []string{"reading", "relating"} {
 		if err := os.CopyFS(filepath.Join(root, act), os.DirFS(filepath.Join(recordedDir, act))); err != nil {
 			t.Fatal(err)
 		}
 	}
-	name := "pm-speech-in-scotland-16-october-2026"
+	return root
+}
+
+// namingNothing rewrites the first sample of the fixture name's reading
+// under root so that it names nothing.
+func namingNothing(t *testing.T, root, name string) {
+	t.Helper()
 	path := samplePath(filepath.Join(root, "reading"), name, 1)
 	sample, err := sampleAt(path)
 	if err != nil {
@@ -90,11 +130,6 @@ func TestTheCompatibilityCheckFailsOnAReadingRelatingCannotTake(t *testing.T) {
 	rec.Output = b
 	attempts[len(attempts)-1] = rec
 	keepSample(t, path, attempts)
-
-	err = feedDownstream(t, root, "reading")
-	if err == nil || !strings.Contains(err.Error(), "relating was never asked about "+name) {
-		t.Fatalf("feedDownstream = %v; want relating never asked about %s", err, name)
-	}
 }
 
 // downstream are the acts that rest on each act's recordings.

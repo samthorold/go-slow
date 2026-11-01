@@ -38,9 +38,9 @@
 {{/* The Briefing over Spans: each statement a block, the Spans it cites
      in its margin, each linking its page, with whose words it is and its
      Item. The margin starts open; the one control folds it away. Each
-     block's Feedback is in its margin: what is already given is state and
-     shows at rest; what is offered is its actions (.actions), shown only
-     while the pointer or keyboard focus is in the block. */}}
+     block's Feedback is in its margin, shown at rest as icons beside what
+     it judges: unwanted beside each Span cited, wrong and new to me on the
+     statement at the margin's foot. */}}
 <div class="margined" data-margin="open">
 {{template "margin-fold" "open"}}
 <ul class="blocks">
@@ -50,7 +50,7 @@
     <div class="block-margin">
       {{- range .Cites}}
       <div class="cited">
-        <p class="quiet"><a href="{{.Href}}"><span hx-disable>{{.Words}}</span></a></p>
+        <div class="quiet"><a href="{{.Href}}"><span hx-disable>{{.Words}}</span></a>{{template "gives" .Gives}}</div>
         {{- with .Speaker}}
         <p class="quiet">spoken by <span hx-disable>{{.}}</span></p>
         {{- end}}

@@ -349,7 +349,9 @@ form.feedback {
    then " · " and its Role, or its kind where it has no Role, in a .pill-tag
    shown in small caps. One hue for every pill, whatever the Role:
      <span class="pill"><span hx-disable>John Healey</span> · <span class="pill-tag">actor</span></span>
-   A row of pills is a <p class="pills">. */
+   A row of pills is a <div class="pills"> (a div, since a pill's
+   Feedback control beside it, in a <span class="judged">, is a form, which
+   would close a paragraph). */
 .pill {
   display: inline-block;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -376,6 +378,12 @@ a.pill:hover {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+/* A pill with its Feedback control: kept together on one line. */
+.judged {
+  white-space: nowrap;
 }
 
 /* An Item is a citation (.citation): its Source's short name, who is
@@ -484,28 +492,6 @@ body:has(.margined) #request-errors {
   display: none;
 }
 
-/* A block's Feedback actions in its margin: hidden at rest, shown while the
-   pointer or keyboard focus is in the block. Hidden visually, never with
-   display: none, so they stay in the tab order and tabbing reveals them. */
-.block-margin .actions {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-.block:hover .block-margin .actions,
-.block:focus-within .block-margin .actions {
-  position: static;
-  width: auto;
-  height: auto;
-  overflow: visible;
-  clip-path: none;
-  white-space: normal;
-}
-
 @media (max-width: 60rem) {
   .block {
     grid-template-columns: 1fr;
@@ -597,32 +583,12 @@ body:has(.margined) #request-errors {
 /* The reading page (the Sunday read) reads as text, its margin folded at
    rest. Feedback is its frequent act, so an Assessment's Feedback controls
    (.actions) sit with its text in the body column, which no fold hides, and
-   the read's title's in its title row (.title-row): hidden at rest and shown
-   while the pointer or keyboard focus is in the block or the row. Hidden visually, not with display: none
-   or visibility: hidden, so they stay in the tab order: tabbing into them is
-   what reveals them. Feedback already given (.given-marks) is state and
-   stays shown. */
-.block-body .actions,
-.title-row .actions {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-.block:hover .block-body .actions,
-.block:focus-within .block-body .actions,
-.title-row:hover .actions,
-.title-row:focus-within .actions {
-  position: static;
-  width: auto;
-  height: auto;
-  overflow: visible;
-  clip-path: none;
-  white-space: normal;
-  margin: 0.2rem 0 0;
+   the read's title's beside it in its title row (.title-row), shown at rest
+   like every other control. */
+.title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
 }
 
 .title-row h1 {
@@ -633,15 +599,80 @@ body:has(.margined) #request-errors {
   margin-bottom: 0.15rem;
 }
 
-.given-marks {
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 0.8rem;
+/* Feedback controls: each a small icon button, one icon per kind, the same
+   on every page (wrong ✗, new to me ✦, unwanted ⊘, missed ⊕), its full
+   label its accessible name and its title. Shown at rest, never revealed
+   on hover or focus, so nothing moves as the pointer does: quiet at rest,
+   the link colour on hover and focus. Each sits beside what it judges (an
+   Entity's pill, a "spoken by" line, a Span cited); a block's own (a
+   statement's, an Assessment's) sit together in its .actions.
+     <button class="give give-wrong" aria-label="Wrong: …" title="Wrong: …"><span aria-hidden="true">✗</span></button> */
+button.give {
+  font-size: 0.9rem;
   color: var(--muted);
-  margin: 0;
+  border: 0;
+  padding: 0 0.2rem;
+  margin-left: 0.15rem;
+  line-height: 1.2;
 }
 
-.title-row .given-marks {
-  margin-bottom: 0.5rem;
+button.give:hover,
+button.give:focus-visible {
+  color: var(--link);
+}
+
+/* Feedback already given shows where its control was: its icon filled in
+   its kind's hue (the kind hues, above), then its Undo, quiet. Its label is
+   read out, not shown (.visually-hidden), and is its title. */
+.feedback.given {
+  white-space: nowrap;
+  margin-left: 0.15rem;
+}
+
+.feedback.given > [aria-hidden] {
+  color: var(--bg);
+  border-radius: 3px;
+  padding: 0 0.25em;
+}
+
+.given-wrong > [aria-hidden] {
+  background: var(--kind-wrong);
+}
+
+.given-new-to-me > [aria-hidden] {
+  background: var(--kind-new-to-me);
+}
+
+.given-unwanted > [aria-hidden] {
+  background: var(--kind-unwanted);
+}
+
+.given-missed > [aria-hidden] {
+  background: var(--kind-missed);
+}
+
+.feedback.given button {
+  border: 0;
+  padding: 0 0.2rem;
+}
+
+.feedback.given button:hover,
+.feedback.given button:focus-visible {
+  color: var(--link);
+}
+
+/* What a screen reader reads and the page does not show. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.actions {
+  margin: 0.2rem 0 0;
 }
 
 /* What a statement cites, each in its margin: the Span, whose words it
@@ -670,8 +701,7 @@ body:has(.margined) #request-errors {
 }
 
 /* The Topics page: a row per Topic, its name and terms. Remove is
-   in the row's .actions, hidden at rest the Briefing's way (in the tab
-   order) and shown while the pointer or keyboard focus is in the row. */
+   in the row's .actions, shown at rest, quiet. */
 .topics {
   width: 100%;
 }
@@ -681,27 +711,12 @@ body:has(.margined) #request-errors {
 }
 
 /* Row actions: a table row's controls (.actions in a cell of a row of
-   .topics or .feedback-table), hidden at rest the Briefing's way (in the
-   tab order) and shown while the pointer or keyboard focus is in the row. */
+   .topics or .feedback-table), shown at rest like every control, in the
+   quiet style buttons take, so no page reveals controls on hover. */
 .feedback-table .actions,
 .topics .actions {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
+  margin: 0;
   white-space: nowrap;
-}
-
-.feedback-table tr:hover .actions,
-.feedback-table tr:focus-within .actions,
-.topics tr:hover .actions,
-.topics tr:focus-within .actions {
-  position: static;
-  width: auto;
-  height: auto;
-  overflow: visible;
-  clip-path: none;
 }
 
 /* The Feedback page: a row per piece, newest first, widened like a

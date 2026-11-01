@@ -66,25 +66,13 @@ func TestTheBriefingCitesAnItemByItsSourcesShortNameBeforeItsTitle(t *testing.T)
 	}
 }
 
-func TestTheStylesheetHidesTheSundayReadsControlsAtRestAndRevealsThemOnHoverOrFocus(t *testing.T) {
+// An Assessment's controls sit in its body column, which no fold hides (and
+// no rule hides any control at rest:
+// TestNoControlIsHiddenAtRestAndTheIconsAreQuietUntilHoveredOrFocused).
+func TestTheFoldHidesNothingInTheBodyColumn(t *testing.T) {
 	app := newApp(t, saturday)
 	css := get(t, app, "/static/go-slow.css").body
 
-	// An Assessment's controls sit in its body column, which no fold hides;
-	// the read's title's beside it, in its title row.
-	rest := regexp.MustCompile(`(?m)^\.block-body \.actions,\s*\.title-row \.actions\s*\{([^}]*)\}`).FindStringSubmatch(css)
-	if rest == nil {
-		t.Fatalf("no rule hides the controls with a block's text, or a title's, at rest:\n%s", css)
-	}
-	if strings.Contains(rest[1], "display: none") || strings.Contains(rest[1], "visibility: hidden") {
-		t.Errorf("the controls are hidden at rest so the keyboard cannot reach them:\n%s", rest[0])
-	}
-	for _, sel := range []string{".block:hover .block-body .actions", ".block:focus-within .block-body .actions",
-		".title-row:hover .actions", ".title-row:focus-within .actions"} {
-		if !strings.Contains(css, sel) {
-			t.Errorf("no rule reveals the controls on %s", sel)
-		}
-	}
 	// The fold hides only the margin.
 	if regexp.MustCompile(`\[data-margin="folded"\][^{]*\.block-body`).MatchString(css) {
 		t.Errorf("a folded margin hides something in the body column:\n%s", css)

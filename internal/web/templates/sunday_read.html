@@ -5,16 +5,11 @@
      cite was drawn from collected text: inert, with hx-disable on the
      elements holding them, so the boosted links still work. */}}
 <p><a href="{{.BriefingPath}}">The day's Briefing</a></p>
-{{/* New to me on the read is its title's action, shown on hover or focus
-     (.title-row); given, it shows at rest. */}}
+{{/* New to me on the read is its title's action, beside it at rest
+     (.title-row). */}}
 <div class="title-row">
 <h1>Sunday read</h1>
-{{- with .Gives.Given}}
-<div class="given-marks">{{template "gives" .}}</div>
-{{- end}}
-{{- with .Gives.Offered}}
-<div class="actions quiet" role="group" aria-label="Feedback on this read">{{template "gives" .}}</div>
-{{- end}}
+<div class="actions" role="group" aria-label="Feedback on this read">{{template "gives" .Gives}}</div>
 </div>
 <p>{{.Date}}{{with .Conversation}} · <a href="{{.}}">How this was written</a>{{end}}</p>
 {{- if not .Exists}}
@@ -52,7 +47,8 @@
 <h2>Assessments</h2>
 {{/* An Assessment is the Editor's judgement, set apart with a left rule
      (.assessment); withdrawn, it is struck through and quiet. Its actions
-     sit with its text, so a folded margin leaves them in reach. */}}
+     sit with its text, shown at rest, so a folded margin leaves them in
+     reach. */}}
 <ul class="blocks">
 {{- range .Assessments}}
   <li class="block" id="{{.Anchor}}">
@@ -62,12 +58,7 @@
       {{- else}}
       <p hx-disable>{{.Statement}}</p>
       {{- end}}
-      {{- with .Gives.Given}}
-      <div class="given-marks">{{template "gives" .}}</div>
-      {{- end}}
-      {{- with .Gives.Offered}}
-      <div class="actions quiet" role="group" aria-label="Feedback on this Assessment">{{template "gives" .}}</div>
-      {{- end}}
+      <div class="actions" role="group" aria-label="Feedback on this Assessment">{{template "gives" .Gives}}</div>
     </div>
     <div class="block-margin">
       <p>as at <time>{{.AsAt}}</time></p>

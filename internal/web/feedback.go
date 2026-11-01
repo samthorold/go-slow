@@ -3,7 +3,6 @@ package web
 import (
 	"cmp"
 	"net/http"
-	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -75,18 +74,22 @@ type giveButton struct {
 	day string
 }
 
-// gives are the pieces of Feedback offered on one target.
+// kindIcons are the icon of each kind of Feedback, the same on every page:
+// plain Unicode, so no icon font or build step.
+var kindIcons = map[string]string{
+	string(feedback.Wrong): "✗", string(feedback.NewToMe): "✦",
+	string(feedback.Unwanted): "⊘", string(feedback.Missed): "⊕",
+}
+
+// Icon is the icon of its kind.
+func (g giveButton) Icon() string { return kindIcons[g.Kind] }
+
+// KindClass is its kind as a class name.
+func (g giveButton) KindClass() string { return kindClass(g.Kind) }
+
+// gives are the pieces of Feedback offered on one target, each a fresh
+// button or, where it stands already, shown as given with its undo.
 type gives []giveButton
-
-// Given are those already standing on the target, each with its undo.
-func (gs gives) Given() gives {
-	return slices.DeleteFunc(slices.Clone(gs), func(g giveButton) bool { return g.UndoPath == "" })
-}
-
-// Offered are those not yet given, each a fresh button.
-func (gs gives) Offered() gives {
-	return slices.DeleteFunc(slices.Clone(gs), func(g giveButton) bool { return g.UndoPath != "" })
-}
 
 // kindClass is a kind as a class name: "new to me" is "new-to-me", so its
 // label takes the hue .kind-new-to-me.

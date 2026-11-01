@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -229,7 +230,7 @@ func TestACandidateIsComparedWithTheLiveJudgeAndChosenToBeLive(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{"number-10 speech", "live: reading v1 on claude-haiku-5-5", "names", "live 1", "candidate 1", "both 1"} {
+	for _, want := range []string{"number-10 speech", "live: reading v" + strconv.Itoa(editor.ReadingVersion) + " on claude-haiku-5-5", "names", "live 1", "candidate 1", "both 1"} {
 		if !strings.Contains(compared, want) {
 			t.Errorf("the comparison printed no %q:\n%s", want, compared)
 		}

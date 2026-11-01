@@ -183,7 +183,7 @@ func spanOf(n int, text string, at editor.Address, published time.Time, j spanJu
 	s, r := at.Span, j.reading
 	in := func(a editor.Address) bool { return a.Span.Start >= s.Start && a.Span.End <= s.End }
 	path := page + "/feedback"
-	row := spanRow{N: n, Pieces: r.Hydrated(text, s)}
+	row := spanRow{N: n, Pieces: inPlace(r.Hydrated(text, s))}
 	offer := []giveButton{missedOn(path, at)}
 	for _, a := range r.Rejected {
 		if a.Span == s {

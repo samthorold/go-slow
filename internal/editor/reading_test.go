@@ -202,6 +202,17 @@ func TestAQuoteNotInItsSpanIsRefusedNamingTheSpanAndTheWords(t *testing.T) {
 	}
 }
 
+func TestAQuoteFoundOnlyInsideALongerWordIsRefused(t *testing.T) {
+	// S2 "“This is fantastic news for the city." holds "he" only inside "the".
+	output := `{"names": [], "refers_to": [{"from": {"span": 2, "words": "he"}, "to": {"span": 1, "words": "Andy Burnham"}}], "rejected": [], "speakers": []}`
+
+	_, err := editor.Read(t.Context(), &fakeModel{output: output}, "", toRead(release))
+
+	if !errors.Is(err, editor.ErrFailedChecks) || !strings.Contains(err.Error(), `"he" are not in S2`) {
+		t.Errorf("err = %v, want the words refused as not in S2", err)
+	}
+}
+
 func TestASpanNotInTheCutIsRefused(t *testing.T) {
 	for name, output := range map[string]string{
 		"rejected":   `{"names": [], "refers_to": [], "rejected": [5], "speakers": []}`,

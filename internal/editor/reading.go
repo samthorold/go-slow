@@ -12,12 +12,13 @@ import (
 	"github.com/samthorold/go-slow/internal/cut"
 )
 
-// ReadingVersion is the version of reading's instructions and schema. A new
-// version is a new Judge: it reads what arrives from then on, and the
-// readings made before stand, with theirs (system design: Every judgement
-// carries its judge, and a changed judge judges forward). Change it with
-// readingInstructions or readingSchema.
-const ReadingVersion = 1
+// ReadingVersion is the version of reading's instructions and schema, and of
+// how code turns its answer into a reading (cut.Within addressing the words
+// quoted). A new version is a new Judge: it reads what arrives from then on,
+// and the readings made before stand, with theirs (system design: Every
+// judgement carries its judge, and a changed judge judges forward). Change it
+// with readingInstructions, readingSchema or what cut.Within addresses.
+const ReadingVersion = 2
 
 // ToRead is an Item awaiting reading, with the Cut it is shown as. The
 // Item's Content is its text as kept, which the Cut's Spans address.

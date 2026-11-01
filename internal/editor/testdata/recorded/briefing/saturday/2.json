@@ -1,34 +1,29 @@
 {
   "act": "briefing",
   "model": "claude-haiku-5-5",
-  "request_hash": "516237418882e62acaeecc10c90b40635f302f58cfe175c1475a282ce832142d",
-  "recorded_at": "2026-10-30T23:56:23.076015Z",
+  "request_hash": "87a8228f4d5b4d86694c2cc85a19c96f365ff0453f3e24cf123651c84dd17202",
+  "recorded_at": "2026-11-01T16:42:49.327473Z",
   "usage": {
-    "input_tokens": 31561,
-    "output_tokens": 16348
+    "input_tokens": 31555,
+    "output_tokens": 14210
   },
   "output": {
     "statements": [
       {
         "spans": [
-          "S22",
           "S23",
-          "S24",
+          "S22",
           "S25",
           "S26"
         ],
         "speakers": [],
         "stories": [
           {
-            "span": "S22",
-            "story": []
-          },
-          {
             "span": "S23",
             "story": []
           },
           {
-            "span": "S24",
+            "span": "S22",
             "story": []
           },
           {
@@ -40,80 +35,29 @@
             "story": []
           }
         ],
-        "text": "The PM says an energy ceasefire is the quickest way to get diesel back onto world markets without rewarding the aggressor, and that he raised this with President Trump in New York. He welcomes Trump's announcement of a reciprocal energy ceasefire and says President Zelenskyy has assured him Ukraine would immediately implement it once a start date is confirmed."
+        "text": "The Prime Minister told the Commons he raised an energy ceasefire with President Trump in New York. He said an energy ceasefire, with both sides stopping their attacks, is the quickest way to get diesel back onto world markets without rewarding the aggressor. He welcomed President Trump's announcement of a reciprocal energy ceasefire, and said President Zelenskyy has assured him Ukraine would implement it immediately once a start date is confirmed."
       },
       {
         "spans": [
-          "S45",
-          "S46",
-          "S47",
-          "S48"
+          "S90",
+          "S101"
         ],
         "speakers": [],
         "stories": [
           {
-            "span": "S45",
-            "story": []
-          },
-          {
-            "span": "S46",
-            "story": []
-          },
-          {
-            "span": "S47",
-            "story": []
-          },
-          {
-            "span": "S48",
-            "story": []
-          }
-        ],
-        "text": "The PM said the UK assesses the incident at RAF Fairford is highly likely to have been coordinated in Iran and almost certainly directed by the Islamic Revolutionary Guard. He said the UK will not tolerate these threats, will crack down on Iran's use of criminal networks, and will bring further sanctions to restrict the capacity of Iran and the IRGC to harm the UK."
-      },
-      {
-        "spans": [
-          "S20",
-          "S21"
-        ],
-        "speakers": [],
-        "stories": [
-          {
-            "span": "S20",
+            "span": "S90",
             "story": [
               "S2"
             ]
           },
           {
-            "span": "S21",
-            "story": []
-          }
-        ],
-        "text": "The PM said new funding has been announced to help Ukraine get through its fifth winter under Russian bombardment, and a new sanctions package now covers over 90% of Russia's oil producing capacity under UK sanctions."
-      },
-      {
-        "spans": [
-          "S93",
-          "S94",
-          "S96"
-        ],
-        "speakers": [],
-        "stories": [
-          {
-            "span": "S93",
-            "story": []
-          },
-          {
-            "span": "S94",
+            "span": "S101",
             "story": [
-              "S111"
+              "S2"
             ]
-          },
-          {
-            "span": "S96",
-            "story": []
           }
         ],
-        "text": "The UK is delivering £45 million of surface-to-air missiles to Ukraine and standing by plans to fully implement a maritime services ban on Russian LNG. It will accelerate deliveries of British Lightweight Multirole Missiles against jet-powered drones; it has committed £1.6 billion to deliver more than 5,000 of them over four years, and will accelerate £10 million of the £45 million package for Ukraine's most urgent winter needs."
+        "text": "The Prime Minister has asked Ministers to draw up further sanctions, military support and fiscal packages to provide urgent support in the coming weeks, and is set to tell President Zelenskyy that the UK will accelerate delivery of critical air defence missiles."
       },
       {
         "spans": [
@@ -143,12 +87,83 @@
             "story": []
           }
         ],
-        "text": "Prime Minister Andy Burnham said rock-solid support for Ukraine is vital for keeping the UK safe, that the UK is with Ukraine for as long as it takes and will go further and faster, that this support is not just the right thing but the necessary thing, and that Russia's aggression cannot be allowed to succeed on the continent."
+        "text": "Prime Minister Andy Burnham said UK support for Ukraine is vital for keeping the UK safe, that the UK is with Ukraine for as long as it takes and will go further and faster, and that Russia's aggression cannot be allowed to succeed on the continent."
       },
       {
         "spans": [
-          "S105",
-          "S106",
+          "S94",
+          "S96",
+          "S111",
+          "S113"
+        ],
+        "speakers": [],
+        "stories": [
+          {
+            "span": "S94",
+            "story": [
+              "S111"
+            ]
+          },
+          {
+            "span": "S96",
+            "story": []
+          },
+          {
+            "span": "S111",
+            "story": [
+              "S94"
+            ]
+          },
+          {
+            "span": "S113",
+            "story": [
+              "S90"
+            ]
+          }
+        ],
+        "text": "The UK will accelerate deliveries of British Lightweight Multirole Missiles, which have proven extremely effective against jet-powered drones. The UK has committed £1.6 billion to deliver more than 5000 to Ukraine over four years, and will accelerate £10 million of a £45 million missile package to meet Ukraine's most urgent winter needs. At the 14 October meeting the Prime Minister set out the latest LMM package, and the leaders discussed how the UK could accelerate defensive support ahead of winter, including on long range missiles."
+      },
+      {
+        "spans": [
+          "S108",
+          "S109",
+          "S110",
+          "S112",
+          "S114"
+        ],
+        "speakers": [
+          "the Prime Minister"
+        ],
+        "stories": [
+          {
+            "span": "S108",
+            "story": [
+              "S89"
+            ]
+          },
+          {
+            "span": "S109",
+            "story": []
+          },
+          {
+            "span": "S110",
+            "story": []
+          },
+          {
+            "span": "S112",
+            "story": []
+          },
+          {
+            "span": "S114",
+            "story": []
+          }
+        ],
+        "text": "The Prime Minister welcomed President Zelenskyy to Downing Street on 14 October. The leaders reflected on Russia's indiscriminate attacks on civilians and energy infrastructure since President Trump called for an energy ceasefire, and agreed Russia had no interest in peace. The Prime Minister said the UK would continue to develop innovative military solutions, including retrofitting British capability onto equipment gifted by other partners, and would continue its diplomatic efforts to support international supplies of defensive equipment."
+      },
+      {
+        "spans": [
+          "S102",
+          "S103",
           "S107"
         ],
         "speakers": [
@@ -156,11 +171,11 @@
         ],
         "stories": [
           {
-            "span": "S105",
+            "span": "S102",
             "story": []
           },
           {
-            "span": "S106",
+            "span": "S103",
             "story": []
           },
           {
@@ -168,7 +183,7 @@
             "story": []
           }
         ],
-        "text": "Chancellor of the Exchequer John Healey said conflict in the Middle East and in Europe is hitting people across the world, that the UK's commitment to the Ukrainian people is unshakeable, and urged partners to back the ban on Russian LNG, as the UK has, to curtail the war chest funding Putin."
+        "text": "Chancellor of the Exchequer John Healey urged partners to back the ban on Russian LNG, like the UK, to curtail the war chest funding Putin, and is to urge partners at the IMF meetings in Bangkok to fully implement an equivalent ban. The Foreign Secretary did the same with partners at the Warsaw Security Forum."
       },
       {
         "spans": [
@@ -188,184 +203,68 @@
             "story": []
           }
         ],
-        "text": "A UK government spokesperson said Ukraine has repeatedly shown it is serious about peace, while Russia has repeatedly rejected full and partial ceasefires and continued attacks on Ukrainian civilians and energy, and that Russia could end the war today."
+        "text": "A UK government spokesperson said Ukraine has repeatedly shown it is serious about peace, while Russia has repeatedly rejected full and partial ceasefires and continues attacks on Ukrainian civilians and energy, and that Russia could end the war today."
       },
       {
         "spans": [
-          "S18",
-          "S19"
+          "S20",
+          "S21"
         ],
         "speakers": [],
         "stories": [
           {
-            "span": "S18",
-            "story": []
-          },
-          {
-            "span": "S19",
-            "story": []
-          }
-        ],
-        "text": "The PM said he spoke to President Zelenskyy on Saturday, who described a step change from Russia, including daylight attacks intended to break Russia's will and Ukraine's. The PM said that will never happen."
-      },
-      {
-        "spans": [
-          "S108",
-          "S109",
-          "S110",
-          "S113"
-        ],
-        "speakers": [],
-        "stories": [
-          {
-            "span": "S108",
+            "span": "S20",
             "story": [
-              "S89"
+              "S2"
             ]
           },
           {
-            "span": "S109",
-            "story": []
-          },
-          {
-            "span": "S110",
-            "story": []
-          },
-          {
-            "span": "S113",
-            "story": [
-              "S90"
-            ]
-          }
-        ],
-        "text": "The PM welcomed President Zelenskyy to Downing Street on 14 October. The leaders reflected on their call and on Russia's attacks on civilians and energy since President Trump called for an energy ceasefire, and underlined that Russia had no interest in peace. They discussed how the UK could accelerate defensive support to Ukraine ahead of the winter, including on long range missiles."
-      },
-      {
-        "spans": [
-          "S111",
-          "S112",
-          "S114"
-        ],
-        "speakers": [
-          "the Prime Minister"
-        ],
-        "stories": [
-          {
-            "span": "S111",
-            "story": [
-              "S94"
-            ]
-          },
-          {
-            "span": "S112",
-            "story": []
-          },
-          {
-            "span": "S114",
+            "span": "S21",
             "story": []
           }
         ],
-        "text": "The Prime Minister set out the UK's latest package of Lightweight Multirole Missiles. He said the UK would continue developing innovative military solutions for the battlefield in Ukraine, including retrofitting British capability onto equipment gifted by other partners, and would continue its diplomatic efforts to support international supplies of defensive equipment."
+        "text": "The Prime Minister said the UK has recently announced new funding to help Ukraine get through its fifth winter under Russian bombardment, and a new sanctions package that brings over 90% of Russia's oil producing capacity under UK sanctions."
       },
       {
         "spans": [
-          "S52",
-          "S54",
-          "S71"
+          "S45",
+          "S46",
+          "S47",
+          "S48"
         ],
         "speakers": [],
         "stories": [
           {
-            "span": "S52",
+            "span": "S45",
             "story": []
           },
           {
-            "span": "S54",
+            "span": "S46",
             "story": []
           },
           {
-            "span": "S71",
+            "span": "S47",
+            "story": []
+          },
+          {
+            "span": "S48",
             "story": []
           }
         ],
-        "text": "The PM confirmed the UK-EU summit will take place in Brussels on 20 November. On the table are a food and drink trade deal, progress on emissions trading towards linking energy systems, a new youth experience scheme and deeper cooperation on immigration. He says he will work hard over the next five weeks to achieve a deal."
+        "text": "The Prime Minister said the UK's assessment is that the incident at RAF Fairford is highly likely to have been coordinated in Iran and almost certainly directed by Iran's Islamic Revolutionary Guard. He said the UK will not tolerate these threats, will crack down on Iran's use of criminal networks, and will bring further sanctions to restrict the capacity of Iran and the IRGC to harm the UK."
       },
       {
         "spans": [
-          "S56",
-          "S65",
-          "S66",
-          "S67"
-        ],
-        "speakers": [],
-        "stories": [
-          {
-            "span": "S56",
-            "story": []
-          },
-          {
-            "span": "S65",
-            "story": []
-          },
-          {
-            "span": "S66",
-            "story": []
-          },
-          {
-            "span": "S67",
-            "story": []
-          }
-        ],
-        "text": "The PM says a food and drink trade deal would add the equivalent of over £10 billion a year to the UK economy by 2040, with potential for significantly more. He says the agreement would lift a burden that can reach £1,400 on a single shipment for farmers and food producers, end export health certificates costing up to £200 each time for small businesses, and ease pressure on supermarket prices."
-      },
-      {
-        "spans": [
-          "S68",
-          "S69"
-        ],
-        "speakers": [],
-        "stories": [
-          {
-            "span": "S68",
-            "story": []
-          },
-          {
-            "span": "S69",
-            "story": []
-          }
-        ],
-        "text": "The PM says the proposed energy deal could help lower energy costs for households and businesses, and could cut wholesale energy costs in Northern Ireland by 20%."
-      },
-      {
-        "spans": [
-          "S72",
-          "S73",
-          "S77"
-        ],
-        "speakers": [],
-        "stories": [
-          {
-            "span": "S72",
-            "story": []
-          },
-          {
-            "span": "S73",
-            "story": []
-          },
-          {
-            "span": "S77",
-            "story": []
-          }
-        ],
-        "text": "The PM says being open to discussing the UK's relationship with the EU in the longer term would improve the chances of a summit deal, and that such a conversation is one the UK must have. He says the immediate priority is the summit, after which he believes there should be a serious dialogue about the options for the long-term relationship."
-      },
-      {
-        "spans": [
+          "S31",
           "S32",
           "S34"
         ],
         "speakers": [],
         "stories": [
+          {
+            "span": "S31",
+            "story": []
+          },
           {
             "span": "S32",
             "story": []
@@ -375,7 +274,7 @@
             "story": []
           }
         ],
-        "text": "The PM said he and Chancellor Merz agreed in Berlin a new partnership to tackle Russian hybrid threats. He confirmed the UK's commitment to establish a new National Centre for Information Defence, as recommended by the Foreign Affairs Select Committee."
+        "text": "The Prime Minister said Russia is conducting a campaign of hybrid attacks and sabotage across Europe. He said he and Chancellor Merz agreed a new partnership in Berlin to tackle these threats, and confirmed the commitment to establish a National Centre for Information Defence, as recommended by the Foreign Affairs Select Committee."
       },
       {
         "spans": [
@@ -403,55 +302,70 @@
             "story": []
           }
         ],
-        "text": "The PM confirmed Britain's decision to send air defence and a Voyager aircraft to Saudi Arabia for air-to-air refuelling, and said a Voyager has already completed 14 operational missions. He condemned the attacks on King Khalid International Airport and said the UK will continue to stand with Saudi Arabia against the Houthis."
+        "text": "The Prime Minister confirmed Britain's decision to send air defence and a Voyager aircraft to Saudi Arabia for air-to-air refuelling, said a Voyager has already completed 14 operational missions, condemned the attacks on King Khalid International Airport, and said the UK will continue to stand with Saudi Arabia against the Houthis."
       },
       {
         "spans": [
-          "S49",
-          "S50"
+          "S52",
+          "S54",
+          "S56",
+          "S71"
         ],
         "speakers": [],
         "stories": [
           {
-            "span": "S49",
+            "span": "S52",
             "story": []
           },
           {
-            "span": "S50",
+            "span": "S54",
+            "story": []
+          },
+          {
+            "span": "S56",
+            "story": []
+          },
+          {
+            "span": "S71",
             "story": []
           }
         ],
-        "text": "The PM said he raised the Falkland Islands with President Trump, and the clear and declared will of the islanders to remain British. He said the UK will always do whatever it takes to uphold the islanders' will."
+        "text": "The UK-EU summit will take place in Brussels on 20 November. On the table are a food and drink trade deal, progress on emissions trading and linking energy systems, a youth experience scheme and deeper immigration cooperation. A food and drink deal is expected to add over £10 billion a year to the UK economy by 2040. The Prime Minister said he will work hard over the next five weeks to secure a deal."
       },
       {
         "spans": [
-          "S81",
-          "S82",
-          "S84"
+          "S72",
+          "S77",
+          "S78"
         ],
         "speakers": [],
         "stories": [
           {
-            "span": "S81",
+            "span": "S72",
             "story": []
           },
           {
-            "span": "S82",
+            "span": "S77",
             "story": []
           },
           {
-            "span": "S84",
+            "span": "S78",
             "story": []
           }
         ],
-        "text": "The PM said that as the UK takes up the G20 presidency in 2027, he confirmed in New York that AI will be centre stage, and that the UK will work towards agreeing a single set of global principles and standards on AI during its presidency year."
+        "text": "The Prime Minister said being open to discussing the UK's relationship with the EU in the longer term would enhance the chances of a successful summit outcome. He said that after the summit a serious dialogue on the options for the long-term relationship should be set up, and that the British public will be the boss at every stage."
       },
       {
         "spans": [
           "S159",
-          "S162"
+          "S162",
+          "S165",
+          "S169"
         ],
-        "speakers": [],
+        "speakers": [
+          "Andy Burnham",
+          "Douglas Alexander"
+        ],
         "stories": [
           {
             "span": "S159",
@@ -465,20 +379,7 @@
             "story": [
               "S465"
             ]
-          }
-        ],
-        "text": "The PM will invite the First Minister of Scotland to work with him to push more power out of both Westminster and Holyrood. He will call on the Scottish Government to work with the UK Government through No10 North and the Scotland Office to develop a new model of regional empowerment for Scotland."
-      },
-      {
-        "spans": [
-          "S165",
-          "S169"
-        ],
-        "speakers": [
-          "Andy Burnham",
-          "Douglas Alexander"
-        ],
-        "stories": [
+          },
           {
             "span": "S165",
             "story": [
@@ -492,13 +393,14 @@
             ]
           }
         ],
-        "text": "Andy Burnham said he is making an offer to the Scottish Government. Douglas Alexander said the Prime Minister's offer is a genuine one and that the Scotland Office is ready to work alongside the Scottish Government to make it happen."
+        "text": "On 15 October the Prime Minister invited the First Minister to work with him to push more power out of Westminster and Holyrood, and to develop with the UK Government through No10 North and the Scotland Office a new model of regional empowerment. Andy Burnham said he was making an offer to the Scottish Government. Douglas Alexander said the offer is a genuine one, and the Scotland Office is ready to work alongside the Scottish Government to make it happen."
       },
       {
         "spans": [
           "S459",
           "S465",
           "S474",
+          "S475",
           "S487"
         ],
         "speakers": [],
@@ -522,34 +424,49 @@
             "story": []
           },
           {
+            "span": "S475",
+            "story": []
+          },
+          {
             "span": "S487",
             "story": []
           }
         ],
-        "text": "The PM says he makes a serious and genuine offer to the Scottish Government to design together a new model of regional economic empowerment across Scotland in the immediate months ahead. He offers DWP devolution, a localised employment support model shaped by Holyrood. He says the National Economic Council will meet the First Ministers of Scotland, Wales and Northern Ireland in a couple of weeks, the first such meeting since he became Prime Minister, to put the offer on the table."
+        "text": "In his 16 October speech in Motherwell the Prime Minister made what he called a serious and genuine offer to the Scottish Government to design a new model of regional economic empowerment across Scotland. The offer includes DWP devolution, a localised employment support model shaped by Holyrood, and a meeting of the National Economic Council with the First Ministers of Scotland, Wales and Northern Ireland in a couple of weeks."
       },
       {
         "spans": [
-          "S410",
-          "S411"
+          "S491",
+          "S494",
+          "S496",
+          "S497"
         ],
         "speakers": [],
         "stories": [
           {
-            "span": "S410",
+            "span": "S491",
             "story": []
           },
           {
-            "span": "S411",
+            "span": "S494",
+            "story": []
+          },
+          {
+            "span": "S496",
+            "story": []
+          },
+          {
+            "span": "S497",
             "story": []
           }
         ],
-        "text": "The PM says the review led by Alan Milburn is challenging government to build a system based on the Easterhouse principle of names not numbers, built from the bottom up."
+        "text": "The Prime Minister said to John Swinney that he wants to push economic power out into Scotland's regions, asked whether Swinney does too, and proposed agreeing a new process and proposal with Douglas Alexander and Swinney's team, with both governments working together towards a joint ambition."
       },
       {
         "spans": [
           "S344",
-          "S345"
+          "S345",
+          "S348"
         ],
         "speakers": [],
         "stories": [
@@ -560,42 +477,99 @@
           {
             "span": "S345",
             "story": []
+          },
+          {
+            "span": "S348",
+            "story": []
           }
         ],
-        "text": "The PM says the Scottish Government has this week agreed to match the UK Government's £10 million to create two defence technical excellence colleges, one in the east and one in the west of Scotland."
+        "text": "The Prime Minister said the Scottish Government has this week agreed to match the UK government's £10 million to create two defence technical excellence colleges, one in the east and one in the west, and credited Douglas Alexander and John Swinney for working together on it."
       },
       {
         "spans": [
-          "S397",
-          "S399"
+          "S399",
+          "S410",
+          "S411",
+          "S412"
         ],
         "speakers": [],
         "stories": [
-          {
-            "span": "S397",
-            "story": []
-          },
           {
             "span": "S399",
             "story": []
+          },
+          {
+            "span": "S410",
+            "story": []
+          },
+          {
+            "span": "S411",
+            "story": []
+          },
+          {
+            "span": "S412",
+            "story": []
           }
         ],
-        "text": "The PM says too many young people are missing out, and that around one in six young people in Scotland are not in education, employment or training."
+        "text": "The Prime Minister said around one in six young people in Scotland are not in education, employment or training. He said the review led by Alan Milburn is challenging the government to build a system on the Easterhouse principle of names not numbers, built from the bottom up."
       },
       {
         "spans": [
-          "S118",
-          "S122",
-          "S123",
-          "S125",
-          "S138"
+          "S363",
+          "S367",
+          "S370"
         ],
         "speakers": [],
         "stories": [
           {
-            "span": "S118",
+            "span": "S363",
             "story": []
           },
+          {
+            "span": "S367",
+            "story": []
+          },
+          {
+            "span": "S370",
+            "story": []
+          }
+        ],
+        "text": "The Prime Minister said he wants a change in public procurement across the UK, working with the devolved governments, to back a plan to reindustrialise Britain. He cited Greater Manchester buses that he said were built by Alexander Dennis in Falkirk."
+      },
+      {
+        "spans": [
+          "S81",
+          "S82",
+          "S84"
+        ],
+        "speakers": [],
+        "stories": [
+          {
+            "span": "S81",
+            "story": []
+          },
+          {
+            "span": "S82",
+            "story": []
+          },
+          {
+            "span": "S84",
+            "story": []
+          }
+        ],
+        "text": "The Prime Minister said the UK takes the G20 presidency in 2027, with AI centre stage, and that the aim during the presidency year is to agree a single set of global principles and standards on AI."
+      },
+      {
+        "spans": [
+          "S122",
+          "S123",
+          "S138",
+          "S135"
+        ],
+        "speakers": [
+          "Heidi Alexander"
+        ],
+        "stories": [
           {
             "span": "S122",
             "story": []
@@ -605,47 +579,7 @@
             "story": []
           },
           {
-            "span": "S125",
-            "story": []
-          },
-          {
             "span": "S138",
-            "story": []
-          }
-        ],
-        "text": "The site of Great British Railways' headquarters was unveiled in Derby on 15 October. Construction at the Becketwell brownfield site is expected to begin in early 2027 and be completed by spring 2029, accommodating up to 450 GBR staff. It is estimated to bring hundreds of rail jobs and a £151 million boost to Derby's economy, and up to 600 apprentices aged 16 to 21 will enrol over four years on the rail foundation apprenticeship."
-      },
-      {
-        "spans": [
-          "S128",
-          "S130"
-        ],
-        "speakers": [
-          "Andy Burnham"
-        ],
-        "stories": [
-          {
-            "span": "S128",
-            "story": []
-          },
-          {
-            "span": "S130",
-            "story": []
-          }
-        ],
-        "text": "Andy Burnham said today is another big step forward, and that the Derby headquarters will bring investment and good jobs, giving young people the chance to build their future in Derby."
-      },
-      {
-        "spans": [
-          "S134",
-          "S135"
-        ],
-        "speakers": [
-          "Heidi Alexander"
-        ],
-        "stories": [
-          {
-            "span": "S134",
             "story": []
           },
           {
@@ -653,17 +587,24 @@
             "story": []
           }
         ],
-        "text": "Heidi Alexander said the biggest shake-up to the railways in a generation is underway, with Great British Railways bringing the railway together around one mission, better services for passengers. She said she is delighted Becketwell will become GBR's new home."
+        "text": "Great British Railways' headquarters is to be built at Becketwell, a brownfield site in Derby city centre, for up to 450 GBR staff. Construction is expected to begin in early 2027 and be completed by spring 2029, and the HQ is expected to bring hundreds of rail jobs and an estimated £151 million boost to Derby's economy. Heidi Alexander said she is delighted Becketwell will become GBR's new home."
       },
       {
         "spans": [
+          "S125",
           "S143",
-          "S144"
+          "S144",
+          "S147"
         ],
         "speakers": [
-          "Pat McFadden"
+          "Pat McFadden",
+          "Claire Ward"
         ],
         "stories": [
+          {
+            "span": "S125",
+            "story": []
+          },
           {
             "span": "S143",
             "story": []
@@ -671,29 +612,13 @@
           {
             "span": "S144",
             "story": []
-          }
-        ],
-        "text": "Pat McFadden said the foundation apprenticeship will give young people the chance to explore rail career paths while earning. He said it forms part of a £2.5 billion youth employment support package creating up to 500,000 opportunities to earn or learn."
-      },
-      {
-        "spans": [
-          "S145",
-          "S147"
-        ],
-        "speakers": [
-          "Claire Ward"
-        ],
-        "stories": [
-          {
-            "span": "S145",
-            "story": []
           },
           {
             "span": "S147",
             "story": []
           }
         ],
-        "text": "Claire Ward called the announcement fantastic news for Derby, and said she was particularly pleased about the 600 apprenticeship places."
+        "text": "Up to 600 apprentices aged 16 to 21 will enrol over the next four years on the rail foundation apprenticeship, with the first starters based in Derby. Pat McFadden said this is part of a £2.5 billion youth employment support package creating up to 500,000 opportunities. Claire Ward said she is particularly pleased about the 600 apprenticeship places."
       },
       {
         "spans": [

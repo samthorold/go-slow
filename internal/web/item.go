@@ -190,7 +190,7 @@ func spanOf(n int, text string, at editor.Address, published time.Time, j spanJu
 	in := func(a editor.Address) bool { return a.Span.Start >= s.Start && a.Span.End <= s.End }
 	path := page + "/feedback"
 	on := func(g ...giveButton) gives { return givesOn(g, j.pieces, page) }
-	row := spanRow{N: n, Pieces: r.Hydrated(text, s), Missed: on(missedOn(path, at))}
+	row := spanRow{N: n, Pieces: inPlace(r.Hydrated(text, s)), Missed: on(missedOn(path, at))}
 	for _, a := range r.Rejected {
 		if a.Span == s {
 			row.Rejected = true

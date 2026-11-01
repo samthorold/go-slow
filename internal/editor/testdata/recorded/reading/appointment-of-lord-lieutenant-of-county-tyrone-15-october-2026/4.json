@@ -1,11 +1,11 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "d61630b8da56ec7e628f87a7f61713559933fe9ca0584a70359768b64455af9f",
-  "recorded_at": "2026-10-30T21:15:02.838513Z",
+  "request_hash": "e2fc2c11257b757b6269327f488337a4b806ea5847e76d1d7ea73b242769f58c",
+  "recorded_at": "2026-11-01T18:04:50.263558Z",
   "usage": {
-    "input_tokens": 2577,
-    "output_tokens": 4666
+    "input_tokens": 2676,
+    "output_tokens": 5866
   },
   "output": {
     "names": [
@@ -16,7 +16,16 @@
         },
         "kind": "person",
         "name": "William James Baxter",
-        "office": "His Majesty's Lord-Lieutenant of County Tyrone"
+        "office": "Lord-Lieutenant of County Tyrone"
+      },
+      {
+        "at": {
+          "span": 1,
+          "words": "Sir Robert William Lowry Scott KCVO OBE"
+        },
+        "kind": "person",
+        "name": "Sir Robert William Lowry Scott KCVO OBE",
+        "office": ""
       },
       {
         "at": {
@@ -30,15 +39,6 @@
       {
         "at": {
           "span": 1,
-          "words": "Sir Robert William Lowry Scott KCVO OBE"
-        },
-        "kind": "person",
-        "name": "Sir Robert William Lowry Scott KCVO OBE",
-        "office": "Lord-Lieutenant of County Tyrone"
-      },
-      {
-        "at": {
-          "span": 1,
           "words": "County Tyrone"
         },
         "kind": "place",
@@ -48,20 +48,20 @@
       {
         "at": {
           "span": 3,
+          "words": "Mr Baxter"
+        },
+        "kind": "person",
+        "name": "William James Baxter",
+        "office": "Lord-Lieutenant of County Tyrone"
+      },
+      {
+        "at": {
+          "span": 3,
           "words": "RUC/PSNI"
         },
         "kind": "organisation",
         "name": "RUC/PSNI",
         "office": ""
-      },
-      {
-        "at": {
-          "span": 3,
-          "words": "Mr Baxter"
-        },
-        "kind": "person",
-        "name": "William James Baxter",
-        "office": "His Majesty's Lord-Lieutenant of County Tyrone"
       },
       {
         "at": {
@@ -106,7 +106,7 @@
         },
         "kind": "person",
         "name": "William James Baxter",
-        "office": "His Majesty's Lord-Lieutenant of County Tyrone"
+        "office": "Lord-Lieutenant of County Tyrone"
       },
       {
         "at": {
@@ -142,7 +142,7 @@
         },
         "kind": "person",
         "name": "William James Baxter",
-        "office": "His Majesty's Lord-Lieutenant of County Tyrone"
+        "office": "Lord-Lieutenant of County Tyrone"
       },
       {
         "at": {
@@ -173,6 +173,16 @@
       }
     ],
     "refers_to": [
+      {
+        "from": {
+          "span": 1,
+          "words": "His Majesty’s"
+        },
+        "to": {
+          "span": 1,
+          "words": "The King"
+        }
+      },
       {
         "from": {
           "span": 1,

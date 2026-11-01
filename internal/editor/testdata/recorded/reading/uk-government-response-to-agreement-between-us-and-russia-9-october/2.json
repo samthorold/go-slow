@@ -1,11 +1,11 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "7fe1d9a1a90efbf8358b46ddab3d540643f6bd3fcc9081dc3ac5d6d70a6f0009",
-  "recorded_at": "2026-10-30T21:07:16.804227Z",
+  "request_hash": "4c2bb71753e117d156011eee54a816cbe8eaaa0b6dc768764d3e07136e78bde7",
+  "recorded_at": "2026-11-01T17:59:55.529178Z",
   "usage": {
-    "input_tokens": 2497,
-    "output_tokens": 4143
+    "input_tokens": 2596,
+    "output_tokens": 3851
   },
   "output": {
     "names": [
@@ -15,7 +15,7 @@
           "words": "UK government"
         },
         "kind": "organisation",
-        "name": "United Kingdom Government",
+        "name": "UK Government",
         "office": ""
       },
       {
@@ -24,7 +24,7 @@
           "words": "UK"
         },
         "kind": "place",
-        "name": "United Kingdom",
+        "name": "UK",
         "office": ""
       },
       {
@@ -42,7 +42,7 @@
           "words": "UK"
         },
         "kind": "place",
-        "name": "United Kingdom",
+        "name": "UK",
         "office": ""
       },
       {
@@ -83,29 +83,11 @@
       },
       {
         "at": {
-          "span": 7,
-          "words": "Ukraine"
-        },
-        "kind": "place",
-        "name": "Ukraine",
-        "office": ""
-      },
-      {
-        "at": {
           "span": 9,
           "words": "UK"
         },
         "kind": "place",
-        "name": "United Kingdom",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 10,
-          "words": "The Government"
-        },
-        "kind": "organisation",
-        "name": "United Kingdom Government",
+        "name": "UK",
         "office": ""
       },
       {
@@ -114,7 +96,7 @@
           "words": "UK"
         },
         "kind": "place",
-        "name": "United Kingdom",
+        "name": "UK",
         "office": ""
       },
       {
@@ -123,7 +105,7 @@
           "words": "US"
         },
         "kind": "place",
-        "name": "United States",
+        "name": "US",
         "office": ""
       },
       {
@@ -134,19 +116,18 @@
         "kind": "place",
         "name": "Ukraine",
         "office": ""
+      },
+      {
+        "at": {
+          "span": 11,
+          "words": "US"
+        },
+        "kind": "place",
+        "name": "US",
+        "office": ""
       }
     ],
     "refers_to": [
-      {
-        "from": {
-          "span": 3,
-          "words": "it"
-        },
-        "to": {
-          "span": 3,
-          "words": "Ukraine"
-        }
-      },
       {
         "from": {
           "span": 3,
@@ -169,12 +150,12 @@
       },
       {
         "from": {
-          "span": 11,
-          "words": "that objective"
+          "span": 10,
+          "words": "The Government"
         },
         "to": {
-          "span": 11,
-          "words": "secure a just and lasting peace in Ukraine"
+          "span": 1,
+          "words": "UK government"
         }
       }
     ],

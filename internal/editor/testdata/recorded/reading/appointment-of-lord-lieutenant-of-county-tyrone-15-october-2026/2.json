@@ -1,18 +1,36 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "d61630b8da56ec7e628f87a7f61713559933fe9ca0584a70359768b64455af9f",
-  "recorded_at": "2026-10-30T21:14:30.192598Z",
+  "request_hash": "e2fc2c11257b757b6269327f488337a4b806ea5847e76d1d7ea73b242769f58c",
+  "recorded_at": "2026-11-01T18:03:36.471038Z",
   "usage": {
-    "input_tokens": 2577,
-    "output_tokens": 2792
+    "input_tokens": 2676,
+    "output_tokens": 4904
   },
   "output": {
     "names": [
       {
         "at": {
           "span": 1,
-          "words": "Mr William James Baxter"
+          "words": "Mr William James Baxter QPM DL"
+        },
+        "kind": "person",
+        "name": "William James Baxter",
+        "office": "His Majesty's Lord-Lieutenant of County Tyrone"
+      },
+      {
+        "at": {
+          "span": 3,
+          "words": "Mr Baxter"
+        },
+        "kind": "person",
+        "name": "William James Baxter",
+        "office": "His Majesty's Lord-Lieutenant of County Tyrone"
+      },
+      {
+        "at": {
+          "span": 6,
+          "words": "Mr Baxter"
         },
         "kind": "person",
         "name": "William James Baxter",
@@ -24,8 +42,17 @@
           "words": "Sir Robert William Lowry Scott KCVO OBE"
         },
         "kind": "person",
-        "name": "Sir Robert William Lowry Scott KCVO OBE",
+        "name": "Sir Robert William Lowry Scott",
         "office": "former Lord-Lieutenant of County Tyrone"
+      },
+      {
+        "at": {
+          "span": 9,
+          "words": "Pearl"
+        },
+        "kind": "person",
+        "name": "Pearl",
+        "office": ""
       },
       {
         "at": {
@@ -38,12 +65,30 @@
       },
       {
         "at": {
-          "span": 3,
-          "words": "Mr Baxter"
+          "span": 6,
+          "words": "County Tyrone"
         },
-        "kind": "person",
-        "name": "William James Baxter",
-        "office": "His Majesty's Lord-Lieutenant of County Tyrone"
+        "kind": "place",
+        "name": "County Tyrone",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 8,
+          "words": "County Tyrone"
+        },
+        "kind": "place",
+        "name": "County Tyrone",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 9,
+          "words": "County Tyrone"
+        },
+        "kind": "place",
+        "name": "County Tyrone",
+        "office": ""
       },
       {
         "at": {
@@ -66,7 +111,7 @@
       {
         "at": {
           "span": 3,
-          "words": "the Omagh bombing in 1998"
+          "words": "Omagh bombing"
         },
         "kind": "occasion",
         "name": "Omagh bombing",
@@ -84,28 +129,10 @@
       {
         "at": {
           "span": 5,
-          "words": "Newtownstewart Presbyterian Church"
+          "words": "Kirk Session, Newtownstewart Presbyterian Church"
         },
         "kind": "organisation",
-        "name": "Newtownstewart Presbyterian Church",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 6,
-          "words": "Mr Baxter"
-        },
-        "kind": "person",
-        "name": "William James Baxter",
-        "office": "His Majesty's Lord-Lieutenant of County Tyrone"
-      },
-      {
-        "at": {
-          "span": 6,
-          "words": "Royal British Legion"
-        },
-        "kind": "organisation",
-        "name": "Royal British Legion",
+        "name": "Kirk Session, Newtownstewart Presbyterian Church",
         "office": ""
       },
       {
@@ -119,20 +146,11 @@
       },
       {
         "at": {
-          "span": 8,
-          "words": "Mr Baxter"
+          "span": 6,
+          "words": "Royal British Legion"
         },
-        "kind": "person",
-        "name": "William James Baxter",
-        "office": "His Majesty's Lord-Lieutenant of County Tyrone"
-      },
-      {
-        "at": {
-          "span": 8,
-          "words": "County Tyrone"
-        },
-        "kind": "place",
-        "name": "County Tyrone",
+        "kind": "organisation",
+        "name": "Royal British Legion",
         "office": ""
       }
     ],
@@ -153,8 +171,8 @@
           "words": "his"
         },
         "to": {
-          "span": 3,
-          "words": "Mr Baxter"
+          "span": 1,
+          "words": "Mr William James Baxter QPM DL"
         }
       },
       {
@@ -164,7 +182,7 @@
         },
         "to": {
           "span": 1,
-          "words": "Mr William James Baxter"
+          "words": "Mr William James Baxter QPM DL"
         }
       },
       {
@@ -174,7 +192,7 @@
         },
         "to": {
           "span": 1,
-          "words": "Mr William James Baxter"
+          "words": "Mr William James Baxter QPM DL"
         }
       },
       {
@@ -184,7 +202,17 @@
         },
         "to": {
           "span": 1,
-          "words": "Mr William James Baxter"
+          "words": "Mr William James Baxter QPM DL"
+        }
+      },
+      {
+        "from": {
+          "span": 8,
+          "words": "He"
+        },
+        "to": {
+          "span": 1,
+          "words": "Mr William James Baxter QPM DL"
         }
       },
       {
@@ -194,7 +222,17 @@
         },
         "to": {
           "span": 1,
-          "words": "Mr William James Baxter"
+          "words": "Mr William James Baxter QPM DL"
+        }
+      },
+      {
+        "from": {
+          "span": 9,
+          "words": "his"
+        },
+        "to": {
+          "span": 1,
+          "words": "Mr William James Baxter QPM DL"
         }
       }
     ],
@@ -202,5 +240,502 @@
       2
     ],
     "speakers": []
-  }
+  },
+  "earlier_attempts": [
+    {
+      "act": "reading",
+      "model": "claude-haiku-5-5",
+      "request_hash": "e2fc2c11257b757b6269327f488337a4b806ea5847e76d1d7ea73b242769f58c",
+      "recorded_at": "2026-11-01T18:02:56.604098Z",
+      "usage": {
+        "input_tokens": 2676,
+        "output_tokens": 3951
+      },
+      "output": {
+        "names": [
+          {
+            "at": {
+              "span": 1,
+              "words": "Mr William James Baxter QPM DL"
+            },
+            "kind": "person",
+            "name": "William James Baxter",
+            "office": "His Majesty's Lord-Lieutenant of County Tyrone"
+          },
+          {
+            "at": {
+              "span": 1,
+              "words": "The King"
+            },
+            "kind": "person",
+            "name": "The King",
+            "office": "King"
+          },
+          {
+            "at": {
+              "span": 1,
+              "words": "County Tyrone"
+            },
+            "kind": "place",
+            "name": "County Tyrone",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 1,
+              "words": "Sir Robert William Lowry Scott KCVO OBE"
+            },
+            "kind": "person",
+            "name": "Sir Robert William Lowry Scott",
+            "office": "Lord-Lieutenant of County Tyrone"
+          },
+          {
+            "at": {
+              "span": 3,
+              "words": "Mr Baxter"
+            },
+            "kind": "person",
+            "name": "William James Baxter",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 3,
+              "words": "RUC/PSNI"
+            },
+            "kind": "organisation",
+            "name": "RUC/PSNI",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 3,
+              "words": "Omagh"
+            },
+            "kind": "place",
+            "name": "Omagh",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 3,
+              "words": "Omagh bombing"
+            },
+            "kind": "occasion",
+            "name": "Omagh bombing",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 4,
+              "words": "Omagh Police District Voluntary Welfare Support Group"
+            },
+            "kind": "organisation",
+            "name": "Omagh Police District Voluntary Welfare Support Group",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 5,
+              "words": "Newtownstewart Presbyterian Church"
+            },
+            "kind": "organisation",
+            "name": "Newtownstewart Presbyterian Church",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 6,
+              "words": "Mr Baxter"
+            },
+            "kind": "person",
+            "name": "William James Baxter",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 6,
+              "words": "Royal British Legion"
+            },
+            "kind": "organisation",
+            "name": "Royal British Legion",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 6,
+              "words": "Newtownstewart"
+            },
+            "kind": "place",
+            "name": "Newtownstewart",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 6,
+              "words": "County Tyrone"
+            },
+            "kind": "place",
+            "name": "County Tyrone",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 8,
+              "words": "County Tyrone"
+            },
+            "kind": "place",
+            "name": "County Tyrone",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 9,
+              "words": "County Tyrone"
+            },
+            "kind": "place",
+            "name": "County Tyrone",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 9,
+              "words": "Pearl"
+            },
+            "kind": "person",
+            "name": "Pearl",
+            "office": ""
+          }
+        ],
+        "refers_to": [
+          {
+            "from": {
+              "span": 4,
+              "words": "He"
+            },
+            "to": {
+              "span": 1,
+              "words": "Mr William James Baxter QPM DL"
+            }
+          },
+          {
+            "from": {
+              "span": 5,
+              "words": "He"
+            },
+            "to": {
+              "span": 1,
+              "words": "Mr William James Baxter QPM DL"
+            }
+          },
+          {
+            "from": {
+              "span": 7,
+              "words": "He"
+            },
+            "to": {
+              "span": 1,
+              "words": "Mr William James Baxter QPM DL"
+            }
+          },
+          {
+            "from": {
+              "span": 8,
+              "words": "He"
+            },
+            "to": {
+              "span": 1,
+              "words": "Mr William James Baxter QPM DL"
+            }
+          },
+          {
+            "from": {
+              "span": 9,
+              "words": "He"
+            },
+            "to": {
+              "span": 1,
+              "words": "Mr William James Baxter QPM DL"
+            }
+          },
+          {
+            "from": {
+              "span": 9,
+              "words": "his"
+            },
+            "to": {
+              "span": 1,
+              "words": "Mr William James Baxter QPM DL"
+            }
+          }
+        ],
+        "rejected": [
+          2
+        ],
+        "speakers": []
+      }
+    },
+    {
+      "act": "reading",
+      "model": "claude-haiku-5-5",
+      "request_hash": "e2fc2c11257b757b6269327f488337a4b806ea5847e76d1d7ea73b242769f58c",
+      "recorded_at": "2026-11-01T18:03:17.509291Z",
+      "usage": {
+        "input_tokens": 2676,
+        "output_tokens": 5557
+      },
+      "output": {
+        "names": [
+          {
+            "at": {
+              "span": 1,
+              "words": "Mr William James Baxter QPM DL"
+            },
+            "kind": "person",
+            "name": "William James Baxter",
+            "office": "His Majesty's Lord-Lieutenant of County Tyrone"
+          },
+          {
+            "at": {
+              "span": 1,
+              "words": "Sir Robert William Lowry Scott KCVO OBE"
+            },
+            "kind": "person",
+            "name": "Robert William Lowry Scott",
+            "office": "Lord-Lieutenant of County Tyrone"
+          },
+          {
+            "at": {
+              "span": 1,
+              "words": "The King"
+            },
+            "kind": "person",
+            "name": "The King",
+            "office": "King"
+          },
+          {
+            "at": {
+              "span": 1,
+              "words": "County Tyrone"
+            },
+            "kind": "place",
+            "name": "County Tyrone",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 3,
+              "words": "Mr Baxter"
+            },
+            "kind": "person",
+            "name": "William James Baxter",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 3,
+              "words": "RUC/PSNI"
+            },
+            "kind": "organisation",
+            "name": "RUC/PSNI",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 3,
+              "words": "Omagh"
+            },
+            "kind": "place",
+            "name": "Omagh",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 3,
+              "words": "Omagh bombing"
+            },
+            "kind": "occasion",
+            "name": "Omagh bombing in 1998",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 4,
+              "words": "Omagh Police District Voluntary Welfare Support Group"
+            },
+            "kind": "organisation",
+            "name": "Omagh Police District Voluntary Welfare Support Group",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 5,
+              "words": "Kirk Session, Newtownstewart Presbyterian Church"
+            },
+            "kind": "organisation",
+            "name": "Kirk Session, Newtownstewart Presbyterian Church",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 6,
+              "words": "Mr Baxter"
+            },
+            "kind": "person",
+            "name": "William James Baxter",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 6,
+              "words": "County Tyrone"
+            },
+            "kind": "place",
+            "name": "County Tyrone",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 6,
+              "words": "Royal British Legion"
+            },
+            "kind": "organisation",
+            "name": "Royal British Legion",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 6,
+              "words": "Newtownstewart"
+            },
+            "kind": "place",
+            "name": "Newtownstewart",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 8,
+              "words": "Mr Baxter"
+            },
+            "kind": "person",
+            "name": "William James Baxter",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 8,
+              "words": "County Tyrone"
+            },
+            "kind": "place",
+            "name": "County Tyrone",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 9,
+              "words": "County Tyrone"
+            },
+            "kind": "place",
+            "name": "County Tyrone",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 9,
+              "words": "Pearl"
+            },
+            "kind": "person",
+            "name": "Pearl",
+            "office": ""
+          }
+        ],
+        "refers_to": [
+          {
+            "from": {
+              "span": 1,
+              "words": "his"
+            },
+            "to": {
+              "span": 1,
+              "words": "Sir Robert William Lowry Scott KCVO OBE"
+            }
+          },
+          {
+            "from": {
+              "span": 3,
+              "words": "He"
+            },
+            "to": {
+              "span": 1,
+              "words": "Mr William James Baxter QPM DL"
+            }
+          },
+          {
+            "from": {
+              "span": 3,
+              "words": "his"
+            },
+            "to": {
+              "span": 1,
+              "words": "Mr William James Baxter QPM DL"
+            }
+          },
+          {
+            "from": {
+              "span": 4,
+              "words": "He"
+            },
+            "to": {
+              "span": 1,
+              "words": "Mr William James Baxter QPM DL"
+            }
+          },
+          {
+            "from": {
+              "span": 5,
+              "words": "He"
+            },
+            "to": {
+              "span": 1,
+              "words": "Mr William James Baxter QPM DL"
+            }
+          },
+          {
+            "from": {
+              "span": 7,
+              "words": "He"
+            },
+            "to": {
+              "span": 1,
+              "words": "Mr William James Baxter QPM DL"
+            }
+          },
+          {
+            "from": {
+              "span": 9,
+              "words": "He"
+            },
+            "to": {
+              "span": 1,
+              "words": "Mr William James Baxter QPM DL"
+            }
+          },
+          {
+            "from": {
+              "span": 9,
+              "words": "his"
+            },
+            "to": {
+              "span": 1,
+              "words": "Mr William James Baxter QPM DL"
+            }
+          }
+        ],
+        "rejected": [
+          2
+        ],
+        "speakers": []
+      }
+    }
+  ]
 }

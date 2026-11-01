@@ -1,14 +1,23 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "7fe1d9a1a90efbf8358b46ddab3d540643f6bd3fcc9081dc3ac5d6d70a6f0009",
-  "recorded_at": "2026-10-30T21:07:00.125314Z",
+  "request_hash": "4c2bb71753e117d156011eee54a816cbe8eaaa0b6dc768764d3e07136e78bde7",
+  "recorded_at": "2026-11-01T17:59:39.254263Z",
   "usage": {
-    "input_tokens": 2497,
-    "output_tokens": 3604
+    "input_tokens": 2596,
+    "output_tokens": 4558
   },
   "output": {
     "names": [
+      {
+        "at": {
+          "span": 1,
+          "words": "A UK government spokesperson"
+        },
+        "kind": "person",
+        "name": "UK government spokesperson",
+        "office": "UK government spokesperson"
+      },
       {
         "at": {
           "span": 1,
@@ -20,20 +29,11 @@
       },
       {
         "at": {
-          "span": 1,
-          "words": "A UK government spokesperson"
-        },
-        "kind": "person",
-        "name": "A UK government spokesperson",
-        "office": "UK government spokesperson"
-      },
-      {
-        "at": {
           "span": 2,
-          "words": "UK’s"
+          "words": "UK"
         },
         "kind": "place",
-        "name": "UK",
+        "name": "United Kingdom",
         "office": ""
       },
       {
@@ -48,19 +48,28 @@
       {
         "at": {
           "span": 4,
-          "words": "UK"
+          "words": "Putin"
         },
-        "kind": "place",
-        "name": "UK",
+        "kind": "person",
+        "name": "Putin",
         "office": ""
       },
       {
         "at": {
           "span": 4,
-          "words": "Putin’s"
+          "words": "Russia"
         },
-        "kind": "person",
-        "name": "Putin",
+        "kind": "place",
+        "name": "Russia",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "UK"
+        },
+        "kind": "place",
+        "name": "United Kingdom",
         "office": ""
       },
       {
@@ -105,16 +114,16 @@
           "words": "UK"
         },
         "kind": "place",
-        "name": "UK",
+        "name": "United Kingdom",
         "office": ""
       },
       {
         "at": {
-          "span": 10,
-          "words": "The Government"
+          "span": 11,
+          "words": "UK"
         },
-        "kind": "organisation",
-        "name": "UK Government",
+        "kind": "place",
+        "name": "United Kingdom",
         "office": ""
       },
       {
@@ -134,9 +143,28 @@
         "kind": "place",
         "name": "Ukraine",
         "office": ""
+      },
+      {
+        "at": {
+          "span": 11,
+          "words": "US"
+        },
+        "kind": "place",
+        "name": "US",
+        "office": ""
       }
     ],
     "refers_to": [
+      {
+        "from": {
+          "span": 3,
+          "words": "it"
+        },
+        "to": {
+          "span": 3,
+          "words": "Ukraine"
+        }
+      },
       {
         "from": {
           "span": 3,
@@ -155,6 +183,26 @@
         "to": {
           "span": 5,
           "words": "Ukraine"
+        }
+      },
+      {
+        "from": {
+          "span": 7,
+          "words": "it"
+        },
+        "to": {
+          "span": 7,
+          "words": "Ukraine"
+        }
+      },
+      {
+        "from": {
+          "span": 10,
+          "words": "The Government"
+        },
+        "to": {
+          "span": 1,
+          "words": "UK government"
         }
       }
     ],

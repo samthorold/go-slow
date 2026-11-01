@@ -1,11 +1,11 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "1c8068d716982ebb9b7e71e037cf78cc6d8529aa5652cead0ed6497d9e1cb628",
-  "recorded_at": "2026-10-30T21:02:36.433536Z",
+  "request_hash": "3facbc02e21dcd21c5287dd213a0fac4dc15245505960b57efcfe9ecee64cbf4",
+  "recorded_at": "2026-11-01T17:54:56.573768Z",
   "usage": {
-    "input_tokens": 5188,
-    "output_tokens": 14054
+    "input_tokens": 5287,
+    "output_tokens": 12082
   },
   "output": {
     "names": [
@@ -14,59 +14,23 @@
           "span": 1,
           "words": "United Nations General Assembly"
         },
-        "kind": "organisation",
+        "kind": "occasion",
         "name": "United Nations General Assembly",
         "office": ""
       },
       {
         "at": {
-          "span": 1,
-          "words": "Mr Speaker"
+          "span": 2,
+          "words": "Holborn and St Pancras"
         },
-        "kind": "person",
-        "name": "Mr Speaker",
-        "office": "Speaker of the House of Commons"
-      },
-      {
-        "at": {
-          "span": 1,
-          "words": "the House"
-        },
-        "kind": "organisation",
-        "name": "House of Commons",
+        "kind": "place",
+        "name": "Holborn and St Pancras",
         "office": ""
       },
       {
         "at": {
-          "span": 2,
-          "words": "the new member for Holborn and St Pancras"
-        },
-        "kind": "person",
-        "name": "the new member for Holborn and St Pancras",
-        "office": "Member of Parliament for Holborn and St Pancras"
-      },
-      {
-        "at": {
-          "span": 4,
-          "words": "Mr Speaker"
-        },
-        "kind": "person",
-        "name": "Mr Speaker",
-        "office": "Speaker of the House of Commons"
-      },
-      {
-        "at": {
           "span": 6,
-          "words": "Mr Speaker"
-        },
-        "kind": "person",
-        "name": "Mr Speaker",
-        "office": "Speaker of the House of Commons"
-      },
-      {
-        "at": {
-          "span": 6,
-          "words": "the UN"
+          "words": "UN"
         },
         "kind": "organisation",
         "name": "United Nations",
@@ -128,43 +92,16 @@
       },
       {
         "at": {
-          "span": 10,
-          "words": "Mr Speaker"
-        },
-        "kind": "person",
-        "name": "Mr Speaker",
-        "office": "Speaker of the House of Commons"
-      },
-      {
-        "at": {
           "span": 12,
-          "words": "Russia"
+          "words": "UK"
         },
         "kind": "place",
-        "name": "Russia",
+        "name": "United Kingdom",
         "office": ""
       },
       {
         "at": {
           "span": 14,
-          "words": "President Trump"
-        },
-        "kind": "person",
-        "name": "Trump",
-        "office": "President of the United States"
-      },
-      {
-        "at": {
-          "span": 15,
-          "words": "Ukraine"
-        },
-        "kind": "place",
-        "name": "Ukraine",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 16,
           "words": "President Trump"
         },
         "kind": "person",
@@ -182,30 +119,12 @@
       },
       {
         "at": {
-          "span": 17,
-          "words": "Ukraine"
-        },
-        "kind": "place",
-        "name": "Ukraine",
-        "office": ""
-      },
-      {
-        "at": {
           "span": 18,
           "words": "NATO"
         },
         "kind": "organisation",
         "name": "NATO",
         "office": ""
-      },
-      {
-        "at": {
-          "span": 18,
-          "words": "Mr Speaker"
-        },
-        "kind": "person",
-        "name": "Mr Speaker",
-        "office": "Speaker of the House of Commons"
       },
       {
         "at": {
@@ -214,7 +133,7 @@
         },
         "kind": "person",
         "name": "NATO Secretary General",
-        "office": "Secretary General of NATO"
+        "office": "NATO Secretary General"
       },
       {
         "at": {
@@ -223,33 +142,6 @@
         },
         "kind": "place",
         "name": "Oxfordshire",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 21,
-          "words": "NATO"
-        },
-        "kind": "organisation",
-        "name": "NATO",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 22,
-          "words": "Russia"
-        },
-        "kind": "place",
-        "name": "Russia",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 22,
-          "words": "Europe"
-        },
-        "kind": "place",
-        "name": "Europe",
         "office": ""
       },
       {
@@ -273,15 +165,6 @@
       {
         "at": {
           "span": 25,
-          "words": "UN General Assembly"
-        },
-        "kind": "organisation",
-        "name": "United Nations General Assembly",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 25,
           "words": "National Centre for Information Defence"
         },
         "kind": "organisation",
@@ -300,28 +183,10 @@
       {
         "at": {
           "span": 26,
-          "words": "Berlin"
-        },
-        "kind": "place",
-        "name": "Berlin",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 26,
           "words": "Germany"
         },
         "kind": "place",
         "name": "Germany",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 26,
-          "words": "Global Combat Air Programme"
-        },
-        "kind": "organisation",
-        "name": "Global Combat Air Programme",
         "office": ""
       },
       {
@@ -353,24 +218,6 @@
       },
       {
         "at": {
-          "span": 27,
-          "words": "Middle East"
-        },
-        "kind": "place",
-        "name": "Middle East",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 28,
-          "words": "Britain"
-        },
-        "kind": "place",
-        "name": "Britain",
-        "office": ""
-      },
-      {
-        "at": {
           "span": 28,
           "words": "Saudi Arabia"
         },
@@ -390,15 +237,6 @@
       {
         "at": {
           "span": 32,
-          "words": "Saudi Arabia"
-        },
-        "kind": "place",
-        "name": "Saudi Arabia",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 32,
           "words": "Houthis"
         },
         "kind": "organisation",
@@ -408,29 +246,11 @@
       {
         "at": {
           "span": 33,
-          "words": "UNGA"
-        },
-        "kind": "organisation",
-        "name": "United Nations General Assembly",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 33,
           "words": "US"
         },
         "kind": "place",
-        "name": "US",
+        "name": "United States",
         "office": ""
-      },
-      {
-        "at": {
-          "span": 33,
-          "words": "Mr Speaker"
-        },
-        "kind": "person",
-        "name": "Mr Speaker",
-        "office": "Speaker of the House of Commons"
       },
       {
         "at": {
@@ -453,20 +273,11 @@
       {
         "at": {
           "span": 35,
-          "words": "the Home Secretary"
+          "words": "Home Secretary"
         },
         "kind": "person",
         "name": "Home Secretary",
         "office": "Home Secretary"
-      },
-      {
-        "at": {
-          "span": 35,
-          "words": "RAF Fairford"
-        },
-        "kind": "place",
-        "name": "RAF Fairford",
-        "office": ""
       },
       {
         "at": {
@@ -483,25 +294,7 @@
           "words": "Islamic Revolutionary Guard"
         },
         "kind": "organisation",
-        "name": "Islamic Revolutionary Guard Corps",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 38,
-          "words": "Iran"
-        },
-        "kind": "place",
-        "name": "Iran",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 39,
-          "words": "Iran"
-        },
-        "kind": "place",
-        "name": "Iran",
+        "name": "Islamic Revolutionary Guard",
         "office": ""
       },
       {
@@ -510,7 +303,7 @@
           "words": "IRGC"
         },
         "kind": "organisation",
-        "name": "Islamic Revolutionary Guard Corps",
+        "name": "IRGC",
         "office": ""
       },
       {
@@ -525,16 +318,7 @@
       {
         "at": {
           "span": 42,
-          "words": "New York"
-        },
-        "kind": "place",
-        "name": "New York",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 42,
-          "words": "President of the European Commission, Ursula von der Leyen"
+          "words": "Ursula von der Leyen"
         },
         "kind": "person",
         "name": "Ursula von der Leyen",
@@ -551,39 +335,12 @@
       },
       {
         "at": {
-          "span": 42,
-          "words": "Mr Speaker"
-        },
-        "kind": "person",
-        "name": "Mr Speaker",
-        "office": "Speaker of the House of Commons"
-      },
-      {
-        "at": {
           "span": 43,
           "words": "Brussels"
         },
         "kind": "place",
         "name": "Brussels",
         "office": ""
-      },
-      {
-        "at": {
-          "span": 46,
-          "words": "The Summit"
-        },
-        "kind": "occasion",
-        "name": "UK-EU summit",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 48,
-          "words": "Mr Speaker"
-        },
-        "kind": "person",
-        "name": "Mr Speaker",
-        "office": "Speaker of the House of Commons"
       },
       {
         "at": {
@@ -614,15 +371,6 @@
       },
       {
         "at": {
-          "span": 62,
-          "words": "Mr Speaker"
-        },
-        "kind": "person",
-        "name": "Mr Speaker",
-        "office": "Speaker of the House of Commons"
-      },
-      {
-        "at": {
           "span": 63,
           "words": "EU"
         },
@@ -632,12 +380,12 @@
       },
       {
         "at": {
-          "span": 71,
-          "words": "Mr Speaker"
+          "span": 72,
+          "words": "G20"
         },
-        "kind": "person",
-        "name": "Mr Speaker",
-        "office": "Speaker of the House of Commons"
+        "kind": "occasion",
+        "name": "G20",
+        "office": ""
       },
       {
         "at": {
@@ -651,19 +399,19 @@
       {
         "at": {
           "span": 72,
-          "words": "G20"
+          "words": "Europe"
         },
-        "kind": "occasion",
-        "name": "G20 presidency",
+        "kind": "place",
+        "name": "Europe",
         "office": ""
       },
       {
         "at": {
-          "span": 73,
-          "words": "New York"
+          "span": 74,
+          "words": "Microsoft"
         },
-        "kind": "place",
-        "name": "New York",
+        "kind": "organisation",
+        "name": "Microsoft",
         "office": ""
       },
       {
@@ -674,33 +422,6 @@
         "kind": "person",
         "name": "President of Microsoft",
         "office": "President of Microsoft"
-      },
-      {
-        "at": {
-          "span": 74,
-          "words": "Britain"
-        },
-        "kind": "place",
-        "name": "Britain",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 75,
-          "words": "G20"
-        },
-        "kind": "occasion",
-        "name": "G20 presidency",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 76,
-          "words": "Mr Speaker"
-        },
-        "kind": "person",
-        "name": "Mr Speaker",
-        "office": "Speaker of the House of Commons"
       },
       {
         "at": {
@@ -715,12 +436,22 @@
     "refers_to": [
       {
         "from": {
+          "span": 2,
+          "words": "her"
+        },
+        "to": {
+          "span": 2,
+          "words": "new member for Holborn and St Pancras"
+        }
+      },
+      {
+        "from": {
           "span": 5,
           "words": "my Honourable Friend"
         },
         "to": {
           "span": 2,
-          "words": "the new member for Holborn and St Pancras"
+          "words": "new member for Holborn and St Pancras"
         }
       },
       {
@@ -735,18 +466,18 @@
       },
       {
         "from": {
-          "span": 9,
-          "words": "their"
+          "span": 11,
+          "words": "them"
         },
         "to": {
-          "span": 9,
-          "words": "Russia"
+          "span": 7,
+          "words": "Ukraine"
         }
       },
       {
         "from": {
           "span": 11,
-          "words": "them"
+          "words": "their"
         },
         "to": {
           "span": 7,
@@ -760,7 +491,7 @@
         },
         "to": {
           "span": 13,
-          "words": "energy ceasefire"
+          "words": "an energy ceasefire"
         }
       },
       {
@@ -775,12 +506,32 @@
       },
       {
         "from": {
+          "span": 17,
+          "words": "him"
+        },
+        "to": {
+          "span": 17,
+          "words": "President Zelenskyy"
+        }
+      },
+      {
+        "from": {
           "span": 29,
           "words": "it"
         },
         "to": {
           "span": 28,
-          "words": "Voyager aircraft"
+          "words": "a Voyager aircraft"
+        }
+      },
+      {
+        "from": {
+          "span": 33,
+          "words": "UNGA"
+        },
+        "to": {
+          "span": 1,
+          "words": "United Nations General Assembly"
         }
       },
       {
@@ -895,16 +646,28 @@
       },
       {
         "from": {
-          "span": 73,
+          "span": 62,
           "words": "it"
         },
         "to": {
-          "span": 73,
-          "words": "AI"
+          "span": 62,
+          "words": "a deal along these lines"
+        }
+      },
+      {
+        "from": {
+          "span": 68,
+          "words": "the summit"
+        },
+        "to": {
+          "span": 42,
+          "words": "UK-EU summit"
         }
       }
     ],
-    "rejected": [],
+    "rejected": [
+      79
+    ],
     "speakers": []
   }
 }

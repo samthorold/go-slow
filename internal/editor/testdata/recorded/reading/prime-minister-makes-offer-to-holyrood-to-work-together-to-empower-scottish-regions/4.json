@@ -1,45 +1,18 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "9f6653a628033d0716fdae463edfb365030d6251cbda7a5fe423eda19a075dcb",
-  "recorded_at": "2026-10-30T21:12:50.944369Z",
+  "request_hash": "e6517ae375569f3e3d28b7a749029ca943f13cbfb4d7633c3070bb8ccd1edc93",
+  "recorded_at": "2026-11-01T17:59:03.517434Z",
   "usage": {
-    "input_tokens": 2822,
-    "output_tokens": 5089
+    "input_tokens": 2921,
+    "output_tokens": 6319
   },
   "output": {
     "names": [
       {
         "at": {
           "span": 1,
-          "words": "Prime Minister"
-        },
-        "kind": "person",
-        "name": "Andy Burnham",
-        "office": "Prime Minister of the United Kingdom"
-      },
-      {
-        "at": {
-          "span": 2,
-          "words": "Andy Burnham"
-        },
-        "kind": "person",
-        "name": "Andy Burnham",
-        "office": "Prime Minister of the United Kingdom"
-      },
-      {
-        "at": {
-          "span": 5,
-          "words": "Prime Minister Andy Burnham"
-        },
-        "kind": "person",
-        "name": "Andy Burnham",
-        "office": "Prime Minister of the United Kingdom"
-      },
-      {
-        "at": {
-          "span": 13,
-          "words": "Prime Minister"
+          "words": "the Prime Minister"
         },
         "kind": "person",
         "name": "Andy Burnham",
@@ -51,26 +24,8 @@
           "words": "Scotland’s First Minister"
         },
         "kind": "person",
-        "name": "First Minister of Scotland",
+        "name": "Scotland’s First Minister",
         "office": "First Minister of Scotland"
-      },
-      {
-        "at": {
-          "span": 6,
-          "words": "the First Minister"
-        },
-        "kind": "person",
-        "name": "First Minister of Scotland",
-        "office": "First Minister of Scotland"
-      },
-      {
-        "at": {
-          "span": 10,
-          "words": "Douglas Alexander"
-        },
-        "kind": "person",
-        "name": "Douglas Alexander",
-        "office": "Scottish Secretary"
       },
       {
         "at": {
@@ -86,17 +41,26 @@
           "span": 1,
           "words": "Holyrood"
         },
-        "kind": "place",
-        "name": "Holyrood",
+        "kind": "organisation",
+        "name": "the Scottish Parliament",
         "office": ""
       },
       {
         "at": {
           "span": 2,
-          "words": "Holyrood"
+          "words": "Andy Burnham"
         },
-        "kind": "place",
-        "name": "Holyrood",
+        "kind": "person",
+        "name": "Andy Burnham",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 2,
+          "words": "Scottish Government"
+        },
+        "kind": "organisation",
+        "name": "the Scottish Government",
         "office": ""
       },
       {
@@ -111,37 +75,46 @@
       {
         "at": {
           "span": 2,
-          "words": "Scottish Government"
+          "words": "Holyrood"
         },
         "kind": "organisation",
-        "name": "Scottish Government",
+        "name": "the Scottish Parliament",
         "office": ""
       },
       {
         "at": {
           "span": 3,
-          "words": "Scottish Parliament"
+          "words": "the Prime Minister"
+        },
+        "kind": "person",
+        "name": "Andy Burnham",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 3,
+          "words": "the Scottish Parliament"
         },
         "kind": "organisation",
-        "name": "Scottish Parliament",
+        "name": "the Scottish Parliament",
         "office": ""
       },
       {
         "at": {
           "span": 4,
-          "words": "Scottish Government"
+          "words": "the Scottish Government"
         },
         "kind": "organisation",
-        "name": "Scottish Government",
+        "name": "the Scottish Government",
         "office": ""
       },
       {
         "at": {
           "span": 4,
-          "words": "UK Government"
+          "words": "the UK Government"
         },
         "kind": "organisation",
-        "name": "UK Government",
+        "name": "the UK Government",
         "office": ""
       },
       {
@@ -156,11 +129,38 @@
       {
         "at": {
           "span": 4,
-          "words": "Scotland Office"
+          "words": "the Scotland Office"
         },
         "kind": "organisation",
-        "name": "Scotland Office",
+        "name": "the Scotland Office",
         "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "Scotland"
+        },
+        "kind": "place",
+        "name": "Scotland",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 5,
+          "words": "Prime Minister Andy Burnham"
+        },
+        "kind": "person",
+        "name": "Andy Burnham",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 6,
+          "words": "the First Minister"
+        },
+        "kind": "person",
+        "name": "Scotland’s First Minister",
+        "office": "First Minister of Scotland"
       },
       {
         "at": {
@@ -174,10 +174,37 @@
       {
         "at": {
           "span": 8,
-          "words": "Scottish Government"
+          "words": "the Scottish Government"
         },
         "kind": "organisation",
-        "name": "Scottish Government",
+        "name": "the Scottish Government",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 10,
+          "words": "The Scottish Secretary"
+        },
+        "kind": "person",
+        "name": "Douglas Alexander",
+        "office": "Scottish Secretary"
+      },
+      {
+        "at": {
+          "span": 10,
+          "words": "Douglas Alexander"
+        },
+        "kind": "person",
+        "name": "Douglas Alexander",
+        "office": "Scottish Secretary"
+      },
+      {
+        "at": {
+          "span": 11,
+          "words": "the Scottish Parliament"
+        },
+        "kind": "organisation",
+        "name": "the Scottish Parliament",
         "office": ""
       },
       {
@@ -228,33 +255,23 @@
       {
         "at": {
           "span": 13,
-          "words": "Scotland Office"
+          "words": "The Prime Minister’s"
         },
-        "kind": "organisation",
-        "name": "Scotland Office",
-        "office": ""
+        "kind": "person",
+        "name": "Andy Burnham",
+        "office": "Prime Minister of the United Kingdom"
       },
       {
         "at": {
-          "span": 14,
-          "words": "Scotland"
+          "span": 13,
+          "words": "the Scotland Office"
         },
-        "kind": "place",
-        "name": "Scotland",
+        "kind": "organisation",
+        "name": "the Scotland Office",
         "office": ""
       }
     ],
     "refers_to": [
-      {
-        "from": {
-          "span": 1,
-          "words": "him"
-        },
-        "to": {
-          "span": 2,
-          "words": "Andy Burnham"
-        }
-      },
       {
         "from": {
           "span": 2,
@@ -277,12 +294,32 @@
       },
       {
         "from": {
+          "span": 6,
+          "words": "the First Minister"
+        },
+        "to": {
+          "span": 1,
+          "words": "Scotland’s First Minister"
+        }
+      },
+      {
+        "from": {
+          "span": 6,
+          "words": "him"
+        },
+        "to": {
+          "span": 1,
+          "words": "Scotland’s First Minister"
+        }
+      },
+      {
+        "from": {
           "span": 13,
           "words": "them"
         },
         "to": {
           "span": 4,
-          "words": "Scottish Government"
+          "words": "the Scottish Government"
         }
       }
     ],

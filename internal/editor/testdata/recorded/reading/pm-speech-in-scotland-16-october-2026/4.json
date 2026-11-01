@@ -1,11 +1,11 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "6c49881ec186d68660dd849b7160c65a24f710a3d042c7222f189d23abee2fb6",
-  "recorded_at": "2026-10-30T20:56:09.983414Z",
+  "request_hash": "660c5933e14cd8c53a3772b900be13388062d7ff9463d16ec15bd66f48ed486c",
+  "recorded_at": "2026-11-01T17:48:27.534809Z",
   "usage": {
-    "input_tokens": 12337,
-    "output_tokens": 14653
+    "input_tokens": 12436,
+    "output_tokens": 12671
   },
   "output": {
     "names": [
@@ -21,19 +21,19 @@
       {
         "at": {
           "span": 3,
-          "words": "Scotland"
+          "words": "Motherwell"
         },
         "kind": "place",
-        "name": "Scotland",
+        "name": "Motherwell",
         "office": ""
       },
       {
         "at": {
           "span": 3,
-          "words": "Motherwell"
+          "words": "Scotland"
         },
         "kind": "place",
-        "name": "Motherwell",
+        "name": "Scotland",
         "office": ""
       },
       {
@@ -43,15 +43,6 @@
         },
         "kind": "place",
         "name": "Manchester",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 6,
-          "words": "Number 10 North"
-        },
-        "kind": "organisation",
-        "name": "Number 10 North",
         "office": ""
       },
       {
@@ -86,7 +77,7 @@
           "span": 28,
           "words": "Westminster"
         },
-        "kind": "organisation",
+        "kind": "place",
         "name": "Westminster",
         "office": ""
       },
@@ -101,6 +92,24 @@
       },
       {
         "at": {
+          "span": 32,
+          "words": "Prime Minister"
+        },
+        "kind": "person",
+        "name": "Prime Minister",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 36,
+          "words": "Scottish Violence Reduction Unit"
+        },
+        "kind": "organisation",
+        "name": "Scottish Violence Reduction Unit",
+        "office": ""
+      },
+      {
+        "at": {
           "span": 36,
           "words": "FARE-Scotland"
         },
@@ -111,28 +120,10 @@
       {
         "at": {
           "span": 36,
-          "words": "Bannatyne House"
-        },
-        "kind": "place",
-        "name": "Bannatyne House",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 36,
           "words": "Easterhouse"
         },
         "kind": "place",
         "name": "Easterhouse",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 36,
-          "words": "Scottish Violence Reduction Unit"
-        },
-        "kind": "organisation",
-        "name": "Scottish Violence Reduction Unit",
         "office": ""
       },
       {
@@ -151,7 +142,7 @@
         },
         "kind": "person",
         "name": "Pamela",
-        "office": "Member of Parliament for Motherwell"
+        "office": "local MP"
       },
       {
         "at": {
@@ -185,7 +176,7 @@
           "span": 92,
           "words": "Whitehall"
         },
-        "kind": "organisation",
+        "kind": "place",
         "name": "Whitehall",
         "office": ""
       },
@@ -236,15 +227,6 @@
       },
       {
         "at": {
-          "span": 117,
-          "words": "Glasgow"
-        },
-        "kind": "place",
-        "name": "Glasgow",
-        "office": ""
-      },
-      {
-        "at": {
           "span": 141,
           "words": "Scottish Parliament"
         },
@@ -291,10 +273,10 @@
       {
         "at": {
           "span": 183,
-          "words": "Grangemouth site"
+          "words": "Grangemouth"
         },
         "kind": "place",
-        "name": "Grangemouth site",
+        "name": "Grangemouth",
         "office": ""
       },
       {
@@ -304,15 +286,6 @@
         },
         "kind": "occasion",
         "name": "EU-UK Summit",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 195,
-          "words": "Greater Manchester"
-        },
-        "kind": "place",
-        "name": "Greater Manchester",
         "office": ""
       },
       {
@@ -344,33 +317,6 @@
       },
       {
         "at": {
-          "span": 204,
-          "words": "Dundee"
-        },
-        "kind": "place",
-        "name": "Dundee",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 205,
-          "words": "Highlands and the Islands"
-        },
-        "kind": "place",
-        "name": "Highlands and the Islands",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 206,
-          "words": "Edinburgh"
-        },
-        "kind": "place",
-        "name": "Edinburgh",
-        "office": ""
-      },
-      {
-        "at": {
           "span": 211,
           "words": "Chemify"
         },
@@ -380,56 +326,11 @@
       },
       {
         "at": {
-          "span": 211,
-          "words": "Glasgow"
-        },
-        "kind": "place",
-        "name": "Glasgow",
-        "office": ""
-      },
-      {
-        "at": {
           "span": 241,
           "words": "Alan Milburn"
         },
         "kind": "person",
         "name": "Alan Milburn",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 258,
-          "words": "Lanarkshire"
-        },
-        "kind": "place",
-        "name": "Lanarkshire",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 283,
-          "words": "First Minister"
-        },
-        "kind": "person",
-        "name": "John Swinney",
-        "office": "First Minister of Scotland"
-      },
-      {
-        "at": {
-          "span": 286,
-          "words": "John"
-        },
-        "kind": "person",
-        "name": "John Swinney",
-        "office": "First Minister of Scotland"
-      },
-      {
-        "at": {
-          "span": 294,
-          "words": "Number 10 North"
-        },
-        "kind": "organisation",
-        "name": "Number 10 North",
         "office": ""
       },
       {
@@ -449,42 +350,33 @@
         "kind": "organisation",
         "name": "National Economic Council",
         "office": ""
-      },
-      {
-        "at": {
-          "span": 321,
-          "words": "John"
-        },
-        "kind": "person",
-        "name": "John Swinney",
-        "office": "First Minister of Scotland"
       }
     ],
     "refers_to": [
       {
         "from": {
-          "span": 37,
-          "words": "they"
+          "span": 13,
+          "words": "it"
         },
         "to": {
-          "span": 36,
-          "words": "FARE-Scotland"
+          "span": 13,
+          "words": "Commonwealth Games"
         }
       },
       {
         "from": {
-          "span": 59,
-          "words": "it"
+          "span": 14,
+          "words": "them"
         },
         "to": {
-          "span": 58,
-          "words": "Poverty Safari"
+          "span": 13,
+          "words": "Glasgow"
         }
       },
       {
         "from": {
           "span": 63,
-          "words": "out of it"
+          "words": "it"
         },
         "to": {
           "span": 63,
@@ -493,12 +385,42 @@
       },
       {
         "from": {
-          "span": 82,
-          "words": "it"
+          "span": 69,
+          "words": "this community"
         },
         "to": {
-          "span": 81,
-          "words": "Ravenscraig"
+          "span": 3,
+          "words": "Motherwell"
+        }
+      },
+      {
+        "from": {
+          "span": 78,
+          "words": "this area"
+        },
+        "to": {
+          "span": 3,
+          "words": "Motherwell"
+        }
+      },
+      {
+        "from": {
+          "span": 95,
+          "words": "its"
+        },
+        "to": {
+          "span": 3,
+          "words": "Motherwell"
+        }
+      },
+      {
+        "from": {
+          "span": 132,
+          "words": "They"
+        },
+        "to": {
+          "span": 131,
+          "words": "the regions themselves"
         }
       },
       {
@@ -513,22 +435,12 @@
       },
       {
         "from": {
-          "span": 153,
-          "words": "itself"
+          "span": 193,
+          "words": "it"
         },
         "to": {
-          "span": 153,
-          "words": "Scotland"
-        }
-      },
-      {
-        "from": {
-          "span": 209,
-          "words": "they"
-        },
-        "to": {
-          "span": 209,
-          "words": "the people who understood those industries best"
+          "span": 190,
+          "words": "a new deal for food and farming"
         }
       },
       {
@@ -548,7 +460,17 @@
         },
         "to": {
           "span": 238,
-          "words": "another scheme designed in the centre"
+          "words": "another top-down scheme"
+        }
+      },
+      {
+        "from": {
+          "span": 264,
+          "words": "their"
+        },
+        "to": {
+          "span": 264,
+          "words": "every region"
         }
       },
       {
@@ -558,71 +480,27 @@
         },
         "to": {
           "span": 267,
-          "words": "tribal politics and point-scoring"
+          "words": "point-scoring"
         }
       },
       {
         "from": {
-          "span": 297,
-          "words": "One"
+          "span": 283,
+          "words": "the First Minister"
         },
         "to": {
-          "span": 296,
-          "words": "a new model"
-        }
-      },
-      {
-        "from": {
-          "span": 308,
-          "words": "it"
-        },
-        "to": {
-          "span": 306,
-          "words": "localised employment support"
-        }
-      },
-      {
-        "from": {
-          "span": 309,
-          "words": "It"
-        },
-        "to": {
-          "span": 306,
-          "words": "localised employment support"
-        }
-      },
-      {
-        "from": {
-          "span": 310,
-          "words": "it"
-        },
-        "to": {
-          "span": 306,
-          "words": "localised employment support"
-        }
-      },
-      {
-        "from": {
-          "span": 313,
-          "words": "it won't work"
-        },
-        "to": {
-          "span": 306,
-          "words": "localised employment support"
-        }
-      },
-      {
-        "from": {
-          "span": 314,
-          "words": "It"
-        },
-        "to": {
-          "span": 306,
-          "words": "localised employment support"
+          "span": 179,
+          "words": "John Swinney"
         }
       }
     ],
-    "rejected": [],
+    "rejected": [
+      1,
+      12,
+      19,
+      343,
+      344
+    ],
     "speakers": []
   }
 }

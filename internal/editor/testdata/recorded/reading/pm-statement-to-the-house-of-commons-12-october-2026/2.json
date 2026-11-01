@@ -1,23 +1,14 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "1c8068d716982ebb9b7e71e037cf78cc6d8529aa5652cead0ed6497d9e1cb628",
-  "recorded_at": "2026-10-30T20:59:11.183376Z",
+  "request_hash": "3facbc02e21dcd21c5287dd213a0fac4dc15245505960b57efcfe9ecee64cbf4",
+  "recorded_at": "2026-11-01T17:51:20.49845Z",
   "usage": {
-    "input_tokens": 5188,
-    "output_tokens": 12279
+    "input_tokens": 5287,
+    "output_tokens": 11989
   },
   "output": {
     "names": [
-      {
-        "at": {
-          "span": 1,
-          "words": "United Nations General Assembly"
-        },
-        "kind": "occasion",
-        "name": "United Nations General Assembly",
-        "office": ""
-      },
       {
         "at": {
           "span": 1,
@@ -29,21 +20,48 @@
       },
       {
         "at": {
-          "span": 2,
-          "words": "Holborn and St Pancras"
+          "span": 1,
+          "words": "the House"
         },
-        "kind": "place",
-        "name": "Holborn and St Pancras",
+        "kind": "organisation",
+        "name": "House of Commons",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 1,
+          "words": "United Nations General Assembly"
+        },
+        "kind": "occasion",
+        "name": "United Nations General Assembly",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 2,
+          "words": "the new member for Holborn and St Pancras"
+        },
+        "kind": "person",
+        "name": "the new member for Holborn and St Pancras",
+        "office": "Member of Parliament for Holborn and St Pancras"
+      },
+      {
+        "at": {
+          "span": 5,
+          "words": "this House"
+        },
+        "kind": "organisation",
+        "name": "House of Commons",
         "office": ""
       },
       {
         "at": {
           "span": 6,
-          "words": "UN"
+          "words": "Mr Speaker"
         },
-        "kind": "organisation",
-        "name": "United Nations",
-        "office": ""
+        "kind": "person",
+        "name": "Mr Speaker",
+        "office": "Speaker of the House of Commons"
       },
       {
         "at": {
@@ -51,16 +69,16 @@
           "words": "Britain"
         },
         "kind": "place",
-        "name": "United Kingdom",
+        "name": "Britain",
         "office": ""
       },
       {
         "at": {
-          "span": 7,
-          "words": "Ukraine"
+          "span": 6,
+          "words": "the UN"
         },
-        "kind": "place",
-        "name": "Ukraine",
+        "kind": "organisation",
+        "name": "United Nations",
         "office": ""
       },
       {
@@ -74,25 +92,16 @@
       },
       {
         "at": {
-          "span": 7,
-          "words": "New York"
+          "span": 9,
+          "words": "President Zelenskyy"
         },
-        "kind": "place",
-        "name": "New York",
-        "office": ""
+        "kind": "person",
+        "name": "Zelenskyy",
+        "office": "President of Ukraine"
       },
       {
         "at": {
-          "span": 12,
-          "words": "UK"
-        },
-        "kind": "place",
-        "name": "United Kingdom",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 12,
+          "span": 9,
           "words": "Russia"
         },
         "kind": "place",
@@ -110,12 +119,39 @@
       },
       {
         "at": {
-          "span": 21,
+          "span": 16,
+          "words": "President Trump"
+        },
+        "kind": "person",
+        "name": "Trump",
+        "office": "President of the United States"
+      },
+      {
+        "at": {
+          "span": 17,
+          "words": "President Zelenskyy"
+        },
+        "kind": "person",
+        "name": "Zelenskyy",
+        "office": "President of Ukraine"
+      },
+      {
+        "at": {
+          "span": 18,
           "words": "NATO"
         },
         "kind": "organisation",
         "name": "NATO",
         "office": ""
+      },
+      {
+        "at": {
+          "span": 18,
+          "words": "Mr Speaker"
+        },
+        "kind": "person",
+        "name": "Mr Speaker",
+        "office": "Speaker of the House of Commons"
       },
       {
         "at": {
@@ -125,15 +161,6 @@
         "kind": "person",
         "name": "NATO Secretary General",
         "office": "Secretary General of NATO"
-      },
-      {
-        "at": {
-          "span": 21,
-          "words": "Oxfordshire"
-        },
-        "kind": "place",
-        "name": "Oxfordshire",
-        "office": ""
       },
       {
         "at": {
@@ -156,38 +183,20 @@
       {
         "at": {
           "span": 25,
-          "words": "National Centre for Information Defence"
+          "words": "UN General Assembly"
         },
-        "kind": "organisation",
-        "name": "National Centre for Information Defence",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 25,
-          "words": "Foreign Affairs Select Committee"
-        },
-        "kind": "organisation",
-        "name": "Foreign Affairs Select Committee",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 26,
-          "words": "Germany"
-        },
-        "kind": "place",
-        "name": "Germany",
+        "kind": "occasion",
+        "name": "United Nations General Assembly",
         "office": ""
       },
       {
         "at": {
           "span": 27,
-          "words": "Middle East"
+          "words": "President Trump"
         },
-        "kind": "place",
-        "name": "Middle East",
-        "office": ""
+        "kind": "person",
+        "name": "Trump",
+        "office": "President of the United States"
       },
       {
         "at": {
@@ -200,11 +209,11 @@
       },
       {
         "at": {
-          "span": 31,
-          "words": "King Khalid International Airport"
+          "span": 32,
+          "words": "Saudi Arabia"
         },
         "kind": "place",
-        "name": "King Khalid International Airport",
+        "name": "Saudi Arabia",
         "office": ""
       },
       {
@@ -219,43 +228,16 @@
       {
         "at": {
           "span": 33,
-          "words": "UNGA"
+          "words": "Mr Speaker"
         },
-        "kind": "occasion",
-        "name": "UN General Assembly",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 33,
-          "words": "US"
-        },
-        "kind": "place",
-        "name": "United States",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 34,
-          "words": "RAF Fairford"
-        },
-        "kind": "place",
-        "name": "RAF Fairford",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 34,
-          "words": "RAF Molesworth"
-        },
-        "kind": "place",
-        "name": "RAF Molesworth",
-        "office": ""
+        "kind": "person",
+        "name": "Mr Speaker",
+        "office": "Speaker of the House of Commons"
       },
       {
         "at": {
           "span": 35,
-          "words": "Home Secretary"
+          "words": "the Home Secretary"
         },
         "kind": "person",
         "name": "Home Secretary",
@@ -272,21 +254,66 @@
       },
       {
         "at": {
-          "span": 39,
-          "words": "the IRGC"
+          "span": 36,
+          "words": "Islamic Revolutionary Guard"
         },
         "kind": "organisation",
-        "name": "Islamic Revolutionary Guard (IRGC)",
+        "name": "Islamic Revolutionary Guard",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 38,
+          "words": "Iran’s"
+        },
+        "kind": "place",
+        "name": "Iran",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 39,
+          "words": "Iran and the IRGC"
+        },
+        "kind": "place",
+        "name": "Iran",
         "office": ""
       },
       {
         "at": {
           "span": 40,
-          "words": "Falkland Islands"
+          "words": "the President"
+        },
+        "kind": "person",
+        "name": "Trump",
+        "office": "President of the United States"
+      },
+      {
+        "at": {
+          "span": 40,
+          "words": "the Falkland Islands"
         },
         "kind": "place",
         "name": "Falkland Islands",
         "office": ""
+      },
+      {
+        "at": {
+          "span": 41,
+          "words": "the General Assembly"
+        },
+        "kind": "occasion",
+        "name": "United Nations General Assembly",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 42,
+          "words": "Mr Speaker"
+        },
+        "kind": "person",
+        "name": "Mr Speaker",
+        "office": "Speaker of the House of Commons"
       },
       {
         "at": {
@@ -300,16 +327,7 @@
       {
         "at": {
           "span": 42,
-          "words": "European Commission"
-        },
-        "kind": "organisation",
-        "name": "European Commission",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 42,
-          "words": "UK-EU summit"
+          "words": "the forthcoming UK-EU summit"
         },
         "kind": "occasion",
         "name": "UK-EU summit",
@@ -326,30 +344,48 @@
       },
       {
         "at": {
-          "span": 54,
-          "words": "Scotland"
+          "span": 48,
+          "words": "this House"
         },
-        "kind": "place",
-        "name": "Scotland",
+        "kind": "organisation",
+        "name": "House of Commons",
         "office": ""
       },
       {
         "at": {
-          "span": 54,
-          "words": "Wales"
+          "span": 48,
+          "words": "Mr Speaker"
+        },
+        "kind": "person",
+        "name": "Mr Speaker",
+        "office": "Speaker of the House of Commons"
+      },
+      {
+        "at": {
+          "span": 62,
+          "words": "Mr Speaker"
+        },
+        "kind": "person",
+        "name": "Mr Speaker",
+        "office": "Speaker of the House of Commons"
+      },
+      {
+        "at": {
+          "span": 65,
+          "words": "Britain"
         },
         "kind": "place",
-        "name": "Wales",
+        "name": "Britain",
         "office": ""
       },
       {
         "at": {
-          "span": 60,
-          "words": "Northern Ireland"
+          "span": 71,
+          "words": "Mr Speaker"
         },
-        "kind": "place",
-        "name": "Northern Ireland",
-        "office": ""
+        "kind": "person",
+        "name": "Mr Speaker",
+        "office": "Speaker of the House of Commons"
       },
       {
         "at": {
@@ -363,11 +399,29 @@
       {
         "at": {
           "span": 74,
-          "words": "Microsoft"
+          "words": "the President of Microsoft"
         },
-        "kind": "organisation",
-        "name": "Microsoft",
+        "kind": "person",
+        "name": "President of Microsoft",
+        "office": "President of Microsoft"
+      },
+      {
+        "at": {
+          "span": 74,
+          "words": "Britain"
+        },
+        "kind": "place",
+        "name": "Britain",
         "office": ""
+      },
+      {
+        "at": {
+          "span": 76,
+          "words": "Mr Speaker"
+        },
+        "kind": "person",
+        "name": "Mr Speaker",
+        "office": "Speaker of the House of Commons"
       }
     ],
     "refers_to": [
@@ -378,7 +432,7 @@
         },
         "to": {
           "span": 2,
-          "words": "new member for Holborn and St Pancras"
+          "words": "the new member for Holborn and St Pancras"
         }
       },
       {
@@ -388,7 +442,7 @@
         },
         "to": {
           "span": 2,
-          "words": "new member for Holborn and St Pancras"
+          "words": "the new member for Holborn and St Pancras"
         }
       },
       {
@@ -398,7 +452,7 @@
         },
         "to": {
           "span": 2,
-          "words": "new member for Holborn and St Pancras"
+          "words": "the new member for Holborn and St Pancras"
         }
       },
       {
@@ -407,8 +461,18 @@
           "words": "he"
         },
         "to": {
-          "span": 9,
+          "span": 7,
           "words": "President Zelenskyy"
+        }
+      },
+      {
+        "from": {
+          "span": 9,
+          "words": "their"
+        },
+        "to": {
+          "span": 9,
+          "words": "Russia"
         }
       },
       {
@@ -423,22 +487,22 @@
       },
       {
         "from": {
-          "span": 13,
-          "words": "it"
+          "span": 11,
+          "words": "their"
         },
         "to": {
-          "span": 13,
-          "words": "diesel"
+          "span": 7,
+          "words": "Ukraine"
         }
       },
       {
         "from": {
-          "span": 15,
-          "words": "It"
+          "span": 13,
+          "words": "the aggressor"
         },
         "to": {
-          "span": 13,
-          "words": "an energy ceasefire"
+          "span": 9,
+          "words": "Russia"
         }
       },
       {
@@ -448,7 +512,17 @@
         },
         "to": {
           "span": 16,
-          "words": "reciprocal energy ceasefire"
+          "words": "a reciprocal energy ceasefire"
+        }
+      },
+      {
+        "from": {
+          "span": 17,
+          "words": "this"
+        },
+        "to": {
+          "span": 16,
+          "words": "a reciprocal energy ceasefire"
         }
       },
       {
@@ -473,32 +547,12 @@
       },
       {
         "from": {
-          "span": 38,
-          "words": "them"
-        },
-        "to": {
-          "span": 38,
-          "words": "criminal networks"
-        }
-      },
-      {
-        "from": {
-          "span": 38,
-          "words": "their"
-        },
-        "to": {
-          "span": 38,
-          "words": "criminal networks"
-        }
-      },
-      {
-        "from": {
           "span": 41,
           "words": "their"
         },
         "to": {
           "span": 40,
-          "words": "islanders"
+          "words": "the islanders"
         }
       },
       {
@@ -508,7 +562,7 @@
         },
         "to": {
           "span": 42,
-          "words": "UK-EU summit"
+          "words": "the forthcoming UK-EU summit"
         }
       },
       {
@@ -518,7 +572,7 @@
         },
         "to": {
           "span": 42,
-          "words": "UK-EU summit"
+          "words": "the forthcoming UK-EU summit"
         }
       },
       {
@@ -528,7 +582,7 @@
         },
         "to": {
           "span": 42,
-          "words": "UK-EU summit"
+          "words": "the forthcoming UK-EU summit"
         }
       },
       {
@@ -563,6 +617,16 @@
       },
       {
         "from": {
+          "span": 71,
+          "words": "the country"
+        },
+        "to": {
+          "span": 6,
+          "words": "Britain"
+        }
+      },
+      {
+        "from": {
           "span": 73,
           "words": "it"
         },
@@ -573,797 +637,6 @@
       }
     ],
     "rejected": [],
-    "speakers": [
-      {
-        "span": {
-          "span": 1,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 2,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 3,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 4,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 5,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 6,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 7,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 8,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 9,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 10,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 11,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 12,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 13,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 14,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 15,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 16,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 17,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 18,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 19,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 20,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 21,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 22,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 23,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 24,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 25,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 26,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 27,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 28,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 29,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 30,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 31,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 32,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 33,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 34,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 35,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 36,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 37,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 38,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 39,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 40,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 41,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 42,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 43,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 44,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 45,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 46,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 47,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 48,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 49,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 50,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 51,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 52,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 53,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 54,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 55,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 56,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 57,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 58,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 59,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 60,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 61,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 62,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 63,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 64,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 65,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 66,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 67,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 68,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 69,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 70,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 71,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 72,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 73,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 74,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 75,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 76,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 77,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 78,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      },
-      {
-        "span": {
-          "span": 79,
-          "words": ""
-        },
-        "speaker": {
-          "span": 1,
-          "words": "I"
-        }
-      }
-    ]
+    "speakers": []
   }
 }

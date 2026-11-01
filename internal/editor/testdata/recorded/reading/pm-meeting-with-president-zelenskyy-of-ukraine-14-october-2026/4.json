@@ -1,18 +1,18 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "f9ab059432a16fac6eb1475533df887a989aff81c5a45b7de16228076aa6abb9",
-  "recorded_at": "2026-10-30T20:52:54.007784Z",
+  "request_hash": "182674a3acf0f424c49a090c6ecab311155d2bcb3d49ca8259da91b3445d3589",
+  "recorded_at": "2026-11-01T17:41:30.449675Z",
   "usage": {
-    "input_tokens": 2484,
-    "output_tokens": 4374
+    "input_tokens": 2583,
+    "output_tokens": 3481
   },
   "output": {
     "names": [
       {
         "at": {
           "span": 1,
-          "words": "Prime Minister"
+          "words": "The Prime Minister"
         },
         "kind": "person",
         "name": "Prime Minister",
@@ -66,16 +66,7 @@
       {
         "at": {
           "span": 4,
-          "words": "Ukraine"
-        },
-        "kind": "place",
-        "name": "Ukraine",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 4,
-          "words": "Prime Minister"
+          "words": "the Prime Minister"
         },
         "kind": "person",
         "name": "Prime Minister",
@@ -92,6 +83,24 @@
       },
       {
         "at": {
+          "span": 4,
+          "words": "Ukraine"
+        },
+        "kind": "place",
+        "name": "Ukraine",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "Russia"
+        },
+        "kind": "place",
+        "name": "Russia",
+        "office": ""
+      },
+      {
+        "at": {
           "span": 5,
           "words": "UK"
         },
@@ -102,20 +111,20 @@
       {
         "at": {
           "span": 5,
-          "words": "Prime Minister"
-        },
-        "kind": "person",
-        "name": "Prime Minister",
-        "office": "Prime Minister of the United Kingdom"
-      },
-      {
-        "at": {
-          "span": 5,
           "words": "Ukraine"
         },
         "kind": "place",
         "name": "Ukraine",
         "office": ""
+      },
+      {
+        "at": {
+          "span": 5,
+          "words": "the Prime Minister"
+        },
+        "kind": "person",
+        "name": "Prime Minister",
+        "office": "Prime Minister of the United Kingdom"
       },
       {
         "at": {
@@ -147,7 +156,7 @@
       {
         "at": {
           "span": 7,
-          "words": "Prime Minister"
+          "words": "the Prime Minister"
         },
         "kind": "person",
         "name": "Prime Minister",

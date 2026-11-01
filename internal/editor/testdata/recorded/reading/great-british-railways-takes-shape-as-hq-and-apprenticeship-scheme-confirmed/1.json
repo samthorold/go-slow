@@ -1,71 +1,26 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "9da1dbc9aeac7a1b3f4fd51718102968ff4059a927eaa412a8ef3043a95bf25b",
-  "recorded_at": "2026-10-30T20:49:13.1934Z",
+  "request_hash": "e25a5bc7a9a4383bd0327ce9a5a10e63e49915d07db917b4d12c3f1828a8c16b",
+  "recorded_at": "2026-11-01T17:37:43.027166Z",
   "usage": {
-    "input_tokens": 4010,
-    "output_tokens": 6176
+    "input_tokens": 4109,
+    "output_tokens": 7568
   },
   "output": {
     "names": [
       {
         "at": {
-          "span": 12,
-          "words": "Andy Burnham"
+          "span": 1,
+          "words": "Derby"
         },
-        "kind": "person",
-        "name": "Andy Burnham",
-        "office": "Prime Minister of the United Kingdom"
-      },
-      {
-        "at": {
-          "span": 20,
-          "words": "Heidi Alexander"
-        },
-        "kind": "person",
-        "name": "Heidi Alexander",
-        "office": "Transport Secretary"
-      },
-      {
-        "at": {
-          "span": 30,
-          "words": "Pat McFadden"
-        },
-        "kind": "person",
-        "name": "Pat McFadden",
-        "office": "Work and Pensions Secretary"
-      },
-      {
-        "at": {
-          "span": 34,
-          "words": "Claire Ward"
-        },
-        "kind": "person",
-        "name": "Claire Ward",
-        "office": "Mayor of the East Midlands"
+        "kind": "place",
+        "name": "Derby",
+        "office": ""
       },
       {
         "at": {
           "span": 4,
-          "words": "Great British Railways"
-        },
-        "kind": "organisation",
-        "name": "Great British Railways",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 16,
-          "words": "Great British Railways"
-        },
-        "kind": "organisation",
-        "name": "Great British Railways",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 22,
           "words": "Great British Railways"
         },
         "kind": "organisation",
@@ -83,20 +38,11 @@
       },
       {
         "at": {
-          "span": 16,
-          "words": "Derby"
+          "span": 7,
+          "words": "Britain"
         },
         "kind": "place",
-        "name": "Derby",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 22,
-          "words": "Derby"
-        },
-        "kind": "place",
-        "name": "Derby",
+        "name": "Britain",
         "office": ""
       },
       {
@@ -106,6 +52,78 @@
         },
         "kind": "place",
         "name": "Becketwell",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 8,
+          "words": "Derby"
+        },
+        "kind": "place",
+        "name": "Derby",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 11,
+          "words": "Derby"
+        },
+        "kind": "place",
+        "name": "Derby",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 12,
+          "words": "Prime Minister Andy Burnham"
+        },
+        "kind": "person",
+        "name": "Andy Burnham",
+        "office": "Prime Minister"
+      },
+      {
+        "at": {
+          "span": 16,
+          "words": "Great British Railways"
+        },
+        "kind": "organisation",
+        "name": "Great British Railways",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 16,
+          "words": "Derby"
+        },
+        "kind": "place",
+        "name": "Derby",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 20,
+          "words": "Transport Secretary Heidi Alexander"
+        },
+        "kind": "person",
+        "name": "Heidi Alexander",
+        "office": "Transport Secretary"
+      },
+      {
+        "at": {
+          "span": 23,
+          "words": "Becketwell"
+        },
+        "kind": "place",
+        "name": "Becketwell",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 23,
+          "words": "Derby’s"
+        },
+        "kind": "place",
+        "name": "Derby",
         "office": ""
       },
       {
@@ -146,20 +164,47 @@
       },
       {
         "at": {
-          "span": 7,
-          "words": "Britain"
+          "span": 27,
+          "words": "Derby"
         },
         "kind": "place",
-        "name": "Britain",
+        "name": "Derby",
         "office": ""
       },
       {
         "at": {
-          "span": 28,
-          "words": "Midlands"
+          "span": 30,
+          "words": "Work and Pensions Secretary Pat McFadden"
+        },
+        "kind": "person",
+        "name": "Pat McFadden",
+        "office": "Work and Pensions Secretary"
+      },
+      {
+        "at": {
+          "span": 34,
+          "words": "Mayor of the East Midlands, Claire Ward"
+        },
+        "kind": "person",
+        "name": "Claire Ward",
+        "office": "Mayor of the East Midlands"
+      },
+      {
+        "at": {
+          "span": 36,
+          "words": "Great British Railways"
+        },
+        "kind": "organisation",
+        "name": "Great British Railways",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 39,
+          "words": "Derby"
         },
         "kind": "place",
-        "name": "East Midlands",
+        "name": "Derby",
         "office": ""
       }
     ],
@@ -170,8 +215,18 @@
           "words": "the city"
         },
         "to": {
-          "span": 4,
+          "span": 1,
           "words": "Derby"
+        }
+      },
+      {
+        "from": {
+          "span": 9,
+          "words": "The new HQ"
+        },
+        "to": {
+          "span": 8,
+          "words": "Becketwell"
         }
       },
       {
@@ -180,27 +235,7 @@
           "words": "the city"
         },
         "to": {
-          "span": 4,
-          "words": "Derby"
-        }
-      },
-      {
-        "from": {
-          "span": 9,
-          "words": "the region’s"
-        },
-        "to": {
-          "span": 4,
-          "words": "Derby"
-        }
-      },
-      {
-        "from": {
-          "span": 11,
-          "words": "the city’s"
-        },
-        "to": {
-          "span": 4,
+          "span": 1,
           "words": "Derby"
         }
       },
@@ -210,7 +245,7 @@
           "words": "its"
         },
         "to": {
-          "span": 16,
+          "span": 4,
           "words": "Great British Railways"
         }
       },
@@ -220,18 +255,38 @@
           "words": "a city"
         },
         "to": {
-          "span": 16,
+          "span": 1,
           "words": "Derby"
         }
       },
       {
         "from": {
           "span": 17,
-          "words": "the place they call home"
+          "words": "the place"
+        },
+        "to": {
+          "span": 1,
+          "words": "Derby"
+        }
+      },
+      {
+        "from": {
+          "span": 17,
+          "words": "they"
+        },
+        "to": {
+          "span": 3,
+          "words": "young people"
+        }
+      },
+      {
+        "from": {
+          "span": 23,
+          "words": "GBR’s"
         },
         "to": {
           "span": 4,
-          "words": "Derby"
+          "words": "Great British Railways"
         }
       },
       {
@@ -240,8 +295,18 @@
           "words": "the city"
         },
         "to": {
-          "span": 4,
+          "span": 1,
           "words": "Derby"
+        }
+      },
+      {
+        "from": {
+          "span": 25,
+          "words": "headquarters"
+        },
+        "to": {
+          "span": 8,
+          "words": "Becketwell"
         }
       },
       {
@@ -250,7 +315,7 @@
           "words": "the organisation’s"
         },
         "to": {
-          "span": 22,
+          "span": 4,
           "words": "Great British Railways"
         }
       },
@@ -266,11 +331,21 @@
       },
       {
         "from": {
+          "span": 29,
+          "words": "The new headquarters site"
+        },
+        "to": {
+          "span": 8,
+          "words": "Becketwell"
+        }
+      },
+      {
+        "from": {
           "span": 36,
           "words": "here"
         },
         "to": {
-          "span": 4,
+          "span": 1,
           "words": "Derby"
         }
       },
@@ -280,7 +355,7 @@
           "words": "the city"
         },
         "to": {
-          "span": 4,
+          "span": 1,
           "words": "Derby"
         }
       },
@@ -290,7 +365,7 @@
           "words": "here"
         },
         "to": {
-          "span": 4,
+          "span": 1,
           "words": "Derby"
         }
       }

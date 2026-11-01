@@ -1,23 +1,14 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "6c49881ec186d68660dd849b7160c65a24f710a3d042c7222f189d23abee2fb6",
-  "recorded_at": "2026-10-30T20:54:19.681103Z",
+  "request_hash": "660c5933e14cd8c53a3772b900be13388062d7ff9463d16ec15bd66f48ed486c",
+  "recorded_at": "2026-11-01T17:45:05.806294Z",
   "usage": {
-    "input_tokens": 12337,
-    "output_tokens": 8022
+    "input_tokens": 12436,
+    "output_tokens": 12446
   },
   "output": {
     "names": [
-      {
-        "at": {
-          "span": 2,
-          "words": "Douglas"
-        },
-        "kind": "person",
-        "name": "Douglas",
-        "office": ""
-      },
       {
         "at": {
           "span": 3,
@@ -25,6 +16,15 @@
         },
         "kind": "place",
         "name": "Motherwell",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 3,
+          "words": "Scotland"
+        },
+        "kind": "place",
+        "name": "Scotland",
         "office": ""
       },
       {
@@ -65,15 +65,6 @@
       },
       {
         "at": {
-          "span": 17,
-          "words": "Motherwell"
-        },
-        "kind": "place",
-        "name": "Motherwell",
-        "office": ""
-      },
-      {
-        "at": {
           "span": 21,
           "words": "Downing Street"
         },
@@ -86,7 +77,7 @@
           "span": 28,
           "words": "Westminster"
         },
-        "kind": "organisation",
+        "kind": "place",
         "name": "Westminster",
         "office": ""
       },
@@ -97,6 +88,15 @@
         },
         "kind": "place",
         "name": "Greater Manchester",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 36,
+          "words": "Scottish Violence Reduction Unit"
+        },
+        "kind": "organisation",
+        "name": "Scottish Violence Reduction Unit",
         "office": ""
       },
       {
@@ -124,15 +124,6 @@
         },
         "kind": "place",
         "name": "Easterhouse",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 36,
-          "words": "Scottish Violence Reduction Unit"
-        },
-        "kind": "organisation",
-        "name": "Scottish Violence Reduction Unit",
         "office": ""
       },
       {
@@ -191,29 +182,110 @@
       },
       {
         "at": {
+          "span": 92,
+          "words": "Whitehall"
+        },
+        "kind": "organisation",
+        "name": "Whitehall",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 94,
+          "words": "the UK"
+        },
+        "kind": "place",
+        "name": "the UK",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 97,
+          "words": "Prime Minister"
+        },
+        "kind": "person",
+        "name": "Prime Minister",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 103,
+          "words": "Edinburgh"
+        },
+        "kind": "place",
+        "name": "Edinburgh",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 104,
+          "words": "Dundee"
+        },
+        "kind": "place",
+        "name": "Dundee",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 108,
+          "words": "Aberdeen"
+        },
+        "kind": "place",
+        "name": "Aberdeen",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 109,
+          "words": "Inverclyde"
+        },
+        "kind": "place",
+        "name": "Inverclyde",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 117,
+          "words": "East Renfrewshire"
+        },
+        "kind": "place",
+        "name": "East Renfrewshire",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 136,
+          "words": "Holyrood"
+        },
+        "kind": "organisation",
+        "name": "Holyrood",
+        "office": ""
+      },
+      {
+        "at": {
           "span": 141,
-          "words": "Scottish Parliament"
+          "words": "the Scottish Parliament"
         },
         "kind": "organisation",
-        "name": "Scottish Parliament",
+        "name": "the Scottish Parliament",
         "office": ""
       },
       {
         "at": {
-          "span": 175,
-          "words": "Scottish government"
+          "span": 172,
+          "words": "the UK government"
         },
         "kind": "organisation",
-        "name": "Scottish government",
+        "name": "the UK government",
         "office": ""
       },
       {
         "at": {
-          "span": 175,
-          "words": "UK government"
+          "span": 172,
+          "words": "the Scottish government"
         },
         "kind": "organisation",
-        "name": "UK government",
+        "name": "the Scottish government",
         "office": ""
       },
       {
@@ -223,7 +295,16 @@
         },
         "kind": "person",
         "name": "John Swinney",
-        "office": "First Minister of Scotland"
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 179,
+          "words": "Douglas"
+        },
+        "kind": "person",
+        "name": "Douglas",
+        "office": ""
       },
       {
         "at": {
@@ -272,11 +353,11 @@
       },
       {
         "at": {
-          "span": 204,
-          "words": "Dundee"
+          "span": 205,
+          "words": "the Highlands and the Islands"
         },
         "kind": "place",
-        "name": "Dundee",
+        "name": "the Highlands and the Islands",
         "office": ""
       },
       {
@@ -299,20 +380,38 @@
       },
       {
         "at": {
-          "span": 283,
-          "words": "First Minister"
+          "span": 257,
+          "words": "the Highlands"
         },
-        "kind": "person",
-        "name": "John Swinney",
-        "office": "First Minister of Scotland"
+        "kind": "place",
+        "name": "the Highlands",
+        "office": ""
       },
       {
         "at": {
-          "span": 286,
-          "words": "John"
+          "span": 258,
+          "words": "Lanarkshire"
+        },
+        "kind": "place",
+        "name": "Lanarkshire",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 271,
+          "words": "City Region Deals"
+        },
+        "kind": "organisation",
+        "name": "City Region Deals",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 283,
+          "words": "the First Minister"
         },
         "kind": "person",
-        "name": "John Swinney",
+        "name": "the First Minister",
         "office": "First Minister of Scotland"
       },
       {
@@ -347,22 +446,52 @@
       },
       {
         "from": {
-          "span": 14,
-          "words": "them"
+          "span": 63,
+          "words": "it"
         },
         "to": {
-          "span": 13,
-          "words": "Glasgow"
+          "span": 63,
+          "words": "No10"
         }
       },
       {
         "from": {
-          "span": 37,
-          "words": "they"
+          "span": 69,
+          "words": "this community"
         },
         "to": {
-          "span": 36,
-          "words": "FARE-Scotland"
+          "span": 3,
+          "words": "Motherwell"
+        }
+      },
+      {
+        "from": {
+          "span": 71,
+          "words": "this town"
+        },
+        "to": {
+          "span": 3,
+          "words": "Motherwell"
+        }
+      },
+      {
+        "from": {
+          "span": 72,
+          "words": "the local MP"
+        },
+        "to": {
+          "span": 72,
+          "words": "Pamela"
+        }
+      },
+      {
+        "from": {
+          "span": 78,
+          "words": "this area"
+        },
+        "to": {
+          "span": 3,
+          "words": "Motherwell"
         }
       },
       {
@@ -377,6 +506,46 @@
       },
       {
         "from": {
+          "span": 82,
+          "words": "it"
+        },
+        "to": {
+          "span": 81,
+          "words": "Ravenscraig"
+        }
+      },
+      {
+        "from": {
+          "span": 88,
+          "words": "there"
+        },
+        "to": {
+          "span": 88,
+          "words": "Leigh"
+        }
+      },
+      {
+        "from": {
+          "span": 96,
+          "words": "them"
+        },
+        "to": {
+          "span": 96,
+          "words": "Leigh"
+        }
+      },
+      {
+        "from": {
+          "span": 101,
+          "words": "the capital of Scotland"
+        },
+        "to": {
+          "span": 103,
+          "words": "Edinburgh"
+        }
+      },
+      {
+        "from": {
           "span": 113,
           "words": "this college"
         },
@@ -387,30 +556,524 @@
       },
       {
         "from": {
-          "span": 295,
-          "words": "Number 10 South"
+          "span": 150,
+          "words": "him"
         },
         "to": {
-          "span": 6,
-          "words": "Number 10 North"
+          "span": 2,
+          "words": "Douglas"
         }
       }
     ],
     "rejected": [
       1,
+      2,
       12,
-      19,
       25,
-      44,
-      45,
-      53,
-      54,
-      59,
-      77,
       331,
+      332,
       343,
       344
     ],
     "speakers": []
-  }
+  },
+  "earlier_attempts": [
+    {
+      "act": "reading",
+      "model": "claude-haiku-5-5",
+      "request_hash": "660c5933e14cd8c53a3772b900be13388062d7ff9463d16ec15bd66f48ed486c",
+      "recorded_at": "2026-11-01T17:44:16.449002Z",
+      "usage": {
+        "input_tokens": 12436,
+        "output_tokens": 11070
+      },
+      "output": {
+        "names": [
+          {
+            "at": {
+              "span": 3,
+              "words": "Scotland"
+            },
+            "kind": "place",
+            "name": "Scotland",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 3,
+              "words": "Motherwell"
+            },
+            "kind": "place",
+            "name": "Motherwell",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 70,
+              "words": "Motherwell"
+            },
+            "kind": "place",
+            "name": "Motherwell",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 2,
+              "words": "Douglas"
+            },
+            "kind": "person",
+            "name": "Douglas",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 5,
+              "words": "Manchester"
+            },
+            "kind": "place",
+            "name": "Manchester",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 6,
+              "words": "Number 10 North"
+            },
+            "kind": "place",
+            "name": "Number 10 North",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 13,
+              "words": "Commonwealth Games"
+            },
+            "kind": "occasion",
+            "name": "Commonwealth Games",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 13,
+              "words": "Glasgow"
+            },
+            "kind": "place",
+            "name": "Glasgow",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 21,
+              "words": "Downing Street"
+            },
+            "kind": "place",
+            "name": "Downing Street",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 28,
+              "words": "Westminster"
+            },
+            "kind": "place",
+            "name": "Westminster",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 28,
+              "words": "Greater Manchester"
+            },
+            "kind": "place",
+            "name": "Greater Manchester",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 32,
+              "words": "Prime Minister"
+            },
+            "kind": "person",
+            "name": "Prime Minister",
+            "office": "Prime Minister of the United Kingdom"
+          },
+          {
+            "at": {
+              "span": 36,
+              "words": "Scottish Violence Reduction Unit"
+            },
+            "kind": "organisation",
+            "name": "Scottish Violence Reduction Unit",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 36,
+              "words": "FARE-Scotland"
+            },
+            "kind": "organisation",
+            "name": "FARE-Scotland",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 36,
+              "words": "Bannatyne House"
+            },
+            "kind": "place",
+            "name": "Bannatyne House",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 36,
+              "words": "Easterhouse"
+            },
+            "kind": "place",
+            "name": "Easterhouse",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 36,
+              "words": "Greater Manchester Violence Reduction Unit"
+            },
+            "kind": "organisation",
+            "name": "Greater Manchester Violence Reduction Unit",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 58,
+              "words": "Darren McGarvey"
+            },
+            "kind": "person",
+            "name": "Darren McGarvey",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 72,
+              "words": "Pamela"
+            },
+            "kind": "person",
+            "name": "Pamela",
+            "office": "Member of Parliament for Motherwell"
+          },
+          {
+            "at": {
+              "span": 80,
+              "words": "Ravenscraig"
+            },
+            "kind": "place",
+            "name": "Ravenscraig",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 88,
+              "words": "Leigh"
+            },
+            "kind": "place",
+            "name": "Leigh",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 90,
+              "words": "Bickershaw Colliery"
+            },
+            "kind": "place",
+            "name": "Bickershaw Colliery",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 92,
+              "words": "Whitehall"
+            },
+            "kind": "place",
+            "name": "Whitehall",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 101,
+              "words": "Edinburgh"
+            },
+            "kind": "place",
+            "name": "Edinburgh",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 104,
+              "words": "Dundee"
+            },
+            "kind": "place",
+            "name": "Dundee",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 108,
+              "words": "Aberdeen"
+            },
+            "kind": "place",
+            "name": "Aberdeen",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 109,
+              "words": "Inverclyde"
+            },
+            "kind": "place",
+            "name": "Inverclyde",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 117,
+              "words": "East Renfrewshire"
+            },
+            "kind": "place",
+            "name": "East Renfrewshire",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 136,
+              "words": "Holyrood"
+            },
+            "kind": "place",
+            "name": "Holyrood",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 137,
+              "words": "London"
+            },
+            "kind": "place",
+            "name": "London",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 141,
+              "words": "Scottish Parliament"
+            },
+            "kind": "organisation",
+            "name": "Scottish Parliament",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 175,
+              "words": "Scottish government"
+            },
+            "kind": "organisation",
+            "name": "Scottish Government",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 175,
+              "words": "UK government"
+            },
+            "kind": "organisation",
+            "name": "UK Government",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 179,
+              "words": "John Swinney"
+            },
+            "kind": "person",
+            "name": "John Swinney",
+            "office": "First Minister of Scotland"
+          },
+          {
+            "at": {
+              "span": 183,
+              "words": "Grangemouth"
+            },
+            "kind": "place",
+            "name": "Grangemouth",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 190,
+              "words": "EU-UK Summit"
+            },
+            "kind": "occasion",
+            "name": "EU-UK Summit",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 198,
+              "words": "Alexander Dennis"
+            },
+            "kind": "organisation",
+            "name": "Alexander Dennis",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 198,
+              "words": "Falkirk"
+            },
+            "kind": "place",
+            "name": "Falkirk",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 200,
+              "words": "Euan"
+            },
+            "kind": "person",
+            "name": "Euan",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 204,
+              "words": "Dundee"
+            },
+            "kind": "place",
+            "name": "Dundee",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 211,
+              "words": "Chemify"
+            },
+            "kind": "organisation",
+            "name": "Chemify",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 241,
+              "words": "Alan Milburn"
+            },
+            "kind": "person",
+            "name": "Alan Milburn",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 286,
+              "words": "John"
+            },
+            "kind": "person",
+            "name": "John Swinney",
+            "office": "First Minister of Scotland"
+          },
+          {
+            "at": {
+              "span": 318,
+              "words": "National Economic Council"
+            },
+            "kind": "organisation",
+            "name": "National Economic Council",
+            "office": ""
+          }
+        ],
+        "refers_to": [
+          {
+            "from": {
+              "span": 30,
+              "words": "the mayor"
+            },
+            "to": {
+              "span": 28,
+              "words": "first Mayor of Greater Manchester"
+            }
+          },
+          {
+            "from": {
+              "span": 58,
+              "words": "his"
+            },
+            "to": {
+              "span": 58,
+              "words": "Darren McGarvey"
+            }
+          },
+          {
+            "from": {
+              "span": 88,
+              "words": "a former mining community"
+            },
+            "to": {
+              "span": 88,
+              "words": "Leigh"
+            }
+          },
+          {
+            "from": {
+              "span": 88,
+              "words": "there"
+            },
+            "to": {
+              "span": 88,
+              "words": "Leigh"
+            }
+          },
+          {
+            "from": {
+              "span": 78,
+              "words": "this area"
+            },
+            "to": {
+              "span": 70,
+              "words": "Motherwell"
+            }
+          },
+          {
+            "from": {
+              "span": 95,
+              "words": "its"
+            },
+            "to": {
+              "span": 95,
+              "words": "Motherwell"
+            }
+          },
+          {
+            "from": {
+              "span": 101,
+              "words": "the capital of Scotland"
+            },
+            "to": {
+              "span": 103,
+              "words": "Edinburgh"
+            }
+          },
+          {
+            "from": {
+              "span": 283,
+              "words": "the First Minister"
+            },
+            "to": {
+              "span": 179,
+              "words": "John Swinney"
+            }
+          }
+        ],
+        "rejected": [
+          343,
+          344
+        ],
+        "speakers": []
+      }
+    }
+  ]
 }

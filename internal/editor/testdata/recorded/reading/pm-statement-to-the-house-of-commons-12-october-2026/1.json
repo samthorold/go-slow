@@ -1,14 +1,23 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "1c8068d716982ebb9b7e71e037cf78cc6d8529aa5652cead0ed6497d9e1cb628",
-  "recorded_at": "2026-10-30T20:58:27.196828Z",
+  "request_hash": "3facbc02e21dcd21c5287dd213a0fac4dc15245505960b57efcfe9ecee64cbf4",
+  "recorded_at": "2026-11-01T17:50:34.703421Z",
   "usage": {
-    "input_tokens": 5188,
-    "output_tokens": 13250
+    "input_tokens": 5287,
+    "output_tokens": 14607
   },
   "output": {
     "names": [
+      {
+        "at": {
+          "span": 1,
+          "words": "Mr Speaker"
+        },
+        "kind": "person",
+        "name": "Mr Speaker",
+        "office": "Speaker of the House of Commons"
+      },
       {
         "at": {
           "span": 1,
@@ -16,15 +25,6 @@
         },
         "kind": "occasion",
         "name": "United Nations General Assembly",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 2,
-          "words": "Holborn and St Pancras"
-        },
-        "kind": "place",
-        "name": "Holborn and St Pancras",
         "office": ""
       },
       {
@@ -38,12 +38,21 @@
       },
       {
         "at": {
-          "span": 6,
-          "words": "UN"
+          "span": 4,
+          "words": "Mr Speaker"
         },
-        "kind": "organisation",
-        "name": "United Nations",
-        "office": ""
+        "kind": "person",
+        "name": "Mr Speaker",
+        "office": "Speaker of the House of Commons"
+      },
+      {
+        "at": {
+          "span": 6,
+          "words": "Mr Speaker"
+        },
+        "kind": "person",
+        "name": "Mr Speaker",
+        "office": "Speaker of the House of Commons"
       },
       {
         "at": {
@@ -56,11 +65,20 @@
       },
       {
         "at": {
+          "span": 6,
+          "words": "UN"
+        },
+        "kind": "organisation",
+        "name": "United Nations",
+        "office": ""
+      },
+      {
+        "at": {
           "span": 7,
-          "words": "Ukraine"
+          "words": "New York"
         },
         "kind": "place",
-        "name": "Ukraine",
+        "name": "New York",
         "office": ""
       },
       {
@@ -75,10 +93,10 @@
       {
         "at": {
           "span": 7,
-          "words": "New York"
+          "words": "Ukraine"
         },
         "kind": "place",
-        "name": "New York",
+        "name": "Ukraine",
         "office": ""
       },
       {
@@ -101,17 +119,17 @@
       },
       {
         "at": {
-          "span": 12,
-          "words": "UK"
+          "span": 10,
+          "words": "Mr Speaker"
         },
-        "kind": "place",
-        "name": "United Kingdom",
-        "office": ""
+        "kind": "person",
+        "name": "Mr Speaker",
+        "office": "Speaker of the House of Commons"
       },
       {
         "at": {
           "span": 12,
-          "words": "Russia"
+          "words": "Russia’s"
         },
         "kind": "place",
         "name": "Russia",
@@ -125,33 +143,15 @@
         "kind": "person",
         "name": "Trump",
         "office": "President of the United States"
-      },
-      {
-        "at": {
-          "span": 14,
-          "words": "New York"
-        },
-        "kind": "place",
-        "name": "New York",
-        "office": ""
       },
       {
         "at": {
           "span": 16,
-          "words": "President Trump"
+          "words": "President Trump’s"
         },
         "kind": "person",
         "name": "Trump",
         "office": "President of the United States"
-      },
-      {
-        "at": {
-          "span": 17,
-          "words": "Ukraine"
-        },
-        "kind": "place",
-        "name": "Ukraine",
-        "office": ""
       },
       {
         "at": {
@@ -164,7 +164,16 @@
       },
       {
         "at": {
-          "span": 21,
+          "span": 18,
+          "words": "Mr Speaker"
+        },
+        "kind": "person",
+        "name": "Mr Speaker",
+        "office": "Speaker of the House of Commons"
+      },
+      {
+        "at": {
+          "span": 18,
           "words": "NATO"
         },
         "kind": "organisation",
@@ -178,7 +187,7 @@
         },
         "kind": "person",
         "name": "NATO Secretary General",
-        "office": "NATO Secretary General"
+        "office": "Secretary General of NATO"
       },
       {
         "at": {
@@ -227,11 +236,11 @@
       },
       {
         "at": {
-          "span": 25,
-          "words": "UN General Assembly"
+          "span": 26,
+          "words": "Berlin"
         },
-        "kind": "occasion",
-        "name": "United Nations General Assembly",
+        "kind": "place",
+        "name": "Berlin",
         "office": ""
       },
       {
@@ -281,15 +290,6 @@
       },
       {
         "at": {
-          "span": 27,
-          "words": "Middle East"
-        },
-        "kind": "place",
-        "name": "Middle East",
-        "office": ""
-      },
-      {
-        "at": {
           "span": 28,
           "words": "Saudi Arabia"
         },
@@ -323,6 +323,15 @@
         "kind": "organisation",
         "name": "Houthis",
         "office": ""
+      },
+      {
+        "at": {
+          "span": 33,
+          "words": "Mr Speaker"
+        },
+        "kind": "person",
+        "name": "Mr Speaker",
+        "office": "Speaker of the House of Commons"
       },
       {
         "at": {
@@ -390,7 +399,7 @@
       {
         "at": {
           "span": 38,
-          "words": "Iran"
+          "words": "Iran’s"
         },
         "kind": "place",
         "name": "Iran",
@@ -425,21 +434,12 @@
       },
       {
         "at": {
-          "span": 41,
-          "words": "General Assembly"
-        },
-        "kind": "occasion",
-        "name": "United Nations General Assembly",
-        "office": ""
-      },
-      {
-        "at": {
           "span": 42,
-          "words": "New York"
+          "words": "Mr Speaker"
         },
-        "kind": "place",
-        "name": "New York",
-        "office": ""
+        "kind": "person",
+        "name": "Mr Speaker",
+        "office": "Speaker of the House of Commons"
       },
       {
         "at": {
@@ -449,6 +449,15 @@
         "kind": "person",
         "name": "Ursula von der Leyen",
         "office": "President of the European Commission"
+      },
+      {
+        "at": {
+          "span": 42,
+          "words": "European Commission"
+        },
+        "kind": "organisation",
+        "name": "European Commission",
+        "office": ""
       },
       {
         "at": {
@@ -467,6 +476,15 @@
         "kind": "place",
         "name": "Brussels",
         "office": ""
+      },
+      {
+        "at": {
+          "span": 48,
+          "words": "Mr Speaker"
+        },
+        "kind": "person",
+        "name": "Mr Speaker",
+        "office": "Speaker of the House of Commons"
       },
       {
         "at": {
@@ -498,20 +516,20 @@
       {
         "at": {
           "span": 62,
-          "words": "Britain"
+          "words": "Mr Speaker"
         },
-        "kind": "place",
-        "name": "Britain",
-        "office": ""
+        "kind": "person",
+        "name": "Mr Speaker",
+        "office": "Speaker of the House of Commons"
       },
       {
         "at": {
-          "span": 63,
-          "words": "EU"
+          "span": 71,
+          "words": "Mr Speaker"
         },
-        "kind": "organisation",
-        "name": "European Union",
-        "office": ""
+        "kind": "person",
+        "name": "Mr Speaker",
+        "office": "Speaker of the House of Commons"
       },
       {
         "at": {
@@ -551,30 +569,12 @@
       },
       {
         "at": {
-          "span": 74,
-          "words": "Britain"
+          "span": 76,
+          "words": "Mr Speaker"
         },
-        "kind": "place",
-        "name": "Britain",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 75,
-          "words": "G20"
-        },
-        "kind": "occasion",
-        "name": "G20",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 77,
-          "words": "Britain"
-        },
-        "kind": "place",
-        "name": "Britain",
-        "office": ""
+        "kind": "person",
+        "name": "Mr Speaker",
+        "office": "Speaker of the House of Commons"
       }
     ],
     "refers_to": [
@@ -600,22 +600,22 @@
       },
       {
         "from": {
+          "span": 5,
+          "words": "her"
+        },
+        "to": {
+          "span": 2,
+          "words": "the new member for Holborn and St Pancras"
+        }
+      },
+      {
+        "from": {
           "span": 9,
           "words": "he"
         },
         "to": {
           "span": 9,
           "words": "President Zelenskyy"
-        }
-      },
-      {
-        "from": {
-          "span": 9,
-          "words": "their"
-        },
-        "to": {
-          "span": 9,
-          "words": "Russia"
         }
       },
       {
@@ -630,12 +630,12 @@
       },
       {
         "from": {
-          "span": 13,
-          "words": "it"
+          "span": 11,
+          "words": "their"
         },
         "to": {
-          "span": 13,
-          "words": "diesel"
+          "span": 7,
+          "words": "Ukraine"
         }
       },
       {
@@ -655,7 +655,17 @@
         },
         "to": {
           "span": 16,
-          "words": "reciprocal energy ceasefire"
+          "words": "a reciprocal energy ceasefire"
+        }
+      },
+      {
+        "from": {
+          "span": 17,
+          "words": "this"
+        },
+        "to": {
+          "span": 16,
+          "words": "a reciprocal energy ceasefire"
         }
       },
       {
@@ -680,12 +690,42 @@
       },
       {
         "from": {
+          "span": 30,
+          "words": "This support"
+        },
+        "to": {
+          "span": 28,
+          "words": "air-to-air refuelling support"
+        }
+      },
+      {
+        "from": {
           "span": 36,
           "words": "it"
         },
         "to": {
           "span": 35,
           "words": "the incident at RAF Fairford"
+        }
+      },
+      {
+        "from": {
+          "span": 38,
+          "words": "them"
+        },
+        "to": {
+          "span": 38,
+          "words": "criminal networks"
+        }
+      },
+      {
+        "from": {
+          "span": 38,
+          "words": "their"
+        },
+        "to": {
+          "span": 38,
+          "words": "criminal networks"
         }
       },
       {
@@ -715,7 +755,7 @@
         },
         "to": {
           "span": 42,
-          "words": "the forthcoming UK-EU summit"
+          "words": "forthcoming UK-EU summit"
         }
       },
       {
@@ -725,7 +765,7 @@
         },
         "to": {
           "span": 42,
-          "words": "the forthcoming UK-EU summit"
+          "words": "forthcoming UK-EU summit"
         }
       },
       {
@@ -735,47 +775,7 @@
         },
         "to": {
           "span": 42,
-          "words": "the forthcoming UK-EU summit"
-        }
-      },
-      {
-        "from": {
-          "span": 47,
-          "words": "these deals"
-        },
-        "to": {
-          "span": 45,
-          "words": "a trade deal on food and drink products"
-        }
-      },
-      {
-        "from": {
-          "span": 56,
-          "words": "it"
-        },
-        "to": {
-          "span": 55,
-          "words": "the agreement on the table"
-        }
-      },
-      {
-        "from": {
-          "span": 57,
-          "words": "it"
-        },
-        "to": {
-          "span": 55,
-          "words": "the agreement on the table"
-        }
-      },
-      {
-        "from": {
-          "span": 59,
-          "words": "It"
-        },
-        "to": {
-          "span": 55,
-          "words": "the agreement on the table"
+          "words": "forthcoming UK-EU summit"
         }
       },
       {
@@ -786,16 +786,6 @@
         "to": {
           "span": 73,
           "words": "AI"
-        }
-      },
-      {
-        "from": {
-          "span": 75,
-          "words": "this role"
-        },
-        "to": {
-          "span": 72,
-          "words": "presidency of the G20"
         }
       }
     ],

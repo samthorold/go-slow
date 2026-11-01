@@ -1,23 +1,14 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "2e9537070d1d11ea1022aa0e9137736f75d19ab8d414380bd1fd1a101d04c644",
-  "recorded_at": "2026-10-30T21:04:57.641678Z",
+  "request_hash": "e6f53eca2635e036ae9db5cb4b0800f1ae68dd87ffc9969f1ea30e1dce710449",
+  "recorded_at": "2026-11-01T17:57:37.063163Z",
   "usage": {
-    "input_tokens": 3351,
-    "output_tokens": 7239
+    "input_tokens": 3450,
+    "output_tokens": 7179
   },
   "output": {
     "names": [
-      {
-        "at": {
-          "span": 1,
-          "words": "Prime Minister"
-        },
-        "kind": "person",
-        "name": "Andy Burnham",
-        "office": "Prime Minister of the United Kingdom"
-      },
       {
         "at": {
           "span": 1,
@@ -30,25 +21,43 @@
       {
         "at": {
           "span": 1,
-          "words": "Downing Street"
+          "words": "Prime Minister"
+        },
+        "kind": "person",
+        "name": "Andy Burnham",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 1,
+          "words": "UK’s"
         },
         "kind": "place",
-        "name": "Downing Street",
+        "name": "United Kingdom",
         "office": ""
       },
       {
         "at": {
           "span": 1,
-          "words": "UK"
+          "words": "Ukraine"
         },
         "kind": "place",
-        "name": "UK",
+        "name": "Ukraine",
         "office": ""
       },
       {
         "at": {
           "span": 2,
-          "words": "the Prime Minister"
+          "words": "UK"
+        },
+        "kind": "place",
+        "name": "United Kingdom",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 2,
+          "words": "Prime Minister"
         },
         "kind": "person",
         "name": "Andy Burnham",
@@ -62,15 +71,6 @@
         "kind": "person",
         "name": "Volodymyr Zelenskyy",
         "office": "President of Ukraine"
-      },
-      {
-        "at": {
-          "span": 2,
-          "words": "Ukraine"
-        },
-        "kind": "place",
-        "name": "Ukraine",
-        "office": ""
       },
       {
         "at": {
@@ -93,10 +93,28 @@
       {
         "at": {
           "span": 3,
+          "words": "Ukraine"
+        },
+        "kind": "place",
+        "name": "Ukraine",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 3,
           "words": "Russia"
         },
         "kind": "place",
         "name": "Russia",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 3,
+          "words": "US’"
+        },
+        "kind": "place",
+        "name": "United States",
         "office": ""
       },
       {
@@ -114,7 +132,16 @@
           "words": "UK"
         },
         "kind": "place",
-        "name": "UK",
+        "name": "United Kingdom",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "Russia"
+        },
+        "kind": "place",
+        "name": "Russia",
         "office": ""
       },
       {
@@ -128,65 +155,11 @@
       },
       {
         "at": {
-          "span": 4,
-          "words": "Russia"
-        },
-        "kind": "place",
-        "name": "Russia",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 4,
-          "words": "United States"
-        },
-        "kind": "place",
-        "name": "United States",
-        "office": ""
-      },
-      {
-        "at": {
           "span": 5,
           "words": "UK"
         },
         "kind": "place",
-        "name": "UK",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 5,
-          "words": "Russia"
-        },
-        "kind": "place",
-        "name": "Russia",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 6,
-          "words": "UK"
-        },
-        "kind": "place",
-        "name": "UK",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 6,
-          "words": "Ukraine"
-        },
-        "kind": "place",
-        "name": "Ukraine",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 6,
-          "words": "Kyiv"
-        },
-        "kind": "place",
-        "name": "Kyiv",
+        "name": "United Kingdom",
         "office": ""
       },
       {
@@ -195,16 +168,7 @@
           "words": "UK"
         },
         "kind": "place",
-        "name": "UK",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 8,
-          "words": "Ukraine"
-        },
-        "kind": "place",
-        "name": "Ukraine",
+        "name": "United Kingdom",
         "office": ""
       },
       {
@@ -215,15 +179,6 @@
         "kind": "person",
         "name": "Andy Burnham",
         "office": "Prime Minister of the United Kingdom"
-      },
-      {
-        "at": {
-          "span": 13,
-          "words": "Russia"
-        },
-        "kind": "place",
-        "name": "Russia",
-        "office": ""
       },
       {
         "at": {
@@ -264,10 +219,10 @@
       {
         "at": {
           "span": 15,
-          "words": "UK"
+          "words": "UK’s"
         },
         "kind": "place",
-        "name": "UK",
+        "name": "United Kingdom",
         "office": ""
       },
       {
@@ -291,10 +246,10 @@
       {
         "at": {
           "span": 17,
-          "words": "Russia"
+          "words": "Ukraine’s"
         },
         "kind": "place",
-        "name": "Russia",
+        "name": "Ukraine",
         "office": ""
       },
       {
@@ -309,11 +264,11 @@
       {
         "at": {
           "span": 17,
-          "words": "Ukraine"
+          "words": "the Chancellor"
         },
-        "kind": "place",
-        "name": "Ukraine",
-        "office": ""
+        "kind": "person",
+        "name": "John Healey",
+        "office": "Chancellor of the Exchequer"
       },
       {
         "at": {
@@ -331,15 +286,6 @@
         },
         "kind": "person",
         "name": "Putin",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 20,
-          "words": "Ukraine"
-        },
-        "kind": "place",
-        "name": "Ukraine",
         "office": ""
       },
       {
@@ -365,16 +311,6 @@
       },
       {
         "from": {
-          "span": 6,
-          "words": "which"
-        },
-        "to": {
-          "span": 6,
-          "words": "British Lightweight Multirole Missiles (LMMs)"
-        }
-      },
-      {
-        "from": {
           "span": 7,
           "words": "The drones"
         },
@@ -391,26 +327,6 @@
         "to": {
           "span": 6,
           "words": "jet-powered drones"
-        }
-      },
-      {
-        "from": {
-          "span": 8,
-          "words": "£45m package of missiles"
-        },
-        "to": {
-          "span": 5,
-          "words": "£45 million of surface-to-air missiles"
-        }
-      },
-      {
-        "from": {
-          "span": 15,
-          "words": "his"
-        },
-        "to": {
-          "span": 18,
-          "words": "Chancellor of the Exchequer John Healey"
         }
       }
     ],

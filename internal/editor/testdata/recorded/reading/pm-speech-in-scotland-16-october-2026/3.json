@@ -1,14 +1,23 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "6c49881ec186d68660dd849b7160c65a24f710a3d042c7222f189d23abee2fb6",
-  "recorded_at": "2026-10-30T20:55:12.52241Z",
+  "request_hash": "660c5933e14cd8c53a3772b900be13388062d7ff9463d16ec15bd66f48ed486c",
+  "recorded_at": "2026-11-01T17:47:38.09419Z",
   "usage": {
-    "input_tokens": 12337,
-    "output_tokens": 13546
+    "input_tokens": 12436,
+    "output_tokens": 27959
   },
   "output": {
     "names": [
+      {
+        "at": {
+          "span": 2,
+          "words": "Douglas"
+        },
+        "kind": "person",
+        "name": "Douglas",
+        "office": ""
+      },
       {
         "at": {
           "span": 3,
@@ -29,15 +38,6 @@
       },
       {
         "at": {
-          "span": 2,
-          "words": "Douglas"
-        },
-        "kind": "person",
-        "name": "Douglas",
-        "office": ""
-      },
-      {
-        "at": {
           "span": 5,
           "words": "Manchester"
         },
@@ -50,26 +50,8 @@
           "span": 6,
           "words": "Number 10 North"
         },
-        "kind": "organisation",
+        "kind": "place",
         "name": "Number 10 North",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 9,
-          "words": "Number 10 South"
-        },
-        "kind": "organisation",
-        "name": "Number 10 South",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 13,
-          "words": "Commonwealth Games"
-        },
-        "kind": "occasion",
-        "name": "Commonwealth Games",
         "office": ""
       },
       {
@@ -83,11 +65,11 @@
       },
       {
         "at": {
-          "span": 17,
-          "words": "Hibs-Hearts"
+          "span": 13,
+          "words": "Commonwealth Games"
         },
         "kind": "occasion",
-        "name": "Hibs-Hearts",
+        "name": "Commonwealth Games",
         "office": ""
       },
       {
@@ -104,8 +86,17 @@
           "span": 28,
           "words": "Westminster"
         },
-        "kind": "organisation",
+        "kind": "place",
         "name": "Westminster",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 28,
+          "words": "Greater Manchester"
+        },
+        "kind": "place",
+        "name": "Greater Manchester",
         "office": ""
       },
       {
@@ -129,19 +120,19 @@
       {
         "at": {
           "span": 36,
-          "words": "FARE-Scotland"
+          "words": "Easterhouse"
         },
-        "kind": "organisation",
-        "name": "FARE-Scotland",
+        "kind": "place",
+        "name": "Easterhouse",
         "office": ""
       },
       {
         "at": {
           "span": 36,
-          "words": "Easterhouse"
+          "words": "FARE-Scotland"
         },
-        "kind": "place",
-        "name": "Easterhouse",
+        "kind": "organisation",
+        "name": "FARE-Scotland",
         "office": ""
       },
       {
@@ -164,15 +155,6 @@
       },
       {
         "at": {
-          "span": 36,
-          "words": "Bannatyne House"
-        },
-        "kind": "place",
-        "name": "Bannatyne House",
-        "office": ""
-      },
-      {
-        "at": {
           "span": 58,
           "words": "Darren McGarvey"
         },
@@ -183,19 +165,10 @@
       {
         "at": {
           "span": 63,
-          "words": "Downing Street"
-        },
-        "kind": "place",
-        "name": "Downing Street",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 63,
           "words": "No10"
         },
         "kind": "place",
-        "name": "No10",
+        "name": "Number 10",
         "office": ""
       },
       {
@@ -236,64 +209,19 @@
       },
       {
         "at": {
-          "span": 103,
-          "words": "Edinburgh"
+          "span": 97,
+          "words": "Prime Minister"
         },
-        "kind": "place",
-        "name": "Edinburgh",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 104,
-          "words": "Dundee"
-        },
-        "kind": "place",
-        "name": "Dundee",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 108,
-          "words": "Aberdeen"
-        },
-        "kind": "place",
-        "name": "Aberdeen",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 109,
-          "words": "Inverclyde"
-        },
-        "kind": "place",
-        "name": "Inverclyde",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 117,
-          "words": "East Renfrewshire"
-        },
-        "kind": "place",
-        "name": "East Renfrewshire",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 117,
-          "words": "Glasgow"
-        },
-        "kind": "place",
-        "name": "Glasgow",
-        "office": ""
+        "kind": "person",
+        "name": "Prime Minister",
+        "office": "Prime Minister of the United Kingdom"
       },
       {
         "at": {
           "span": 136,
           "words": "Holyrood"
         },
-        "kind": "organisation",
+        "kind": "place",
         "name": "Holyrood",
         "office": ""
       },
@@ -308,47 +236,20 @@
       },
       {
         "at": {
-          "span": 150,
-          "words": "Douglas"
+          "span": 175,
+          "words": "Scottish government"
         },
-        "kind": "person",
-        "name": "Douglas",
+        "kind": "organisation",
+        "name": "Scottish Government",
         "office": ""
       },
       {
         "at": {
-          "span": 172,
+          "span": 175,
           "words": "UK government"
         },
         "kind": "organisation",
-        "name": "UK government",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 172,
-          "words": "Scottish government"
-        },
-        "kind": "organisation",
-        "name": "Scottish government",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 175,
-          "words": "Scottish government"
-        },
-        "kind": "organisation",
-        "name": "Scottish government",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 175,
-          "words": "Douglas"
-        },
-        "kind": "person",
-        "name": "Douglas",
+        "name": "UK Government",
         "office": ""
       },
       {
@@ -407,11 +308,20 @@
       },
       {
         "at": {
-          "span": 205,
-          "words": "the Highlands and the Islands"
+          "span": 204,
+          "words": "Dundee"
         },
         "kind": "place",
-        "name": "the Highlands and the Islands",
+        "name": "Dundee",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 205,
+          "words": "Highlands and the Islands"
+        },
+        "kind": "place",
+        "name": "Highlands and the Islands",
         "office": ""
       },
       {
@@ -452,20 +362,11 @@
       },
       {
         "at": {
-          "span": 258,
-          "words": "Lanarkshire"
+          "span": 271,
+          "words": "City Region Deals"
         },
-        "kind": "place",
-        "name": "Lanarkshire",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 275,
-          "words": "Scottish government"
-        },
-        "kind": "organisation",
-        "name": "Scottish government",
+        "kind": "occasion",
+        "name": "City Region Deals",
         "office": ""
       },
       {
@@ -479,20 +380,11 @@
       },
       {
         "at": {
-          "span": 286,
-          "words": "John"
-        },
-        "kind": "person",
-        "name": "John Swinney",
-        "office": "First Minister of Scotland"
-      },
-      {
-        "at": {
           "span": 305,
           "words": "DWP"
         },
         "kind": "organisation",
-        "name": "Department for Work and Pensions",
+        "name": "DWP",
         "office": ""
       },
       {
@@ -503,21 +395,22 @@
         "kind": "organisation",
         "name": "National Economic Council",
         "office": ""
-      },
-      {
-        "at": {
-          "span": 321,
-          "words": "John"
-        },
-        "kind": "person",
-        "name": "John Swinney",
-        "office": "First Minister of Scotland"
       }
     ],
     "refers_to": [
       {
         "from": {
           "span": 9,
+          "words": "it"
+        },
+        "to": {
+          "span": 6,
+          "words": "Number 10 North"
+        }
+      },
+      {
+        "from": {
+          "span": 11,
           "words": "it"
         },
         "to": {
@@ -547,42 +440,22 @@
       },
       {
         "from": {
-          "span": 37,
-          "words": "they"
-        },
-        "to": {
-          "span": 36,
-          "words": "FARE-Scotland"
-        }
-      },
-      {
-        "from": {
-          "span": 58,
-          "words": "his"
-        },
-        "to": {
-          "span": 58,
-          "words": "Darren McGarvey"
-        }
-      },
-      {
-        "from": {
-          "span": 59,
-          "words": "it"
-        },
-        "to": {
-          "span": 58,
-          "words": "Poverty Safari"
-        }
-      },
-      {
-        "from": {
           "span": 63,
           "words": "it"
         },
         "to": {
           "span": 63,
           "words": "No10"
+        }
+      },
+      {
+        "from": {
+          "span": 69,
+          "words": "this community"
+        },
+        "to": {
+          "span": 3,
+          "words": "Motherwell"
         }
       },
       {
@@ -597,30 +470,4319 @@
       },
       {
         "from": {
-          "span": 101,
-          "words": "the capital of Scotland"
+          "span": 144,
+          "words": "It"
         },
         "to": {
-          "span": 103,
-          "words": "Edinburgh"
+          "span": 143,
+          "words": "devolution"
         }
       },
       {
         "from": {
-          "span": 150,
-          "words": "him"
+          "span": 193,
+          "words": "it"
         },
         "to": {
-          "span": 2,
-          "words": "Douglas"
+          "span": 190,
+          "words": "new deal for food and farming"
+        }
+      },
+      {
+        "from": {
+          "span": 239,
+          "words": "It"
+        },
+        "to": {
+          "span": 238,
+          "words": "another scheme"
+        }
+      },
+      {
+        "from": {
+          "span": 244,
+          "words": "it"
+        },
+        "to": {
+          "span": 242,
+          "words": "a system"
+        }
+      },
+      {
+        "from": {
+          "span": 298,
+          "words": "it"
+        },
+        "to": {
+          "span": 296,
+          "words": "a new model"
+        }
+      },
+      {
+        "from": {
+          "span": 310,
+          "words": "it"
+        },
+        "to": {
+          "span": 306,
+          "words": "localised employment support"
         }
       }
     ],
     "rejected": [
       1,
       19,
+      331,
+      343,
       344
     ],
-    "speakers": []
-  }
+    "speakers": [
+      {
+        "span": {
+          "span": 1,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 2,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 3,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 4,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 5,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 6,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 7,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 8,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 9,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 10,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 11,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 12,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 13,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 14,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 15,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 16,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 17,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 18,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 19,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 20,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 21,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 22,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 23,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 24,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 25,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 26,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 27,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 28,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 29,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 30,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 31,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 32,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 33,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 34,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 35,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 36,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 37,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 38,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 39,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 40,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 41,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 42,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 43,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 44,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 45,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 46,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 47,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 48,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 49,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 50,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 51,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 52,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 53,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 54,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 55,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 56,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 57,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 58,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 59,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 60,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 61,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 62,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 63,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 64,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 65,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 66,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 67,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 68,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 69,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 70,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 71,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 72,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 73,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 74,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 75,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 76,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 77,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 78,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 79,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 80,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 81,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 82,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 83,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 84,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 85,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 86,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 87,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 88,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 89,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 90,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 91,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 92,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 93,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 94,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 95,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 96,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 97,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 98,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 99,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 100,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 101,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 102,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 103,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 104,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 105,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 106,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 107,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 108,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 109,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 110,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 111,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 112,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 113,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 114,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 115,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 116,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 117,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 118,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 119,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 120,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 121,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 122,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 123,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 124,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 125,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 126,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 127,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 128,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 129,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 130,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 131,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 132,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 133,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 134,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 135,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 136,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 137,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 138,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 139,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 140,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 141,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 142,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 143,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 144,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 145,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 146,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 147,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 148,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 149,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 150,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 151,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 152,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 153,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 154,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 155,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 156,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 157,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 158,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 159,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 160,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 161,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 162,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 163,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 164,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 165,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 166,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 167,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 168,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 169,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 170,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 171,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 172,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 173,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 174,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 175,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 176,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 177,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 178,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 179,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 180,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 181,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 182,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 183,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 184,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 185,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 186,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 187,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 188,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 189,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 190,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 191,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 192,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 193,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 194,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 195,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 196,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 197,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 198,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 199,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 200,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 201,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 202,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 203,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 204,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 205,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 206,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 207,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 208,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 209,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 210,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 211,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 212,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 213,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 214,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 215,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 216,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 217,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 218,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 219,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 220,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 221,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 222,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 223,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 224,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 225,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 226,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 227,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 228,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 229,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 230,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 231,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 232,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 233,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 234,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 235,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 236,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 237,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 238,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 239,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 240,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 241,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 242,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 243,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 244,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 245,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 246,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 247,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 248,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 249,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 250,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 251,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 252,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 253,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 254,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 255,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 256,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 257,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 258,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 259,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 260,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 261,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 262,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 263,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 264,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 265,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 266,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 267,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 268,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 269,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 270,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 271,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 272,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 273,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 274,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 275,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 276,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 277,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 278,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 279,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 280,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 281,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 282,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 283,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 284,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 285,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 286,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 287,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 288,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 289,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 290,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 291,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 292,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 293,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 294,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 295,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 296,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 297,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 298,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 299,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 300,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 301,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 302,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 303,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 304,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 305,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 306,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 307,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 308,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 309,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 310,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 311,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 312,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 313,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 314,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 315,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 316,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 317,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 318,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 319,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 320,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 321,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 322,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 323,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 324,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 325,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 326,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 327,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 328,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 329,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 330,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 331,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 332,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 333,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 334,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 335,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 336,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 337,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 338,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 339,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 340,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 341,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 342,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 343,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 344,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 345,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 346,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 347,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 348,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 349,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 350,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      },
+      {
+        "span": {
+          "span": 351,
+          "words": ""
+        },
+        "speaker": {
+          "span": 32,
+          "words": "Prime Minister"
+        }
+      }
+    ]
+  },
+  "earlier_attempts": [
+    {
+      "act": "reading",
+      "model": "claude-haiku-5-5",
+      "request_hash": "660c5933e14cd8c53a3772b900be13388062d7ff9463d16ec15bd66f48ed486c",
+      "recorded_at": "2026-11-01T17:46:06.412308Z",
+      "usage": {
+        "input_tokens": 12436,
+        "output_tokens": 15422
+      },
+      "output": {
+        "names": [
+          {
+            "at": {
+              "span": 3,
+              "words": "Motherwell"
+            },
+            "kind": "place",
+            "name": "Motherwell",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 3,
+              "words": "Scotland"
+            },
+            "kind": "place",
+            "name": "Scotland",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 5,
+              "words": "Manchester"
+            },
+            "kind": "place",
+            "name": "Manchester",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 6,
+              "words": "Number 10 North"
+            },
+            "kind": "organisation",
+            "name": "Number 10 North",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 9,
+              "words": "Number 10 South"
+            },
+            "kind": "organisation",
+            "name": "Number 10 South",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 10,
+              "words": "Number 10 South South"
+            },
+            "kind": "organisation",
+            "name": "Number 10 South South",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 13,
+              "words": "Glasgow"
+            },
+            "kind": "place",
+            "name": "Glasgow",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 13,
+              "words": "Commonwealth Games"
+            },
+            "kind": "occasion",
+            "name": "Commonwealth Games",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 21,
+              "words": "Downing Street"
+            },
+            "kind": "place",
+            "name": "Downing Street",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 28,
+              "words": "Westminster"
+            },
+            "kind": "place",
+            "name": "Westminster",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 28,
+              "words": "Greater Manchester"
+            },
+            "kind": "place",
+            "name": "Greater Manchester",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 28,
+              "words": "North of England"
+            },
+            "kind": "place",
+            "name": "North of England",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 29,
+              "words": "Hillsborough"
+            },
+            "kind": "occasion",
+            "name": "Hillsborough",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 36,
+              "words": "Scottish Violence Reduction Unit"
+            },
+            "kind": "organisation",
+            "name": "Scottish Violence Reduction Unit",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 36,
+              "words": "FARE-Scotland"
+            },
+            "kind": "organisation",
+            "name": "FARE-Scotland",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 36,
+              "words": "Bannatyne House"
+            },
+            "kind": "place",
+            "name": "Bannatyne House",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 36,
+              "words": "Easterhouse"
+            },
+            "kind": "place",
+            "name": "Easterhouse",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 36,
+              "words": "Greater Manchester Violence Reduction Unit"
+            },
+            "kind": "organisation",
+            "name": "Greater Manchester Violence Reduction Unit",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 58,
+              "words": "Darren McGarvey"
+            },
+            "kind": "person",
+            "name": "Darren McGarvey",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 2,
+              "words": "Douglas"
+            },
+            "kind": "person",
+            "name": "Douglas",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 32,
+              "words": "Prime Minister"
+            },
+            "kind": "person",
+            "name": "Prime Minister",
+            "office": "Prime Minister of the United Kingdom"
+          },
+          {
+            "at": {
+              "span": 72,
+              "words": "Pamela"
+            },
+            "kind": "person",
+            "name": "Pamela",
+            "office": "Member of Parliament for Motherwell"
+          },
+          {
+            "at": {
+              "span": 80,
+              "words": "Ravenscraig"
+            },
+            "kind": "place",
+            "name": "Ravenscraig",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 88,
+              "words": "Leigh"
+            },
+            "kind": "place",
+            "name": "Leigh",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 88,
+              "words": "Lancashire coalfield"
+            },
+            "kind": "place",
+            "name": "Lancashire coalfield",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 90,
+              "words": "Bickershaw Colliery"
+            },
+            "kind": "place",
+            "name": "Bickershaw Colliery",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 92,
+              "words": "Whitehall"
+            },
+            "kind": "place",
+            "name": "Whitehall",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 94,
+              "words": "UK"
+            },
+            "kind": "place",
+            "name": "UK",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 103,
+              "words": "Edinburgh"
+            },
+            "kind": "place",
+            "name": "Edinburgh",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 104,
+              "words": "Dundee"
+            },
+            "kind": "place",
+            "name": "Dundee",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 108,
+              "words": "Aberdeen"
+            },
+            "kind": "place",
+            "name": "Aberdeen",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 109,
+              "words": "Inverclyde"
+            },
+            "kind": "place",
+            "name": "Inverclyde",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 117,
+              "words": "East Renfrewshire"
+            },
+            "kind": "place",
+            "name": "East Renfrewshire",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 117,
+              "words": "Glasgow"
+            },
+            "kind": "place",
+            "name": "Glasgow",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 136,
+              "words": "Holyrood"
+            },
+            "kind": "organisation",
+            "name": "Holyrood",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 137,
+              "words": "London"
+            },
+            "kind": "place",
+            "name": "London",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 141,
+              "words": "Scottish Parliament"
+            },
+            "kind": "organisation",
+            "name": "Scottish Parliament",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 153,
+              "words": "Europe"
+            },
+            "kind": "place",
+            "name": "Europe",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 158,
+              "words": "England"
+            },
+            "kind": "place",
+            "name": "England",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 172,
+              "words": "Scottish government"
+            },
+            "kind": "organisation",
+            "name": "Scottish government",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 172,
+              "words": "UK government"
+            },
+            "kind": "organisation",
+            "name": "UK government",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 175,
+              "words": "Scottish government"
+            },
+            "kind": "organisation",
+            "name": "Scottish government",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 183,
+              "words": "Grangemouth"
+            },
+            "kind": "place",
+            "name": "Grangemouth",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 190,
+              "words": "EU-UK Summit"
+            },
+            "kind": "occasion",
+            "name": "EU-UK Summit",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 198,
+              "words": "Alexander Dennis"
+            },
+            "kind": "organisation",
+            "name": "Alexander Dennis",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 198,
+              "words": "Falkirk"
+            },
+            "kind": "place",
+            "name": "Falkirk",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 200,
+              "words": "Euan"
+            },
+            "kind": "person",
+            "name": "Euan",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 205,
+              "words": "Highlands and Islands"
+            },
+            "kind": "place",
+            "name": "Highlands and Islands",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 211,
+              "words": "Chemify"
+            },
+            "kind": "organisation",
+            "name": "Chemify",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 241,
+              "words": "Alan Milburn"
+            },
+            "kind": "person",
+            "name": "Alan Milburn",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 258,
+              "words": "Lanarkshire"
+            },
+            "kind": "place",
+            "name": "Lanarkshire",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 305,
+              "words": "DWP"
+            },
+            "kind": "organisation",
+            "name": "DWP",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 318,
+              "words": "National Economic Council"
+            },
+            "kind": "organisation",
+            "name": "National Economic Council",
+            "office": ""
+          },
+          {
+            "at": {
+              "span": 179,
+              "words": "John Swinney"
+            },
+            "kind": "person",
+            "name": "John Swinney",
+            "office": "First Minister of Scotland"
+          }
+        ],
+        "refers_to": [
+          {
+            "from": {
+              "span": 9,
+              "words": "it"
+            },
+            "to": {
+              "span": 6,
+              "words": "Number 10 North"
+            }
+          },
+          {
+            "from": {
+              "span": 13,
+              "words": "it"
+            },
+            "to": {
+              "span": 13,
+              "words": "Commonwealth Games"
+            }
+          },
+          {
+            "from": {
+              "span": 14,
+              "words": "them"
+            },
+            "to": {
+              "span": 13,
+              "words": "Glasgow"
+            }
+          },
+          {
+            "from": {
+              "span": 58,
+              "words": "his"
+            },
+            "to": {
+              "span": 58,
+              "words": "Darren McGarvey"
+            }
+          },
+          {
+            "from": {
+              "span": 63,
+              "words": "it"
+            },
+            "to": {
+              "span": 63,
+              "words": "No10"
+            }
+          },
+          {
+            "from": {
+              "span": 71,
+              "words": "this town"
+            },
+            "to": {
+              "span": 3,
+              "words": "Motherwell"
+            }
+          },
+          {
+            "from": {
+              "span": 72,
+              "words": "the local MP"
+            },
+            "to": {
+              "span": 72,
+              "words": "Pamela"
+            }
+          },
+          {
+            "from": {
+              "span": 78,
+              "words": "this area"
+            },
+            "to": {
+              "span": 3,
+              "words": "Motherwell"
+            }
+          },
+          {
+            "from": {
+              "span": 80,
+              "words": "this college"
+            },
+            "to": {
+              "span": 2,
+              "words": "the college"
+            }
+          },
+          {
+            "from": {
+              "span": 82,
+              "words": "it"
+            },
+            "to": {
+              "span": 80,
+              "words": "Ravenscraig"
+            }
+          },
+          {
+            "from": {
+              "span": 95,
+              "words": "its"
+            },
+            "to": {
+              "span": 95,
+              "words": "Motherwell"
+            }
+          },
+          {
+            "from": {
+              "span": 96,
+              "words": "them"
+            },
+            "to": {
+              "span": 96,
+              "words": "Leigh"
+            }
+          },
+          {
+            "from": {
+              "span": 108,
+              "words": "they’re"
+            },
+            "to": {
+              "span": 108,
+              "words": "people in Aberdeen"
+            }
+          },
+          {
+            "from": {
+              "span": 111,
+              "words": "they"
+            },
+            "to": {
+              "span": 111,
+              "words": "young people"
+            }
+          },
+          {
+            "from": {
+              "span": 153,
+              "words": "itself"
+            },
+            "to": {
+              "span": 153,
+              "words": "Scotland"
+            }
+          },
+          {
+            "from": {
+              "span": 217,
+              "words": "they"
+            },
+            "to": {
+              "span": 217,
+              "words": "the people building these industries"
+            }
+          },
+          {
+            "from": {
+              "span": 243,
+              "words": "it"
+            },
+            "to": {
+              "span": 242,
+              "words": "a system"
+            }
+          },
+          {
+            "from": {
+              "span": 244,
+              "words": "it"
+            },
+            "to": {
+              "span": 242,
+              "words": "a system"
+            }
+          },
+          {
+            "from": {
+              "span": 245,
+              "words": "They"
+            },
+            "to": {
+              "span": 244,
+              "words": "communities"
+            }
+          },
+          {
+            "from": {
+              "span": 283,
+              "words": "the First Minister"
+            },
+            "to": {
+              "span": 179,
+              "words": "John Swinney"
+            }
+          },
+          {
+            "from": {
+              "span": 286,
+              "words": "John"
+            },
+            "to": {
+              "span": 179,
+              "words": "John Swinney"
+            }
+          },
+          {
+            "from": {
+              "span": 321,
+              "words": "John"
+            },
+            "to": {
+              "span": 179,
+              "words": "John Swinney"
+            }
+          },
+          {
+            "from": {
+              "span": 326,
+              "words": "John’s"
+            },
+            "to": {
+              "span": 179,
+              "words": "John Swinney"
+            }
+          }
+        ],
+        "rejected": [],
+        "speakers": []
+      }
+    }
+  ]
 }

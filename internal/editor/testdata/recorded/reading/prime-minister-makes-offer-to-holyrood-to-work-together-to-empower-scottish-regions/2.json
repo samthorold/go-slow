@@ -1,11 +1,11 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "9f6653a628033d0716fdae463edfb365030d6251cbda7a5fe423eda19a075dcb",
-  "recorded_at": "2026-10-30T21:12:10.404703Z",
+  "request_hash": "e6517ae375569f3e3d28b7a749029ca943f13cbfb4d7633c3070bb8ccd1edc93",
+  "recorded_at": "2026-11-01T17:58:20.074053Z",
   "usage": {
-    "input_tokens": 2822,
-    "output_tokens": 6660
+    "input_tokens": 2921,
+    "output_tokens": 6008
   },
   "output": {
     "names": [
@@ -30,15 +30,6 @@
       {
         "at": {
           "span": 1,
-          "words": "Westminster"
-        },
-        "kind": "place",
-        "name": "Westminster",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 1,
           "words": "Holyrood"
         },
         "kind": "organisation",
@@ -47,11 +38,11 @@
       },
       {
         "at": {
-          "span": 2,
-          "words": "Lanarkshire"
+          "span": 1,
+          "words": "Westminster"
         },
         "kind": "place",
-        "name": "Lanarkshire",
+        "name": "Westminster",
         "office": ""
       },
       {
@@ -66,10 +57,19 @@
       {
         "at": {
           "span": 2,
-          "words": "the Scottish Government"
+          "words": "Scottish Government"
         },
         "kind": "organisation",
         "name": "Scottish Government",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 2,
+          "words": "Lanarkshire"
+        },
+        "kind": "place",
+        "name": "Lanarkshire",
         "office": ""
       },
       {
@@ -93,20 +93,20 @@
       {
         "at": {
           "span": 3,
-          "words": "the Scottish Parliament"
-        },
-        "kind": "organisation",
-        "name": "Scottish Parliament",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 3,
           "words": "the Prime Minister"
         },
         "kind": "person",
         "name": "Andy Burnham",
         "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 3,
+          "words": "the Scottish Parliament"
+        },
+        "kind": "organisation",
+        "name": "Scottish Parliament",
+        "office": ""
       },
       {
         "at": {
@@ -191,30 +191,12 @@
       },
       {
         "at": {
-          "span": 8,
-          "words": "the Scottish Government"
-        },
-        "kind": "organisation",
-        "name": "Scottish Government",
-        "office": ""
-      },
-      {
-        "at": {
           "span": 10,
-          "words": "Douglas Alexander"
+          "words": "The Scottish Secretary, Douglas Alexander"
         },
         "kind": "person",
         "name": "Douglas Alexander",
         "office": "Scottish Secretary"
-      },
-      {
-        "at": {
-          "span": 11,
-          "words": "the Scottish Parliament"
-        },
-        "kind": "organisation",
-        "name": "Scottish Parliament",
-        "office": ""
       },
       {
         "at": {
@@ -240,7 +222,7 @@
           "words": "the Highlands"
         },
         "kind": "place",
-        "name": "Highlands",
+        "name": "the Highlands",
         "office": ""
       },
       {
@@ -273,15 +255,6 @@
       {
         "at": {
           "span": 13,
-          "words": "the Scottish Government"
-        },
-        "kind": "organisation",
-        "name": "Scottish Government",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 13,
           "words": "the Scotland Office"
         },
         "kind": "organisation",
@@ -301,16 +274,6 @@
     "refers_to": [
       {
         "from": {
-          "span": 1,
-          "words": "him"
-        },
-        "to": {
-          "span": 5,
-          "words": "Prime Minister Andy Burnham"
-        }
-      },
-      {
-        "from": {
           "span": 2,
           "words": "his"
         },
@@ -325,8 +288,38 @@
           "words": "he"
         },
         "to": {
-          "span": 5,
-          "words": "Prime Minister Andy Burnham"
+          "span": 2,
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "from": {
+          "span": 6,
+          "words": "him"
+        },
+        "to": {
+          "span": 1,
+          "words": "Scotland’s First Minister"
+        }
+      },
+      {
+        "from": {
+          "span": 12,
+          "words": "they"
+        },
+        "to": {
+          "span": 12,
+          "words": "People"
+        }
+      },
+      {
+        "from": {
+          "span": 12,
+          "words": "their"
+        },
+        "to": {
+          "span": 12,
+          "words": "People"
         }
       },
       {
@@ -336,7 +329,7 @@
         },
         "to": {
           "span": 2,
-          "words": "the Scottish Government"
+          "words": "Scottish Government"
         }
       },
       {

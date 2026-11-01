@@ -189,6 +189,9 @@ func readingVerdicts(t *testing.T, root, path string) []error {
 		for _, ref := range references[name] {
 			referenceFollowed(p, read, ref)
 		}
+		if _, ok := verbBeside[name]; ok {
+			referencesQuoteNoVerb(p, read)
+		}
 		if name == "pm-meeting-with-president-zelenskyy-of-ukraine-14-october-2026" {
 			// The readout names the Prime Minister only by office: the name
 			// carries the office, which Wikidata resolves by date.
@@ -317,6 +320,41 @@ func referenceFollowed(p properties, o readingOf, ref reference) {
 	}
 }
 
+// finiteVerb is a finite verb from a small fixed list, as a whole word: what
+// a referring expression, or what it refers to, never quotes, since the page
+// shows the stretch replaced by what it refers to and a verb quoted with it
+// is swallowed ("they then found" read as "Manchester City Council").
+var finiteVerb = regexp.MustCompile(`(?i)\b(said|found|started|talked|is|are|was|were|has|have|would|will)\b`)
+
+// verbBeside is, by fixture, words in one of its Spans where a pronoun has a
+// listed verb after it: the case a reference quoting more than its referring
+// expression would take the verb from.
+var verbBeside = map[string]string{
+	"appointment-of-lord-lieutenant-of-county-tyrone-15-october-2026":                     "He was",
+	"great-british-railways-takes-shape-as-hq-and-apprenticeship-scheme-confirmed":        "they have",
+	"pm-meeting-with-president-zelenskyy-of-ukraine-14-october-2026":                      "It was",
+	"pm-speech-in-scotland-16-october-2026":                                               "It was",
+	"pm-statement-to-the-house-of-commons-12-october-2026":                                "It is",
+	"president-zelenskyy-to-visit-downing-street":                                         "he has",
+	"prime-minister-makes-offer-to-holyrood-to-work-together-to-empower-scottish-regions": "he will",
+	"uk-government-response-to-agreement-between-us-and-russia-9-october":                 "it is",
+}
+
+// referencesQuoteNoVerb asserts no reference quotes a listed verb, in its
+// referring expression or in what it refers to.
+func referencesQuoteNoVerb(p properties, o readingOf) {
+	quoted := p.property("a reference quotes no verb")
+	for _, r := range o.r.RefersTo {
+		from, to := cut.Words(o.it.Content, r.From.Span), cut.Words(o.it.Content, r.To.Span)
+		if v := finiteVerb.FindString(from); v != "" {
+			quoted("%q (referring to %q) quotes %q", from, to, v)
+		}
+		if v := finiteVerb.FindString(to); v != "" {
+			quoted("%q refers to %q, which quotes %q", from, to, v)
+		}
+	}
+}
+
 // casesPresent fails unless the fixture's Spans carry each case its
 // properties rest on, so a changed fixture or cutter can't leave them
 // testing nothing.
@@ -333,6 +371,9 @@ func casesPresent(t *testing.T, name string, spans []string) {
 			t.Fatalf("%s's S%d no longer has %q", name, ref.n, ref.words)
 		}
 	}
+	if w, ok := verbBeside[name]; ok && !slices.ContainsFunc(spans, func(s string) bool { return strings.Contains(s, w) }) {
+		t.Fatalf("%s no longer has %q in a Span", name, w)
+	}
 }
 
 func TestABareAttributionIsAFewWordsEndingInSaid(t *testing.T) {
@@ -346,6 +387,25 @@ func TestABareAttributionIsAFewWordsEndingInSaid(t *testing.T) {
 	} {
 		if got := bareAttribution.MatchString(s); got != want {
 			t.Errorf("%q is a bare attribution: %v, want %v", s, got, want)
+		}
+	}
+}
+
+func TestAFiniteVerbIsOneOfTheListAsAWholeWord(t *testing.T) {
+	for s, want := range map[string]string{
+		"they then found":           "found",
+		"Keely talked":              "talked",
+		"It is":                     "is",
+		"they would use":            "would",
+		"their great credit":        "",
+		"this regime":               "",
+		"Ravenscraig, which was":    "was",
+		"the city’s":                "",
+		"Hasan":                     "",
+		"the people who HAVE grown": "HAVE",
+	} {
+		if got := finiteVerb.FindString(s); got != want {
+			t.Errorf("finite verb in %q: %q, want %q", s, got, want)
 		}
 	}
 }

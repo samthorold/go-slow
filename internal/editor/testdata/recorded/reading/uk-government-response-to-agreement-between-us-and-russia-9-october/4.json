@@ -1,11 +1,11 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "7fe1d9a1a90efbf8358b46ddab3d540643f6bd3fcc9081dc3ac5d6d70a6f0009",
-  "recorded_at": "2026-10-30T21:07:54.283228Z",
+  "request_hash": "4c2bb71753e117d156011eee54a816cbe8eaaa0b6dc768764d3e07136e78bde7",
+  "recorded_at": "2026-11-01T18:00:28.621739Z",
   "usage": {
-    "input_tokens": 2497,
-    "output_tokens": 3568
+    "input_tokens": 2596,
+    "output_tokens": 3431
   },
   "output": {
     "names": [
@@ -17,6 +17,15 @@
         "kind": "organisation",
         "name": "UK Government",
         "office": ""
+      },
+      {
+        "at": {
+          "span": 1,
+          "words": "A UK government spokesperson"
+        },
+        "kind": "person",
+        "name": "UK government spokesperson",
+        "office": "UK government spokesperson"
       },
       {
         "at": {
@@ -83,34 +92,7 @@
       },
       {
         "at": {
-          "span": 7,
-          "words": "Ukraine"
-        },
-        "kind": "place",
-        "name": "Ukraine",
-        "office": ""
-      },
-      {
-        "at": {
           "span": 9,
-          "words": "UK"
-        },
-        "kind": "place",
-        "name": "UK",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 10,
-          "words": "Government"
-        },
-        "kind": "organisation",
-        "name": "UK Government",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 11,
           "words": "UK"
         },
         "kind": "place",
@@ -165,6 +147,26 @@
         "to": {
           "span": 5,
           "words": "Ukraine"
+        }
+      },
+      {
+        "from": {
+          "span": 7,
+          "words": "it"
+        },
+        "to": {
+          "span": 3,
+          "words": "Ukraine"
+        }
+      },
+      {
+        "from": {
+          "span": 10,
+          "words": "The Government"
+        },
+        "to": {
+          "span": 1,
+          "words": "UK government"
         }
       }
     ],

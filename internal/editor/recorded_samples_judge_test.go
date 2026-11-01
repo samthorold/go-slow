@@ -3,6 +3,8 @@ package editor_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -215,9 +217,70 @@ func TestASampleRefusedOnEveryAttemptFails(t *testing.T) {
 	if len(live.sent) != editor.MaxAttempts {
 		t.Errorf("%d attempts made, want %d", len(live.sent), editor.MaxAttempts)
 	}
+	if s, err := sampleAt(path); err != nil || len(s.attempts()) != editor.MaxAttempts {
+		t.Errorf("kept %+v, %v; want the sample with its %d refused attempts", s, err, editor.MaxAttempts)
+	}
 	r := replayingSample(t, path, "claude-haiku-5-5", readingCommand, func(err error) { t.Error(err) })
 	if readSample(t, r) {
 		t.Error("replayed, the refused sample passed")
+	}
+}
+
+// erring answers its first errs calls with an error, as a provider that
+// answers nothing does, and every later one as answer does.
+type erring struct {
+	errs   int
+	calls  int
+	answer editor.Model
+}
+
+func (m *erring) Complete(ctx context.Context, r editor.Request) (editor.Response, error) {
+	m.calls++
+	if m.calls <= m.errs {
+		return editor.Response{}, errors.New("overloaded")
+	}
+	return m.answer.Complete(ctx, r)
+}
+
+// A live call that errors, answering nothing, is not an attempt at the
+// sample: it is made again, and the sample is kept with the attempt that
+// answered.
+func TestALiveErrorWhileRecordingIsTriedAgain(t *testing.T) {
+	path := samplePath(t.TempDir(), "the-speech", 1)
+	live := &erring{errs: 1, answer: &fakeModel{output: goodReading}}
+	m := recordingSample(t, path, live, "claude-haiku-5-5", readingCommand)
+	m.pause = 0
+	if !readSample(t, m) {
+		t.Fatal("the sample did not pass once the live call answered")
+	}
+	s, err := sampleAt(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := s.attempts(); len(got) != 1 || got[0].RequestHash == "" {
+		t.Errorf("kept %d attempts %+v; want the one that answered", len(got), got)
+	}
+}
+
+// A live call that answers nothing on every try stops the sample with the
+// error, and nothing of it is kept: no empty sample counting as failing.
+func TestALiveCallAnsweringNothingStopsTheRecordingUnkept(t *testing.T) {
+	path := samplePath(t.TempDir(), "the-speech", 1)
+	live := &erring{errs: liveTries, answer: &fakeModel{output: goodReading}}
+	m := recordingSample(t, path, live, "claude-haiku-5-5", readingCommand)
+	m.pause = 0
+	passed, err := runSample(m, func(model editor.Model) (bool, error) {
+		_, err := editor.Read(t.Context(), model, "", toRead(speech))
+		return err == nil, nil
+	})
+	if !errors.Is(err, errLost) || passed {
+		t.Errorf("the sample ran to %v, %v; want it stopped, the live call lost", passed, err)
+	}
+	if live.calls != liveTries {
+		t.Errorf("%d live calls, want %d", live.calls, liveTries)
+	}
+	if _, err := os.Stat(filepath.Dir(path)); !errors.Is(err, fs.ErrNotExist) {
+		t.Errorf("a sample is kept: %v", err)
 	}
 }
 

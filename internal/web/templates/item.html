@@ -28,8 +28,8 @@
   {{template "margin-fold" "open"}}
   <ol class="spans blocks">
   {{- range .Spans}}
-    <li id="span-{{.N}}" value="{{.N}}" class="block{{if .Rejected}} struck{{end}}">
-      <div class="block-body" hx-disable><p>{{range .Pieces}}{{if .Was}}<ins title="{{.Was}}">{{.Words}}</ins>{{else}}{{.Words}}{{end}}{{end}}</p></div>
+    <li id="span-{{.N}}" value="{{.N}}" class="block">
+      <div class="block-body{{if .Rejected}} struck{{end}}" hx-disable><p>{{range .Pieces}}{{if .Was}}<ins title="{{.Was}}">{{.Words}}</ins>{{else}}{{.Words}}{{end}}{{end}}</p></div>
       <div class="block-margin">
         <div><a href="{{.Href}}">S{{.N}}</a>{{template "gives" .Missed}}</div>
         {{- if .Rejected}}

@@ -66,6 +66,31 @@ func spanPath(t *testing.T, app http.Handler, entry string, n int) string {
 	return m[1]
 }
 
+func TestARejectedSpansPageStrikesThroughOnlyItsText(t *testing.T) {
+	store := openStore(t)
+	readRelease(t, store, releaseReading)
+	app, _ := newAppWithLog(t, saturday, store)
+
+	page := get(t, app, spanPath(t, app, "release", 1)).body
+
+	at := strings.Index(page, `<li class="block`)
+	if at < 0 {
+		t.Fatalf("the Span's page has no block:\n%s", page)
+	}
+	rest := page[at:]
+	marginAt := strings.Index(rest, `class="block-margin`)
+	end := strings.Index(rest, "</li>")
+	if marginAt < 0 || end < marginAt {
+		t.Fatalf("the Span's block has no margin:\n%s", rest)
+	}
+	if !strings.HasPrefix(rest, `<li class="block">`) || !strings.Contains(rest[:marginAt], `<div class="block-body struck"`) {
+		t.Errorf("the Rejected Span's text alone is not struck through:\n%s", rest[:end])
+	}
+	if margin := rest[marginAt:end]; !strings.Contains(margin, "rejected") || strings.Contains(margin, "struck") {
+		t.Errorf("the Rejected Span's margin does not say so plainly:\n%s", margin)
+	}
+}
+
 func TestASpansPageShowsItWithItsItemEntitiesAndRelationsBothWaysEachWithItsCall(t *testing.T) {
 	app, _ := newAppWithLog(t, saturday, relatedRecord(t))
 

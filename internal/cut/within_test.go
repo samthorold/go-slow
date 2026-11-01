@@ -11,15 +11,14 @@ func TestWordsQuotedWithinASpanAreTurnedIntoTheirAddress(t *testing.T) {
 	span := cut.Sentences(text)[0]
 
 	for words, want := range map[string]string{
-		"the city":                 "the city",
-		"fantastic news":           "fantastic news",
-		"city & its people":        "city & its people",
-		"":                         "This is fantastic news for the city & its people.",
-		"news for the city & its":  "news for the city & its",
-		"This is fantastic news":   "This is fantastic news",
-		"  for   the city ":        "for the city",
-		"its people.":              "its people.",
-		"is fantastic news for th": "is fantastic news for th",
+		"the city":                "the city",
+		"fantastic news":          "fantastic news",
+		"city & its people":       "city & its people",
+		"":                        "This is fantastic news for the city & its people.",
+		"news for the city & its": "news for the city & its",
+		"This is fantastic news":  "This is fantastic news",
+		"  for   the city ":       "for the city",
+		"its people.":             "its people.",
 	} {
 		got, ok := cut.Within(text, span, words)
 		if !ok {
@@ -40,6 +39,39 @@ func TestQuotesAreMatchedWhicheverWayTheyAreCurled(t *testing.T) {
 
 	if !ok || cut.Words(text, got) != "It’s “good”" {
 		t.Errorf("straight quotes found %v (%v): %q", got, ok, cut.Words(text, got))
+	}
+}
+
+func TestQuotedWordsAddressAWholeWordNotOneInsideALongerWord(t *testing.T) {
+	text := "<p>In addition, it will open.</p>"
+	span := cut.Sentences(text)[0]
+
+	got, ok := cut.Within(text, span, "it")
+
+	if !ok || text[got.Start-1:got.End+1] != " it " {
+		t.Errorf(`"it" is addressed as %v (%v), reading %q`, got, ok, text[got.Start-1:got.End+1])
+	}
+}
+
+func TestQuotedWordsAddressTheStandaloneWordAfterALongerOneHoldingIt(t *testing.T) {
+	text := "<p>The Prime Minister said he would go.</p>"
+	span := cut.Sentences(text)[0]
+
+	got, ok := cut.Within(text, span, "he")
+
+	if !ok || text[got.Start-1:got.End+1] != " he " {
+		t.Errorf(`"he" is addressed as %v (%v), reading %q`, got, ok, text[got.Start-1:got.End+1])
+	}
+}
+
+func TestWordsOnlyInsideLongerWordsHaveNoAddress(t *testing.T) {
+	text := "<p>This is <em>fantastic</em> news for the city &amp; its   people, 2026 itself.</p>"
+	span := cut.Sentences(text)[0]
+
+	for _, words := range []string{"is fantastic news for th", "he", "antastic", "it", "202", "ity &"} {
+		if got, ok := cut.Within(text, span, words); ok {
+			t.Errorf("%q, only inside longer words, is addressed as %v, reading %q", words, got, cut.Words(text, got))
+		}
 	}
 }
 

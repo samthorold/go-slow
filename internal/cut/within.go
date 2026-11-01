@@ -10,8 +10,10 @@ import (
 // Within is the address of words quoted within the Span s of text, the
 // first place they occur in it, reporting whether they do. Words are matched
 // as a reader sees them (tags dropped, entities decoded, each run of space
-// one space, curled quotes the same as straight ones), exactly otherwise;
-// empty words are the whole Span. This is how a judge shown an Item as
+// one space, curled quotes the same as straight ones), exactly otherwise,
+// and only as whole words: a match starting or ending inside a run of
+// letters or digits is no match, so words found only inside longer words
+// ("he" in "The") have no address. Empty words are the whole Span. This is how a judge shown an Item as
 // numbered Spans cites a finer one: by its number and its words, which code
 // turns into an address (system design: The grain belongs to the judgement,
 // not to the Span).
@@ -29,7 +31,7 @@ func Within(text string, s Span, words string) (Span, bool) {
 		got[i] = c.r
 	}
 	for i := 0; i+len(want) <= len(got); i++ {
-		if runesEqual(got[i:i+len(want)], want) {
+		if runesEqual(got[i:i+len(want)], want) && boundary(got, i) && boundary(got, i+len(want)) {
 			return Span{Start: read[i].start, End: read[i+len(want)-1].end}, true
 		}
 	}
@@ -102,6 +104,16 @@ func straight(r rune) rune {
 		return '"'
 	}
 	return r
+}
+
+// boundary reports whether i, a place between the characters of got, is not
+// inside a run of letters or digits: a word starts or ends there.
+func boundary(got []rune, i int) bool {
+	return i == 0 || i == len(got) || !wordChar(got[i-1]) || !wordChar(got[i])
+}
+
+func wordChar(r rune) bool {
+	return unicode.IsLetter(r) || unicode.IsDigit(r)
 }
 
 func runesEqual(a, b []rune) bool {

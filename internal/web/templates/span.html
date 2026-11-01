@@ -14,8 +14,8 @@
 {{template "margin-fold" "open"}}
 <ul class="blocks">
   {{- with .Span}}
-  <li class="block{{if .Rejected}} struck{{end}}">
-    <div class="block-body" hx-disable><p>{{range .Pieces}}{{if .Was}}<ins title="{{.Was}}">{{.Words}}</ins>{{else}}{{.Words}}{{end}}{{end}}</p></div>
+  <li class="block">
+    <div class="block-body{{if .Rejected}} struck{{end}}" hx-disable><p>{{range .Pieces}}{{if .Was}}<ins title="{{.Was}}">{{.Words}}</ins>{{else}}{{.Words}}{{end}}{{end}}</p></div>
     <div class="block-margin">
       {{- if .Rejected}}
       <p class="quiet">rejected</p>

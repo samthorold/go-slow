@@ -147,6 +147,57 @@ func TestASundayReadSampleFailingEveryTryIsRefuted(t *testing.T) {
 	}
 }
 
+// turnsErring answers its first errs turns with an error and no turn, as a
+// provider that answers nothing does, and every later one as conv does.
+type turnsErring struct {
+	errs, calls int
+	conv        editor.Conversation
+}
+
+func (f *turnsErring) Turn(ctx context.Context, r editor.ConversationRequest) (editor.Turn, error) {
+	f.calls++
+	if f.calls <= f.errs {
+		return editor.Turn{}, errors.New("overloaded")
+	}
+	return f.conv.Turn(ctx, r)
+}
+
+// A turn that answers nothing while recording is no try at the sample: it
+// is asked again, and the try goes on as if it had answered.
+func TestALiveErrorWhileRecordingTheSundayReadIsAskedAgain(t *testing.T) {
+	dir := t.TempDir()
+	live := &tries{scripts: [][]editor.Turn{passingTry}}
+	if errs := recordSundaySamples(t, dir, &turnsErring{errs: 1, conv: live}, 0); len(errs) != 0 {
+		t.Fatalf("recorded: %v", errs)
+	}
+	if live.asked != sundayReadRule.samples {
+		t.Errorf("%d conversations recorded, want %d", live.asked, sundayReadRule.samples)
+	}
+	if _, rec := keptTry(t, dir, "1"); rec.Outcome != editor.Applied || len(rec.Turns) != 2 {
+		t.Errorf("sample 1 kept %+v; want the try that passed, its two turns", rec)
+	}
+	if errs := replaySundaySamples(t, dir); len(errs) != 0 {
+		t.Errorf("replayed: %v", errs)
+	}
+}
+
+// A turn that answers nothing on every try stops the recording, and nothing
+// of the try is kept.
+func TestALiveTurnAnsweringNothingStopsTheSundayReadUnkept(t *testing.T) {
+	dir := t.TempDir()
+	live := &turnsErring{errs: liveTries, conv: &tries{scripts: [][]editor.Turn{passingTry}}}
+	errs := recordSundaySamples(t, dir, live, 0)
+	if len(errs) != 1 || !errors.Is(errs[0], errLost) {
+		t.Errorf("recorded %v; want the recording stopped, the turn lost", errs)
+	}
+	if live.calls != liveTries {
+		t.Errorf("%d live turns, want %d", live.calls, liveTries)
+	}
+	if _, err := os.Stat(filepath.Dir(tryPath(dir, 1, 1))); !errors.Is(err, os.ErrNotExist) {
+		t.Errorf("a try is kept: %v", err)
+	}
+}
+
 // A Sunday read with fewer samples kept than its rule fails, naming the
 // command that records them.
 func TestTheSundayReadWithTooFewSamplesFails(t *testing.T) {

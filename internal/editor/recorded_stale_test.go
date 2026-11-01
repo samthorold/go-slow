@@ -126,7 +126,7 @@ func (s *scripted) Turn(context.Context, editor.ConversationRequest) (editor.Tur
 func recordedConversation(t *testing.T, model string) conversationRecording {
 	t.Helper()
 	var rec conversationRecording
-	r := conversationRecorder{&scripted{[]editor.Turn{firstTurn, {Text: "Done.", Model: model}}}, &rec, model, ""}
+	r := conversationRecorder{model: &scripted{[]editor.Turn{firstTurn, {Text: "Done.", Model: model}}}, rec: &rec, asked: model}
 	for _, req := range []editor.ConversationRequest{opening, second} {
 		if _, err := r.Turn(t.Context(), req); err != nil {
 			t.Fatal(err)
@@ -160,7 +160,7 @@ func TestARecordedTurnsHashIsTheHashAKeptTurnCarries(t *testing.T) {
 	submitting := submits(citesTheTold)
 	submitting.Raw = json.RawMessage(`{"role":"assistant","content":[{"type":"tool_use","id":"call-1"}]}`)
 	var rec conversationRecording
-	agent := conversationRecorder{&fakeAgent{turns: []editor.Turn{looking, submitting}}, &rec, "claude-opus-5-5", ""}
+	agent := conversationRecorder{model: &fakeAgent{turns: []editor.Turn{looking, submitting}}, rec: &rec, asked: "claude-opus-5-5"}
 	ed := editor.New(editor.Deps{Store: store, SundayReads: store, SundayReadModel: agent, Wikidata: &fakeWikidata{},
 		ModelFor: func(string) string { return "claude-opus-5-5" }, Log: slog.New(slog.DiscardHandler)})
 	if err := ed.SundayRead(t.Context(), sundayMorning); err != nil {

@@ -68,17 +68,37 @@ func (k keptTurn) turn() (editor.Turn, error) {
 
 // conversationRecorder passes each turn to the real model and keeps it, with
 // the hash of its request, asked of the model named asked, writing the
-// recording to path (if any) as each turn arrives.
+// recording to path (if any) as each turn arrives. A turn that errs with
+// nothing come back (no turn in the provider's form) is no turn of the try:
+// it is asked again, up to liveTries times pause apart, and if none answers
+// the error, wrapping errLost, is kept in lost (when given) and returned, so
+// the recording stops (as sampleModel does for the daily acts). A refusal or
+// a turn cut off came back, and is kept as the turn.
 type conversationRecorder struct {
 	model editor.Conversation
 	rec   *conversationRecording
 	asked string
 	path  string
+	pause time.Duration
+	lost  *error
 }
 
 func (r conversationRecorder) Turn(ctx context.Context, req editor.ConversationRequest) (editor.Turn, error) {
 	hash := editor.ConversationRequestHash(req, r.asked)
 	t, err := r.model.Turn(ctx, req)
+	for try := 2; err != nil && t.Raw == nil && try <= liveTries; try++ {
+		if werr := sleep(ctx, r.pause); werr != nil {
+			return t, werr
+		}
+		t, err = r.model.Turn(ctx, req)
+	}
+	if err != nil && t.Raw == nil {
+		err = fmt.Errorf("%s: %w after %d tries, the try not kept; record again to resume: %w", r.path, errLost, liveTries, err)
+		if r.lost != nil {
+			*r.lost = err
+		}
+		return t, err
+	}
 	r.rec.Act, r.rec.RecordedAt = req.Act, time.Now().UTC()
 	if t.Model != "" {
 		r.rec.Model = t.Model
@@ -235,7 +255,7 @@ func recordedSundayRead(t *testing.T, root string) {
 			t.Fatalf("recording needs GOSLOW_ANTHROPIC_API_KEY and %s", sundayReadCommand.modelVar)
 		}
 		live = &sundayLive{conv: claude.New(claude.Options{APIKey: key, Model: name}), model: name, maxTries: *maxTriesFlag,
-			maxSamples: *maxSamplesFlag}
+			maxSamples: *maxSamplesFlag, pause: livePause}
 	}
 	for _, err := range sundaySampled(t, dir, fresh, live, func(err error) { t.Error(err) }) {
 		t.Error(err)
@@ -304,14 +324,16 @@ func casesPresentForSundayRead(t *testing.T, store *sqlite.Store) {
 
 // sundayLive is the model the Sunday read is recorded on: the conversation,
 // the model it is asked for, Wikidata as fetched (the network, if nil), and
-// the most tries a sample is given (0: the act's own) and the most samples
-// drawn (0: the rule's).
+// the most tries a sample is given (0: the act's own), the most samples
+// drawn (0: the rule's), and how long to wait before asking a turn again
+// that answered nothing (liveTries).
 type sundayLive struct {
 	conv       editor.Conversation
 	model      string
 	wikidata   http.RoundTripper
 	maxTries   int
 	maxSamples int
+	pause      time.Duration
 }
 
 // sundayAt is when the recorded Sunday read is written: the morning after
@@ -380,8 +402,17 @@ func sundaySampled(t *testing.T, dir string, fresh func() *sqlite.Store, live *s
 					t.Fatal(err)
 				}
 				rec = conversationRecording{}
-				passed = sundayTry(t, store, conversationRecorder{live.conv, &rec, model, path},
+				var lost error
+				passed = sundayTry(t, store, conversationRecorder{model: live.conv, rec: &rec, asked: model, path: path, pause: live.pause, lost: &lost},
 					liveWikidata(t, filepath.Dir(path), live.wikidata))
+				if lost != nil {
+					// The provider lost a turn: the try says nothing about
+					// the act, and the recording stops without it.
+					if err := os.RemoveAll(filepath.Dir(path)); err != nil {
+						t.Fatal(err)
+					}
+					return []error{lost}
+				}
 				rec.Outcome = editor.Failed
 				if passed {
 					rec.Outcome = editor.Applied

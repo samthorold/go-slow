@@ -11,6 +11,7 @@ import (
 	"slices"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/samthorold/go-slow/internal/claude"
 	"github.com/samthorold/go-slow/internal/editor"
@@ -227,6 +228,12 @@ type sampleModel struct {
 	model    string // the model a request is hashed with
 	cmd      rerecordCmd
 	report   func(error)
+	// pause is how long recording waits before calling the live model
+	// again after a call that answered nothing.
+	pause time.Duration
+	// lost is the error of a live call that answered nothing on every
+	// try: the sample stops there, unkept (runSample returns it).
+	lost error
 	// unchecked answers the attempts kept in order, whatever is asked: an
 	// act's current recordings given to an act downstream.
 	unchecked bool
@@ -253,7 +260,38 @@ func recordingSample(t *testing.T, path string, live editor.Model, model string,
 		t.Fatal(err)
 	}
 	return &sampleModel{t: t, path: path, attempts: s.attempts(), live: live, model: model, cmd: cmd,
-		report: func(err error) { t.Error(err) }}
+		pause: livePause, report: func(err error) { t.Error(err) }}
+}
+
+// A live call while recording that errors, answering nothing (the provider
+// overloaded, the connection lost, after the adapter's own retries), says
+// nothing about the act: it is no attempt at the sample. It is made again,
+// up to liveTries calls livePause apart, and if none answers the recording
+// stops without keeping the sample, so a fixture is never judged on a
+// sample the provider lost. Only an answer the act's checks refuse counts
+// against passing them. (An answer the model gave and the adapter took as an
+// error, a refusal or a turn cut off, is not kept either: it too stops the
+// recording once it has been asked liveTries times.)
+const liveTries = 3
+
+var livePause = 30 * time.Second
+
+// errLost is a live call that answered nothing on every try.
+var errLost = errors.New("the live model answered nothing")
+
+// sleep waits d, or until ctx is done.
+func sleep(ctx context.Context, d time.Duration) error {
+	if d <= 0 {
+		return ctx.Err()
+	}
+	timer := time.NewTimer(d)
+	defer timer.Stop()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-timer.C:
+		return nil
+	}
 }
 
 func (s *sampleModel) Complete(ctx context.Context, req editor.Request) (editor.Response, error) {
@@ -284,8 +322,17 @@ func (s *sampleModel) Complete(ctx context.Context, req editor.Request) (editor.
 	}
 	var rec recording
 	res, err := recorder{s.live, &rec, s.model}.Complete(ctx, req)
+	for try := 2; err != nil && try <= liveTries; try++ {
+		s.t.Logf("%s: the live call answered nothing (%v); calling again in %s, try %d of %d", s.path, err, s.pause, try, liveTries)
+		if werr := sleep(ctx, s.pause); werr != nil {
+			err = werr
+			break
+		}
+		res, err = recorder{s.live, &rec, s.model}.Complete(ctx, req)
+	}
 	if err != nil {
-		return res, err
+		s.lost = fmt.Errorf("%s: %w after %d tries, the sample not kept; record again to resume: %w", s.path, errLost, liveTries, err)
+		return res, s.lost
 	}
 	s.attempts = append(s.attempts, rec)
 	s.next++
@@ -304,11 +351,15 @@ func (s *sampleModel) more() bool {
 
 // runSample runs one sample on m as the work runs in use: attempt is tried
 // on m until it passes the act's checks or no attempt is left. An error is
-// the Record's or the harness's, not the act's.
+// the Record's or the harness's, not the act's, or a live call lost
+// (errLost), which stops the sample unkept.
 func runSample(m *sampleModel, attempt func(editor.Model) (bool, error)) (bool, error) {
 	for {
 		before := m.next
 		passed, err := attempt(m)
+		if m.lost != nil {
+			return false, m.lost
+		}
 		if err != nil || passed {
 			return passed, err
 		}
@@ -356,7 +407,7 @@ func sampled(t *testing.T, dir, fixture string, r rule, cmd rerecordCmd, run fun
 	var total editor.Usage
 	for _, m := range models {
 		results = append(results, run(m))
-		if m.live != nil && len(m.attempts) == 0 {
+		if m.live != nil && m.lost == nil && len(m.attempts) == 0 {
 			// Work that made no call, such as relating an Item with no
 			// candidates, is kept as a sample of none.
 			keepSample(t, m.path, nil)

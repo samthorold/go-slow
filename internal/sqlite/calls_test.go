@@ -1,24 +1,62 @@
 package sqlite
 
 import (
+	"context"
 	"database/sql"
+	"os"
 	"path/filepath"
 	"strconv"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/samthorold/go-slow/internal/editor"
 )
 
+// openTestStore is an empty Record of the test's own. It is a copy of one
+// migrated once per test binary, since under the race detector migrating
+// takes about a second (the package sqlitetest, which this package's own
+// tests can't import, does the same for other packages).
 func openTestStore(t *testing.T) *Store {
 	t.Helper()
-	s, err := Open(t.Context(), filepath.Join(t.TempDir(), "go-slow.db"))
+	s, err := Open(t.Context(), migratedPath(t))
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = s.Close() })
 	return s
 }
+
+// migratedPath is a file in t's temporary directory holding an empty Record
+// with every migration applied.
+func migratedPath(t *testing.T) string {
+	t.Helper()
+	migratedOnce.Do(func() {
+		path := filepath.Join(t.TempDir(), "template.db")
+		s, err := Open(context.Background(), path)
+		if err == nil {
+			err = s.Close()
+		}
+		if err == nil {
+			migratedBytes, err = os.ReadFile(path) //nolint:gosec // the test's own temporary file
+		}
+		migratedErr = err
+	})
+	if migratedErr != nil {
+		t.Fatal(migratedErr)
+	}
+	path := filepath.Join(t.TempDir(), "go-slow.db")
+	if err := os.WriteFile(path, migratedBytes, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	return path
+}
+
+var (
+	migratedOnce  sync.Once
+	migratedBytes []byte
+	migratedErr   error
+)
 
 var instructions = "Read the Item. " + string(make([]byte, 4000))
 

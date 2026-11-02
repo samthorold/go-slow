@@ -5,7 +5,6 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
-	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
@@ -15,6 +14,7 @@ import (
 	"github.com/samthorold/go-slow/internal/feedback"
 	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/sqlite"
+	"github.com/samthorold/go-slow/internal/sqlite/sqlitetest"
 	"github.com/samthorold/go-slow/internal/web"
 )
 
@@ -28,7 +28,7 @@ func newApp(t *testing.T, now time.Time) http.Handler {
 
 func openStore(t *testing.T) *sqlite.Store {
 	t.Helper()
-	store, err := sqlite.Open(t.Context(), filepath.Join(t.TempDir(), "go-slow.db"))
+	store, err := sqlite.Open(t.Context(), sqlitetest.Path(t))
 	if err != nil {
 		t.Fatalf("open store: %v", err)
 	}

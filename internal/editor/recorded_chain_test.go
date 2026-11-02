@@ -19,6 +19,7 @@ import (
 	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/sqlite"
+	"github.com/samthorold/go-slow/internal/sqlite/sqlitetest"
 )
 
 // Each recorded act is replayed over its own frozen copies of the
@@ -68,10 +69,11 @@ func newRecord(t *testing.T, topics []interest.Draft) (*sqlite.Store, *interest.
 	return newRecordAt(t, filepath.Join(t.TempDir(), "go-slow.db"), topics)
 }
 
-// newRecordAt is newRecord, kept at path.
+// newRecordAt is newRecord, kept at path, a file not yet there.
 func newRecordAt(t *testing.T, path string, topics []interest.Draft) (*sqlite.Store, *interest.Service) {
 	t.Helper()
 	ctx := t.Context()
+	sqlitetest.At(t, path)
 	store, err := sqlite.Open(ctx, path)
 	if err != nil {
 		t.Fatal(err)

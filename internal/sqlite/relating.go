@@ -78,6 +78,12 @@ type spansRead struct {
 
 // readSpans is the Item's newest reading and its Spans not rejected.
 func (s *Store) readSpans(ctx context.Context, it editor.Item) (spansRead, error) {
+	return s.readSpansAs(ctx, it, nil)
+}
+
+// readSpansAs is readSpans with what each key names now, is, already read
+// (every key its reading judges, or more); nil reads it.
+func (s *Store) readSpansAs(ctx context.Context, it editor.Item, is map[editor.LookupKey]editor.NamedEntity) (spansRead, error) {
 	r, _, err := s.NewestReading(ctx, it.SourceID, it.EntryID)
 	if err != nil {
 		return spansRead{}, err
@@ -86,9 +92,10 @@ func (s *Store) readSpans(ctx context.Context, it editor.Item) (spansRead, error
 	if err != nil {
 		return spansRead{}, err
 	}
-	is, err := s.EntitiesNamed(ctx, r.Keys(it.Published))
-	if err != nil {
-		return spansRead{}, err
+	if is == nil {
+		if is, err = s.EntitiesNamed(ctx, r.Keys(it.Published)); err != nil {
+			return spansRead{}, err
+		}
 	}
 	out := spansRead{reading: r, is: is}
 	for i, sp := range all {
@@ -153,68 +160,51 @@ func (s *Store) ItemsToRelate(ctx context.Context) ([]editor.ToRelate, error) {
 	return out, nil
 }
 
-// namesRead are the keys of every name the newest readings of the Items
-// first read op (SQL "<" or "<=") readBefore judge, each once.
-func (s *Store) namesRead(ctx context.Context, op string, readBefore int64) ([]editor.LookupKey, error) {
-	rows, err := s.db.QueryContext(ctx, `
-		SELECT DISTINCT n.name, n.kind, n.office, `+lookupOn+`
-		FROM items JOIN span_names n ON n.reading_id = `+newestReadingOf+`
-		WHERE `+firstRead+` `+op+` ?`, readBefore)
-	if err != nil {
-		return nil, fmt.Errorf("names read: %w", err)
-	}
-	defer func() { _ = rows.Close() }()
-	var keys []editor.LookupKey
-	for rows.Next() {
-		var k editor.LookupKey
-		if err := rows.Scan(&k.Name, &k.Kind, &k.Office, &k.On); err != nil {
-			return nil, fmt.Errorf("names read: %w", err)
-		}
-		keys = append(keys, k)
-	}
-	return keys, rows.Err()
+// itemNaming is an Item read, by its Source and entry, with the Entities
+// its newest reading names.
+type itemNaming struct {
+	sourceID, entryID string
+	names             []editor.NamedEntity
 }
 
-// itemsNaming are the Items first read at or before readBefore (before it,
-// if strictly) whose newest reading names one of the Entities es, as the
-// Record's look-ups have each name now.
-func (s *Store) itemsNaming(ctx context.Context, es []editor.NamedEntity, readBefore int64, strictly bool) ([]readItem, error) {
-	if len(es) == 0 {
-		return nil, nil
-	}
-	op := "<="
-	if strictly {
-		op = "<"
-	}
-	keys, err := s.namesRead(ctx, op, readBefore)
+// itemsNamed are the Items first read op (SQL "<" or "<=") readBefore, in
+// the order they were first read, each with the Entities its newest reading
+// names, as the Record's look-ups have each name now; with what each key the
+// Record has looked up names now. Every name in the Record is read in one
+// query, and every look-up in another, so the cost is two queries however
+// many Entities are asked about.
+func (s *Store) itemsNamed(ctx context.Context, op string, readBefore int64) ([]itemNaming, map[editor.LookupKey]editor.NamedEntity, error) {
+	is, err := s.allEntitiesNamed(ctx)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	// What each is now.
-	is, err := s.EntitiesNamed(ctx, keys)
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT items.source_id, items.entry_id, n.name, n.kind, n.office, `+lookupOn+`
+		FROM items JOIN span_names n ON n.reading_id = `+newestReadingOf+`
+		WHERE `+firstRead+` `+op+` ?
+		ORDER BY `+firstRead+`, n.event_id`, readBefore)
 	if err != nil {
-		return nil, err
+		return nil, nil, fmt.Errorf("names read: %w", err)
 	}
-	var where []string
-	var args []any
-	for k, e := range is {
-		if slices.Contains(es, e) {
-			where = append(where, `(n.name = ? AND n.kind = ? AND n.office = ? AND `+lookupOn+` = ?)`)
-			args = append(args, k.Name, k.Kind, k.Office, k.On)
+	defer func() { _ = rows.Close() }()
+	var out []itemNaming
+	for rows.Next() {
+		var src, entry string
+		var k editor.LookupKey
+		if err := rows.Scan(&src, &entry, &k.Name, &k.Kind, &k.Office, &k.On); err != nil {
+			return nil, nil, fmt.Errorf("names read: %w", err)
+		}
+		if len(out) == 0 || out[len(out)-1].sourceID != src || out[len(out)-1].entryID != entry {
+			out = append(out, itemNaming{sourceID: src, entryID: entry})
+		}
+		if e, ok := is[k]; ok {
+			last := &out[len(out)-1]
+			if !slices.Contains(last.names, e) {
+				last.names = append(last.names, e)
+			}
 		}
 	}
-	if len(where) == 0 {
-		return nil, nil
-	}
-	cond := `EXISTS (SELECT 1 FROM span_names n WHERE n.reading_id = ` + newestReadingOf + ` AND (`
-	for i, w := range where {
-		if i > 0 {
-			cond += " OR "
-		}
-		cond += w
-	}
-	cond += `)) AND ` + firstRead + ` ` + op + ` ?`
-	return s.readItems(ctx, cond, append(args, readBefore)...)
+	return out, is, rows.Err()
 }
 
 // SpansMentioning are the Spans of Items first read before readBefore that
@@ -223,22 +213,32 @@ func (s *Store) itemsNaming(ctx context.Context, es []editor.NamedEntity, readBe
 // Spans relating finds a Span's candidates among. Each comes with its Item,
 // its hydrated reading, whose words it is and every Entity it mentions.
 func (s *Store) SpansMentioning(ctx context.Context, es []editor.NamedEntity, readBefore int64) ([]editor.OtherSpan, error) {
-	items, err := s.itemsNaming(ctx, es, readBefore, true)
+	if len(es) == 0 {
+		return nil, nil
+	}
+	named, is, err := s.itemsNamed(ctx, "<", readBefore)
 	if err != nil {
 		return nil, fmt.Errorf("spans mentioning: %w", err)
 	}
 	var out []editor.OtherSpan
-	for _, ri := range items {
-		sr, err := s.readSpans(ctx, ri.item)
+	for _, in := range named {
+		if !slices.ContainsFunc(in.names, func(e editor.NamedEntity) bool { return slices.Contains(es, e) }) {
+			continue
+		}
+		it, _, err := s.itemAt(ctx, in.sourceID, in.entryID)
+		if err != nil {
+			return nil, fmt.Errorf("spans mentioning: %w", err)
+		}
+		sr, err := s.readSpansAs(ctx, it, is)
 		if err != nil {
 			return nil, fmt.Errorf("spans mentioning: %w", err)
 		}
 		for i, sp := range sr.spans {
-			mentions := sr.reading.Entities(sp, ri.item.Published, sr.is)
+			mentions := sr.reading.Entities(sp, it.Published, sr.is)
 			if !slices.ContainsFunc(mentions, func(e editor.NamedEntity) bool { return slices.Contains(es, e) }) {
 				continue
 			}
-			out = append(out, otherSpan(ri.item, sr.reading, sp, sr.numbers[i], mentions))
+			out = append(out, otherSpan(it, sr.reading, sp, sr.numbers[i], mentions))
 		}
 	}
 	return out, nil
@@ -258,12 +258,22 @@ func otherSpan(it editor.Item, r editor.Reading, sp cut.Span, n int, mentions []
 // is mentioned, as at the Item read then.
 func (s *Store) ItemsMentioning(ctx context.Context, es []editor.NamedEntity, readBefore int64) (map[editor.NamedEntity]int, error) {
 	out := map[editor.NamedEntity]int{}
+	if len(es) == 0 {
+		return out, nil
+	}
 	for _, e := range es {
-		items, err := s.itemsNaming(ctx, []editor.NamedEntity{e}, readBefore, false)
-		if err != nil {
-			return nil, fmt.Errorf("items mentioning: %w", err)
+		out[e] = 0
+	}
+	named, _, err := s.itemsNamed(ctx, "<=", readBefore)
+	if err != nil {
+		return nil, fmt.Errorf("items mentioning: %w", err)
+	}
+	for _, in := range named {
+		for _, e := range in.names {
+			if _, asked := out[e]; asked {
+				out[e]++
+			}
 		}
-		out[e] = len(items)
 	}
 	return out, nil
 }

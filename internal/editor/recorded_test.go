@@ -3,6 +3,7 @@ package editor_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -50,6 +51,9 @@ type recording struct {
 	RecordedAt  time.Time       `json:"recorded_at"`
 	Usage       editor.Usage    `json:"usage"`
 	Output      json.RawMessage `json:"output"`
+	// Err is the error the adapter took an answer that came back as (a
+	// refusal, an answer cut off), with no output: an attempt that failed.
+	Err string `json:"error,omitempty"`
 }
 
 // replay answers with a kept response, as the model did when it was kept,
@@ -59,7 +63,21 @@ type recording struct {
 type replay struct{ rec recording }
 
 func (r replay) Complete(context.Context, editor.Request) (editor.Response, error) {
-	return editor.Response{Output: r.rec.Output, Model: r.rec.Model, Usage: r.rec.Usage}, nil
+	return editor.Response{Output: r.rec.Output, Model: r.rec.Model, Usage: r.rec.Usage}, r.rec.err()
+}
+
+// err is the error the recording was kept with, nil for none: the same
+// error, wrapping the adapter's (ErrRefused, ErrTruncated) it begins with.
+func (r recording) err() error {
+	if r.Err == "" {
+		return nil
+	}
+	for _, sentinel := range []error{editor.ErrRefused, editor.ErrTruncated} {
+		if rest, ok := strings.CutPrefix(r.Err, sentinel.Error()); ok {
+			return fmt.Errorf("%w%s", sentinel, rest)
+		}
+	}
+	return errors.New(r.Err)
 }
 
 // rerecordCmd is how a recorded test is re-recorded: the test, and the
@@ -351,7 +369,10 @@ func TestABareAttributionIsAFewWordsEndingInSaid(t *testing.T) {
 }
 
 // recorder passes a call to the real model and keeps what it answered, with
-// the hash of the request, asked of the model named asked.
+// the hash of the request, asked of the model named asked. An answer that
+// came back as an error (a refusal, an answer cut off: the response as the
+// provider returned it is there) is kept with its error; an error with
+// nothing come back keeps nothing.
 type recorder struct {
 	model editor.Model
 	rec   *recording
@@ -360,10 +381,17 @@ type recorder struct {
 
 func (r recorder) Complete(ctx context.Context, req editor.Request) (editor.Response, error) {
 	res, err := r.model.Complete(ctx, req)
-	if err != nil {
+	if !cameBack(res, err) {
 		return res, err
 	}
 	*r.rec = recording{Act: req.Act, Model: res.Model, RequestHash: editor.RequestHash(req, r.asked),
 		RecordedAt: time.Now().UTC(), Usage: res.Usage, Output: res.Output}
-	return res, nil
+	if err != nil {
+		r.rec.Err = err.Error()
+	}
+	return res, err
 }
+
+// cameBack is whether a live call came back with an answer, which recorder
+// keeps: with no error, or with one the adapter took the answer as.
+func cameBack(res editor.Response, err error) bool { return err == nil || res.Raw != nil }

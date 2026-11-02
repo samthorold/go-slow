@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/samthorold/go-slow/internal/editor"
 )
@@ -177,27 +178,95 @@ func (s *Store) LookupsNamed(ctx context.Context, keys []editor.LookupKey) (map[
 func (s *Store) entitiesNamed(ctx context.Context, keys []editor.LookupKey) (map[editor.LookupKey]editor.NamedEntity, map[editor.LookupKey]int64, error) {
 	out := map[editor.LookupKey]editor.NamedEntity{}
 	from := map[editor.LookupKey]int64{}
-	for _, k := range keys {
-		e := editor.NamedEntity{Kind: k.Kind}
-		var lookup int64
-		var editorID sql.NullInt64
-		var editorName, mergedID, mergedLabel sql.NullString
-		err := s.db.QueryRowContext(ctx, `
-			SELECT l.event_id, l.wikidata_id, l.label, e.event_id, e.name, ml.wikidata_id, ml.label
-			FROM lookups l
-				LEFT JOIN editor_entities e ON l.wikidata_id = '' AND e.name = l.name AND e.kind = l.kind
-				LEFT JOIN entity_merges m ON m.event_id = (SELECT max(event_id) FROM entity_merges WHERE entity_id = e.event_id)
-				LEFT JOIN lookups ml ON ml.event_id = m.lookup_id
-			WHERE l.name = ? AND l.kind = ? AND l.office = ? AND l.on_date = ?
-				AND NOT `+wrongStanding("l.event_id")+`
-			ORDER BY l.event_id DESC LIMIT 1`, k.Name, k.Kind, k.Office, k.On,
-		).Scan(&lookup, &e.WikidataID, &e.Name, &editorID, &editorName, &mergedID, &mergedLabel)
-		if errors.Is(err, sql.ErrNoRows) {
-			continue
+	// One query a batch of keys, each key's look-ups newest first, the first
+	// of each read; SQLite takes at most 32766 parameters.
+	const batch = 1000
+	for len(keys) > 0 {
+		n := min(len(keys), batch)
+		values := make([]string, n)
+		args := make([]any, 0, 4*n)
+		for i, k := range keys[:n] {
+			values[i] = "(?, ?, ?, ?)"
+			args = append(args, k.Name, k.Kind, k.Office, k.On)
 		}
+		keys = keys[n:]
+		rows, err := s.db.QueryContext(ctx, `WITH asked (name, kind, office, on_date) AS (VALUES `+strings.Join(values, ", ")+`)`+
+			lookupsRead(`asked a JOIN lookups l
+				ON l.name = a.name AND l.kind = a.kind AND l.office = a.office AND l.on_date = a.on_date`)+`
+			ORDER BY l.event_id DESC`, args...)
 		if err != nil {
 			return nil, nil, fmt.Errorf("entities named: %w", err)
 		}
+		if err := readEntities(rows, firstOfEach(), out, from); err != nil {
+			return nil, nil, fmt.Errorf("entities named: %w", err)
+		}
+	}
+	return out, from, nil
+}
+
+// firstOfEach takes each key the first time it is asked, and never again:
+// over look-ups newest first, each key's newest.
+func firstOfEach() func(editor.LookupKey) bool {
+	seen := map[editor.LookupKey]bool{}
+	return func(k editor.LookupKey) bool {
+		if seen[k] {
+			return false
+		}
+		seen[k] = true
+		return true
+	}
+}
+
+// allEntitiesNamed is EntitiesNamed for every key the Record has looked up,
+// in one query: what a view working out which Items mention an Entity
+// reads, since it reads every name in the Record.
+func (s *Store) allEntitiesNamed(ctx context.Context) (map[editor.LookupKey]editor.NamedEntity, error) {
+	rows, err := s.db.QueryContext(ctx, lookupsRead(`lookups l`)+` ORDER BY l.event_id DESC`)
+	if err != nil {
+		return nil, fmt.Errorf("entities named: %w", err)
+	}
+	out := map[editor.LookupKey]editor.NamedEntity{}
+	if err := readEntities(rows, firstOfEach(), out, map[editor.LookupKey]int64{}); err != nil {
+		return nil, fmt.Errorf("entities named: %w", err)
+	}
+	return out, nil
+}
+
+// lookupsRead is the look-ups a view reads, not under standing wrong, each
+// with its key, its match and the Editor's Entity of its name and the item
+// that was merged into, if any. from is the FROM clause, naming the look-ups
+// l.
+func lookupsRead(from string) string {
+	return `
+		SELECT l.name, l.kind, l.office, l.on_date, l.event_id, l.wikidata_id, l.label, e.event_id, e.name, ml.wikidata_id, ml.label
+		FROM ` + from + `
+			LEFT JOIN editor_entities e ON l.wikidata_id = '' AND e.name = l.name AND e.kind = l.kind
+			LEFT JOIN entity_merges m ON m.event_id = (SELECT max(event_id) FROM entity_merges WHERE entity_id = e.event_id)
+			LEFT JOIN lookups ml ON ml.event_id = m.lookup_id
+		WHERE NOT ` + wrongStanding("l.event_id")
+}
+
+// readEntities reads the rows of lookupsRead into the Entity each key names
+// and the look-up it is read from, for each row whose key take takes, and
+// closes them.
+func readEntities(rows *sql.Rows, take func(editor.LookupKey) bool,
+	out map[editor.LookupKey]editor.NamedEntity, from map[editor.LookupKey]int64,
+) error {
+	defer func() { _ = rows.Close() }()
+	for rows.Next() {
+		var k editor.LookupKey
+		var e editor.NamedEntity
+		var lookup int64
+		var editorID sql.NullInt64
+		var editorName, mergedID, mergedLabel sql.NullString
+		if err := rows.Scan(&k.Name, &k.Kind, &k.Office, &k.On,
+			&lookup, &e.WikidataID, &e.Name, &editorID, &editorName, &mergedID, &mergedLabel); err != nil {
+			return err
+		}
+		if !take(k) {
+			continue
+		}
+		e.Kind = k.Kind
 		switch {
 		case e.WikidataID != "":
 		case mergedID.Valid:
@@ -211,5 +280,5 @@ func (s *Store) entitiesNamed(ctx context.Context, keys []editor.LookupKey) (map
 		}
 		out[k], from[k] = e, lookup
 	}
-	return out, from, nil
+	return rows.Err()
 }

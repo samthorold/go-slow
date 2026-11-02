@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"log/slog"
-	"path/filepath"
 	"testing"
 	"time"
 
@@ -13,6 +12,7 @@ import (
 	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/sqlite"
+	"github.com/samthorold/go-slow/internal/sqlite/sqlitetest"
 )
 
 var saturday = time.Date(2026, time.October, 24, 7, 0, 0, 0, time.UTC)
@@ -28,7 +28,7 @@ var number10 = collect.Source{
 func record(t *testing.T) *sqlite.Store {
 	t.Helper()
 	ctx := t.Context()
-	store, err := sqlite.Open(ctx, filepath.Join(t.TempDir(), "go-slow.db"))
+	store, err := sqlite.Open(ctx, sqlitetest.Path(t))
 	if err != nil {
 		t.Fatal(err)
 	}

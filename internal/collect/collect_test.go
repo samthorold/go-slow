@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
-	"path/filepath"
 	"sync"
 	"testing"
 	"time"
@@ -15,6 +14,7 @@ import (
 	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/polite"
 	"github.com/samthorold/go-slow/internal/sqlite"
+	"github.com/samthorold/go-slow/internal/sqlite/sqlitetest"
 )
 
 const feedV1 = `<?xml version="1.0" encoding="UTF-8"?>
@@ -95,7 +95,7 @@ func newFixture(t *testing.T, feed, etag string) *fixture {
 	srv := httptest.NewServer(pub)
 	t.Cleanup(srv.Close)
 
-	store, err := sqlite.Open(t.Context(), filepath.Join(t.TempDir(), "go-slow.db"))
+	store, err := sqlite.Open(t.Context(), sqlitetest.Path(t))
 	if err != nil {
 		t.Fatal(err)
 	}

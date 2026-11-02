@@ -17,6 +17,7 @@ import (
 	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/polite"
 	"github.com/samthorold/go-slow/internal/sqlite"
+	"github.com/samthorold/go-slow/internal/sqlite/sqlitetest"
 )
 
 // appointment is a GOV.UK document as the Content API returned it, whose
@@ -294,7 +295,7 @@ func TestTextIsFetchedPolitely(t *testing.T) {
 		g.failing["/api/content"+speech] = http.StatusServiceUnavailable
 		g.retryAfter = "120"
 	})
-	store, err := sqlite.Open(t.Context(), filepath.Join(t.TempDir(), "go-slow.db"))
+	store, err := sqlite.Open(t.Context(), sqlitetest.Path(t))
 	if err != nil {
 		t.Fatal(err)
 	}

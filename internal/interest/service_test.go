@@ -1,16 +1,16 @@
 package interest_test
 
 import (
-	"path/filepath"
 	"testing"
 
 	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/sqlite"
+	"github.com/samthorold/go-slow/internal/sqlite/sqlitetest"
 )
 
 func openStore(t *testing.T) *sqlite.Store {
 	t.Helper()
-	store, err := sqlite.Open(t.Context(), filepath.Join(t.TempDir(), "go-slow.db"))
+	store, err := sqlite.Open(t.Context(), sqlitetest.Path(t))
 	if err != nil {
 		t.Fatal(err)
 	}

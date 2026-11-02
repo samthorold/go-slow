@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
-	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
@@ -16,6 +15,7 @@ import (
 	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/sqlite"
+	"github.com/samthorold/go-slow/internal/sqlite/sqlitetest"
 	"github.com/samthorold/go-slow/internal/wikidata"
 	"github.com/samthorold/go-slow/internal/wikidata/wikidatatest"
 )
@@ -41,7 +41,7 @@ var releases = []editor.Item{
 func readRecord(t *testing.T, output string, items ...editor.Item) *sqlite.Store {
 	t.Helper()
 	ctx := t.Context()
-	store, err := sqlite.Open(ctx, filepath.Join(t.TempDir(), "go-slow.db"))
+	store, err := sqlite.Open(ctx, sqlitetest.Path(t))
 	if err != nil {
 		t.Fatal(err)
 	}

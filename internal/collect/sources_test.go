@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
-	"path/filepath"
 	"strings"
 	"sync"
 	"testing"
@@ -15,6 +14,7 @@ import (
 	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/polite"
 	"github.com/samthorold/go-slow/internal/sqlite"
+	"github.com/samthorold/go-slow/internal/sqlite/sqlitetest"
 )
 
 const onsPublished = `{"took":6,"breakdown":{"total":2},"releases":[
@@ -74,7 +74,7 @@ func newAPI(t *testing.T, routes map[string]string) (*api, string) {
 // before now, longer than any usual gap.
 func collectorFor(t *testing.T, sources ...collect.Source) (*collect.Collector, *sqlite.Store) {
 	t.Helper()
-	store, err := sqlite.Open(t.Context(), filepath.Join(t.TempDir(), "go-slow.db"))
+	store, err := sqlite.Open(t.Context(), sqlitetest.Path(t))
 	if err != nil {
 		t.Fatal(err)
 	}

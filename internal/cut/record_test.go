@@ -1,20 +1,20 @@
 package cut_test
 
 import (
-	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/sqlite"
+	"github.com/samthorold/go-slow/internal/sqlite/sqlitetest"
 )
 
 var now = time.Date(2026, time.October, 30, 7, 0, 0, 0, time.UTC)
 
 func openStore(t *testing.T) *sqlite.Store {
 	t.Helper()
-	s, err := sqlite.Open(t.Context(), filepath.Join(t.TempDir(), "go-slow.db"))
+	s, err := sqlite.Open(t.Context(), sqlitetest.Path(t))
 	if err != nil {
 		t.Fatal(err)
 	}

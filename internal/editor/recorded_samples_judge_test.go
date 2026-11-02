@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -223,6 +224,81 @@ func TestASampleRefusedOnEveryAttemptFails(t *testing.T) {
 	r := replayingSample(t, path, "claude-haiku-5-5", readingCommand, func(err error) { t.Error(err) })
 	if readSample(t, r) {
 		t.Error("replayed, the refused sample passed")
+	}
+}
+
+// declining answers every call as the Claude adapter answers a refusal: what
+// came back, with ErrRefused.
+type declining struct{ calls int }
+
+func (m *declining) Complete(context.Context, editor.Request) (editor.Response, error) {
+	m.calls++
+	return editor.Response{Raw: json.RawMessage(`{"stop_reason": "refusal"}`), Model: "fake", StopReason: "refusal",
+		Usage: editor.Usage{InputTokens: 10, OutputTokens: 1}}, fmt.Errorf("%w (cyber)", editor.ErrRefused)
+}
+
+// A refusal, or an answer cut off, is the act's behaviour on its request: in
+// use a failed attempt. Recorded, it is kept as an attempt with its error,
+// counting against passing the act's checks, and replays as the same error.
+func TestARefusalWhileRecordingIsKeptAsAnAttempt(t *testing.T) {
+	path := samplePath(t.TempDir(), "the-speech", 1)
+	live := &declining{}
+	m := recordingSample(t, path, live, "claude-haiku-5-5", readingCommand)
+	m.pause = 0
+	if readSample(t, m) {
+		t.Fatal("a sample refused on every attempt passed")
+	}
+	if live.calls != editor.MaxAttempts {
+		t.Errorf("%d live calls, want %d: one per attempt", live.calls, editor.MaxAttempts)
+	}
+	s, err := sampleAt(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := s.attempts()
+	if len(got) != editor.MaxAttempts {
+		t.Fatalf("kept %d attempts %+v; want the %d refused", len(got), got, editor.MaxAttempts)
+	}
+	for _, a := range got {
+		if a.Err == "" || a.RequestHash == "" || a.Usage.InputTokens != 10 {
+			t.Errorf("kept %+v; want the refusal, with its error, request hash and usage", a)
+		}
+	}
+
+	// Replayed, each attempt answers with the same error, and the sample fails.
+	r := replayingSample(t, path, "claude-haiku-5-5", readingCommand, func(err error) { t.Error(err) })
+	if readSample(t, r) || r.next != editor.MaxAttempts {
+		t.Errorf("replayed: passed, or stopped at attempt %d; want it to fail on all %d", r.next, editor.MaxAttempts)
+	}
+}
+
+// A refused attempt kept replays as the same error, the adapter's own, for
+// the request it answered; asked another, it is stale, as any attempt is.
+func TestARefusedAttemptReplaysAsTheSameErrorForItsRequestAlone(t *testing.T) {
+	var rec recording
+	_, want := recorder{&declining{}, &rec, "claude-haiku-5-5"}.Complete(t.Context(), asRecorded)
+	path := samplePath(t.TempDir(), "one", 1)
+	keepSample(t, path, []recording{rec})
+
+	r := replayingSample(t, path, "claude-haiku-5-5", readingCommand, func(err error) { t.Error(err) })
+	res, err := r.Complete(t.Context(), asRecorded)
+	if !errors.Is(err, editor.ErrRefused) || err.Error() != want.Error() || res.Model != "fake" || res.Usage.InputTokens != 10 {
+		t.Errorf("replayed %+v, %v; want the refusal as kept, %v", res, err, want)
+	}
+
+	var reported []error
+	r = replayingSample(t, path, "claude-haiku-5-5", readingCommand, func(err error) { reported = append(reported, err) })
+	if _, err := r.Complete(t.Context(), changed); errors.Is(err, editor.ErrRefused) || len(reported) != 1 ||
+		!strings.Contains(reported[0].Error(), "stale: re-record with") {
+		t.Errorf("asked another request: %v, reported %v; want it stale", err, reported)
+	}
+}
+
+// A cut-off answer kept replays wrapping ErrTruncated.
+func TestACutOffAttemptReplaysAsCutOff(t *testing.T) {
+	rec := recording{Err: editor.ErrTruncated.Error()}
+	if _, err := (replay{rec}).Complete(t.Context(), asRecorded); !errors.Is(err, editor.ErrTruncated) {
+		t.Errorf("replayed %v; want it cut off", err)
 	}
 }
 

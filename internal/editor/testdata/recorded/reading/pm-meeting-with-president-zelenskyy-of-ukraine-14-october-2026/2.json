@@ -1,11 +1,11 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "f9ab059432a16fac6eb1475533df887a989aff81c5a45b7de16228076aa6abb9",
-  "recorded_at": "2026-10-30T20:52:21.405686Z",
+  "request_hash": "6d890fed69b6a7592b913f33e93f9a8c6e972dc0b97fceb19f797b94dad91883",
+  "recorded_at": "2026-11-02T15:22:48.496769Z",
   "usage": {
-    "input_tokens": 2484,
-    "output_tokens": 3963
+    "input_tokens": 2682,
+    "output_tokens": 4564
   },
   "output": {
     "names": [
@@ -42,8 +42,8 @@
           "words": "President Trump"
         },
         "kind": "person",
-        "name": "Trump",
-        "office": "President"
+        "name": "President Trump",
+        "office": ""
       },
       {
         "at": {
@@ -75,15 +75,6 @@
       {
         "at": {
           "span": 4,
-          "words": "Ukraine"
-        },
-        "kind": "place",
-        "name": "Ukraine",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 4,
           "words": "Russia"
         },
         "kind": "place",
@@ -96,16 +87,34 @@
           "words": "UK"
         },
         "kind": "place",
-        "name": "UK",
+        "name": "United Kingdom",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "Ukraine"
+        },
+        "kind": "place",
+        "name": "Ukraine",
         "office": ""
       },
       {
         "at": {
           "span": 5,
-          "words": "The UK"
+          "words": "the Prime Minister"
+        },
+        "kind": "person",
+        "name": "Prime Minister",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 5,
+          "words": "UK"
         },
         "kind": "place",
-        "name": "UK",
+        "name": "United Kingdom",
         "office": ""
       },
       {
@@ -119,8 +128,17 @@
       },
       {
         "at": {
-          "span": 5,
-          "words": "the Prime Minister added"
+          "span": 6,
+          "words": "UK"
+        },
+        "kind": "place",
+        "name": "United Kingdom",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 7,
+          "words": "the Prime Minister"
         },
         "kind": "person",
         "name": "Prime Minister",
@@ -128,39 +146,12 @@
       },
       {
         "at": {
-          "span": 6,
-          "words": "the UK"
-        },
-        "kind": "place",
-        "name": "UK",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 6,
-          "words": "Ukraine"
-        },
-        "kind": "place",
-        "name": "Ukraine",
-        "office": ""
-      },
-      {
-        "at": {
           "span": 7,
-          "words": "The UK"
+          "words": "UK"
         },
         "kind": "place",
-        "name": "UK",
+        "name": "United Kingdom",
         "office": ""
-      },
-      {
-        "at": {
-          "span": 7,
-          "words": "the Prime Minister added"
-        },
-        "kind": "person",
-        "name": "Prime Minister",
-        "office": "Prime Minister of the United Kingdom"
       }
     ],
     "refers_to": [],
@@ -173,7 +164,7 @@
         },
         "speaker": {
           "span": 5,
-          "words": "the Prime Minister added"
+          "words": "the Prime Minister"
         }
       },
       {
@@ -183,7 +174,7 @@
         },
         "speaker": {
           "span": 7,
-          "words": "the Prime Minister added"
+          "words": "the Prime Minister"
         }
       }
     ]

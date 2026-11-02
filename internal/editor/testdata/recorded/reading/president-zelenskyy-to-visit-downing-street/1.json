@@ -1,23 +1,14 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "2e9537070d1d11ea1022aa0e9137736f75d19ab8d414380bd1fd1a101d04c644",
-  "recorded_at": "2026-10-30T21:03:01.309824Z",
+  "request_hash": "bccfbb27fe2e74e5efcbc146ced4453177c04b3aea26b9db5c5a5c211f850999",
+  "recorded_at": "2026-11-02T15:37:16.336697Z",
   "usage": {
-    "input_tokens": 3351,
-    "output_tokens": 6563
+    "input_tokens": 3549,
+    "output_tokens": 11834
   },
   "output": {
     "names": [
-      {
-        "at": {
-          "span": 1,
-          "words": "Prime Minister"
-        },
-        "kind": "person",
-        "name": "Andy Burnham",
-        "office": "Prime Minister of the United Kingdom"
-      },
       {
         "at": {
           "span": 1,
@@ -26,6 +17,15 @@
         "kind": "person",
         "name": "Volodymyr Zelenskyy",
         "office": "President of Ukraine"
+      },
+      {
+        "at": {
+          "span": 1,
+          "words": "Prime Minister"
+        },
+        "kind": "person",
+        "name": "Andy Burnham",
+        "office": "Prime Minister of the United Kingdom"
       },
       {
         "at": {
@@ -47,6 +47,15 @@
       },
       {
         "at": {
+          "span": 1,
+          "words": "Ukraine"
+        },
+        "kind": "place",
+        "name": "Ukraine",
+        "office": ""
+      },
+      {
+        "at": {
           "span": 2,
           "words": "UK"
         },
@@ -57,7 +66,16 @@
       {
         "at": {
           "span": 2,
-          "words": "Prime Minister"
+          "words": "President Zelenskyy"
+        },
+        "kind": "person",
+        "name": "Volodymyr Zelenskyy",
+        "office": "President of Ukraine"
+      },
+      {
+        "at": {
+          "span": 2,
+          "words": "the Prime Minister"
         },
         "kind": "person",
         "name": "Andy Burnham",
@@ -66,11 +84,20 @@
       {
         "at": {
           "span": 2,
-          "words": "President Zelenskyy"
+          "words": "Ukraine"
         },
-        "kind": "person",
-        "name": "Volodymyr Zelenskyy",
-        "office": "President of Ukraine"
+        "kind": "place",
+        "name": "Ukraine",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 3,
+          "words": "IMF"
+        },
+        "kind": "organisation",
+        "name": "International Monetary Fund",
+        "office": ""
       },
       {
         "at": {
@@ -84,10 +111,10 @@
       {
         "at": {
           "span": 3,
-          "words": "IMF"
+          "words": "Ukraine"
         },
-        "kind": "organisation",
-        "name": "International Monetary Fund",
+        "kind": "place",
+        "name": "Ukraine",
         "office": ""
       },
       {
@@ -129,19 +156,19 @@
       {
         "at": {
           "span": 4,
-          "words": "Putin"
+          "words": "Russia"
         },
-        "kind": "person",
-        "name": "Putin",
+        "kind": "place",
+        "name": "Russia",
         "office": ""
       },
       {
         "at": {
           "span": 4,
-          "words": "Russia"
+          "words": "Putin"
         },
-        "kind": "place",
-        "name": "Russia",
+        "kind": "person",
+        "name": "Putin",
         "office": ""
       },
       {
@@ -156,6 +183,24 @@
       {
         "at": {
           "span": 5,
+          "words": "UK"
+        },
+        "kind": "place",
+        "name": "United Kingdom",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 5,
+          "words": "Ukraine"
+        },
+        "kind": "place",
+        "name": "Ukraine",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 6,
           "words": "UK"
         },
         "kind": "place",
@@ -191,12 +236,39 @@
       },
       {
         "at": {
+          "span": 8,
+          "words": "Ukraine"
+        },
+        "kind": "place",
+        "name": "Ukraine",
+        "office": ""
+      },
+      {
+        "at": {
           "span": 9,
           "words": "Prime Minister Andy Burnham"
         },
         "kind": "person",
         "name": "Andy Burnham",
         "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 10,
+          "words": "Ukraine"
+        },
+        "kind": "place",
+        "name": "Ukraine",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 10,
+          "words": "UK"
+        },
+        "kind": "place",
+        "name": "United Kingdom",
+        "office": ""
       },
       {
         "at": {
@@ -246,11 +318,11 @@
       {
         "at": {
           "span": 16,
-          "words": "Foreign Secretary"
+          "words": "the Foreign Secretary"
         },
         "kind": "person",
         "name": "Foreign Secretary",
-        "office": "Foreign Secretary"
+        "office": "Foreign Secretary of the United Kingdom"
       },
       {
         "at": {
@@ -264,11 +336,11 @@
       {
         "at": {
           "span": 17,
-          "words": "Kyiv"
+          "words": "the Chancellor"
         },
-        "kind": "place",
-        "name": "Kyiv",
-        "office": ""
+        "kind": "person",
+        "name": "John Healey",
+        "office": "Chancellor of the Exchequer"
       },
       {
         "at": {
@@ -281,12 +353,48 @@
       },
       {
         "at": {
+          "span": 17,
+          "words": "Ukraine"
+        },
+        "kind": "place",
+        "name": "Ukraine",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 17,
+          "words": "Kyiv"
+        },
+        "kind": "place",
+        "name": "Kyiv",
+        "office": ""
+      },
+      {
+        "at": {
           "span": 18,
           "words": "Chancellor of the Exchequer John Healey"
         },
         "kind": "person",
         "name": "John Healey",
         "office": "Chancellor of the Exchequer"
+      },
+      {
+        "at": {
+          "span": 19,
+          "words": "Middle East"
+        },
+        "kind": "place",
+        "name": "Middle East",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 19,
+          "words": "Europe"
+        },
+        "kind": "place",
+        "name": "Europe",
+        "office": ""
       },
       {
         "at": {
@@ -329,41 +437,73 @@
       {
         "from": {
           "span": 2,
+          "within": "",
           "words": "he"
         },
         "to": {
           "span": 9,
+          "within": "",
           "words": "Prime Minister Andy Burnham"
         }
       },
       {
         "from": {
+          "span": 6,
+          "within": "",
+          "words": "which"
+        },
+        "to": {
+          "span": 6,
+          "within": "",
+          "words": "British Lightweight Multirole Missiles (LMMs)"
+        }
+      },
+      {
+        "from": {
           "span": 7,
+          "within": "",
           "words": "The drones"
         },
         "to": {
           "span": 6,
+          "within": "",
           "words": "jet-powered drones"
         }
       },
       {
         "from": {
-          "span": 7,
-          "words": "them"
+          "span": 8,
+          "within": "",
+          "words": "the £45m package"
         },
         "to": {
-          "span": 6,
-          "words": "jet-powered drones"
+          "span": 5,
+          "within": "",
+          "words": "£45 million of surface-to-air missiles deliveries"
         }
       },
       {
         "from": {
           "span": 15,
+          "within": "",
           "words": "his"
         },
         "to": {
-          "span": 15,
-          "words": "Chancellor John Healey"
+          "span": 18,
+          "within": "",
+          "words": "Chancellor of the Exchequer John Healey"
+        }
+      },
+      {
+        "from": {
+          "span": 17,
+          "within": "",
+          "words": "its"
+        },
+        "to": {
+          "span": 17,
+          "within": "",
+          "words": "Russia"
         }
       }
     ],

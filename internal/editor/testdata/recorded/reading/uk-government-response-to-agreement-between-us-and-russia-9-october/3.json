@@ -1,27 +1,27 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "7fe1d9a1a90efbf8358b46ddab3d540643f6bd3fcc9081dc3ac5d6d70a6f0009",
-  "recorded_at": "2026-10-30T21:07:39.549782Z",
+  "request_hash": "7a05d8996c6aa54f75f63c9d25b10ba04132d5efc70d75c53afbd007d7f23fb5",
+  "recorded_at": "2026-11-02T15:48:16.959067Z",
   "usage": {
-    "input_tokens": 2497,
-    "output_tokens": 5708
+    "input_tokens": 2695,
+    "output_tokens": 4635
   },
   "output": {
     "names": [
       {
         "at": {
           "span": 1,
-          "words": "UK government spokesperson"
+          "words": "UK government"
         },
-        "kind": "person",
-        "name": "UK government spokesperson",
-        "office": "Spokesperson for the UK government"
+        "kind": "organisation",
+        "name": "UK Government",
+        "office": ""
       },
       {
         "at": {
           "span": 2,
-          "words": "UK"
+          "words": "UK’s"
         },
         "kind": "place",
         "name": "UK",
@@ -102,7 +102,16 @@
       {
         "at": {
           "span": 11,
-          "words": "US-led"
+          "words": "UK"
+        },
+        "kind": "place",
+        "name": "UK",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 11,
+          "words": "US"
         },
         "kind": "place",
         "name": "US",
@@ -111,25 +120,7 @@
       {
         "at": {
           "span": 11,
-          "words": "in Ukraine"
-        },
-        "kind": "place",
-        "name": "Ukraine",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 11,
-          "words": "the US"
-        },
-        "kind": "place",
-        "name": "US",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 11,
-          "words": "Ukraine and other allies"
+          "words": "Ukraine"
         },
         "kind": "place",
         "name": "Ukraine",
@@ -140,50 +131,60 @@
       {
         "from": {
           "span": 3,
-          "words": "it needs"
+          "within": "it needs",
+          "words": "it"
         },
         "to": {
           "span": 3,
+          "within": "",
           "words": "Ukraine"
         }
       },
       {
         "from": {
           "span": 3,
+          "within": "",
           "words": "itself"
         },
         "to": {
           "span": 3,
+          "within": "",
           "words": "Ukraine"
         }
       },
       {
         "from": {
           "span": 5,
-          "words": "it is serious"
+          "within": "",
+          "words": "it"
         },
         "to": {
-          "span": 5,
+          "span": 3,
+          "within": "",
           "words": "Ukraine"
         }
       },
       {
         "from": {
           "span": 7,
-          "words": "it takes"
+          "within": "",
+          "words": "it"
         },
         "to": {
-          "span": 7,
+          "span": 3,
+          "within": "",
           "words": "Ukraine"
         }
       },
       {
         "from": {
           "span": 10,
+          "within": "",
           "words": "The Government"
         },
         "to": {
           "span": 1,
+          "within": "",
           "words": "UK government"
         }
       }

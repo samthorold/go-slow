@@ -1,23 +1,14 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "f9ab059432a16fac6eb1475533df887a989aff81c5a45b7de16228076aa6abb9",
-  "recorded_at": "2026-10-30T20:52:54.007784Z",
+  "request_hash": "6d890fed69b6a7592b913f33e93f9a8c6e972dc0b97fceb19f797b94dad91883",
+  "recorded_at": "2026-11-02T15:23:11.86721Z",
   "usage": {
-    "input_tokens": 2484,
-    "output_tokens": 4374
+    "input_tokens": 2682,
+    "output_tokens": 3471
   },
   "output": {
     "names": [
-      {
-        "at": {
-          "span": 1,
-          "words": "Prime Minister"
-        },
-        "kind": "person",
-        "name": "Prime Minister",
-        "office": "Prime Minister of the United Kingdom"
-      },
       {
         "at": {
           "span": 1,
@@ -26,6 +17,15 @@
         "kind": "person",
         "name": "Volodymyr Zelenskyy",
         "office": "President of Ukraine"
+      },
+      {
+        "at": {
+          "span": 1,
+          "words": "The Prime Minister"
+        },
+        "kind": "person",
+        "name": "Prime Minister",
+        "office": "Prime Minister of the United Kingdom"
       },
       {
         "at": {
@@ -48,7 +48,7 @@
       {
         "at": {
           "span": 2,
-          "words": "Russia"
+          "words": "Russia’s"
         },
         "kind": "place",
         "name": "Russia",
@@ -66,16 +66,7 @@
       {
         "at": {
           "span": 4,
-          "words": "Ukraine"
-        },
-        "kind": "place",
-        "name": "Ukraine",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 4,
-          "words": "Prime Minister"
+          "words": "the Prime Minister"
         },
         "kind": "person",
         "name": "Prime Minister",
@@ -84,7 +75,25 @@
       {
         "at": {
           "span": 4,
-          "words": "UK"
+          "words": "Russia’s"
+        },
+        "kind": "place",
+        "name": "Russia",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "Ukraine’s"
+        },
+        "kind": "place",
+        "name": "Ukraine",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "the UK’s"
         },
         "kind": "place",
         "name": "United Kingdom",
@@ -93,7 +102,7 @@
       {
         "at": {
           "span": 5,
-          "words": "UK"
+          "words": "The UK"
         },
         "kind": "place",
         "name": "United Kingdom",
@@ -102,7 +111,7 @@
       {
         "at": {
           "span": 5,
-          "words": "Prime Minister"
+          "words": "the Prime Minister"
         },
         "kind": "person",
         "name": "Prime Minister",
@@ -110,35 +119,8 @@
       },
       {
         "at": {
-          "span": 5,
-          "words": "Ukraine"
-        },
-        "kind": "place",
-        "name": "Ukraine",
-        "office": ""
-      },
-      {
-        "at": {
           "span": 6,
-          "words": "UK"
-        },
-        "kind": "place",
-        "name": "United Kingdom",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 6,
-          "words": "Ukraine"
-        },
-        "kind": "place",
-        "name": "Ukraine",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 7,
-          "words": "UK"
+          "words": "the UK"
         },
         "kind": "place",
         "name": "United Kingdom",
@@ -147,7 +129,16 @@
       {
         "at": {
           "span": 7,
-          "words": "Prime Minister"
+          "words": "The UK"
+        },
+        "kind": "place",
+        "name": "United Kingdom",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 7,
+          "words": "the Prime Minister"
         },
         "kind": "person",
         "name": "Prime Minister",
@@ -156,27 +147,6 @@
     ],
     "refers_to": [],
     "rejected": [],
-    "speakers": [
-      {
-        "span": {
-          "span": 5,
-          "words": ""
-        },
-        "speaker": {
-          "span": 5,
-          "words": "the Prime Minister"
-        }
-      },
-      {
-        "span": {
-          "span": 7,
-          "words": ""
-        },
-        "speaker": {
-          "span": 7,
-          "words": "the Prime Minister"
-        }
-      }
-    ]
+    "speakers": []
   }
 }

@@ -232,6 +232,71 @@ func TestASpanNotInTheCutIsRefused(t *testing.T) {
 // goodFactReading is an answer in the earlier reading act's schema.
 const goodFactReading = `{"facts": [], "claims": [], "mentions": []}`
 
+// talks is an Item whose second Span holds "they" twice, cut into S1
+// "Ministers met council leaders on Monday." and S2 "The leaders said they
+// would act if they could."
+var talks = editor.Item{
+	SourceID: "govuk-number-10", EntryID: "talks", Title: "Talks with council leaders",
+	Content:   "<p>Ministers met council leaders on Monday.</p><p>The leaders said they would act if they could.</p>",
+	Published: time.Date(2026, time.October, 15, 9, 0, 0, 0, time.UTC),
+}
+
+func TestARefersToKeepsOnlyItsStretchWhereTheWordsAroundItLocateIt(t *testing.T) {
+	output := `{"names": [], "refers_to": [{"from": {"span": 2, "within": "they could", "words": "they"}, "to": {"span": 1, "within": "", "words": "council leaders"}}], "rejected": [], "speakers": []}`
+
+	r, err := editor.Read(t.Context(), &fakeModel{output: output}, "", toRead(talks))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(r.RefersTo) != 1 {
+		t.Fatalf("refers to = %+v", r.RefersTo)
+	}
+	from := r.RefersTo[0].From.Span
+	if got := cut.Words(talks.Content, from); got != "they" {
+		t.Errorf("the stretch kept is %q, want only the referring expression", got)
+	}
+	if second := strings.LastIndex(talks.Content, "they"); from.Start != second {
+		t.Errorf("the stretch kept starts at %d, want the second \"they\", at %d", from.Start, second)
+	}
+	if got := spanWords(talks, r.RefersTo[0].To); got != "council leaders" {
+		t.Errorf("with no locating words, the stretch is %q", got)
+	}
+}
+
+func TestLocatingWordsThatDoNotHoldTheStretchOrAreNotInTheSpanAreRefusedNamingBoth(t *testing.T) {
+	for name, output := range map[string]string{
+		"not holding the stretch": `{"names": [], "refers_to": [{"from": {"span": 2, "within": "would act", "words": "they"}, "to": {"span": 1, "within": "", "words": "council leaders"}}], "rejected": [], "speakers": []}`,
+		"not in the Span":         `{"names": [], "refers_to": [{"from": {"span": 2, "within": "they met", "words": "they"}, "to": {"span": 1, "within": "", "words": "council leaders"}}], "rejected": [], "speakers": []}`,
+		"on the to side":          `{"names": [], "refers_to": [{"from": {"span": 2, "within": "they could", "words": "they"}, "to": {"span": 1, "within": "they met", "words": "council leaders"}}], "rejected": [], "speakers": []}`,
+	} {
+		t.Run(name, func(t *testing.T) {
+			_, err := editor.Read(t.Context(), &fakeModel{output: output}, "", toRead(talks))
+
+			if !errors.Is(err, editor.ErrFailedChecks) {
+				t.Fatalf("err = %v, want ErrFailedChecks", err)
+			}
+			var locating struct {
+				RefersTo []struct {
+					From, To struct{ Within, Words string }
+				} `json:"refers_to"`
+			}
+			if err := json.Unmarshal([]byte(output), &locating); err != nil {
+				t.Fatal(err)
+			}
+			bad := locating.RefersTo[0].From
+			if name == "on the to side" {
+				bad = locating.RefersTo[0].To
+			}
+			for _, want := range []string{`"` + bad.Within + `"`, `"` + bad.Words + `"`} {
+				if !strings.Contains(err.Error(), want) {
+					t.Errorf("the refusal does not name %s: %v", want, err)
+				}
+			}
+		})
+	}
+}
+
 func TestAReferenceToItselfIsNoReference(t *testing.T) {
 	output := `{"names": [], "refers_to": [{"from": {"span": 3, "words": "Derby"}, "to": {"span": 3, "words": "Derby"}}], "rejected": [], "speakers": []}`
 

@@ -1,23 +1,14 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "6c49881ec186d68660dd849b7160c65a24f710a3d042c7222f189d23abee2fb6",
-  "recorded_at": "2026-10-30T20:55:12.52241Z",
+  "request_hash": "3253d6ca26c6b5ff9ef17a92e02d50a622d1c641cd8a08201aa97d3f4f92c830",
+  "recorded_at": "2026-11-02T15:29:23.466735Z",
   "usage": {
-    "input_tokens": 12337,
-    "output_tokens": 13546
+    "input_tokens": 12535,
+    "output_tokens": 8684
   },
   "output": {
     "names": [
-      {
-        "at": {
-          "span": 3,
-          "words": "Scotland"
-        },
-        "kind": "place",
-        "name": "Scotland",
-        "office": ""
-      },
       {
         "at": {
           "span": 3,
@@ -25,6 +16,15 @@
         },
         "kind": "place",
         "name": "Motherwell",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 3,
+          "words": "Scotland"
+        },
+        "kind": "place",
+        "name": "Scotland",
         "office": ""
       },
       {
@@ -50,17 +50,8 @@
           "span": 6,
           "words": "Number 10 North"
         },
-        "kind": "organisation",
+        "kind": "place",
         "name": "Number 10 North",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 9,
-          "words": "Number 10 South"
-        },
-        "kind": "organisation",
-        "name": "Number 10 South",
         "office": ""
       },
       {
@@ -84,10 +75,10 @@
       {
         "at": {
           "span": 17,
-          "words": "Hibs-Hearts"
+          "words": "SPL"
         },
-        "kind": "occasion",
-        "name": "Hibs-Hearts",
+        "kind": "organisation",
+        "name": "Scottish Professional Football League",
         "office": ""
       },
       {
@@ -104,8 +95,17 @@
           "span": 28,
           "words": "Westminster"
         },
-        "kind": "organisation",
+        "kind": "place",
         "name": "Westminster",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 28,
+          "words": "Greater Manchester"
+        },
+        "kind": "place",
+        "name": "Greater Manchester",
         "office": ""
       },
       {
@@ -115,33 +115,6 @@
         },
         "kind": "occasion",
         "name": "Hillsborough",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 32,
-          "words": "Prime Minister"
-        },
-        "kind": "person",
-        "name": "Prime Minister",
-        "office": "Prime Minister of the United Kingdom"
-      },
-      {
-        "at": {
-          "span": 36,
-          "words": "FARE-Scotland"
-        },
-        "kind": "organisation",
-        "name": "FARE-Scotland",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 36,
-          "words": "Easterhouse"
-        },
-        "kind": "place",
-        "name": "Easterhouse",
         "office": ""
       },
       {
@@ -156,10 +129,10 @@
       {
         "at": {
           "span": 36,
-          "words": "Greater Manchester Violence Reduction Unit"
+          "words": "FARE-Scotland"
         },
         "kind": "organisation",
-        "name": "Greater Manchester Violence Reduction Unit",
+        "name": "FARE-Scotland",
         "office": ""
       },
       {
@@ -173,12 +146,30 @@
       },
       {
         "at": {
+          "span": 36,
+          "words": "Easterhouse"
+        },
+        "kind": "place",
+        "name": "Easterhouse",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 36,
+          "words": "Greater Manchester Violence Reduction Unit"
+        },
+        "kind": "organisation",
+        "name": "Greater Manchester Violence Reduction Unit",
+        "office": ""
+      },
+      {
+        "at": {
           "span": 58,
           "words": "Darren McGarvey"
         },
         "kind": "person",
         "name": "Darren McGarvey",
-        "office": ""
+        "office": "Author"
       },
       {
         "at": {
@@ -227,12 +218,30 @@
       },
       {
         "at": {
+          "span": 88,
+          "words": "Lancashire coalfield"
+        },
+        "kind": "place",
+        "name": "Lancashire coalfield",
+        "office": ""
+      },
+      {
+        "at": {
           "span": 90,
           "words": "Bickershaw Colliery"
         },
         "kind": "place",
         "name": "Bickershaw Colliery",
         "office": ""
+      },
+      {
+        "at": {
+          "span": 97,
+          "words": "Prime Minister"
+        },
+        "kind": "person",
+        "name": "Prime Minister of the United Kingdom",
+        "office": "Prime Minister of the United Kingdom"
       },
       {
         "at": {
@@ -290,15 +299,6 @@
       },
       {
         "at": {
-          "span": 136,
-          "words": "Holyrood"
-        },
-        "kind": "organisation",
-        "name": "Holyrood",
-        "office": ""
-      },
-      {
-        "at": {
           "span": 141,
           "words": "Scottish Parliament"
         },
@@ -308,47 +308,29 @@
       },
       {
         "at": {
-          "span": 150,
-          "words": "Douglas"
+          "span": 158,
+          "words": "England"
         },
-        "kind": "person",
-        "name": "Douglas",
+        "kind": "place",
+        "name": "England",
         "office": ""
       },
       {
         "at": {
           "span": 172,
-          "words": "UK government"
+          "words": "the UK government"
         },
         "kind": "organisation",
-        "name": "UK government",
+        "name": "UK Government",
         "office": ""
       },
       {
         "at": {
           "span": 172,
-          "words": "Scottish government"
+          "words": "the Scottish government"
         },
         "kind": "organisation",
-        "name": "Scottish government",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 175,
-          "words": "Scottish government"
-        },
-        "kind": "organisation",
-        "name": "Scottish government",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 175,
-          "words": "Douglas"
-        },
-        "kind": "person",
-        "name": "Douglas",
+        "name": "Scottish Government",
         "office": ""
       },
       {
@@ -407,11 +389,20 @@
       },
       {
         "at": {
+          "span": 204,
+          "words": "Dundee"
+        },
+        "kind": "place",
+        "name": "Dundee",
+        "office": ""
+      },
+      {
+        "at": {
           "span": 205,
           "words": "the Highlands and the Islands"
         },
         "kind": "place",
-        "name": "the Highlands and the Islands",
+        "name": "Highlands and Islands",
         "office": ""
       },
       {
@@ -461,26 +452,8 @@
       },
       {
         "at": {
-          "span": 275,
-          "words": "Scottish government"
-        },
-        "kind": "organisation",
-        "name": "Scottish government",
-        "office": ""
-      },
-      {
-        "at": {
           "span": 283,
-          "words": "First Minister"
-        },
-        "kind": "person",
-        "name": "John Swinney",
-        "office": "First Minister of Scotland"
-      },
-      {
-        "at": {
-          "span": 286,
-          "words": "John"
+          "words": "the First Minister"
         },
         "kind": "person",
         "name": "John Swinney",
@@ -506,121 +479,86 @@
       },
       {
         "at": {
-          "span": 321,
-          "words": "John"
+          "span": 318,
+          "words": "Wales"
         },
-        "kind": "person",
-        "name": "John Swinney",
-        "office": "First Minister of Scotland"
+        "kind": "place",
+        "name": "Wales",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 318,
+          "words": "Northern Ireland"
+        },
+        "kind": "place",
+        "name": "Northern Ireland",
+        "office": ""
       }
     ],
     "refers_to": [
       {
         "from": {
           "span": 9,
+          "within": "",
           "words": "it"
         },
         "to": {
           "span": 6,
+          "within": "",
           "words": "Number 10 North"
         }
       },
       {
         "from": {
-          "span": 13,
-          "words": "it"
-        },
-        "to": {
-          "span": 13,
-          "words": "Commonwealth Games"
-        }
-      },
-      {
-        "from": {
           "span": 14,
+          "within": "",
           "words": "them"
         },
         "to": {
           "span": 13,
+          "within": "",
           "words": "Glasgow"
         }
       },
       {
         "from": {
-          "span": 37,
-          "words": "they"
+          "span": 286,
+          "within": "",
+          "words": "John"
         },
         "to": {
-          "span": 36,
-          "words": "FARE-Scotland"
+          "span": 179,
+          "within": "",
+          "words": "John Swinney"
         }
       },
       {
         "from": {
-          "span": 58,
-          "words": "his"
+          "span": 321,
+          "within": "",
+          "words": "John"
         },
         "to": {
-          "span": 58,
-          "words": "Darren McGarvey"
+          "span": 179,
+          "within": "",
+          "words": "John Swinney"
         }
       },
       {
         "from": {
-          "span": 59,
-          "words": "it"
+          "span": 283,
+          "within": "",
+          "words": "the First Minister"
         },
         "to": {
-          "span": 58,
-          "words": "Poverty Safari"
-        }
-      },
-      {
-        "from": {
-          "span": 63,
-          "words": "it"
-        },
-        "to": {
-          "span": 63,
-          "words": "No10"
-        }
-      },
-      {
-        "from": {
-          "span": 72,
-          "words": "the local MP"
-        },
-        "to": {
-          "span": 72,
-          "words": "Pamela"
-        }
-      },
-      {
-        "from": {
-          "span": 101,
-          "words": "the capital of Scotland"
-        },
-        "to": {
-          "span": 103,
-          "words": "Edinburgh"
-        }
-      },
-      {
-        "from": {
-          "span": 150,
-          "words": "him"
-        },
-        "to": {
-          "span": 2,
-          "words": "Douglas"
+          "span": 179,
+          "within": "",
+          "words": "John Swinney"
         }
       }
     ],
-    "rejected": [
-      1,
-      19,
-      344
-    ],
+    "rejected": [],
     "speakers": []
   }
 }

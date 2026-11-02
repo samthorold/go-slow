@@ -207,6 +207,9 @@ func readingVerdicts(t *testing.T, root, path string) []error {
 		for _, ref := range references[name] {
 			referenceFollowed(p, read, ref)
 		}
+		for _, e := range expressions[name] {
+			expressionQuotedExactly(p, read, e)
+		}
 		if name == "pm-meeting-with-president-zelenskyy-of-ukraine-14-october-2026" {
 			// The readout names the Prime Minister only by office: the name
 			// carries the office, which Wikidata resolves by date.
@@ -335,6 +338,66 @@ func referenceFollowed(p properties, o readingOf, ref reference) {
 	}
 }
 
+// expression is a fixture's referring expression in Span n, whose words a
+// refers to quotes as exactly those, and, where it is clear, what it refers
+// to, a name or noun phrase in Span toN that the refers to quotes as exactly
+// those words (system design: The grain belongs to the judgement, not to the
+// Span). The cases are where the earlier reading act's recordings quoted more
+// than the expression ("it is serious", "it won't work").
+type expression struct {
+	n     int
+	words string
+	toN   int
+	to    string
+}
+
+// expressions are each fixture's named referring expressions, by fixture.
+var expressions = map[string][]expression{
+	"uk-government-response-to-agreement-between-us-and-russia-9-october": {
+		// "…the military and financial support it needs to defend itself."
+		{n: 3, words: "it", toN: 3, to: "Ukraine"},
+		// "Ukraine has repeatedly demonstrated it is serious about peace…"
+		{n: 5, words: "it", toN: 5, to: "Ukraine"},
+	},
+	"pm-speech-in-scotland-16-october-2026": {
+		// "If it’s not based on that, it won’t work.": "it" twice.
+		{n: 313, words: "it"},
+	},
+	"great-british-railways-takes-shape-as-hq-and-apprenticeship-scheme-confirmed": {
+		{n: 9, words: "the city", toN: 4, to: "Derby"},
+	},
+}
+
+// expressionQuotedExactly asserts each refers to from a stretch of Span n
+// holding the expression quotes exactly the expression, and, for a case with
+// a clear target, refers to exactly the target's words where it refers to
+// words of Span toN holding them. It judges how a case is cited, not whether
+// it is: that the Item's references are followed is referenceFollowed's.
+func expressionQuotedExactly(p properties, o readingOf, e expression) {
+	from := p.property("a referring expression is quoted as only its words")
+	to := p.property("what an expression refers to is quoted as only its name or noun phrase")
+	for _, r := range o.r.RefersTo {
+		if !o.within(r.From, e.n) {
+			continue
+		}
+		if _, ok := cut.Within(o.it.Content, r.From.Span, e.words); !ok {
+			continue
+		}
+		if w := cut.Words(o.it.Content, r.From.Span); w != e.words {
+			from("S%d quotes %q for %q", e.n, w, e.words)
+		}
+		if e.to == "" || !o.within(r.To, e.toN) {
+			continue
+		}
+		if _, ok := cut.Within(o.it.Content, r.To.Span, e.to); !ok {
+			continue
+		}
+		if w := cut.Words(o.it.Content, r.To.Span); w != e.to {
+			to("%q in S%d refers to %q in S%d, not only %q", e.words, e.n, w, e.toN, e.to)
+		}
+	}
+}
+
 // casesPresent fails unless the fixture's Spans carry each case its
 // properties rest on, so a changed fixture or cutter can't leave them
 // testing nothing.
@@ -351,6 +414,50 @@ func casesPresent(t *testing.T, name string, spans []string) {
 			t.Fatalf("%s's S%d no longer has %q", name, ref.n, ref.words)
 		}
 	}
+	for _, e := range expressions[name] {
+		if e.n > len(spans) || !hasWords(spans[e.n-1], e.words) {
+			t.Fatalf("%s's S%d no longer has %q", name, e.n, e.words)
+		}
+		if e.to != "" && (e.toN > len(spans) || !hasWords(spans[e.toN-1], e.to)) {
+			t.Fatalf("%s's S%d no longer has %q", name, e.toN, e.to)
+		}
+	}
+}
+
+func TestAnExpressionQuotedWithWordsAroundItFailsItsProperty(t *testing.T) {
+	it, _ := fixture(t, "testdata/govuk/uk-government-response-to-agreement-between-us-and-russia-9-october.json")
+	tr := fixtureToRead(it)
+	at := func(n int, words string) editor.Address {
+		s, ok := cut.Within(it.Content, tr.Cut.Spans[n-1], words)
+		if !ok {
+			t.Fatalf("S%d has no %q", n, words)
+		}
+		return editor.Address{SourceID: it.SourceID, EntryID: it.EntryID, Span: s}
+	}
+	e := expression{n: 5, words: "it", toN: 5, to: "Ukraine"}
+	for _, c := range []struct {
+		from, to string
+		fails    string
+	}{
+		{"it", "Ukraine", ""},
+		{"it is serious", "Ukraine", "a referring expression is quoted as only its words"},
+		{"it", "Ukraine has repeatedly", "what an expression refers to is quoted as only its name or noun phrase"},
+	} {
+		p := properties{}
+		r := editor.Reading{RefersTo: []editor.RefersTo{{From: at(5, c.from), To: at(5, c.to)}}}
+		expressionQuotedExactly(p, readingOf{it: it, r: r, spans: tr.Cut.Spans}, e)
+		for name, failed := range p {
+			if want := name == c.fails; want != (len(failed) > 0) {
+				t.Errorf("%q to %q: %q failed = %v", c.from, c.to, name, failed)
+			}
+		}
+	}
+}
+
+// hasWords is whether the Span's words hold words as whole words.
+func hasWords(span, words string) bool {
+	_, ok := cut.Within(span, cut.Span{Start: 0, End: len(span)}, words)
+	return ok
 }
 
 func TestABareAttributionIsAFewWordsEndingInSaid(t *testing.T) {

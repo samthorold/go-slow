@@ -1,11 +1,11 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "d61630b8da56ec7e628f87a7f61713559933fe9ca0584a70359768b64455af9f",
-  "recorded_at": "2026-10-30T21:14:45.671097Z",
+  "request_hash": "96ffd3373459b05d11fec7830b79b07e824a7120d72da227b085701ebd5a95b9",
+  "recorded_at": "2026-11-02T15:18:50.452744Z",
   "usage": {
-    "input_tokens": 2577,
-    "output_tokens": 3994
+    "input_tokens": 2775,
+    "output_tokens": 5950
   },
   "output": {
     "names": [
@@ -16,7 +16,7 @@
         },
         "kind": "person",
         "name": "William James Baxter",
-        "office": "His Majesty's Lord-Lieutenant of County Tyrone"
+        "office": "Lord-Lieutenant of County Tyrone"
       },
       {
         "at": {
@@ -24,8 +24,17 @@
           "words": "Sir Robert William Lowry Scott"
         },
         "kind": "person",
-        "name": "Sir Robert William Lowry Scott",
-        "office": "Lord-Lieutenant of County Tyrone"
+        "name": "Robert William Lowry Scott",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 1,
+          "words": "The King"
+        },
+        "kind": "person",
+        "name": "The King",
+        "office": "King"
       },
       {
         "at": {
@@ -48,20 +57,20 @@
       {
         "at": {
           "span": 3,
-          "words": "Mr Baxter"
-        },
-        "kind": "person",
-        "name": "William James Baxter",
-        "office": "Superintendent, RUC/PSNI"
-      },
-      {
-        "at": {
-          "span": 3,
           "words": "Omagh"
         },
         "kind": "place",
         "name": "Omagh",
         "office": ""
+      },
+      {
+        "at": {
+          "span": 3,
+          "words": "Mr Baxter"
+        },
+        "kind": "person",
+        "name": "William James Baxter",
+        "office": "Lord-Lieutenant of County Tyrone"
       },
       {
         "at": {
@@ -84,10 +93,10 @@
       {
         "at": {
           "span": 5,
-          "words": "Newtownstewart Presbyterian Church"
+          "words": "Kirk Session, Newtownstewart Presbyterian Church"
         },
         "kind": "organisation",
-        "name": "Newtownstewart Presbyterian Church",
+        "name": "Kirk Session, Newtownstewart Presbyterian Church",
         "office": ""
       },
       {
@@ -97,7 +106,7 @@
         },
         "kind": "person",
         "name": "William James Baxter",
-        "office": "Sheriff for County Tyrone"
+        "office": "Lord-Lieutenant of County Tyrone"
       },
       {
         "at": {
@@ -111,19 +120,19 @@
       {
         "at": {
           "span": 6,
-          "words": "Newtownstewart"
+          "words": "Royal British Legion"
         },
-        "kind": "place",
-        "name": "Newtownstewart",
+        "kind": "organisation",
+        "name": "Royal British Legion",
         "office": ""
       },
       {
         "at": {
           "span": 6,
-          "words": "Royal British Legion"
+          "words": "Newtownstewart"
         },
-        "kind": "organisation",
-        "name": "Royal British Legion",
+        "kind": "place",
+        "name": "Newtownstewart",
         "office": ""
       },
       {
@@ -133,7 +142,7 @@
         },
         "kind": "person",
         "name": "William James Baxter",
-        "office": "Deputy Lieutenant of County Tyrone"
+        "office": "Lord-Lieutenant of County Tyrone"
       },
       {
         "at": {
@@ -167,70 +176,84 @@
       {
         "from": {
           "span": 1,
+          "within": "",
+          "words": "His Majesty"
+        },
+        "to": {
+          "span": 1,
+          "within": "",
+          "words": "The King"
+        }
+      },
+      {
+        "from": {
+          "span": 1,
+          "within": "",
           "words": "his"
         },
         "to": {
           "span": 1,
+          "within": "",
           "words": "Sir Robert William Lowry Scott"
         }
       },
       {
         "from": {
-          "span": 3,
-          "words": "his"
-        },
-        "to": {
-          "span": 1,
-          "words": "Mr William James Baxter"
-        }
-      },
-      {
-        "from": {
           "span": 4,
+          "within": "",
           "words": "He"
         },
         "to": {
           "span": 1,
+          "within": "",
           "words": "Mr William James Baxter"
         }
       },
       {
         "from": {
           "span": 5,
+          "within": "",
           "words": "He"
         },
         "to": {
           "span": 1,
+          "within": "",
           "words": "Mr William James Baxter"
         }
       },
       {
         "from": {
           "span": 7,
+          "within": "",
           "words": "He"
         },
         "to": {
           "span": 1,
+          "within": "",
           "words": "Mr William James Baxter"
         }
       },
       {
         "from": {
           "span": 9,
+          "within": "",
           "words": "He"
         },
         "to": {
           "span": 1,
+          "within": "",
           "words": "Mr William James Baxter"
         }
       },
       {
         "from": {
           "span": 9,
+          "within": "",
           "words": "his"
         },
         "to": {
           "span": 1,
+          "within": "",
           "words": "Mr William James Baxter"
         }
       }

@@ -37,8 +37,9 @@ type sampleFile struct {
 
 // attempts are the sample's attempts in the order they were made.
 func (s sampleFile) attempts() []recording {
-	if s.Output == nil || string(s.Output) == "null" {
-		// A sample of work that made no call keeps none.
+	if (s.Output == nil || string(s.Output) == "null") && s.Err == "" {
+		// A sample of work that made no call keeps none. (An attempt the
+		// model answered with an error, a refusal, keeps no output either.)
 		return s.EarlierAttempts
 	}
 	return append(slices.Clone(s.EarlierAttempts), s.recording)
@@ -269,9 +270,10 @@ func recordingSample(t *testing.T, path string, live editor.Model, model string,
 // up to liveTries calls livePause apart, and if none answers the recording
 // stops without keeping the sample, so a fixture is never judged on a
 // sample the provider lost. Only an answer the act's checks refuse counts
-// against passing them. (An answer the model gave and the adapter took as an
-// error, a refusal or a turn cut off, is not kept either: it too stops the
-// recording once it has been asked liveTries times.)
+// against passing them, and so does an answer the model gave and the adapter
+// took as an error (a refusal, an answer cut off): it came back, so it is the
+// act's behaviour on its request, a failed attempt in use, kept as an attempt
+// with its error and replayed as the same error.
 const liveTries = 3
 
 var livePause = 30 * time.Second
@@ -322,7 +324,7 @@ func (s *sampleModel) Complete(ctx context.Context, req editor.Request) (editor.
 	}
 	var rec recording
 	res, err := recorder{s.live, &rec, s.model}.Complete(ctx, req)
-	for try := 2; err != nil && try <= liveTries; try++ {
+	for try := 2; !cameBack(res, err) && try <= liveTries; try++ {
 		s.t.Logf("%s: the live call answered nothing (%v); calling again in %s, try %d of %d", s.path, err, s.pause, try, liveTries)
 		if werr := sleep(ctx, s.pause); werr != nil {
 			err = werr
@@ -330,14 +332,14 @@ func (s *sampleModel) Complete(ctx context.Context, req editor.Request) (editor.
 		}
 		res, err = recorder{s.live, &rec, s.model}.Complete(ctx, req)
 	}
-	if err != nil {
+	if !cameBack(res, err) {
 		s.lost = fmt.Errorf("%s: %w after %d tries, the sample not kept; record again to resume: %w", s.path, errLost, liveTries, err)
 		return res, s.lost
 	}
 	s.attempts = append(s.attempts, rec)
 	s.next++
 	keepSample(s.t, s.path, s.attempts)
-	return res, nil
+	return res, err
 }
 
 // more is whether another attempt can be made at the sample: in use, up to

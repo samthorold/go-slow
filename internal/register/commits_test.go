@@ -55,6 +55,44 @@ internal/sqlite/precedents.go
 	}
 }
 
+// A change to the Editor is a change to the app that runs (system design:
+// Shared reading rule for the three parts that should fall): tests, recorded
+// runs and the dev tools beside them are not.
+func TestOnlyWhatIsBuiltIntoTheAppChangesTheEditor(t *testing.T) {
+	for _, c := range []struct {
+		name   string
+		paths  []string
+		editor bool
+	}{
+		{"tests only", []string{"internal/editor/reading_test.go", "internal/claude/turn_test.go"}, false},
+		{"recordings only", []string{
+			"internal/editor/testdata/recorded/reading/derby/1.json",
+			"internal/editor/testdata/govuk/derby.json",
+			"internal/feedback/testdata/case.json",
+		}, false},
+		{"the yield dev tool only", []string{"internal/editor/yield/main.go"}, false},
+		// An act's instructions changed together with its re-recording.
+		{"an act and its recordings", []string{
+			"internal/editor/reading.go",
+			"internal/editor/reading_test.go",
+			"internal/editor/testdata/recorded/reading/derby/1.json",
+		}, true},
+		{"a test outside the Editor's paths", []string{"internal/sqlite/pieces_test.go"}, false},
+		{"testdata outside the Editor's paths", []string{"internal/wikidata/testdata/search.json"}, false},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			log := "commit 1111 2026-10-25T00:00:00Z\n\n" + strings.Join(c.paths, "\n") + "\n"
+			got, err := register.ParseGitLog(strings.NewReader(log))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(got) != 1 || got[0].Editor != c.editor {
+				t.Errorf("%v read as %+v, want Editor %v", c.paths, got, c.editor)
+			}
+		})
+	}
+}
+
 func TestALogNotInTheExpectedFormatIsRefused(t *testing.T) {
 	for _, log := range []string{
 		"internal/editor/briefing.go\n",

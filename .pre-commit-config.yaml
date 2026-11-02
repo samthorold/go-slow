@@ -1,4 +1,13 @@
-# The repo's checks. CI runs exactly these: pre-commit run --all-files.
+# The repo's checks. CI runs exactly these, on a PR's changed files
+# (--from-ref the base), or on every file when a PR changes this file or a
+# workflow, and on a push to main: see .github/workflows/ci.yml. A hook's
+# files: filter is what decides whether CI runs it, so it names everything the
+# hook depends on.
+#
+# go test is at the manual stage: it never runs on commit or push, only when
+# asked (pre-commit run --hook-stage manual go-test), and CI asks. Every other
+# hook runs at every stage, manual included, so CI's one manual-stage run is
+# all of them. Locally, run go test on the packages being changed.
 minimum_pre_commit_version: "4.5.0"
 
 # Vendored files stay byte-identical to upstream, so their hash still matches.
@@ -48,7 +57,9 @@ repos:
         name: golangci-lint fmt
         entry: go tool -modfile=tools/go.mod golangci-lint fmt
         language: system
-        types: [go]
+        # Its formatters are configured in .golangci.yml, and its version
+        # pinned in tools/go.mod.
+        files: \.go$|^\.golangci\.yml$|(^|/)go\.(mod|sum)$
         pass_filenames: false
       - id: golangci-lint
         name: golangci-lint run
@@ -60,5 +71,11 @@ repos:
         name: go test
         entry: go test -race ./...
         language: system
-        files: \.go$|\.html$|\.sql$|\.css$|\.js$|(^|/)go\.(mod|sum)$
+        # Manual: the full suite runs only in CI (see the top of this file).
+        stages: [manual]
+        # Everything the tests read: Go, the embedded templates, static files
+        # and migrations, every testdata/ (a PR that only re-records must
+        # replay its recordings), .env.example (the model pins the recordings
+        # answer), and the checks themselves.
+        files: \.go$|\.html$|\.sql$|\.css$|\.js$|(^|/)go\.(mod|sum)$|(^|/)testdata/|^\.env\.example$|^\.pre-commit-config\.yaml$|^\.github/workflows/
         pass_filenames: false

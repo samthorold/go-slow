@@ -1,36 +1,27 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "7fe1d9a1a90efbf8358b46ddab3d540643f6bd3fcc9081dc3ac5d6d70a6f0009",
-  "recorded_at": "2026-10-30T21:07:00.125314Z",
+  "request_hash": "7a05d8996c6aa54f75f63c9d25b10ba04132d5efc70d75c53afbd007d7f23fb5",
+  "recorded_at": "2026-11-02T15:47:36.132452Z",
   "usage": {
-    "input_tokens": 2497,
-    "output_tokens": 3604
+    "input_tokens": 2695,
+    "output_tokens": 5500
   },
   "output": {
     "names": [
       {
         "at": {
           "span": 1,
-          "words": "UK government"
-        },
-        "kind": "organisation",
-        "name": "UK Government",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 1,
           "words": "A UK government spokesperson"
         },
         "kind": "person",
-        "name": "A UK government spokesperson",
-        "office": "UK government spokesperson"
+        "name": "UK government spokesperson",
+        "office": "spokesperson of the UK Government"
       },
       {
         "at": {
           "span": 2,
-          "words": "UK’s"
+          "words": "UK"
         },
         "kind": "place",
         "name": "UK",
@@ -57,7 +48,7 @@
       {
         "at": {
           "span": 4,
-          "words": "Putin’s"
+          "words": "Putin"
         },
         "kind": "person",
         "name": "Putin",
@@ -129,6 +120,15 @@
       {
         "at": {
           "span": 11,
+          "words": "the US"
+        },
+        "kind": "place",
+        "name": "US",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 11,
           "words": "Ukraine"
         },
         "kind": "place",
@@ -140,20 +140,36 @@
       {
         "from": {
           "span": 3,
+          "within": "support it needs",
+          "words": "it"
+        },
+        "to": {
+          "span": 3,
+          "within": "",
+          "words": "Ukraine"
+        }
+      },
+      {
+        "from": {
+          "span": 3,
+          "within": "",
           "words": "itself"
         },
         "to": {
           "span": 3,
+          "within": "",
           "words": "Ukraine"
         }
       },
       {
         "from": {
           "span": 5,
+          "within": "",
           "words": "it"
         },
         "to": {
           "span": 5,
+          "within": "",
           "words": "Ukraine"
         }
       }

@@ -1,11 +1,11 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "6c49881ec186d68660dd849b7160c65a24f710a3d042c7222f189d23abee2fb6",
-  "recorded_at": "2026-10-30T20:57:38.252416Z",
+  "request_hash": "3253d6ca26c6b5ff9ef17a92e02d50a622d1c641cd8a08201aa97d3f4f92c830",
+  "recorded_at": "2026-11-02T15:31:39.256142Z",
   "usage": {
-    "input_tokens": 12337,
-    "output_tokens": 27227
+    "input_tokens": 12535,
+    "output_tokens": 26687
   },
   "output": {
     "names": [
@@ -16,15 +16,6 @@
         },
         "kind": "person",
         "name": "Douglas",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 2,
-          "words": "the college"
-        },
-        "kind": "organisation",
-        "name": "the college",
         "office": ""
       },
       {
@@ -51,7 +42,7 @@
           "words": "Manchester"
         },
         "kind": "place",
-        "name": "Manchester",
+        "name": "Greater Manchester",
         "office": ""
       },
       {
@@ -59,14 +50,23 @@
           "span": 6,
           "words": "Number 10 North"
         },
-        "kind": "organisation",
+        "kind": "place",
         "name": "Number 10 North",
         "office": ""
       },
       {
         "at": {
+          "span": 9,
+          "words": "Number 10 South"
+        },
+        "kind": "place",
+        "name": "Number 10 South",
+        "office": ""
+      },
+      {
+        "at": {
           "span": 13,
-          "words": "Commonwealth Games"
+          "words": "the Commonwealth Games"
         },
         "kind": "occasion",
         "name": "Commonwealth Games",
@@ -83,6 +83,15 @@
       },
       {
         "at": {
+          "span": 17,
+          "words": "Hibs-Hearts"
+        },
+        "kind": "occasion",
+        "name": "Hibs-Hearts",
+        "office": ""
+      },
+      {
+        "at": {
           "span": 21,
           "words": "Downing Street"
         },
@@ -95,7 +104,7 @@
           "span": 28,
           "words": "Westminster"
         },
-        "kind": "place",
+        "kind": "organisation",
         "name": "Westminster",
         "office": ""
       },
@@ -110,29 +119,29 @@
       },
       {
         "at": {
-          "span": 28,
-          "words": "North of England"
+          "span": 32,
+          "words": "Prime Minister"
         },
-        "kind": "place",
-        "name": "North of England",
+        "kind": "person",
+        "name": "Prime Minister",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 36,
+          "words": "FARE-Scotland"
+        },
+        "kind": "organisation",
+        "name": "FARE-Scotland",
         "office": ""
       },
       {
         "at": {
-          "span": 29,
-          "words": "Hillsborough"
-        },
-        "kind": "occasion",
-        "name": "Hillsborough",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 31,
-          "words": "Whitehall"
+          "span": 36,
+          "words": "Bannatyne House"
         },
         "kind": "place",
-        "name": "Whitehall",
+        "name": "Bannatyne House",
         "office": ""
       },
       {
@@ -151,24 +160,6 @@
         },
         "kind": "organisation",
         "name": "Scottish Violence Reduction Unit",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 36,
-          "words": "FARE-Scotland"
-        },
-        "kind": "organisation",
-        "name": "FARE-Scotland",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 36,
-          "words": "Bannatyne House"
-        },
-        "kind": "place",
-        "name": "Bannatyne House",
         "office": ""
       },
       {
@@ -218,15 +209,6 @@
       },
       {
         "at": {
-          "span": 88,
-          "words": "Lancashire coalfield"
-        },
-        "kind": "place",
-        "name": "Lancashire coalfield",
-        "office": ""
-      },
-      {
-        "at": {
           "span": 90,
           "words": "Bickershaw Colliery"
         },
@@ -236,38 +218,11 @@
       },
       {
         "at": {
-          "span": 97,
-          "words": "as Prime Minister"
+          "span": 92,
+          "words": "Whitehall"
         },
-        "kind": "person",
-        "name": "Prime Minister",
-        "office": "Prime Minister of the United Kingdom"
-      },
-      {
-        "at": {
-          "span": 101,
-          "words": "the capital of Scotland"
-        },
-        "kind": "place",
-        "name": "Edinburgh",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 103,
-          "words": "Edinburgh"
-        },
-        "kind": "place",
-        "name": "Edinburgh",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 104,
-          "words": "Dundee"
-        },
-        "kind": "place",
-        "name": "Dundee",
+        "kind": "organisation",
+        "name": "Whitehall",
         "office": ""
       },
       {
@@ -290,19 +245,10 @@
       },
       {
         "at": {
-          "span": 117,
-          "words": "Glasgow"
-        },
-        "kind": "place",
-        "name": "Glasgow",
-        "office": ""
-      },
-      {
-        "at": {
           "span": 136,
           "words": "Holyrood"
         },
-        "kind": "place",
+        "kind": "organisation",
         "name": "Holyrood",
         "office": ""
       },
@@ -326,20 +272,29 @@
       },
       {
         "at": {
-          "span": 172,
-          "words": "UK government"
+          "span": 175,
+          "words": "Scottish government"
         },
         "kind": "organisation",
-        "name": "UK government",
+        "name": "Scottish Government",
         "office": ""
       },
       {
         "at": {
-          "span": 172,
-          "words": "Scottish government"
+          "span": 175,
+          "words": "UK government"
         },
         "kind": "organisation",
-        "name": "Scottish government",
+        "name": "UK Government",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 175,
+          "words": "Douglas"
+        },
+        "kind": "person",
+        "name": "Douglas",
         "office": ""
       },
       {
@@ -349,6 +304,15 @@
         },
         "kind": "person",
         "name": "John Swinney",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 183,
+          "words": "Grangemouth"
+        },
+        "kind": "place",
+        "name": "Grangemouth",
         "office": ""
       },
       {
@@ -399,10 +363,19 @@
       {
         "at": {
           "span": 205,
-          "words": "Highlands and the Islands"
+          "words": "the Highlands and the Islands"
         },
         "kind": "place",
         "name": "Highlands and the Islands",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 206,
+          "words": "Edinburgh"
+        },
+        "kind": "place",
+        "name": "Edinburgh",
         "office": ""
       },
       {
@@ -421,7 +394,7 @@
         },
         "kind": "person",
         "name": "Alan Milburn",
-        "office": "leader of the review"
+        "office": ""
       },
       {
         "at": {
@@ -461,6 +434,15 @@
       },
       {
         "at": {
+          "span": 306,
+          "words": "England"
+        },
+        "kind": "place",
+        "name": "England",
+        "office": ""
+      },
+      {
+        "at": {
           "span": 318,
           "words": "National Economic Council"
         },
@@ -470,91 +452,80 @@
       },
       {
         "at": {
-          "span": 318,
-          "words": "First Ministers of Scotland and Wales"
+          "span": 326,
+          "words": "Douglas"
         },
         "kind": "person",
-        "name": "First Ministers of Scotland and Wales",
-        "office": "First Minister"
+        "name": "Douglas",
+        "office": ""
       }
     ],
     "refers_to": [
       {
         "from": {
           "span": 9,
+          "within": "",
           "words": "it"
         },
         "to": {
           "span": 6,
+          "within": "",
           "words": "Number 10 North"
         }
       },
       {
         "from": {
-          "span": 58,
-          "words": "his"
+          "span": 63,
+          "within": "",
+          "words": "it"
         },
         "to": {
-          "span": 58,
-          "words": "Darren McGarvey"
+          "span": 63,
+          "within": "",
+          "words": "No10"
         }
       },
       {
         "from": {
-          "span": 72,
-          "words": "the local MP"
+          "span": 66,
+          "within": "rewire it so",
+          "words": "it"
         },
         "to": {
-          "span": 72,
-          "words": "Pamela"
+          "span": 66,
+          "within": "",
+          "words": "the state"
         }
       },
       {
         "from": {
-          "span": 80,
-          "words": "this college"
+          "span": 139,
+          "within": "",
+          "words": "that centre"
         },
         "to": {
-          "span": 2,
-          "words": "the college"
+          "span": 137,
+          "within": "",
+          "words": "London"
         }
       },
       {
         "from": {
-          "span": 88,
-          "words": "a former mining community"
+          "span": 217,
+          "within": "",
+          "words": "they"
         },
         "to": {
-          "span": 88,
-          "words": "Leigh"
-        }
-      },
-      {
-        "from": {
-          "span": 101,
-          "words": "the capital of Scotland"
-        },
-        "to": {
-          "span": 103,
-          "words": "Edinburgh"
-        }
-      },
-      {
-        "from": {
-          "span": 247,
-          "words": "this wonderful nation"
-        },
-        "to": {
-          "span": 3,
-          "words": "Scotland"
+          "span": 217,
+          "within": "",
+          "words": "the people building these industries"
         }
       }
     ],
     "rejected": [
       1,
-      7,
-      8,
       19,
+      236,
       331,
       343,
       344

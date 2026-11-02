@@ -1,11 +1,11 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "2e9537070d1d11ea1022aa0e9137736f75d19ab8d414380bd1fd1a101d04c644",
-  "recorded_at": "2026-10-30T21:04:57.641678Z",
+  "request_hash": "bccfbb27fe2e74e5efcbc146ced4453177c04b3aea26b9db5c5a5c211f850999",
+  "recorded_at": "2026-11-02T15:39:24.437294Z",
   "usage": {
-    "input_tokens": 3351,
-    "output_tokens": 7239
+    "input_tokens": 3549,
+    "output_tokens": 9278
   },
   "output": {
     "names": [
@@ -42,13 +42,13 @@
           "words": "UK"
         },
         "kind": "place",
-        "name": "UK",
+        "name": "United Kingdom",
         "office": ""
       },
       {
         "at": {
           "span": 2,
-          "words": "the Prime Minister"
+          "words": "Prime Minister"
         },
         "kind": "person",
         "name": "Andy Burnham",
@@ -75,7 +75,7 @@
       {
         "at": {
           "span": 3,
-          "words": "the Chancellor"
+          "words": "Chancellor"
         },
         "kind": "person",
         "name": "John Healey",
@@ -101,6 +101,15 @@
       },
       {
         "at": {
+          "span": 3,
+          "words": "US’"
+        },
+        "kind": "place",
+        "name": "United States",
+        "office": ""
+      },
+      {
+        "at": {
           "span": 4,
           "words": "President Zelenskyy"
         },
@@ -114,7 +123,16 @@
           "words": "UK"
         },
         "kind": "place",
-        "name": "UK",
+        "name": "United Kingdom",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "Russia"
+        },
+        "kind": "place",
+        "name": "Russia",
         "office": ""
       },
       {
@@ -129,16 +147,7 @@
       {
         "at": {
           "span": 4,
-          "words": "Russia"
-        },
-        "kind": "place",
-        "name": "Russia",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 4,
-          "words": "United States"
+          "words": "United States’"
         },
         "kind": "place",
         "name": "United States",
@@ -150,34 +159,25 @@
           "words": "UK"
         },
         "kind": "place",
-        "name": "UK",
+        "name": "United Kingdom",
         "office": ""
       },
       {
         "at": {
           "span": 5,
-          "words": "Russia"
-        },
-        "kind": "place",
-        "name": "Russia",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 6,
-          "words": "UK"
-        },
-        "kind": "place",
-        "name": "UK",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 6,
           "words": "Ukraine"
         },
         "kind": "place",
         "name": "Ukraine",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 5,
+          "words": "Russia’s"
+        },
+        "kind": "place",
+        "name": "Russia",
         "office": ""
       },
       {
@@ -191,17 +191,26 @@
       },
       {
         "at": {
-          "span": 8,
-          "words": "UK"
+          "span": 6,
+          "words": "Ukraine"
         },
         "kind": "place",
-        "name": "UK",
+        "name": "Ukraine",
         "office": ""
       },
       {
         "at": {
           "span": 8,
-          "words": "Ukraine"
+          "words": "UK"
+        },
+        "kind": "place",
+        "name": "United Kingdom",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 8,
+          "words": "Ukraine’s"
         },
         "kind": "place",
         "name": "Ukraine",
@@ -218,8 +227,26 @@
       },
       {
         "at": {
-          "span": 13,
+          "span": 10,
+          "words": "UK"
+        },
+        "kind": "place",
+        "name": "United Kingdom",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 10,
           "words": "Russia"
+        },
+        "kind": "place",
+        "name": "Russia",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 13,
+          "words": "Russia’s"
         },
         "kind": "place",
         "name": "Russia",
@@ -255,19 +282,10 @@
       {
         "at": {
           "span": 15,
-          "words": "Bangkok"
+          "words": "UK’s"
         },
         "kind": "place",
-        "name": "Bangkok",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 15,
-          "words": "UK"
-        },
-        "kind": "place",
-        "name": "UK",
+        "name": "United Kingdom",
         "office": ""
       },
       {
@@ -291,10 +309,19 @@
       {
         "at": {
           "span": 17,
-          "words": "Russia"
+          "words": "the Chancellor"
+        },
+        "kind": "person",
+        "name": "John Healey",
+        "office": "Chancellor of the Exchequer"
+      },
+      {
+        "at": {
+          "span": 17,
+          "words": "Ukraine’s"
         },
         "kind": "place",
-        "name": "Russia",
+        "name": "Ukraine",
         "office": ""
       },
       {
@@ -309,10 +336,10 @@
       {
         "at": {
           "span": 17,
-          "words": "Ukraine"
+          "words": "Russia"
         },
         "kind": "place",
-        "name": "Ukraine",
+        "name": "Russia",
         "office": ""
       },
       {
@@ -326,11 +353,20 @@
       },
       {
         "at": {
-          "span": 20,
-          "words": "Putin"
+          "span": 19,
+          "words": "Middle East"
         },
-        "kind": "person",
-        "name": "Putin",
+        "kind": "place",
+        "name": "Middle East",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 19,
+          "words": "Europe"
+        },
+        "kind": "place",
+        "name": "Europe",
         "office": ""
       },
       {
@@ -344,11 +380,29 @@
       },
       {
         "at": {
+          "span": 20,
+          "words": "Putin"
+        },
+        "kind": "person",
+        "name": "Putin",
+        "office": ""
+      },
+      {
+        "at": {
           "span": 21,
           "words": "Putin"
         },
         "kind": "person",
         "name": "Putin",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 21,
+          "words": "UK"
+        },
+        "kind": "place",
+        "name": "United Kingdom",
         "office": ""
       }
     ],
@@ -356,61 +410,73 @@
       {
         "from": {
           "span": 2,
+          "within": "that he has",
           "words": "he"
         },
         "to": {
           "span": 9,
+          "within": "",
           "words": "Prime Minister Andy Burnham"
         }
       },
       {
         "from": {
           "span": 6,
+          "within": "",
           "words": "which"
         },
         "to": {
           "span": 6,
+          "within": "",
           "words": "British Lightweight Multirole Missiles (LMMs)"
         }
       },
       {
         "from": {
           "span": 7,
+          "within": "",
           "words": "The drones"
         },
         "to": {
           "span": 6,
+          "within": "",
           "words": "jet-powered drones"
         }
       },
       {
         "from": {
           "span": 7,
+          "within": "",
           "words": "them"
         },
         "to": {
           "span": 6,
+          "within": "",
+          "words": "jet-powered drones"
+        }
+      },
+      {
+        "from": {
+          "span": 7,
+          "within": "before they hit",
+          "words": "they"
+        },
+        "to": {
+          "span": 6,
+          "within": "",
           "words": "jet-powered drones"
         }
       },
       {
         "from": {
           "span": 8,
-          "words": "£45m package of missiles"
+          "within": "",
+          "words": "the £45m package"
         },
         "to": {
           "span": 5,
-          "words": "£45 million of surface-to-air missiles"
-        }
-      },
-      {
-        "from": {
-          "span": 15,
-          "words": "his"
-        },
-        "to": {
-          "span": 18,
-          "words": "Chancellor of the Exchequer John Healey"
+          "within": "",
+          "words": "£45 million of surface-to-air missiles deliveries"
         }
       }
     ],
@@ -426,7 +492,7 @@
         },
         "speaker": {
           "span": 9,
-          "words": "Prime Minister Andy Burnham"
+          "words": "Andy Burnham"
         }
       },
       {
@@ -436,7 +502,7 @@
         },
         "speaker": {
           "span": 9,
-          "words": "Prime Minister Andy Burnham"
+          "words": "Andy Burnham"
         }
       },
       {
@@ -446,7 +512,7 @@
         },
         "speaker": {
           "span": 9,
-          "words": "Prime Minister Andy Burnham"
+          "words": "Andy Burnham"
         }
       },
       {
@@ -456,7 +522,7 @@
         },
         "speaker": {
           "span": 9,
-          "words": "Prime Minister Andy Burnham"
+          "words": "Andy Burnham"
         }
       },
       {

@@ -1,11 +1,11 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "7fe1d9a1a90efbf8358b46ddab3d540643f6bd3fcc9081dc3ac5d6d70a6f0009",
-  "recorded_at": "2026-10-30T21:07:54.283228Z",
+  "request_hash": "7a05d8996c6aa54f75f63c9d25b10ba04132d5efc70d75c53afbd007d7f23fb5",
+  "recorded_at": "2026-11-02T15:48:27.128011Z",
   "usage": {
-    "input_tokens": 2497,
-    "output_tokens": 3568
+    "input_tokens": 2695,
+    "output_tokens": 2455
   },
   "output": {
     "names": [
@@ -24,7 +24,7 @@
           "words": "UK"
         },
         "kind": "place",
-        "name": "UK",
+        "name": "United Kingdom",
         "office": ""
       },
       {
@@ -42,7 +42,7 @@
           "words": "UK"
         },
         "kind": "place",
-        "name": "UK",
+        "name": "United Kingdom",
         "office": ""
       },
       {
@@ -96,13 +96,13 @@
           "words": "UK"
         },
         "kind": "place",
-        "name": "UK",
+        "name": "United Kingdom",
         "office": ""
       },
       {
         "at": {
           "span": 10,
-          "words": "Government"
+          "words": "The Government"
         },
         "kind": "organisation",
         "name": "UK Government",
@@ -114,16 +114,7 @@
           "words": "UK"
         },
         "kind": "place",
-        "name": "UK",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 11,
-          "words": "US"
-        },
-        "kind": "place",
-        "name": "US",
+        "name": "United Kingdom",
         "office": ""
       },
       {
@@ -139,31 +130,13 @@
     "refers_to": [
       {
         "from": {
-          "span": 3,
-          "words": "it"
-        },
-        "to": {
-          "span": 3,
-          "words": "Ukraine"
-        }
-      },
-      {
-        "from": {
-          "span": 3,
-          "words": "itself"
-        },
-        "to": {
-          "span": 3,
-          "words": "Ukraine"
-        }
-      },
-      {
-        "from": {
           "span": 5,
+          "within": "",
           "words": "it"
         },
         "to": {
           "span": 5,
+          "within": "",
           "words": "Ukraine"
         }
       }

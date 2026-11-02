@@ -1,18 +1,18 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "9f6653a628033d0716fdae463edfb365030d6251cbda7a5fe423eda19a075dcb",
-  "recorded_at": "2026-10-30T21:12:50.944369Z",
+  "request_hash": "9956d2145cd7871c0ded3690b0c5c42e0920ee434f1f2a15921c44ca30dd619f",
+  "recorded_at": "2026-11-02T15:40:58.233178Z",
   "usage": {
-    "input_tokens": 2822,
-    "output_tokens": 5089
+    "input_tokens": 3020,
+    "output_tokens": 4919
   },
   "output": {
     "names": [
       {
         "at": {
           "span": 1,
-          "words": "Prime Minister"
+          "words": "the Prime Minister"
         },
         "kind": "person",
         "name": "Andy Burnham",
@@ -38,12 +38,12 @@
       },
       {
         "at": {
-          "span": 13,
-          "words": "Prime Minister"
+          "span": 10,
+          "words": "The Scottish Secretary, Douglas Alexander"
         },
         "kind": "person",
-        "name": "Andy Burnham",
-        "office": "Prime Minister of the United Kingdom"
+        "name": "Douglas Alexander",
+        "office": "Scottish Secretary"
       },
       {
         "at": {
@@ -52,7 +52,7 @@
         },
         "kind": "person",
         "name": "First Minister of Scotland",
-        "office": "First Minister of Scotland"
+        "office": ""
       },
       {
         "at": {
@@ -61,16 +61,7 @@
         },
         "kind": "person",
         "name": "First Minister of Scotland",
-        "office": "First Minister of Scotland"
-      },
-      {
-        "at": {
-          "span": 10,
-          "words": "Douglas Alexander"
-        },
-        "kind": "person",
-        "name": "Douglas Alexander",
-        "office": "Scottish Secretary"
+        "office": ""
       },
       {
         "at": {
@@ -173,11 +164,11 @@
       },
       {
         "at": {
-          "span": 8,
-          "words": "Scottish Government"
+          "span": 7,
+          "words": "Scotland"
         },
-        "kind": "organisation",
-        "name": "Scottish Government",
+        "kind": "place",
+        "name": "Scotland",
         "office": ""
       },
       {
@@ -236,6 +227,15 @@
       },
       {
         "at": {
+          "span": 13,
+          "words": "Scottish Government"
+        },
+        "kind": "organisation",
+        "name": "Scottish Government",
+        "office": ""
+      },
+      {
+        "at": {
           "span": 14,
           "words": "Scotland"
         },
@@ -247,41 +247,61 @@
     "refers_to": [
       {
         "from": {
-          "span": 1,
-          "words": "him"
-        },
-        "to": {
-          "span": 2,
-          "words": "Andy Burnham"
-        }
-      },
-      {
-        "from": {
-          "span": 2,
-          "words": "his"
-        },
-        "to": {
-          "span": 2,
-          "words": "Andy Burnham"
-        }
-      },
-      {
-        "from": {
           "span": 4,
+          "within": "",
           "words": "he"
         },
         "to": {
           "span": 2,
+          "within": "",
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "from": {
+          "span": 3,
+          "within": "",
+          "words": "the Prime Minister"
+        },
+        "to": {
+          "span": 2,
+          "within": "",
+          "words": "Andy Burnham"
+        }
+      },
+      {
+        "from": {
+          "span": 6,
+          "within": "",
+          "words": "the First Minister"
+        },
+        "to": {
+          "span": 1,
+          "within": "",
+          "words": "Scotland’s First Minister"
+        }
+      },
+      {
+        "from": {
+          "span": 13,
+          "within": "",
+          "words": "The Prime Minister’s"
+        },
+        "to": {
+          "span": 2,
+          "within": "",
           "words": "Andy Burnham"
         }
       },
       {
         "from": {
           "span": 13,
+          "within": "",
           "words": "them"
         },
         "to": {
-          "span": 4,
+          "span": 2,
+          "within": "",
           "words": "Scottish Government"
         }
       }
@@ -338,7 +358,7 @@
         },
         "speaker": {
           "span": 10,
-          "words": "Douglas Alexander"
+          "words": "The Scottish Secretary, Douglas Alexander"
         }
       },
       {
@@ -348,7 +368,7 @@
         },
         "speaker": {
           "span": 10,
-          "words": "Douglas Alexander"
+          "words": "The Scottish Secretary, Douglas Alexander"
         }
       },
       {
@@ -358,7 +378,7 @@
         },
         "speaker": {
           "span": 10,
-          "words": "Douglas Alexander"
+          "words": "The Scottish Secretary, Douglas Alexander"
         }
       },
       {
@@ -368,7 +388,7 @@
         },
         "speaker": {
           "span": 10,
-          "words": "Douglas Alexander"
+          "words": "The Scottish Secretary, Douglas Alexander"
         }
       }
     ]

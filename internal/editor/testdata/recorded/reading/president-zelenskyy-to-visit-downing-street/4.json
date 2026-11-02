@@ -1,14 +1,50 @@
 {
   "act": "reading",
   "model": "claude-haiku-5-5",
-  "request_hash": "2e9537070d1d11ea1022aa0e9137736f75d19ab8d414380bd1fd1a101d04c644",
-  "recorded_at": "2026-10-30T21:04:32.000461Z",
+  "request_hash": "bccfbb27fe2e74e5efcbc146ced4453177c04b3aea26b9db5c5a5c211f850999",
+  "recorded_at": "2026-11-02T15:38:49.072322Z",
   "usage": {
-    "input_tokens": 3351,
-    "output_tokens": 8550
+    "input_tokens": 3549,
+    "output_tokens": 6073
   },
   "output": {
     "names": [
+      {
+        "at": {
+          "span": 1,
+          "words": "Prime Minister"
+        },
+        "kind": "person",
+        "name": "Andy Burnham",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 2,
+          "words": "the Prime Minister"
+        },
+        "kind": "person",
+        "name": "Andy Burnham",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 9,
+          "words": "Andy Burnham"
+        },
+        "kind": "person",
+        "name": "Andy Burnham",
+        "office": "Prime Minister of the United Kingdom"
+      },
+      {
+        "at": {
+          "span": 14,
+          "words": "Prime Minister"
+        },
+        "kind": "person",
+        "name": "Andy Burnham",
+        "office": "Prime Minister of the United Kingdom"
+      },
       {
         "at": {
           "span": 1,
@@ -38,183 +74,12 @@
       },
       {
         "at": {
-          "span": 1,
-          "words": "Ukraine"
-        },
-        "kind": "place",
-        "name": "Ukraine",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 2,
-          "words": "Ukraine"
-        },
-        "kind": "place",
-        "name": "Ukraine",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 3,
-          "words": "Ukraine"
-        },
-        "kind": "place",
-        "name": "Ukraine",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 5,
-          "words": "Ukraine"
-        },
-        "kind": "place",
-        "name": "Ukraine",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 6,
-          "words": "Ukraine"
-        },
-        "kind": "place",
-        "name": "Ukraine",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 8,
-          "words": "Ukraine’s"
-        },
-        "kind": "place",
-        "name": "Ukraine",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 17,
-          "words": "Ukraine’s"
-        },
-        "kind": "place",
-        "name": "Ukraine",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 1,
-          "words": "the UK’s"
-        },
-        "kind": "place",
-        "name": "United Kingdom",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 2,
-          "words": "UK"
-        },
-        "kind": "place",
-        "name": "United Kingdom",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 4,
-          "words": "the UK"
-        },
-        "kind": "place",
-        "name": "United Kingdom",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 5,
-          "words": "the UK"
-        },
-        "kind": "place",
-        "name": "United Kingdom",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 8,
-          "words": "The UK"
-        },
-        "kind": "place",
-        "name": "United Kingdom",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 10,
-          "words": "the UK"
-        },
-        "kind": "place",
-        "name": "United Kingdom",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 15,
-          "words": "the UK’s"
-        },
-        "kind": "place",
-        "name": "United Kingdom",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 21,
-          "words": "the UK"
-        },
-        "kind": "place",
-        "name": "United Kingdom",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 1,
-          "words": "Prime Minister"
-        },
-        "kind": "person",
-        "name": "Andy Burnham",
-        "office": "Prime Minister of the United Kingdom"
-      },
-      {
-        "at": {
-          "span": 2,
-          "words": "the Prime Minister"
-        },
-        "kind": "person",
-        "name": "Andy Burnham",
-        "office": "Prime Minister of the United Kingdom"
-      },
-      {
-        "at": {
-          "span": 9,
-          "words": "Prime Minister Andy Burnham"
-        },
-        "kind": "person",
-        "name": "Andy Burnham",
-        "office": "Prime Minister of the United Kingdom"
-      },
-      {
-        "at": {
-          "span": 14,
-          "words": "The Prime Minister"
-        },
-        "kind": "person",
-        "name": "Andy Burnham",
-        "office": "Prime Minister of the United Kingdom"
-      },
-      {
-        "at": {
           "span": 3,
           "words": "the Chancellor"
         },
         "kind": "person",
         "name": "John Healey",
-        "office": "Chancellor of the Exchequer"
+        "office": "Chancellor of the Exchequer of the United Kingdom"
       },
       {
         "at": {
@@ -223,7 +88,7 @@
         },
         "kind": "person",
         "name": "John Healey",
-        "office": "Chancellor of the Exchequer"
+        "office": "Chancellor of the Exchequer of the United Kingdom"
       },
       {
         "at": {
@@ -232,7 +97,7 @@
         },
         "kind": "person",
         "name": "John Healey",
-        "office": "Chancellor of the Exchequer"
+        "office": "Chancellor of the Exchequer of the United Kingdom"
       },
       {
         "at": {
@@ -241,97 +106,16 @@
         },
         "kind": "person",
         "name": "John Healey",
-        "office": "Chancellor of the Exchequer"
+        "office": "Chancellor of the Exchequer of the United Kingdom"
       },
       {
         "at": {
-          "span": 3,
-          "words": "IMF"
+          "span": 16,
+          "words": "Foreign Secretary"
         },
-        "kind": "organisation",
-        "name": "International Monetary Fund",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 15,
-          "words": "IMF"
-        },
-        "kind": "organisation",
-        "name": "International Monetary Fund",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 3,
-          "words": "Russia"
-        },
-        "kind": "place",
-        "name": "Russia",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 4,
-          "words": "Russia"
-        },
-        "kind": "place",
-        "name": "Russia",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 5,
-          "words": "Russia’s"
-        },
-        "kind": "place",
-        "name": "Russia",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 10,
-          "words": "Russia"
-        },
-        "kind": "place",
-        "name": "Russia",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 13,
-          "words": "Russia’s"
-        },
-        "kind": "place",
-        "name": "Russia",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 17,
-          "words": "Russia"
-        },
-        "kind": "place",
-        "name": "Russia",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 3,
-          "words": "the US’"
-        },
-        "kind": "place",
-        "name": "United States",
-        "office": ""
-      },
-      {
-        "at": {
-          "span": 4,
-          "words": "the United States’"
-        },
-        "kind": "place",
-        "name": "United States",
-        "office": ""
+        "kind": "person",
+        "name": "Foreign Secretary",
+        "office": "Foreign Secretary of the United Kingdom"
       },
       {
         "at": {
@@ -363,28 +147,37 @@
       {
         "at": {
           "span": 1,
-          "words": "Downing Street"
+          "words": "Ukraine"
         },
         "kind": "place",
-        "name": "Downing Street",
+        "name": "Ukraine",
         "office": ""
       },
       {
         "at": {
-          "span": 6,
-          "words": "Kyiv"
+          "span": 3,
+          "words": "Russia"
         },
         "kind": "place",
-        "name": "Kyiv",
+        "name": "Russia",
         "office": ""
       },
       {
         "at": {
-          "span": 17,
-          "words": "Kyiv"
+          "span": 3,
+          "words": "IMF"
         },
-        "kind": "place",
-        "name": "Kyiv",
+        "kind": "organisation",
+        "name": "International Monetary Fund",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 15,
+          "words": "IMF"
+        },
+        "kind": "organisation",
+        "name": "International Monetary Fund",
         "office": ""
       },
       {
@@ -407,83 +200,49 @@
       },
       {
         "at": {
-          "span": 16,
-          "words": "the Foreign Secretary"
+          "span": 17,
+          "words": "Kyiv"
         },
-        "kind": "person",
-        "name": "Foreign Secretary",
-        "office": "Foreign Secretary of the United Kingdom"
+        "kind": "place",
+        "name": "Kyiv",
+        "office": ""
       }
     ],
     "refers_to": [
       {
         "from": {
           "span": 2,
+          "within": "that he has asked",
           "words": "he"
         },
         "to": {
-          "span": 9,
-          "words": "Prime Minister Andy Burnham"
+          "span": 2,
+          "within": "",
+          "words": "the Prime Minister"
         }
       },
       {
         "from": {
           "span": 6,
+          "within": "",
           "words": "which"
         },
         "to": {
           "span": 6,
+          "within": "",
           "words": "British Lightweight Multirole Missiles (LMMs)"
         }
       },
       {
         "from": {
           "span": 7,
+          "within": "",
           "words": "The drones"
         },
         "to": {
           "span": 6,
+          "within": "",
           "words": "jet-powered drones"
-        }
-      },
-      {
-        "from": {
-          "span": 7,
-          "words": "them"
-        },
-        "to": {
-          "span": 6,
-          "words": "jet-powered drones"
-        }
-      },
-      {
-        "from": {
-          "span": 7,
-          "words": "they"
-        },
-        "to": {
-          "span": 6,
-          "words": "jet-powered drones"
-        }
-      },
-      {
-        "from": {
-          "span": 8,
-          "words": "the £45m package"
-        },
-        "to": {
-          "span": 5,
-          "words": "£45 million of surface-to-air missiles deliveries"
-        }
-      },
-      {
-        "from": {
-          "span": 15,
-          "words": "his"
-        },
-        "to": {
-          "span": 18,
-          "words": "Chancellor of the Exchequer John Healey"
         }
       }
     ],
@@ -499,7 +258,7 @@
         },
         "speaker": {
           "span": 9,
-          "words": "Prime Minister Andy Burnham"
+          "words": "Andy Burnham"
         }
       },
       {
@@ -509,7 +268,7 @@
         },
         "speaker": {
           "span": 9,
-          "words": "Prime Minister Andy Burnham"
+          "words": "Andy Burnham"
         }
       },
       {
@@ -519,7 +278,7 @@
         },
         "speaker": {
           "span": 9,
-          "words": "Prime Minister Andy Burnham"
+          "words": "Andy Burnham"
         }
       },
       {
@@ -529,7 +288,7 @@
         },
         "speaker": {
           "span": 9,
-          "words": "Prime Minister Andy Burnham"
+          "words": "Andy Burnham"
         }
       },
       {

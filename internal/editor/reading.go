@@ -14,11 +14,12 @@ import (
 
 // ReadingVersion is the version of reading's instructions and schema, and of
 // how code turns its answer into a reading (cut.Within addressing the words
-// quoted). A new version is a new Judge: it reads what arrives from then on,
-// and the readings made before stand, with theirs (system design: Every
-// judgement carries its judge, and a changed judge judges forward). Change it
-// with readingInstructions, readingSchema or what cut.Within addresses.
-const ReadingVersion = 2
+// quoted, and a refers to's stretch within the words locating it). A new
+// version is a new Judge: it reads what arrives from then on, and the
+// readings made before stand, with theirs (system design: Every judgement
+// carries its judge, and a changed judge judges forward). Change it with
+// readingInstructions, readingSchema or what cut.Within addresses.
+const ReadingVersion = 3
 
 // ToRead is an Item awaiting reading, with the Cut it is shown as. The
 // Item's Content is its text as kept, which the Cut's Spans address.
@@ -106,7 +107,7 @@ Cite a Span by its number. To cite a stretch within a Span (a word or a few), gi
 
 Judge, of this Item alone:
 - names: each stretch that names a person, organisation, place or named occasion (such as a summit or a Budget), every time one does, including by an office or title alone ("the Prime Minister", "the Chancellor"). Cite the stretch, and give the name in its fullest form in the Item and its kind. A person the Item names by name is named by that name; one it never names, by the office as the Item gives it. For a person the Item gives an office or position, give that office in full, with its country or body where the Item makes it plain ("Prime Minister of the United Kingdom", "Secretary of State for Defence"); otherwise leave the office empty. A place's name the Item also uses for its authority ("Greater Manchester") is a place. A pronoun or a description in other words ("he", "the city") is not a name: it refers to one.
-- refers_to: each stretch that names something only in other words than this Item names it elsewhere: a pronoun such as "he", "she", "it" or "they", or a description such as "the city", "the region", "the department" or "the scheme". Go through the Spans in order and give every such stretch, each time one occurs, citing it in the Span where its words actually are, with the stretch of this Item that names the same thing most fully. Words that recur ("the city" in three Spans) are cited in every Span they occur in. A Span with no such words gets none: never cite words a Span does not contain. Only where the Item makes plain what it refers to. Not for "I", "we", "my", "our" and the like: who says them is the speaker's.
+- refers_to: each stretch that names something only in other words than this Item names it elsewhere: a pronoun such as "he", "she", "it" or "they", or a description such as "the city", "the region", "the department" or "the scheme". Go through the Spans in order and give every such stretch, each time one occurs, citing it in the Span where its words actually are, with the stretch of this Item that names the same thing most fully. Each side quotes only its stretch: the from side only the referring expression ("they", not "they then found"; "the city", not "the city is"), the to side only the name or noun phrase it refers to ("Derby", not "Derby was"). Quoted words stand for their first occurrence in their Span, so where a stretch's words occur more than once in its Span, give within: a few words around the one you mean, copied from that Span, that occur there only once and hold the stretch; otherwise leave within empty. Words that recur ("the city" in three Spans) are cited in every Span they occur in. A Span with no such words gets none: never cite words a Span does not contain. Only where the Item makes plain what it refers to. Not for "I", "we", "my", "our" and the like: who says them is the speaker's.
 - rejected: the numbers of the Spans that are not useful for editorial work, saying nothing on their own of what happened or what anyone said or thinks: a bare attribution introducing a quotation ("Andy Burnham said:"), a heading ("Background"), contact details, a sign-off. A Span that is someone's words is not rejected for that.
 - speakers: each Span that is someone's words rather than the publisher's own (a quotation, what a spokesperson said, a statement given in someone's voice), cited whole, with the stretch naming whose words they are: by name where this Item gives one ("Andy Burnham"), otherwise as the Item describes them ("a UK government spokesperson"). Give every Span of a quotation its speaker, however many Spans it runs to. The stretch naming the speaker may be in a Span you reject, such as "Andy Burnham said:". Give no speaker for the publisher's own words, or where no Span of this Item names who speaks.
 
@@ -117,6 +118,17 @@ Keep to what the Item says. Do not add background knowledge.`
 var spanRef = object(map[string]any{
 	"span":  integer(),
 	"words": str(),
+})
+
+// locatedRef is a stretch as a refers to cites it: a Span of the Cut by its
+// number, words around the stretch that locate it within the Span, or none,
+// and the stretch's own words, found within those (system design: The grain
+// belongs to the judgement, not to the Span). Its fields come in name order,
+// so the model gives the words that locate the stretch before the stretch.
+var locatedRef = object(map[string]any{
+	"span":   integer(),
+	"within": str(),
+	"words":  str(),
 })
 
 // readingSchema is the reading act's output schema. Its fields are written
@@ -136,8 +148,8 @@ var readingSchema = map[string]any{
 			"office": str(),
 		})),
 		"refers_to": array(object(map[string]any{
-			"from": spanRef,
-			"to":   spanRef,
+			"from": locatedRef,
+			"to":   locatedRef,
 		})),
 		"rejected": array(integer()),
 		"speakers": array(object(map[string]any{
@@ -155,6 +167,14 @@ type cited struct {
 	Words string `json:"words"`
 }
 
+// located is a stretch as a refers to cites it: its words, found within the
+// words Within, which locate it in the Span; with none, in the Span itself.
+type located struct {
+	Span   int    `json:"span"`
+	Within string `json:"within"`
+	Words  string `json:"words"`
+}
+
 // readingOutput is the reading act's output as the model gives it. An answer
 // in the earlier reading act's schema (facts, claims, mentions) does not
 // match it.
@@ -166,8 +186,8 @@ type readingOutput struct {
 		Office string `json:"office"`
 	} `json:"names"`
 	RefersTo *[]struct {
-		From cited `json:"from"`
-		To   cited `json:"to"`
+		From located `json:"from"`
+		To   located `json:"to"`
 	} `json:"refers_to"`
 	Rejected *[]int `json:"rejected"`
 	Speakers *[]struct {
@@ -259,12 +279,29 @@ func checkReading(tr ToRead, req Request, asked string, res Response) (Reading, 
 			r.Names = append(r.Names, named)
 		}
 	}
+	// locate is the Address of a stretch a refers to cites: found within the
+	// words locating it, themselves found in the Span, so a stretch whose
+	// words recur in the Span is reached where they occur again.
+	locate := func(l located) (Address, error) {
+		if l.Within == "" {
+			return address(cited{Span: l.Span, Words: l.Words})
+		}
+		around, err := address(cited{Span: l.Span, Words: l.Within})
+		if err != nil {
+			return Address{}, fmt.Errorf("%w, so they do not locate the words %q", err, l.Words)
+		}
+		s, ok := cut.Within(it.Content, around.Span, l.Words)
+		if !ok {
+			return Address{}, fmt.Errorf("the words %q are not in the words locating them, %q, in S%d", l.Words, l.Within, l.Span)
+		}
+		return Address{SourceID: it.SourceID, EntryID: it.EntryID, Span: s}, nil
+	}
 	for _, ref := range *out.RefersTo {
-		from, err := address(ref.From)
+		from, err := locate(ref.From)
 		if err != nil {
 			return refuse("a refers to: %v", err)
 		}
-		to, err := address(ref.To)
+		to, err := locate(ref.To)
 		if err != nil {
 			return refuse("a refers to: %v", err)
 		}

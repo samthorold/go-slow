@@ -29,7 +29,8 @@ import (
 //
 // with GOSLOW_ANTHROPIC_API_KEY and BRIEFING_MODEL set in the environment.
 // Re-recording an earlier act leaves it valid; bringing it onto newer ones
-// is a refresh: copy the current readings and relatings together over its
+// is a refresh: once relating has been refreshed onto the current readings
+// and re-recorded, copy the current readings and relatings together over its
 // inputs, then re-record it.
 func TestRecordedBriefing(t *testing.T) {
 	t.Parallel()

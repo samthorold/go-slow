@@ -23,7 +23,11 @@ jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
+      # Full history, so a PR's run can diff against the merge base with its
+      # base branch.
       - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
 
       # The Go version comes from go.mod's go directive.
       - uses: actions/setup-go@v7.0.0
@@ -41,5 +45,26 @@ jobs:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
 
+      # A PR runs the hooks on the files it changes (pre-commit diffs
+      # origin/<base>...HEAD, from the merge base), so each hook's files:
+      # filter decides whether it runs, as on a local commit: a docs-only PR
+      # skips the Go hooks. A PR changing the hooks' config or a workflow, and
+      # a push to main (which runs only when pins change), run every hook on
+      # every file, since a change to the checks should check everything.
+      # One run at the manual stage covers every hook: go test is manual-only
+      # (so it never runs on a local commit), and the rest run at every stage.
       - name: pre-commit
-        run: uvx --from pre-commit==4.7.0 pre-commit run --all-files --show-diff-on-failure
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          scope=--all-files
+          if [ "$EVENT" = pull_request ]; then
+            changed=$(git diff --name-only "origin/$BASE_REF...HEAD")
+            if ! printf '%s\n' "$changed" | grep -qE '^(\.pre-commit-config\.yaml|\.github/workflows/)'; then
+              scope="--from-ref origin/$BASE_REF --to-ref HEAD"
+            fi
+          fi
+          echo "pre-commit runs with: $scope"
+          # shellcheck disable=SC2086 # $scope is one or three words.
+          uvx --from pre-commit==4.7.0 pre-commit run --hook-stage manual --show-diff-on-failure $scope

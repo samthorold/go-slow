@@ -2,6 +2,23 @@
 // end state, each derived from the Record by the reading rule the system
 // design declares for it, never written by hand (system design, End state).
 // Status lives here and nowhere else.
+//
+// It is pure code over a constructed Record, derived on every view of
+// /register, never stored. Windows count from the first Briefing; the three
+// parts that should fall count theirs from the first whole day after the
+// switch (Record.Switch), so both windows lie wholly after it. Feedback is
+// counted as it stands, undone pieces left out, each piece by what it was
+// given on (Given.On, from the storage adapter's givenFeedback). Everything
+// traces is refuted by any Briefing or Sunday read statement, or
+// Assessment, citing nothing or citing a Span outside its Item's text
+// (Record.Untraced, the storage adapter's untraced). Opening a Briefing or a
+// Sunday read is kept as a side record, once per day; commits come from the
+// commits admin command (ParseGitLog), each marked if it changes the Editor
+// (editorPaths). A new Judge is a change to the Editor too, which a model
+// changed through config shows where no commit does: Record.Judges lists
+// each live Judge as it began judging (a return to an earlier one included,
+// a chosen candidate's from its choice), and one that began after a falling
+// part's last reading makes it Due.
 package register
 
 import (

@@ -3,6 +3,10 @@
 // main is the composition root: it reads the config from the environment,
 // builds the adapters and passes them to the app's constructor. Nothing else
 // reads the environment.
+//
+// The same binary runs the one-off admin commands (admin.go: commits,
+// retry, backfill; rejudge.go: rejudge), with the app's own config, tested
+// end to end in admin_test.go, backfill_test.go and rejudge_test.go.
 package main
 
 import (

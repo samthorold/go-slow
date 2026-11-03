@@ -1,8 +1,3 @@
-// Package editor is the Editor: the editorial acts done on the Record. An act
-// that needs judgement calls a model through the port here; the act owns its
-// instructions and output schema, and checks the result before anything is
-// written back (system design: The Editor's daily work is a sequence of
-// editorial acts; The model is an adapter).
 package editor
 
 import (

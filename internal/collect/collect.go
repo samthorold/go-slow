@@ -1,6 +1,22 @@
 // Package collect is Collection: checking the Sources on a timetable and
 // bringing their new Items into the Record. It makes no editorial judgement;
-// fetching (and its politeness) and storage are behind the ports here.
+// fetching (and its politeness) and storage are behind the ports here
+// (Fetcher, Store).
+//
+// It holds the Sources list, with each one's short name (for citations),
+// terms (licence, attribution, what may be kept) and rate limit; reading
+// each feed format (Atom, the ONS release search, Parliament's written
+// statements); and the No Source goes quiet check. A Source whose feed
+// carries only a summary declares how each entry's full text is fetched
+// (Source.Text, text.go: GOV.UK's Content API document for the entry's
+// path, or the written statement itself), and a new entry is kept only once
+// its text is fetched, through the same Fetcher; one whose fetch fails is
+// left out, and the feed's validators are not saved, so the next run sees it
+// again. Backfill (backfill.go, its port TextStore) gives the text to uncut
+// Items collected with only a summary. After every run, Collection cuts the
+// Items with text and no Cut (Deps.Cut), then runs the Editor's reading and
+// look-ups (Deps.Read, Deps.LookUp).
+// Its timetable runs inside the app process, started by main.
 package collect
 
 import (

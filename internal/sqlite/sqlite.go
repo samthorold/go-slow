@@ -1,4 +1,3 @@
-// Package sqlite is the storage adapter: the Record kept in a SQLite file.
 package sqlite
 
 import (

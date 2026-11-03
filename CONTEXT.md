@@ -18,7 +18,7 @@ Checking the **Sources** on a timetable and bringing their new **Items** into th
 _Avoid_: Ingestion, scraping, crawling
 
 **Record**:
-Everything collected, with every **Judgement** made on it and every piece of **Feedback**.
+Everything collected, with every **Judgement** made on it, kept as events in the order they happened.
 _Avoid_: Archive, database
 
 **Item**:
@@ -59,7 +59,7 @@ _Avoid_: Tag, reference
 ### Editorial work
 
 **Judgement**:
-Something go-slow decided about **Spans**, kept with its **Judge** and never changed: a **Cut**, a *refers to*, a **Speaker**, a *follows*, a gathered **Story**, a **Briefing** statement, an **Assessment**.
+Something go-slow decided about **Spans**, kept with its **Judge** and never changed: a **Cut**, a *refers to*, a **Speaker**, a change to a **Story**, a **Briefing** statement, an **Assessment**.
 _Avoid_: Annotation, label, inference
 
 **Judge**:
@@ -70,71 +70,57 @@ _Avoid_: Annotator, model (a model is one part of a **Judge**)
 A **Judge** whose **Judgements** are kept beside the live ones and read by no view until the **Owner** chooses it; once chosen it is a live **Judge**.
 _Avoid_: Shadow judge, experiment
 
-**Follows**:
-A **Span** *follows* an earlier-published **Span** of another **Item** when it moves on what that one said: the speech that argues what the press release said it "will argue". Many-to-many: a **Span** can follow several, and be followed by several.
-_Avoid_: Updates, continues (a chain, which *follows* is not)
-
-**Same as**:
-Two **Spans** of different **Items** are the *same as* each other when they say the same thing. Said by two independent **Sources**, it is corroboration; said twice by one publisher, it is not.
-_Avoid_: Duplicate
-
-**Contradicts**:
-Two **Spans** of different **Items** *contradict* each other when both cannot hold.
-
 **Story**:
-A **Span**'s story: the **Spans** it moves on from and those that move it on, as editorial work gathers them at a time. It is a view from its **Span**, not a thing **Spans** belong to, so it has no identity of its own and every **Span** has one.
-_Avoid_: Running story, developing story, thread
+A group of **Spans** kept in the **Record**, with an identity of its own. Every **Span** belongs to at least one, and can belong to several; an **Item**'s **Spans** start in one together. **Stories** are fluid: editorial work changes which **Spans** they hold and how they stand to one another. A one-off is a **Story** of one.
+_Avoid_: Running story, developing story, thread, cluster
 
 **Timeline**:
 A **Story**'s **Spans** in the order they were published.
 
 **Assessment**:
 A **Judgement** the **Editor** reaches by reasoning over **Spans**, citing the **Spans** and earlier **Assessments** it rests on, as at a date. Unlike a **Span** it is go-slow's own words.
-_Avoid_: Analysis (the format of the **Sunday read**), finding
+_Avoid_: Analysis (the format of the **Long read**), finding
 
 ### Output
 
 **Briefing**:
-The daily output: what the **Editor** judges worth telling of the **Spans** read since the last one, in statements each citing the **Spans** it rests on.
+The daily output: what the **Editor** judges worth telling of the **Spans** of the **Items** cut since the last one, in statements each citing the **Spans** it rests on.
 _Avoid_: Newsletter, digest, summary
 
-**Sunday read**:
+**Long read**:
 The weekly output, alongside Sunday's **Briefing**: analysis that puts the week's **Stories** into wider context from the **Record** and **Reference sources**.
-_Avoid_: Weekly briefing, recap, long read
+_Avoid_: Sunday read, weekly briefing, recap
 
 ### People
 
 **Editor**:
-The agent that does the editorial work: making the **Judgements** on what the **Record** holds, and writing the **Briefing** and the **Sunday read**.
+The agent that does the editorial work: making the **Judgements** on what the **Record** holds, and writing the **Briefing** and the **Long read**.
 _Avoid_: Assistant, pipeline
 
 **Owner**:
-The person who chooses the **Sources** and **Topics** and gives the **Editor** **Feedback**. Anyone else who reads reads the same output.
-_Avoid_: User, reader (a reader only reads; the **Owner** also steers)
+The person who chooses the **Sources** and **Topics** and reads the output. Anyone else who reads reads the same output.
+_Avoid_: User, reader (a reader only reads; the **Owner** also chooses)
 
-**Feedback**:
-What the **Owner** tells the **Editor**, as at the time it is given. It is one of four kinds: *wrong* (a **Judgement** is mistaken), *unwanted* (a **Span** told shouldn't have been), *missed* (a **Span** should have been told) or *new to me* (something told showed the **Owner** what they hadn't seen). A piece the **Owner** takes back is *undone*: still kept, but no longer standing.
-_Avoid_: Correction (*new to me* corrects nothing), rating; deleted or retracted (for undone)
 
 ### Interest
 
 **Topic**:
-A standing area of interest the owner follows. It has no starting event, unlike a **Story**. It may be about an **Entity** (Reform UK) or be more abstract (standards in public life). It selects nothing the **Owner** is shown.
+A standing area of interest the owner follows, given by its terms. Unlike a **Story** it groups no **Spans**, though a large **Story** can look like one. It may be about an **Entity** (Reform UK) or be more abstract (standards in public life). It selects nothing the **Owner** is shown.
 _Avoid_: Interest, beat, subject; Depth (how closely a **Topic** is followed is no longer said)
 
 ## Flagged ambiguities
 
-- **"Story"** in newsroom usage means both a single published piece and the ongoing subject it belongs to (Reuters uses both senses in one sentence). Here it means only a **Span**'s story, across **Items**; a single piece is an **Item**.
+- **"Story"** in newsroom usage means both a single published piece and the ongoing subject it belongs to (Reuters uses both senses in one sentence). Here it means only a group of **Spans**, across **Items**; a single piece is an **Item**.
 
-- **"Briefing"** at *The Economist* is a long analytical section; for the IPTC it is a summary of many items. Here it is the short daily output; the long weekly analysis is the **Sunday read**.
+- **"Briefing"** at *The Economist* is a long analytical section; for the IPTC it is a summary of many items. Here it is the short daily output; the long weekly analysis is the **Long read**.
 
-- **"Fact"** and **"Claim"** are not used: a **Span** is what a publisher wrote, whoever its **Speaker**, and corroboration is *same as* across independent **Sources**.
+- **"Fact"** and **"Claim"** are not used: a **Span** is what a publisher wrote, whoever its **Speaker**, and whether two **Spans** say the same thing, contradict each other, or one moves the other on is noticed by the **Briefing**, not kept as a **Judgement** of its own.
 
 ## Example dialogue
 
-> **Dev:** The Holyrood speech came in this morning. Its line that the next stage of devolution should put more decisions with Scotland's regions: is that new?
-> **Owner:** No, it *follows* Tuesday's press release, which said the PM "will argue" exactly that. The speech is the **Span** that moves it on.
+> **Dev:** The Holyrood speech came in this morning. Its line that the next stage of devolution should put more decisions with Scotland's regions: which **Story** is it in?
+> **Owner:** It started in its own **Item**'s **Story**, and the **Briefing** that told it put it in the devolution **Story**, with Tuesday's press release that said the PM "will argue" exactly that.
 > **Dev:** And "Scotland is one of the most centralised nations in Europe" is in both.
-> **Owner:** That's *same as*, but it's one publisher saying it twice, so it isn't corroboration.
+> **Owner:** The **Briefing** sees that when it reads the **Story**: one publisher saying it twice, so it isn't corroboration.
 > **Dev:** And the GBR headquarters release says "this is fantastic news for the city". Whose words?
 > **Owner:** Its **Speaker** is the Mayor, and "the city" *refers to* Derby, so the **Span** mentions Derby. The **Briefing** tells it as the Mayor's view, never in its own voice.

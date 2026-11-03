@@ -3,6 +3,14 @@
 // judgement, not to the Span). A Cut is a Judgement, kept with its Judge (the
 // cutter and its version) and never changed; a Span is an address into the
 // Item's text as kept, not a thing with an identity of its own.
+//
+// The Cut is the first event of the event-based Record. Collection runs
+// Cutter.CutNew after every run, before reading (collect.Deps.Cut), so the
+// start's run cuts the Items already in the Record, once, and an Item with
+// no text yet is cut once it is given its text. Spans are byte offsets into
+// the text as kept (the publisher's HTML): Words reads the words at an
+// address, Within turns words quoted within a Span into their address, and
+// Stretch reads a stretch of a Span.
 package cut
 
 import (

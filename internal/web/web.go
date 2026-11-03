@@ -1,5 +1,3 @@
-// Package web is the web adapter: the hypermedia API, its handlers and
-// templates.
 package web
 
 import (

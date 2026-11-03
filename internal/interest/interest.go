@@ -1,7 +1,8 @@
 // Package interest is the Owner's Topics, and how a Span touches one, by
 // its terms, with no model call (system design: Every Item is read, and
 // Topics select nothing). Touching counts and selects nothing: the Owner
-// steers by the counts per Source.
+// steers by the counts per Source (SourceCounts), so taking up or removing a
+// Topic changes only the counts.
 package interest
 
 import (

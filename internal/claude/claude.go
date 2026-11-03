@@ -1,6 +1,14 @@
 // Package claude is the model adapter for Claude, through Anthropic's
 // Messages API. It answers the Editor's model port with structured output
 // against the act's own schema; nothing of Anthropic's types leaves it.
+//
+// It speaks the Messages API and the Message Batches API (Options.ActModels
+// sends each request of a batch to its act's model) through
+// anthropic-sdk-go, and answers the Conversation port with Turn (the beta
+// Messages API, conversation.go). Its prices (prices.go: PriceOf, dated
+// PricesAsOf, with PricesSource) stay inside it too, used only by a
+// re-judging run's estimate; read them again when a model changes or before
+// a run whose cap matters. A test fails if a model in .env.example has none.
 package claude
 
 import (

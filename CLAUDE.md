@@ -52,6 +52,8 @@ This is a map. A fact about the code lives in the code: each package's doc comme
 
 Recording calls the real model and costs money; the suite only replays. Re-record deliberately, when an act's instructions, schema, model or precedents change, and only that act. Each command needs `GOSLOW_ANTHROPIC_API_KEY` and the act's model variable, and `-timeout 90m` (the default 10m is too short for five samples of every fixture); commit the recordings. How: the Model calls Guide's detail files (`recording.md`, `samples.md`, `changing-an-act.md`); why: system design, *The Editor* (*A recording is one sample…*, *Each act is recorded over its own frozen inputs*); go-slow's paths, properties and checks: [`internal/editor/testdata/recorded/README.md`](internal/editor/testdata/recorded/README.md).
 
+**The Owner's standing say (2026-11-03), while the design is being redrawn (#294):** an agent re-records or refreshes any act without asking, the Sunday read included, up to $10 a recording run, and says what it spent. Speed of iteration matters more than the cost of a recording. Where a line below says "only on the Owner's say", this is that say, up to the cap.
+
 - **Reading:** `go test -count=1 -timeout 90m ./internal/editor -run TestRecordedReadings -record`, with `READING_MODEL`. Five calls per fixture, more where the checks refuse an attempt.
 - **Relating:** `go test -count=1 -timeout 90m ./internal/editor -run TestRecordedRelatings -record`, with `RELATING_MODEL`.
 - **The Briefing:** `go test -count=1 -timeout 90m ./internal/editor -run '^TestRecordedBriefing$' -record`, with `BRIEFING_MODEL` (on Claude Haiku 5.5, about a cent a sample: some 30k tokens in, 6–27k out). Iterate on its instructions on single samples first, and look at them, before recording.

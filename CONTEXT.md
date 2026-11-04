@@ -17,124 +17,138 @@ A store of background facts about the world, such as Wikidata, a poll archive or
 Checking the **Sources** on a timetable and bringing their new **Items** into the **Record**.
 _Avoid_: Ingestion, scraping, crawling
 
-**Record**:
-Everything collected, with every **Judgement** made on it and every piece of **Feedback**.
-_Avoid_: Archive, database
-
 **Item**:
 One piece of material as collection brought it in from a source: a report, a release, a poll, a comment piece. The IPTC's "news item".
 _Avoid_: Article, piece, story (for a single item)
 
 **Span**:
-A stretch of an **Item**'s text, as written, known by where it starts and ends: an address, not a thing with an identity of its own, so two **Judgements** about the same words are about the same **Span**. Spans nest, from the whole **Item** down to a word: "the city" is a **Span** inside "This is fantastic news for the city". A **Span** is never reworded or rewritten; what is said of it is said by **Judgements** on it.
+A stretch of text, known by where it starts and ends: an address, not a thing with an identity of its own, so two **Judgements** about the same words are about the same **Span**. Most are of an **Item**'s text, as written; the rest are **Editor's Spans**. Spans nest, from the whole **Item** down to a word: "the city" is a **Span** inside "This is fantastic news for the city". A **Span** is never reworded or rewritten; what is said of it is said by **Judgements** on it.
 _Avoid_: Statement, quote, sentence, chunk
 
+**Editor's Span**:
+A **Span** the **Editor** wrote, in a **Listing**, citing the **Spans** it rests on. Its **Speaker** is always the **Editor**. It may say more than what it cites can support, and does not reword it.
+_Avoid_: Assessment, statement, summary
+
+**Entity**:
+A thing in the world that can be referred to again: a person, organisation, place, or named occasion (the Budget, the 2024 general election), with an identity of its own, whatever any **Item** says of it. Some come from Wikidata, others are made by the **Editor**.
+_Avoid_: Event (something that happened in the world is said by a **Span**; an **Event** is something kept in the **Record**)
+
+### The Record
+
+**Record**:
+Every **Event**, in the order it happened.
+_Avoid_: Archive, database
+
+**Event**:
+Something that happened, kept in the **Record** and never changed: an **Item** collected, its **Cut**, or a **Judgement**.
+_Avoid_: Log entry, update
+
+**Command**:
+A step of the **Editor**'s work: it reads a **Projection** and outputs zero or more **Judgements**. The only thing that writes a **Judgement**.
+_Avoid_: Act, pass, job
+
+**Projection**:
+What the **Events** say about something as at a time, worked out by plain code that only reads: the **Spans** a **Story** holds, a **Command**'s input, a **Page**.
+_Avoid_: View, read model, state
+
+**Page**:
+A **Projection** the **Owner** opens. Opening one changes nothing.
+_Avoid_: View, screen
+
+### Judgements
+
+**Judgement**:
+An **Event** a **Command** outputs about **Spans** or **Stories**, kept with its **Judge**: a *refers to*, a **Speaker**, a **Rejected**, a name and the **Entity** it matches, a **Listing**, a **Name**.
+_Avoid_: Annotation, label, inference
+
+**Judge**:
+What made a **Judgement**: the **Command**, the version of its instructions, and the model. A new version of a **Command** is a new **Judge**.
+_Avoid_: Annotator, model (a model is one part of a **Judge**)
+
+**Candidate**:
+A **Judge** whose **Judgements** are kept beside the live ones and read by no **Projection** until the **Owner** chooses it; once chosen it is a live **Judge**.
+_Avoid_: Shadow judge, experiment
+
 **Cut**:
-A **Judgement** listing an **Item**'s **Spans** before anything else is judged of them: the **Spans** editorial work starts from. A **Judgement** may still be about a **Span** no **Cut** lists ("the city" inside one that does).
+The **Event** at which an **Item** enters editorial work, once: plain code lists its **Spans** before anything else is judged of them, and puts them in its **Item's Story**. It is not a **Judgement** and has no **Judge**. A **Judgement** may still be about a **Span** no **Cut** lists ("the city" inside one that does).
 _Avoid_: Segmentation, split
 
-**Rejected**:
-A **Span** judged not useful for editorial work ("Andy Burnham said:"). It stays in its **Item**; rejections are counted per **Source**.
-_Avoid_: Deleted
+**Hydration**:
+Judging what a **Span**'s **Spans** refer to, what it names, who speaks it and whether it is **Rejected**, from the whole of its **Item**. The hydrated reading of a **Span** ("fantastic news for Derby") is worked out by following *refers to*, never written.
 
 **Refers to**:
 A **Span** *refers to* another **Span** of the same **Item** when it names the same thing in other words: "the city" refers to "Derby", "he" to "Andy Burnham".
 _Avoid_: Resolves to, rewrite
 
-**Hydration**:
-Judging what a **Span**'s **Spans** refer to, from the whole of its **Item**. The hydrated reading of a **Span** ("fantastic news for Derby") is worked out by following *refers to*, never written.
-
 **Speaker**:
-Whose words a **Span** is: a **Span** of the same **Item** naming them ("Andy Burnham", "a government spokesperson"). A **Span** with no speaker judged is the publisher's own.
+Whose words a **Span** is: a **Span** of the same **Item** naming them ("Andy Burnham", "a government spokesperson"). A **Span** of an **Item** with no speaker judged is the publisher's own; an **Editor's Span** is the **Editor**'s.
 _Avoid_: Attribution, author, role
 
-**Entity**:
-A thing in the world that can be referred to again: a person, organisation, place, or named occasion (the Budget, the 2024 general election), with an identity of its own, whatever any **Item** says of it. Some come from Wikidata, others are made by the **Editor**.
-_Avoid_: Event (something that happened is said by a **Span**)
+**Rejected**:
+A **Span** judged not useful for editorial work ("Andy Burnham said:"). It stays in its **Item** and its **Item's Story**; rejections are counted per **Source**.
+_Avoid_: Deleted
 
 **Mention**:
 A **Span** *mentions* an **Entity** when a **Span** inside it names the **Entity**, by name or by office ("Burnham", "the Prime Minister"), or *refers to* one that does. A mention says only that the **Span** names the **Entity**, not what part the **Entity** plays in anything.
 _Avoid_: Tag, reference
 
-### Editorial work
-
-**Judgement**:
-Something go-slow decided about **Spans**, kept with its **Judge** and never changed: a **Cut**, a *refers to*, a **Speaker**, a *follows*, a gathered **Story**, a **Briefing** statement, an **Assessment**.
-_Avoid_: Annotation, label, inference
-
-**Judge**:
-What made a **Judgement**: the act, the version of its instructions, and the model. A new version of an act is a new **Judge**.
-_Avoid_: Annotator, model (a model is one part of a **Judge**)
-
-**Candidate**:
-A **Judge** whose **Judgements** are kept beside the live ones and read by no view until the **Owner** chooses it; once chosen it is a live **Judge**.
-_Avoid_: Shadow judge, experiment
-
-**Follows**:
-A **Span** *follows* an earlier-published **Span** of another **Item** when it moves on what that one said: the speech that argues what the press release said it "will argue". Many-to-many: a **Span** can follow several, and be followed by several.
-_Avoid_: Updates, continues (a chain, which *follows* is not)
-
-**Same as**:
-Two **Spans** of different **Items** are the *same as* each other when they say the same thing. Said by two independent **Sources**, it is corroboration; said twice by one publisher, it is not.
-_Avoid_: Duplicate
-
-**Contradicts**:
-Two **Spans** of different **Items** *contradict* each other when both cannot hold.
+### Stories
 
 **Story**:
-A **Span**'s story: the **Spans** it moves on from and those that move it on, as editorial work gathers them at a time. It is a view from its **Span**, not a thing **Spans** belong to, so it has no identity of its own and every **Span** has one.
-_Avoid_: Running story, developing story, thread
+A group of **Spans** kept in the **Record**: an **Item's Story** or an **Editorial Story**.
+_Avoid_: Running story, developing story, thread, cluster
+
+**Item's Story**:
+The **Spans** of one **Item**, from its **Cut**, unchanged after. Every **Span** of an **Item** is in exactly one.
+
+**Editorial Story**:
+A **Story** the **Editor** makes and keeps re-forming: it holds what its latest **Listing** lists. A **Span** can be in any number, or none.
+_Avoid_: Merge, Split (both are only **Listings**)
+
+**Listing**:
+A **Judgement** saying in full which **Spans** an **Editorial Story** holds. The latest counts; listing nothing ends the **Story**.
+_Avoid_: Membership, Join
+
+**Name**:
+A short subject for an **Editorial Story**, written for the **Owner** to recognise it by. No **Command** reads it.
+_Avoid_: Title, headline, summary
 
 **Timeline**:
 A **Story**'s **Spans** in the order they were published.
 
-**Assessment**:
-A **Judgement** the **Editor** reaches by reasoning over **Spans**, citing the **Spans** and earlier **Assessments** it rests on, as at a date. Unlike a **Span** it is go-slow's own words.
-_Avoid_: Analysis (the format of the **Sunday read**), finding
-
-### Output
-
-**Briefing**:
-The daily output: what the **Editor** judges worth telling of the **Spans** read since the last one, in statements each citing the **Spans** it rests on.
-_Avoid_: Newsletter, digest, summary
-
-**Sunday read**:
-The weekly output, alongside Sunday's **Briefing**: analysis that puts the week's **Stories** into wider context from the **Record** and **Reference sources**.
-_Avoid_: Weekly briefing, recap, long read
-
 ### People
 
 **Editor**:
-The agent that does the editorial work: making the **Judgements** on what the **Record** holds, and writing the **Briefing** and the **Sunday read**.
+What does the editorial work: the **Commands** that make the **Judgements**.
 _Avoid_: Assistant, pipeline
 
 **Owner**:
-The person who chooses the **Sources** and **Topics** and gives the **Editor** **Feedback**. Anyone else who reads reads the same output.
-_Avoid_: User, reader (a reader only reads; the **Owner** also steers)
-
-**Feedback**:
-What the **Owner** tells the **Editor**, as at the time it is given. It is one of four kinds: *wrong* (a **Judgement** is mistaken), *unwanted* (a **Span** told shouldn't have been), *missed* (a **Span** should have been told) or *new to me* (something told showed the **Owner** what they hadn't seen). A piece the **Owner** takes back is *undone*: still kept, but no longer standing.
-_Avoid_: Correction (*new to me* corrects nothing), rating; deleted or retracted (for undone)
+The person who chooses the **Sources** and **Topics** and reads the **Stories**. Anyone else who reads reads the same **Pages**.
+_Avoid_: User, reader (a reader only reads; the **Owner** also chooses)
 
 ### Interest
 
 **Topic**:
-A standing area of interest the owner follows. It has no starting event, unlike a **Story**. It may be about an **Entity** (Reform UK) or be more abstract (standards in public life). It selects nothing the **Owner** is shown.
+A standing area of interest the owner follows, given by its terms. Unlike a **Story** it groups no **Spans**, though a large **Story** can look like one. It may be about an **Entity** (Reform UK) or be more abstract (standards in public life). It selects nothing the **Owner** is shown.
 _Avoid_: Interest, beat, subject; Depth (how closely a **Topic** is followed is no longer said)
 
 ## Flagged ambiguities
 
-- **"Story"** in newsroom usage means both a single published piece and the ongoing subject it belongs to (Reuters uses both senses in one sentence). Here it means only a **Span**'s story, across **Items**; a single piece is an **Item**.
+- **"Story"** in newsroom usage means both a single published piece and the ongoing subject it belongs to (Reuters uses both senses in one sentence). Here it means only a group of **Spans**, across **Items**; a single piece is an **Item**.
 
-- **"Briefing"** at *The Economist* is a long analytical section; for the IPTC it is a summary of many items. Here it is the short daily output; the long weekly analysis is the **Sunday read**.
+- **"Event"** means something kept in the **Record**, never something that happened in the world: what happened in the world is said by a **Span**, and a named occasion (the Budget) is an **Entity**.
 
-- **"Fact"** and **"Claim"** are not used: a **Span** is what a publisher wrote, whoever its **Speaker**, and corroboration is *same as* across independent **Sources**.
+- **"Briefing"** names what go-slow is (a slow-news briefing), not a thing in it: the **Owner** reads **Stories**.
+
+- **"Fact"** and **"Claim"** are not used: a **Span** is what a publisher wrote, whoever its **Speaker**. Whether two **Spans** say the same thing, contradict each other, or one moves the other on is not judged; that they belong together is a **Story**.
 
 ## Example dialogue
 
-> **Dev:** The Holyrood speech came in this morning. Its line that the next stage of devolution should put more decisions with Scotland's regions: is that new?
-> **Owner:** No, it *follows* Tuesday's press release, which said the PM "will argue" exactly that. The speech is the **Span** that moves it on.
-> **Dev:** And "Scotland is one of the most centralised nations in Europe" is in both.
-> **Owner:** That's *same as*, but it's one publisher saying it twice, so it isn't corroboration.
+> **Dev:** The Holyrood speech came in this morning. Its line that the next stage of devolution should put more decisions with Scotland's regions: which **Story** is it in?
+> **Owner:** Its **Item's Story**, from the **Cut**. Tuesday's press release said the PM "will argue" exactly that, so a **Listing** should put both in one **Editorial Story**.
+> **Dev:** And if the speech also announced a new rail line?
+> **Owner:** Then a rail **Editorial Story** lists that sentence. Nothing moves: it's still in the speech's **Item's Story**.
+> **Dev:** And if two **Editorial Stories** turn out to be about the same thing?
+> **Owner:** The next pass reads them, and can list one with everything and the other with nothing.
 > **Dev:** And the GBR headquarters release says "this is fantastic news for the city". Whose words?
-> **Owner:** Its **Speaker** is the Mayor, and "the city" *refers to* Derby, so the **Span** mentions Derby. The **Briefing** tells it as the Mayor's view, never in its own voice.
+> **Owner:** Its **Speaker** is the Mayor, and "the city" *refers to* Derby, so the **Span** mentions Derby. That's **Hydration**, from its **Item** alone; no **Story** comes into it.

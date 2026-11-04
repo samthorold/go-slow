@@ -22,8 +22,12 @@ One piece of material as collection brought it in from a source: a report, a rel
 _Avoid_: Article, piece, story (for a single item)
 
 **Span**:
-A stretch of an **Item**'s text, as written, known by where it starts and ends: an address, not a thing with an identity of its own, so two **Judgements** about the same words are about the same **Span**. Spans nest, from the whole **Item** down to a word: "the city" is a **Span** inside "This is fantastic news for the city". A **Span** is never reworded or rewritten; what is said of it is said by **Judgements** on it.
+A stretch of text, known by where it starts and ends: an address, not a thing with an identity of its own, so two **Judgements** about the same words are about the same **Span**. Most are of an **Item**'s text, as written; the rest are **Editor's Spans**. Spans nest, from the whole **Item** down to a word: "the city" is a **Span** inside "This is fantastic news for the city". A **Span** is never reworded or rewritten; what is said of it is said by **Judgements** on it.
 _Avoid_: Statement, quote, sentence, chunk
+
+**Editor's Span**:
+A **Span** the **Editor** wrote, in a **Listing**, citing the **Spans** it rests on. Its **Speaker** is always the **Editor**. It may say more than what it cites can support, and does not reword it.
+_Avoid_: Assessment, statement, summary
 
 **Entity**:
 A thing in the world that can be referred to again: a person, organisation, place, or named occasion (the Budget, the 2024 general election), with an identity of its own, whatever any **Item** says of it. Some come from Wikidata, others are made by the **Editor**.
@@ -36,7 +40,7 @@ Every **Event**, in the order it happened.
 _Avoid_: Archive, database
 
 **Event**:
-Something that happened, kept in the **Record** and never changed: an **Item** collected, or a **Judgement**.
+Something that happened, kept in the **Record** and never changed: an **Item** collected, its **Cut**, or a **Judgement**.
 _Avoid_: Log entry, update
 
 **Command**:
@@ -54,7 +58,7 @@ _Avoid_: View, screen
 ### Judgements
 
 **Judgement**:
-An **Event** a **Command** outputs about **Spans** or **Stories**, kept with its **Judge**: a **Cut**, a *refers to*, a **Speaker**, a **Rejected**, a name and the **Entity** it matches, a **Merge**, a **Split**, a **Name**.
+An **Event** a **Command** outputs about **Spans** or **Stories**, kept with its **Judge**: a *refers to*, a **Speaker**, a **Rejected**, a name and the **Entity** it matches, a **Listing**, a **Name**.
 _Avoid_: Annotation, label, inference
 
 **Judge**:
@@ -66,7 +70,7 @@ A **Judge** whose **Judgements** are kept beside the live ones and read by no **
 _Avoid_: Shadow judge, experiment
 
 **Cut**:
-A **Judgement** listing an **Item**'s **Spans** before anything else is judged of them, and putting them in the **Item**'s **Story**: the **Spans** editorial work starts from. A **Judgement** may still be about a **Span** no **Cut** lists ("the city" inside one that does).
+The **Event** at which an **Item** enters editorial work, once: plain code lists its **Spans** before anything else is judged of them, and puts them in its **Item's Story**. It is not a **Judgement** and has no **Judge**. A **Judgement** may still be about a **Span** no **Cut** lists ("the city" inside one that does).
 _Avoid_: Segmentation, split
 
 **Hydration**:
@@ -77,11 +81,11 @@ A **Span** *refers to* another **Span** of the same **Item** when it names the s
 _Avoid_: Resolves to, rewrite
 
 **Speaker**:
-Whose words a **Span** is: a **Span** of the same **Item** naming them ("Andy Burnham", "a government spokesperson"). A **Span** with no speaker judged is the publisher's own.
+Whose words a **Span** is: a **Span** of the same **Item** naming them ("Andy Burnham", "a government spokesperson"). A **Span** of an **Item** with no speaker judged is the publisher's own; an **Editor's Span** is the **Editor**'s.
 _Avoid_: Attribution, author, role
 
 **Rejected**:
-A **Span** judged not useful for editorial work ("Andy Burnham said:"). It stays in its **Item** and its **Story**; rejections are counted per **Source**.
+A **Span** judged not useful for editorial work ("Andy Burnham said:"). It stays in its **Item** and its **Item's Story**; rejections are counted per **Source**.
 _Avoid_: Deleted
 
 **Mention**:
@@ -91,19 +95,22 @@ _Avoid_: Tag, reference
 ### Stories
 
 **Story**:
-A group of **Spans** kept in the **Record**. Every **Span** is in exactly one at a time, from the **Cut** of its **Item** on. **Stories** are changed only by **Merge** and **Split**. A one-off is a **Story** of one **Item**.
+A group of **Spans** kept in the **Record**: an **Item's Story** or an **Editorial Story**.
 _Avoid_: Running story, developing story, thread, cluster
 
-**Merge**:
-A **Judgement** that some **Stories** are one.
-_Avoid_: Join, link
+**Item's Story**:
+The **Spans** of one **Item**, from its **Cut**, unchanged after. Every **Span** of an **Item** is in exactly one.
 
-**Split**:
-A **Judgement** that a **Story** is several.
-_Avoid_: Fork
+**Editorial Story**:
+A **Story** the **Editor** makes and keeps re-forming: it holds what its latest **Listing** lists. A **Span** can be in any number, or none.
+_Avoid_: Merge, Split (both are only **Listings**)
+
+**Listing**:
+A **Judgement** saying in full which **Spans** an **Editorial Story** holds. The latest counts; listing nothing ends the **Story**.
+_Avoid_: Membership, Join
 
 **Name**:
-A short subject for a **Story**, written for the **Owner** to recognise it by. No **Command** reads it.
+A short subject for an **Editorial Story**, written for the **Owner** to recognise it by. No **Command** reads it.
 _Avoid_: Title, headline, summary
 
 **Timeline**:
@@ -138,8 +145,10 @@ _Avoid_: Interest, beat, subject; Depth (how closely a **Topic** is followed is 
 ## Example dialogue
 
 > **Dev:** The Holyrood speech came in this morning. Its line that the next stage of devolution should put more decisions with Scotland's regions: which **Story** is it in?
-> **Owner:** Its **Item**'s, from the **Cut**. Tuesday's press release said the PM "will argue" exactly that, so a **Merge** should make the two **Items**' **Stories** one.
+> **Owner:** Its **Item's Story**, from the **Cut**. Tuesday's press release said the PM "will argue" exactly that, so a **Listing** should put both in one **Editorial Story**.
 > **Dev:** And if the speech also announced a new rail line?
-> **Owner:** Then a **Split** takes the rail line out into a **Story** of its own, which can be merged with the rail **Story** later.
+> **Owner:** Then a rail **Editorial Story** lists that sentence. Nothing moves: it's still in the speech's **Item's Story**.
+> **Dev:** And if two **Editorial Stories** turn out to be about the same thing?
+> **Owner:** The next pass reads them, and can list one with everything and the other with nothing.
 > **Dev:** And the GBR headquarters release says "this is fantastic news for the city". Whose words?
 > **Owner:** Its **Speaker** is the Mayor, and "the city" *refers to* Derby, so the **Span** mentions Derby. That's **Hydration**, from its **Item** alone; no **Story** comes into it.

@@ -91,7 +91,7 @@ _Avoid_: Tag, reference
 ### Stories
 
 **Story**:
-A group of **Spans** kept in the **Record**. Every **Span** is in at least one, from the **Cut** of its **Item** on, and can be in several. **Stories** are changed only by **Merge** and **Split**. A one-off is a **Story** of one **Item**.
+A group of **Spans** kept in the **Record**. Every **Span** is in exactly one at a time, from the **Cut** of its **Item** on. **Stories** are changed only by **Merge** and **Split**. A one-off is a **Story** of one **Item**.
 _Avoid_: Running story, developing story, thread, cluster
 
 **Merge**:

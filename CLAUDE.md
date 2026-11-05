@@ -1,6 +1,6 @@
 # go-slow
 
-A slow-news briefing: a Go web app, hypermedia-driven with htmx, storing the Record in SQLite.
+Slow news, acting like the Economist: a Go web app, hypermedia-driven with htmx, storing the Record in SQLite.
 
 @~/.claude/commons/guides/global.md
 
@@ -20,7 +20,9 @@ There is no Go Guide yet; the Go tooling below is this repo's own until there is
 
 This is a map. A fact about the code lives in the code: each package's doc comment (`go doc ./internal/<pkg>`) is its overview, and its identifiers' comments the detail. A reason lives in the system design.
 
-- [`CONTEXT.md`](CONTEXT.md): the domain language (Briefing, Owner, Story, Item...). Use its terms in code, tests and issues.
+The docs state the design, and the code still builds an earlier one until epic #294's slices land. So the code, the commands and the config below still name its acts (reading, relating, the Briefing, the Sunday read, Feedback), which `CONTEXT.md` and the system design no longer use.
+
+- [`CONTEXT.md`](CONTEXT.md): the domain language (Owner, Story, Span, Item...). Use its terms in new code, tests and issues.
 - [`docs/system-design/README.md`](docs/system-design/README.md): the design, its end state and hypotheses, and why it has its shape.
 - [`docs/research/`](docs/research/): research that grounds the design.
 - [`internal/editor/testdata/recorded/README.md`](internal/editor/testdata/recorded/README.md): the Editor's recorded runs: what is where, what each act's recording asserts, refreshing frozen copies, the yield report.

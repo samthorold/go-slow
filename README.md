@@ -1,14 +1,14 @@
 # go-slow
 
-Slow news: a daily briefing, with a longer read on Sundays that puts the week into wider context.
+Slow news: it acts like the Economist, seeing the stories behind the stories and taking a zoomed-out view of the long-term causes.
 
-The value is the editorial work: following how things unfold, linking across items, telling claims from facts against primary sources, and surfacing what a casual reader would miss. Collection from news sources is plumbing, done politely on its own timetable.
+The value is the editorial work: writing what no single source says, across sources and over time, and citing what it rests on. Collection from news sources is plumbing, done politely on its own timetable.
 
-Early design. Go and htmx. The working concepts are in the issues.
+Go and htmx. This describes the design; the code still builds an earlier one until epic #294's slices land.
 
 ## How it flows
 
-Collection runs every few minutes, cutting each new Item into Spans. Reading and relating run in batches, each applied on a later Collection run, so the acts follow one another; between them, what the readings name is looked up in Wikidata. The Briefing is written in real time at its set time, over what the Record holds then. The terms are in [`CONTEXT.md`](CONTEXT.md); the reasons for this shape are in the [system design](docs/system-design/README.md).
+Collection brings in each new Item, and the Cut splits it into Spans and puts them in one Story. Hydrating and looking up names work on those Spans. Weaving reads Stories and writes new ones, in the Editor's own words, citing what they rest on. A Story never changes, and the Owner reads them newest first, or through a Topic. The terms are in [`CONTEXT.md`](CONTEXT.md); the reasons for this shape are in the [system design](docs/system-design/README.md).
 
 ```mermaid
 flowchart TD
@@ -20,26 +20,22 @@ flowchart TD
 
     Sources -->|every Collection run| COLLECT[Collection<br/>feed + full text]
     COLLECT --> ITEMS[(Items)]
-    ITEMS --> CUT[Cut<br/>Item → Spans]
-    CUT --> READ
+    ITEMS --> CUT[Cut<br/>Item → Spans, in one Story]
+    CUT --> RECORD[(Record: Events)]
 
-    subgraph Batches["Daily acts: batches, each applied on a later Collection run"]
-        READ[Reading<br/>Spans: refers to, names, speakers, Rejected]
-        LOOKUP[Look-ups<br/>names → Entities, plain code]
-        RELATE[Relating<br/>Span follows, same as, contradicts Spans read before]
-        READ --> LOOKUP --> RELATE
+    subgraph Commands["Commands: read the Record, add Events, each in its own time"]
+        HYDRATE[Hydrating<br/>Span: refers to, names, speaker, Rejected]
+        LOOKUP[Looking up a name<br/>name → Entity, plain code]
+        WEAVE[Weaving<br/>Stories → new Stories: the Editor's Spans and what they cite]
+        NAME[Naming<br/>Story → Name, for the Owner]
     end
 
+    RECORD <--> HYDRATE
+    RECORD <--> LOOKUP
+    RECORD <--> WEAVE
+    RECORD <--> NAME
     WD[(Wikidata)] -.->|matches names| LOOKUP
-    FB[(Owner's Feedback)]
 
-    RELATE --> RECORD[(Record: events on Spans,<br/>and the Stories built before)]
-
-    RECORD --> BRIEF[Write the Briefing<br/>real time, at BRIEFING_TIME]
-    BRIEF -->|Sundays| SUNDAY[Sunday read<br/>agent with tools over the Record + Wikidata]
-
-    BRIEF --> OWNER((Owner))
-    SUNDAY --> OWNER
-    OWNER -->|Wrong, Unwanted, Missed, New to me| FB
-    FB -->|marks, never deletions| RECORD
+    RECORD --> PAGES[Pages<br/>Stories, Topics, each Story and Span]
+    PAGES --> OWNER((Owner))
 ```

@@ -1,6 +1,6 @@
 # go-slow
 
-The language of a slow-news briefing: the material that arrives from news sources and the editorial work done on it.
+The language of go-slow, which acts like a slow-news outfit: the material that arrives from news sources and the editorial work done on it.
 
 ## Language
 
@@ -74,7 +74,11 @@ The **Event** at which an **Item** enters editorial work, once: plain code lists
 _Avoid_: Segmentation, split
 
 **Hydration**:
-Judging what a **Span**'s **Spans** refer to, what it names, who speaks it and whether it is **Rejected**, from the whole of its **Item**. The hydrated reading of a **Span** ("fantastic news for Derby") is worked out by following *refers to*, never written.
+Judging what a **Span**'s **Spans** refer to, what it names, who speaks it and whether it is **Rejected**, from the whole **Story** its **Cut** made. The hydrated reading of a **Span** ("fantastic news for Derby") is worked out by following *refers to*, never written.
+
+**Weaving**:
+Reading **Stories** and making new ones, each holding the **Editor's Spans** it wrote and the **Spans** they cite. A run with nothing new to say makes none.
+_Avoid_: Listing, Merge, Split, Briefing
 
 **Refers to**:
 A **Span** *refers to* another **Span** of the same **Item** when it names the same thing in other words: "the city" refers to "Derby", "he" to "Andy Burnham".
@@ -118,7 +122,7 @@ _Avoid_: User, reader (a reader only reads; the **Owner** also chooses)
 ### Interest
 
 **Topic**:
-A standing area of interest the owner follows, given by its terms. Unlike a **Story** it groups no **Spans**: its **Page** lists the **Stories** that touch it, and that is how the **Owner** follows a subject. It may be about an **Entity** (Reform UK) or be more abstract (standards in public life). It gates none of the editorial work.
+A standing area of interest the owner follows, given by its terms. Unlike a **Story** it groups no **Spans**: its **Page** lists the **Stories** that touch it, and that is how the **Owner** follows it. It may be about an **Entity** (Reform UK) or be more abstract (standards in public life). It gates none of the editorial work.
 _Avoid_: Interest, beat, subject; Depth (how closely a **Topic** is followed is no longer said)
 
 ## Flagged ambiguities
@@ -127,7 +131,7 @@ _Avoid_: Interest, beat, subject; Depth (how closely a **Topic** is followed is 
 
 - **"Event"** means something kept in the **Record**, never something that happened in the world: what happened in the world is said by a **Span**, and a named occasion (the Budget) is an **Entity**.
 
-- **"Briefing"** names what go-slow is (a slow-news briefing), not a thing in it: the **Owner** reads **Stories**.
+- **"Briefing"** is not used: go-slow has no daily output, and the **Owner** reads **Stories**.
 
 - **"Fact"** and **"Claim"** are not used: a **Span** is what a publisher wrote, whoever its **Speaker**. Whether two **Spans** say the same thing, contradict each other, or one moves the other on is not judged; that they belong together is a **Story**.
 
@@ -142,4 +146,4 @@ _Avoid_: Interest, beat, subject; Depth (how closely a **Topic** is followed is 
 > **Dev:** How do I follow devolution, then?
 > **Owner:** It's a **Topic**. Its **Page** lists the **Stories** that touch it, newest first.
 > **Dev:** And the GBR headquarters release says "this is fantastic news for the city". Whose words?
-> **Owner:** Its **Speaker** is the Mayor, and "the city" *refers to* Derby, so the **Span** mentions Derby. That's **Hydration**, from its **Item** alone; no **Story** comes into it.
+> **Owner:** Its **Speaker** is the Mayor, and "the city" *refers to* Derby, so the **Span** mentions Derby. That's **Hydration**, from the **Story** its **Cut** made alone; no other **Story** comes into it.

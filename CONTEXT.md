@@ -26,7 +26,7 @@ A stretch of text, known by where it starts and ends: an address, not a thing wi
 _Avoid_: Statement, quote, sentence, chunk
 
 **Editor's Span**:
-A **Span** the **Editor** wrote, in a **Listing**, citing the **Spans** it rests on. Its **Speaker** is always the **Editor**. It may say more than what it cites can support, and does not reword it.
+A **Span** the **Editor** wrote, in a **Judgement** saying which **Spans** a **Story** holds, citing the **Spans** it rests on. Its **Speaker** is always the **Editor**. It may say more than what it cites can support, and does not reword it.
 _Avoid_: Assessment, statement, summary
 
 **Entity**:
@@ -58,7 +58,7 @@ _Avoid_: View, screen
 ### Judgements
 
 **Judgement**:
-An **Event** a **Command** outputs about **Spans** or **Stories**, kept with its **Judge**: a *refers to*, a **Speaker**, a **Rejected**, a name and the **Entity** it matches, a **Listing**, a **Name**.
+An **Event** a **Command** outputs about **Spans** or **Stories**, kept with its **Judge**: a *refers to*, a **Speaker**, a **Rejected**, a name and the **Entity** it matches, which **Spans** a **Story** holds, a **Name**.
 _Avoid_: Annotation, label, inference
 
 **Judge**:
@@ -70,7 +70,7 @@ A **Judge** whose **Judgements** are kept beside the live ones and read by no **
 _Avoid_: Shadow judge, experiment
 
 **Cut**:
-The **Event** at which an **Item** enters editorial work, once: plain code lists its **Spans** before anything else is judged of them, and puts them in its **Item's Story**. It is not a **Judgement** and has no **Judge**. A **Judgement** may still be about a **Span** no **Cut** lists ("the city" inside one that does).
+The **Event** at which an **Item** enters editorial work, once: plain code lists its **Spans** before anything else is judged of them, and puts them in one **Story**. It is not a **Judgement** and has no **Judge**. A **Judgement** may still be about a **Span** no **Cut** lists ("the city" inside one that does).
 _Avoid_: Segmentation, split
 
 **Hydration**:
@@ -85,7 +85,7 @@ Whose words a **Span** is: a **Span** of the same **Item** naming them ("Andy Bu
 _Avoid_: Attribution, author, role
 
 **Rejected**:
-A **Span** judged not useful for editorial work ("Andy Burnham said:"). It stays in its **Item** and its **Item's Story**; rejections are counted per **Source**.
+A **Span** judged not useful for editorial work ("Andy Burnham said:"). It stays in its **Item** and in the **Story** its **Cut** made; rejections are counted per **Source**.
 _Avoid_: Deleted
 
 **Mention**:
@@ -95,22 +95,11 @@ _Avoid_: Tag, reference
 ### Stories
 
 **Story**:
-A group of **Spans** kept in the **Record**: an **Item's Story** or an **Editorial Story**.
-_Avoid_: Running story, developing story, thread, cluster
-
-**Item's Story**:
-The **Spans** of one **Item**, from its **Cut**, unchanged after. Every **Span** of an **Item** is in exactly one.
-
-**Editorial Story**:
-A **Story** the **Editor** makes and keeps re-forming: it holds what its latest **Listing** lists. A **Span** can be in any number, or none.
-_Avoid_: Merge, Split (both are only **Listings**)
-
-**Listing**:
-A **Judgement** saying in full which **Spans** an **Editorial Story** holds. The latest counts; listing nothing ends the **Story**.
-_Avoid_: Membership, Join
+A group of **Spans** kept in the **Record**. A **Cut** makes one from an **Item**'s **Spans**, and it never changes. The **Editor** makes the rest and keeps re-forming them: each holds what the latest **Judgement** about it lists, in full and never nothing. A **Span** of an **Item** is in the one its **Cut** made, and in any number of the **Editor**'s, or none.
+_Avoid_: Running story, developing story, thread, cluster, Item's Story, Editorial Story, Merge, Split, Listing
 
 **Name**:
-A short subject for an **Editorial Story**, written for the **Owner** to recognise it by. No **Command** reads it.
+A short subject for a **Story** the **Editor** made, written for the **Owner** to recognise it by. No **Command** reads it.
 _Avoid_: Title, headline, summary
 
 **Timeline**:
@@ -134,7 +123,7 @@ _Avoid_: Interest, beat, subject; Depth (how closely a **Topic** is followed is 
 
 ## Flagged ambiguities
 
-- **"Story"** in newsroom usage means both a single published piece and the ongoing subject it belongs to (Reuters uses both senses in one sentence). Here it means only a group of **Spans**, across **Items**; a single piece is an **Item**.
+- **"Story"** in newsroom usage means both a single published piece and the ongoing subject it belongs to (Reuters uses both senses in one sentence). Here it means only a group of **Spans**; a single piece is an **Item**.
 
 - **"Event"** means something kept in the **Record**, never something that happened in the world: what happened in the world is said by a **Span**, and a named occasion (the Budget) is an **Entity**.
 
@@ -145,10 +134,10 @@ _Avoid_: Interest, beat, subject; Depth (how closely a **Topic** is followed is 
 ## Example dialogue
 
 > **Dev:** The Holyrood speech came in this morning. Its line that the next stage of devolution should put more decisions with Scotland's regions: which **Story** is it in?
-> **Owner:** Its **Item's Story**, from the **Cut**. Tuesday's press release said the PM "will argue" exactly that, so a **Listing** should put both in one **Editorial Story**.
+> **Owner:** The one its **Cut** made. Tuesday's press release said the PM "will argue" exactly that, so the **Editor** should list both in one **Story**.
 > **Dev:** And if the speech also announced a new rail line?
-> **Owner:** Then a rail **Editorial Story** lists that sentence. Nothing moves: it's still in the speech's **Item's Story**.
-> **Dev:** And if two **Editorial Stories** turn out to be about the same thing?
-> **Owner:** The next pass reads them, and can list one with everything and the other with nothing.
+> **Owner:** Then a rail **Story** lists that sentence. Nothing moves: it's still in the **Story** the speech's **Cut** made.
+> **Dev:** And if two **Stories** turn out to be about the same thing?
+> **Owner:** The next pass reads them, and may do something about it. One left over does no harm.
 > **Dev:** And the GBR headquarters release says "this is fantastic news for the city". Whose words?
 > **Owner:** Its **Speaker** is the Mayor, and "the city" *refers to* Derby, so the **Span** mentions Derby. That's **Hydration**, from its **Item** alone; no **Story** comes into it.

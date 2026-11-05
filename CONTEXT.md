@@ -77,7 +77,7 @@ _Avoid_: Segmentation, split
 Judging what a **Span**'s **Spans** refer to, what it names, who speaks it and whether it is **Rejected**, from the whole **Story** its **Cut** made. The hydrated reading of a **Span** ("fantastic news for Derby") is worked out by following *refers to*, never written.
 
 **Weaving**:
-Reading **Stories** and making new ones, each holding the **Editor's Spans** it wrote and the **Spans** they cite. A run with nothing new to say makes none.
+Reading **Stories** and making new ones, each a substantive editorial opinion: the **Editor's Spans** it wrote and the **Spans** they cite. A run with nothing substantive to say makes none.
 _Avoid_: Listing, Merge, Split, Briefing
 
 **Refers to**:
@@ -107,7 +107,7 @@ A short subject for a **Story** the **Editor** made, written for the **Owner** t
 _Avoid_: Title, headline, summary
 
 **Timeline**:
-A **Story**'s **Spans** in the order they were published.
+A **Story**'s **Spans** in the order they were published. An **Editor's Span** is published by the **Judgement** that wrote it.
 
 ### People
 

@@ -26,7 +26,7 @@ A stretch of text, known by where it starts and ends: an address, not a thing wi
 _Avoid_: Statement, quote, sentence, chunk
 
 **Editor's Span**:
-A **Span** the **Editor** wrote, in a **Judgement** saying which **Spans** a **Story** holds, citing the **Spans** it rests on. Its **Speaker** is always the **Editor**. It may say more than what it cites can support, and does not reword it.
+A **Span** the **Editor** wrote, in the **Judgement** that makes a **Story**, citing the **Spans** it rests on. Its **Speaker** is always the **Editor**. It may say more than what it cites can support, and does not reword it.
 _Avoid_: Assessment, statement, summary
 
 **Entity**:
@@ -48,7 +48,7 @@ A step of the **Editor**'s work: it reads a **Projection** and outputs zero or m
 _Avoid_: Act, pass, job
 
 **Projection**:
-What the **Events** say about something as at a time, worked out by plain code that only reads: the **Spans** a **Story** holds, a **Command**'s input, a **Page**.
+What the **Events** say about something as at a time, worked out by plain code that only reads: the **Stories** a **Span** is in, a **Command**'s input, a **Page**.
 _Avoid_: View, read model, state
 
 **Page**:
@@ -58,7 +58,7 @@ _Avoid_: View, screen
 ### Judgements
 
 **Judgement**:
-An **Event** a **Command** outputs about **Spans** or **Stories**, kept with its **Judge**: a *refers to*, a **Speaker**, a **Rejected**, a name and the **Entity** it matches, which **Spans** a **Story** holds, a **Name**.
+An **Event** a **Command** outputs about **Spans** or **Stories**, kept with its **Judge**: a *refers to*, a **Speaker**, a **Rejected**, a name and the **Entity** it matches, a new **Story**, a **Name**.
 _Avoid_: Annotation, label, inference
 
 **Judge**:
@@ -95,7 +95,7 @@ _Avoid_: Tag, reference
 ### Stories
 
 **Story**:
-A group of **Spans** kept in the **Record**. A **Cut** makes one from an **Item**'s **Spans**, and it never changes. The **Editor** makes the rest and keeps re-forming them: each holds what the latest **Judgement** about it lists, in full and never nothing. A **Span** of an **Item** is in the one its **Cut** made, and in any number of the **Editor**'s, or none.
+A group of **Spans** kept in the **Record**, as at one point in time: one **Event** makes it and nothing changes it. A **Cut** makes one from an **Item**'s **Spans**. The **Editor** makes the rest, each holding the **Editor's Spans** it wrote and the **Spans** they cite. A **Span** of an **Item** is in the one its **Cut** made, and in any number of the **Editor**'s, or none.
 _Avoid_: Running story, developing story, thread, cluster, Item's Story, Editorial Story, Merge, Split, Listing
 
 **Name**:
@@ -118,12 +118,12 @@ _Avoid_: User, reader (a reader only reads; the **Owner** also chooses)
 ### Interest
 
 **Topic**:
-A standing area of interest the owner follows, given by its terms. Unlike a **Story** it groups no **Spans**, though a large **Story** can look like one. It may be about an **Entity** (Reform UK) or be more abstract (standards in public life). It selects nothing the **Owner** is shown.
+A standing area of interest the owner follows, given by its terms. Unlike a **Story** it groups no **Spans**: its **Page** lists the **Stories** that touch it, and that is how the **Owner** follows a subject. It may be about an **Entity** (Reform UK) or be more abstract (standards in public life). It gates none of the editorial work.
 _Avoid_: Interest, beat, subject; Depth (how closely a **Topic** is followed is no longer said)
 
 ## Flagged ambiguities
 
-- **"Story"** in newsroom usage means both a single published piece and the ongoing subject it belongs to (Reuters uses both senses in one sentence). Here it means only a group of **Spans**; a single piece is an **Item**.
+- **"Story"** in newsroom usage means both a single published piece and the ongoing subject it belongs to (Reuters uses both senses in one sentence). Here it means only a group of **Spans**; a single published piece is an **Item**, and an ongoing subject is followed through a **Topic**.
 
 - **"Event"** means something kept in the **Record**, never something that happened in the world: what happened in the world is said by a **Span**, and a named occasion (the Budget) is an **Entity**.
 
@@ -134,10 +134,12 @@ _Avoid_: Interest, beat, subject; Depth (how closely a **Topic** is followed is 
 ## Example dialogue
 
 > **Dev:** The Holyrood speech came in this morning. Its line that the next stage of devolution should put more decisions with Scotland's regions: which **Story** is it in?
-> **Owner:** The one its **Cut** made. Tuesday's press release said the PM "will argue" exactly that, so the **Editor** should list both in one **Story**.
-> **Dev:** And if the speech also announced a new rail line?
-> **Owner:** Then a rail **Story** lists that sentence. Nothing moves: it's still in the **Story** the speech's **Cut** made.
+> **Owner:** The one its **Cut** made. Tuesday's press release said the PM "will argue" exactly that, but no story lies behind that link, so the **Editor** needn't make one.
+> **Dev:** And if that line bears on a longer cause no **Source** connects it to?
+> **Owner:** Then the **Editor** makes a new **Story**: its own words, citing that sentence and whatever else they rest on. Nothing moves: the sentence is still in the **Story** the speech's **Cut** made.
 > **Dev:** And if two **Stories** turn out to be about the same thing?
-> **Owner:** The next pass reads them, and may do something about it. One left over does no harm.
+> **Owner:** Neither changes, and neither does harm. A later run may make another that follows them.
+> **Dev:** How do I follow devolution, then?
+> **Owner:** It's a **Topic**. Its **Page** lists the **Stories** that touch it, newest first.
 > **Dev:** And the GBR headquarters release says "this is fantastic news for the city". Whose words?
 > **Owner:** Its **Speaker** is the Mayor, and "the city" *refers to* Derby, so the **Span** mentions Derby. That's **Hydration**, from its **Item** alone; no **Story** comes into it.

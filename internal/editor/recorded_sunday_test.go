@@ -203,10 +203,11 @@ const testContact = "go-slow-tests@example.org"
 // the retries its brief allows.
 var maxTriesFlag = flag.Int("max-tries", 0, "recording the Sunday read, the most tries each sample is given (0: the act's own)")
 
-// maxSamplesFlag bounds the samples recording draws of the Sunday read, to
-// probe a changed act on one before paying for the rule's: a recording with
-// fewer samples than the rule fails, as any does.
-var maxSamplesFlag = flag.Int("max-samples", 0, "recording the Sunday read, the most samples drawn (0: the rule's)")
+// maxSamplesFlag bounds the samples recording draws of each fixture (of the
+// Sunday read, of its one), to probe a changed act on one before paying for
+// the rule's: a recording with fewer samples than the rule fails, as any
+// does.
+var maxSamplesFlag = flag.Int("max-samples", 0, "recording, the most samples drawn of each fixture (0: the rule's)")
 
 // The recorded runs of the Sunday read. Its own frozen copies of the
 // readings, relatings and the Briefing (testdata/recorded/sunday/inputs)

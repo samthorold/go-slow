@@ -1,11 +1,16 @@
 {{define "title"}}{{.Title}}{{end}}
 
 {{define "content"}}
-{{/* A Story the Editor made: the Editor's Spans it wrote, in the order
-     written, as the argument they are, each with the Spans it cites in its
-     margin; then the Judgement that made it. Every Editor's Span is the
-     Editor's words, and the page says so. Collected text is inert:
-     hx-disable on the elements holding it. */}}
+{{/* A Story's Page. For a Story the Editor made: the Editor's Spans it
+     wrote, in the order written, as the argument they are, each with the
+     Spans it cites in its margin; then its Timeline; then the Judgement that
+     made it. Every Editor's Span is the Editor's words, and the page says so.
+     For a Story a Cut made: its Item, and its Timeline, the Item's Spans.
+     Collected text is inert: hx-disable on the elements holding it. */}}
+{{- with .Cut}}
+<p class="quiet">The Story the Cut made of {{template "citation" .}} · {{$.When}}</p>
+<h1 hx-disable>{{$.Title}}</h1>
+{{- else}}
 <p class="quiet">A Story the Editor made · {{.When}}</p>
 <h1>{{.Title}}</h1>
 
@@ -16,7 +21,7 @@
   <li class="block">
     <div class="block-body"><p>{{.Body}}</p></div>
     <div class="block-margin">
-      <p class="quiet">spoken by the Editor</p>
+      <p class="quiet"><a href="{{.Href}}">spoken by the Editor</a></p>
       {{- range .Cites}}
       <p><a href="{{.Href}}"><span hx-disable>{{.Words}}</span></a> {{template "citation" .Item}}</p>
       {{- end}}
@@ -25,9 +30,26 @@
   {{- end}}
 </ul>
 </div>
+{{- end}}
 
+<section aria-labelledby="timeline">
+  <h2 id="timeline">Timeline</h2>
+  <ul class="blocks">
+  {{- range .Timeline}}
+    <li class="block">
+      <div class="block-body"><p><a href="{{.Href}}"><span hx-disable>{{.Words}}</span></a></p></div>
+      <div class="block-margin">
+        <p>{{if .Editor}}<span class="quiet">spoken by the Editor</span>{{else}}{{template "citation" .Item}}{{end}} <small>{{.Published}}</small></p>
+      </div>
+    </li>
+  {{- end}}
+  </ul>
+</section>
+
+{{- if not .Cut}}
 <section aria-labelledby="made">
   <h2 id="made">How it was made</h2>
   <p>{{template "made" .Made}} <span class="machine">{{.Judge}}</span></p>
 </section>
+{{- end}}
 {{end}}

@@ -2,6 +2,7 @@ package editor
 
 import (
 	"bytes"
+	"cmp"
 	"context"
 	"encoding/json"
 	"errors"
@@ -31,9 +32,10 @@ type CutStory struct {
 	Spans []cut.Span
 }
 
-// Cited is a Span an Editor's Span cites, its words as read, and either its
-// address in its Item's text with its Item's title, or, for an earlier
-// Editor's Span, Of, its address among the Editor's Spans.
+// Cited is a Span an Editor's Span cites, its words as read, when it was
+// published, and either its address in its Item's text with its Item's
+// title, or, for an earlier Editor's Span, Of, its address among the
+// Editor's Spans.
 type Cited struct {
 	Address Address
 	// Of is the earlier Editor's Span cited, when it is one; zero when the
@@ -41,6 +43,9 @@ type Cited struct {
 	Of    EditorSpanAt
 	Words string
 	Title string
+	// Published is its Item's publication, or for an Editor's Span the
+	// Judgement's that wrote it (CONTEXT.md: Timeline).
+	Published time.Time
 }
 
 // EditorSpanAt is an Editor's Span's address: the Story that wrote it, and
@@ -76,6 +81,48 @@ type Story struct {
 	// Call is the kept call that made it, found by its Judge's request hash;
 	// zero if none was kept.
 	Call int64
+}
+
+// CitingSpan is an Editor's Span citing a Span: its Story, its number in
+// it from 1, its words and when it was written, with its Story's opening
+// words.
+type CitingSpan struct {
+	Story   int64
+	N       int
+	Body    string
+	At      time.Time
+	Opening string
+}
+
+// SpanHeld is what holds a Span: the Cuts whose Stories list it, oldest
+// first, and the Editor's Spans citing it, in the order written.
+type SpanHeld struct {
+	Cuts   []int64
+	Citing []CitingSpan
+}
+
+// Timeline is the Spans the Story's Editor's Spans cite, each once, in the
+// order they were published, an earlier Editor's Span by the Judgement that
+// wrote it, and those published together in the order their Item or Story
+// has them (CONTEXT.md: Timeline). Its own Editor's Spans are not in it:
+// they are the argument shown above it, all published last, by the
+// Judgement that made it.
+func (s Story) Timeline() []Cited {
+	var out []Cited
+	for _, es := range s.Spans {
+		for _, c := range es.Cites {
+			if !slices.ContainsFunc(out, func(o Cited) bool { return o.Address == c.Address && o.Of == c.Of }) {
+				out = append(out, c)
+			}
+		}
+	}
+	slices.SortStableFunc(out, func(a, b Cited) int {
+		return cmp.Or(a.Published.Compare(b.Published),
+			cmp.Compare(a.Address.SourceID, b.Address.SourceID), cmp.Compare(a.Address.EntryID, b.Address.EntryID),
+			cmp.Compare(a.Address.Span.Start, b.Address.Span.Start), cmp.Compare(a.Address.Span.End, b.Address.Span.End),
+			cmp.Compare(a.Of.Story, b.Of.Story), cmp.Compare(a.Of.N, b.Of.N))
+	})
+	return out
 }
 
 // Weaving is a weaving run whose result was written: the Stories it made,

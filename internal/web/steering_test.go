@@ -23,25 +23,25 @@ func sourceLine(t *testing.T, page, name string) string {
 	return m
 }
 
-func TestTheItemsPageShowsPerSourceTheStoriesTouchingATopicAndTheSpansRejectedOverItsWindow(t *testing.T) {
-	store := relatedRecord(t)
-	tell(t, store, saturday, teller{text: "Derby will host the headquarters.", tell: "This is fantastic news",
-		story: []string{"Derby will host the headquarters."}})
+func TestTheItemsPageShowsPerSourceTheStoriesTheEditorMadeTouchingATopicAndTheSpansRejectedOverItsWindow(t *testing.T) {
+	store := openStore(t)
+	weaveSpeech(t, store, twoOpinions)
 	app, _ := newAppWithLog(t, saturday, store)
 	name := "Prime Minister&#39;s Office, 10 Downing Street"
 
 	before := get(t, app, "/items").body
-	if _, errs, err := interest.New(store).Add(t.Context(), interest.Draft{Name: "Derby", Terms: "Derby"}); err != nil || errs != nil {
+	// Only the newer Story cites S2, "Scotland will get £2 billion."
+	if _, errs, err := interest.New(store).Add(t.Context(), interest.Draft{Name: "Scotland", Terms: "Scotland"}); err != nil || errs != nil {
 		t.Fatalf("take up a Topic: %v %v", errs, err)
 	}
 	after := get(t, app, "/items").body
 
-	if line := sourceLine(t, before, name); !strings.Contains(line, "Stories: 0 touching a Topic, 1 not") {
-		t.Errorf("with no Topic, the Story gathered is not counted as touching none:\n%s", line)
+	if line := sourceLine(t, before, name); !strings.Contains(line, "Stories: 0 touching a Topic, 2 not") {
+		t.Errorf("with no Topic, the Stories the Editor made are not counted as touching none:\n%s", line)
 	}
 	line := sourceLine(t, after, name)
-	if !strings.Contains(line, "Stories: 1 touching a Topic, 0 not") {
-		t.Errorf("taking up a Topic the Story names does not count it as touching:\n%s", line)
+	if !strings.Contains(line, "Stories: 1 touching a Topic, 1 not") {
+		t.Errorf("taking up a Topic one Story names does not count it as touching:\n%s", line)
 	}
 	if !regexp.MustCompile(`Spans: \d+ of \d+ rejected`).MatchString(line) {
 		t.Errorf("the Source's line lacks its Spans rejected:\n%s", line)

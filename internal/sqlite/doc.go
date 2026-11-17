@@ -120,8 +120,10 @@
 // (StandingWrongOnRelations, StandingTaste) and judgement_precedents
 // (0030_judgement_precedents.sql) keeps which it was shown. SourceCounts
 // (steering.go) is what the Owner steers by, per Source over steeringWindow,
-// the last 28 days: the Stories gathered in it holding a Span of one of the
-// Source's Items (latest gathering per Span gathered from), touching a Topic
-// when one of their Spans does, and the Spans of its Items collected in it,
-// by their newest live readings.
+// the last 28 days: the Stories the Editor made holding a Span of one of the
+// Source's Items collected in it, touching a Topic when one of their Spans
+// does (storyTouches: an Editor's Span, by its own words, or a Span it
+// cites), and the Spans of its Items collected in it, by their newest live
+// readings. StoriesTouching (touching.go) is a Topic's Page, by the same
+// test.
 package sqlite

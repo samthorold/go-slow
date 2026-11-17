@@ -104,10 +104,20 @@ func TestNoCommandIsShownAName(t *testing.T) {
 	sunday := saturday.Add(24 * time.Hour)
 	cutAt(t, store, sunday)
 	runAt(t, b, sunday)
-	answerLast(batcher, `{"stories": [{"editor_spans": [{"body": "Ferries follow the money.", "cites": [1]}]}]}`)
+	// The run is shown the named Story: its Editor's Spans, but not its Name.
+	weaving := batcher.submitted[2][0].Request.Input
+	if !strings.Contains(weaving, "S3 (the Editor's, citing S1, S2): Money follows the Prime Minister to Scotland.") {
+		t.Fatalf("the second weaving run was not shown the named Story:\n%s", weaving)
+	}
+	// Its Story cites the named Story's first Editor's Span, S3.
+	answerLast(batcher, `{"stories": [{"editor_spans": [{"body": "Ferries follow the money.", "cites": [3, 5]}]}]}`)
 	runAt(t, b, sunday.Add(time.Hour))
 	if len(batcher.submitted) != 4 {
 		t.Fatalf("submitted %d batches, want a second weaving and its naming", len(batcher.submitted))
+	}
+	naming := batcher.submitted[3][0].Request.Input
+	if !strings.Contains(naming, "cites the Editor's earlier words: Money follows the Prime Minister to Scotland.") {
+		t.Errorf("the second naming was not shown the earlier Editor's Span it cites as the Editor's:\n%s", naming)
 	}
 	for _, batch := range batcher.submitted {
 		for _, r := range batch {

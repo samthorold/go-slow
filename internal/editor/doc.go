@@ -147,12 +147,14 @@
 // work is each Story the Editor made with no Name (NamingStore.StoriesToName),
 // keyed by the Story's event. Its request, at EffortLow, shows the Story's
 // Editor's Spans numbered E1, E2…, each followed by the Spans it cites under
-// their Items' titles, and answers name. The checks refuse a name that is
+// their Items' titles (an earlier Editor's Span marked as the Editor's), and
+// answers name. The checks refuse a name that is
 // empty, runs to more than one line or has more than MaxNameWords words.
 // A Story never changes once made, so a result is applied through
 // Job.Apply as any other. KeepName keeps it as a Judgement of its own;
-// Story.Name is the newest. No act is shown a Name: weaving's input is built
-// from Cuts and Spans alone, and naming's from a Story's Editor's Spans.
+// Story.Name is the newest. No act is shown a Name: weaving's input shows
+// the Stories the Editor made by their date and Spans alone, and naming's a
+// Story's Editor's Spans and what they cite.
 // Naming follows weaving in the batch runner's acts, so a run's Stories are
 // named in the batch submitted on the turn its result is applied.
 //

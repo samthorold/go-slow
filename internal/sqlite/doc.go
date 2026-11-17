@@ -111,7 +111,7 @@
 // its request hash). A kept call and a pending request also keep the effort
 // asked for (effort, ” for none).
 //
-// A Story's Name (0034_naming.sql, namings.go) is an event of kind
+// A Story's Name (0035_naming.sql, namings.go) is an event of kind
 // story_name (story_names: the Story, its words and its Judge; kind name is
 // a reading's). StoriesMade and StoryMade give each Story its newest Name and
 // the applied naming call on the Story's work (keyed by the Story's event)

@@ -102,13 +102,18 @@ func (e *Editor) Naming() BatchAct {
 }
 
 // namingInput shows a Story's Editor's Spans in the order written, numbered
-// E1, E2…, each followed by the Spans it cites, under their Items' titles.
+// E1, E2…, each followed by the Spans it cites, under their Items' titles,
+// or marked the Editor's for an earlier Editor's Span.
 // It shows no Name: a Command is never shown one.
 func namingInput(s Story) string {
 	var b strings.Builder
 	for i, es := range s.Spans {
 		fmt.Fprintf(&b, "E%d: %s\n", i+1, es.Body)
 		for _, c := range es.Cites {
+			if !c.Of.IsZero() {
+				fmt.Fprintf(&b, "  cites the Editor's earlier words: %s\n", c.Words)
+				continue
+			}
 			fmt.Fprintf(&b, "  cites %q: %s\n", c.Title, c.Words)
 		}
 	}

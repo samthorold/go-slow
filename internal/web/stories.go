@@ -8,6 +8,7 @@ import (
 
 	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
+	"github.com/samthorold/go-slow/internal/interest"
 )
 
 // Stories answers the Stories Page and a Story's Page.
@@ -23,6 +24,9 @@ type Stories interface {
 	// HoldingSpan is what holds the Span at a: the Cuts whose Stories list
 	// it, and the Editor's Spans citing it.
 	HoldingSpan(ctx context.Context, a editor.Address) (editor.SpanHeld, error)
+	// StoriesTouching are the Stories the Editor made that touch the Topic,
+	// newest first.
+	StoriesTouching(ctx context.Context, topic interest.Topic) ([]editor.Story, error)
 }
 
 // storiesTmpl is the Stories Page, and storyTmpl a Story's Page.
@@ -101,15 +105,20 @@ func (a *app) stories(w http.ResponseWriter, r *http.Request) {
 		a.serverError(w, r, err)
 		return
 	}
-	var p storiesPage
-	for _, s := range made {
+	a.render(w, r, storiesTmpl, storiesPage{Stories: a.storyRows(made)})
+}
+
+// storyRows are Stories as a list of them shows them, in the order given.
+func (a *app) storyRows(stories []editor.Story) []storyRow {
+	var rows []storyRow
+	for _, s := range stories {
 		row := storyRow{Href: storyPath(s.ID), When: when(s.At, a.Now().Location())}
 		if len(s.Spans) > 0 {
 			row.Opening = shorten(s.Spans[0].Body)
 		}
-		p.Stories = append(p.Stories, row)
+		rows = append(rows, row)
 	}
-	a.render(w, r, storiesTmpl, p)
+	return rows
 }
 
 // storyPage is the view model of a Story's Page: for a Story the Editor
@@ -175,6 +184,14 @@ func (a *app) story(w http.ResponseWriter, r *http.Request) {
 	for i, es := range s.Spans {
 		row := editorSpanRow{Body: es.Body, Href: editorSpanPath(s.ID, i+1)}
 		for _, c := range es.Cites {
+			if !c.Of.IsZero() {
+				// An earlier Editor's Span: its words, linking the Story
+				// that wrote them.
+				href := storyPath(c.Of.Story)
+				row.Cites = append(row.Cites, spanLink{Words: c.Words, Href: href,
+					Item: itemCitation{Source: "the Editor", Title: "an earlier Story", Href: href}})
+				continue
+			}
 			row.Cites = append(row.Cites, spanLink{Words: c.Words, Href: spanPath(c.Address),
 				Item: a.cite(c.Address.SourceID, c.Title, itemPath(c.Address.SourceID, c.Address.EntryID))})
 		}

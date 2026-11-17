@@ -174,10 +174,12 @@
 // Spans citing it, each the Editor's.
 //
 // The Topics page says Topics select nothing and links the counts on the
-// Items page, then is a table of the Followed Topics (name and terms):
-// Remove in the row's .actions, shown at rest, quiet (as Undo on the
-// Feedback page is), and Take up a Topic a <details> above it, open again
-// when a take-up fails.
+// Items page, then is a table of the Followed Topics (name, linking the
+// Topic's page, and terms): Remove in the row's .actions, shown at rest,
+// quiet (as Undo on the Feedback page is), and Take up a Topic a <details>
+// above it, open again when a take-up fails. A Topic's page, /topics/{id}
+// (topics.go), lists the Stories the Editor made that touch it, newest
+// first, as the Stories page lists them.
 //
 // The Items page leads with exceptions only when there are any (quiet
 // Sources, and failed work with its retry command, status-refuted for

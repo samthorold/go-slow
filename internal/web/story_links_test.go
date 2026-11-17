@@ -32,10 +32,14 @@ func weaveVisitAndBudget(t *testing.T, store *sqlite.Store) {
 	speech.Content = "<p>It’s good to be here in Motherwell.</p><p>Scotland will get £2 billion.</p>"
 	budget := item("budget", "Budget statement", saturday.Add(-72*time.Hour))
 	budget.Content = "<p>The Budget sets aside £2 billion for Scotland.</p>"
-	weave(t, store, `{"stories": [{"editor_spans": [
+	// Cut in this order: Items are cut in the order collected.
+	speech.CollectedAt = saturday.Add(-2 * time.Minute)
+	budget.CollectedAt = saturday.Add(-time.Minute)
+	seed(t, store, saturday.AddDate(0, 0, -7), speech, budget)
+	weave(t, store, saturday, `{"stories": [{"editor_spans": [
 	  {"body": "The money was announced twice.", "cites": [2, 3]},
 	  {"body": "The second time, in Motherwell.", "cites": [1, 2]}
-	]}]}`, speech, budget)
+	]}]}`)
 }
 
 func TestAStorysTimelineOrdersTheSpansItHoldsByPublication(t *testing.T) {

@@ -10,7 +10,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/sqlite"
@@ -23,20 +22,15 @@ func weaveSpeech(t *testing.T, store *sqlite.Store, output string) {
 	t.Helper()
 	speech := item("speech", "PM speech in Scotland", saturday.Add(-48*time.Hour))
 	speech.Content = "<p>It’s good to be here in Motherwell.</p><p>Scotland will get £2 billion.</p>"
-	weave(t, store, output, speech)
+	seed(t, store, saturday.AddDate(0, 0, -7), speech)
+	weave(t, store, saturday, output)
 }
 
-// weave seeds items, cuts them and weaves them with output through the
-// batch runner, as main does, its call kept. The Spans are numbered across
-// the items in the order they are given.
-func weave(t *testing.T, store *sqlite.Store, output string, items ...collect.Item) {
+// weave cuts what awaits its Cut at at and weaves it with output through the
+// batch runner, as main does, its call kept.
+func weave(t *testing.T, store *sqlite.Store, at time.Time, output string) {
 	t.Helper()
-	for i := range items {
-		// Cut in the order given: Items are cut in the order collected.
-		items[i].CollectedAt = saturday.Add(time.Duration(i-len(items)) * time.Minute)
-	}
-	seed(t, store, saturday.AddDate(0, 0, -7), items...)
-	if err := cut.New(store).CutNew(t.Context(), saturday); err != nil {
+	if err := cut.New(store).CutNew(t.Context(), at); err != nil {
 		t.Fatal(err)
 	}
 	log := slog.New(slog.DiscardHandler)
@@ -45,9 +39,41 @@ func weave(t *testing.T, store *sqlite.Store, output string, items ...collect.It
 		Acts: []editor.BatchAct{ed.Weaving(6 * time.Hour)}, Log: log})
 	// Submitted, then applied once its batch has ended.
 	for range 2 {
-		if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+		if err := b.ReadWaiting(t.Context(), at); err != nil {
 			t.Fatal(err)
 		}
+	}
+}
+
+func TestAStorysPageShowsAnEarlierEditorsSpanItCitesLinkingTheStoryThatWroteIt(t *testing.T) {
+	store := openStore(t)
+	weaveSpeech(t, store, twoOpinions)
+	// Sunday's run is shown the two Stories made (S1 to S5, the earlier
+	// Editor's Span "Motherwell is where…" S2), then the ferries as S6.
+	sunday := saturday.Add(24 * time.Hour)
+	ferries := item("ferries", "Ferries to the islands", sunday)
+	ferries.Content = "<p>Ferries to Scotland's islands will run more often.</p>"
+	seed(t, store, saturday.AddDate(0, 0, -7), ferries)
+	weave(t, store, sunday, `{"stories": [{"editor_spans": [
+	  {"body": "The ferries follow the money to the islands.", "cites": [2, 6]}
+	]}]}`)
+	app, _ := newAppWithLog(t, sunday, store)
+
+	res := storyPage(t, app, "The ferries follow the money to the islands.")
+
+	if res.status != 200 {
+		t.Fatalf("status %d:\n%s", res.status, res.body)
+	}
+	cited := regexp.MustCompile(`<a href="(/stories/\d+)"><span hx-disable>Motherwell is where the money lands first, as it did a decade ago when the steelworks closed.</span></a>`).
+		FindStringSubmatch(res.body)
+	if cited == nil {
+		t.Fatalf("the page does not show the earlier Editor's Span's words linking a Story:\n%s", res.body)
+	}
+	if got := get(t, app, cited[1]); !strings.Contains(got.body, "<h1>Motherwell is where the money lands first") {
+		t.Errorf("the Story it links is not the one that wrote it:\n%s", got.body)
+	}
+	if !strings.Contains(res.body, "Ferries to the islands") {
+		t.Errorf("the page lacks the ferries it cites:\n%s", res.body)
 	}
 }
 
@@ -146,7 +172,7 @@ func TestAStorysPageShowsItsEditorsSpansInOrderWithWhatEachCitesAndHowItWasMade(
 	if c := get(t, app, "/calls/"+call[1]); c.status != 200 || !strings.Contains(c.body, "A weaving call") {
 		t.Errorf("the call it links is not the weaving call (status %d):\n%s", c.status, c.body)
 	}
-	if !strings.Contains(res.body, "weaving v1") {
+	if !strings.Contains(res.body, fmt.Sprintf("weaving v%d", editor.WeavingVersion)) {
 		t.Errorf("the Story's Page does not name its Judge:\n%s", res.body)
 	}
 }

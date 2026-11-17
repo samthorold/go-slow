@@ -101,7 +101,10 @@
 // an event of kind weaving (weavings: its day as work_key, through_cut, the
 // newest Cut it was shown, and its Judge), and each Story it made an event of
 // kind story (woven_stories), holding its Editor's Spans (editor_spans, with
-// their words) and what each cites (editor_span_cites, addresses).
+// their words) and what each cites: a Source's Span (editor_span_cites, an
+// address into its Item's text) or an earlier Editor's Span
+// (editor_span_cites_editor, 0034: its Story and place, its words read from
+// the Story that wrote it), the two sharing the order cited, m.
 // StoriesToWeave is every Cut after the newest through_cut, of Items
 // collected after the switch; StoriesMade and StoryMade the Stories made,
 // each with its call (the applied weaving call on its run's day answering
@@ -117,8 +120,10 @@
 // (StandingWrongOnRelations, StandingTaste) and judgement_precedents
 // (0030_judgement_precedents.sql) keeps which it was shown. SourceCounts
 // (steering.go) is what the Owner steers by, per Source over steeringWindow,
-// the last 28 days: the Stories gathered in it holding a Span of one of the
-// Source's Items (latest gathering per Span gathered from), touching a Topic
-// when one of their Spans does, and the Spans of its Items collected in it,
-// by their newest live readings.
+// the last 28 days: the Stories the Editor made holding a Span of one of the
+// Source's Items collected in it, touching a Topic when one of their Spans
+// does (storyTouches: an Editor's Span, by its own words, or a Span it
+// cites), and the Spans of its Items collected in it, by their newest live
+// readings. StoriesTouching (touching.go) is a Topic's Page, by the same
+// test.
 package sqlite

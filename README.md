@@ -16,6 +16,7 @@ flowchart TD
         GOV[GOV.UK: No 10, UK Space Agency, Treasury]
         PARL[Parliament written statements]
         ONS[ONS releases]
+        NASA[NASA news releases]
     end
 
     Sources -->|every Collection run| COLLECT[Collection<br/>feed + full text]

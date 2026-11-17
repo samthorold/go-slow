@@ -174,6 +174,7 @@ func TestEveryListedSourceHasAShortNameSayingWhoIsSpeaking(t *testing.T) {
 		"ons-releases":                  "ONS",
 		"ons-release-calendar":          "ONS",
 		"govuk-uk-space-agency":         "UK Space Agency",
+		"nasa-news-releases":            "NASA",
 	}
 	listed := map[string]bool{}
 	for _, s := range collect.Sources() {
@@ -212,10 +213,11 @@ func TestTheUKSpaceAgencyIsCollectedFromItsGOVUKFeed(t *testing.T) {
 	t.Error("no UK Space Agency Source is listed")
 }
 
-func TestTheListedSourcesIncludeParliamentAndTheONS(t *testing.T) {
+func TestEveryFeedFormatIsReadByAListedSource(t *testing.T) {
 	want := map[collect.Format]bool{
 		collect.Atom: false, collect.ONSReleases: false,
 		collect.ONSReleaseCalendar: false, collect.WrittenStatements: false,
+		collect.RSS: false,
 	}
 	for _, s := range collect.Sources() {
 		want[s.Format] = true

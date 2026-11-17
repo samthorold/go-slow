@@ -18,6 +18,10 @@ const (
 	// ONSReleaseCalendar is the same ONS release search asked for upcoming
 	// releases: each entry is a scheduled event, due on its release date.
 	ONSReleaseCalendar
+	// RSS is an RSS 2.0 feed, such as NASA's: each item's guid is its
+	// entry id, and its content:encoded, where it carries one, its full
+	// text.
+	RSS
 )
 
 // parse reads a feed of this Format as Items (without Source or collection
@@ -32,6 +36,8 @@ func (f Format) parse(body []byte) ([]Item, error) {
 		return parseONSCalendar(body)
 	case WrittenStatements:
 		return parseWrittenStatements(body)
+	case RSS:
+		return parseRSS(body)
 	default:
 		return nil, fmt.Errorf("unknown feed format %d", f)
 	}

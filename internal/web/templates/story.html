@@ -29,5 +29,8 @@
 <section aria-labelledby="made">
   <h2 id="made">How it was made</h2>
   <p>{{template "made" .Made}} <span class="machine">{{.Judge}}</span></p>
+  {{- if .NameJudge}}
+  <p>{{template "made" .Named}} <span class="machine">{{.NameJudge}}</span></p>
+  {{- end}}
 </section>
 {{end}}

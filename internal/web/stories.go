@@ -26,10 +26,22 @@ var (
 // storyPath is a Story's Page: its event's id.
 func storyPath(id int64) string { return "/stories/" + strconv.FormatInt(id, 10) }
 
-// storyRow is a Story as the Stories Page lists it: by its opening words,
-// until it has a Name, linking its page, with when it was made.
+// storyRow is a Story as the Stories Page lists it: by its Name, or by its
+// opening words until it has one, linking its page, with when it was made.
 type storyRow struct {
-	Opening, Href, When string
+	Title, Href, When string
+}
+
+// storyTitle is what a Story is known by: its Name, or until it has one, its
+// opening words.
+func storyTitle(s editor.Story) string {
+	if s.Name.Text != "" {
+		return s.Name.Text
+	}
+	if len(s.Spans) > 0 {
+		return shorten(s.Spans[0].Body)
+	}
+	return ""
 }
 
 // storiesPage is the view model of the Stories Page.
@@ -47,11 +59,7 @@ func (a *app) stories(w http.ResponseWriter, r *http.Request) {
 	}
 	var p storiesPage
 	for _, s := range made {
-		row := storyRow{Href: storyPath(s.ID), When: when(s.At, a.Now().Location())}
-		if len(s.Spans) > 0 {
-			row.Opening = shorten(s.Spans[0].Body)
-		}
-		p.Stories = append(p.Stories, row)
+		p.Stories = append(p.Stories, storyRow{Title: storyTitle(s), Href: storyPath(s.ID), When: when(s.At, a.Now().Location())})
 	}
 	a.render(w, r, storiesTmpl, p)
 }
@@ -64,9 +72,16 @@ type storyPage struct {
 	When  string
 	Spans []editorSpanRow
 	// Made is the call that made it, and Judge its Judge's act, version and
-	// model.
-	Made  made
-	Judge string
+	// model; Named and NameJudge the same of its Name, if it has one.
+	Made      made
+	Judge     string
+	Named     made
+	NameJudge string
+}
+
+// judgeLabel is a Judge as a page shows it: its act, version and model.
+func judgeLabel(j editor.Judge) string {
+	return j.Act + " v" + strconv.Itoa(j.Version) + " · " + j.Model
 }
 
 // editorSpanRow is an Editor's Span as its Story's Page shows it: its words,
@@ -93,12 +108,13 @@ func (a *app) story(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	p := storyPage{
+		Title: storyTitle(s),
 		When:  when(s.At, a.Now().Location()),
 		Made:  made{Act: "woven", Call: s.Call},
-		Judge: s.Judge.Act + " v" + strconv.Itoa(s.Judge.Version) + " · " + s.Judge.Model,
+		Judge: judgeLabel(s.Judge),
 	}
-	if len(s.Spans) > 0 {
-		p.Title = shorten(s.Spans[0].Body)
+	if s.Name.Text != "" {
+		p.Named, p.NameJudge = made{Act: "named", Call: s.Name.Call}, judgeLabel(s.Name.Judge)
 	}
 	for _, es := range s.Spans {
 		row := editorSpanRow{Body: es.Body}

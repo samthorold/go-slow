@@ -30,6 +30,7 @@ func TestConfigIsReadFromTheEnvironment(t *testing.T) {
 		"BRIEFING_TIME":            "07:30",
 		"WEAVING_MODEL":            "claude-opus-5-5",
 		"WEAVING_TIME":             "05:45",
+		"NAMING_MODEL":             "claude-haiku-5-5",
 		"GOSLOW_ANTHROPIC_API_KEY": "sk-test",
 	}))
 	if err != nil {
@@ -48,6 +49,7 @@ func TestConfigIsReadFromTheEnvironment(t *testing.T) {
 		BriefingAt:         7*time.Hour + 30*time.Minute,
 		WeavingModel:       "claude-opus-5-5",
 		WeavingAt:          5*time.Hour + 45*time.Minute,
+		NamingModel:        "claude-haiku-5-5",
 		AnthropicAPIKey:    "sk-test",
 	}
 	if cfg != want {
@@ -61,7 +63,7 @@ func TestMissingVariablesAreAllNamed(t *testing.T) {
 	if err == nil {
 		t.Fatal("Load succeeded with nothing set")
 	}
-	for _, name := range []string{"PORT", "DATABASE_PATH", "COLLECTION_CONTACT", "COLLECTION_INTERVAL", "READING_MODEL", "RELATING_MODEL", "BRIEFING_MODEL", "SUNDAY_READ_MODEL", "BRIEFING_TIME", "WEAVING_MODEL", "WEAVING_TIME", "GOSLOW_ANTHROPIC_API_KEY"} {
+	for _, name := range []string{"PORT", "DATABASE_PATH", "COLLECTION_CONTACT", "COLLECTION_INTERVAL", "READING_MODEL", "RELATING_MODEL", "BRIEFING_MODEL", "SUNDAY_READ_MODEL", "BRIEFING_TIME", "WEAVING_MODEL", "WEAVING_TIME", "NAMING_MODEL", "GOSLOW_ANTHROPIC_API_KEY"} {
 		if !strings.Contains(err.Error(), name) {
 			t.Errorf("error %q does not name %s", err, name)
 		}
@@ -103,6 +105,7 @@ func valid() map[string]string {
 		"BRIEFING_TIME":            "07:00",
 		"WEAVING_MODEL":            "claude-opus-5-5",
 		"WEAVING_TIME":             "06:00",
+		"NAMING_MODEL":             "claude-haiku-5-5",
 		"GOSLOW_ANTHROPIC_API_KEY": "sk-test",
 	}
 }
@@ -124,7 +127,7 @@ func TestEachTimeOfDayMustBeATimeOfDay(t *testing.T) {
 func TestEachActsModelMustBeAClaudeModel(t *testing.T) {
 	// Only the Claude adapter exists yet; another provider's model would be
 	// sent to Anthropic's API and fail on every call.
-	for _, name := range []string{"READING_MODEL", "RELATING_MODEL", "BRIEFING_MODEL", "SUNDAY_READ_MODEL", "WEAVING_MODEL"} {
+	for _, name := range []string{"READING_MODEL", "RELATING_MODEL", "BRIEFING_MODEL", "SUNDAY_READ_MODEL", "WEAVING_MODEL", "NAMING_MODEL"} {
 		vars := valid()
 		vars[name] = "glm-5.3-flash"
 		_, err := config.Load(env(vars))

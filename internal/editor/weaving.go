@@ -60,6 +60,9 @@ type Story struct {
 	// Call is the kept call that made it, found by its Judge's request hash;
 	// zero if none was kept.
 	Call int64
+	// Name is its Name, the newest naming of it; its Text is empty until it
+	// has one.
+	Name StoryName
 }
 
 // Weaving is a weaving run whose result was written: the Stories it made,

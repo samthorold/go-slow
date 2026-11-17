@@ -136,11 +136,13 @@ type WorkFailure struct {
 // FailedWork is a piece of work marked failed, as the Owner is shown it: the
 // act, the Item it was on, and when and why it last failed. Work on no Item
 // (a weaving run) has no SourceID or EntryID, and its key, the run's day, as
-// its Title.
+// its Title. Work on a Story the Editor made (its naming) has the Story, and
+// its first Editor's Span as its Title.
 type FailedWork struct {
 	Act               string
 	SourceID, EntryID string
 	Title             string
+	Story             int64
 	Attempts          int
 	LastFailedAt      time.Time
 	Why               string

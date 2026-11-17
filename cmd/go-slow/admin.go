@@ -46,7 +46,7 @@ type adminDeps struct {
 //	each time.
 //
 //	retry [act]: clears the failed marks on the work of one act run in
-//	batches (reading, relating or weaving), or of every act, resetting its
+//	batches (reading, relating, weaving or naming), or of every act, resetting its
 //	attempts, so the next run takes that work up again:
 //
 //	  docker compose run --rm app retry relating

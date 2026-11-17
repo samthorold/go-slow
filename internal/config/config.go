@@ -48,6 +48,9 @@ type Config struct {
 	// to end at or after it, as the time since midnight (WEAVING_TIME, HH:MM
 	// on a 24-hour clock, such as 06:00).
 	WeavingAt time.Duration
+	// NamingModel is the Claude model the Editor names the Stories it made
+	// with (NAMING_MODEL, such as claude-haiku-5-5).
+	NamingModel string
 	// AnthropicAPIKey is the key for Anthropic's API (GOSLOW_ANTHROPIC_API_KEY).
 	AnthropicAPIKey Secret
 }
@@ -78,6 +81,7 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 	briefing, briefingTime := get("BRIEFING_MODEL"), get("BRIEFING_TIME")
 	sundayRead := get("SUNDAY_READ_MODEL")
 	weaving, weavingTime := get("WEAVING_MODEL"), get("WEAVING_TIME")
+	naming := get("NAMING_MODEL")
 	key := get("GOSLOW_ANTHROPIC_API_KEY")
 	if len(missing) > 0 {
 		return Config{}, fmt.Errorf("missing environment variables: %s", strings.Join(missing, ", "))
@@ -95,7 +99,7 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 	// OpenRouter later), so any other model would fail on every call.
 	for _, v := range [][2]string{
 		{"READING_MODEL", model}, {"RELATING_MODEL", relating}, {"BRIEFING_MODEL", briefing},
-		{"SUNDAY_READ_MODEL", sundayRead}, {"WEAVING_MODEL", weaving},
+		{"SUNDAY_READ_MODEL", sundayRead}, {"WEAVING_MODEL", weaving}, {"NAMING_MODEL", naming},
 	} {
 		if !strings.HasPrefix(v[1], "claude-") {
 			return Config{}, errors.New(v[0] + " must be a Claude model such as claude-haiku-5-5, got " + strconv.Quote(v[1]))
@@ -121,6 +125,7 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 		BriefingAt:         briefingAt,
 		WeavingModel:       weaving,
 		WeavingAt:          weavingAt,
+		NamingModel:        naming,
 		AnthropicAPIKey:    Secret(key),
 	}, nil
 }

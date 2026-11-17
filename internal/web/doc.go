@@ -159,12 +159,14 @@
 // stable address is /assessments/{id}, its event id.
 //
 // The Stories page (/stories, stories.go) lists the Stories the Editor made,
-// newest first, each by its first Editor's Span's opening words (shortened)
-// until Stories have Names, linking a Story's page, /stories/{id} (its
-// event's id): its Editor's Spans as blocks in the order written, each
-// margin saying it is the Editor's and holding the Spans it cites (words
-// linking the Span's page, with its Item's .citation), then how it was made,
-// "woven · call N" and its Judge.
+// newest first, each by its Name, or until it has one by its first Editor's
+// Span's opening words (shortened), linking a Story's page, /stories/{id}
+// (its event's id), headed the same way: its Editor's Spans as blocks in the
+// order written, each margin saying it is the Editor's and holding the Spans
+// it cites (words linking the Span's page, with its Item's .citation), then
+// how it was made, "woven · call N" and its Judge, and once named, "named ·
+// call N" and its Name's Judge. A failed naming is listed on the Items page
+// by its Story's opening words, linking its page.
 //
 // The Topics page says Topics select nothing and links the counts on the
 // Items page, then is a table of the Followed Topics (name and terms):

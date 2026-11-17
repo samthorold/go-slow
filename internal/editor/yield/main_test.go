@@ -51,6 +51,30 @@ func TestTheBriefingIsCountedByItsStatementsTheSpansTheyCiteAndTheStoriesItGathe
 	}
 }
 
+// Weaving is counted by the Stories it made, their Editor's Spans and the
+// distinct Spans they cite. With no recordings before it, its fixtures show
+// as added.
+func TestWeavingIsCountedByItsStoriesTheirEditorsSpansAndTheSpansTheyCite(t *testing.T) {
+	before, after := t.TempDir(), t.TempDir()
+	write(t, after, "weaving/saturday/1.json", `{"act": "weaving", "output": {"stories": [
+		{"editor_spans": [{"body": "a", "cites": [1, 2]}, {"body": "b", "cites": [2, 3]}]},
+		{"editor_spans": [{"body": "c", "cites": [4]}]}
+	]}}`)
+	write(t, after, "weaving/saturday/2.json", `{"act": "weaving", "output": {"stories": []}}`)
+
+	got := yieldOf(t, before, after)
+
+	for _, want := range []string{
+		"### weaving",
+		"| Fixture | Stories | Editor's Spans | Spans cited |",
+		"| weaving/saturday (added) | – → 0–2 | – → 0–3 | – → 0–4 |",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("the report has no line %q; it is:\n%s", want, got)
+		}
+	}
+}
+
 func TestRelatingYieldCountsRelationsByKindAndASampleWithNoCallAsNone(t *testing.T) {
 	before, after := t.TempDir(), t.TempDir()
 	write(t, after, "relating/speech/1.json", `{"act": "relating", "output": {"relations": [

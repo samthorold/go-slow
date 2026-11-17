@@ -6,7 +6,8 @@
 //	go run ./internal/editor/yield <before> <after>
 //
 // Relating is counted by its relations' kinds; a sample of an Item related
-// with no call counts none.
+// with no call counts none. Weaving is counted by the Stories it made, their
+// Editor's Spans and the distinct Spans they cite.
 //
 // Each argument is a recordings directory (internal/editor/testdata/recorded,
 // or an older copy of it, e.g. extracted with git archive). A fixture
@@ -96,6 +97,32 @@ var acts = []act{
 	{"reading", []string{"Spans", "Rejected", "Names", "Speakers", "Refers to"}, countReading},
 	{"relating", []string{"Follows", "Same as", "Contradicts"}, countRelating},
 	{"briefing", []string{"Statements", "Spans cited", "Stories gathered"}, countBriefing},
+	{"weaving", []string{"Stories", "Editor's Spans", "Spans cited"}, countWeaving},
+}
+
+// countWeaving counts the Stories a weaving run made, their Editor's Spans
+// and the distinct Spans they cite, by the numbers the run was shown them as.
+func countWeaving(out json.RawMessage, _ about) ([]int, error) {
+	var r struct {
+		Stories []struct {
+			EditorSpans []struct {
+				Cites []int `json:"cites"`
+			} `json:"editor_spans"`
+		} `json:"stories"`
+	}
+	if err := json.Unmarshal(out, &r); err != nil {
+		return nil, err
+	}
+	spans, cited := 0, map[int]bool{}
+	for _, s := range r.Stories {
+		spans += len(s.EditorSpans)
+		for _, es := range s.EditorSpans {
+			for _, c := range es.Cites {
+				cited[c] = true
+			}
+		}
+	}
+	return []int{len(r.Stories), spans, len(cited)}, nil
 }
 
 // countRelating counts the relations a relating judged, by kind. A sample of

@@ -28,26 +28,31 @@ func yieldOf(t *testing.T, before, after string) string {
 	return out.String()
 }
 
-func TestTheBriefingIsCountedByItsStatementsTheSpansTheyCiteAndTheStoriesItGathered(t *testing.T) {
+// Recordings of acts the tool doesn't count (relating and the Briefing are
+// retired) get no table: the report names them as acts it doesn't count.
+func TestRetiredActsAreReportedAsNotCounted(t *testing.T) {
 	before, after := t.TempDir(), t.TempDir()
 	write(t, before, "briefing/saturday.json", `{"act": "briefing", "output": {"statements": [
 		{"spans": ["S1"], "stories": [], "text": "a"}
 	]}}`)
-	write(t, after, "briefing/saturday.json", `{"act": "briefing", "output": {"statements": [
-		{"spans": ["S1", "S2"], "stories": [{"span": "S1", "story": ["E1"]}], "text": "a"},
-		{"spans": ["S2", "S3"], "stories": [], "text": "c"}
+	write(t, after, "relating/speech/1.json", `{"act": "relating", "output": {"relations": [
+		{"span": "S1", "to": "C1", "verdict": "follows"}
 	]}}`)
+	write(t, after, "relating/first/1.json", `{"act": "", "model": "", "output": null}`)
+	write(t, after, "weaving/saturday/1.json", `{"act": "weaving", "output": {"stories": []}}`)
 
 	got := yieldOf(t, before, after)
 
-	for _, want := range []string{
-		"### briefing",
-		"| Fixture | Statements | Spans cited | Stories gathered |",
-		"| briefing/saturday | 1 → 2 | 1 → 3 | 0 → 1 |",
-	} {
-		if !strings.Contains(got, want) {
-			t.Errorf("the report has no line %q; it is:\n%s", want, got)
+	if !strings.Contains(got, "Not counted: briefing, relating\n") {
+		t.Errorf("the report doesn't name the acts it doesn't count; it is:\n%s", got)
+	}
+	for _, unwanted := range []string{"### briefing", "### relating", "Follows", "Statements"} {
+		if strings.Contains(got, unwanted) {
+			t.Errorf("the report has %q, which it should leave out; it is:\n%s", unwanted, got)
 		}
+	}
+	if !strings.Contains(got, "### weaving") {
+		t.Errorf("the report leaves out weaving; it is:\n%s", got)
 	}
 }
 
@@ -75,48 +80,21 @@ func TestWeavingIsCountedByItsStoriesTheirEditorsSpansAndTheSpansTheyCite(t *tes
 	}
 }
 
-func TestRelatingYieldCountsRelationsByKindAndASampleWithNoCallAsNone(t *testing.T) {
-	before, after := t.TempDir(), t.TempDir()
-	write(t, after, "relating/speech/1.json", `{"act": "relating", "output": {"relations": [
-		{"span": "S1", "to": "C1", "verdict": "follows"}, {"span": "S2", "to": "C1", "verdict": "follows"},
-		{"span": "S3", "to": "C2", "verdict": "same_as"}
-	]}}`)
-	write(t, after, "relating/speech/2.json", `{"act": "relating", "output": {"relations": [
-		{"span": "S1", "to": "C1", "verdict": "follows"}, {"span": "S4", "to": "C3", "verdict": "contradicts"}
-	]}}`)
-	// The first Item read had nothing read before it: related with no call.
-	write(t, after, "relating/first/1.json", `{"act": "", "model": "", "output": null}`)
-
-	got := yieldOf(t, before, after)
-
-	for _, want := range []string{
-		"### relating",
-		"| Fixture | Follows | Same as | Contradicts |",
-		"| relating/first (added) | – → 0 | – → 0 | – → 0 |",
-		"| relating/speech (added) | – → 1–2 | – → 0–1 | – → 0–1 |",
-	} {
-		if !strings.Contains(got, want) {
-			t.Errorf("yield lacks %q:\n%s", want, got)
-		}
-	}
-}
-
 func TestFrozenInputsAndOtherFilesAreLeftOut(t *testing.T) {
 	before, after := t.TempDir(), t.TempDir()
 	for _, dir := range []string{before, after} {
-		write(t, dir, "relating/x.json", `{"act": "relating", "output": {"relations": []}}`)
-		write(t, dir, "sunday/inputs/reading/x.json", `{"act": "reading", "output": {"names": [{}], "refers_to": [], "rejected": [], "speakers": []}}`)
-		write(t, dir, "relating/inputs/reading/x.json", `{"act": "reading", "output": {"names": [], "refers_to": [], "rejected": [], "speakers": []}}`)
-		write(t, dir, "sunday/conversation.json", `{"act": "sunday_read", "turns": []}`)
-		write(t, dir, "sunday/wikidata/search.json", `[{"id": "Q1"}]`)
+		write(t, dir, "weaving/x.json", `{"act": "weaving", "output": {"stories": []}}`)
+		write(t, dir, "weaving/inputs/reading/x.json", `{"act": "reading", "output": {"names": [{}], "refers_to": [], "rejected": [], "speakers": []}}`)
+		write(t, dir, "naming/inputs/weaving/x.json", `{"act": "weaving", "output": {"stories": [{"editor_spans": []}]}}`)
+		write(t, dir, "weaving/wikidata/search.json", `[{"id": "Q1"}]`)
 	}
 
 	got := yieldOf(t, before, after)
 
-	if !strings.Contains(got, "| relating/x | 0 → 0 |") {
-		t.Errorf("the report leaves out the relating recording; it is:\n%s", got)
+	if !strings.Contains(got, "| weaving/x | 0 → 0 |") {
+		t.Errorf("the report leaves out the weaving recording; it is:\n%s", got)
 	}
-	for _, unwanted := range []string{"inputs", "### reading", "sunday"} {
+	for _, unwanted := range []string{"inputs", "### reading", "wikidata", "naming", "Not counted"} {
 		if strings.Contains(got, unwanted) {
 			t.Errorf("the report has %q, which it should leave out; it is:\n%s", unwanted, got)
 		}
@@ -165,22 +143,30 @@ func TestReadingYieldShowsTheSpansRejectedNamesSpeakersAndReferences(t *testing.
 // from every fixture's least to its most.
 func TestAFixturesSamplesShowAsTheRangeTheyDrew(t *testing.T) {
 	before, after := t.TempDir(), t.TempDir()
-	follows := `{"span": "S1", "to": "C1", "verdict": "follows"}`
-	write(t, before, "relating/x.json", `{"act": "relating", "output": {"relations": [`+follows+`]}}`)
-	write(t, before, "relating/y.json", `{"act": "relating", "output": {"relations": []}}`)
-	write(t, after, "relating/x/1.json", `{"act": "relating", "output": {"relations": [`+follows+`, `+follows+`]},
-		"earlier_attempts": [{"act": "relating", "output": {"relations": [`+follows+`, `+follows+`, `+follows+`]}}]}`)
-	write(t, after, "relating/x/2.json", `{"act": "relating", "output": {"relations": []}}`)
-	write(t, after, "relating/x/3.json", `{"act": "relating", "output": {"relations": [`+follows+`]}}`)
-	write(t, after, "relating/y/1.json", `{"act": "relating", "output": {"relations": [`+follows+`]}}`)
-	write(t, after, "relating/y/2.json", `{"act": "relating", "output": {"relations": [`+follows+`]}}`)
+	story := `{"editor_spans": []}`
+	stories := func(n int) string {
+		s := make([]string, n)
+		for i := range s {
+			s[i] = story
+		}
+		return `{"act": "weaving", "output": {"stories": [` + strings.Join(s, ", ") + `]}`
+	}
+	write(t, before, "weaving/x.json", stories(1)+`}`)
+	write(t, before, "weaving/y.json", stories(0)+`}`)
+	write(t, before, "weaving/gone.json", stories(1)+`}`)
+	write(t, after, "weaving/x/1.json", stories(2)+`, "earlier_attempts": [`+stories(3)+`}]}`)
+	write(t, after, "weaving/x/2.json", stories(0)+`}`)
+	write(t, after, "weaving/x/3.json", stories(1)+`}`)
+	write(t, after, "weaving/y/1.json", stories(1)+`}`)
+	write(t, after, "weaving/y/2.json", stories(1)+`}`)
 
 	got := yieldOf(t, before, after)
 
 	for _, want := range []string{
-		"| relating/x | 1 → 0–2 |",
-		"| relating/y | 0 → 1 |",
-		"| **Total** | 1 → 1–3 |",
+		"| weaving/x | 1 → 0–2 |",
+		"| weaving/y | 0 → 1 |",
+		"| weaving/gone (removed) | 1 → – |",
+		"| **Total** | 2 → 1–3 |",
 	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("the report has no line %q; it is:\n%s", want, got)

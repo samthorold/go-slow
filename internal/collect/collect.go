@@ -11,7 +11,9 @@
 // LinkPrefix. A Source whose feed
 // carries only a summary declares how each entry's full text is fetched
 // (Source.Text, text.go: GOV.UK's Content API document for the entry's
-// path, or the written statement itself), and a new entry is kept only once
+// path, the written statement itself, or, where no feed or API carries the
+// text and the terms let it be kept, the article body of the entry's own
+// page, found as Source.PageBody says), and a new entry is kept only once
 // its text is fetched, through the same Fetcher; one whose fetch fails is
 // left out, and the feed's validators are not saved, so the next run sees it
 // again. Backfill (backfill.go, its port TextStore) gives the text to uncut
@@ -73,6 +75,9 @@ type Source struct {
 	// Text is how the Source's entries get their full text, where the feed
 	// carries only a summary or an opening.
 	Text Text
+	// PageBody is where the article body is on an entry's page, for a
+	// Source whose Text is TextFromPage.
+	PageBody PageBody
 	// Licence names the terms the Source is collected under; Attribution is
 	// the statement they ask for, carried by every Item; Keeps is how much
 	// of an Item they let the Record keep.

@@ -17,6 +17,7 @@ flowchart TD
         PARL[Parliament written statements]
         ONS[ONS releases]
         NASA[NASA news releases]
+        FED[Federal Reserve press releases and speeches]
     end
 
     Sources -->|every Collection run| COLLECT[Collection<br/>feed + full text]

@@ -4,6 +4,7 @@ go 1.27.3
 
 require (
 	github.com/anthropics/anthropic-sdk-go v1.84.0
+	golang.org/x/net v0.41.0
 	modernc.org/sqlite v1.61.0
 )
 

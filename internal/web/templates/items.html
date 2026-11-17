@@ -23,7 +23,7 @@
   <p>Each failed every attempt and is no longer tried. Once the cause is fixed, take an act's work up again with the <code>retry</code> admin command beside it.</p>
   <ul>
   {{- range .Failed}}
-    <li>{{.Act}} <a href="{{.Page}}" hx-disable>{{.Title}}</a>: <span class="status status-refuted">failed</span> {{if .AttemptsPage}}<a href="{{.AttemptsPage}}">{{.Attempts}} times</a>{{else}}{{.Attempts}} times{{end}}, last {{.When}}
+    <li>{{.Act}} {{if .Page}}<a href="{{.Page}}" hx-disable>{{.Title}}</a>{{else}}{{.Title}}{{end}}:<span class="status status-refuted">failed</span> {{if .AttemptsPage}}<a href="{{.AttemptsPage}}">{{.Attempts}} times</a>{{else}}{{.Attempts}} times{{end}}, last {{.When}}
       <p hx-disable>{{.Why}}</p>
       <p><code>docker compose run --rm app retry {{.Act}}</code></p>
     </li>

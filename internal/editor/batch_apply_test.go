@@ -28,7 +28,7 @@ type stubAct struct {
 func (s *stubAct) act() editor.BatchAct {
 	return editor.BatchAct{
 		Name: "stub",
-		Waiting: func(context.Context) ([]editor.Job, error) {
+		Waiting: func(context.Context, time.Time) ([]editor.Job, error) {
 			var jobs []editor.Job
 			for _, k := range s.keys {
 				if slices.Contains(s.applied, k) {

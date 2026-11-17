@@ -58,6 +58,7 @@ func appDeps(now time.Time, store *sqlite.Store, logs *bytes.Buffer) web.Deps {
 		Register:    store,
 		SundayReads: store,
 		Calls:       store,
+		Stories:     store,
 		Sources:     []collect.Source{number10},
 		BriefingAt:  7 * time.Hour,
 		Now:         func() time.Time { return now },

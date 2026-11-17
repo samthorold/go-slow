@@ -40,6 +40,14 @@ type Config struct {
 	// Briefing is written and due by, as the time since midnight
 	// (BRIEFING_TIME, HH:MM on a 24-hour clock, such as 07:00).
 	BriefingAt time.Duration
+	// WeavingModel is the Claude model the Editor weaves Stories with
+	// (WEAVING_MODEL, such as claude-opus-5-5).
+	WeavingModel string
+	// WeavingAt is the time of day, in the Owner's time zone (TZ), from
+	// which the day's weaving run is submitted, on the first Collection run
+	// to end at or after it, as the time since midnight (WEAVING_TIME, HH:MM
+	// on a 24-hour clock, such as 06:00).
+	WeavingAt time.Duration
 	// AnthropicAPIKey is the key for Anthropic's API (GOSLOW_ANTHROPIC_API_KEY).
 	AnthropicAPIKey Secret
 }
@@ -69,6 +77,7 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 	model, relating := get("READING_MODEL"), get("RELATING_MODEL")
 	briefing, briefingTime := get("BRIEFING_MODEL"), get("BRIEFING_TIME")
 	sundayRead := get("SUNDAY_READ_MODEL")
+	weaving, weavingTime := get("WEAVING_MODEL"), get("WEAVING_TIME")
 	key := get("GOSLOW_ANTHROPIC_API_KEY")
 	if len(missing) > 0 {
 		return Config{}, fmt.Errorf("missing environment variables: %s", strings.Join(missing, ", "))
@@ -86,15 +95,19 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 	// OpenRouter later), so any other model would fail on every call.
 	for _, v := range [][2]string{
 		{"READING_MODEL", model}, {"RELATING_MODEL", relating}, {"BRIEFING_MODEL", briefing},
-		{"SUNDAY_READ_MODEL", sundayRead},
+		{"SUNDAY_READ_MODEL", sundayRead}, {"WEAVING_MODEL", weaving},
 	} {
 		if !strings.HasPrefix(v[1], "claude-") {
 			return Config{}, errors.New(v[0] + " must be a Claude model such as claude-haiku-5-5, got " + strconv.Quote(v[1]))
 		}
 	}
-	clock, err := time.Parse("15:04", briefingTime)
-	if err != nil || len(briefingTime) != len("15:04") {
-		return Config{}, errors.New("BRIEFING_TIME must be a time of day such as 07:00, got " + strconv.Quote(briefingTime))
+	briefingAt, err := timeOfDay("BRIEFING_TIME", briefingTime)
+	if err != nil {
+		return Config{}, err
+	}
+	weavingAt, err := timeOfDay("WEAVING_TIME", weavingTime)
+	if err != nil {
+		return Config{}, err
 	}
 	return Config{
 		Port:               n,
@@ -105,7 +118,19 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 		RelatingModel:      relating,
 		BriefingModel:      briefing,
 		SundayReadModel:    sundayRead,
-		BriefingAt:         time.Duration(clock.Hour())*time.Hour + time.Duration(clock.Minute())*time.Minute,
+		BriefingAt:         briefingAt,
+		WeavingModel:       weaving,
+		WeavingAt:          weavingAt,
 		AnthropicAPIKey:    Secret(key),
 	}, nil
+}
+
+// timeOfDay is the variable name's value v, HH:MM on a 24-hour clock, as the
+// time since midnight.
+func timeOfDay(name, v string) (time.Duration, error) {
+	clock, err := time.Parse("15:04", v)
+	if err != nil || len(v) != len("15:04") {
+		return 0, errors.New(name + " must be a time of day such as 07:00, got " + strconv.Quote(v))
+	}
+	return time.Duration(clock.Hour())*time.Hour + time.Duration(clock.Minute())*time.Minute, nil
 }

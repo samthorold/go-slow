@@ -95,6 +95,19 @@
 // in told_read_citations) and each Story it gathered (gatherings with
 // read_id).
 //
+// # Weaving
+//
+// A weaving run whose result was written (0033_weaving.sql, weavings.go) is
+// an event of kind weaving (weavings: its day as work_key, through_cut, the
+// newest Cut it was shown, and its Judge), and each Story it made an event of
+// kind story (woven_stories), holding its Editor's Spans (editor_spans, with
+// their words) and what each cites (editor_span_cites, addresses).
+// StoriesToWeave is every Cut after the newest through_cut, of Items
+// collected after the switch; StoriesMade and StoryMade the Stories made,
+// each with its call (the applied weaving call on its run's day answering
+// its request hash). A kept call and a pending request also keep the effort
+// asked for (effort, ” for none).
+//
 // # Feedback and steering
 //
 // Feedback is kept as events by pieces.go (0029_feedback_events.sql); every

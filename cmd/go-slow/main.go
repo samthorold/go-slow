@@ -70,9 +70,9 @@ func main() {
 }
 
 // batchActs are the acts run in batches, in the order their work is
-// submitted.
-func batchActs(ed *editor.Editor) []editor.BatchAct {
-	return []editor.BatchAct{ed.Reading(), ed.Relating()}
+// submitted; weaving from the time of day weavingAt.
+func batchActs(ed *editor.Editor, weavingAt time.Duration) []editor.BatchAct {
+	return []editor.BatchAct{ed.Reading(), ed.Relating(), ed.Weaving(weavingAt)}
 }
 
 func run(log *slog.Logger) error {
@@ -103,7 +103,7 @@ func run(log *slog.Logger) error {
 		Model:  cfg.ReadingModel,
 		ActModels: map[string]string{
 			"reading": cfg.ReadingModel, "relating": cfg.RelatingModel, "briefing": cfg.BriefingModel,
-			"sunday_read": cfg.SundayReadModel,
+			"sunday_read": cfg.SundayReadModel, "weaving": cfg.WeavingModel,
 		},
 	})
 	// What the readings name, and the Sunday read's tools, look Wikidata
@@ -119,7 +119,7 @@ func run(log *slog.Logger) error {
 	ed := editor.New(editor.Deps{
 		Store: store, Model: models, RelatingModel: models, Wikidata: wd,
 		Briefings: store, BriefingModel: models, SundayReads: store, SundayReadModel: models,
-		ModelFor: models.ModelFor, Log: log,
+		Weavings: store, ModelFor: models.ModelFor, Log: log,
 	})
 	// The daily acts run in batches: submitted after a Collection run, and
 	// their results applied on later runs as they arrive. One batch carries
@@ -127,7 +127,7 @@ func run(log *slog.Logger) error {
 	batches := editor.NewBatches(editor.BatchDeps{
 		Store:    store,
 		Batcher:  models,
-		Acts:     batchActs(ed),
+		Acts:     batchActs(ed, cfg.WeavingAt),
 		ModelFor: models.ModelFor,
 		Log:      log,
 	})
@@ -205,6 +205,7 @@ func run(log *slog.Logger) error {
 		Register:    store,
 		SundayReads: store,
 		Calls:       store,
+		Stories:     store,
 		Sources:     sources,
 		BriefingAt:  cfg.BriefingAt,
 		Now:         time.Now,

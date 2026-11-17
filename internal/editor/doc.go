@@ -108,6 +108,31 @@
 // admin command. Editor.ReadWaiting and Editor.RelateWaiting are the
 // synchronous paths, for when no batch interface is available.
 //
+// # Weaving
+//
+// Weaving (weaving.go, WeavingVersion; system design: Weaving asks for an
+// editor's opinion, and need get none) is the first act of the new design,
+// built alongside the old ones. Editor.Weaving is a BatchAct whose work is
+// one run a day, keyed by the day (time.DateOnly in now's location): its
+// Waiting, told now, gives a job only at or after the time of day it was
+// built with (DueAt), when that day's run has been neither written nor marked
+// failed (WeavingStore.WeavingRan) and something has been cut since the last
+// run written; while a run's request is in a pending batch, that run's job
+// alone. A run is one request, at EffortMedium, shown every Story cut since
+// the last run written (the storage adapter's StoriesToWeave: Cuts after its
+// through_cut, of Items collected after the switch), each under its Item's
+// title and date, its Spans as written numbered S1, S2… across them all. It
+// answers stories, each editor_spans, each body then cites (numbers). The
+// checks refuse a citation of a Span not shown, an Editor's Span with no
+// words or no citation, and a Story with none; an empty stories is a run
+// that made nothing, kept all the same. A result is applied through
+// Job.ApplySent to the request as sent, never refused as stale: the Stories
+// it showed are the first of those now awaiting (shownIn), since Cuts are
+// only added to and numbering runs on from the first. KeepWeaving keeps the
+// run (its Judge and the newest Cut shown) and each Story as its own event.
+// A run failing MaxAttempts is listed on the Items page by its day, and its
+// Stories are shown to the next day's run.
+//
 // # Precedents
 //
 // Relating and the Briefing are shown precedents (precedent.go, system
@@ -129,7 +154,7 @@
 //
 // # Kept calls
 //
-// Every model call reading, relating and writing the Briefing make is kept
+// Every model call reading, relating, weaving and writing the Briefing make is kept
 // (calls.go), in a batch and through the synchronous paths alike
 // (Editor.callNow): a Call holds the act and work, the request as sent (a
 // batch's request is kept when it is submitted, with the pending batch), the

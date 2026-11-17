@@ -56,6 +56,9 @@ type Deps struct {
 	// agent with tools.
 	SundayReads     SundayStore
 	SundayReadModel Conversation
+	// Weavings is the part of the Record weaving reads and keeps its
+	// Stories in; weaving runs in batches, on the batch interface's models.
+	Weavings WeavingStore
 	// ModelFor is the model an act's calls run on, as the model adapter
 	// chooses it, kept with each call; nil leaves it unknown.
 	ModelFor func(act string) string

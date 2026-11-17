@@ -46,7 +46,7 @@ type adminDeps struct {
 //	each time.
 //
 //	retry [act]: clears the failed marks on the work of one act run in
-//	batches (reading or relating), or of every act, resetting its
+//	batches (reading, relating or weaving), or of every act, resetting its
 //	attempts, so the next run takes that work up again:
 //
 //	  docker compose run --rm app retry relating
@@ -118,7 +118,7 @@ func admin(ctx context.Context, log *slog.Logger, args []string, d adminDeps) er
 			act = args[1]
 		}
 		var known []string
-		for _, a := range batchActs(editor.New(editor.Deps{})) {
+		for _, a := range batchActs(editor.New(editor.Deps{}), 0) {
 			known = append(known, a.Name)
 		}
 		if act != "" && !slices.Contains(known, act) {

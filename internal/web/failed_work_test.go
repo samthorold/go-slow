@@ -42,6 +42,31 @@ func TestTheItemsPageShowsFailedWorkWithWhenAndWhyItLastFailed(t *testing.T) {
 	}
 }
 
+func TestAFailedWeavingRunIsListedByItsDayWithNoItemToLink(t *testing.T) {
+	store := openStore(t)
+	if err := store.EndBatch(t.Context(), "batch-1", []editor.WorkFailure{{
+		Act: "weaving", Key: "2026-10-24", At: saturday.Add(-time.Hour),
+		Why: "the result fails the act's checks: story 1 has no editor_spans", Failed: true,
+	}}, nil); err != nil {
+		t.Fatal(err)
+	}
+	app, _ := newAppWithLog(t, saturday, store)
+
+	section := leadingExceptions(t, get(t, app, "/items").body)
+
+	for _, want := range []string{
+		"weaving", "the run of 2026-10-24", "story 1 has no editor_spans",
+		"<code>docker compose run --rm app retry weaving</code>",
+	} {
+		if !strings.Contains(section, want) {
+			t.Errorf("failed work lacks %q:\n%s", want, section)
+		}
+	}
+	if strings.Contains(section, `href=""`) {
+		t.Errorf("the failed run links nowhere:\n%s", section)
+	}
+}
+
 // refusingBatcher ends every batch at once, answering each request with
 // output.
 type refusingBatcher struct {

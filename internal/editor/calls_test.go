@@ -198,6 +198,7 @@ func TestARequestsHashCoversItsInstructionsSchemaInputAndModel(t *testing.T) {
 		"input":        func() (editor.Request, string) { r := req; r.Input = "Title: y"; return r, "m" },
 		"schema":       func() (editor.Request, string) { r := req; r.Schema = map[string]any{"type": "array"}; return r, "m" },
 		"model":        func() (editor.Request, string) { return req, "n" },
+		"effort":       func() (editor.Request, string) { r := req; r.Effort = editor.EffortMedium; return r, "m" },
 	} {
 		if editor.RequestHash(other()) == h {
 			t.Errorf("a request with other %s hashes the same", name)

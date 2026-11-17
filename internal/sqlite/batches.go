@@ -16,7 +16,7 @@ import (
 func (s *Store) PendingBatches(ctx context.Context) ([]editor.PendingBatch, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT batches.id, batches.submitted_at, r.request_id, r.act, r.work_key,
-			r.model, i.text, s.text, n.text, r.precedents
+			r.model, i.text, s.text, n.text, r.effort, r.precedents
 		FROM batches JOIN batch_requests r ON r.batch_id = batches.id
 			LEFT JOIN call_texts i ON i.hash = r.instructions
 			LEFT JOIN call_texts s ON s.hash = r.schema
@@ -31,12 +31,13 @@ func (s *Store) PendingBatches(ctx context.Context) ([]editor.PendingBatch, erro
 		var id, submitted string
 		var r editor.PendingRequest
 		var model, instructions, schema, input, precedents sql.NullString
+		var effort string
 		if err := rows.Scan(&id, &submitted, &r.ID, &r.Act, &r.Key,
-			&model, &instructions, &schema, &input, &precedents); err != nil {
+			&model, &instructions, &schema, &input, &effort, &precedents); err != nil {
 			return nil, fmt.Errorf("pending batches: %w", err)
 		}
 		if model.Valid {
-			req := editor.Request{Act: r.Act, Instructions: instructions.String, Input: input.String}
+			req := editor.Request{Act: r.Act, Instructions: instructions.String, Input: input.String, Effort: effort}
 			if err := json.Unmarshal([]byte(schema.String), &req.Schema); err != nil {
 				return nil, fmt.Errorf("pending batches: schema: %w", err)
 			}
@@ -114,7 +115,9 @@ func saveBatch(ctx context.Context, tx *sql.Tx, b editor.PendingBatch) error {
 	}
 	for _, r := range b.Requests {
 		var model, instructions, schema, input, precedents sql.NullString
+		var effort string
 		if r.Request != nil {
+			effort = r.Request.Effort
 			t, err := keepRequest(ctx, tx, *r.Request)
 			if err != nil {
 				return fmt.Errorf("save batch %s: %w", b.ID, err)
@@ -131,9 +134,9 @@ func saveBatch(ctx context.Context, tx *sql.Tx, b editor.PendingBatch) error {
 		}
 		if _, err := tx.ExecContext(ctx, `
 			INSERT INTO batch_requests (batch_id, request_id, act, work_key,
-				model, instructions, schema, input, precedents)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-			b.ID, r.ID, r.Act, r.Key, model, instructions, schema, input, precedents); err != nil {
+				model, instructions, schema, input, effort, precedents)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			b.ID, r.ID, r.Act, r.Key, model, instructions, schema, input, effort, precedents); err != nil {
 			return fmt.Errorf("save batch %s: %w", b.ID, err)
 		}
 	}

@@ -51,6 +51,8 @@ type Deps struct {
 	SundayReads SundayReads
 	// Calls answers the kept calls' pages.
 	Calls Calls
+	// Stories answers the Stories Page and each Story's.
+	Stories Stories
 	// Sources is the Sources list, from which a citation takes its
 	// Source's short name, by ID. A Source not in it is cited by the
 	// Item's title alone.
@@ -117,6 +119,7 @@ type navLink struct {
 var indexes = []navLink{
 	{Href: "/", Name: "Briefing"},
 	{Href: "/briefings", Name: "Briefings"},
+	{Href: "/stories", Name: "Stories"},
 	{Href: "/items", Name: "Items"},
 	{Href: "/topics", Name: "Topics"},
 	{Href: "/feedback", Name: "Feedback"},
@@ -175,6 +178,8 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("POST /items/{source}/{entry}/spans/{span}/feedback", a.spanFeedback)
 	mux.HandleFunc("PUT /items/{source}/{entry}/spans/{span}/feedback/{feedback}/undone", a.undoOnSpan)
 	mux.HandleFunc("GET /register", a.register)
+	mux.HandleFunc("GET /stories", a.stories)
+	mux.HandleFunc("GET /stories/{id}", a.story)
 	mux.HandleFunc("GET /topics", a.topics)
 	mux.HandleFunc("POST /topics", a.addTopic)
 	mux.HandleFunc("DELETE /topics/{id}", a.removeTopic)

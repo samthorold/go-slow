@@ -52,10 +52,11 @@ type BatchPoll struct {
 type BatchAct struct {
 	// Name names the act, as its requests do.
 	Name string
-	// Waiting is the work awaiting the act in the Record. Work stays waiting
-	// until its result is written, so a batch's results are applied to the
-	// work as it is when they arrive, which may be after a restart.
-	Waiting func(ctx context.Context) ([]Job, error)
+	// Waiting is the work awaiting the act in the Record, at now (the end of
+	// the Collection run the batch runner follows). Work stays waiting until
+	// its result is written, so a batch's results are applied to the work as
+	// it is when they arrive, which may be after a restart.
+	Waiting func(ctx context.Context, now time.Time) ([]Job, error)
 }
 
 // Job is one piece of work awaiting an act.
@@ -70,6 +71,19 @@ type Job struct {
 	// what passes to the Record, at now. A result that fails the checks is
 	// ErrFailedChecks and writes nothing; any other error is the Record's.
 	Apply func(ctx context.Context, res Response, now time.Time) error
+	// ApplySent, when set, is used in Apply's place for work whose answer
+	// stays true of what it was shown however the Record has moved on since
+	// (a Story from weaving): a result is applied to the request as it was
+	// sent, and never refused because the work would now be asked otherwise.
+	ApplySent func(ctx context.Context, sent Request, res Response, now time.Time) error
+}
+
+// apply applies a result to the work, given the request as sent.
+func (j Job) apply(ctx context.Context, sent Request, res Response, now time.Time) error {
+	if j.ApplySent != nil {
+		return j.ApplySent(ctx, sent, res, now)
+	}
+	return j.Apply(ctx, res, now)
 }
 
 // PendingBatch is a batch submitted and not yet ended, as the Record keeps
@@ -120,7 +134,9 @@ type WorkFailure struct {
 }
 
 // FailedWork is a piece of work marked failed, as the Owner is shown it: the
-// act, the Item it was on, and when and why it last failed.
+// act, the Item it was on, and when and why it last failed. Work on no Item
+// (a weaving run) has no SourceID or EntryID, and its key, the run's day, as
+// its Title.
 type FailedWork struct {
 	Act               string
 	SourceID, EntryID string
@@ -191,7 +207,7 @@ func (b *Batches) ReadWaiting(ctx context.Context, now time.Time) error {
 	if err != nil {
 		return err
 	}
-	jobs, err := b.waiting(ctx)
+	jobs, err := b.waiting(ctx, now)
 	if err != nil {
 		return err
 	}
@@ -223,7 +239,7 @@ func (b *Batches) ReadWaiting(ctx context.Context, now time.Time) error {
 	var batch PendingBatch
 	var requests []BatchRequest
 	for _, act := range b.Acts {
-		waiting, err := act.Waiting(ctx)
+		waiting, err := act.Waiting(ctx, now)
 		if err != nil {
 			return fmt.Errorf("work awaiting %s: %w", act.Name, err)
 		}
@@ -234,7 +250,7 @@ func (b *Batches) ReadWaiting(ctx context.Context, now time.Time) error {
 			}
 			if j.Request.Act == "" {
 				// Nothing to ask: written at once, with no call.
-				if err := j.Apply(ctx, Response{}, now); err != nil {
+				if err := j.apply(ctx, j.Request, Response{}, now); err != nil {
 					return err
 				}
 				continue
@@ -327,14 +343,18 @@ func (b *Batches) settle(ctx context.Context, p PendingBatch, jobs map[string]ma
 		}
 		call := b.call(p.ID, r, j, now).answered(res.Response)
 		outcome := Failed
-		if res.Err == nil && r.Request != nil && RequestHash(*r.Request, "") != RequestHash(j.Request, "") {
+		sent := j.Request
+		if r.Request != nil {
+			sent = *r.Request
+		}
+		if res.Err == nil && j.ApplySent == nil && RequestHash(sent, "") != RequestHash(j.Request, "") {
 			// The work as it stands is asked otherwise (the Record it is
 			// shown has moved), so the answer is to a question no longer
 			// the work's: refused, and asked again as it stands.
 			res.Err, outcome = fmt.Errorf("%w: the work has changed since its request was sent", ErrFailedChecks), Refused
 		}
 		if res.Err == nil {
-			err := j.Apply(ctx, res.Response, now)
+			err := j.apply(ctx, sent, res.Response, now)
 			if err == nil {
 				if err := b.Store.KeepCall(ctx, call.ended(Applied, nil)); err != nil {
 					return settled{}, err
@@ -395,10 +415,10 @@ func (b *Batches) settle(ctx context.Context, p PendingBatch, jobs map[string]ma
 }
 
 // waiting is the work awaiting each act, by act and key.
-func (b *Batches) waiting(ctx context.Context) (map[string]map[string]Job, error) {
+func (b *Batches) waiting(ctx context.Context, now time.Time) (map[string]map[string]Job, error) {
 	out := map[string]map[string]Job{}
 	for _, act := range b.Acts {
-		jobs, err := act.Waiting(ctx)
+		jobs, err := act.Waiting(ctx, now)
 		if err != nil {
 			return nil, fmt.Errorf("work awaiting %s: %w", act.Name, err)
 		}
@@ -423,7 +443,7 @@ func requestID(act, key string) string {
 func (e *Editor) Reading() BatchAct {
 	return BatchAct{
 		Name: "reading",
-		Waiting: func(ctx context.Context) ([]Job, error) {
+		Waiting: func(ctx context.Context, _ time.Time) ([]Job, error) {
 			waiting, err := e.Store.ItemsToRead(ctx)
 			if err != nil {
 				return nil, err

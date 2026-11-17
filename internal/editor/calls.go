@@ -121,14 +121,17 @@ type KeptTurn struct {
 // It is the hex SHA-256 of the request's canonical JSON encoding, an object
 // with the keys instructions, input, model and schema, in that order, the
 // schema encoded with its object keys sorted (as encoding/json does for a
-// map), so the same request always hashes the same.
+// map), so the same request always hashes the same; then effort, only for a
+// request that asks for one, so a request asking for none hashes as it did
+// before requests could.
 func RequestHash(r Request, model string) string {
 	return hashOf(struct {
 		Instructions string         `json:"instructions"`
 		Input        string         `json:"input"`
 		Model        string         `json:"model"`
 		Schema       map[string]any `json:"schema"`
-	}{r.Instructions, r.Input, model, r.Schema})
+		Effort       string         `json:"effort,omitempty"`
+	}{r.Instructions, r.Input, model, r.Schema, r.Effort})
 }
 
 // ConversationRequestHash is RequestHash for a turn of a conversation: the

@@ -91,6 +91,30 @@ func TestEachRequestInABatchRunsOnItsActsModel(t *testing.T) {
 	}
 }
 
+func TestARequestsEffortIsSentWithItsOutputFormatAndNoneIsSentWithoutOne(t *testing.T) {
+	model, created := batchAPI(t, "in_progress")
+	weaving := request
+	weaving.Act, weaving.Effort = "weaving", editor.EffortMedium
+
+	if _, err := model.Submit(t.Context(), []editor.BatchRequest{
+		{ID: "weaving-1", Request: weaving},
+		{ID: "reading-1", Request: request},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	reqs, _ := (*created)["requests"].([]any)
+	for i, want := range []string{
+		`{"effort":"medium","format":{"schema":{"additionalProperties":false,"type":"object"},"type":"json_schema"}}`,
+		`{"format":{"schema":{"additionalProperties":false,"type":"object"},"type":"json_schema"}}`,
+	} {
+		params, _ := reqs[i].(map[string]any)["params"].(map[string]any)
+		if got, _ := json.Marshal(params["output_config"]); string(got) != want {
+			t.Errorf("request %d output_config = %s, want %s", i, got, want)
+		}
+	}
+}
+
 func message(stopReason, text string) map[string]any {
 	return map[string]any{
 		"id": "msg_1", "type": "message", "role": "assistant", "model": "claude-haiku-5-5",

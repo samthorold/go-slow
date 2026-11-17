@@ -1,0 +1,33 @@
+{{define "title"}}{{.Title}}{{end}}
+
+{{define "content"}}
+{{/* A Story the Editor made: the Editor's Spans it wrote, in the order
+     written, as the argument they are, each with the Spans it cites in its
+     margin; then the Judgement that made it. Every Editor's Span is the
+     Editor's words, and the page says so. Collected text is inert:
+     hx-disable on the elements holding it. */}}
+<p class="quiet">A Story the Editor made · {{.When}}</p>
+<h1>{{.Title}}</h1>
+
+<div class="margined" data-margin="open">
+{{template "margin-fold" "open"}}
+<ul class="blocks">
+  {{- range .Spans}}
+  <li class="block">
+    <div class="block-body"><p>{{.Body}}</p></div>
+    <div class="block-margin">
+      <p class="quiet">spoken by the Editor</p>
+      {{- range .Cites}}
+      <p><a href="{{.Href}}"><span hx-disable>{{.Words}}</span></a> {{template "citation" .Item}}</p>
+      {{- end}}
+    </div>
+  </li>
+  {{- end}}
+</ul>
+</div>
+
+<section aria-labelledby="made">
+  <h2 id="made">How it was made</h2>
+  <p>{{template "made" .Made}} <span class="machine">{{.Judge}}</span></p>
+</section>
+{{end}}

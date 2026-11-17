@@ -1,41 +1,13 @@
 {
   "act": "naming",
   "model": "claude-haiku-5-5",
-  "request_hash": "88cce9d617ae5276263e2f4867426b93c82bb384ce859306ab54fe9c3349d9a3",
-  "recorded_at": "2026-11-17T17:38:57.316971Z",
+  "request_hash": "a8d41a6ac47c11a82a6a190a362e9a508e6cd3b2af767294be4ee68d57013f84",
+  "recorded_at": "2026-11-17T19:21:25.991082Z",
   "usage": {
-    "input_tokens": 1342,
-    "output_tokens": 36
+    "input_tokens": 1355,
+    "output_tokens": 29
   },
   "output": {
-    "name": "PM's Commons statement on EU summit, long-term relationship options and possible public vote"
-  },
-  "earlier_attempts": [
-    {
-      "act": "naming",
-      "model": "claude-haiku-5-5",
-      "request_hash": "88cce9d617ae5276263e2f4867426b93c82bb384ce859306ab54fe9c3349d9a3",
-      "recorded_at": "2026-11-17T17:38:53.554215Z",
-      "usage": {
-        "input_tokens": 1342,
-        "output_tokens": 39
-      },
-      "output": {
-        "name": "PM's Commons statement on EU summit, public vote hints and Brexit-era trade costs"
-      }
-    },
-    {
-      "act": "naming",
-      "model": "claude-haiku-5-5",
-      "request_hash": "88cce9d617ae5276263e2f4867426b93c82bb384ce859306ab54fe9c3349d9a3",
-      "recorded_at": "2026-11-17T17:38:54.917959Z",
-      "usage": {
-        "input_tokens": 1342,
-        "output_tokens": 34
-      },
-      "output": {
-        "name": "Prime Minister's Commons statement on EU deals and a possible future public vote"
-      }
-    }
-  ]
+    "name": "PM's Commons statement on EU reset and possible future public vote"
+  }
 }

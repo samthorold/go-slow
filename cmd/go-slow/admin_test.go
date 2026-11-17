@@ -21,7 +21,7 @@ func env(db string) func(string) (string, bool) {
 		"COLLECTION_INTERVAL": "15m", "READING_MODEL": "claude-haiku-5-5", "RELATING_MODEL": "claude-haiku-5-5",
 		"BRIEFING_MODEL":    "claude-haiku-5-5",
 		"SUNDAY_READ_MODEL": "claude-opus-5-5", "BRIEFING_TIME": "07:00", "GOSLOW_ANTHROPIC_API_KEY": "set-your-own",
-		"WEAVING_MODEL": "claude-opus-5-5", "WEAVING_TIME": "06:00",
+		"WEAVING_MODEL": "claude-opus-5-5", "WEAVING_TIME": "06:00", "NAMING_MODEL": "claude-haiku-5-5",
 	}
 	return func(k string) (string, bool) { v, ok := vars[k]; return v, ok }
 }
@@ -97,6 +97,18 @@ func TestTheRetryCommandTakesAnActsFailedWorkUpAgain(t *testing.T) {
 	}
 	if failed, _ := inRecord(t, db); len(failed) != 0 {
 		t.Errorf("failed work %+v, want none once every act's is retried", failed)
+	}
+}
+
+func TestTheRetryCommandKnowsNaming(t *testing.T) {
+	db := filepath.Join(t.TempDir(), "go-slow.db")
+	failedRecord(t, db)
+
+	if err := admin(t.Context(), slog.New(slog.DiscardHandler), []string{"retry", "naming"}, adminDeps{Lookup: env(db)}); err != nil {
+		t.Errorf("retrying naming failed: %v", err)
+	}
+	if failed, _ := inRecord(t, db); len(failed) != 2 {
+		t.Errorf("failed work %+v, want the other acts' left", failed)
 	}
 }
 

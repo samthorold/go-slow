@@ -1,6 +1,8 @@
 package web_test
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"html"
 	"log/slog"
@@ -109,6 +111,131 @@ func TestTheStoriesPageListsTheStoriesTheEditorMadeNewestFirstByTheirOpeningWord
 	}
 	if !strings.Contains(res.body, `<a href="/stories" aria-current="page">`) {
 		t.Errorf("the navigation does not mark the Stories page current:\n%s", res.body)
+	}
+}
+
+// nameNewest names the newest Story the Editor made through the batch
+// runner, as main does, with the naming model answering name; every other
+// Story's naming is refused.
+func nameNewest(t *testing.T, store *sqlite.Store, name string) {
+	t.Helper()
+	log := slog.New(slog.DiscardHandler)
+	ed := editor.New(editor.Deps{Store: store, Namings: store, Log: log})
+	b := editor.NewBatches(editor.BatchDeps{Store: store, Batcher: &namingBatcher{name: name},
+		Acts: []editor.BatchAct{ed.Naming()}, Log: log})
+	for range 2 {
+		if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
+// namingBatcher ends every batch at once, naming the Story opening with
+// newestOpening name and answering every other naming with no name.
+type namingBatcher struct {
+	refusingBatcher
+	name string
+}
+
+func (b *namingBatcher) Poll(_ context.Context, id string) (editor.BatchPoll, error) {
+	var out []editor.BatchResult
+	for _, r := range b.submitted[id] {
+		output := `{"name": ""}`
+		if strings.Contains(r.Request.Input, newestOpening) {
+			output = fmt.Sprintf(`{"name": %q}`, b.name)
+		}
+		out = append(out, editor.BatchResult{ID: r.ID, Response: editor.Response{Output: json.RawMessage(output), Model: "fake"}})
+	}
+	return editor.BatchPoll{Ended: true, Results: out}, nil
+}
+
+// newestOpening opens the newer Story of twoOpinions.
+const newestOpening = "Two billion is a down payment on devolution."
+
+func TestAStoryWithANameIsListedAndHeadedByItAndOneWithoutByItsOpeningWords(t *testing.T) {
+	store := openStore(t)
+	weaveSpeech(t, store, twoOpinions)
+	nameNewest(t, store, "Devolution's price")
+	app, _ := newAppWithLog(t, saturday, store)
+
+	list := get(t, app, "/stories").body
+
+	if !regexp.MustCompile(`<a href="/stories/\d+">Devolution&#39;s price</a>`).MatchString(list) {
+		t.Errorf("the named Story is not listed by its Name:\n%s", list)
+	}
+	if strings.Contains(list, newestOpening) {
+		t.Errorf("the named Story is listed by its opening words too:\n%s", list)
+	}
+	if !strings.Contains(list, "Motherwell is where the money lands first, as it did a…") {
+		t.Errorf("the Story with no Name is not listed by its opening words:\n%s", list)
+	}
+	res := storyPage(t, app, "Devolution&#39;s price")
+	if !strings.Contains(res.body, "<h1>Devolution&#39;s price</h1>") ||
+		!strings.Contains(res.body, "<title>Devolution&#39;s price") {
+		t.Errorf("the Story's Page is not headed by its Name:\n%s", res.body)
+	}
+	if !strings.Contains(res.body, newestOpening) {
+		t.Errorf("the Story's Page lacks its Editor's Spans:\n%s", res.body)
+	}
+	call := regexp.MustCompile(`<a class="machine" href="/calls/(\d+)">named · call \d+</a>`).FindStringSubmatch(res.body)
+	if call == nil {
+		t.Fatalf("the Story's Page does not link the call that named it:\n%s", res.body)
+	}
+	if c := get(t, app, "/calls/"+call[1]); c.status != 200 || !strings.Contains(c.body, "A naming call") {
+		t.Errorf("the call it links is not the naming call (status %d):\n%s", c.status, c.body)
+	}
+	if !strings.Contains(res.body, "naming v1") {
+		t.Errorf("the Story's Page does not name its Name's Judge:\n%s", res.body)
+	}
+}
+
+func TestASpansPageAndAnEditorsSpansPageKnowAStoryByItsName(t *testing.T) {
+	store := openStore(t)
+	weaveSpeech(t, store, twoOpinions)
+	nameNewest(t, store, "Devolution's price")
+	app, _ := newAppWithLog(t, saturday, store)
+
+	// S2, "Scotland will get £2 billion.", which only the named Story cites.
+	span := get(t, app, "/items/number-10/speech/spans/47-77").body
+	stories := span[strings.Index(span, `<h2 id="stories">`):]
+	if n := strings.Count(stories, ">Devolution&#39;s price</a>"); n != 3 {
+		t.Errorf("the Span's Page names the Story %d times, want 3 (as holding it, and in each citing Span):\n%s", n, stories)
+	}
+	if regexp.MustCompile(`<a href="/stories/\d+">` + regexp.QuoteMeta(newestOpening)).MatchString(stories) {
+		t.Errorf("the Span's Page lists the named Story by its opening words:\n%s", stories)
+	}
+	m := regexp.MustCompile(`<a href="(/stories/\d+/spans/2)">`).FindStringSubmatch(stories)
+	if m == nil {
+		t.Fatalf("the Span's Page does not link the Editor's Span citing it:\n%s", stories)
+	}
+	es := get(t, app, m[1]).body
+	if !regexp.MustCompile(`In <a href="/stories/\d+">Devolution&#39;s price</a>`).MatchString(es) {
+		t.Errorf("the Editor's Span's Page does not know its Story by its Name:\n%s", es)
+	}
+}
+
+func TestAFailedNamingLinksItsStory(t *testing.T) {
+	store := openStore(t)
+	weaveSpeech(t, store, twoOpinions)
+	nameNewest(t, store, "Devolution's price")
+	// The older Story's naming is refused on every attempt.
+	for range editor.MaxAttempts {
+		nameNewest(t, store, "Devolution's price")
+	}
+	app, _ := newAppWithLog(t, saturday, store)
+
+	section := leadingExceptions(t, get(t, app, "/items").body)
+
+	for _, want := range []string{
+		"naming", "Motherwell is where the money lands first, as it did a…", "the name is empty",
+		"<code>docker compose run --rm app retry naming</code>",
+	} {
+		if !strings.Contains(section, want) {
+			t.Errorf("failed work lacks %q:\n%s", want, section)
+		}
+	}
+	if !regexp.MustCompile(`<a href="/stories/\d+" hx-disable>Motherwell`).MatchString(section) {
+		t.Errorf("the failed naming does not link its Story:\n%s", section)
 	}
 }
 

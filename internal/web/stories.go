@@ -49,7 +49,8 @@ func editorSpanPath(story int64, n int) string {
 	return storyPath(story) + "/spans/" + strconv.Itoa(n)
 }
 
-// storyLink is a Story linking its Page, by its opening words, or for a
+// storyLink is a Story linking its Page, by its Name or until it has one its
+// opening words, or for a
 // Story a Cut made, by saying so. Editor is whether its words are the
 // Editor's.
 type storyLink struct {
@@ -90,17 +91,33 @@ func (a *app) holding(ctx context.Context, at editor.Address) ([]storyLink, []ci
 func (a *app) citingRows(cs []editor.CitingSpan) []citingRow {
 	var out []citingRow
 	for _, c := range cs {
+		words := c.Name
+		if words == "" {
+			words = shorten(c.Opening)
+		}
 		out = append(out, citingRow{Body: c.Body, Href: editorSpanPath(c.Story, c.N),
 			When:  when(c.At, a.Now().Location()),
-			Story: storyLink{Words: shorten(c.Opening), Href: storyPath(c.Story), Editor: true}})
+			Story: storyLink{Words: words, Href: storyPath(c.Story), Editor: true}})
 	}
 	return out
 }
 
-// storyRow is a Story as the Stories Page lists it: by its opening words,
-// until it has a Name, linking its page, with when it was made.
+// storyRow is a Story as the Stories Page lists it: by its Name, or by its
+// opening words until it has one, linking its page, with when it was made.
 type storyRow struct {
-	Opening, Href, When string
+	Title, Href, When string
+}
+
+// storyTitle is what a Story is known by: its Name, or until it has one, its
+// opening words.
+func storyTitle(s editor.Story) string {
+	if s.Name.Text != "" {
+		return s.Name.Text
+	}
+	if len(s.Spans) > 0 {
+		return shorten(s.Spans[0].Body)
+	}
+	return ""
 }
 
 // storiesPage is the view model of the Stories Page.
@@ -123,11 +140,7 @@ func (a *app) stories(w http.ResponseWriter, r *http.Request) {
 func (a *app) storyRows(stories []editor.Story) []storyRow {
 	var rows []storyRow
 	for _, s := range stories {
-		row := storyRow{Href: storyPath(s.ID), When: when(s.At, a.Now().Location())}
-		if len(s.Spans) > 0 {
-			row.Opening = shorten(s.Spans[0].Body)
-		}
-		rows = append(rows, row)
+		rows = append(rows, storyRow{Title: storyTitle(s), Href: storyPath(s.ID), When: when(s.At, a.Now().Location())})
 	}
 	return rows
 }
@@ -145,9 +158,16 @@ type storyPage struct {
 	Spans    []editorSpanRow
 	Timeline []timelineRow
 	// Made is the call that made it, and Judge its Judge's act, version and
-	// model.
-	Made  made
-	Judge string
+	// model; Named and NameJudge the same of its Name, if it has one.
+	Made      made
+	Judge     string
+	Named     made
+	NameJudge string
+}
+
+// judgeLabel is a Judge as a page shows it: its act, version and model.
+func judgeLabel(j editor.Judge) string {
+	return j.Act + " v" + strconv.Itoa(j.Version) + " · " + j.Model
 }
 
 // editorSpanRow is an Editor's Span as its Story's Page shows it: its words,
@@ -187,12 +207,13 @@ func (a *app) story(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	p := storyPage{
+		Title: storyTitle(s),
 		When:  when(s.At, a.Now().Location()),
 		Made:  made{Act: "woven", Call: s.Call},
-		Judge: s.Judge.Act + " v" + strconv.Itoa(s.Judge.Version) + " · " + s.Judge.Model,
+		Judge: judgeLabel(s.Judge),
 	}
-	if len(s.Spans) > 0 {
-		p.Title = shorten(s.Spans[0].Body)
+	if s.Name.Text != "" {
+		p.Named, p.NameJudge = made{Act: "named", Call: s.Name.Call}, judgeLabel(s.Name.Judge)
 	}
 	for i, es := range s.Spans {
 		row := editorSpanRow{Body: es.Body, Href: editorSpanPath(s.ID, i+1)}
@@ -260,7 +281,7 @@ func (a *app) editorSpan(w http.ResponseWriter, r *http.Request) {
 	es := s.Spans[n-1]
 	p := editorSpanPage{
 		Title: "The Editor's Span " + strconv.Itoa(n), Body: es.Body, When: when(s.At, a.Now().Location()),
-		Story: storyLink{Words: shorten(s.Spans[0].Body), Href: storyPath(id)},
+		Story: storyLink{Words: storyTitle(s), Href: storyPath(id)},
 	}
 	for _, c := range es.Cites {
 		p.Cites = append(p.Cites, a.citedLink(c))

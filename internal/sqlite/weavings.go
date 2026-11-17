@@ -126,11 +126,14 @@ func (s *Store) CitingEditorSpan(ctx context.Context, a editor.EditorSpanAt) ([]
 }
 
 // citing are the Editor's Spans e for which a row of cites exists, in the
-// order written, each with when its Story was made and its opening words.
+// order written, each with when its Story was made, its opening words and
+// its newest Name, if any.
 func (s *Store) citing(ctx context.Context, cites string, args ...any) ([]editor.CitingSpan, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT e.story_id, e.n, e.body, events.at,
-			(SELECT o.body FROM editor_spans o WHERE o.story_id = e.story_id AND o.n = 1)
+			(SELECT o.body FROM editor_spans o WHERE o.story_id = e.story_id AND o.n = 1),
+			coalesce((SELECT nm.name FROM story_names nm WHERE nm.story_id = e.story_id
+				ORDER BY nm.event_id DESC LIMIT 1), '')
 		FROM editor_spans e JOIN events ON events.id = e.story_id
 		WHERE EXISTS (SELECT 1 FROM `+cites+`)
 		ORDER BY e.story_id, e.n`, args...)
@@ -142,7 +145,7 @@ func (s *Store) citing(ctx context.Context, cites string, args ...any) ([]editor
 	for rows.Next() {
 		var c editor.CitingSpan
 		var at string
-		if err := rows.Scan(&c.Story, &c.N, &c.Body, &at, &c.Opening); err != nil {
+		if err := rows.Scan(&c.Story, &c.N, &c.Body, &at, &c.Opening, &c.Name); err != nil {
 			return nil, err
 		}
 		c.At = parseTime(at)
@@ -230,19 +233,33 @@ func addEvent(ctx context.Context, tx *sql.Tx, kind string, shape int, at time.T
 
 // storyColumns are a Story's columns as scanStory reads them: its event,
 // its run, its Judge, when it was made and the call that made it (the
-// applied weaving call on its run's work answering its request).
+// applied weaving call on its run's work answering its request); then its
+// newest Name, if any, likewise, its naming's work keyed by the Story.
 const storyColumns = `
 	s.event_id, s.weaving_id, w.act, w.version, w.model, w.request_hash, events.at,
 	coalesce((SELECT max(c.id) FROM model_calls c
 		WHERE c.act = 'weaving' AND c.outcome = 'applied' AND c.request_hash = w.request_hash
-			AND c.work_key = w.work_key), 0)
+			AND c.work_key = w.work_key), 0),
+	coalesce(n.name, ''), coalesce(n.act, ''), coalesce(n.version, 0), coalesce(n.model, ''),
+	coalesce(n.request_hash, ''), coalesce(named.at, ''),
+	coalesce((SELECT max(c.id) FROM model_calls c
+		WHERE c.act = 'naming' AND c.outcome = 'applied' AND c.request_hash = n.request_hash
+			AND c.work_key = CAST(s.event_id AS TEXT)), 0)
 	FROM woven_stories s JOIN weavings w ON w.event_id = s.weaving_id
-		JOIN events ON events.id = s.event_id`
+		JOIN events ON events.id = s.event_id
+		LEFT JOIN story_names n ON n.event_id = (SELECT max(event_id) FROM story_names WHERE story_id = s.event_id)
+		LEFT JOIN events named ON named.id = n.event_id`
 
 // StoriesMade are the Stories the Editor made, newest first, each with its
 // Editor's Spans in the order written and what each cites.
 func (s *Store) StoriesMade(ctx context.Context) ([]editor.Story, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT `+storyColumns+` ORDER BY s.event_id DESC`)
+	return s.stories(ctx, `ORDER BY s.event_id DESC`)
+}
+
+// stories are the Stories the Editor made, as StoriesMade reads them, chosen
+// and ordered by the query's tail.
+func (s *Store) stories(ctx context.Context, tail string) ([]editor.Story, error) {
+	rows, err := s.db.QueryContext(ctx, `SELECT `+storyColumns+` `+tail)
 	if err != nil {
 		return nil, fmt.Errorf("stories made: %w", err)
 	}
@@ -285,12 +302,17 @@ func (s *Store) StoryMade(ctx context.Context, id int64) (editor.Story, bool, er
 
 func scanStory(row scanner) (editor.Story, error) {
 	var st editor.Story
-	var at string
+	var at, namedAt string
+	n := &st.Name
 	if err := row.Scan(&st.ID, &st.Weaving, &st.Judge.Act, &st.Judge.Version, &st.Judge.Model,
-		&st.Judge.RequestHash, &at, &st.Call); err != nil {
+		&st.Judge.RequestHash, &at, &st.Call,
+		&n.Text, &n.Judge.Act, &n.Judge.Version, &n.Judge.Model, &n.Judge.RequestHash, &namedAt, &n.Call); err != nil {
 		return st, err
 	}
 	st.At = parseTime(at)
+	if n.Text != "" {
+		n.Story, n.At = st.ID, parseTime(namedAt)
+	}
 	return st, nil
 }
 

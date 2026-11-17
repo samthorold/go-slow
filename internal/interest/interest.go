@@ -1,8 +1,9 @@
 // Package interest is the Owner's Topics, and how a Span touches one, by
-// its terms, with no model call (system design: Every Item is read, and
-// Topics select nothing). Touching counts and selects nothing: the Owner
-// steers by the counts per Source (SourceCounts), so taking up or removing a
-// Topic changes only the counts.
+// its terms, with no model call (system design: Every Item is cut and
+// hydrated, and Topics gate none of the work). Touching counts and selects
+// nothing: the Owner steers by the counts per Source (SourceCounts) and
+// follows a Topic on its Page, the Stories the Editor made that touch it, so
+// taking up or removing a Topic changes only the counts and the lists.
 package interest
 
 import (
@@ -52,8 +53,8 @@ func New(store Store) *Service { return &Service{store: store} }
 func (s *Service) Topics(ctx context.Context) ([]Topic, error) { return s.store.Topics(ctx) }
 
 // Add takes up a new Topic. A Draft that fails validation adds nothing and
-// returns its Errors. Taking one up changes only what is counted, never
-// what is read or told.
+// returns its Errors. Taking one up changes only what is counted and
+// listed, never what is judged.
 func (s *Service) Add(ctx context.Context, d Draft) (Topic, Errors, error) {
 	t, errs := validate(d)
 	existing, err := s.store.Topics(ctx)
@@ -76,7 +77,7 @@ func (s *Service) Add(ctx context.Context, d Draft) (Topic, Errors, error) {
 var ErrNoTopic = errors.New("no such Topic")
 
 // Remove stops following a Topic. Like taking one up, it changes only what
-// is counted.
+// is counted and listed.
 func (s *Service) Remove(ctx context.Context, id int64) error {
 	found, err := s.store.RemoveTopic(ctx, id)
 	if err == nil && !found {

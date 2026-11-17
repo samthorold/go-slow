@@ -182,6 +182,7 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("GET /stories/{id}", a.story)
 	mux.HandleFunc("GET /topics", a.topics)
 	mux.HandleFunc("POST /topics", a.addTopic)
+	mux.HandleFunc("GET /topics/{id}", a.topic)
 	mux.HandleFunc("DELETE /topics/{id}", a.removeTopic)
 	return a.logRequests(mux)
 }

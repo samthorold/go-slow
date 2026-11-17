@@ -3,7 +3,7 @@
 {{define "content"}}
 <h1>Topics</h1>
 
-<p class="quiet">Topics select nothing: every Item is read, and what is told is the Editor's judgement. A Span touches a Topic when it names one of its terms, as whole words, and the <a href="/items">Items</a> page counts, per Source, the Stories that touch one and those that don't.</p>
+<p class="quiet">Topics select nothing: every Item is read, and what is told is the Editor's judgement. A Span touches a Topic when it names one of its terms, as whole words, and the <a href="/items">Items</a> page counts, per Source, the Stories the Editor made that touch one and those that don't. Each Topic's page lists the Stories that touch it.</p>
 
 {{/* Taking up a Topic is the rare act: collapsed, open again when it failed. */}}
 {{- with .Form}}
@@ -38,7 +38,7 @@
     {{- range .Topics}}
       {{/* What the Owner typed is inert: hx-disable on the elements holding it. */}}
       <tr id="topic-{{.ID}}">
-        <td><strong hx-disable>{{.Name}}</strong></td>
+        <td><strong hx-disable><a href="/topics/{{.ID}}">{{.Name}}</a></strong></td>
         <td class="quiet"><span hx-disable>{{range $i, $t := .Terms}}{{if $i}}, {{end}}{{$t}}{{end}}</span></td>
         <td>
           {{/* Shown at rest, quiet (.actions, in the stylesheet). */}}

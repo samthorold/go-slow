@@ -5,9 +5,11 @@
 //
 //	go run ./internal/editor/yield <before> <after>
 //
-// Relating is counted by its relations' kinds; a sample of an Item related
-// with no call counts none. Weaving is counted by the Stories it made, their
-// Editor's Spans and the distinct Spans they cite.
+// It counts reading and weaving. Reading is counted by the Spans its fixture
+// is cut into and what it judged of them; weaving by the Stories it made,
+// their Editor's Spans and the distinct Spans they cite. Recordings of any
+// other act (a retired act's, in an older tree) are not counted: the report
+// ends by naming those acts.
 //
 // Each argument is a recordings directory (internal/editor/testdata/recorded,
 // or an older copy of it, e.g. extracted with git archive). A fixture
@@ -95,8 +97,6 @@ type act struct {
 
 var acts = []act{
 	{"reading", []string{"Spans", "Rejected", "Names", "Speakers", "Refers to"}, countReading},
-	{"relating", []string{"Follows", "Same as", "Contradicts"}, countRelating},
-	{"briefing", []string{"Statements", "Spans cited", "Stories gathered"}, countBriefing},
 	{"weaving", []string{"Stories", "Editor's Spans", "Spans cited"}, countWeaving},
 }
 
@@ -123,57 +123,6 @@ func countWeaving(out json.RawMessage, _ about) ([]int, error) {
 		}
 	}
 	return []int{len(r.Stories), spans, len(cited)}, nil
-}
-
-// countRelating counts the relations a relating judged, by kind. A sample of
-// an Item related with no call (its Spans had no candidates) judged none.
-func countRelating(out json.RawMessage, _ about) ([]int, error) {
-	var r struct {
-		Relations []struct {
-			Verdict string `json:"verdict"`
-		} `json:"relations"`
-	}
-	if len(out) > 0 && string(out) != "null" {
-		if err := json.Unmarshal(out, &r); err != nil {
-			return nil, err
-		}
-	}
-	n := []int{0, 0, 0}
-	for _, rel := range r.Relations {
-		switch rel.Verdict {
-		case "follows":
-			n[0]++
-		case "same_as":
-			n[1]++
-		case "contradicts":
-			n[2]++
-		}
-	}
-	return n, nil
-}
-
-// countBriefing counts the Briefing's statements, the distinct Spans they
-// cite and the Stories it gathered (those the model gathered: a Span told
-// with no relations has an empty Story the act keeps without asking).
-func countBriefing(out json.RawMessage, _ about) ([]int, error) {
-	var r struct {
-		Statements []struct {
-			Spans   []string          `json:"spans"`
-			Stories []json.RawMessage `json:"stories"`
-		} `json:"statements"`
-	}
-	if err := json.Unmarshal(out, &r); err != nil {
-		return nil, err
-	}
-	cited := map[string]bool{}
-	gathered := 0
-	for _, st := range r.Statements {
-		gathered += len(st.Stories)
-		for _, s := range st.Spans {
-			cited[s] = true
-		}
-	}
-	return []int{len(r.Statements), len(cited), gathered}, nil
 }
 
 // countReading counts a reading of Spans: the Spans its fixture was shown
@@ -217,9 +166,14 @@ func fixtureSpans(govuk, name string) (int, error) {
 	return len(cut.Sentences(doc.Details.Body)), nil
 }
 
-// counts is, per act, each fixture's counts, one per sample: a fixture
-// recorded once has one.
-type counts map[string]map[string][][]int
+// counts is one tree's yield: per act, each fixture's counts, one per sample
+// (a fixture recorded once has one), and the acts it holds recordings of but
+// the tool doesn't count (retired acts, whose recordings an older tree may
+// still hold).
+type counts struct {
+	acts      map[string]map[string][][]int
+	uncounted map[string]bool
+}
 
 // fixtureOf is the fixture a recording at rel (with no extension) is of: a
 // sample, kept as <fixture>/<k>, is of its directory.
@@ -232,7 +186,7 @@ func fixtureOf(rel string) string {
 }
 
 func load(dir, govuk string) (counts, error) {
-	c := counts{}
+	c := counts{acts: map[string]map[string][][]int{}, uncounted: map[string]bool{}}
 	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -253,7 +207,7 @@ func load(dir, govuk string) (counts, error) {
 			return err
 		}
 		// Files that are not a kept response (a recorded Wikidata answer)
-		// are not counted, nor are acts with no counts below.
+		// are not counted; acts with no counts below are named as such.
 		var rec recording
 		if json.Unmarshal(data, &rec) != nil {
 			return nil
@@ -262,13 +216,17 @@ func load(dir, govuk string) (counts, error) {
 			// A sample of work that made no call is its act's, by where it
 			// is kept: <act>/<fixture>/<k>.json.
 			if rel, err := filepath.Rel(dir, path); err == nil {
-				rec.Act, _, _ = strings.Cut(filepath.ToSlash(rel), "/")
+				if act, _, found := strings.Cut(filepath.ToSlash(rel), "/"); found {
+					rec.Act = act
+				}
 			}
 		}
+		counted := false
 		for _, a := range acts {
 			if a.name != rec.Act {
 				continue
 			}
+			counted = true
 			rel, err := filepath.Rel(dir, path)
 			if err != nil {
 				return err
@@ -284,10 +242,13 @@ func load(dir, govuk string) (counts, error) {
 			if err != nil {
 				return fmt.Errorf("%s: %w", path, err)
 			}
-			if c[a.name] == nil {
-				c[a.name] = map[string][][]int{}
+			if c.acts[a.name] == nil {
+				c.acts[a.name] = map[string][][]int{}
 			}
-			c[a.name][f] = append(c[a.name][f], n)
+			c.acts[a.name][f] = append(c.acts[a.name][f], n)
+		}
+		if !counted && rec.Act != "" {
+			c.uncounted[rec.Act] = true
 		}
 		return nil
 	})
@@ -297,10 +258,10 @@ func load(dir, govuk string) (counts, error) {
 func report(b *strings.Builder, before, after counts) {
 	for _, a := range acts {
 		fixtures := map[string]bool{}
-		for f := range before[a.name] {
+		for f := range before.acts[a.name] {
 			fixtures[f] = true
 		}
-		for f := range after[a.name] {
+		for f := range after.acts[a.name] {
 			fixtures[f] = true
 		}
 		names := make([]string, 0, len(fixtures))
@@ -314,8 +275,8 @@ func report(b *strings.Builder, before, after counts) {
 		fmt.Fprintf(b, "### %s\n\n| Fixture | %s |\n|%s\n", a.name, strings.Join(a.columns, " | "), strings.Repeat("---|", len(a.columns)+1))
 		totalBefore, totalAfter := make([]span, len(a.columns)), make([]span, len(a.columns))
 		for _, f := range names {
-			was, inBefore := before[a.name][f]
-			now, inAfter := after[a.name][f]
+			was, inBefore := before.acts[a.name][f]
+			now, inAfter := after.acts[a.name][f]
 			label := f
 			switch {
 			case !inBefore:
@@ -340,6 +301,21 @@ func report(b *strings.Builder, before, after counts) {
 			cells[i] = totalBefore[i].String() + " → " + totalAfter[i].String()
 		}
 		fmt.Fprintf(b, "| **Total** | %s |\n\n", strings.Join(cells, " | "))
+	}
+	uncounted := map[string]bool{}
+	for act := range before.uncounted {
+		uncounted[act] = true
+	}
+	for act := range after.uncounted {
+		uncounted[act] = true
+	}
+	if len(uncounted) > 0 {
+		names := make([]string, 0, len(uncounted))
+		for act := range uncounted {
+			names = append(names, act)
+		}
+		sort.Strings(names)
+		fmt.Fprintf(b, "Not counted: %s\n", strings.Join(names, ", "))
 	}
 }
 

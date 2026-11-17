@@ -1,7 +1,6 @@
 package web_test
 
 import (
-	"encoding/json"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -9,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/sqlite/sqlitetest"
 )
 
@@ -37,14 +35,10 @@ func retiredRecord(t *testing.T) (http.Handler, int64, int64) {
 				'{"content": []}', '', '[{"id":"2","name":"submit_read","input":{}}]',
 				'fake-agent', 'end_turn', 200, 20, 0, 'applied', '')`,
 	)
+	keepRetiredCall(t, path, "briefing", "2026-10-24", "S1: Derby will host the headquarters.", "[3]")
+	keepRetiredCall(t, path, "relating", number10.ID+"\nspeech", "S1: Derby will host the headquarters.", "[3]")
 	store := openStoreAt(t, path)
-	keep := func(act, key string) int64 {
-		req := editor.Request{Act: act, Instructions: "Write.", Input: "S1: Derby will host the headquarters.", Schema: map[string]any{}}
-		if err := store.KeepCall(t.Context(), editor.Call{Act: act, Key: key, At: saturday, Model: "m",
-			Request: req, RequestHash: editor.RequestHash(req, "m"), Precedents: []int64{3}, Outcome: editor.Applied,
-			Response: &editor.Response{Output: json.RawMessage(`{"statements": []}`), Model: "m"}}); err != nil {
-			t.Fatal(err)
-		}
+	kept := func(act, key string) int64 {
 		calls, err := store.CallsOn(t.Context(), act, key)
 		if err != nil || len(calls) != 1 {
 			t.Fatalf("calls on %s: %v %v", act, calls, err)
@@ -52,8 +46,8 @@ func retiredRecord(t *testing.T) (http.Handler, int64, int64) {
 		return calls[0].ID
 	}
 	seed(t, store, saturday.AddDate(0, 0, -7), item("speech", "PM speech in Scotland", saturday.Add(-2*time.Hour)))
-	briefing := keep("briefing", "2026-10-24")
-	relating := keep("relating", number10.ID+"\nspeech")
+	briefing := kept("briefing", "2026-10-24")
+	relating := kept("relating", number10.ID+"\nspeech")
 	app, _ := newAppWithLog(t, sunday, store)
 	return app, briefing, relating
 }
@@ -82,6 +76,25 @@ func TestARetiredActsKeptCallsStayReadableByTheirPages(t *testing.T) {
 	if res := get(t, app, callPath(relating)); !strings.Contains(summaryHead(t, res.body), `href="/items/`) {
 		t.Errorf("the relating call does not link its Item:\n%s", res.body)
 	}
+}
+
+// keepRetiredCall writes a kept call of a retired act as the build that made
+// it left it, showing the Feedback precedents (a JSON array of ids) as
+// precedent: nothing that makes a call now carries precedents, so it is
+// written here directly.
+func keepRetiredCall(t *testing.T, path, act, key, input, precedents string) {
+	t.Helper()
+	sqlitetest.Exec(t, path,
+		`INSERT INTO call_texts (hash, text) VALUES ('rw', 'Write.'), ('rs', '{}'), ('ri-`+act+`', '`+input+`')
+			ON CONFLICT DO NOTHING`,
+		`INSERT INTO model_calls (act, work_key, at, batch_id, model, request_hash,
+			instructions, schema, input, effort, precedents,
+			response, output, reported_model, stop_reason, input_tokens, output_tokens, cache_read_tokens,
+			outcome, why)
+			VALUES ('`+act+`', '`+key+`', '`+saturday.UTC().Format("2006-01-02T15:04:05.000000000Z")+`', '', 'm', 'h-`+act+`',
+				'rw', 'rs', 'ri-`+act+`', '', '`+precedents+`',
+				NULL, '{"statements": []}', 'm', 'end_turn', 0, 0, 0, 'applied', '')`,
+	)
 }
 
 func callPath(id int64) string { return "/calls/" + strconv.FormatInt(id, 10) }

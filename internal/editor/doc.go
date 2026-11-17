@@ -162,8 +162,8 @@
 // connecting, the reading that drew Facts; relating, the Briefing, the
 // Sunday read's conversations, KeptConversation) stay kept, as every call
 // does, and readable on their pages; no act is shown them. Call.Precedents
-// and Job.Precedents carry the Feedback a retired act was shown as
-// precedent; no act shows any now.
+// is the Feedback a retired act's call showed as precedent, read from the
+// Record; no act shows any now, so nothing that makes a call carries them.
 //
 // # Re-judging
 //

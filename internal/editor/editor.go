@@ -58,7 +58,7 @@ func (e *Editor) ReadWaiting(ctx context.Context, now time.Time) error {
 	for _, tr := range waiting {
 		req := readingRequest(tr)
 		var r Reading
-		call, err := e.callNow(ctx, e.Model, itemKey(tr.Item), req, nil, now, func(res Response) (err error) {
+		call, err := e.callNow(ctx, e.Model, itemKey(tr.Item), req, now, func(res Response) (err error) {
 			r, err = checkReading(tr, req, modelOf(e.ModelFor, req.Act), res)
 			return err
 		})

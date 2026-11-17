@@ -340,7 +340,7 @@ func (r *Rejudge) Run(ctx context.Context, act RejudgeAct, rng Range, o RunOptio
 			now := r.Now()
 			// notKept is the Record failing to keep a result that passed.
 			var notKept error
-			call, err := callModel(ctx, r.Model, r.ModelName, j.Key, act.Name, j.Request, nil, now, func(res Response) error {
+			call, err := callModel(ctx, r.Model, r.ModelName, j.Key, act.Name, j.Request, now, func(res Response) error {
 				err := j.Apply(ctx, res, now, out.Candidate)
 				if err != nil && !errors.Is(err, ErrFailedChecks) {
 					notKept = err

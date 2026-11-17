@@ -11,6 +11,7 @@ import (
 
 	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/sqlite"
+	"github.com/samthorold/go-slow/internal/sqlite/sqlitetest"
 )
 
 // callLink follows the first link to a call's page in body.
@@ -75,15 +76,12 @@ func failThrice(t *testing.T, store *sqlite.Store) {
 	}
 }
 
-func TestACallsPageShowsThePrecedentsItsRequestShowed(t *testing.T) {
-	store := openStore(t)
+func TestARetiredActsCallsPageShowsThePrecedentsItsRequestShowed(t *testing.T) {
+	path := sqlitetest.Path(t)
+	// A retired act's call, kept by the build that made it.
+	keepRetiredCall(t, path, "relating", number10.ID+"\nspeech", "S1: Scotland.", "[9, 7]")
+	store := openStoreAt(t, path)
 	seed(t, store, saturday.AddDate(0, 0, -7), item("speech", "PM speech in Scotland", saturday.Add(-2*time.Hour)))
-	req := editor.Request{Act: "reading", Instructions: "Read.", Input: "S1: Scotland.", Schema: map[string]any{}}
-	if err := store.KeepCall(t.Context(), editor.Call{Act: "reading", Key: number10.ID + "\nspeech", At: saturday, Model: "m",
-		Request: req, RequestHash: editor.RequestHash(req, "m"), Precedents: []int64{9, 7}, Outcome: editor.Applied,
-		Response: &editor.Response{Output: json.RawMessage(`{}`), Model: "m"}}); err != nil {
-		t.Fatal(err)
-	}
 	app, _ := newAppWithLog(t, saturday, store)
 
 	res := get(t, app, "/calls/1")

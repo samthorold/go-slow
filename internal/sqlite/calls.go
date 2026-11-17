@@ -69,10 +69,6 @@ func keepCall(ctx context.Context, tx execer, c editor.Call) error {
 	if err != nil {
 		return err
 	}
-	precedents, err := json.Marshal(nonNil(c.Precedents))
-	if err != nil {
-		return err
-	}
 	var response, output, reported, stop sql.NullString
 	var in, out, cached sql.NullInt64
 	if r := c.Response; r != nil {
@@ -84,26 +80,22 @@ func keepCall(ctx context.Context, tx execer, c editor.Call) error {
 		out = sql.NullInt64{Int64: r.Usage.OutputTokens, Valid: true}
 		cached = sql.NullInt64{Int64: r.Usage.CacheReadTokens, Valid: true}
 	}
+	// precedents is the Feedback a retired act's call showed as precedent,
+	// read for its page; no act shows any now, so a call kept now writes the
+	// empty array the column, NOT NULL, needs.
 	if _, err := tx.ExecContext(ctx, `
 		INSERT INTO model_calls (act, work_key, at, batch_id, model, request_hash,
 			instructions, schema, input, effort, precedents,
 			response, output, reported_model, stop_reason, input_tokens, output_tokens, cache_read_tokens,
 			outcome, why)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '[]', ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		c.Act, c.Key, formatTime(c.At), c.BatchID, c.Model, c.RequestHash,
-		t.instructions, t.schema, t.input, c.Request.Effort, string(precedents),
+		t.instructions, t.schema, t.input, c.Request.Effort,
 		response, output, reported, stop, in, out, cached,
 		string(c.Outcome), c.Why); err != nil {
 		return fmt.Errorf("keep %s call: %w", c.Act, err)
 	}
 	return nil
-}
-
-func nonNil(ids []int64) []int64 {
-	if ids == nil {
-		return []int64{}
-	}
-	return ids
 }
 
 // callColumns are a kept call's columns, its texts joined in, as scanCall

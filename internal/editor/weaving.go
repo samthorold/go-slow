@@ -102,15 +102,16 @@ type SpanHeld struct {
 }
 
 // Timeline is the Spans the Story's Editor's Spans cite, each once, in the
-// order they were published, and those published together in the order
-// their Item has them (CONTEXT.md: Timeline). Its own Editor's Spans are
-// not in it: they are the argument shown above it, all published last, by
-// the Judgement that made it.
+// order they were published, an earlier Editor's Span by the Judgement that
+// wrote it, and those published together in the order their Item or Story
+// has them (CONTEXT.md: Timeline). Its own Editor's Spans are not in it:
+// they are the argument shown above it, all published last, by the
+// Judgement that made it.
 func (s Story) Timeline() []Cited {
 	var out []Cited
 	for _, es := range s.Spans {
 		for _, c := range es.Cites {
-			if !slices.ContainsFunc(out, func(o Cited) bool { return o.Address == c.Address }) {
+			if !slices.ContainsFunc(out, func(o Cited) bool { return o.Address == c.Address && o.Of == c.Of }) {
 				out = append(out, c)
 			}
 		}
@@ -118,7 +119,8 @@ func (s Story) Timeline() []Cited {
 	slices.SortStableFunc(out, func(a, b Cited) int {
 		return cmp.Or(a.Published.Compare(b.Published),
 			cmp.Compare(a.Address.SourceID, b.Address.SourceID), cmp.Compare(a.Address.EntryID, b.Address.EntryID),
-			cmp.Compare(a.Address.Span.Start, b.Address.Span.Start), cmp.Compare(a.Address.Span.End, b.Address.Span.End))
+			cmp.Compare(a.Address.Span.Start, b.Address.Span.Start), cmp.Compare(a.Address.Span.End, b.Address.Span.End),
+			cmp.Compare(a.Of.Story, b.Of.Story), cmp.Compare(a.Of.N, b.Of.N))
 	})
 	return out
 }

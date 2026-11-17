@@ -103,28 +103,52 @@ func (s *Store) HoldingSpan(ctx context.Context, a editor.Address) (editor.SpanH
 		return h, fmt.Errorf("holding span: %w", err)
 	}
 	_ = rows.Close()
-	rows, err = s.db.QueryContext(ctx, `
-		SELECT e.story_id, e.n, e.body, events.at,
-			(SELECT o.body FROM editor_spans o WHERE o.story_id = e.story_id AND o.n = 1)
-		FROM editor_spans e JOIN events ON events.id = e.story_id
-		WHERE EXISTS (SELECT 1 FROM editor_span_cites c
-			WHERE c.story_id = e.story_id AND c.n = e.n
-				AND c.source_id = ? AND c.entry_id = ? AND c.span_start = ? AND c.span_end = ?)
-		ORDER BY e.story_id, e.n`, a.SourceID, a.EntryID, a.Span.Start, a.Span.End)
+	h.Citing, err = s.citing(ctx, `editor_span_cites c
+		WHERE c.story_id = e.story_id AND c.n = e.n
+			AND c.source_id = ? AND c.entry_id = ? AND c.span_start = ? AND c.span_end = ?`,
+		a.SourceID, a.EntryID, a.Span.Start, a.Span.End)
 	if err != nil {
 		return h, fmt.Errorf("holding span: %w", err)
 	}
+	return h, nil
+}
+
+// CitingEditorSpan are the Editor's Spans citing the Editor's Span at a, in
+// the order written: what a wrong one's Page shows (system design: The
+// Editor writes Spans).
+func (s *Store) CitingEditorSpan(ctx context.Context, a editor.EditorSpanAt) ([]editor.CitingSpan, error) {
+	out, err := s.citing(ctx, `editor_span_cites_editor c
+		WHERE c.story_id = e.story_id AND c.n = e.n AND c.cited_story_id = ? AND c.cited_n = ?`, a.Story, a.N)
+	if err != nil {
+		return nil, fmt.Errorf("citing editor's span %d/%d: %w", a.Story, a.N, err)
+	}
+	return out, nil
+}
+
+// citing are the Editor's Spans e for which a row of cites exists, in the
+// order written, each with when its Story was made and its opening words.
+func (s *Store) citing(ctx context.Context, cites string, args ...any) ([]editor.CitingSpan, error) {
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT e.story_id, e.n, e.body, events.at,
+			(SELECT o.body FROM editor_spans o WHERE o.story_id = e.story_id AND o.n = 1)
+		FROM editor_spans e JOIN events ON events.id = e.story_id
+		WHERE EXISTS (SELECT 1 FROM `+cites+`)
+		ORDER BY e.story_id, e.n`, args...)
+	if err != nil {
+		return nil, err
+	}
 	defer func() { _ = rows.Close() }()
+	var out []editor.CitingSpan
 	for rows.Next() {
 		var c editor.CitingSpan
 		var at string
 		if err := rows.Scan(&c.Story, &c.N, &c.Body, &at, &c.Opening); err != nil {
-			return h, fmt.Errorf("holding span: %w", err)
+			return nil, err
 		}
 		c.At = parseTime(at)
-		h.Citing = append(h.Citing, c)
+		out = append(out, c)
 	}
-	return h, rows.Err()
+	return out, rows.Err()
 }
 
 // WeavingRan reports whether the weaving run keyed key has had its result
@@ -283,10 +307,11 @@ func (s *Store) editorSpans(ctx context.Context, storyID int64) ([]editor.Editor
 			JOIN items ON items.source_id = c.source_id AND items.entry_id = c.entry_id
 		WHERE e.story_id = ?
 		UNION ALL
-		SELECT e.n, e.body, c.m, '', '', 0, 0, cited.body, '', '', c.cited_story_id, c.cited_n
+		SELECT e.n, e.body, c.m, '', '', 0, 0, cited.body, '', written.at, c.cited_story_id, c.cited_n
 		FROM editor_spans e
 			JOIN editor_span_cites_editor c ON c.story_id = e.story_id AND c.n = e.n
 			JOIN editor_spans cited ON cited.story_id = c.cited_story_id AND cited.n = c.cited_n
+			JOIN events written ON written.id = c.cited_story_id
 		WHERE e.story_id = ?
 		ORDER BY 1, 3`, storyID, storyID)
 	if err != nil {
@@ -310,7 +335,7 @@ func (s *Store) editorSpans(ctx context.Context, storyID int64) ([]editor.Editor
 		}
 		es := &out[len(out)-1]
 		if !of.IsZero() {
-			es.Cites = append(es.Cites, editor.Cited{Of: of, Words: text})
+			es.Cites = append(es.Cites, editor.Cited{Of: of, Words: text, Published: parseTime(published)})
 			continue
 		}
 		es.Cites = append(es.Cites, editor.Cited{Address: a, Words: cut.Words(text, a.Span), Title: title,

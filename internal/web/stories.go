@@ -24,6 +24,8 @@ type Stories interface {
 	// HoldingSpan is what holds the Span at a: the Cuts whose Stories list
 	// it, and the Editor's Spans citing it.
 	HoldingSpan(ctx context.Context, a editor.Address) (editor.SpanHeld, error)
+	// CitingEditorSpan are the Editor's Spans citing the Editor's Span at a.
+	CitingEditorSpan(ctx context.Context, a editor.EditorSpanAt) ([]editor.CitingSpan, error)
 	// StoriesTouching are the Stories the Editor made that touch the Topic,
 	// newest first.
 	StoriesTouching(ctx context.Context, topic interest.Topic) ([]editor.Story, error)
@@ -74,16 +76,25 @@ func (a *app) holding(ctx context.Context, at editor.Address) ([]storyLink, []ci
 	for _, id := range h.Cuts {
 		stories = append(stories, storyLink{Words: "The Story its Cut made", Href: storyPath(id)})
 	}
-	var citing []citingRow
-	for _, c := range h.Citing {
-		s := storyLink{Words: shorten(c.Opening), Href: storyPath(c.Story), Editor: true}
-		if !slices.Contains(stories, s) {
-			stories = append(stories, s)
+	citing := a.citingRows(h.Citing)
+	for _, c := range citing {
+		if !slices.Contains(stories, c.Story) {
+			stories = append(stories, c.Story)
 		}
-		citing = append(citing, citingRow{Body: c.Body, Href: editorSpanPath(c.Story, c.N),
-			When: when(c.At, a.Now().Location()), Story: s})
 	}
 	return stories, citing, nil
+}
+
+// citingRows are the Editor's Spans cs as a Page lists them, citing what it
+// shows.
+func (a *app) citingRows(cs []editor.CitingSpan) []citingRow {
+	var out []citingRow
+	for _, c := range cs {
+		out = append(out, citingRow{Body: c.Body, Href: editorSpanPath(c.Story, c.N),
+			When:  when(c.At, a.Now().Location()),
+			Story: storyLink{Words: shorten(c.Opening), Href: storyPath(c.Story), Editor: true}})
+	}
+	return out
 }
 
 // storyRow is a Story as the Stories Page lists it: by its opening words,
@@ -149,10 +160,12 @@ type editorSpanRow struct {
 }
 
 // timelineRow is one Span of a Story's Timeline: its words linking its page,
-// with its Item, and when it was published.
+// with its Item, or for an earlier Editor's Span (Editor) saying it is the
+// Editor's, and when it was published.
 type timelineRow struct {
 	Words, Href string
 	Item        itemCitation
+	Editor      bool
 	Published   string
 }
 
@@ -184,35 +197,46 @@ func (a *app) story(w http.ResponseWriter, r *http.Request) {
 	for i, es := range s.Spans {
 		row := editorSpanRow{Body: es.Body, Href: editorSpanPath(s.ID, i+1)}
 		for _, c := range es.Cites {
-			if !c.Of.IsZero() {
-				// An earlier Editor's Span: its words, linking the Story
-				// that wrote them.
-				href := storyPath(c.Of.Story)
-				row.Cites = append(row.Cites, spanLink{Words: c.Words, Href: href,
-					Item: itemCitation{Source: "the Editor", Title: "an earlier Story", Href: href}})
-				continue
-			}
-			row.Cites = append(row.Cites, spanLink{Words: c.Words, Href: spanPath(c.Address),
-				Item: a.cite(c.Address.SourceID, c.Title, itemPath(c.Address.SourceID, c.Address.EntryID))})
+			row.Cites = append(row.Cites, a.citedLink(c))
 		}
 		p.Spans = append(p.Spans, row)
 	}
 	for _, c := range s.Timeline() {
-		p.Timeline = append(p.Timeline, timelineRow{Words: c.Words, Href: spanPath(c.Address),
-			Item:      a.cite(c.Address.SourceID, c.Title, itemPath(c.Address.SourceID, c.Address.EntryID)),
-			Published: when(c.Published, a.Now().Location())})
+		row := timelineRow{Words: c.Words, Published: when(c.Published, a.Now().Location())}
+		if c.Of.IsZero() {
+			row.Href = spanPath(c.Address)
+			row.Item = a.cite(c.Address.SourceID, c.Title, itemPath(c.Address.SourceID, c.Address.EntryID))
+		} else {
+			row.Href, row.Editor = editorSpanPath(c.Of.Story, c.Of.N), true
+		}
+		p.Timeline = append(p.Timeline, row)
 	}
 	a.render(w, r, storyTmpl, p)
 }
 
+// citedLink is a Span an Editor's Span cites, as its margin shows it: a
+// Source's, its words linking its page, with its Item; an earlier Editor's,
+// its words linking the Story that wrote them, cited as the Editor's.
+func (a *app) citedLink(c editor.Cited) spanLink {
+	if !c.Of.IsZero() {
+		href := storyPath(c.Of.Story)
+		return spanLink{Words: c.Words, Href: href,
+			Item: itemCitation{Source: "the Editor", Title: "an earlier Story", Href: href}}
+	}
+	return spanLink{Words: c.Words, Href: spanPath(c.Address),
+		Item: a.cite(c.Address.SourceID, c.Title, itemPath(c.Address.SourceID, c.Address.EntryID))}
+}
+
 // editorSpanPage is the view model of an Editor's Span's Page: its words,
-// the Story whose Judgement wrote it and when, and the Spans it cites.
+// the Story whose Judgement wrote it and when, the Spans it cites, and the
+// later Editor's Spans citing it: a wrong one's corrections.
 type editorSpanPage struct {
-	Title string
-	Body  string
-	When  string
-	Story storyLink
-	Cites []spanLink
+	Title   string
+	Body    string
+	When    string
+	Story   storyLink
+	Cites   []spanLink
+	CitedBy []citingRow
 }
 
 // editorSpan is an Editor's Span's Page, by its Story and its number in it.
@@ -239,9 +263,14 @@ func (a *app) editorSpan(w http.ResponseWriter, r *http.Request) {
 		Story: storyLink{Words: shorten(s.Spans[0].Body), Href: storyPath(id)},
 	}
 	for _, c := range es.Cites {
-		p.Cites = append(p.Cites, spanLink{Words: c.Words, Href: spanPath(c.Address),
-			Item: a.cite(c.Address.SourceID, c.Title, itemPath(c.Address.SourceID, c.Address.EntryID))})
+		p.Cites = append(p.Cites, a.citedLink(c))
 	}
+	citing, err := a.Stories.CitingEditorSpan(r.Context(), editor.EditorSpanAt{Story: id, N: n})
+	if err != nil {
+		a.serverError(w, r, err)
+		return
+	}
+	p.CitedBy = a.citingRows(citing)
 	a.render(w, r, editorSpanTmpl, p)
 }
 

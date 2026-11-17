@@ -39,7 +39,7 @@
     <li class="block">
       <div class="block-body"><p><a href="{{.Href}}"><span hx-disable>{{.Words}}</span></a></p></div>
       <div class="block-margin">
-        <p>{{template "citation" .Item}} <small>{{.Published}}</small></p>
+        <p>{{if .Editor}}<span class="quiet">spoken by the Editor</span>{{else}}{{template "citation" .Item}}{{end}} <small>{{.Published}}</small></p>
       </div>
     </li>
   {{- end}}

@@ -1,12 +1,14 @@
 package web_test
 
 import (
+	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
 
@@ -67,6 +69,121 @@ func TestAStorysTimelineOrdersTheSpansItHoldsByPublication(t *testing.T) {
 		if !strings.Contains(timeline, want) {
 			t.Errorf("the Timeline lacks %q:\n%s", want, timeline)
 		}
+	}
+}
+
+// weaveOnSunday weaves, after Saturday's twoOpinions, a Sunday Story citing
+// the ferries (S6, published Sunday), the earlier Editor's Span "Motherwell
+// is where…" (S2, written Saturday) and the speech's "Scotland will get £2
+// billion." (S3, published Thursday), in that order.
+func weaveOnSunday(t *testing.T, store *sqlite.Store) time.Time {
+	t.Helper()
+	weaveSpeech(t, store, twoOpinions)
+	sunday := saturday.Add(24 * time.Hour)
+	ferries := item("ferries", "Ferries to the islands", sunday)
+	ferries.Content = "<p>Ferries to Scotland's islands will run more often.</p>"
+	seed(t, store, saturday.AddDate(0, 0, -7), ferries)
+	weave(t, store, sunday, `{"stories": [{"editor_spans": [
+	  {"body": "The ferries follow the money to the islands.", "cites": [6, 2, 3]}
+	]}]}`)
+	return sunday
+}
+
+func TestAStorysTimelineHoldsAnEarlierEditorsSpanAtItsJudgementsDate(t *testing.T) {
+	store := openStore(t)
+	sunday := weaveOnSunday(t, store)
+	app, _ := newAppWithLog(t, sunday, store)
+
+	res := storyPage(t, app, "The ferries follow the money to the islands.")
+
+	at := strings.Index(res.body, `<h2 id="timeline">Timeline</h2>`)
+	if at < 0 {
+		t.Fatalf("the Story's Page has no Timeline:\n%s", res.body)
+	}
+	timeline := res.body[at:]
+	speech := strings.Index(timeline, "Scotland will get £2 billion.")
+	earlier := strings.Index(timeline, "Motherwell is where the money lands first")
+	ferries := strings.Index(timeline, "Ferries to Scotland")
+	if speech < 0 || earlier < speech || ferries < earlier {
+		t.Errorf("the Timeline does not place the earlier Editor's Span at its Judgement's date:\n%s", timeline)
+	}
+	row := timeline[earlier:ferries]
+	for _, want := range []string{"Sat 24 Oct 2026, 07:30", "spoken by the Editor"} {
+		if !strings.Contains(row, want) {
+			t.Errorf("the earlier Editor's Span's row lacks %q:\n%s", want, row)
+		}
+	}
+	if !regexp.MustCompile(`<a href="/stories/\d+/spans/1"><span hx-disable>Motherwell is where`).MatchString(timeline) {
+		t.Errorf("the earlier Editor's Span does not link its Page:\n%s", timeline)
+	}
+}
+
+func TestAnEditorsSpansPageListsTheEditorsSpansCitingIt(t *testing.T) {
+	store := openStore(t)
+	sunday := weaveOnSunday(t, store)
+	app, _ := newAppWithLog(t, sunday, store)
+	timeline := storyPage(t, app, "The ferries follow the money to the islands.").body
+	m := regexp.MustCompile(`<a href="(/stories/\d+/spans/1)"><span hx-disable>Motherwell is where`).FindStringSubmatch(timeline)
+	if m == nil {
+		t.Fatalf("the Timeline does not link the earlier Editor's Span's Page:\n%s", timeline)
+	}
+	citing := regexp.MustCompile(`<a href="((/stories/\d+)/spans/1)">spoken by the Editor</a>`).FindStringSubmatch(timeline)
+	if citing == nil {
+		t.Fatalf("the Story's Page does not link its Editor's Span:\n%s", timeline)
+	}
+
+	res := get(t, app, m[1])
+
+	at := strings.Index(res.body, `<h2 id="cited-by">`)
+	if res.status != 200 || at < 0 {
+		t.Fatalf("status %d, the Editor's Span's Page does not show what cites it:\n%s", res.status, res.body)
+	}
+	cites := res.body[at:]
+	for _, want := range []string{
+		`<a href="` + citing[1] + `">The ferries follow the money to the islands.</a>`,
+		`<a href="` + citing[2] + `">`, "spoken by the Editor", "Sun 25 Oct 2026, 07:30",
+	} {
+		if !strings.Contains(cites, want) {
+			t.Errorf("what cites the Editor's Span lacks %q:\n%s", want, cites)
+		}
+	}
+	if !strings.Contains(get(t, app, citing[1]).body, `<h2 id="cited-by">`) {
+		t.Errorf("an Editor's Span nothing cites has no section saying so")
+	}
+	if strings.Contains(get(t, app, citing[1]).body, `href="/items///`) {
+		t.Errorf("an Editor's Span's Page links an earlier Editor's Span it cites as an Item's")
+	}
+}
+
+func TestOpeningATimelineOrWhatCitesAnEditorsSpanChangesNothing(t *testing.T) {
+	store := openStore(t)
+	sunday := weaveOnSunday(t, store)
+	app, _ := newAppWithLog(t, sunday, store)
+	state := func() string {
+		made, err := store.StoriesMade(t.Context())
+		if err != nil {
+			t.Fatal(err)
+		}
+		citing, err := store.CitingEditorSpan(t.Context(), editor.EditorSpanAt{Story: made[len(made)-1].ID, N: 1})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return fmt.Sprintf("%+v %+v", made, citing)
+	}
+	before := state()
+
+	story := storyPage(t, app, "The ferries follow the money to the islands.").body
+	m := regexp.MustCompile(`<a href="(/stories/\d+/spans/1)"><span hx-disable>Motherwell is where`).FindStringSubmatch(story)
+	if m == nil {
+		t.Fatalf("the Timeline does not link the earlier Editor's Span's Page:\n%s", story)
+	}
+	span := get(t, app, m[1]).body
+
+	if after := state(); after != before {
+		t.Errorf("opening the pages changed the Record:\nbefore %s\nafter  %s", before, after)
+	}
+	if storyPage(t, app, "The ferries follow the money to the islands.").body != story || get(t, app, m[1]).body != span {
+		t.Errorf("the pages changed on being opened again")
 	}
 }
 

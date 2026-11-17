@@ -29,7 +29,10 @@ type Call struct {
 	// Request is the request exactly as sent.
 	Request Request
 	// Precedents are the ids of the Feedback the request showed as
-	// precedent; they are in its input too.
+	// precedent, in its input too: read from the Record, for the calls of the
+	// retired acts that showed Feedback (relating and the Briefing). No act
+	// shows any now, so a call made now has none, and keeping a call never
+	// writes them.
 	Precedents []int64
 	// RequestHash is RequestHash of the request and the model asked for.
 	RequestHash string
@@ -150,10 +153,10 @@ func hashOf(v any) string {
 
 // newCall is a call on a piece of work, its request hashed with the model
 // asked for.
-func newCall(act, key, batchID, model string, req Request, precedents []int64, at time.Time) Call {
+func newCall(act, key, batchID, model string, req Request, at time.Time) Call {
 	return Call{
 		Act: act, Key: key, At: at, BatchID: batchID, Model: model,
-		Request: req, Precedents: precedents, RequestHash: RequestHash(req, model),
+		Request: req, RequestHash: RequestHash(req, model),
 	}
 }
 
@@ -180,18 +183,18 @@ func (c Call) ended(o Outcome, why error) Call {
 // came out, and the error that ended it, if one did. An answer check refuses
 // with ErrFailedChecks is Refused; any other error check returns means the
 // answer passed and could not be made ready to write, and is Failed.
-func (e *Editor) callNow(ctx context.Context, m Model, key string, req Request, precedents []int64,
+func (e *Editor) callNow(ctx context.Context, m Model, key string, req Request,
 	now time.Time, check func(Response) error,
 ) (Call, error) {
-	return callModel(ctx, m, modelOf(e.ModelFor, req.Act), key, req.Act, req, precedents, now, check)
+	return callModel(ctx, m, modelOf(e.ModelFor, req.Act), key, req.Act, req, now, check)
 }
 
 // callModel is callNow on the model named model, a failed call's error
 // prefixed with what.
-func callModel(ctx context.Context, m Model, model, key, what string, req Request, precedents []int64,
+func callModel(ctx context.Context, m Model, model, key, what string, req Request,
 	now time.Time, check func(Response) error,
 ) (Call, error) {
-	call := newCall(req.Act, key, "", model, req, precedents, now)
+	call := newCall(req.Act, key, "", model, req, now)
 	res, err := m.Complete(ctx, req)
 	call = call.answered(res)
 	if err != nil {

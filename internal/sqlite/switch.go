@@ -47,7 +47,8 @@ const storySwitch = `coalesce((SELECT through_cut FROM story_switch ORDER BY eve
 
 // KeepStorySwitch keeps a switch to Stories at at, as an event, through the
 // Cut throughCut: from then on the Stories cut after it, and after the last
-// weaving run written, await weaving (system design: The switch to Stories).
+// weaving run written, await weaving (system design: The Record is recreated
+// when the design of its Judgements changes, not translated).
 func (s *Store) KeepStorySwitch(ctx context.Context, throughCut int64, at time.Time) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {

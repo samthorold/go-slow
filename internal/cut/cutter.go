@@ -6,8 +6,10 @@ import (
 	"time"
 )
 
-// Judge is what made a Cut: the cutter and its version. A new version of a
-// cutter is a new Judge, and adds Cuts beside its earlier version's.
+// Judge is what made a Cut: the cutter and its version. A Cut is not a
+// Judgement and has no Judge in the domain's sense (CONTEXT.md); the type
+// keeps the name. A new version of a cutter adds Cuts beside its earlier
+// version's.
 type Judge struct {
 	Cutter  string
 	Version int
@@ -23,7 +25,7 @@ type Text struct {
 	Text              string
 }
 
-// Cut is the Judgement listing an Item's Spans, in order. It is kept as an
+// Cut is the event listing an Item's Spans, in order. It is kept as an
 // event and never changed.
 type Cut struct {
 	// ID is the event's identifier in the Record; zero until kept.
@@ -59,9 +61,9 @@ func New(store Store) *Cutter {
 
 // CutNew cuts, at now, every Item with text that has no Cut yet: those just
 // collected, and on its first run those already in the Record. An Item
-// already cut is left to its Cut, whatever cutter made it: a new cutter
-// judges forward, and re-cutting what is kept is a deliberate run of its
-// own (system design: Every judgement carries its judge).
+// already cut is left to its Cut, whatever cutter made it: an Item is cut
+// once, as it enters, and re-cutting what is kept is a deliberate run of its
+// own (system design: The Cut is the boundary, not a Command).
 func (c *Cutter) CutNew(ctx context.Context, now time.Time) error {
 	texts, err := c.store.Uncut(ctx)
 	if err != nil {

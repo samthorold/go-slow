@@ -49,7 +49,8 @@ type sourceRow struct {
 }
 
 // steeringWindow is how far back the Items page counts, per Source, the
-// Stories gathered and the Spans of the Items collected: four weeks, long
+// Stories the Editor made holding a Span of an Item collected in it, and
+// the Spans of the Items collected: four weeks, long
 // enough for a Source that publishes weekly to show a few, short enough to
 // show a Source as it is now.
 const steeringWindow = 28 * 24 * time.Hour

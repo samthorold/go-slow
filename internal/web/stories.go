@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/samthorold/go-slow/internal/editor"
+	"github.com/samthorold/go-slow/internal/interest"
 )
 
 // Stories answers the Stories Page and a Story's Page.
@@ -15,6 +16,9 @@ type Stories interface {
 	// StoryMade is a Story the Editor made, by its event, reporting whether
 	// the Record holds one.
 	StoryMade(ctx context.Context, id int64) (editor.Story, bool, error)
+	// StoriesTouching are the Stories the Editor made that touch the Topic,
+	// newest first.
+	StoriesTouching(ctx context.Context, topic interest.Topic) ([]editor.Story, error)
 }
 
 // storiesTmpl is the Stories Page, and storyTmpl a Story's Page.
@@ -57,11 +61,16 @@ func (a *app) stories(w http.ResponseWriter, r *http.Request) {
 		a.serverError(w, r, err)
 		return
 	}
-	var p storiesPage
-	for _, s := range made {
-		p.Stories = append(p.Stories, storyRow{Title: storyTitle(s), Href: storyPath(s.ID), When: when(s.At, a.Now().Location())})
+	a.render(w, r, storiesTmpl, storiesPage{Stories: a.storyRows(made)})
+}
+
+// storyRows are Stories as a list of them shows them, in the order given.
+func (a *app) storyRows(stories []editor.Story) []storyRow {
+	var rows []storyRow
+	for _, s := range stories {
+		rows = append(rows, storyRow{Title: storyTitle(s), Href: storyPath(s.ID), When: when(s.At, a.Now().Location())})
 	}
-	a.render(w, r, storiesTmpl, p)
+	return rows
 }
 
 // storyPage is the view model of a Story's Page: the Editor's Spans it

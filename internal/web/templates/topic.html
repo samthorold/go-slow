@@ -1,0 +1,16 @@
+{{define "title"}}{{.Name}}{{end}}
+
+{{define "content"}}
+{{/* A Topic's Page: the Stories the Editor made that touch it, newest first,
+     like a section of a magazine. What the Owner typed is inert. */}}
+<h1 hx-disable>{{.Name}}</h1>
+<p class="quiet">The Stories the Editor made that touch this Topic: one of their Spans, or of the Editor's own, names one of its terms (<span hx-disable>{{range $i, $t := .Terms}}{{if $i}}, {{end}}{{$t}}{{end}}</span>).</p>
+{{- if not .Stories}}
+<p>No Story the Editor made touches this Topic yet.</p>
+{{- end}}
+<ul>
+{{- range .Stories}}
+  <li><a href="{{.Href}}">{{.Title}}</a> <small class="quiet">{{.When}}</small></li>
+{{- end}}
+</ul>
+{{end}}

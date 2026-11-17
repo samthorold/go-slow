@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"slices"
 	"strconv"
 
 	"github.com/samthorold/go-slow/internal/interest"
@@ -74,6 +75,42 @@ func (a *app) removeTopic(w http.ResponseWriter, r *http.Request) {
 	default:
 		w.WriteHeader(http.StatusOK)
 	}
+}
+
+// topicTmpl is a Topic's Page.
+var topicTmpl = page(noIndex, "topic.html")
+
+// topicPage is the view model of a Topic's Page: the Topic, and the Stories
+// the Editor made that touch it, newest first.
+type topicPage struct {
+	Name    string
+	Terms   []string
+	Stories []storyRow
+}
+
+// topic is a Topic's Page (system design: The Owner reads Stories). Opening
+// it changes nothing.
+func (a *app) topic(w http.ResponseWriter, r *http.Request) {
+	id, ok := topicID(w, r)
+	if !ok {
+		return
+	}
+	topics, err := a.Topics.Topics(r.Context())
+	if err != nil {
+		a.serverError(w, r, err)
+		return
+	}
+	i := slices.IndexFunc(topics, func(t interest.Topic) bool { return t.ID == id })
+	if i < 0 {
+		http.NotFound(w, r)
+		return
+	}
+	stories, err := a.Stories.StoriesTouching(r.Context(), topics[i])
+	if err != nil {
+		a.serverError(w, r, err)
+		return
+	}
+	a.render(w, r, topicTmpl, topicPage{Name: topics[i].Name, Terms: topics[i].Terms, Stories: a.storyRows(stories)})
 }
 
 // topicID reads the Topic's id from the path, answering 404 if it can't.

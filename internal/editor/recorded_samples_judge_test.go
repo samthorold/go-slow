@@ -27,7 +27,7 @@ func samplesPassing(passed, n int) []sampleResult {
 	return out
 }
 
-// A fixture's samples are judged by the daily acts' rule: "passes its checks
+// A fixture's samples are judged by reading's and weaving's rule: "passes its checks
 // within its attempts" is supported at five of five, undecided at four and
 // refuted at three or fewer, each verdict but supported failing with the
 // fixture, the property and the count.

@@ -10,8 +10,8 @@ import (
 // Mentions are the names of what the Span s mentions, by r, each once, in
 // the order r judged them: a Span mentions what a Span inside it names, or
 // what a Span inside it refers to names, followed as far as the references
-// go without coming back on themselves (system design: Entities find
-// candidates; they don't say who did what). It is worked out, never
+// go without coming back on themselves (system design: Who did what is read
+// in the Span, not judged apart from it). It is worked out, never
 // written. Which Entity each name is comes from its look-up (KeyOf).
 func (r Reading) Mentions(s cut.Span) []Name {
 	var reached []cut.Span

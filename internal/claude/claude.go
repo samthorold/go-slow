@@ -4,10 +4,9 @@
 //
 // It speaks the Messages API and the Message Batches API (Options.ActModels
 // sends each request of a batch to its act's model) through
-// anthropic-sdk-go, and answers the Conversation port with Turn (the beta
-// Messages API, conversation.go). Its prices (prices.go: PriceOf, dated
-// PricesAsOf, with PricesSource) stay inside it too, used only by a
-// re-judging run's estimate; read them again when a model changes or before
+// anthropic-sdk-go. Its prices (prices.go: PriceOf, dated
+// PricesAsOf, with PricesSource) stay inside it too, used only by the
+// estimates of the rejudge and weave commands; read them again when a model changes or before
 // a run whose cap matters. A test fails if a model in .env.example has none.
 package claude
 

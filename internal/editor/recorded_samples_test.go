@@ -119,7 +119,7 @@ func samplesOf(dir, fixture string, r rule, cmd rerecordCmd) ([][]recording, err
 // refuted when in refutedAtMost or fewer, and undecided between.
 type rule struct{ samples, supportedAt, refutedAtMost int }
 
-// dailyRule is reading's.
+// dailyRule is reading's and weaving's.
 var dailyRule = rule{samples: 5, supportedAt: 5, refutedAtMost: 3}
 
 // verdict is what a rule makes of a count.
@@ -436,8 +436,8 @@ func drawSamples(t *testing.T, dir, fixture string, r rule, cmd rerecordCmd, liv
 	for _, m := range models {
 		results = append(results, run(m))
 		if m.live != nil && m.lost == nil && len(m.attempts) == 0 {
-			// Work that made no call, such as relating an Item with no
-			// candidates, is kept as a sample of none.
+			// Work that made no call (a job with no request, applied at
+			// once) is kept as a sample of none.
 			keepSample(t, m.path, nil)
 		}
 		for _, a := range m.attempts {

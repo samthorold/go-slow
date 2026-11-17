@@ -1,10 +1,12 @@
 // Package cut is the Cut: listing an Item's Spans before anything else is
 // judged of them, in plain code (system design: The grain belongs to the
-// judgement, not to the Span). A Cut is a Judgement, kept with its Judge (the
-// cutter and its version) and never changed; a Span is an address into the
-// Item's text as kept, not a thing with an identity of its own.
+// judgement, not to the Span). A Cut is an event, not a Judgement: plain code
+// that no model call replaces, kept with its cutter and the cutter's version
+// (the type Judge) and never changed (system design: The Cut is the boundary,
+// not a Command); a Span is an address into the Item's text as kept, not a
+// thing with an identity of its own.
 //
-// The Cut is the first event of the event-based Record. Collection runs
+// The Cut is the first event of the Record. Collection runs
 // Cutter.CutNew after every run, before reading (collect.Deps.Cut), so the
 // start's run cuts the Items already in the Record, once, and an Item with
 // no text yet is cut once it is given its text. Spans are byte offsets into

@@ -384,19 +384,37 @@ func (p properties) property(name string) func(format string, args ...any) {
 // test-only properties it asserted, if it passed its checks.
 func sampled(t *testing.T, dir, fixture string, r rule, cmd rerecordCmd, run func(*sampleModel) sampleResult) []error {
 	t.Helper()
-	var models []*sampleModel
+	report := func(err error) { t.Error(err) }
 	if *rerecordFlag {
 		live, model := liveModel(t, cmd.modelVar)
-		for k := 1; k <= r.samples; k++ {
+		return sampledOn(t, dir, fixture, r, cmd, live, model, report, run)
+	}
+	return sampledOn(t, dir, fixture, r, cmd, nil, pinnedModel(t, cmd.modelVar), report, run)
+}
+
+// sampledOn is sampled recording on live, asked for model, or, with live
+// nil, replaying with each request hashed with model, a stale sample
+// reported to report. Recording draws at most -max-samples samples, when it
+// is set.
+func sampledOn(t *testing.T, dir, fixture string, r rule, cmd rerecordCmd, live editor.Model, model string,
+	report func(error), run func(*sampleModel) sampleResult,
+) []error {
+	t.Helper()
+	var models []*sampleModel
+	if live != nil {
+		samples := r.samples
+		if *maxSamplesFlag > 0 {
+			samples = min(samples, *maxSamplesFlag)
+		}
+		for k := 1; k <= samples; k++ {
 			models = append(models, recordingSample(t, samplePath(dir, fixture, k), live, model, cmd))
 		}
 	} else {
 		if _, err := samplesOf(dir, fixture, r, cmd); err != nil {
 			return []error{err}
 		}
-		model := pinnedModel(t, cmd.modelVar)
 		for k := 1; k <= r.samples; k++ {
-			models = append(models, replayingSample(t, samplePath(dir, fixture, k), model, cmd, func(err error) { t.Error(err) }))
+			models = append(models, replayingSample(t, samplePath(dir, fixture, k), model, cmd, report))
 		}
 	}
 	results := make([]sampleResult, 0, len(models))

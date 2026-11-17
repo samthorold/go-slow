@@ -19,9 +19,6 @@
   <h2 id="text">Text</h2>
   <p><span class="machine">{{.CutBy}}</span>{{with .ReadBy}} {{template "made" .}}{{end}}</p>
   <p><a href="{{.Story}}">The Story its Cut made</a></p>
-  {{- with .FeedbackError}}
-  <p role="alert">{{.}}</p>
-  {{- end}}
   {{- if not .ReadBy}}
   <p>Awaiting reading.</p>
   {{- end}}
@@ -32,7 +29,7 @@
     <li id="span-{{.N}}" value="{{.N}}" class="block">
       <div class="block-body{{if .Rejected}} struck{{end}}" hx-disable><p>{{range .Pieces}}{{if .Was}}<ins title="{{.Was}}">{{.Words}}</ins>{{else}}{{.Words}}{{end}}{{end}}</p></div>
       <div class="block-margin">
-        <div><a href="{{.Href}}">S{{.N}}</a>{{template "gives" .Missed}}</div>
+        <div><a href="{{.Href}}">S{{.N}}</a></div>
         {{- if .Rejected}}
         <p class="quiet">rejected</p>
         {{- end}}
@@ -44,5 +41,4 @@
   </div>
 </section>
 {{- end}}
-{{template "given" .Feedback}}
 {{end}}

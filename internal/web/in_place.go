@@ -13,7 +13,7 @@ import (
 // read as they would be written where they land: the reading's words keep
 // their antecedent's case and form, which reads wrongly in place. Only the
 // page's words change; Was keeps the words the stretch was, and the
-// reading's own Hydrated, which relating is shown, is left as it is.
+// reading's own Hydrated is left as it is.
 func inPlace(pieces []editor.Piece) []editor.Piece {
 	out := make([]editor.Piece, len(pieces))
 	var before strings.Builder

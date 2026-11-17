@@ -75,6 +75,3 @@ type Usage struct {
 func (u Usage) add(v Usage) Usage {
 	return Usage{u.InputTokens + v.InputTokens, u.OutputTokens + v.OutputTokens, u.CacheReadTokens + v.CacheReadTokens}
 }
-
-// total is every token, input and output, cached or not.
-func (u Usage) total() int64 { return u.InputTokens + u.OutputTokens + u.CacheReadTokens }

@@ -271,10 +271,10 @@ func (s *Store) readingByID(ctx context.Context, id int64) (editor.Reading, erro
 		}
 		return rows.Err()
 	}
-	// A judgement under standing wrong is read by no view, and shown to no
-	// act (system design: Feedback lands on a judgement).
+	// The Feedback given in the app before it was retired is read by no
+	// view: a judgement it said was wrong is read as judged.
 	if err := each(`SELECT event_id, from_start, from_end, to_start, to_end FROM refers_to
-		WHERE reading_id = ? AND NOT `+wrongStanding("refers_to.event_id")+` ORDER BY event_id`,
+		WHERE reading_id = ? ORDER BY event_id`,
 		func(rows *sql.Rows) error {
 			var id int64
 			var fs, fe, ts, te int
@@ -300,7 +300,7 @@ func (s *Store) readingByID(ctx context.Context, id int64) (editor.Reading, erro
 		return editor.Reading{}, err
 	}
 	if err := each(`SELECT event_id, span_start, span_end, speaker_start, speaker_end FROM speakers
-		WHERE reading_id = ? AND NOT `+wrongStanding("speakers.event_id")+` ORDER BY event_id`,
+		WHERE reading_id = ? ORDER BY event_id`,
 		func(rows *sql.Rows) error {
 			var id int64
 			var s0, s1, b0, b1 int

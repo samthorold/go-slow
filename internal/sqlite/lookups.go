@@ -158,18 +158,11 @@ func unmerged(ctx context.Context, tx *sql.Tx, kind, name, other string) ([]int6
 // EntitiesNamed is the Entity each key names, as the Record's look-ups have
 // it now: the item its newest look-up matched; or, with no match, the
 // Editor's Entity for its name and kind, or the item a later look-up merged
-// that into. A key not yet looked up is left out. A look-up under standing
-// wrong is read by no view: the key names what an older look-up matched, or
-// nothing, and is not looked up again for it.
+// that into. A key not yet looked up is left out. The Feedback given in the
+// app before it was retired is read by no view: a look-up it said was wrong
+// is read as made.
 func (s *Store) EntitiesNamed(ctx context.Context, keys []editor.LookupKey) (map[editor.LookupKey]editor.NamedEntity, error) {
 	out, _, err := s.entitiesNamed(ctx, keys)
-	return out, err
-}
-
-// LookupsNamed is the look-up each key's Entity is read from, as
-// EntitiesNamed reads it: what Feedback on the match names.
-func (s *Store) LookupsNamed(ctx context.Context, keys []editor.LookupKey) (map[editor.LookupKey]int64, error) {
-	_, out, err := s.entitiesNamed(ctx, keys)
 	return out, err
 }
 
@@ -217,33 +210,16 @@ func firstOfEach() func(editor.LookupKey) bool {
 	}
 }
 
-// allEntitiesNamed is EntitiesNamed for every key the Record has looked up,
-// in one query: what a view working out which Items mention an Entity
-// reads, since it reads every name in the Record.
-func (s *Store) allEntitiesNamed(ctx context.Context) (map[editor.LookupKey]editor.NamedEntity, error) {
-	rows, err := s.db.QueryContext(ctx, lookupsRead(`lookups l`)+` ORDER BY l.event_id DESC`)
-	if err != nil {
-		return nil, fmt.Errorf("entities named: %w", err)
-	}
-	out := map[editor.LookupKey]editor.NamedEntity{}
-	if err := readEntities(rows, firstOfEach(), out, map[editor.LookupKey]int64{}); err != nil {
-		return nil, fmt.Errorf("entities named: %w", err)
-	}
-	return out, nil
-}
-
-// lookupsRead is the look-ups a view reads, not under standing wrong, each
-// with its key, its match and the Editor's Entity of its name and the item
-// that was merged into, if any. from is the FROM clause, naming the look-ups
-// l.
+// lookupsRead is the look-ups a view reads, each with its key, its match
+// and the Editor's Entity of its name and the item that was merged into, if
+// any. from is the FROM clause, naming the look-ups l.
 func lookupsRead(from string) string {
 	return `
 		SELECT l.name, l.kind, l.office, l.on_date, l.event_id, l.wikidata_id, l.label, e.event_id, e.name, ml.wikidata_id, ml.label
 		FROM ` + from + `
 			LEFT JOIN editor_entities e ON l.wikidata_id = '' AND e.name = l.name AND e.kind = l.kind
 			LEFT JOIN entity_merges m ON m.event_id = (SELECT max(event_id) FROM entity_merges WHERE entity_id = e.event_id)
-			LEFT JOIN lookups ml ON ml.event_id = m.lookup_id
-		WHERE NOT ` + wrongStanding("l.event_id")
+			LEFT JOIN lookups ml ON ml.event_id = m.lookup_id`
 }
 
 // readEntities reads the rows of lookupsRead into the Entity each key names

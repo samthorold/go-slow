@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
 )
 
@@ -91,35 +92,33 @@ func (b *refusingBatcher) Poll(_ context.Context, id string) (editor.BatchPoll, 
 	return editor.BatchPoll{Ended: true, Results: out}, nil
 }
 
-func TestFailedRelatingWorkLinksToEveryAttemptAtIt(t *testing.T) {
-	for _, act := range []string{"relating"} {
-		t.Run(act, func(t *testing.T) {
-			// The release, and a later Item naming Derby, read and awaiting
-			// relating.
-			store := readToRelate(t)
-			log := slog.New(slog.DiscardHandler)
-			ed := editor.New(editor.Deps{Store: store, Log: log})
-			batchAct := ed.Relating()
-			b := editor.NewBatches(editor.BatchDeps{Store: store, Batcher: &refusingBatcher{output: `{}`},
-				Acts: []editor.BatchAct{batchAct}, Log: log})
-			// Submitted, then refused on each of its attempts.
-			for range editor.MaxAttempts + 1 {
-				if err := b.ReadWaiting(t.Context(), saturday); err != nil {
-					t.Fatal(err)
-				}
-			}
-			app, _ := newAppWithLog(t, saturday, store)
+func TestFailedBatchWorkLinksToEveryAttemptAtIt(t *testing.T) {
+	// The release, cut and awaiting reading, whose every answer is refused.
+	store := openStore(t)
+	seed(t, store, saturday.AddDate(0, 0, -7), release())
+	if err := cut.New(store).CutNew(t.Context(), saturday); err != nil {
+		t.Fatal(err)
+	}
+	log := slog.New(slog.DiscardHandler)
+	ed := editor.New(editor.Deps{Store: store, Log: log})
+	b := editor.NewBatches(editor.BatchDeps{Store: store, Batcher: &refusingBatcher{output: `{}`},
+		Acts: []editor.BatchAct{ed.Reading()}, Log: log})
+	// Submitted, then refused on each of its attempts.
+	for range editor.MaxAttempts + 1 {
+		if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+			t.Fatal(err)
+		}
+	}
+	app, _ := newAppWithLog(t, saturday, store)
 
-			res := get(t, app, callLink(t, get(t, app, "/items").body, `id="failed"`))
+	res := get(t, app, callLink(t, get(t, app, "/items").body, `id="failed"`))
 
-			if res.status != 200 || !strings.Contains(res.body, "A "+act+" call") {
-				t.Fatalf("status %d, or not a %s call:\n%s", res.status, act, res.body)
-			}
-			attempts := res.body[strings.Index(res.body, `id="attempts"`):]
-			if n := strings.Count(attempts, "refused"); n != editor.MaxAttempts {
-				t.Errorf("%d refused attempts listed, want %d:\n%s", n, editor.MaxAttempts, attempts)
-			}
-		})
+	if res.status != 200 || !strings.Contains(res.body, "A reading call") {
+		t.Fatalf("status %d, or not a reading call:\n%s", res.status, res.body)
+	}
+	attempts := res.body[strings.Index(res.body, `id="attempts"`):]
+	if n := strings.Count(attempts, "refused"); n != editor.MaxAttempts {
+		t.Errorf("%d refused attempts listed, want %d:\n%s", n, editor.MaxAttempts, attempts)
 	}
 }
 

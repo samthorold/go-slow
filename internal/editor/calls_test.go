@@ -20,7 +20,7 @@ func modelFor(act string) string { return "fake-" + act }
 // keepingBatches is the batch runner over reading, keeping every call.
 func keepingBatches(store *sqlite.Store, b editor.Batcher) *editor.Batches {
 	log := slog.New(slog.NewTextHandler(&bytes.Buffer{}, nil))
-	ed := editor.New(editor.Deps{Store: store, Wikidata: &fakeWikidata{}, ModelFor: modelFor, Log: log})
+	ed := editor.New(editor.Deps{Store: store, ModelFor: modelFor, Log: log})
 	return editor.NewBatches(editor.BatchDeps{
 		Store:    store,
 		Batcher:  b,
@@ -223,7 +223,7 @@ func (m *answeringModel) Complete(_ context.Context, r editor.Request) (editor.R
 func readInRealTime(t *testing.T, store *sqlite.Store, m editor.Model) {
 	t.Helper()
 	ed := editor.New(editor.Deps{
-		Store: store, Model: m, Wikidata: &fakeWikidata{}, ModelFor: modelFor,
+		Store: store, Model: m, ModelFor: modelFor,
 		Log: slog.New(slog.DiscardHandler),
 	})
 	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {

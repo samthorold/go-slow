@@ -10,7 +10,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"time"
 
 	_ "modernc.org/sqlite" // registers the "sqlite" driver (pure Go, no cgo)
 )
@@ -44,19 +43,6 @@ func Open(ctx context.Context, path string) (*Store, error) {
 
 // Close closes the database.
 func (s *Store) Close() error { return s.db.Close() }
-
-// HasBriefing reports whether a Briefing has been written for the day that
-// contains t (taken in t's location).
-func (s *Store) HasBriefing(ctx context.Context, t time.Time) (bool, error) {
-	var n int
-	err := s.db.QueryRowContext(ctx,
-		`SELECT count(*) FROM briefings WHERE day = ?`, t.Format(time.DateOnly),
-	).Scan(&n)
-	if err != nil {
-		return false, fmt.Errorf("query briefings: %w", err)
-	}
-	return n > 0, nil
-}
 
 // migrate applies, in name order, the embedded migrations the database has
 // not yet seen. The count applied is kept in PRAGMA user_version.

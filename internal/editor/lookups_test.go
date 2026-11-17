@@ -69,7 +69,7 @@ func readMore(t *testing.T, store *sqlite.Store, output string, items ...editor.
 	if err := cut.New(store).CutNew(ctx, saturday); err != nil {
 		t.Fatal(err)
 	}
-	ed, logs := newEditor(store, &fakeModel{output: output}, &fakeWikidata{})
+	ed, logs := newEditor(store, &fakeModel{output: output})
 	if err := ed.ReadWaiting(ctx, saturday); err != nil {
 		t.Fatal(err)
 	}

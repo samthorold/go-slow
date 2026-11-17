@@ -9,7 +9,6 @@ import (
 
 	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/cut"
-	"github.com/samthorold/go-slow/internal/editor"
 )
 
 // beforeEventsOnly is the number of migrations before the Record kept only
@@ -143,8 +142,9 @@ func TestTheRecordKeepsOnlyItsItemsAndEventsAndNoneOfTheOldJudgements(t *testing
 	if got := strs(t, db, `SELECT hash FROM commits`); !slices.Equal(got, []string{"abc"}) {
 		t.Errorf("commits = %v, want them carried over", got)
 	}
-	if got := strs(t, db, `SELECT act FROM work_attempts`); !slices.Equal(got, []string{"relating"}) {
-		t.Errorf("work kept for acts = %v, want only an act the Editor still runs", got)
+	// Relating, still run when the Record became events, is retired since.
+	if got := strs(t, db, `SELECT act FROM work_attempts`); len(got) != 0 {
+		t.Errorf("work kept for acts = %v, want none of the retired acts'", got)
 	}
 	if got, want := strs(t, db, `SELECT name || '|' || terms FROM topics`), []string{"Derby|Derby"}; !slices.Equal(got, want) {
 		t.Errorf("Topics = %v, want %v", got, want)
@@ -213,96 +213,5 @@ func TestOnlyItemsCollectedAfterTheSwitchAwaitReading(t *testing.T) {
 	}
 	if !slices.Equal(got, []string{"after"}) {
 		t.Errorf("awaiting reading: %v, want only the Item collected after the switch", got)
-	}
-}
-
-// Re-judging reads the Items collected before the switch; relating then
-// relates them through its usual batch, whenever they were collected.
-func TestAnItemCollectedBeforeTheSwitchAwaitsRelatingOnceReJudgingHasReadIt(t *testing.T) {
-	ctx := t.Context()
-	db := oldRecord(t)
-	if err := migrateTo(ctx, db, -1); err != nil {
-		t.Fatal(err)
-	}
-	s := &Store{db: db}
-	if err := cut.New(s).CutNew(ctx, cutAt); err != nil {
-		t.Fatal(err)
-	}
-	c, _, _, err := s.NewestCut(ctx, "s", "old")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := s.KeepReading(ctx, editor.Reading{SourceID: "s", EntryID: "old", CutID: c.ID, At: cutAt,
-		Judge: editor.Judge{Act: "reading", Version: 1, Model: "claude-test", RequestHash: "h"}}); err != nil {
-		t.Fatal(err)
-	}
-
-	waiting, err := s.ItemsToRelate(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(waiting) != 1 || waiting[0].Item.EntryID != "old" {
-		t.Errorf("awaiting relating: %+v, want the Item collected before the switch and read since", waiting)
-	}
-}
-
-// The Record's Items are all first cut after the switch; the Briefing would
-// otherwise be shown the whole Record as today's. They stay reachable as
-// earlier Spans through today's relations.
-func TestTheBriefingTellsOnlyItemsCollectedAfterTheSwitchAndReachesEarlierOnesByRelations(t *testing.T) {
-	ctx := t.Context()
-	db := oldRecord(t)
-	if err := migrateTo(ctx, db, -1); err != nil {
-		t.Fatal(err)
-	}
-	s := &Store{db: db}
-	if _, err := s.AddItems(ctx, []collect.Item{{SourceID: "s", EntryID: "after", Title: "After",
-		Content: "<p>Derby gets more jobs.</p>", CollectedAt: time.Date(2026, time.October, 31, 9, 0, 0, 0, time.UTC)}}); err != nil {
-		t.Fatal(err)
-	}
-	if err := cut.New(s).CutNew(ctx, cutAt); err != nil {
-		t.Fatal(err)
-	}
-	readNow := func(entry string) (cut.Cut, editor.Reading) {
-		c, _, _, err := s.NewestCut(ctx, "s", entry)
-		if err != nil {
-			t.Fatal(err)
-		}
-		r := editor.Reading{SourceID: "s", EntryID: entry, CutID: c.ID, At: cutAt,
-			Judge: editor.Judge{Act: "reading", Version: 1, Model: "claude-test", RequestHash: "h-" + entry}}
-		if err := s.KeepReading(ctx, r); err != nil {
-			t.Fatal(err)
-		}
-		r, _, err = s.NewestReading(ctx, "s", entry)
-		if err != nil {
-			t.Fatal(err)
-		}
-		return c, r
-	}
-	oldCut, _ := readNow("old")
-	afterCut, afterReading := readNow("after")
-	old := editor.Address{SourceID: "s", EntryID: "old", Span: oldCut.Spans[0]}
-	after := editor.Address{SourceID: "s", EntryID: "after", Span: afterCut.Spans[0]}
-	if err := s.KeepRelating(ctx, editor.Relating{SourceID: "s", EntryID: "after", ReadingID: afterReading.ID, At: cutAt,
-		Judge:     editor.Judge{Act: "relating", Version: 1, Model: "claude-test", RequestHash: "rel"},
-		Relations: []editor.Relation{{Kind: editor.Follows, From: old, To: after}}}); err != nil {
-		t.Fatal(err)
-	}
-
-	got, err := s.SpansToTell(ctx, cutAt.Add(-time.Hour), cutAt)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	var told []string
-	for _, tt := range got {
-		told = append(told, tt.Item.EntryID)
-	}
-	if !slices.Equal(told, []string{"after"}) {
-		t.Fatalf("told %v, want only the Item collected after the switch", told)
-	}
-	rels := got[0].Spans[0].Relations
-	if len(rels) != 1 || rels[0].Other.At != old || rels[0].Other.Words != "Derby waits." {
-		t.Errorf("relations of today's Span: %+v, want the earlier Span of the Item collected before the switch", rels)
 	}
 }

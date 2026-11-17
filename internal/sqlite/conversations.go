@@ -10,66 +10,6 @@ import (
 	"github.com/samthorold/go-slow/internal/editor"
 )
 
-// keepConversation keeps a conversation turn by turn, in tx, and returns its
-// id; nil for none, which keeps nothing.
-func keepConversation(ctx context.Context, tx *sql.Tx, c *editor.KeptConversation) (sql.NullInt64, error) {
-	if c == nil {
-		return sql.NullInt64{}, nil
-	}
-	tools, err := json.Marshal(c.Tools)
-	if err != nil {
-		return sql.NullInt64{}, fmt.Errorf("keep %s conversation tools: %w", c.Act, err)
-	}
-	instructions, err := keepText(ctx, tx, c.Instructions)
-	if err != nil {
-		return sql.NullInt64{}, err
-	}
-	toolsHash, err := keepText(ctx, tx, string(tools))
-	if err != nil {
-		return sql.NullInt64{}, err
-	}
-	var id int64
-	if err := tx.QueryRowContext(ctx, `
-		INSERT INTO conversations (act, work_key, at, model, instructions, tools, outcome, why)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
-		c.Act, c.Key, formatTime(c.At), c.Model, instructions, toolsHash, string(c.Outcome), c.Why).Scan(&id); err != nil {
-		return sql.NullInt64{}, fmt.Errorf("keep %s conversation: %w", c.Act, err)
-	}
-	for _, t := range c.Turns {
-		sent, err := json.Marshal(t.Sent)
-		if err != nil {
-			return sql.NullInt64{}, fmt.Errorf("keep %s turn %d: %w", c.Act, t.N, err)
-		}
-		var response, text, calls, reported, stop sql.NullString
-		var in, out, cached sql.NullInt64
-		if r := t.Response; r != nil {
-			b, err := json.Marshal(r.Calls)
-			if err != nil {
-				return sql.NullInt64{}, fmt.Errorf("keep %s turn %d: %w", c.Act, t.N, err)
-			}
-			response = sql.NullString{String: string(r.Raw), Valid: r.Raw != nil}
-			text = sql.NullString{String: r.Text, Valid: true}
-			calls = sql.NullString{String: string(b), Valid: true}
-			reported = sql.NullString{String: r.Model, Valid: true}
-			stop = sql.NullString{String: r.StopReason, Valid: true}
-			in = sql.NullInt64{Int64: r.Usage.InputTokens, Valid: true}
-			out = sql.NullInt64{Int64: r.Usage.OutputTokens, Valid: true}
-			cached = sql.NullInt64{Int64: r.Usage.CacheReadTokens, Valid: true}
-		}
-		if _, err := tx.ExecContext(ctx, `
-			INSERT INTO conversation_turns (conversation_id, turn, at, request_hash, sent,
-				response, text, calls, reported_model, stop_reason, input_tokens, output_tokens, cache_read_tokens,
-				outcome, why)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-			id, t.N, formatTime(t.At), t.RequestHash, string(sent),
-			response, text, calls, reported, stop, in, out, cached,
-			string(t.Outcome), t.Why); err != nil {
-			return sql.NullInt64{}, fmt.Errorf("keep %s turn %d: %w", c.Act, t.N, err)
-		}
-	}
-	return sql.NullInt64{Int64: id, Valid: true}, nil
-}
-
 // Conversation is one kept conversation with its turns in order, reporting
 // whether the Record holds it.
 func (s *Store) Conversation(ctx context.Context, id int64) (editor.KeptConversation, bool, error) {

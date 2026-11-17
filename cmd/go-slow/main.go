@@ -1,12 +1,12 @@
-// Command go-slow serves the Briefing and runs Collection on its timetable.
+// Command go-slow serves the Stories and runs Collection on its timetable.
 //
 // main is the composition root: it reads the config from the environment,
 // builds the adapters and passes them to the app's constructor. Nothing else
 // reads the environment.
 //
-// The same binary runs the one-off admin commands (admin.go: commits,
-// retry, backfill; rejudge.go: rejudge), with the app's own config, tested
-// end to end in admin_test.go, backfill_test.go and rejudge_test.go.
+// The same binary runs the one-off admin commands (admin.go: retry,
+// backfill; rejudge.go: rejudge), with the app's own config, tested end to
+// end in admin_test.go, backfill_test.go and rejudge_test.go.
 package main
 
 import (
@@ -27,7 +27,6 @@ import (
 	"github.com/samthorold/go-slow/internal/config"
 	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
-	"github.com/samthorold/go-slow/internal/feedback"
 	"github.com/samthorold/go-slow/internal/interest"
 	"github.com/samthorold/go-slow/internal/polite"
 	"github.com/samthorold/go-slow/internal/server"
@@ -49,7 +48,7 @@ func main() {
 	if len(os.Args) > 1 {
 		ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, os.Interrupt)
 		err := admin(ctx, log, os.Args[1:], adminDeps{
-			Lookup: os.LookupEnv, Stdin: os.Stdin, Stdout: os.Stdout,
+			Lookup: os.LookupEnv, Stdout: os.Stdout,
 			Web: &http.Client{Timeout: fetchTimeout},
 			Models: func(key config.Secret, model string) editor.Model {
 				return claude.New(claude.Options{APIKey: string(key), Model: model})
@@ -74,7 +73,7 @@ func main() {
 // the Stories a run's result makes are named in the batch submitted on the
 // same turn.
 func batchActs(ed *editor.Editor, weavingAt time.Duration) []editor.BatchAct {
-	return []editor.BatchAct{ed.Reading(), ed.Relating(), ed.Weaving(weavingAt), ed.Naming()}
+	return []editor.BatchAct{ed.Reading(), ed.Weaving(weavingAt), ed.Naming()}
 }
 
 func run(log *slog.Logger) error {
@@ -104,12 +103,10 @@ func run(log *slog.Logger) error {
 		APIKey: string(cfg.AnthropicAPIKey),
 		Model:  cfg.ReadingModel,
 		ActModels: map[string]string{
-			"reading": cfg.ReadingModel, "relating": cfg.RelatingModel, "briefing": cfg.BriefingModel,
-			"sunday_read": cfg.SundayReadModel, "weaving": cfg.WeavingModel, "naming": cfg.NamingModel,
+			"reading": cfg.ReadingModel, "weaving": cfg.WeavingModel, "naming": cfg.NamingModel,
 		},
 	})
-	// What the readings name, and the Sunday read's tools, look Wikidata
-	// up, politely, as go-slow.
+	// What the readings name is looked up in Wikidata, politely, as go-slow.
 	wd := wikidata.New(wikidata.Options{
 		HTTP:      &http.Client{Timeout: fetchTimeout},
 		Endpoint:  wikidata.Endpoint,
@@ -119,9 +116,7 @@ func run(log *slog.Logger) error {
 		Sleep:     polite.Sleep,
 	})
 	ed := editor.New(editor.Deps{
-		Store: store, Model: models, RelatingModel: models, Wikidata: wd,
-		Briefings: store, BriefingModel: models, SundayReads: store, SundayReadModel: models,
-		Weavings: store, Namings: store, ModelFor: models.ModelFor, Log: log,
+		Store: store, Model: models, Weavings: store, Namings: store, ModelFor: models.ModelFor, Log: log,
 	})
 	// The daily acts run in batches: submitted after a Collection run, and
 	// their results applied on later runs as they arrive. One batch carries
@@ -156,62 +151,24 @@ func run(log *slog.Logger) error {
 	defer ticker.Stop()
 	collectCtx, stopCollecting := context.WithCancel(ctx)
 	collected := make(chan struct{})
-	// firstRun closes once the start's Collection run has ended, so the
-	// Briefing waits for what it collected (system design: go-slow runs
-	// when the Owner starts it).
-	firstRun := make(chan struct{})
 	go func() {
 		defer close(collected)
 		collector.Run(collectCtx, time.Now())
-		close(firstRun)
 		collector.RunEvery(collectCtx, ticker.C, time.Now)
 	}()
 	// Before the store closes: stop Collection and wait for its run to end.
 	defer func() { stopCollecting(); <-collected }()
 
-	// The Briefing is written in real time at the set time, on its own
-	// clock, checked every minute from the end of the start's Collection
-	// run, over what the Record holds then: it never waits for reading or
-	// relating. On Sundays the Sunday read is written just after it.
-	schedule := editor.NewSchedule(editor.ScheduleDeps{
-		Store:      store,
-		At:         cfg.BriefingAt,
-		Brief:      ed.Brief,
-		SundayRead: ed.SundayRead,
-		Log:        log,
-	})
-	minutes := time.NewTicker(time.Minute)
-	defer minutes.Stop()
-	briefCtx, stopBriefing := context.WithCancel(ctx)
-	briefed := make(chan struct{})
-	go func() {
-		defer close(briefed)
-		select {
-		case <-firstRun:
-		case <-briefCtx.Done():
-			return
-		}
-		schedule.RunOn(briefCtx, minutes.C, time.Now)
-	}()
-	defer func() { stopBriefing(); <-briefed }()
-
 	app := web.New(web.Deps{
-		Briefings:   store,
-		Items:       store,
-		Readings:    store,
-		Cuts:        store,
-		Relations:   store,
-		Topics:      topics,
-		Pieces:      feedback.NewPieces(store),
-		Given:       store,
-		Register:    store,
-		SundayReads: store,
-		Calls:       store,
-		Stories:     store,
-		Sources:     sources,
-		BriefingAt:  cfg.BriefingAt,
-		Now:         time.Now,
-		Log:         log,
+		Items:    store,
+		Readings: store,
+		Cuts:     store,
+		Topics:   topics,
+		Calls:    store,
+		Stories:  store,
+		Sources:  sources,
+		Now:      time.Now,
+		Log:      log,
 	})
 
 	ln, err := new(net.ListenConfig).Listen(ctx, "tcp", ":"+strconv.Itoa(cfg.Port))

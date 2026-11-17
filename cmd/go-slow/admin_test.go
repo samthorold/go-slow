@@ -18,15 +18,15 @@ var saturday = time.Date(2026, time.October, 24, 7, 0, 0, 0, time.UTC)
 func env(db string) func(string) (string, bool) {
 	vars := map[string]string{
 		"PORT": "8080", "DATABASE_PATH": db, "COLLECTION_CONTACT": "owner@example.org",
-		"COLLECTION_INTERVAL": "15m", "READING_MODEL": "claude-haiku-5-5", "RELATING_MODEL": "claude-haiku-5-5",
-		"BRIEFING_MODEL":    "claude-haiku-5-5",
-		"SUNDAY_READ_MODEL": "claude-opus-5-5", "BRIEFING_TIME": "07:00", "GOSLOW_ANTHROPIC_API_KEY": "set-your-own",
+		"COLLECTION_INTERVAL": "15m", "READING_MODEL": "claude-haiku-5-5", "GOSLOW_ANTHROPIC_API_KEY": "set-your-own",
 		"WEAVING_MODEL": "claude-opus-5-5", "WEAVING_TIME": "06:00", "NAMING_MODEL": "claude-haiku-5-5",
 	}
 	return func(k string) (string, bool) { v, ok := vars[k]; return v, ok }
 }
 
-// failedRecord is a Record at db holding an Item cut and awaiting reading, whose reading and placing are both marked failed.
+// failedRecord is a Record at db holding an Item cut and awaiting reading,
+// whose reading is marked failed, and the day's weaving run, marked failed
+// too.
 func failedRecord(t *testing.T, db string) {
 	t.Helper()
 	ctx := t.Context()
@@ -48,8 +48,8 @@ func failedRecord(t *testing.T, db string) {
 		t.Fatal(err)
 	}
 	var failures []editor.WorkFailure
-	for _, act := range []string{"reading", "relating"} {
-		failures = append(failures, editor.WorkFailure{Act: act, Key: src.ID + "\nspeech", At: saturday,
+	for act, key := range map[string]string{"reading": src.ID + "\nspeech", "weaving": "2026-10-24"} {
+		failures = append(failures, editor.WorkFailure{Act: act, Key: key, At: saturday,
 			Why: "the result fails the act's checks", Failed: true})
 	}
 	if err := store.EndBatch(ctx, "batch-1", failures, nil); err != nil {
@@ -88,8 +88,8 @@ func TestTheRetryCommandTakesAnActsFailedWorkUpAgain(t *testing.T) {
 	if len(toRead) != 1 {
 		t.Errorf("awaiting reading %+v, want the speech taken up again", toRead)
 	}
-	if len(failed) != 1 || failed[0].Act != "relating" {
-		t.Errorf("failed work %+v, want only relating's left", failed)
+	if len(failed) != 1 || failed[0].Act != "weaving" {
+		t.Errorf("failed work %+v, want only weaving's left", failed)
 	}
 
 	if err := admin(t.Context(), log, []string{"retry"}, adminDeps{Lookup: env(db)}); err != nil {
@@ -116,10 +116,22 @@ func TestTheRetryCommandRefusesAnActItDoesNotKnow(t *testing.T) {
 	db := filepath.Join(t.TempDir(), "go-slow.db")
 	failedRecord(t, db)
 
-	if err := admin(t.Context(), slog.New(slog.DiscardHandler), []string{"retry", "briefing"}, adminDeps{Lookup: env(db)}); err == nil {
-		t.Error("retrying an act that is not run in batches did not fail")
+	// The retired acts are no longer run, so their work is not retried.
+	for _, act := range []string{"briefing", "relating", "sunday_read"} {
+		if err := admin(t.Context(), slog.New(slog.DiscardHandler), []string{"retry", act}, adminDeps{Lookup: env(db)}); err == nil {
+			t.Errorf("retrying %s, which is not run, did not fail", act)
+		}
 	}
 	if failed, _ := inRecord(t, db); len(failed) != 2 {
 		t.Errorf("failed work %+v, want both left", failed)
+	}
+}
+
+// The register, which read the commits, is retired with the old design.
+func TestThereIsNoCommitsCommand(t *testing.T) {
+	db := filepath.Join(t.TempDir(), "go-slow.db")
+
+	if err := admin(t.Context(), slog.New(slog.DiscardHandler), []string{"commits"}, adminDeps{Lookup: env(db)}); err == nil {
+		t.Error("the commits command ran")
 	}
 }

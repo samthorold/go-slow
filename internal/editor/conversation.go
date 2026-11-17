@@ -1,38 +1,13 @@
 package editor
 
-import (
-	"context"
-	"encoding/json"
-)
+import "encoding/json"
 
-// Conversation is the port the one act with tools goes through, the Sunday
-// read (system design: The Sunday read is the one place the Editor is an
-// agent with tools). Apart from the single-call Model port, it is one turn
-// of a conversation in which the model may call tools: the act's
-// instructions, its tools and the conversation so far go in, and the model's
-// next turn comes out. The act runs the loop, runs the tools and checks what
-// comes back; an adapter only reports what the model said. It is
-// provider-neutral: nothing of a provider's types crosses it. A turn with no
-// usable answer (ErrRefused, ErrTruncated) still returns what came back, to
-// be kept.
-type Conversation interface {
-	Turn(ctx context.Context, r ConversationRequest) (Turn, error)
-}
+// The shapes of a kept conversation (KeptConversation): one an act had with
+// a model, a turn at a time, the model calling tools. Only the retired
+// Sunday read held conversations, and no act holds one now; they are kept
+// for good, so these shapes stay to read them.
 
-// ConversationRequest is one turn's call on a model.
-type ConversationRequest struct {
-	// Act names the act, for logs and recordings.
-	Act string
-	// Instructions are the act's own, the same on every turn.
-	Instructions string
-	// Tools are the tools the model may call, the same on every turn.
-	Tools []Tool
-	// Messages are the conversation so far, oldest first, starting with the
-	// act's own message.
-	Messages []Message
-}
-
-// Tool is a tool the model may call, by name, with input matching Schema.
+// Tool is a tool the model could call, by name, with input matching Schema.
 type Tool struct {
 	Name        string
 	Description string
@@ -48,13 +23,11 @@ type Message struct {
 }
 
 // Turn is the model's turn: what it said, and the tools it called. With no
-// calls, the model has ended its turn.
+// calls, the model ended its turn.
 type Turn struct {
 	Text  string
 	Calls []ToolCall
-	// Raw is the turn in the provider's own form, opaque to the act, which
-	// the adapter is given back unchanged in the conversation's later turns
-	// (a model's reasoning in a turn is valid only as it was given).
+	// Raw is the turn in the provider's own form.
 	Raw   json.RawMessage
 	Model string
 	// StopReason is why the model stopped, as the provider says it.
@@ -69,8 +42,8 @@ type ToolCall struct {
 	Input json.RawMessage
 }
 
-// ToolResult is what running a tool gave, for the call with CallID. An
-// error is told to the model as one, so it can try another way.
+// ToolResult is what running a tool gave, for the call with CallID, an error
+// told to the model as one.
 type ToolResult struct {
 	CallID  string
 	Content string

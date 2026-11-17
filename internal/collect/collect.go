@@ -216,8 +216,7 @@ func (c *Collector) RunOn(ctx context.Context, ticks <-chan time.Time, now func(
 }
 
 // RunEvery is RunOn without the run at once: a run on every tick until ctx
-// is done. main runs the first run itself, so that the Briefing's schedule
-// starts only once it has ended.
+// is done. main runs the first run itself, at once, then this.
 func (c *Collector) RunEvery(ctx context.Context, ticks <-chan time.Time, now func() time.Time) {
 	for {
 		select {

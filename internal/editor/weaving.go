@@ -194,6 +194,13 @@ type weavingOutput struct {
 	} `json:"stories"`
 }
 
+// DueAt is when the day that holds day, in day's location, reaches at, as a
+// time of day (6h is 06:00), on that day's clock.
+func DueAt(day time.Time, at time.Duration) time.Time {
+	y, m, d := day.Date()
+	return time.Date(y, m, d, int(at/time.Hour), int(at%time.Hour/time.Minute), 0, 0, day.Location())
+}
+
 // Weaving is the weaving act as it runs in batches (system design: Weaving
 // runs at most once a day): at most one run a day, keyed by the day, on the
 // first run of the batch runner at or after the time of day at (in now's

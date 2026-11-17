@@ -13,7 +13,7 @@ var requestErrors = regexp.MustCompile(`<div id="request-errors" role="alert"[^>
 func TestEveryPageHasAnEmptyRegionForRequestErrors(t *testing.T) {
 	app := newApp(t, saturday)
 
-	for _, path := range []string{"/", "/briefings", "/items", "/topics", "/feedback", "/register"} {
+	for _, path := range []string{"/stories", "/items", "/topics"} {
 		res := get(t, app, path)
 		if res.status != http.StatusOK {
 			t.Fatalf("GET %s: status = %d, want 200", path, res.status)
@@ -33,7 +33,7 @@ func TestEveryPageHasAnEmptyRegionForRequestErrors(t *testing.T) {
 // htmx fires when a request fails and when one succeeds.
 func TestEveryPageLoadsTheBehaviourThatShowsRequestErrors(t *testing.T) {
 	app := newApp(t, saturday)
-	res := get(t, app, "/")
+	res := get(t, app, "/stories")
 
 	src := regexp.MustCompile(`<script src="(/static/request-errors\.js)"></script>`).FindStringSubmatch(res.body)
 	if src == nil {

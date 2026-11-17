@@ -8,7 +8,7 @@ import (
 )
 
 // logRequests logs each request the app answers as one line: its method,
-// its path (never the query, nor the form: Feedback can carry what the
+// its path (never the query, nor the form: a form can carry what the
 // Owner typed), the status answered and how long it took, on the app's
 // clock. A static file is logged at debug level, so a page load is one
 // info line. A request that

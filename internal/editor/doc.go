@@ -1,13 +1,11 @@
 // Package editor is the Editor: the editorial acts done on the Record. An act
 // that needs judgement calls a model through the port here; the act owns its
 // instructions and output schema, and checks the result before anything is
-// written back (system design: The Editor's daily work is a sequence of
-// editorial acts; The model is an adapter).
+// written back (system design: The Editor's work is a set of Commands; The
+// model is an adapter).
 //
-// The ports are provider-neutral: Model (one call, at once), Batcher (a
-// provider's batch interface) and Conversation (one turn at a time, with
-// tool definitions, calls and results, the provider's own form of each turn
-// passed back opaque as Turn.Raw). Each act has its own instructions, output
+// The ports are provider-neutral: Model (one call, at once) and Batcher (a
+// provider's batch interface). Each act has its own instructions, output
 // schema and checks.
 //
 // # Reading an Item
@@ -55,36 +53,13 @@
 // or the Editor's Entity, or the item that was merged into), each a
 // NamedEntity (equal exactly when the same Entity).
 //
-// # Relating a Span
-//
-// Relating (relating.go): once an Item is read and what its reading names
-// looked up, its Spans not Rejected are shown, hydrated and with their
-// speakers, beside its candidates: Spans not Rejected of Items first read
-// before it (ToRelate.ReadOrder, the Item's first reading) that mention an
-// Entity one of its Spans mentions (relate_waiting.go, candidatesOf: per
-// Span ranked by the Entities each shares, each weighted by one over how
-// many Items read by then mention it, then the most recent, at most
-// candidatesPerSpan per Span and candidatesPerItem for the Item, not
-// narrowed by recency), pooled and numbered C1, C2… under their Items, every
-// Span weighed against the whole pool. One call judges each pair follows,
-// same_as or contradicts, or none, refusing a relation to anything not shown
-// (a Span of the same Item included) or two verdicts on one pair. Code turns
-// each into a Relation from the later-published Span to the earlier (follows
-// from the one that moves on what the other said); Relation.Corroborates
-// (same as across different Sources) is worked out, never judged. An Item
-// none of whose Spans finds a candidate (the first read, for one) is related
-// with no call. Each pair is judged once, by the Item read second: of two
-// read in one batch, the later-published, since a batch's results are
-// applied in the order its requests were submitted (PendingBatches, by
-// rowid), reading's oldest Item first.
-//
 // # Batches
 //
 // The daily acts run in batches through Batches: an act is a BatchAct (what
 // awaits it, each piece of work with its request and how its result is
-// checked and written), so relating (Editor.Relating) plugs in beside
-// Editor.Reading. Work that needs no call (Job.Request empty: an Item
-// related with no candidates) is applied at once. One batch carries every
+// checked and written), so weaving (Editor.Weaving) and naming
+// (Editor.Naming) plug in beside Editor.Reading. Work that needs no call
+// (Job.Request empty) is applied at once. One batch carries every
 // act's requests, and the Claude adapter sends each to its act's model.
 // After each Collection run, Batches applies the results of batches that
 // have ended (matched by request ID), resubmits each failed request alone,
@@ -103,16 +78,15 @@
 // whose request has changed since it was sent (RequestHash of the request
 // kept with the batch against the one the work builds now) is refused,
 // counting an attempt, and the work asked again as it stands. Work marked
-// failed is left out of ItemsToRead and ItemsToRelate by the storage
-// adapter, listed on the Items page, and taken up again only by the retry
-// admin command. Editor.ReadWaiting and Editor.RelateWaiting are the
-// synchronous paths, for when no batch interface is available.
+// failed is left out of what awaits its act by the storage adapter, listed
+// on the Items page, and taken up again only by the retry admin command.
+// Editor.ReadWaiting is the synchronous path, for when no batch interface is
+// available.
 //
 // # Weaving
 //
 // Weaving (weaving.go, WeavingVersion; system design: Weaving asks for an
-// editor's opinion, and need get none) is the first act of the new design,
-// built alongside the old ones. Editor.Weaving is a BatchAct whose work is
+// editor's opinion, and need get none) is a BatchAct whose work is
 // one run a day, keyed by the day (time.DateOnly in now's location): its
 // Waiting, told now, gives a job only at or after the time of day it was
 // built with (DueAt), when that day's run has been neither written nor marked
@@ -124,7 +98,8 @@
 // Spans it cites not yet shown and marked "the Editor's" with the numbers it
 // cites; then every Story cut since the last run written (the storage
 // adapter's StoriesToWeave: Cuts after its through_cut, of Items collected
-// after the switch), each under its Item's title and date, its Spans as
+// after the switch, and since the switch to Stories, story_switch), each
+// under its Item's title and date, its Spans as
 // written. Every Span shown, a Source's or an Editor's, is numbered S1, S2…
 // once, across them all (showMade, woven). It answers stories, each
 // editor_spans, each body then cites (numbers); a citation of an earlier
@@ -158,28 +133,9 @@
 // Naming follows weaving in the batch runner's acts, so a run's Stories are
 // named in the batch submitted on the turn its result is applied.
 //
-// # Precedents
-//
-// Relating and the Briefing are shown precedents (precedent.go, system
-// design: Feedback becomes precedent, shown as cases); reading is shown none
-// (its recorded case was refuted; the design says why). Relating is shown
-// the wrong standing on relations whose two Spans mention an Entity its
-// Spans mention (relatingPrecedents), those sharing the most first, then the
-// newest, since wrong holds at any age; the Briefing the unwanted and missed
-// standing, newest first (briefingPrecedents), so the oldest drop out first;
-// each at most precedentsShown. The storage adapter gives them
-// (StandingWrongOnRelations, StandingTaste), never undone ones. They follow
-// the act's input as one JSON object per line under one heading
-// (withPrecedents), each saying what its kind of Feedback means (said), and
-// nothing is added when there are none, so a case with none sends exactly
-// the request it would without them. Their ids are kept with the call
-// (Call.Precedents, shown on the call's page) and with the judgement
-// (Relating.Precedents, Briefing.Precedents; table judgement_precedents).
-// Re-judging is not shown precedents yet.
-//
 // # Kept calls
 //
-// Every model call reading, relating, weaving, naming and writing the Briefing make is kept
+// Every model call reading, weaving and naming make is kept
 // (calls.go), in a batch and through the synchronous paths alike
 // (Editor.callNow): a Call holds the act and work, the request as sent (a
 // batch's request is kept when it is submitted, with the pending batch), the
@@ -191,9 +147,12 @@
 // schema, input, model) that recorded runs share. Applied calls go through
 // KeepCall, failed attempts with their WorkFailure in EndBatch. The storage
 // adapter keeps each distinct text once (call_texts) and refuses to rewrite
-// or remove a kept call. The calls the old design's acts made (placing,
-// connecting, the reading that drew Facts) stay kept, as every call does;
-// no act is shown them.
+// or remove a kept call. The calls the old designs' acts made (placing,
+// connecting, the reading that drew Facts; relating, the Briefing, the
+// Sunday read's conversations, KeptConversation) stay kept, as every call
+// does, and readable on their pages; no act is shown them. Call.Precedents
+// and Job.Precedents carry the Feedback a retired act was shown as
+// precedent; no act shows any now.
 //
 // # Re-judging
 //
@@ -213,91 +172,11 @@
 // kind of judgement, what a live and a candidate reading each made and both
 // made.
 //
-// # The Briefing
-//
-// The Briefing is written in real time (briefing.go, schedule.go): Schedule
-// is its own clock in the app process, writing the day's Briefing at
-// BRIEFING_TIME through Model.Complete, not the batch runner, over what the
-// Record holds then, never waiting for reading or relating (system design:
-// The Briefing doesn't wait for construction); main starts it only once the
-// start's first Collection run has ended. It covers the Items collected
-// after the switch and first cut since the last Briefing was written (the
-// storage adapter's SpansToTell, by the Cut event's time), each with its
-// Spans not Rejected by its newest reading, hydrated and with their speakers
-// (an Item only cut: every Span of its newest Cut, as written, marked "(not
-// yet read)"), and each Span's relations either way so far; with none, it is
-// written empty, with no call.
-//
-// The act (WriteBriefing, BriefingVersion; there is no Topic or Depth in it)
-// shows today's Spans numbered S1, S2… under their Items, each relation
-// beneath its Span ("follows E1", "same as S7, corroborated"), and the Spans
-// of earlier Items they reach as E1, E2…. Its answer is statements, each
-// spans (the refs whose words it tells), then speakers (who speaks them, as
-// shown; the model's own note, not kept, written so the text names them),
-// then stories (beside it, the Story of each of today's Spans it tells: refs
-// its relations reach, empty for none), then text. Gathering beside the
-// statement, rather than in a list of its own, and noting the speakers
-// before the text are what the recordings needed: a separate list left told
-// Spans ungathered, and without the note the text named speakers otherwise
-// than shown, or told a spokesperson's line in its own voice. The checks
-// refuse the whole Briefing for a statement citing nothing or a ref not
-// shown, a Story of a Span its statement doesn't tell, not one of today's or
-// holding a Span its relations don't reach, or a Span told with relations
-// whose Story is not gathered; a Span gathered beside two statements keeps
-// the first Story, and a Span told with no relations gets an empty Story
-// with no judgement asked. It is kept (KeepBriefing) as events: the Briefing
-// with its Judge, each statement with the Spans it cites and the reading
-// each was shown as, and each Story gathered. The Briefing's calls are keyed
-// by its day (act briefing), each attempt kept, refused or failed ones
-// before the failure; a Briefing written empty makes and keeps no call. A
-// failure is kept, shown on the day's page, and retried after RetryBriefing.
-//
-// # The Sunday read
-//
-// The Sunday read (sunday.go, sunday_tools.go, SundayReadVersion) is the one
-// act that is an agent with tools, through the Conversation port
-// (conversation.go). It is shown what the Briefings over Spans written since
-// the last read told (the storage adapter's BriefingsWritten; the first
-// read, the week before it): each Briefing's statements standing, each with
-// the Spans it cites, each Span shown once by a ref (P1, P2… numbered as
-// shown, across the run), its Item's title and date, its speaker and the
-// Entities it names; with nothing told, it is written empty, with no call.
-// Its tools only read: story (a Span's latest gathering, by the Briefing or
-// a read, and its relations judged since, or all of them; LatestGathering,
-// RelationsOf), spans_naming (the Spans naming an Entity a Span shown
-// names, the latest Items first, back through time with before, from
-// SpansMentioning), assessments (earlier Assessments, A and the event id,
-// each with the Spans and Assessments it rests on, none under wrong),
-// wikidata_search and wikidata_item (each lookup L1, L2…). The agent submits
-// through submit_read: assessments (N1, N2…, each resting on Spans shown, at
-// least one, and earlier Assessments shown, superseding at most one current
-// one shown) and statements (each citing P, A, N and L refs, and the stories
-// it ties together: a cited Span's Story, of Spans shown its relations
-// reach, gathered as the Briefing gathers them, kept as gatherings with
-// read_id).
-//
-// The act runs its own loop (bounded by SundayReadMaxTurns and
-// SundayReadTokenBudget), and the check refuses a statement citing nothing,
-// a ref the run was not shown and the read does not make, an Assessment
-// citing no Span shown, a supersession of one not shown or already
-// superseded, or a Story holding a Span its relations don't reach, and tells
-// the agent why. A read is kept (KeepSundayRead) as events: the read with
-// its Judge, each Assessment with what it rests on, each statement with what
-// it cites, and each Story it gathered; a read written before it told Spans
-// keeps only its day. Schedule writes it
-// on Sundays just after the Briefing (ScheduleDeps.SundayRead), retried
-// RetrySundayRead apart at most SundayReadTries times. Each attempt's
-// conversation is kept turn by turn (KeptConversation, with the read or its
-// failure, in one transaction): each turn keeps only the messages new with
-// its request (the conversation's prefix isn't kept again), the turn as
-// returned (a refusal's too), its usage and what came of it (continued,
-// applied, refused with the reason told back, failed), and
-// ConversationRequestHash of the whole request, the conversation counterpart
-// of RequestHash. Feedback on the read (new to me) and its Assessments
-// (wrong, new to me) is kept as judgements (internal/feedback).
-//
-// The old design (Facts and Claims drawn from each Item, Stories,
-// Developments and Connections, the Briefings and Sunday reads over them and
-// the Feedback on them) is gone from the code and the Record (system design:
-// The Record became events by dropping the old design's judgements).
+// The old designs (Facts and Claims drawn from each Item, Stories,
+// Developments and Connections; then relating, the Briefing, the Sunday read,
+// the gatherings they made and the Feedback given on them) are gone from the
+// code. The first's judgements were dropped from the Record (system design:
+// The Record became events); the second's stay in it, read by no projection
+// (The Record is recreated when the design of its Judgements changes, not
+// translated).
 package editor

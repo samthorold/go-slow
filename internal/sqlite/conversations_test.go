@@ -2,28 +2,43 @@ package sqlite
 
 import (
 	"testing"
-	"time"
-
-	"github.com/samthorold/go-slow/internal/editor"
 )
+
+// keptConversation keeps, as the retired Sunday read did, a conversation of
+// one turn that failed with no response, and returns its id.
+func keptConversation(t *testing.T, s *Store) int64 {
+	t.Helper()
+	for _, q := range []string{
+		`INSERT INTO call_texts (hash, text) VALUES ('i', 'Read the week.'), ('t', '[{"name":"story","schema":{"type":"object"}}]')`,
+		`INSERT INTO conversations (id, act, work_key, at, model, instructions, tools, outcome, why)
+			VALUES (1, 'sunday_read', '2026-10-25', '2026-10-25T09:00:00.000000000Z', 'm', 'i', 't', 'failed', 'stopped')`,
+		`INSERT INTO conversation_turns (conversation_id, turn, at, request_hash, sent, outcome, why)
+			VALUES (1, 1, '2026-10-25T09:00:00.000000000Z', 'h', '[{"user":"The week."}]', 'failed', 'the model refused')`,
+	} {
+		if _, err := s.db.ExecContext(t.Context(), q); err != nil {
+			t.Fatalf("%s: %v", q, err)
+		}
+	}
+	return 1
+}
+
+func TestAKeptConversationIsReadAsKept(t *testing.T) {
+	s := openTestStore(t)
+	id := keptConversation(t, s)
+
+	c, found, err := s.Conversation(t.Context(), id)
+	if err != nil || !found {
+		t.Fatalf("conversation %d: %v %v", id, found, err)
+	}
+	if c.Act != "sunday_read" || c.Key != "2026-10-25" || c.Instructions != "Read the week." || len(c.Tools) != 1 ||
+		len(c.Turns) != 1 || c.Turns[0].Response != nil || len(c.Turns[0].Sent) != 1 || c.Turns[0].Sent[0].User != "The week." {
+		t.Errorf("conversation = %+v; want it as kept, its one turn with no response", c)
+	}
+}
 
 func TestAKeptConversationIsNeverRewrittenOrRemoved(t *testing.T) {
 	s := openTestStore(t)
-	at := time.Date(2026, 10, 25, 9, 0, 0, 0, time.UTC)
-	if err := s.SaveSundayReadFailure(t.Context(), editor.SundayReadFailure{
-		Day: "2026-10-25", At: at, Reason: "stopped",
-		Conversation: &editor.KeptConversation{
-			Act: "sunday_read", Key: "2026-10-25", At: at, Model: "m", Instructions: instructions,
-			Tools:   []editor.Tool{{Name: "story", Schema: map[string]any{"type": "object"}}},
-			Outcome: editor.Failed, Why: "stopped",
-			Turns: []editor.KeptTurn{{
-				N: 1, At: at, Sent: []editor.Message{{User: "The week."}}, RequestHash: "h",
-				Outcome: editor.Failed, Why: "the model refused",
-			}},
-		},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	keptConversation(t, s)
 
 	for _, q := range []string{
 		`UPDATE conversations SET why = ''`,
@@ -35,25 +50,11 @@ func TestAKeptConversationIsNeverRewrittenOrRemoved(t *testing.T) {
 			t.Errorf("%s: a kept conversation was changed", q)
 		}
 	}
-	fs, err := s.SundayReadFailures(t.Context(), "2026-10-25")
-	if err != nil || len(fs) != 1 {
-		t.Fatalf("failures = %+v, %v", fs, err)
-	}
-	c, found, err := s.Conversation(t.Context(), fs[0].ConversationID)
-	if err != nil || !found || len(c.Turns) != 1 || c.Turns[0].Response != nil || c.Instructions != instructions {
-		t.Errorf("conversation = %+v, %v, %v; want its one turn, with no response", c, found, err)
-	}
 }
 
-func TestAFailureWithNoModelCallKeepsNoConversation(t *testing.T) {
+func TestAConversationNotKeptIsNotFound(t *testing.T) {
 	s := openTestStore(t)
-	if err := s.SaveSundayReadFailure(t.Context(), editor.SundayReadFailure{Day: "2026-10-25", At: time.Now(), Reason: "Record"}); err != nil {
-		t.Fatal(err)
-	}
-	fs, err := s.SundayReadFailures(t.Context(), "2026-10-25")
-	if err != nil || len(fs) != 1 || fs[0].ConversationID != 0 {
-		t.Errorf("failures = %+v, %v; want one with no conversation", fs, err)
-	}
+
 	if _, found, err := s.Conversation(t.Context(), 1); err != nil || found {
 		t.Errorf("Conversation(1) = %v, %v; want none", found, err)
 	}

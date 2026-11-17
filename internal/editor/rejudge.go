@@ -38,8 +38,7 @@ type Candidate struct {
 }
 
 // RejudgeAct is an act as it judges a Range of the Record again. Reading is
-// the one today; an act on Spans that comes later (relating, the Briefing)
-// plugs in by giving its own Work.
+// the one today; another act plugs in by giving its own Work.
 type RejudgeAct struct {
 	// Name names the act, as its requests do, and Version is the version of
 	// its instructions this build sends.

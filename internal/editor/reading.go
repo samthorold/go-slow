@@ -48,8 +48,7 @@ type Judge struct {
 // RefersTo is the judgement that the Span From names the same thing as the
 // Span To, of the same Item, in other words: "the city" refers to "Derby".
 type RefersTo struct {
-	// ID is its event's in the Record, once it is kept there: what
-	// Feedback on it names.
+	// ID is its event's in the Record, once it is kept there.
 	ID       int64
 	From, To Address
 }

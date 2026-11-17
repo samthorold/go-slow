@@ -8,7 +8,7 @@ import (
 )
 
 // fullPages are pages every Record has, each rendered in the layout.
-var fullPages = []string{"/", "/briefings", "/items", "/topics", "/feedback", "/register"}
+var fullPages = []string{"/stories", "/items", "/topics"}
 
 // stylesheetLink matches a layout's link to a stylesheet, as served.
 var stylesheetLink = regexp.MustCompile(`<link rel="stylesheet" href="([^"]+)">`)
@@ -49,9 +49,9 @@ func TestPagesAndTheStylesheetLoadNothingFromAnotherHost(t *testing.T) {
 // a hue per status any page can take.
 func TestTheStylesheetCarriesFocusTheQuietStyleRequestErrorsAndStatusHues(t *testing.T) {
 	app := newApp(t, saturday)
-	link := stylesheetLink.FindStringSubmatch(get(t, app, "/").body)
+	link := stylesheetLink.FindStringSubmatch(get(t, app, "/stories").body)
 	if link == nil {
-		t.Fatal("the Briefing links no stylesheet")
+		t.Fatal("the Stories page links no stylesheet")
 	}
 	css := get(t, app, link[1]).body
 
@@ -80,9 +80,9 @@ func TestTheStylesheetCarriesFocusTheQuietStyleRequestErrorsAndStatusHues(t *tes
 // take.
 func TestTheStylesheetCarriesTheBodyAndMarginLayoutAndItsVocabulary(t *testing.T) {
 	app := newApp(t, saturday)
-	link := stylesheetLink.FindStringSubmatch(get(t, app, "/").body)
+	link := stylesheetLink.FindStringSubmatch(get(t, app, "/stories").body)
 	if link == nil {
-		t.Fatal("the Briefing links no stylesheet")
+		t.Fatal("the Stories page links no stylesheet")
 	}
 	css := get(t, app, link[1]).body
 

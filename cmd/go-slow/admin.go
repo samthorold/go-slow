@@ -14,7 +14,6 @@ import (
 	"github.com/samthorold/go-slow/internal/config"
 	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/polite"
-	"github.com/samthorold/go-slow/internal/register"
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
 
@@ -22,9 +21,8 @@ import (
 type adminDeps struct {
 	// Lookup reads the config's environment.
 	Lookup func(string) (string, bool)
-	// Stdin is what is piped in, and Stdout where a command prints what
-	// the Owner reads (logs go to the log).
-	Stdin  io.Reader
+	// Stdout is where a command prints what the Owner reads (logs go to
+	// the log).
 	Stdout io.Writer
 	// Web fetches from Sources.
 	Web *http.Client
@@ -36,20 +34,11 @@ type adminDeps struct {
 // admin runs a one-off admin command, from the same binary and config as
 // the app, the config read through d.Lookup.
 //
-//	commits: keeps the commits to go-slow, read from git log on stdin, for
-//	the register's quiet window and its changes to the Editor. The app
-//	can't see the repository, so the Owner pipes the log in:
-//
-//	  git log --format='commit %H %cI' --name-only | docker compose run --rm -T app commits
-//
-//	Commits already kept are skipped, so the whole history can be piped in
-//	each time.
-//
 //	retry [act]: clears the failed marks on the work of one act run in
-//	batches (reading, relating, weaving or naming), or of every act, resetting its
+//	batches (reading, weaving or naming), or of every act, resetting its
 //	attempts, so the next run takes that work up again:
 //
-//	  docker compose run --rm app retry relating
+//	  docker compose run --rm app retry weaving
 //
 //	backfill: gives their text to the Items of the Sources whose text is
 //	fetched that were collected with only a summary and are still uncut,
@@ -92,26 +81,6 @@ func admin(ctx context.Context, log *slog.Logger, args []string, d adminDeps) er
 		}
 		log.Info("items given their text", "given", n)
 		return nil
-	case "commits":
-		cfg, err := config.Load(d.Lookup)
-		if err != nil {
-			return err
-		}
-		commits, err := register.ParseGitLog(d.Stdin)
-		if err != nil {
-			return fmt.Errorf("read git log (want --format='%s' --name-only): %w", register.GitLogFormat, err)
-		}
-		store, err := sqlite.Open(ctx, cfg.DatabasePath)
-		if err != nil {
-			return err
-		}
-		defer func() { _ = store.Close() }()
-		n, err := store.KeepCommits(ctx, commits)
-		if err != nil {
-			return err
-		}
-		log.Info("commits kept", "read", len(commits), "new", n)
-		return nil
 	case "retry":
 		var act string
 		if len(args) > 1 {
@@ -142,6 +111,6 @@ func admin(ctx context.Context, log *slog.Logger, args []string, d adminDeps) er
 	case "rejudge":
 		return rejudge(ctx, log, args[1:], d)
 	default:
-		return fmt.Errorf("unknown command %q (known: backfill, commits, rejudge, retry)", args[0])
+		return fmt.Errorf("unknown command %q (known: backfill, rejudge, retry)", args[0])
 	}
 }

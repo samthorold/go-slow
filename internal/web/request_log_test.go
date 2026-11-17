@@ -30,16 +30,16 @@ func requestLines(t *testing.T, logs *bytes.Buffer) []map[string]any {
 func TestARequestToAPageLogsOneLineWithMethodPathStatusAndDuration(t *testing.T) {
 	app, logs := newAppWithLog(t, saturday, openStore(t))
 
-	get(t, app, "/briefings?page=2")
+	get(t, app, "/stories?page=2")
 
 	lines := requestLines(t, logs)
 	if len(lines) != 1 {
 		t.Fatalf("logged %d request lines, want 1:\n%s", len(lines), logs)
 	}
 	line := lines[0]
-	if line["level"] != "INFO" || line["method"] != http.MethodGet || line["path"] != "/briefings" ||
+	if line["level"] != "INFO" || line["method"] != http.MethodGet || line["path"] != "/stories" ||
 		line["status"] != float64(http.StatusOK) {
-		t.Errorf("request line = %v, want INFO GET /briefings 200, the path without its query", line)
+		t.Errorf("request line = %v, want INFO GET /stories 200, the path without its query", line)
 	}
 	if _, ok := line["duration_ms"]; !ok {
 		t.Errorf("request line has no duration: %v", line)
@@ -67,7 +67,7 @@ func TestAServerErrorLogsTheErrorBehindItOnItsRequestLine(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	get(t, app, "/")
+	get(t, app, "/stories")
 
 	lines := requestLines(t, logs)
 	if len(lines) != 1 {
@@ -82,14 +82,12 @@ func TestAServerErrorLogsTheErrorBehindItOnItsRequestLine(t *testing.T) {
 	}
 }
 
-func TestAPostOfFeedbackLogsItsStatusAndNeverItsFormValues(t *testing.T) {
-	store := openStore(t)
-	readRelease(t, store, releaseReading)
-	app, logs := newAppWithLog(t, saturday, store)
-	path := "/items/" + number10.ID + "/release/feedback"
+func TestAPostOfAFormLogsItsStatusAndNeverItsFormValues(t *testing.T) {
+	app, logs := newAppWithLog(t, saturday, openStore(t))
+	path := "/topics"
 
-	send(t, app, http.MethodPost, path, url.Values{"kind": {"missed"}, "span": {"3-23"}})
-	send(t, app, http.MethodPost, path, url.Values{"kind": {"unwanted"}, "span": {"3-23"}})
+	send(t, app, http.MethodPost, path, url.Values{"name": {"Derby"}, "terms": {"Derby County"}})
+	send(t, app, http.MethodPost, path, url.Values{"name": {""}, "terms": {"Derby County"}})
 
 	lines := requestLines(t, logs)
 	if len(lines) != 2 {
@@ -100,7 +98,7 @@ func TestAPostOfFeedbackLogsItsStatusAndNeverItsFormValues(t *testing.T) {
 			t.Errorf("request line %d = %v, want POST %s %d", i, lines[i], path, want)
 		}
 	}
-	for _, typed := range []string{"3-23", "missed"} {
+	for _, typed := range []string{"Derby"} {
 		if strings.Contains(logs.String(), typed) {
 			t.Errorf("the log holds the form value %q:\n%s", typed, logs)
 		}

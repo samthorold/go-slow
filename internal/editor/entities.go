@@ -2,7 +2,6 @@ package editor
 
 import (
 	"context"
-	"fmt"
 	"time"
 )
 
@@ -43,31 +42,4 @@ type Tenure struct {
 	// StartToTheDay is whether Wikidata gives Start to the day, not only
 	// the month or year.
 	StartToTheDay bool
-}
-
-// Lookup is one consultation of a Reference source, which a Sunday read's
-// statement citing it traces to.
-type Lookup struct {
-	// ID is the lookup's own, once the Record keeps it.
-	ID int64
-	// Reference names the Reference source.
-	Reference string
-	// ItemID and Revision are the Wikidata item and the revision of it the
-	// lookup saw.
-	ItemID   string
-	Revision int64
-	At       time.Time
-	// Licence is what the Reference source licenses its data under.
-	Licence string
-}
-
-// WikidataLicence is the licence of Wikidata's structured data, checked
-// against Wikidata:Licensing: the main, Property and Lexeme namespaces are
-// released into the public domain under CC0, so it may be stored and needs
-// no attribution (sources research, Reference sources).
-const WikidataLicence = "CC0 1.0"
-
-// URL is where the revision the lookup saw can be read.
-func (l Lookup) URL() string {
-	return fmt.Sprintf("https://www.wikidata.org/w/index.php?oldid=%d", l.Revision)
 }

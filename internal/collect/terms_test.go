@@ -134,6 +134,10 @@ func TestTheListedSourcesWhoseFeedsCarryOnlySummariesFetchTheirText(t *testing.T
 			want = collect.TextFromGOVUKContent
 		case s.Format == collect.WrittenStatements:
 			want = collect.TextFromWrittenStatement
+		case strings.HasPrefix(s.FeedURL, "https://www.federalreserve.gov/"):
+			// The Fed's items carry only a title or where a speech was
+			// given; no feed or API carries the text.
+			want = collect.TextFromPage
 		default:
 			want = collect.TextInEntry
 		}
@@ -175,6 +179,8 @@ func TestEveryListedSourceHasAShortNameSayingWhoIsSpeaking(t *testing.T) {
 		"ons-release-calendar":          "ONS",
 		"govuk-uk-space-agency":         "UK Space Agency",
 		"nasa-news-releases":            "NASA",
+		"fed-press-releases":            "Federal Reserve",
+		"fed-speeches":                  "Federal Reserve",
 	}
 	listed := map[string]bool{}
 	for _, s := range collect.Sources() {

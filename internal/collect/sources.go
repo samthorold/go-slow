@@ -25,6 +25,26 @@ const (
 	NASACredit     = "Source: NASA (www.nasa.gov)."
 )
 
+// The Federal Reserve Board's terms, from its website's disclaimer
+// (https://www.federalreserve.gov/disclaimer.htm, Copyright/trademark, read
+// in full 2026-11-17): unless otherwise indicated, information on the
+// Board's website is in the public domain and may be copied and distributed
+// without permission; the Board asks to be cited as the source. Material
+// identified as a non-Board party's (a photo, a graphic) is not covered.
+const (
+	FedDisclaimer = "Federal Reserve Board website disclaimer (public domain unless otherwise indicated; cite the Board)"
+	FedCitation   = "Source: Board of Governors of the Federal Reserve System (www.federalreserve.gov)."
+)
+
+// fedArticle is where the article body is on a Fed press release's or
+// speech's page. Its pages carry no element for the body alone: within
+// div#article, a "heading col-sm-8" div holds the date, title, speaker and
+// sharing links, and the body is the sibling col-sm-8 div after it, with no
+// id or class of its own (both page kinds, 2026-11-17). If the site changes
+// shape, a page has no such element and its fetch fails, logged, as any
+// failed fetch does.
+var fedArticle = PageBody{Within: "article", Class: "col-sm-8", Except: "heading"}
+
 // ons is the ONS API's release search; the two ONS Sources ask it for
 // published releases and for upcoming ones.
 const ons = "https://api.beta.ons.gov.uk/v1/search/releases"
@@ -127,6 +147,52 @@ func Sources() []Source {
 			// It answers conditional requests (ETag, 304), so an unchanged
 			// feed costs it a 304 on every run; its Cache-Control max-age
 			// is 300 seconds, shorter than Collection's interval.
+		},
+		{
+			// The Federal Reserve Board's press releases: monetary policy
+			// decisions and schedules, regulation, enforcement and its
+			// other announcements, the first Source for US economics.
+			ID:        "fed-press-releases",
+			Name:      "Federal Reserve Board: press releases",
+			ShortName: "Federal Reserve",
+			FeedURL:   "https://www.federalreserve.gov/feeds/press_all.xml",
+			Format:    RSS,
+			// Its items carry only their title as description; the text is
+			// on each release's page, and no feed or API carries it.
+			Text:        TextFromPage,
+			PageBody:    fedArticle,
+			Licence:     FedDisclaimer,
+			Attribution: FedCitation,
+			Keeps:       KeepFullText,
+			// Several a week, but the feed's twenty items before 17
+			// November 2026 (from 25 September) went twelve days without
+			// one (16 to 28 October). Sixteen days keeps such a lull from
+			// showing it quiet.
+			UsualGap: 16 * 24 * time.Hour,
+			// Its feeds send an ETag and a Last-Modified (2026-11-17), so
+			// each run asks conditionally and needs no rate limit of its
+			// own.
+		},
+		{
+			// Speeches of Federal Reserve officials, as the feed names
+			// them (the Board's members, in the items read on 2026-11-17),
+			// as delivered: the Board's thinking in its members' own words.
+			ID:        "fed-speeches",
+			Name:      "Federal Reserve Board: speeches",
+			ShortName: "Federal Reserve",
+			FeedURL:   "https://www.federalreserve.gov/feeds/speeches.xml",
+			Format:    RSS,
+			// Its items carry only where the speech was given; the text is
+			// on each speech's page.
+			Text:        TextFromPage,
+			PageBody:    fedArticle,
+			Licence:     FedDisclaimer,
+			Attribution: FedCitation,
+			Keeps:       KeepFullText,
+			// The feed's fifteen items before 17 November 2026 (from 29
+			// September) went twenty-six days without one (15 October to
+			// 10 November); thirty keeps such a lull from showing it quiet.
+			UsualGap: 30 * 24 * time.Hour,
 		},
 		{
 			// Written ministerial statements to both Houses: government

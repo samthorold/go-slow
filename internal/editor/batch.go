@@ -64,9 +64,6 @@ type Job struct {
 	// Key identifies the work within its act, such as an Item.
 	Key     string
 	Request Request
-	// Precedents are the ids of the Feedback the request shows as
-	// precedent, kept with its call.
-	Precedents []int64
 	// Apply checks a model's answer with the act's own checks and writes
 	// what passes to the Record, at now. A result that fails the checks is
 	// ErrFailedChecks and writes nothing; any other error is the Record's.
@@ -100,13 +97,11 @@ type PendingRequest struct {
 	ID  string
 	Act string
 	Key string
-	// Request is the request as sent, Model the model it asked for and
-	// Precedents the Feedback it showed. Request is nil for a request
-	// submitted before requests were kept: its call keeps the work's
-	// request as it is when the batch ends.
-	Request    *Request
-	Model      string
-	Precedents []int64
+	// Request is the request as sent, and Model the model it asked for.
+	// Request is nil for a request submitted before requests were kept: its
+	// call keeps the work's request as it is when the batch ends.
+	Request *Request
+	Model   string
 }
 
 // MaxAttempts is how many times a piece of work is attempted in batches
@@ -277,15 +272,15 @@ func (b *Batches) ReadWaiting(ctx context.Context, now time.Time) error {
 func (b *Batches) pending(id, act string, j Job) PendingRequest {
 	req := j.Request
 	return PendingRequest{ID: id, Act: act, Key: j.Key, Request: &req,
-		Model: modelOf(b.ModelFor, act), Precedents: j.Precedents}
+		Model: modelOf(b.ModelFor, act)}
 }
 
 // call is a pending request's call, as it was sent in its batch.
 func (b *Batches) call(batchID string, r PendingRequest, j Job, at time.Time) Call {
 	if r.Request == nil {
-		return newCall(r.Act, r.Key, batchID, modelOf(b.ModelFor, r.Act), j.Request, j.Precedents, at)
+		return newCall(r.Act, r.Key, batchID, modelOf(b.ModelFor, r.Act), j.Request, at)
 	}
-	return newCall(r.Act, r.Key, batchID, r.Model, *r.Request, r.Precedents, at)
+	return newCall(r.Act, r.Key, batchID, r.Model, *r.Request, at)
 }
 
 // settled is what settling a pending batch came to: whether it has ended,

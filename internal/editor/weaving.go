@@ -567,8 +567,8 @@ func cutStoryHeader(s CutStory) string {
 // A Span's number is the same however it is hydrated, so the numbers are
 // worked out again here; which Spans were left out, Rejected, and how each
 // was shown, are read from the request as sent, since a Span hydrated after
-// it went is shown otherwise now (system design: nothing waits for
-// hydration).
+// it went is shown otherwise now (system design: Construction judges a Span
+// from the Story its Cut made; nothing waits for hydration).
 func shownIn(made []Story, stories []CutStory, sent Request) (*woven, bool) {
 	sh := showMade(made, nil)
 	in := sent.Input

@@ -10,7 +10,7 @@
 // opens and commits). Each event is a row
 // of events (its identifier id, its kind, the version of its shape shape,
 // and at), with its detail at its own grain in its kind's tables keyed by
-// the event's id (a Cut: cuts, naming the Item and its Judge, cutter and
+// the event's id (a Cut: cuts, naming the Item and its cutter, cutter and
 // cutter_version, and cut_spans, the Spans numbered n from 1 as
 // span_start/span_end). Triggers refuse every update and delete on them:
 // events are append-only, and a view reads every shape it has ever been

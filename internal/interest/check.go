@@ -12,8 +12,8 @@ import (
 // (markup stripped, entities decoded), ignoring case and punctuation, so
 // "Farage" touches "Mr Farage's statement" but not "Farageist". It is plain
 // code with no model in it, so it can run over every Span. Touching counts
-// and selects nothing (system design: Every Item is read, and Topics select
-// nothing).
+// and selects nothing (system design: Every Item is cut and hydrated, and
+// Topics gate none of the work).
 func (t Topic) Touches(span string) bool {
 	return t.matches(words(visible(span)))
 }

@@ -20,7 +20,7 @@ There is no Go Guide yet; the Go tooling below is this repo's own until there is
 
 This is a map. A fact about the code lives in the code: each package's doc comment (`go doc ./internal/<pkg>`) is its overview, and its identifiers' comments the detail. A reason lives in the system design.
 
-The code builds the design the docs state, but for one name: hydration is still called *reading* in the code, the commands and the config (`READING_MODEL`), until #309 makes it hydration. The old design's acts (relating, the Briefing, the Sunday read, gatherings, Feedback in the app, the register) are retired: what they wrote stays in the Record, read by no Page, and their kept calls stay readable on their call's and conversation's pages.
+The code builds the design the docs state, but for two things. Hydration is called *reading* in the code, the commands and the config (`READING_MODEL`); #309 changed what weaving is shown, not the name. And it judges a whole Item's Spans in one call, where the design has one call per Span (#303, which needs design first). The old design's acts (relating, the Briefing, the Sunday read, gatherings, Feedback in the app, the register) are retired: what they wrote stays in the Record, read by no Page, and their kept calls stay readable on their call's and conversation's pages.
 
 - [`CONTEXT.md`](CONTEXT.md): the domain language (Owner, Story, Span, Item...). Use its terms in new code, tests and issues.
 - [`docs/system-design/README.md`](docs/system-design/README.md): the design, its end state and hypotheses, and why it has its shape.
@@ -50,7 +50,7 @@ The code builds the design the docs state, but for one name: hydration is still 
 
 ### Re-recording the Editor's acts
 
-Recording calls the real model and costs money; the suite only replays. Re-record deliberately, when an act's instructions, schema, model or precedents change, and only that act. Each command needs `GOSLOW_ANTHROPIC_API_KEY` and the act's model variable, and `-timeout 90m` (the default 10m is too short for five samples of every fixture); commit the recordings. How: the Model calls Guide's detail files (`recording.md`, `samples.md`, `changing-an-act.md`); why: system design, *The Editor* (*A recording is one sample…*, *Each act is recorded over its own frozen inputs*); go-slow's paths, properties and checks: [`internal/editor/testdata/recorded/README.md`](internal/editor/testdata/recorded/README.md).
+Recording calls the real model and costs money; the suite only replays. Re-record deliberately, when an act's instructions, schema or model change, and only that act. Each command needs `GOSLOW_ANTHROPIC_API_KEY` and the act's model variable, and `-timeout 90m` (the default 10m is too short for five samples of every fixture); commit the recordings. How: the Model calls Guide's detail files (`recording.md`, `samples.md`, `changing-an-act.md`); why: system design, *The Editor* (*A recording is one sample…*, *Each Command is recorded over its own frozen inputs*); go-slow's paths, properties and checks: [`internal/editor/testdata/recorded/README.md`](internal/editor/testdata/recorded/README.md).
 
 **The Owner's standing say (2026-11-03), while the design is being redrawn (#294):** an agent re-records or refreshes any act without asking, up to $10 a recording run, and says what it spent. Speed of iteration matters more than the cost of a recording. Where a line below says "only on the Owner's say", this is that say, up to the cap.
 

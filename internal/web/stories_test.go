@@ -184,7 +184,7 @@ func TestAStoryWithANameIsListedAndHeadedByItAndOneWithoutByItsOpeningWords(t *t
 	if c := get(t, app, "/calls/"+call[1]); c.status != 200 || !strings.Contains(c.body, "A naming call") {
 		t.Errorf("the call it links is not the naming call (status %d):\n%s", c.status, c.body)
 	}
-	if !strings.Contains(res.body, "naming v1") {
+	if !strings.Contains(res.body, fmt.Sprintf("naming v%d", editor.NamingVersion)) {
 		t.Errorf("the Story's Page does not name its Name's Judge:\n%s", res.body)
 	}
 }

@@ -5,8 +5,10 @@
 //
 // It holds the Sources list, with each one's short name (for citations),
 // terms (licence, attribution, what may be kept) and rate limit; reading
-// each feed format (Atom, the ONS release search, Parliament's written
-// statements); and the No Source goes quiet check. A Source whose feed
+// each feed format (Atom, RSS 2.0, the ONS release search, Parliament's
+// written statements); and the No Source goes quiet check. A Source whose
+// feed carries more than its own entries keeps only those linking under its
+// LinkPrefix. A Source whose feed
 // carries only a summary declares how each entry's full text is fetched
 // (Source.Text, text.go: GOV.UK's Content API document for the entry's
 // path, or the written statement itself), and a new entry is kept only once
@@ -25,6 +27,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/url"
+	"slices"
 	"strings"
 	"time"
 )
@@ -62,6 +65,11 @@ type Source struct {
 	ShortName string
 	FeedURL   string
 	Format    Format
+	// LinkPrefix, where set, is where the Source's own entries link: an
+	// entry linking anywhere else is not the Source's and is never
+	// collected. It is for a feed that carries more than the Source's
+	// entries, with no feed of its own for them.
+	LinkPrefix string
 	// Text is how the Source's entries get their full text, where the feed
 	// carries only a summary or an opening.
 	Text Text
@@ -307,6 +315,11 @@ func (c *Collector) collect(ctx context.Context, s Source, now time.Time) (int, 
 	items, err := s.Format.parse(f.Body)
 	if err != nil {
 		return 0, err
+	}
+	if s.LinkPrefix != "" {
+		items = slices.DeleteFunc(items, func(it Item) bool {
+			return !strings.HasPrefix(it.Link, s.LinkPrefix)
+		})
 	}
 	for i := range items {
 		items[i].SourceID = s.ID

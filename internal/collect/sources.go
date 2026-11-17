@@ -10,6 +10,21 @@ const (
 	OPLv3 = "Open Parliament Licence v3.0"
 )
 
+// NASA's terms, from its media usage guidelines
+// (https://www.nasa.gov/nasa-brand-center/images-and-media/, read
+// 2026-11-17): NASA content is generally not subject to copyright in the
+// United States, news outlets may use it without explicit permission in a
+// factual manner that implies no endorsement, NASA should be acknowledged
+// as its source, and third parties' copyright material on its site is
+// marked as such and not covered. The page speaks of media; that a
+// release's text is a US government work, in the public domain, is the
+// sources research's reading (docs/research/197-more-sources.md), not a
+// sentence of the page.
+const (
+	NASAGuidelines = "NASA media usage guidelines (US government work, not subject to copyright in the US)"
+	NASACredit     = "Source: NASA (www.nasa.gov)."
+)
+
 // ons is the ONS API's release search; the two ONS Sources ask it for
 // published releases and for upcoming ones.
 const ons = "https://api.beta.ons.gov.uk/v1/search/releases"
@@ -81,6 +96,37 @@ func Sources() []Source {
 			// and six once, in August. Seven days covers those; a longer
 			// gap is worth noticing.
 			UsualGap: 7 * 24 * time.Hour,
+		},
+		{
+			// NASA's news releases: the agency's own announcements of
+			// missions, launches, contracts and results, as published, the
+			// first Source for space outside the UK.
+			ID:        "nasa-news-releases",
+			Name:      "NASA: news releases",
+			ShortName: "NASA",
+			// The feed NASA lists as its news releases, which also carries
+			// image posts, APOD and other articles (2026-11-17: two
+			// releases among ten items). No feed carries the releases
+			// alone (asking its feed for ?post_type=press-release answers
+			// the same mix); the WordPress API does, but the feed serves,
+			// read for the entries linking under /news-release/, which are
+			// NASA's releases and nothing else.
+			FeedURL:    "https://www.nasa.gov/news-release/feed/",
+			Format:     RSS,
+			LinkPrefix: "https://www.nasa.gov/news-release/",
+			// Each item carries its full text in content:encoded.
+			Text:        TextInEntry,
+			Licence:     NASAGuidelines,
+			Attribution: NASACredit,
+			Keeps:       KeepFullText,
+			// About one release a day: the hundred before 17 November 2026
+			// (its WordPress API, from 20 July) went at most nine days and
+			// nineteen hours without one (31 July to 10 August). Twelve
+			// days keeps such a lull from showing it quiet.
+			UsualGap: 12 * 24 * time.Hour,
+			// It answers conditional requests (ETag, 304), so an unchanged
+			// feed costs it a 304 on every run; its Cache-Control max-age
+			// is 300 seconds, shorter than Collection's interval.
 		},
 		{
 			// Written ministerial statements to both Houses: government

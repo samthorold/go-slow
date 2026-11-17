@@ -268,8 +268,119 @@ func TestNoRunIsSubmittedWhileARunsBatchIsPending(t *testing.T) {
 	if len(madeStories(t, store)) != 1 {
 		t.Errorf("Saturday's run was not applied")
 	}
-	if len(batcher.submitted) != 2 || strings.Contains(batcher.submitted[1][0].Request.Input, "Motherwell") {
+	if len(batcher.submitted) != 2 || strings.Contains(batcher.submitted[1][0].Request.Input, speechAsCut) {
 		t.Errorf("submitted %d batches, want Sunday's run shown only what was cut since", len(batcher.submitted))
+	}
+}
+
+// wovenThenFerries is a Record whose Saturday run made oneOpinion's Story,
+// with the ferries Item cut on Sunday, and the runner whose Sunday run is
+// next.
+func wovenThenFerries(t *testing.T) (*sqlite.Store, *fakeBatcher, *editor.Batches, time.Time) {
+	t.Helper()
+	store := record(t)
+	batcher := &fakeBatcher{}
+	b := weavingBatches(store, batcher)
+	runAt(t, b, saturday)
+	answerLast(batcher, oneOpinion)
+	runAt(t, b, saturday.Add(time.Hour))
+	sunday := saturday.Add(24 * time.Hour)
+	cutAt(t, store, sunday)
+	return store, batcher, b, sunday
+}
+
+func TestARunIsShownEveryStoryTheEditorMadeItsSpansMarkedAsTheEditors(t *testing.T) {
+	_, batcher, b, sunday := wovenThenFerries(t)
+	runAt(t, b, sunday)
+	if len(batcher.submitted) != 2 {
+		t.Fatalf("submitted %d batches, want Sunday's run", len(batcher.submitted))
+	}
+	want := `Story the Editor made, 2026-10-24
+S1 (from "PM speech in Scotland: 16 October 2026"): It’s good to be back in Scotland, to be here in Motherwell.
+S2 (from "PM speech in Scotland: 16 October 2026"): Scotland will get £2 billion.
+S3 (the Editor's, citing S1, S2): Money follows the Prime Minister to Scotland.
+S4 (the Editor's, citing S1): Motherwell is where it lands first.
+
+Story from "Ferries to the islands", published 2026-10-24
+S5: Ferries to Scotland's islands will run more often.
+
+`
+	if got := batcher.submitted[1][0].Request.Input; got != want {
+		t.Errorf("Sunday's run was shown:\n%s\nwant:\n%s", got, want)
+	}
+}
+
+func TestAStoryCitingAnEarlierEditorsSpanHoldsItByAddress(t *testing.T) {
+	store, batcher, b, sunday := wovenThenFerries(t)
+	earlier := madeStories(t, store)[0]
+	runAt(t, b, sunday)
+	answerLast(batcher, `{"stories": [{"editor_spans": [
+	  {"body": "The money and the ferries are one promise.", "cites": [3, 5]}
+	]}]}`)
+	runAt(t, b, sunday.Add(time.Hour))
+
+	stories := madeStories(t, store)
+	if len(stories) != 2 {
+		t.Fatalf("made %d Stories, want a second", len(stories))
+	}
+	cites := stories[0].Spans[0].Cites
+	if len(cites) != 2 {
+		t.Fatalf("cites %+v, want two", cites)
+	}
+	if want := (editor.EditorSpanAt{Story: earlier.ID, N: 1}); cites[0].Of != want ||
+		cites[0].Words != "Money follows the Prime Minister to Scotland." {
+		t.Errorf("cites %+v, want the earlier Editor's Span at %+v", cites[0], want)
+	}
+	if !cites[1].Of.IsZero() || cites[1].Address.EntryID != ferries.EntryID {
+		t.Errorf("cites %+v, want the ferries", cites[1])
+	}
+
+	// The next run shows it citing the earlier Editor's Span by its number.
+	monday := sunday.Add(24 * time.Hour)
+	it := ferries
+	it.EntryID, it.CollectedAt = "ferries-again", monday
+	if _, err := store.AddItems(t.Context(), []collect.Item{it}); err != nil {
+		t.Fatal(err)
+	}
+	if err := cut.New(store).CutNew(t.Context(), monday); err != nil {
+		t.Fatal(err)
+	}
+	runAt(t, b, monday)
+	in := batcher.submitted[len(batcher.submitted)-1][0].Request.Input
+	if !strings.Contains(in, "S5 (from \"Ferries to the islands\"): Ferries to Scotland's islands will run more often.\n"+
+		"S6 (the Editor's, citing S3, S5): The money and the ferries are one promise.\n") {
+		t.Errorf("Monday's run was shown:\n%s", in)
+	}
+}
+
+func TestACitationOfANumberNotShownIsRefusedBesideTheEditorsStories(t *testing.T) {
+	store, batcher, b, sunday := wovenThenFerries(t)
+	runAt(t, b, sunday)
+	answerLast(batcher, `{"stories": [{"editor_spans": [{"body": "Words.", "cites": [6]}]}]}`)
+	runAt(t, b, sunday.Add(time.Hour))
+
+	if got := madeStories(t, store); len(got) != 1 {
+		t.Errorf("made %d Stories, want none beside the first", len(got))
+	}
+	calls, err := store.CallsOn(t.Context(), "weaving", "2026-10-25")
+	if err != nil || len(calls) != 1 || calls[0].Outcome != editor.Refused || !strings.Contains(calls[0].Why, "S1 to S5") {
+		t.Errorf("calls %+v (%v), want one refused for citing a Span not shown", calls, err)
+	}
+}
+
+func TestARunWithNothingNewlyCutIsSkippedWhateverTheEditorHasMade(t *testing.T) {
+	store := record(t)
+	batcher := &fakeBatcher{}
+	b := weavingBatches(store, batcher)
+	runAt(t, b, saturday)
+	answerLast(batcher, oneOpinion)
+	runAt(t, b, saturday.Add(time.Hour))
+	if len(madeStories(t, store)) != 1 {
+		t.Fatal("Saturday's run made no Story")
+	}
+	runAt(t, b, saturday.Add(24*time.Hour))
+	if len(batcher.submitted) != 1 {
+		t.Errorf("submitted %d batches with nothing newly cut, want none after the first", len(batcher.submitted))
 	}
 }
 
@@ -292,10 +403,17 @@ func TestAResultArrivingAfterTheRecordHasMovedOnIsAppliedToWhatTheRunWasShown(t 
 	}
 	// What was cut after the request went is the next run's.
 	runAt(t, b, saturday.Add(24*time.Hour))
-	if len(batcher.submitted) != 2 || !strings.Contains(batcher.submitted[1][0].Request.Input, "S1: Ferries") {
-		t.Errorf("the next run was not shown what was cut after the last was sent")
+	if len(batcher.submitted) != 2 {
+		t.Fatalf("submitted %d batches, want the next run", len(batcher.submitted))
+	}
+	if in := batcher.submitted[1][0].Request.Input; !strings.Contains(in, `Story from "Ferries to the islands"`) ||
+		strings.Contains(in, speechAsCut) {
+		t.Errorf("the next run was not shown what was cut after the last was sent, alone:\n%s", in)
 	}
 }
+
+// speechAsCut heads the speech's Story as a run shown it newly cut.
+const speechAsCut = `Story from "PM speech in Scotland: 16 October 2026"`
 
 func TestALateResultCitingASpanCutAfterItsRequestWentIsRefused(t *testing.T) {
 	store := record(t)

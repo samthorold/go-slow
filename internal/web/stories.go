@@ -103,6 +103,14 @@ func (a *app) story(w http.ResponseWriter, r *http.Request) {
 	for _, es := range s.Spans {
 		row := editorSpanRow{Body: es.Body}
 		for _, c := range es.Cites {
+			if !c.Of.IsZero() {
+				// An earlier Editor's Span: its words, linking the Story
+				// that wrote them.
+				href := storyPath(c.Of.Story)
+				row.Cites = append(row.Cites, spanLink{Words: c.Words, Href: href,
+					Item: itemCitation{Source: "the Editor", Title: "an earlier Story", Href: href}})
+				continue
+			}
 			row.Cites = append(row.Cites, spanLink{Words: c.Words, Href: spanPath(c.Address),
 				Item: a.cite(c.Address.SourceID, c.Title, itemPath(c.Address.SourceID, c.Address.EntryID))})
 		}

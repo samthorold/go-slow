@@ -5,9 +5,10 @@
 //
 //	go run ./internal/editor/yield <before> <after>
 //
-// It counts reading and weaving. Reading is counted by the Spans its fixture
-// is cut into and what it judged of them; weaving by the Stories it made,
-// their Editor's Spans and the distinct Spans they cite. Recordings of any
+// It counts reading, weaving and naming. Reading is counted by the Spans its
+// fixture is cut into and what it judged of them; weaving by the Stories it
+// made, their Editor's Spans and the distinct Spans they cite; naming by the
+// words of the Name it gave its Story. Recordings of any
 // other act (a retired act's, in an older tree) are not counted: the report
 // ends by naming those acts.
 //
@@ -98,6 +99,19 @@ type act struct {
 var acts = []act{
 	{"reading", []string{"Spans", "Rejected", "Names", "Speakers", "Refers to"}, countReading},
 	{"weaving", []string{"Stories", "Editor's Spans", "Spans cited"}, countWeaving},
+	{"naming", []string{"Words"}, countNaming},
+}
+
+// countNaming counts the words of the Name naming gave a Story: none when it
+// gave none.
+func countNaming(out json.RawMessage, _ about) ([]int, error) {
+	var r struct {
+		Name string `json:"name"`
+	}
+	if err := json.Unmarshal(out, &r); err != nil {
+		return nil, err
+	}
+	return []int{len(strings.Fields(r.Name))}, nil
 }
 
 // countWeaving counts the Stories a weaving run made, their Editor's Spans

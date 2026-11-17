@@ -1,0 +1,41 @@
+{
+  "act": "naming",
+  "model": "claude-haiku-5-5",
+  "request_hash": "88cce9d617ae5276263e2f4867426b93c82bb384ce859306ab54fe9c3349d9a3",
+  "recorded_at": "2026-11-17T17:38:51.891077Z",
+  "usage": {
+    "input_tokens": 1342,
+    "output_tokens": 32
+  },
+  "output": {
+    "name": "PM's Commons statement on EU summit deals and a possible future public vote"
+  },
+  "earlier_attempts": [
+    {
+      "act": "naming",
+      "model": "claude-haiku-5-5",
+      "request_hash": "88cce9d617ae5276263e2f4867426b93c82bb384ce859306ab54fe9c3349d9a3",
+      "recorded_at": "2026-11-17T17:38:43.840601Z",
+      "usage": {
+        "input_tokens": 1342,
+        "output_tokens": 36
+      },
+      "output": {
+        "name": "PM's Commons statement on EU summit, long-term relationship options and possible public vote"
+      }
+    },
+    {
+      "act": "naming",
+      "model": "claude-haiku-5-5",
+      "request_hash": "88cce9d617ae5276263e2f4867426b93c82bb384ce859306ab54fe9c3349d9a3",
+      "recorded_at": "2026-11-17T17:38:47.017615Z",
+      "usage": {
+        "input_tokens": 1342,
+        "output_tokens": 36
+      },
+      "output": {
+        "name": "PM's Commons statement on EU summit, long-term relationship options and possible public vote"
+      }
+    }
+  ]
+}

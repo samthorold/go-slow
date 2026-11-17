@@ -80,6 +80,33 @@ func TestWeavingIsCountedByItsStoriesTheirEditorsSpansAndTheSpansTheyCite(t *tes
 	}
 }
 
+// Naming is counted by the words of the Name it gave each Story, by the
+// last attempt of each sample: none for a sample whose last attempt gave no
+// Name.
+func TestNamingIsCountedByTheWordsOfItsNames(t *testing.T) {
+	before, after := t.TempDir(), t.TempDir()
+	write(t, before, "naming/saturday-story-1/1.json", `{"act": "naming", "output": {"name": "Britain's war of services"}}`)
+	write(t, after, "naming/saturday-story-1/1.json", `{"act": "naming", "output": {"name": "Britain's war"}}`)
+	write(t, after, "naming/saturday-story-1/2.json", `{"act": "naming", "output": {"name": "Britain fights a war by denying services"}}`)
+	write(t, after, "naming/saturday-story-2/1.json", `{"act": "naming", "output": null, "error": "refused"}`)
+
+	got := yieldOf(t, before, after)
+
+	for _, want := range []string{
+		"### naming",
+		"| Fixture | Words |",
+		"| naming/saturday-story-1 | 4 → 2–7 |",
+		"| naming/saturday-story-2 (added) | – → 0 |",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("the report has no line %q; it is:\n%s", want, got)
+		}
+	}
+	if strings.Contains(got, "Not counted") {
+		t.Errorf("the report names naming as not counted; it is:\n%s", got)
+	}
+}
+
 func TestFrozenInputsAndOtherFilesAreLeftOut(t *testing.T) {
 	before, after := t.TempDir(), t.TempDir()
 	for _, dir := range []string{before, after} {

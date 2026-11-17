@@ -34,22 +34,12 @@ type Items interface {
 // Deps are the app's dependencies. The app reads nothing from the
 // environment: main builds these and passes them in.
 type Deps struct {
-	Briefings Briefings
-	Items     Items
-	Readings  Readings
+	Items    Items
+	Readings Readings
 	// Cuts answers an Item's Spans, from its newest Cut.
-	Cuts Cuts
-	// Relations answers a Span's relations, for its page.
-	Relations Relations
-	Topics    Topics
-	// Pieces is the Feedback commands on judgements and Spans, and Given
-	// the Feedback they keep, as events.
-	Pieces   Pieces
-	Given    Given
-	Register Register
-	// SundayReads answers the Sunday read's page.
-	SundayReads SundayReads
-	// Calls answers the kept calls' pages.
+	Cuts   Cuts
+	Topics Topics
+	// Calls answers the kept calls' pages, the retired acts' included.
 	Calls Calls
 	// Stories answers the Stories Page and each Story's.
 	Stories Stories
@@ -57,9 +47,6 @@ type Deps struct {
 	// Source's short name, by ID. A Source not in it is cited by the
 	// Item's title alone.
 	Sources []collect.Source
-	// BriefingAt is the time of day the Briefing is due (7h is 07:00): a
-	// day with none by then is flagged.
-	BriefingAt time.Duration
 	// Now is the clock. The day it returns, in its location, is "today".
 	Now func() time.Time
 	// Log takes one line for each request the app answers. Required: tests
@@ -74,21 +61,6 @@ var (
 	staticFS embed.FS
 )
 
-// todaysBriefingTmpl is today's Briefing page: the layout around its
-// content. briefingTmpl is the same page for any other day, which is not the
-// navigation's Briefing (today's) and no index of its own.
-var (
-	todaysBriefingTmpl = page("/", "briefing.html", "briefing_status.html")
-	briefingTmpl       = page(noIndex, "briefing.html", "briefing_status.html")
-)
-
-// briefingStatusTmpl is the fragment the day's page polls while its
-// Briefing is being written.
-var briefingStatusTmpl = template.Must(template.ParseFS(templateFS, "templates/briefing_status.html"))
-
-// briefingsTmpl is the list of Briefings, by day.
-var briefingsTmpl = page("/briefings", "briefings.html")
-
 // itemsTmpl is the Items page.
 var itemsTmpl = page("/items", "items.html")
 
@@ -101,12 +73,6 @@ var (
 // topicsTmpl is the Topics page.
 var topicsTmpl = page("/topics", "topics.html")
 
-// feedbackTmpl is the Feedback page: every piece, as given.
-var feedbackTmpl = page("/feedback", "feedback_list.html")
-
-// sundayReadTmpl is a Sunday read's page.
-var sundayReadTmpl = page(noIndex, "sunday_read.html")
-
 // navLink is one link of the layout's navigation, to a page with an index of
 // its own.
 type navLink struct {
@@ -117,13 +83,9 @@ type navLink struct {
 
 // indexes are the pages the navigation reaches, in its order: flat, one row.
 var indexes = []navLink{
-	{Href: "/", Name: "Briefing"},
-	{Href: "/briefings", Name: "Briefings"},
 	{Href: "/stories", Name: "Stories"},
 	{Href: "/items", Name: "Items"},
 	{Href: "/topics", Name: "Topics"},
-	{Href: "/feedback", Name: "Feedback"},
-	{Href: "/register", Name: "Register"},
 }
 
 // noIndex is the index of a page that is none of the navigation's indexes,
@@ -139,7 +101,7 @@ func page(index, name string, components ...string) *template.Template {
 		l.Current = l.Href == index
 		nav[i] = l
 	}
-	files := []string{"templates/layout.html", "templates/feedback.html", "templates/margin.html", "templates/" + name}
+	files := []string{"templates/layout.html", "templates/margin.html", "templates/" + name}
 	for _, c := range components {
 		files = append(files, "templates/"+c)
 	}
@@ -155,29 +117,13 @@ func New(d Deps) http.Handler {
 	}
 	mux := http.NewServeMux()
 	mux.Handle("GET /static/", http.FileServerFS(staticFS))
-	mux.HandleFunc("GET /{$}", a.todaysBriefing)
-	mux.HandleFunc("GET /briefings", a.briefings)
-	mux.HandleFunc("GET /briefings/{day}", a.pastBriefing)
-	mux.HandleFunc("GET /briefings/{day}/status", a.briefingStatus)
-	mux.HandleFunc("GET /briefings/{day}/trail", a.briefingTrail)
-	mux.HandleFunc("POST /briefings/{day}/feedback", a.briefingFeedback)
-	mux.HandleFunc("PUT /briefings/{day}/feedback/{feedback}/undone", a.undoOnBriefing)
-	mux.HandleFunc("GET /sunday-reads/{day}", a.sundayRead)
-	mux.HandleFunc("POST /sunday-reads/{day}/feedback", a.sundayReadFeedback)
-	mux.HandleFunc("PUT /sunday-reads/{day}/feedback/{feedback}/undone", a.undoOnSundayRead)
-	mux.HandleFunc("GET /assessments/{id}", a.assessment)
+	// The Owner reads Stories: the root lands on them.
+	mux.Handle("GET /{$}", http.RedirectHandler("/stories", http.StatusSeeOther))
 	mux.HandleFunc("GET /calls/{id}", a.call)
 	mux.HandleFunc("GET /conversations/{id}", a.conversation)
-	mux.HandleFunc("GET /feedback", a.feedback)
-	mux.HandleFunc("PUT /feedback/{feedback}/undone", a.undoOnFeedbackPage)
 	mux.HandleFunc("GET /items", a.items)
 	mux.HandleFunc("GET /items/{source}/{entry}", a.item)
-	mux.HandleFunc("POST /items/{source}/{entry}/feedback", a.itemFeedback)
-	mux.HandleFunc("PUT /items/{source}/{entry}/feedback/{feedback}/undone", a.undoOnItem)
 	mux.HandleFunc("GET /items/{source}/{entry}/spans/{span}", a.span)
-	mux.HandleFunc("POST /items/{source}/{entry}/spans/{span}/feedback", a.spanFeedback)
-	mux.HandleFunc("PUT /items/{source}/{entry}/spans/{span}/feedback/{feedback}/undone", a.undoOnSpan)
-	mux.HandleFunc("GET /register", a.register)
 	mux.HandleFunc("GET /stories", a.stories)
 	mux.HandleFunc("GET /stories/{id}", a.story)
 	mux.HandleFunc("GET /stories/{id}/spans/{n}", a.editorSpan)
@@ -210,17 +156,6 @@ func (a *app) renderStatus(w http.ResponseWriter, r *http.Request, status int, t
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(status)
-	_, _ = buf.WriteTo(w)
-}
-
-// fragment writes a fragment: the named template alone, with no layout.
-func (a *app) fragment(w http.ResponseWriter, r *http.Request, t *template.Template, name string, data any) {
-	var buf bytes.Buffer
-	if err := t.ExecuteTemplate(&buf, name, data); err != nil {
-		a.serverError(w, r, err)
-		return
-	}
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	_, _ = buf.WriteTo(w)
 }
 

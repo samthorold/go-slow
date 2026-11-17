@@ -4,13 +4,12 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
-	"strings"
 	"testing"
 )
 
 // indexes are the pages with an index of their own, in the navigation's
 // order.
-var indexes = []string{"/", "/briefings", "/stories", "/items", "/topics", "/feedback", "/register"}
+var indexes = []string{"/stories", "/items", "/topics"}
 
 var (
 	navigation = regexp.MustCompile(`(?s)<nav aria-label="Pages">(.*?)</nav>`)
@@ -65,59 +64,6 @@ func current(t *testing.T, path, body string) []string {
 	return hrefs
 }
 
-func TestAPageThatIsNoIndexCarriesTheNavigationWithNoLinkMarkedCurrent(t *testing.T) {
-	store := toldBriefing(t)
-	app, _ := newAppWithLog(t, saturday.AddDate(0, 0, 1), store) // Saturday's Briefing is past
-
-	briefing := get(t, app, "/briefings/2026-10-24").body
-	paths := []string{"/briefings/2026-10-24", "/briefings/2026-10-24/trail"}
-	// A Span is cited on its own page, and its Item on its own.
-	for _, link := range []string{`/items/[^"#]+/spans/[^"#]+`, `/items/[^"#/]+/[^"#/]+`} {
-		m := regexp.MustCompile(`href="(` + link + `)["#]`).FindStringSubmatch(briefing)
-		if m == nil {
-			t.Fatalf("the Briefing links no %s:\n%s", link, briefing)
-		}
-		paths = append(paths, m[1])
-	}
-	trail := get(t, app, "/briefings/2026-10-24/trail").body
-	call := regexp.MustCompile(`href="(/calls/\d+)"`).FindStringSubmatch(trail)
-	if call == nil {
-		t.Fatalf("the trail links no call:\n%s", trail)
-	}
-	paths = append(paths, call[1])
-
-	for _, path := range paths {
-		res := get(t, app, path)
-		if res.status != http.StatusOK {
-			t.Fatalf("GET %s: status = %d, want 200", path, res.status)
-		}
-		if got := current(t, path, res.body); len(got) != 0 {
-			t.Errorf("GET %s: links marked current %v, want none", path, got)
-		}
-	}
-}
-
-func TestTodaysBriefingByItsDateIsTheNavigationsBriefing(t *testing.T) {
-	app := newApp(t, saturday)
-
-	res := get(t, app, "/briefings/2026-10-24")
-	if got := current(t, "/briefings/2026-10-24", res.body); len(got) != 1 || got[0] != "/" {
-		t.Errorf("links marked current %v, want only /", got)
-	}
-}
-
-func TestTheBriefingsStatusPollIsAFragmentWithNoNavigation(t *testing.T) {
-	app := newApp(t, saturday) // past the set time, so the Briefing is being written
-
-	res := get(t, app, "/briefings/2026-10-24/status")
-	if res.status != http.StatusOK {
-		t.Fatalf("status = %d, want 200", res.status)
-	}
-	if strings.Contains(res.body, "<nav") {
-		t.Errorf("the fragment carries a navigation:\n%s", res.body)
-	}
-}
-
 // A form that fails validation answers the whole page, swapped into the
 // body: it keeps the page's one navigation, rather than losing it.
 func TestAFormReRenderedAfterFailingValidationKeepsItsPagesNavigation(t *testing.T) {
@@ -132,28 +78,51 @@ func TestAFormReRenderedAfterFailingValidationKeepsItsPagesNavigation(t *testing
 	}
 }
 
-// top is what a page's main content shows around its heading: from the start
-// of main to the end of the paragraph after the heading.
-var top = regexp.MustCompile(`(?s)<main>(.*?<h1[^>]*>.*?</h1>\s*(?:<p>.*?</p>)?)`)
-
-func TestNoPageRepeatsTheNavigationAboveItsContent(t *testing.T) {
-	store := toldBriefing(t)
+// woven are the pages a woven Record reaches that are no index: a Story's,
+// an Editor's Span's, a Span's, an Item's and a call's.
+func woven(t *testing.T) (http.Handler, []string) {
+	t.Helper()
+	store := openStore(t)
+	weaveSpeech(t, store, twoOpinions)
 	app, _ := newAppWithLog(t, saturday, store)
-
-	paths := append([]string{"/briefings/2026-10-24/trail"}, indexes...)
-	for page, link := range map[string]string{
-		"/":                           `/items/[^"#]+/spans/[^"#]+`,
-		"/briefings/2026-10-24":       `/items/[^"#]+`,
-		"/briefings/2026-10-24/trail": `/calls/\d+`,
-	} {
+	paths := []string{}
+	page := "/stories"
+	for _, link := range []string{`/stories/\d+`, `/stories/\d+/spans/\d+`, `/items/[^"#]+/spans/[^"#]+`, `/items/[^"#/]+/[^"#/]+`, `/calls/\d+`} {
 		body := get(t, app, page).body
 		m := regexp.MustCompile(`href="(` + link + `)["#]`).FindStringSubmatch(body)
 		if m == nil {
 			t.Fatalf("GET %s links no %s:\n%s", page, link, body)
 		}
 		paths = append(paths, m[1])
+		if page == "/stories" {
+			page = m[1] // a Story's page links the rest
+		}
 	}
+	return app, paths
+}
+
+func TestAPageThatIsNoIndexCarriesTheNavigationWithNoLinkMarkedCurrent(t *testing.T) {
+	app, paths := woven(t)
+
 	for _, path := range paths {
+		res := get(t, app, path)
+		if res.status != http.StatusOK {
+			t.Fatalf("GET %s: status = %d, want 200", path, res.status)
+		}
+		if got := current(t, path, res.body); len(got) != 0 {
+			t.Errorf("GET %s: links marked current %v, want none", path, got)
+		}
+	}
+}
+
+// top is what a page's main content shows around its heading: from the start
+// of main to the end of the paragraph after the heading.
+var top = regexp.MustCompile(`(?s)<main>(.*?<h1[^>]*>.*?</h1>\s*(?:<p>.*?</p>)?)`)
+
+func TestNoPageRepeatsTheNavigationAboveItsContent(t *testing.T) {
+	app, paths := woven(t)
+
+	for _, path := range append(paths, indexes...) {
 		body := get(t, app, path).body
 		m := top.FindStringSubmatch(body)
 		if m == nil {
@@ -165,6 +134,38 @@ func TestNoPageRepeatsTheNavigationAboveItsContent(t *testing.T) {
 					t.Errorf("GET %s: links %s at its top, repeating the navigation:\n%s", path, index, m[1])
 				}
 			}
+		}
+	}
+}
+
+// The Owner reads Stories: the app's root lands on them.
+func TestTheRootLandsOnTheStories(t *testing.T) {
+	app := newApp(t, saturday)
+
+	res := get(t, app, "/")
+	if res.status != http.StatusSeeOther || res.location != "/stories" {
+		t.Errorf("GET / = %d to %q, want 303 to /stories", res.status, res.location)
+	}
+}
+
+// The old design's acts are retired: none of their pages, or the Feedback
+// and register that read them, is served.
+func TestNoPageOfTheRetiredActsIsServed(t *testing.T) {
+	app := newApp(t, saturday)
+
+	for _, path := range []string{
+		"/briefings", "/briefings/2026-10-24", "/briefings/2026-10-24/status", "/briefings/2026-10-24/trail",
+		"/sunday-reads/2026-10-25", "/assessments/1", "/feedback", "/register",
+	} {
+		if res := get(t, app, path); res.status != http.StatusNotFound {
+			t.Errorf("GET %s: status = %d, want 404", path, res.status)
+		}
+	}
+	for _, path := range []string{
+		"/items/s/e/feedback", "/items/s/e/spans/0-4/feedback", "/briefings/2026-10-24/feedback", "/sunday-reads/2026-10-25/feedback",
+	} {
+		if res := send(t, app, http.MethodPost, path, url.Values{"kind": {"wrong"}}); res.status != http.StatusNotFound && res.status != http.StatusMethodNotAllowed {
+			t.Errorf("POST %s: status = %d, want it not served", path, res.status)
 		}
 	}
 }

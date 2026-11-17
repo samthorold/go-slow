@@ -26,20 +26,6 @@ type Config struct {
 	// ReadingModel is the Claude model the Editor reads Items with
 	// (READING_MODEL, such as claude-haiku-5-5).
 	ReadingModel string
-	// RelatingModel is the Claude model the Editor relates Spans with
-	// (RELATING_MODEL, such as claude-haiku-5-5).
-	RelatingModel string
-	// BriefingModel is the Claude model the Editor writes the Briefing with
-	// (BRIEFING_MODEL, such as claude-haiku-5-5).
-	BriefingModel string
-	// SundayReadModel is the Claude model the Editor writes the Sunday read
-	// with, as an agent with tools (SUNDAY_READ_MODEL, such as
-	// claude-opus-5-5).
-	SundayReadModel string
-	// BriefingAt is the time of day, in the Owner's time zone (TZ), the
-	// Briefing is written and due by, as the time since midnight
-	// (BRIEFING_TIME, HH:MM on a 24-hour clock, such as 07:00).
-	BriefingAt time.Duration
 	// WeavingModel is the Claude model the Editor weaves Stories with
 	// (WEAVING_MODEL, such as claude-opus-5-5).
 	WeavingModel string
@@ -65,7 +51,8 @@ func (Secret) GoString() string { return `"[secret]"` }
 // Load reads the config through lookup (os.LookupEnv in main). Every
 // variable is required: the safe local values live in .env.example, not in
 // code, so a deploy that forgets one fails at start rather than running on a
-// default.
+// default. Only the variables named here are read, so one left set that
+// nothing reads (an old design's act's model, say) changes nothing.
 func Load(lookup func(string) (string, bool)) (Config, error) {
 	var missing []string
 	get := func(key string) string {
@@ -77,9 +64,7 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 	}
 	port, dbPath := get("PORT"), get("DATABASE_PATH")
 	contact, interval := get("COLLECTION_CONTACT"), get("COLLECTION_INTERVAL")
-	model, relating := get("READING_MODEL"), get("RELATING_MODEL")
-	briefing, briefingTime := get("BRIEFING_MODEL"), get("BRIEFING_TIME")
-	sundayRead := get("SUNDAY_READ_MODEL")
+	model := get("READING_MODEL")
 	weaving, weavingTime := get("WEAVING_MODEL"), get("WEAVING_TIME")
 	naming := get("NAMING_MODEL")
 	key := get("GOSLOW_ANTHROPIC_API_KEY")
@@ -98,16 +83,11 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 	// Only the Claude adapter exists yet (open-weight models come through
 	// OpenRouter later), so any other model would fail on every call.
 	for _, v := range [][2]string{
-		{"READING_MODEL", model}, {"RELATING_MODEL", relating}, {"BRIEFING_MODEL", briefing},
-		{"SUNDAY_READ_MODEL", sundayRead}, {"WEAVING_MODEL", weaving}, {"NAMING_MODEL", naming},
+		{"READING_MODEL", model}, {"WEAVING_MODEL", weaving}, {"NAMING_MODEL", naming},
 	} {
 		if !strings.HasPrefix(v[1], "claude-") {
 			return Config{}, errors.New(v[0] + " must be a Claude model such as claude-haiku-5-5, got " + strconv.Quote(v[1]))
 		}
-	}
-	briefingAt, err := timeOfDay("BRIEFING_TIME", briefingTime)
-	if err != nil {
-		return Config{}, err
 	}
 	weavingAt, err := timeOfDay("WEAVING_TIME", weavingTime)
 	if err != nil {
@@ -119,10 +99,6 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 		CollectionContact:  contact,
 		CollectionInterval: every,
 		ReadingModel:       model,
-		RelatingModel:      relating,
-		BriefingModel:      briefing,
-		SundayReadModel:    sundayRead,
-		BriefingAt:         briefingAt,
 		WeavingModel:       weaving,
 		WeavingAt:          weavingAt,
 		NamingModel:        naming,

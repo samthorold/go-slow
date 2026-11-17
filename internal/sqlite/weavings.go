@@ -18,14 +18,16 @@ const (
 )
 
 // StoriesToWeave are the Stories cut since the last weaving run whose result
-// was written (every Cut after its through_cut), of Items collected after the
-// switch, oldest Cut first, each with its Item and its Spans.
+// was written (every Cut after its through_cut) and since the switch to
+// Stories (story_switch), of Items collected after the switch, oldest Cut
+// first, each with its Item and its Spans.
 func (s *Store) StoriesToWeave(ctx context.Context) ([]editor.CutStory, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT cuts.event_id, items.source_id, items.entry_id, items.title, items.link, items.summary,
 			items.content, items.published
 		FROM cuts JOIN items USING (source_id, entry_id)
-		WHERE cuts.event_id > coalesce((SELECT max(through_cut) FROM weavings), 0)
+		WHERE cuts.event_id > max(coalesce((SELECT max(through_cut) FROM weavings), 0),
+				coalesce((SELECT max(through_cut) FROM story_switch), 0))
 			AND `+afterSwitch+`
 		ORDER BY cuts.event_id`)
 	if err != nil {
@@ -53,6 +55,24 @@ func (s *Store) StoriesToWeave(ctx context.Context) ([]editor.CutStory, error) {
 		}
 	}
 	return out, nil
+}
+
+// cutSpans are the Spans the Cut cutID lists, in order.
+func (s *Store) cutSpans(ctx context.Context, cutID int64) ([]cut.Span, error) {
+	rows, err := s.db.QueryContext(ctx, `SELECT span_start, span_end FROM cut_spans WHERE cut_id = ? ORDER BY n`, cutID)
+	if err != nil {
+		return nil, fmt.Errorf("spans of cut %d: %w", cutID, err)
+	}
+	defer func() { _ = rows.Close() }()
+	var out []cut.Span
+	for rows.Next() {
+		var sp cut.Span
+		if err := rows.Scan(&sp.Start, &sp.End); err != nil {
+			return nil, fmt.Errorf("spans of cut %d: %w", cutID, err)
+		}
+		out = append(out, sp)
+	}
+	return out, rows.Err()
 }
 
 // CutStory is the Story the Cut id made, with its Item and its Spans in

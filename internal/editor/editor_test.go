@@ -62,7 +62,7 @@ func record(t *testing.T) *sqlite.Store {
 func TestTheEditorReadsEachItemCutIntoTheRecordEachJudgementWithItsJudge(t *testing.T) {
 	store := record(t)
 	model := &fakeModel{output: goodReading}
-	ed, _ := newEditor(store, model, &fakeWikidata{})
+	ed, _ := newEditor(store, model)
 
 	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
@@ -87,7 +87,7 @@ func TestTheEditorReadsEachItemCutIntoTheRecordEachJudgementWithItsJudge(t *test
 func TestAnItemOnceReadIsNotReadAgain(t *testing.T) {
 	store := record(t)
 	model := &fakeModel{output: goodReading}
-	ed, _ := newEditor(store, model, &fakeWikidata{})
+	ed, _ := newEditor(store, model)
 
 	for range 2 {
 		if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
@@ -112,7 +112,7 @@ func TestAnItemTouchingNoTopicIsReadAllTheSame(t *testing.T) {
 		t.Fatal(err)
 	}
 	model := &fakeModel{output: `{"names": [], "refers_to": [], "rejected": [], "speakers": []}`}
-	ed, _ := newEditor(store, model, &fakeWikidata{})
+	ed, _ := newEditor(store, model)
 
 	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
@@ -130,7 +130,7 @@ func TestAReadingThatFailsWritesNothingAndTheItemStaysAwaitingReading(t *testing
 	} {
 		t.Run(name, func(t *testing.T) {
 			store := record(t)
-			ed, logs := newEditor(store, model, &fakeWikidata{})
+			ed, logs := newEditor(store, model)
 
 			if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
 				t.Fatal(err)
@@ -154,12 +154,11 @@ func TestAReadingThatFailsWritesNothingAndTheItemStaysAwaitingReading(t *testing
 	}
 }
 
-func newEditor(store *sqlite.Store, model editor.Model, wd editor.Wikidata) (*editor.Editor, *bytes.Buffer) {
+func newEditor(store *sqlite.Store, model editor.Model) (*editor.Editor, *bytes.Buffer) {
 	var logs bytes.Buffer
 	return editor.New(editor.Deps{
-		Store:    store,
-		Model:    model,
-		Wikidata: wd,
-		Log:      slog.New(slog.NewTextHandler(&logs, nil)),
+		Store: store,
+		Model: model,
+		Log:   slog.New(slog.NewTextHandler(&logs, nil)),
 	}), &logs
 }

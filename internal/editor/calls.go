@@ -64,8 +64,9 @@ const (
 )
 
 // KeptConversation is a conversation an act had with a model, kept turn by
-// turn: one attempt at its piece of work, as the Sunday read's run is. Like a
-// kept call, it is a side record, never rewritten, that no act is shown.
+// turn: one attempt at its piece of work, as the retired Sunday read's runs
+// were. Like a kept call, it is a side record, never rewritten, that no act
+// is shown.
 type KeptConversation struct {
 	// ID is the conversation's in the Record, once it is kept there.
 	ID int64
@@ -99,8 +100,8 @@ type KeptTurn struct {
 	// instructions and tools and the turns before, each turn's Sent then its
 	// Response.
 	Sent []Message
-	// RequestHash is ConversationRequestHash of the whole request as sent,
-	// and the model asked for.
+	// RequestHash is the hash of the whole request as sent, and the model
+	// asked for, as the Sunday read hashed it.
 	RequestHash string
 	// Response is the model's turn exactly as returned; nil when none came.
 	Response *Turn
@@ -132,73 +133,6 @@ func RequestHash(r Request, model string) string {
 		Schema       map[string]any `json:"schema"`
 		Effort       string         `json:"effort,omitempty"`
 	}{r.Instructions, r.Input, model, r.Schema, r.Effort})
-}
-
-// ConversationRequestHash is RequestHash for a turn of a conversation: the
-// hash of the turn's request as the model is asked it, its instructions, its
-// tools, the conversation so far and the model asked for. As with
-// RequestHash, the act's name is not in it, nor anything the provider adds.
-//
-// It is the hex SHA-256 of the request's canonical JSON encoding, an object
-// with the keys instructions, messages, model and tools, in that order:
-//   - tools, in the order given, each {name, description, schema}, the schema
-//     with its object keys sorted;
-//   - messages, oldest first, each an object with one key: user (the act's
-//     text), results (each {call_id, content, is_error}), or assistant (the
-//     model's turn as the provider gave it, Raw, compacted; for a turn with no
-//     provider form, {text, calls}, each call {id, name, input}), since what
-//     a provider is sent of the model's own turn is that turn as it came.
-func ConversationRequestHash(r ConversationRequest, model string) string {
-	type tool struct {
-		Name        string         `json:"name"`
-		Description string         `json:"description"`
-		Schema      map[string]any `json:"schema"`
-	}
-	type result struct {
-		CallID  string `json:"call_id"`
-		Content string `json:"content"`
-		IsError bool   `json:"is_error"`
-	}
-	type call struct {
-		ID    string          `json:"id"`
-		Name  string          `json:"name"`
-		Input json.RawMessage `json:"input"`
-	}
-	type turn struct {
-		Text  string `json:"text"`
-		Calls []call `json:"calls"`
-	}
-	tools := make([]tool, 0, len(r.Tools))
-	for _, t := range r.Tools {
-		tools = append(tools, tool(t))
-	}
-	messages := make([]map[string]any, 0, len(r.Messages))
-	for _, m := range r.Messages {
-		switch {
-		case m.Assistant != nil && m.Assistant.Raw != nil:
-			messages = append(messages, map[string]any{"assistant": m.Assistant.Raw})
-		case m.Assistant != nil:
-			t := turn{Text: m.Assistant.Text, Calls: []call{}}
-			for _, c := range m.Assistant.Calls {
-				t.Calls = append(t.Calls, call(c))
-			}
-			messages = append(messages, map[string]any{"assistant": t})
-		case m.Results != nil:
-			rs := make([]result, 0, len(m.Results))
-			for _, res := range m.Results {
-				rs = append(rs, result(res))
-			}
-			messages = append(messages, map[string]any{"results": rs})
-		default:
-			messages = append(messages, map[string]any{"user": m.User})
-		}
-	}
-	return hashOf(struct {
-		Instructions string           `json:"instructions"`
-		Messages     []map[string]any `json:"messages"`
-		Model        string           `json:"model"`
-		Tools        []tool           `json:"tools"`
-	}{r.Instructions, messages, model, tools})
 }
 
 // hashOf is the hex SHA-256 of v's JSON encoding, the one way a request is

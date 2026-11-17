@@ -8,24 +8,23 @@
 
 {{/* margin-fold is the one control that folds a margined region's notes
      away and back, given the state the region starts in ("open" on every
-     page but the Sunday read, a reading page, which starts "folded"). static/margin-fold.js
+     page). static/margin-fold.js
      toggles the region's data-margin. */}}
 {{define "margin-fold"}}<p class="margin-fold-row"><button type="button" class="margin-fold" data-margin-fold aria-expanded="{{if eq . "open"}}true{{else}}false{{end}}">Notes</button></p>{{end}}
 
 {{/* pills is a row of Entities, each a pill (template "pill"). */}}
-{{define "pills"}}{{if .}}<div class="pills">{{range .}}{{if .Gives}}<span class="judged">{{template "pill" .}}{{template "gives" .Gives}}</span>{{else}}{{template "pill" .}}{{end}} {{end}}</div>{{end}}{{end}}
+{{define "pills"}}{{if .}}<div class="pills">{{range .}}{{template "pill" .}} {{end}}</div>{{end}}{{end}}
 
 {{/* span-judged is what a Span's reading judged of it, in its margin (a
      spanRow): whose words it is, what each stretch in it refers to, and
-     the Entities it mentions, each line with its Feedback beside it. A line
-     holding a control is a div, never a p: a form's start tag closes an
-     open paragraph. The words were drawn from collected text: inert. */}}
+     the Entities it mentions. The words were drawn from collected text:
+     inert. */}}
 {{define "span-judged"}}
         {{- range .Speakers}}
-        <div class="quiet">spoken by <span hx-disable>{{.Words}}</span>{{template "gives" .Gives}}</div>
+        <div class="quiet">spoken by <span hx-disable>{{.Words}}</span></div>
         {{- end}}
         {{- range .RefersTo}}
-        <div class="quiet"><span hx-disable>{{.Words}}</span> refers to <span hx-disable>{{.To}}</span>{{template "gives" .Gives}}</div>
+        <div class="quiet"><span hx-disable>{{.Words}}</span> refers to <span hx-disable>{{.To}}</span></div>
         {{- end}}
         {{template "pills" .Names}}{{end}}
 
@@ -40,9 +39,3 @@
 
 {{/* made is a machine label: how a block was made, linking its call. */}}
 {{define "made"}}{{if .Call}}<a class="machine" href="{{.Href}}">{{.Label}}</a>{{end}}{{end}}
-
-{{/* block-gives is a block's own Feedback (a gives), together at its
-     block and shown at rest: each offered as its icon, or shown as given in
-     its place, with its undo. */}}
-{{define "block-gives"}}{{if .}}
-            <div class="actions" role="group" aria-label="Feedback">{{template "gives" .}}</div>{{end}}{{end}}

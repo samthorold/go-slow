@@ -35,11 +35,10 @@ import (
 var rerecordFlag = flag.Bool("record", false, "call the real model on the fixtures and keep its responses")
 
 // How each act's own recorded test is re-recorded.
-var (
-	readingCommand    = rerecordCmd{"TestRecordedReadings", "READING_MODEL"}
-	briefingCommand   = rerecordCmd{"TestRecordedBriefing", "BRIEFING_MODEL"}
-	sundayReadCommand = rerecordCmd{"TestRecordedSundayRead", "SUNDAY_READ_MODEL"}
-)
+var readingCommand = rerecordCmd{"TestRecordedReadings", "READING_MODEL"}
+
+// recordedDir holds the recordings of each act, one directory per act.
+var recordedDir = filepath.Join("testdata", "recorded")
 
 // recording is one kept response, with the hash of the request it answered
 // (editor.RequestHash, with the model asked for): a replay is valid only for

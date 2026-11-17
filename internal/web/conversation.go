@@ -4,25 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
-
-	"github.com/samthorold/go-slow/internal/editor"
 )
 
 // conversationTmpl is a kept conversation's page.
 var conversationTmpl = page(noIndex, "conversation.html", "outcome.html")
-
-// conversationPath is a kept conversation's page, at turn n if n is not
-// zero; empty for no conversation.
-func conversationPath(id int64, n int) string {
-	if id == 0 {
-		return ""
-	}
-	p := "/conversations/" + strconv.FormatInt(id, 10)
-	if n != 0 {
-		p += "#" + turnAnchor(n)
-	}
-	return p
-}
 
 func turnAnchor(n int) string { return "turn-" + strconv.Itoa(n) }
 
@@ -32,7 +17,6 @@ func turnAnchor(n int) string { return "turn-" + strconv.Itoa(n) }
 type conversationPage struct {
 	Act          string
 	Day          string
-	ReadPath     string
 	At           string
 	Model        string
 	Outcome      outcome
@@ -106,9 +90,6 @@ func (a *app) conversation(w http.ResponseWriter, r *http.Request) {
 		Act: c.Act, Day: c.Key, At: when(c.At, loc), Model: c.Model, Outcome: outcomeOf(c.Outcome), Why: c.Why,
 		Instructions: c.Instructions, Tools: pretty(tools),
 	}
-	if c.Act == "sunday_read" {
-		p.ReadPath = sundayReadPath(c.Key)
-	}
 	for _, t := range c.Turns {
 		row := turnRow{N: t.N, Anchor: turnAnchor(t.N), At: when(t.At, loc), Hash: t.RequestHash,
 			Outcome: outcomeOf(t.Outcome), Why: t.Why}
@@ -132,24 +113,3 @@ func (a *app) conversation(w http.ResponseWriter, r *http.Request) {
 	}
 	a.render(w, r, conversationTmpl, p)
 }
-
-// reachedBy is how read's Assessments were reached: the turn that submitted
-// it, the read's last, since a read is written by the first submission that
-// passes.
-func reachedBy(read editor.SundayRead) reached {
-	return reached{Conversation: read.ConversationID, Turn: read.Turns}
-}
-
-// reached is how an Assessment was reached, shown in its margin as a machine
-// label worded "reached · turn N", linking the turn.
-type reached struct {
-	// Conversation is the conversation, or 0 if none was kept.
-	Conversation int64
-	Turn         int
-}
-
-// Href is the turn's place on the conversation's page.
-func (r reached) Href() string { return conversationPath(r.Conversation, r.Turn) }
-
-// Label is the label's wording.
-func (r reached) Label() string { return "reached · turn " + strconv.Itoa(r.Turn) }

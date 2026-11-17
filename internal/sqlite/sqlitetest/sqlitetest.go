@@ -6,6 +6,7 @@ package sqlitetest
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"io/fs"
 	"os"
@@ -41,6 +42,23 @@ func At(t testing.TB, path string) {
 	}
 	if err := os.WriteFile(path, migrated, 0o600); err != nil {
 		t.Fatal(err)
+	}
+}
+
+// Exec runs each statement on the Record at path, before it is opened: for
+// a Record holding what no code writes any more, as an older build wrote it
+// (a retired act's kept conversation, say).
+func Exec(t testing.TB, path string, statements ...string) {
+	t.Helper()
+	db, err := sql.Open("sqlite", "file:"+path+"?_pragma=foreign_keys(1)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = db.Close() }()
+	for _, q := range statements {
+		if _, err := db.ExecContext(context.Background(), q); err != nil {
+			t.Fatalf("%s: %v", q, err)
+		}
 	}
 }
 

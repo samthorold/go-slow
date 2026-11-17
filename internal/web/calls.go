@@ -18,9 +18,6 @@ type Calls interface {
 	// CallsOn are the calls an act made on a piece of work, in the order
 	// they were kept.
 	CallsOn(ctx context.Context, act, key string) ([]editor.Call, error)
-	// BriefingTrail is each Span the day's Briefing over Spans cites, as
-	// written, with the reading and relating calls behind it.
-	BriefingTrail(ctx context.Context, day string) ([]editor.CitedSpan, error)
 	// Conversation is one kept conversation with its turns, reporting
 	// whether the Record holds it.
 	Conversation(ctx context.Context, id int64) (editor.KeptConversation, bool, error)
@@ -103,17 +100,11 @@ func callPath(id int64) string {
 	return "/calls/" + strconv.FormatInt(id, 10)
 }
 
-// briefingAct is the act of writing the Briefing, whose work is keyed by its
-// day.
-const briefingAct = "briefing"
-
-// workPage is the page of the work an act's call was on: the day's Briefing
-// for writing it; otherwise an Item, keyed by its Source and entry a line
-// apart, as the acts on Items key their work.
-func workPage(act, key string) string {
-	if act == briefingAct {
-		return briefingPath(key)
-	}
+// workPage is the page of the work a call was on: an Item, keyed by its
+// Source and entry a line apart, as the acts on Items key their work; none
+// for work keyed otherwise (a weaving run's day, a Story's naming, or the
+// retired Briefing's day, whose page is gone).
+func workPage(key string) string {
 	source, entry, ok := strings.Cut(key, "\n")
 	if !ok {
 		return ""
@@ -155,7 +146,7 @@ func (a *app) call(w http.ResponseWriter, r *http.Request) {
 	loc := a.Now().Location()
 	schema, _ := json.Marshal(c.Request.Schema)
 	p := callPage{
-		Act: c.Act, Work: strings.ReplaceAll(c.Key, "\n", " "), WorkPage: workPage(c.Act, c.Key),
+		Act: c.Act, Work: strings.ReplaceAll(c.Key, "\n", " "), WorkPage: workPage(c.Key),
 		At: when(c.At, loc), Batch: c.BatchID, Model: c.Model, Hash: c.RequestHash,
 		Instructions: c.Request.Instructions, Schema: pretty(schema), Input: c.Request.Input,
 		Outcome: outcomeOf(c.Outcome), Why: c.Why,

@@ -3,6 +3,7 @@ package web
 import (
 	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/samthorold/go-slow/internal/editor"
 )
@@ -12,20 +13,15 @@ import (
 // where it has a page (its Wikidata item).
 type pill struct {
 	Name, Tag, Href string
-	// Gives is the Feedback on the look-up that made it this Entity, shown
-	// beside it, where the page offers it.
-	Gives gives
 }
 
-// judged is a judgement as a margin line names it, with its Feedback beside
-// it: whose words a Span is ("spoken by …"), or what a stretch of it refers
-// to.
+// judged is a judgement as a margin line names it: whose words a Span is
+// ("spoken by …"), or what a stretch of it refers to.
 type judged struct {
 	// Words are what the line names: the speaker, or the stretch.
 	Words string
 	// To is what the stretch refers to, for a refers to.
-	To    string
-	Gives gives
+	To string
 }
 
 // pillOf is an Entity as the Record's look-ups have it, tagged with its kind
@@ -54,28 +50,36 @@ func (a *app) cite(sourceID, title, href string) itemCitation {
 }
 
 // made is how a block was made, shown in its margin as a machine label: the
-// act and the call it made, worded "<act> · call N" on every page, and
-// "<act> · call N · 2,140 tok" where the page counts tokens (the trail).
+// act and the call it made, worded "<act> · call N" on every page.
 type made struct {
 	// Act is the act, as the label words it ("read").
 	Act string
 	// Call is the kept call, or 0 if none was kept.
 	Call int64
-	// Tokens is the call's tokens, worded in the label only if Counted.
-	Tokens  int64
-	Counted bool
 }
 
 // Href is the call's page.
 func (m made) Href() string { return callPath(m.Call) }
 
 // Label is the label's wording.
-func (m made) Label() string {
-	l := m.Act + " · call " + strconv.FormatInt(m.Call, 10)
-	if m.Counted {
-		l += " · " + grouped(m.Tokens) + " tok"
+func (m made) Label() string { return m.Act + " · call " + strconv.FormatInt(m.Call, 10) }
+
+// labelLength is the most of a Span's words, in runes, that names it where
+// a page lists it by its opening words: enough to tell them apart.
+const labelLength = 60
+
+// shorten is s, cut at the last word that fits within labelLength and marked
+// with an ellipsis if it is longer.
+func shorten(s string) string {
+	r := []rune(s)
+	if len(r) <= labelLength {
+		return s
 	}
-	return l
+	cut := string(r[:labelLength])
+	if i := strings.LastIndex(cut, " "); i > 0 {
+		cut = cut[:i]
+	}
+	return strings.TrimRight(cut, " ,;:") + "…"
 }
 
 // grouped is n with its thousands separated by commas ("2,140").

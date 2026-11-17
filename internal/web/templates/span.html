@@ -2,13 +2,10 @@
 
 {{define "content"}}
 {{/* A Span's page: the Span as its Item's newest reading reads it, its
-     Item, and its relations both ways, each linked to the call that made
-     it. Collected text is inert: hx-disable on the elements holding it. */}}
+     Item, and the Stories holding it. Collected text is inert: hx-disable
+     on the elements holding it. */}}
 <p>{{template "citation" .Item}}{{with .Published}} <small>{{.}}</small>{{end}}</p>
 <h1>{{.Title}}</h1>
-{{- with .FeedbackError}}
-<p role="alert">{{.}}</p>
-{{- end}}
 
 <div class="margined" data-margin="open">
 {{template "margin-fold" "open"}}
@@ -24,7 +21,6 @@
       {{- with $.ReadBy}}
       <p>{{template "made" .}}</p>
       {{- end}}
-      <div>{{template "gives" .Missed}}</div>
     </div>
   </li>
   {{- end}}
@@ -57,48 +53,5 @@
   </ul>
   {{- end}}
 </section>
-
-{{/* Its Story: the latest gathering a Briefing made of it, then the
-     relations judged since, not yet gathered by any. The page calls no
-     model: what it shows is a judgement someone made, dated. */}}
-{{- with .Gathered}}
-<section aria-labelledby="story">
-  <h2 id="story">Its Story</h2>
-  <p class="quiet">As <a href="{{.Path}}">{{.By}} for {{.Date}}</a> gathered it {{if .Conversation}}<a class="machine" href="{{.Conversation}}">gathered · conversation</a>{{else}}{{template "made" .Made}}{{end}}</p>
-  <div class="actions" role="group" aria-label="Feedback on this Story">{{template "gives" .Gives}}</div>
-  {{- if not .Spans}}
-  <p>Nothing moved on what it says, or was moved on by it.</p>
-  {{- end}}
-  <ul class="blocks">
-  {{- range .Spans}}
-    <li class="block">
-      <div class="block-body"><p><a href="{{.Href}}"><span hx-disable>{{.Words}}</span></a></p></div>
-      <div class="block-margin"><p>{{template "citation" .Item}}</p></div>
-    </li>
-  {{- end}}
-  </ul>
-</section>
-{{- end}}
-
-<section aria-labelledby="relations">
-  <h2 id="relations">{{if .Gathered}}Relations judged since{{else}}Relations{{end}}</h2>
-  {{- if not .Relations}}
-  <p>{{if .Gathered}}No relation has been judged of this Span since.{{else}}No relation has been judged of this Span.{{end}}</p>
-  {{- end}}
-  <ul class="blocks">
-  {{- range .Relations}}
-    <li class="block">
-      <div class="block-body"><p><span class="quiet">{{.How}}</span> <a href="{{.Href}}"><span hx-disable>{{.Words}}</span></a></p></div>
-      <div class="block-margin">
-        <p>{{template "citation" .Item}}</p>
-        <p>{{template "made" .Made}}</p>
-        <p class="quiet">not yet gathered</p>
-        {{- template "block-gives" .Gives}}
-      </div>
-    </li>
-  {{- end}}
-  </ul>
-</section>
 </div>
-{{template "given" .Feedback}}
 {{end}}

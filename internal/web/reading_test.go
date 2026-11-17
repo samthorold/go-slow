@@ -24,16 +24,6 @@ func (f fakeModel) Complete(context.Context, editor.Request) (editor.Response, e
 	return editor.Response{Output: json.RawMessage(f.output), Model: "fake"}, nil
 }
 
-// noWikidata is a Wikidata that finds nothing, so every Entity is the
-// Editor's own.
-type noWikidata struct{}
-
-func (noWikidata) Search(context.Context, string) ([]string, error) { return nil, nil }
-
-func (noWikidata) Items(context.Context, []string) ([]editor.WikidataItem, error) { return nil, nil }
-
-func (noWikidata) Labels(context.Context, []string) (map[string]string, error) { return nil, nil }
-
 // readSpeech seeds a speech, cut into S1 "It’s good to be here in
 // Motherwell.", and reads it with output, the reading's call kept.
 func readSpeech(t *testing.T, store *sqlite.Store, output string) {

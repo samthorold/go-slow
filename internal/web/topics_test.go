@@ -18,7 +18,7 @@ func send(t *testing.T, app http.Handler, method, path string, form url.Values) 
 	req := httptest.NewRequestWithContext(t.Context(), method, path, strings.NewReader(form.Encode()))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	app.ServeHTTP(rec, req)
-	return response{rec.Code, rec.Header(), rec.Body.String()}
+	return response{rec.Code, rec.Header(), rec.Body.String(), rec.Header().Get("Location")}
 }
 
 func TestTheOwnerAddsATopicAndSeesItOnTheTopicsPage(t *testing.T) {

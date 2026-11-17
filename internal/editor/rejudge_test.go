@@ -52,7 +52,7 @@ func (c costing) Complete(ctx context.Context, req editor.Request) (editor.Respo
 func TestADryRunEstimatesTokensFromTheActsPastCallsInTheRecord(t *testing.T) {
 	store := record(t)
 	past := costing{m: &fakeModel{output: goodReading}, usage: editor.Usage{InputTokens: 3000, OutputTokens: 1500}}
-	ed, _ := newEditor(store, past, &fakeWikidata{})
+	ed, _ := newEditor(store, past)
 	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
@@ -97,7 +97,7 @@ func TestADryRunPricesTheRequestsItWouldSendAndCallsNoModel(t *testing.T) {
 // as model.
 func readLive(t *testing.T, store *sqlite.Store, model string) {
 	t.Helper()
-	ed, _ := newEditor(store, costing{m: &fakeModel{output: goodReading}, model: model}, &fakeWikidata{})
+	ed, _ := newEditor(store, costing{m: &fakeModel{output: goodReading}, model: model})
 	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}

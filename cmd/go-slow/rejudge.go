@@ -31,8 +31,8 @@ type rejudgeAct struct {
 }
 
 // rejudgeActs are the acts that judge Spans by a model call and keep each
-// judgement with its judge. Only reading does today; relating and the
-// Briefing are added here as they come, each with its RejudgeAct.
+// judgement with its judge. Only reading does today; another act is added
+// here as it comes, with its RejudgeAct.
 var rejudgeActs = map[string]rejudgeAct{
 	"reading": {
 		act:       func(store *sqlite.Store) editor.RejudgeAct { return editor.Rereading(store) },

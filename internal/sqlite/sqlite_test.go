@@ -3,22 +3,20 @@ package sqlite
 import (
 	"path/filepath"
 	"testing"
-	"time"
+
+	"github.com/samthorold/go-slow/internal/interest"
 )
 
 func TestReopeningTheStoreKeepsWhatItHolds(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "nested", "go-slow.db")
 	ctx := t.Context()
-	day := time.Date(2026, time.October, 24, 7, 0, 0, 0, time.UTC)
 
 	first, err := Open(ctx, path)
 	if err != nil {
 		t.Fatalf("first open: %v", err)
 	}
-	// There is no command that writes a Briefing yet, so the test writes the
-	// row itself.
-	if _, err := first.db.ExecContext(ctx, `INSERT INTO briefings (day) VALUES ('2026-10-24')`); err != nil {
-		t.Fatalf("seed: %v", err)
+	if _, err := first.AddTopic(ctx, interest.Topic{Name: "Derby", Terms: []string{"Derby"}}); err != nil {
+		t.Fatal(err)
 	}
 	if err := first.Close(); err != nil {
 		t.Fatal(err)
@@ -30,18 +28,11 @@ func TestReopeningTheStoreKeepsWhatItHolds(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = second.Close() })
 
-	has, err := second.HasBriefing(ctx, day)
+	topics, err := second.Topics(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !has {
-		t.Error("HasBriefing(24 October) = false after reopening, want true")
-	}
-	has, err = second.HasBriefing(ctx, day.AddDate(0, 0, 1))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if has {
-		t.Error("HasBriefing(25 October) = true, want false")
+	if len(topics) != 1 || topics[0].Name != "Derby" {
+		t.Errorf("Topics after reopening = %+v, want the one added", topics)
 	}
 }

@@ -10,7 +10,7 @@ import (
 
 // indexes are the pages with an index of their own, in the navigation's
 // order.
-var indexes = []string{"/", "/briefings", "/items", "/topics", "/feedback", "/register"}
+var indexes = []string{"/", "/briefings", "/stories", "/items", "/topics", "/feedback", "/register"}
 
 var (
 	navigation = regexp.MustCompile(`(?s)<nav aria-label="Pages">(.*?)</nav>`)

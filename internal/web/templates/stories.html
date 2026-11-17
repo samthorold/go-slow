@@ -1,0 +1,15 @@
+{{define "title"}}Stories{{end}}
+
+{{define "content"}}
+{{/* The Stories the Editor made, newest first, each by its opening words
+     until Stories have Names. A Story a Cut made is reached from its Item. */}}
+<h1>Stories</h1>
+{{- if not .Stories}}
+<p>The Editor has made no Stories yet.</p>
+{{- end}}
+<ul>
+{{- range .Stories}}
+  <li><a href="{{.Href}}">{{.Opening}}</a> <small class="quiet">{{.When}}</small></li>
+{{- end}}
+</ul>
+{{end}}

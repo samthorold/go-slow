@@ -21,6 +21,7 @@ func env(db string) func(string) (string, bool) {
 		"COLLECTION_INTERVAL": "15m", "READING_MODEL": "claude-haiku-5-5", "RELATING_MODEL": "claude-haiku-5-5",
 		"BRIEFING_MODEL":    "claude-haiku-5-5",
 		"SUNDAY_READ_MODEL": "claude-opus-5-5", "BRIEFING_TIME": "07:00", "GOSLOW_ANTHROPIC_API_KEY": "set-your-own",
+		"WEAVING_MODEL": "claude-opus-5-5", "WEAVING_TIME": "06:00",
 	}
 	return func(k string) (string, bool) { v, ok := vars[k]; return v, ok }
 }

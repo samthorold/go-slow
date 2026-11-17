@@ -157,7 +157,7 @@ func TestRelatingsWaitingCheckOverTenThousandItemsTakesUnderASecond(t *testing.T
 	relating := editor.New(editor.Deps{Store: s}).Relating()
 
 	start := time.Now()
-	jobs, err := relating.Waiting(t.Context())
+	jobs, err := relating.Waiting(t.Context(), start)
 	took := time.Since(start)
 
 	if err != nil {

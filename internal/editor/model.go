@@ -32,7 +32,19 @@ type Request struct {
 	Input string
 	// Schema is the JSON Schema the output must match.
 	Schema map[string]any
+	// Effort is how much effort the act asks the model to spend on its
+	// answer (EffortLow, EffortMedium, EffortHigh); empty leaves it to the
+	// model's own default. It is part of the request, as its model is.
+	Effort string
 }
+
+// The efforts an act can ask a model for, provider-neutral: an adapter maps
+// each to its provider's own setting.
+const (
+	EffortLow    = "low"
+	EffortMedium = "medium"
+	EffortHigh   = "high"
+)
 
 // Response is what the model answered. An adapter that reports an error for
 // an answer with no usable output (ErrRefused, ErrTruncated) still returns

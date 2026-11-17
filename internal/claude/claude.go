@@ -106,6 +106,9 @@ func (m *Model) params(r editor.Request) anthropic.MessageNewParams {
 		},
 		OutputConfig: anthropic.OutputConfigParam{
 			Format: anthropic.JSONOutputFormatParam{Schema: r.Schema},
+			// The port's efforts are named as the API names them; empty sends
+			// none, leaving the model's default.
+			Effort: anthropic.OutputConfigEffort(r.Effort),
 		},
 	}
 }

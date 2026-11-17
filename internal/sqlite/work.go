@@ -39,14 +39,16 @@ func (s *Store) Attempts(ctx context.Context, act, key string) (int, error) {
 	return n, nil
 }
 
-// FailedWork is the work marked failed, each with its Item, most recently
-// failed first.
+// FailedWork is the work marked failed, each with its Item, or for a weaving
+// run, which is on no Item, its key in place of the Item's title, most
+// recently failed first.
 func (s *Store) FailedWork(ctx context.Context) ([]editor.FailedWork, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT w.act, items.source_id, items.entry_id, items.title, w.attempts, w.last_failed_at, w.last_error,
+		SELECT w.act, coalesce(items.source_id, ''), coalesce(items.entry_id, ''), coalesce(items.title, w.work_key),
+			w.attempts, w.last_failed_at, w.last_error,
 			coalesce((SELECT max(c.id) FROM model_calls c WHERE c.act = w.act AND c.work_key = w.work_key), 0)
-		FROM work_attempts w JOIN items ON w.work_key = `+itemWorkKey+`
-		WHERE w.failed = 1
+		FROM work_attempts w LEFT JOIN items ON w.work_key = `+itemWorkKey+`
+		WHERE w.failed = 1 AND (items.source_id IS NOT NULL OR w.act = 'weaving')
 		ORDER BY w.last_failed_at DESC, w.act, w.work_key`)
 	if err != nil {
 		return nil, fmt.Errorf("failed work: %w", err)

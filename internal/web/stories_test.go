@@ -1,0 +1,186 @@
+package web_test
+
+import (
+	"fmt"
+	"html"
+	"log/slog"
+	"net/http"
+	"regexp"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/samthorold/go-slow/internal/cut"
+	"github.com/samthorold/go-slow/internal/editor"
+	"github.com/samthorold/go-slow/internal/sqlite"
+)
+
+// weaveSpeech seeds a speech, cut into S1 "It’s good to be here in
+// Motherwell." and S2 "Scotland will get £2 billion.", and weaves it with
+// output through the batch runner, as main does, its call kept.
+func weaveSpeech(t *testing.T, store *sqlite.Store, output string) {
+	t.Helper()
+	speech := item("speech", "PM speech in Scotland", saturday.Add(-48*time.Hour))
+	speech.Content = "<p>It’s good to be here in Motherwell.</p><p>Scotland will get £2 billion.</p>"
+	seed(t, store, saturday.AddDate(0, 0, -7), speech)
+	if err := cut.New(store).CutNew(t.Context(), saturday); err != nil {
+		t.Fatal(err)
+	}
+	log := slog.New(slog.DiscardHandler)
+	ed := editor.New(editor.Deps{Store: store, Weavings: store, Log: log})
+	b := editor.NewBatches(editor.BatchDeps{Store: store, Batcher: &refusingBatcher{output: output},
+		Acts: []editor.BatchAct{ed.Weaving(6 * time.Hour)}, Log: log})
+	// Submitted, then applied once its batch has ended.
+	for range 2 {
+		if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
+// twoOpinions is a weaving run's answer making two Stories of the speech.
+const twoOpinions = `{"stories": [
+  {"editor_spans": [{"body": "Motherwell is where the money lands first, as it did a decade ago when the steelworks closed.", "cites": [1]}]},
+  {"editor_spans": [
+    {"body": "Two billion is a down payment on devolution.", "cites": [2]},
+    {"body": "The visit and the money are one move.", "cites": [1, 2]}
+  ]}
+]}`
+
+func TestTheStoriesPageListsTheStoriesTheEditorMadeNewestFirstByTheirOpeningWords(t *testing.T) {
+	store := openStore(t)
+	weaveSpeech(t, store, twoOpinions)
+	app, _ := newAppWithLog(t, saturday, store)
+
+	res := get(t, app, "/stories")
+
+	if res.status != 200 || !strings.Contains(res.body, "<!doctype html>") {
+		t.Fatalf("status %d, not a full page:\n%s", res.status, res.body)
+	}
+	newer := strings.Index(res.body, "Two billion is a down payment on devolution.")
+	older := strings.Index(res.body, "Motherwell is where the money lands first, as it did a…")
+	if newer < 0 || older < 0 || newer > older {
+		t.Errorf("the Stories are not listed newest first by their opening words:\n%s", res.body)
+	}
+	if strings.Contains(res.body, "when the steelworks closed") {
+		t.Errorf("a Story is listed by more than its opening words:\n%s", res.body)
+	}
+	if !regexp.MustCompile(`<a href="/stories/\d+"`).MatchString(res.body) {
+		t.Errorf("the Stories do not link their pages:\n%s", res.body)
+	}
+	if !strings.Contains(res.body, `<a href="/stories" aria-current="page">`) {
+		t.Errorf("the navigation does not mark the Stories page current:\n%s", res.body)
+	}
+}
+
+func TestWithNoStoriesTheStoriesPageSaysSo(t *testing.T) {
+	app := newApp(t, saturday)
+
+	res := get(t, app, "/stories")
+
+	if res.status != 200 || !strings.Contains(res.body, "The Editor has made no Stories yet.") {
+		t.Errorf("status %d:\n%s", res.status, res.body)
+	}
+}
+
+// storyPage follows the Stories page's link to the Story it lists by its
+// opening words.
+func storyPage(t *testing.T, app http.Handler, opening string) response {
+	t.Helper()
+	list := get(t, app, "/stories").body
+	m := regexp.MustCompile(`<a href="(/stories/\d+)">` + regexp.QuoteMeta(opening)).FindStringSubmatch(list)
+	if m == nil {
+		t.Fatalf("the Stories page does not link %q to its page:\n%s", opening, list)
+	}
+	return get(t, app, m[1])
+}
+
+func TestAStorysPageShowsItsEditorsSpansInOrderWithWhatEachCitesAndHowItWasMade(t *testing.T) {
+	store := openStore(t)
+	weaveSpeech(t, store, twoOpinions)
+	app, _ := newAppWithLog(t, saturday, store)
+
+	res := storyPage(t, app, "Two billion is a down payment on devolution.")
+
+	if res.status != 200 || !strings.Contains(res.body, "<!doctype html>") {
+		t.Fatalf("status %d, not a full page:\n%s", res.status, res.body)
+	}
+	first := strings.Index(res.body, "Two billion is a down payment on devolution.")
+	second := strings.Index(res.body, "The visit and the money are one move.")
+	if first < 0 || second < first {
+		t.Errorf("the Editor's Spans are not shown in the order written:\n%s", res.body)
+	}
+	if strings.Contains(res.body, "steelworks") {
+		t.Errorf("the page shows another Story's Editor's Spans:\n%s", res.body)
+	}
+	blocks := res.body[first:]
+	for _, want := range []string{
+		// What each cites: the Span's words linking its page, with its Item.
+		`<a href="/items/number-10/speech/spans/`, "Scotland will get £2 billion.",
+		"It’s good to be here in Motherwell.", "PM speech in Scotland",
+		// Whose words: the Editor's, always.
+		"the Editor",
+	} {
+		if !strings.Contains(blocks, html.EscapeString(want)) && !strings.Contains(blocks, want) {
+			t.Errorf("the Story's Page lacks %q:\n%s", want, blocks)
+		}
+	}
+	// How the Judgement was made: its call, and its Judge.
+	call := regexp.MustCompile(`<a class="machine" href="/calls/(\d+)">woven · call \d+</a>`).FindStringSubmatch(res.body)
+	if call == nil {
+		t.Fatalf("the Story's Page does not link the call that made it:\n%s", res.body)
+	}
+	if c := get(t, app, "/calls/"+call[1]); c.status != 200 || !strings.Contains(c.body, "A weaving call") {
+		t.Errorf("the call it links is not the weaving call (status %d):\n%s", c.status, c.body)
+	}
+	if !strings.Contains(res.body, "weaving v1") {
+		t.Errorf("the Story's Page does not name its Judge:\n%s", res.body)
+	}
+}
+
+func TestAStoryThatIsNotInTheRecordIsNotFound(t *testing.T) {
+	app := newApp(t, saturday)
+
+	for _, path := range []string{"/stories/99", "/stories/x"} {
+		if res := get(t, app, path); res.status != http.StatusNotFound {
+			t.Errorf("GET %s: status %d, want 404", path, res.status)
+		}
+	}
+}
+
+func TestOpeningTheStoriesPageOrAStorysChangesNothing(t *testing.T) {
+	store := openStore(t)
+	weaveSpeech(t, store, twoOpinions)
+	app, logs := newAppWithLog(t, saturday, store)
+	// state is what the Record says of weaving: the Stories made, what
+	// awaits the next run, and the calls kept.
+	state := func() string {
+		made, err := store.StoriesMade(t.Context())
+		if err != nil {
+			t.Fatal(err)
+		}
+		waiting, err := store.StoriesToWeave(t.Context())
+		if err != nil {
+			t.Fatal(err)
+		}
+		calls, err := store.CallsOn(t.Context(), "weaving", "2026-10-24")
+		if err != nil {
+			t.Fatal(err)
+		}
+		return fmt.Sprintf("%+v %+v %d", made, waiting, len(calls))
+	}
+	before := state()
+
+	list := get(t, app, "/stories").body
+	story := storyPage(t, app, "Two billion is a down payment on devolution.").body
+
+	if after := state(); after != before {
+		t.Errorf("opening the pages changed the Record:\nbefore %s\nafter  %s", before, after)
+	}
+	if get(t, app, "/stories").body != list || storyPage(t, app, "Two billion is a down payment on devolution.").body != story {
+		t.Errorf("the pages changed on being opened again")
+	}
+	if strings.Contains(logs.String(), `"level":"ERROR"`) {
+		t.Errorf("opening the pages logged an error:\n%s", logs)
+	}
+}

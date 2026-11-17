@@ -106,7 +106,7 @@ func candidatesOf(tr ToRelate, others []OtherSpan, mentioned map[NamedEntity]int
 func (e *Editor) Relating() BatchAct {
 	return BatchAct{
 		Name: "relating",
-		Waiting: func(ctx context.Context) ([]Job, error) {
+		Waiting: func(ctx context.Context, _ time.Time) ([]Job, error) {
 			waiting, err := e.toRelate(ctx)
 			if err != nil {
 				return nil, err

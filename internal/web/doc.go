@@ -158,6 +158,14 @@
 // kept (SundayReads.HasSundayRead), and its page says so. An Assessment's
 // stable address is /assessments/{id}, its event id.
 //
+// The Stories page (/stories, stories.go) lists the Stories the Editor made,
+// newest first, each by its first Editor's Span's opening words (shortened)
+// until Stories have Names, linking a Story's page, /stories/{id} (its
+// event's id): its Editor's Spans as blocks in the order written, each
+// margin saying it is the Editor's and holding the Spans it cites (words
+// linking the Span's page, with its Item's .citation), then how it was made,
+// "woven · call N" and its Judge.
+//
 // The Topics page says Topics select nothing and links the counts on the
 // Items page, then is a table of the Followed Topics (name and terms):
 // Remove in the row's .actions, shown at rest, quiet (as Undo on the

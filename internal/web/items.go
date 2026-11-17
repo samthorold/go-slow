@@ -25,7 +25,8 @@ type itemsPage struct {
 // failed work.
 func (p itemsPage) Exceptions() bool { return len(p.Quiet) > 0 || len(p.Failed) > 0 }
 
-// failedRow is an act's work on an Item that failed every attempt.
+// failedRow is an act's work that failed every attempt: on an Item, linking
+// its page, or a weaving run, by its day, linking none.
 type failedRow struct {
 	Act      string
 	Title    string
@@ -133,11 +134,18 @@ func (a *app) items(w http.ResponseWriter, r *http.Request) {
 
 	var p itemsPage
 	for _, f := range failed {
-		p.Failed = append(p.Failed, failedRow{
-			Act: f.Act, Title: f.Title, Page: itemPath(f.SourceID, f.EntryID),
+		row := failedRow{
+			Act: f.Act, Title: f.Title,
 			Attempts: f.Attempts, When: when(f.LastFailedAt, now.Location()), Why: f.Why,
 			AttemptsPage: callPath(f.LastCall),
-		})
+		}
+		if f.SourceID == "" {
+			// Work on no Item, a weaving run, is known by its day.
+			row.Title = "the run of " + f.Title
+		} else {
+			row.Page = itemPath(f.SourceID, f.EntryID)
+		}
+		p.Failed = append(p.Failed, row)
 	}
 	for _, s := range statuses {
 		src := sourceRow{

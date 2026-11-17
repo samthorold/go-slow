@@ -98,6 +98,44 @@ func TestInstructionsAndSchemasSentManyTimesAreKeptOnce(t *testing.T) {
 	}
 }
 
+func TestARequestsEffortIsKeptWithItsCallAndItsPendingBatch(t *testing.T) {
+	s := openTestStore(t)
+	c := call("Title: x")
+	c.Request.Effort = editor.EffortMedium
+	if err := s.KeepCall(t.Context(), c); err != nil {
+		t.Fatal(err)
+	}
+	req := c.Request
+	if err := s.SaveBatch(t.Context(), editor.PendingBatch{ID: "b1", SubmittedAt: c.At,
+		Requests: []editor.PendingRequest{{ID: "r1", Act: "reading", Key: c.Key, Request: &req, Model: "m"}}}); err != nil {
+		t.Fatal(err)
+	}
+
+	kept, err := s.CallsOn(t.Context(), "reading", c.Key)
+	if err != nil || len(kept) != 1 || kept[0].Request.Effort != editor.EffortMedium {
+		t.Errorf("kept calls %+v (%v), want one asking for medium effort", kept, err)
+	}
+	pending, err := s.PendingBatches(t.Context())
+	if err != nil || len(pending) != 1 || pending[0].Requests[0].Request.Effort != editor.EffortMedium {
+		t.Errorf("pending %+v (%v), want its request asking for medium effort", pending, err)
+	}
+}
+
+func TestAWeavingRunAndItsStoriesAreNeverRewrittenOrRemoved(t *testing.T) {
+	s := openTestStore(t)
+	for _, table := range []string{"weavings", "woven_stories", "editor_spans", "editor_span_cites"} {
+		if got := s.db.QueryRowContext(t.Context(),
+			`SELECT count(*) FROM sqlite_master WHERE type = 'trigger' AND tbl_name = ?`, table); got.Err() != nil {
+			t.Fatal(got.Err())
+		} else {
+			var n int
+			if err := got.Scan(&n); err != nil || n != 2 {
+				t.Errorf("%s has %d triggers (%v), want one refusing updates and one deletes", table, n, err)
+			}
+		}
+	}
+}
+
 func TestAKeptCallIsNeverRewrittenOrRemoved(t *testing.T) {
 	s := openTestStore(t)
 	if err := s.KeepCall(t.Context(), call("Title: x")); err != nil {

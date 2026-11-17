@@ -1,0 +1,24 @@
+{{define "title"}}{{.Title}}{{end}}
+
+{{define "content"}}
+{{/* An Editor's Span: the Editor's words, kept in the Judgement that wrote
+     them, with its Story and the Spans it cites in its margin. Collected
+     text is inert: hx-disable on the elements holding it. */}}
+<p class="quiet">In <a href="{{.Story.Href}}">{{.Story.Words}}</a> · {{.When}}</p>
+<h1>{{.Title}}</h1>
+
+<div class="margined" data-margin="open">
+{{template "margin-fold" "open"}}
+<ul class="blocks">
+  <li class="block">
+    <div class="block-body"><p>{{.Body}}</p></div>
+    <div class="block-margin">
+      <p class="quiet">spoken by the Editor</p>
+      {{- range .Cites}}
+      <p><a href="{{.Href}}"><span hx-disable>{{.Words}}</span></a> {{template "citation" .Item}}</p>
+      {{- end}}
+    </div>
+  </li>
+</ul>
+</div>
+{{end}}

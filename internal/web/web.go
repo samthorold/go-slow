@@ -180,6 +180,7 @@ func New(d Deps) http.Handler {
 	mux.HandleFunc("GET /register", a.register)
 	mux.HandleFunc("GET /stories", a.stories)
 	mux.HandleFunc("GET /stories/{id}", a.story)
+	mux.HandleFunc("GET /stories/{id}/spans/{n}", a.editorSpan)
 	mux.HandleFunc("GET /topics", a.topics)
 	mux.HandleFunc("POST /topics", a.addTopic)
 	mux.HandleFunc("DELETE /topics/{id}", a.removeTopic)

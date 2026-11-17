@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/samthorold/go-slow/internal/collect"
 	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
 	"github.com/samthorold/go-slow/internal/sqlite"
@@ -22,7 +23,19 @@ func weaveSpeech(t *testing.T, store *sqlite.Store, output string) {
 	t.Helper()
 	speech := item("speech", "PM speech in Scotland", saturday.Add(-48*time.Hour))
 	speech.Content = "<p>It’s good to be here in Motherwell.</p><p>Scotland will get £2 billion.</p>"
-	seed(t, store, saturday.AddDate(0, 0, -7), speech)
+	weave(t, store, output, speech)
+}
+
+// weave seeds items, cuts them and weaves them with output through the
+// batch runner, as main does, its call kept. The Spans are numbered across
+// the items in the order they are given.
+func weave(t *testing.T, store *sqlite.Store, output string, items ...collect.Item) {
+	t.Helper()
+	for i := range items {
+		// Cut in the order given: Items are cut in the order collected.
+		items[i].CollectedAt = saturday.Add(time.Duration(i-len(items)) * time.Minute)
+	}
+	seed(t, store, saturday.AddDate(0, 0, -7), items...)
 	if err := cut.New(store).CutNew(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
@@ -148,7 +161,7 @@ func TestAStoryThatIsNotInTheRecordIsNotFound(t *testing.T) {
 	}
 }
 
-func TestOpeningTheStoriesPageOrAStorysChangesNothing(t *testing.T) {
+func TestOpeningTheStoriesPagesOrWhatTheyLinkChangesNothing(t *testing.T) {
 	store := openStore(t)
 	weaveSpeech(t, store, twoOpinions)
 	app, logs := newAppWithLog(t, saturday, store)
@@ -167,17 +180,34 @@ func TestOpeningTheStoriesPageOrAStorysChangesNothing(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		return fmt.Sprintf("%+v %+v %d", made, waiting, len(calls))
+		held, err := store.HoldingSpan(t.Context(), editor.Address{SourceID: "number-10", EntryID: "speech", Span: cut.Span{Start: 47, End: 77}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return fmt.Sprintf("%+v %+v %d %+v", made, waiting, len(calls), held)
 	}
 	before := state()
 
-	list := get(t, app, "/stories").body
 	story := storyPage(t, app, "Two billion is a down payment on devolution.").body
+	m := regexp.MustCompile(`<a href="(/stories/\d+/spans/1)">`).FindStringSubmatch(story)
+	if m == nil {
+		t.Fatalf("the Story's Page does not link its Editor's Span:\n%s", story)
+	}
+	pages := map[string]string{}
+	open := func() {
+		for _, path := range []string{"/stories", "/items/number-10/speech", "/items/number-10/speech/spans/47-77", m[1]} {
+			pages[path] = get(t, app, path).body
+		}
+		pages["cut"] = cutStoryOf(t, app, "/items/number-10/speech").body
+	}
+	open()
+	first := fmt.Sprint(pages)
 
 	if after := state(); after != before {
 		t.Errorf("opening the pages changed the Record:\nbefore %s\nafter  %s", before, after)
 	}
-	if get(t, app, "/stories").body != list || storyPage(t, app, "Two billion is a down payment on devolution.").body != story {
+	open()
+	if fmt.Sprint(pages) != first || storyPage(t, app, "Two billion is a down payment on devolution.").body != story {
 		t.Errorf("the pages changed on being opened again")
 	}
 	if strings.Contains(logs.String(), `"level":"ERROR"`) {

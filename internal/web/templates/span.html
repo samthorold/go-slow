@@ -30,6 +30,34 @@
   {{- end}}
 </ul>
 
+{{/* The Stories holding it, each linking its Page, and the Editor's Spans
+     citing it, each the Editor's words, linking its Page. */}}
+<section aria-labelledby="stories">
+  <h2 id="stories">Stories holding it</h2>
+  {{- if not .Stories}}
+  <p>No Story holds this Span.</p>
+  {{- end}}
+  <ul>
+  {{- range .Stories}}
+    <li><a href="{{.Href}}">{{.Words}}</a>{{if .Editor}} <small class="quiet">by the Editor</small>{{end}}</li>
+  {{- end}}
+  </ul>
+  {{- if .Citing}}
+  <h3>The Editor's Spans citing it</h3>
+  <ul class="blocks">
+  {{- range .Citing}}
+    <li class="block">
+      <div class="block-body"><p><a href="{{.Href}}">{{.Body}}</a></p></div>
+      <div class="block-margin">
+        <p class="quiet">spoken by the Editor</p>
+        <p>in <a href="{{.Story.Href}}">{{.Story.Words}}</a> <small>{{.When}}</small></p>
+      </div>
+    </li>
+  {{- end}}
+  </ul>
+  {{- end}}
+</section>
+
 {{/* Its Story: the latest gathering a Briefing made of it, then the
      relations judged since, not yet gathered by any. The page calls no
      model: what it shows is a judgement someone made, dated. */}}

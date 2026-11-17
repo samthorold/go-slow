@@ -2,6 +2,7 @@ package editor
 
 import (
 	"bytes"
+	"cmp"
 	"context"
 	"encoding/json"
 	"errors"
@@ -32,11 +33,12 @@ type CutStory struct {
 }
 
 // Cited is a Span an Editor's Span cites: its address, its words as read,
-// and its Item's title.
+// and its Item's title, and when it was published.
 type Cited struct {
-	Address Address
-	Words   string
-	Title   string
+	Address   Address
+	Words     string
+	Title     string
+	Published time.Time
 }
 
 // EditorSpan is a Span the Editor wrote: its words, and the Spans it cites,
@@ -60,6 +62,46 @@ type Story struct {
 	// Call is the kept call that made it, found by its Judge's request hash;
 	// zero if none was kept.
 	Call int64
+}
+
+// CitingSpan is an Editor's Span citing a Span: its Story, its number in
+// it from 1, its words and when it was written, with its Story's opening
+// words.
+type CitingSpan struct {
+	Story   int64
+	N       int
+	Body    string
+	At      time.Time
+	Opening string
+}
+
+// SpanHeld is what holds a Span: the Cuts whose Stories list it, oldest
+// first, and the Editor's Spans citing it, in the order written.
+type SpanHeld struct {
+	Cuts   []int64
+	Citing []CitingSpan
+}
+
+// Timeline is the Spans the Story's Editor's Spans cite, each once, in the
+// order they were published, and those published together in the order
+// their Item has them (CONTEXT.md: Timeline). Its own Editor's Spans are
+// not in it: they are the argument shown above it, all published last, by
+// the Judgement that made it.
+func (s Story) Timeline() []Cited {
+	var out []Cited
+	for _, es := range s.Spans {
+		for _, c := range es.Cites {
+			if !slices.ContainsFunc(out, func(o Cited) bool { return o.Address == c.Address }) {
+				out = append(out, c)
+			}
+		}
+	}
+	slices.SortStableFunc(out, func(a, b Cited) int {
+		return cmp.Or(a.Published.Compare(b.Published),
+			cmp.Compare(a.Address.SourceID, b.Address.SourceID), cmp.Compare(a.Address.EntryID, b.Address.EntryID),
+			cmp.Compare(a.Address.Span.Start, b.Address.Span.Start), cmp.Compare(a.Address.Span.End, b.Address.Span.End))
+	})
+	return out
 }
 
 // Weaving is a weaving run whose result was written: the Stories it made,
@@ -269,9 +311,10 @@ func checkWeaving(shown []CutStory, req Request, asked string, res Response) (We
 	for _, s := range shown {
 		for _, sp := range s.Spans {
 			spans = append(spans, Cited{
-				Address: Address{SourceID: s.Item.SourceID, EntryID: s.Item.EntryID, Span: sp},
-				Words:   cut.Words(s.Item.Content, sp),
-				Title:   s.Item.Title,
+				Address:   Address{SourceID: s.Item.SourceID, EntryID: s.Item.EntryID, Span: sp},
+				Words:     cut.Words(s.Item.Content, sp),
+				Title:     s.Item.Title,
+				Published: s.Item.Published,
 			})
 		}
 	}

@@ -59,6 +59,10 @@ type spanPage struct {
 	// the pass that tells it).
 	Gathered  *gatheringRow
 	Relations []relationRow
+	// Stories are the Stories holding it, and Citing the Editor's Spans
+	// citing it (system design: The Owner reads Stories).
+	Stories []storyLink
+	Citing  []citingRow
 	// FeedbackError is why Feedback last given on the page was refused, if
 	// it was.
 	FeedbackError string
@@ -173,6 +177,10 @@ func (a *app) spanWith(w http.ResponseWriter, r *http.Request, status int, errs 
 		}
 		return within(k.At, at)
 	})
+	if p.Stories, p.Citing, err = a.holding(ctx, at); err != nil {
+		a.serverError(w, r, err)
+		return
+	}
 	rels, err := a.Relations.RelationsOf(ctx, at)
 	if err != nil {
 		a.serverError(w, r, err)

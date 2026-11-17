@@ -162,9 +162,16 @@
 // newest first, each by its first Editor's Span's opening words (shortened)
 // until Stories have Names, linking a Story's page, /stories/{id} (its
 // event's id): its Editor's Spans as blocks in the order written, each
-// margin saying it is the Editor's and holding the Spans it cites (words
-// linking the Span's page, with its Item's .citation), then how it was made,
-// "woven · call N" and its Judge.
+// margin saying it is the Editor's (linking the Editor's Span's page,
+// /stories/{id}/spans/{n}) and holding the Spans it cites (words linking the
+// Span's page, with its Item's .citation), then its Timeline (the Spans it
+// cites, each once, by publication, with their dates), then how it was made,
+// "woven · call N" and its Judge. Wherever a Story is listed by an Editor's
+// Span's words, the list says "by the Editor". The Story a
+// Cut made is reached only from its Item's page ("The Story its Cut made",
+// /stories/{cut's event id}), and shows its Item and its Timeline, the
+// Item's Spans. A Span's page lists the Stories holding it and the Editor's
+// Spans citing it, each the Editor's.
 //
 // The Topics page says Topics select nothing and links the counts on the
 // Items page, then is a table of the Followed Topics (name and terms):

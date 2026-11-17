@@ -3,7 +3,7 @@
 // and its one stylesheet, static/go-slow.css: plain CSS, dark and minimal,
 // linked from the layout. The stylesheet's quiet style, the class quiet, is
 // for whatever should recede; its status hues (status with
-// status-supported, status-refuted, status-undecided or status-due) are for
+// status-supported, status-refuted or status-undecided) are for
 // a verdict, such as a call's outcome, as its header says.
 //
 // # Body and margin

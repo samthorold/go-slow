@@ -1,7 +1,7 @@
 /* go-slow's one stylesheet: dark and minimal. Plain CSS, no build step,
    nothing fetched from another host (system fonts only).
 
-   The text a page is for (statements, headings) is body text at full
+   The text a page is for (Spans, headings) is body text at full
    contrast; what supports it (metadata, citations, controls) is smaller and
    dimmer. Every colour against --bg meets WCAG AA (4.5:1) for normal text.
 
@@ -17,21 +17,11 @@
    its rules begin, below.
 
    The status hues: one hue per verdict, for every page that says how
-   something stands or came out. Give the element the class "status" and one
-   of status-supported (green), status-refuted (red), status-undecided (amber)
-   or status-due (violet). The register's hypotheses take them by their
-   status; a call's outcomes take the same family: applied is
-   status-supported, refused (by the act's checks) status-undecided, failed
-   status-refuted. Each hue meets AA on --bg (above 8:1).
-
-   The kind hues: one hue per kind of Feedback, a family of its own, apart
-   from the status hues (a kind is what the Owner said, not a verdict) and
-   from the Entity's teal and the link blue. Give the label the class "kind"
-   and one of kind-wrong (pink), kind-unwanted (orange), kind-missed (lime)
-   or kind-new-to-me (sky). A kind is a filled label (the hue behind --bg
-   text), a shape no status or pill takes, so even a hue near another
-   meaning's reads as a kind. Each hue meets AA on --bg, and --bg on it
-   (above 8:1). */
+   something came out. Give the element the class "status" and one of
+   status-supported (green), status-refuted (red) or status-undecided
+   (amber). A call's outcomes take them: applied is status-supported,
+   refused (by the act's checks) status-undecided, failed status-refuted.
+   Each hue meets AA on --bg (above 8:1). */
 
 :root {
   color-scheme: dark;
@@ -48,15 +38,9 @@
   --supported: #7ccf8f;
   --refuted: #ff8f8f;
   --undecided: #e5c070;
-  --due: #b9a4ff;
   /* An Entity's one hue: teal, distinct from the link accent and from
      every status hue, so a pill never reads as a verdict. */
   --entity: #66d1c9;
-  /* The kind hues (see the top of this file). */
-  --kind-wrong: #ff9ecb;
-  --kind-unwanted: #f2a65a;
-  --kind-missed: #cddc6e;
-  --kind-new-to-me: #7cc8f0;
   --measure: 38rem;
   --margin-col: 15rem;
   --gutter: 2rem;
@@ -305,18 +289,6 @@ fieldset label {
   display: block;
 }
 
-/* Feedback given inline sits beside what it is on, not on a line of its own. */
-form.feedback {
-  display: inline;
-  margin: 0 0.25rem 0 0;
-}
-
-.feedback.given {
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 0.8rem;
-  color: var(--muted);
-}
-
 /* The reusable quiet style for any block that should recede: smaller and in
    the muted colour (still AA), links included, until the pointer or keyboard
    focus is inside it. Dimmed by colour, never by opacity, which would take
@@ -349,9 +321,7 @@ form.feedback {
    then " · " and its Role, or its kind where it has no Role, in a .pill-tag
    shown in small caps. One hue for every pill, whatever the Role:
      <span class="pill"><span hx-disable>John Healey</span> · <span class="pill-tag">actor</span></span>
-   A row of pills is a <div class="pills"> (a div, since a pill's
-   Feedback control beside it, in a <span class="judged">, is a form, which
-   would close a paragraph). */
+   A row of pills is a <div class="pills">. */
 .pill {
   display: inline-block;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -381,11 +351,6 @@ a.pill:hover {
   margin-bottom: 1rem;
 }
 
-/* A pill with its Feedback control: kept together on one line. */
-.judged {
-  white-space: nowrap;
-}
-
 /* An Item is a citation (.citation): its Source's short name, who is
    speaking (where the Sources list holds it), then its title in italics, a link to where it is read:
      <span class="citation">No 10 <a href="/items/…"><cite>Title</cite></a></span>
@@ -403,8 +368,7 @@ a.pill:hover {
 /* How something was made is a machine label (.machine): monospace, in the
    muted colour, always worded "<act> · call N", linking the call:
      <a class="machine" href="/calls/43">read · call 43</a>
-   (template "made"), with the call's tokens where the page counts them
-   (the Briefing's trail: "placed · call 43 · 2,140 tok"). */
+   (template "made"). */
 .machine {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.75rem;
@@ -419,10 +383,10 @@ a.machine:focus-visible {
 }
 
 /* Body and margin: every page that shows the Editor's work lays each block
-   (a Span, a statement, an Assessment) out as its text in a body column and its
-   notes in a margin beside it, aligned with it: the quote (quiet), a date,
-   pills, the machine label and the block's Feedback actions, the margin's
-   only buttons. The blocks sit in one region,
+   (a Span, an Editor's Span, a turn) out as its text in a body column and
+   its notes in a margin beside it, aligned with it: the quote (quiet), a
+   date, citations, pills and the machine label. The blocks sit in one
+   region,
      <div class="margined" data-margin="open|folded">
        {{template "margin-fold" "open|folded"}}
        <ul class="blocks"><li class="block">
@@ -430,9 +394,9 @@ a.machine:focus-visible {
        </li></ul>
      </div>
    whose margin the one fold control (static/margin-fold.js) folds away and
-   back. The state lives in data-margin; a page starts open (the Briefing,
-   a Span, an Item), except the Sunday read, a reading page, folded. A page holding a region widens to fit the margin;
-   on a narrow window each block's notes drop below it. */
+   back. The state lives in data-margin; a page starts open. A page holding
+   a region widens to fit the margin; on a narrow window each block's notes
+   drop below it. */
 body:has(.margined) main,
 body:has(.margined) nav,
 body:has(.margined) #request-errors {
@@ -462,6 +426,10 @@ body:has(.margined) #request-errors {
 
 .block-body > :last-child {
   margin-bottom: 0;
+}
+
+.block-body > p {
+  margin-bottom: 0.15rem;
 }
 
 .block-margin {
@@ -504,15 +472,15 @@ body:has(.margined) #request-errors {
 
 /* What is set aside (a Span Rejected) stays on the page, struck through in
    the quiet colour, with the reason in its margin. In a block it goes on the
-   .block-body only, never the block: the margin (the reason, the pills, the
-   Feedback controls) reads plainly. */
+   .block-body only, never the block: the margin (the reason, the pills)
+   reads plainly. */
 .struck {
   text-decoration: line-through;
   color: var(--muted);
 }
 
 /* The status hues (see the top of this file): a verdict, small and set in
-   the hue of its status, so a glance down a column says where things stand. */
+   the hue of its status, so a glance says how something came out. */
 .status {
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 0.8rem;
@@ -532,41 +500,6 @@ body:has(.margined) #request-errors {
   color: var(--undecided);
 }
 
-.status-due {
-  color: var(--due);
-}
-
-/* The kind hues (see the top of this file): a kind of Feedback, a short
-   filled label in its hue, so a glance down the Feedback page's Kind column
-   says what was said. */
-.kind {
-  display: inline-block;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 0.75rem;
-  font-weight: 600;
-  line-height: 1.5;
-  color: var(--bg);
-  border-radius: 3px;
-  padding: 0 0.45em;
-  white-space: nowrap;
-}
-
-.kind-wrong {
-  background: var(--kind-wrong);
-}
-
-.kind-unwanted {
-  background: var(--kind-unwanted);
-}
-
-.kind-missed {
-  background: var(--kind-missed);
-}
-
-.kind-new-to-me {
-  background: var(--kind-new-to-me);
-}
-
 /* A diagnosis page (a call, a conversation) opens with a one-line summary
    head: its outcome in its status hue, then what it was on and what it cost. */
 .summary-head {
@@ -575,135 +508,9 @@ body:has(.margined) #request-errors {
   color: var(--muted);
 }
 
-/* The register: its reading's paragraphs and lists sit close in their cell. */
-.register td p,
-.register td ul,
-.register td details {
-  margin: 0 0 0.35rem;
-}
-
-/* The reading page (the Sunday read) reads as text, its margin folded at
-   rest. Feedback is its frequent act, so an Assessment's Feedback controls
-   (.actions) sit with its text in the body column, which no fold hides, and
-   the read's title's beside it in its title row (.title-row), shown at rest
-   like every other control. */
-.title-row {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-}
-
-.title-row h1 {
-  margin-bottom: 0.5rem;
-}
-
-.block-body > p {
-  margin-bottom: 0.15rem;
-}
-
-/* Feedback controls: each a small icon button, one icon per kind, the same
-   on every page (wrong ✗, new to me ✦, unwanted ⊘, missed ⊕), its full
-   label its accessible name and its title. Shown at rest, never revealed
-   on hover or focus, so nothing moves as the pointer does: quiet at rest,
-   the link colour on hover and focus. Each sits beside what it judges (an
-   Entity's pill, a "spoken by" line, a Span cited); a block's own (a
-   statement's, an Assessment's) sit together in its .actions.
-     <button class="give give-wrong" aria-label="Wrong: …" title="Wrong: …"><span aria-hidden="true">✗</span></button> */
-button.give {
-  font-size: 0.9rem;
-  color: var(--muted);
-  border: 0;
-  padding: 0 0.2rem;
-  margin-left: 0.15rem;
-  line-height: 1.2;
-}
-
-button.give:hover,
-button.give:focus-visible {
-  color: var(--link);
-}
-
-/* Feedback already given shows where its control was: its icon filled in
-   its kind's hue (the kind hues, above), then its Undo, quiet. Its label is
-   read out, not shown (.visually-hidden), and is its title. */
-.feedback.given {
-  white-space: nowrap;
-  margin-left: 0.15rem;
-}
-
-.feedback.given > [aria-hidden] {
-  color: var(--bg);
-  border-radius: 3px;
-  padding: 0 0.25em;
-}
-
-.given-wrong > [aria-hidden] {
-  background: var(--kind-wrong);
-}
-
-.given-new-to-me > [aria-hidden] {
-  background: var(--kind-new-to-me);
-}
-
-.given-unwanted > [aria-hidden] {
-  background: var(--kind-unwanted);
-}
-
-.given-missed > [aria-hidden] {
-  background: var(--kind-missed);
-}
-
-.feedback.given button {
-  border: 0;
-  padding: 0 0.2rem;
-}
-
-.feedback.given button:hover,
-.feedback.given button:focus-visible {
-  color: var(--link);
-}
-
-/* What a screen reader reads and the page does not show. */
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-.actions {
-  margin: 0.2rem 0 0;
-}
-
-/* What a statement cites, each in its margin: the Span, whose words it
-   is, then its Item. */
-.cited p {
-  margin: 0;
-}
-
-.cited + .cited {
-  margin-top: 0.5rem;
-}
-
-/* An Assessment is the Editor's judgement, not a report: set apart from the
-   statements by a left rule. Withdrawn, it is struck through and quiet. */
-.assessment {
-  border-left: 2px solid var(--muted);
-  padding-left: 0.9rem;
-}
-
-.assessment.quiet {
-  border-left-color: var(--rule);
-}
-
-.missed {
-  margin-top: 0.75rem;
-}
-
-/* The Topics page: a row per Topic, its name and terms. Remove is
-   in the row's .actions, shown at rest, quiet. */
+/* The Topics page: a row per Topic, its name and terms. Remove is in the
+   row's .actions, shown at rest like every control, in the quiet style
+   buttons take, so no page reveals controls on hover. */
 .topics {
   width: 100%;
 }
@@ -712,73 +519,9 @@ button.give:focus-visible {
   vertical-align: middle;
 }
 
-/* Row actions: a table row's controls (.actions in a cell of a row of
-   .topics or .feedback-table), shown at rest like every control, in the
-   quiet style buttons take, so no page reveals controls on hover. */
-.feedback-table .actions,
 .topics .actions {
   margin: 0;
   white-space: nowrap;
-}
-
-/* The Feedback page: a row per piece, newest first, widened like a
-   margined page. Its Kind is the one hued cell (.kind, above), About the
-   column that wraps (When wraps under its time); Undo is in the
-   row's actions (above). An undone row stays, struck through in the muted
-   colour, its kind no longer filled; its last cell says when it was undone,
-   unstruck. */
-body:has(.feedback-table) main,
-body:has(.feedback-table) nav,
-body:has(.feedback-table) #request-errors {
-  max-width: calc(var(--measure) + var(--gutter) + var(--margin-col));
-}
-
-.feedback-table {
-  width: 100%;
-}
-
-.feedback-table td {
-  white-space: nowrap;
-}
-
-.feedback-table td.subject,
-.feedback-table td.when {
-  white-space: normal;
-}
-
-.feedback-table td.subject {
-  width: 100%;
-  min-width: 14rem;
-}
-
-.feedback-table td.when {
-  min-width: 8rem;
-}
-
-/* No hue but the kind's: About's link is in the text colour, underlined. */
-.feedback-table .subject a {
-  color: inherit;
-}
-
-.feedback-table .when,
-.feedback-table .when .quiet {
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 0.8rem;
-}
-
-.feedback-table .undone td:not(:last-child) {
-  color: var(--muted);
-  text-decoration: line-through;
-}
-
-.feedback-table .undone a {
-  color: inherit;
-}
-
-.feedback-table .undone .kind {
-  color: var(--muted);
-  background: none;
-  box-shadow: inset 0 0 0 1px var(--rule);
 }
 
 /* Keyboard focus is always visible, on everything that takes it. */

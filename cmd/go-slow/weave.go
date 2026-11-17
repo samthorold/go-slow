@@ -34,7 +34,8 @@ import (
 // --since moves the switch to Stories back to the day, in TZ, for a Record
 // not yet woven: it keeps a new switch through the newest Cut of an Item
 // collected before the day, so the Stories cut since then await weaving
-// (system design: The switch to Stories). It is refused on a Record already
+// (system design: The Record is recreated when the design of its Judgements
+// changes, not translated). It is refused on a Record already
 // woven, which carries on from its last run, so moving its switch would
 // change nothing.
 func weave(ctx context.Context, log *slog.Logger, args []string, d adminDeps) error {

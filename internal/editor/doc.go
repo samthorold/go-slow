@@ -55,7 +55,7 @@
 //
 // # Batches
 //
-// The daily acts run in batches through Batches: an act is a BatchAct (what
+// The acts that call a model run in batches through Batches: an act is a BatchAct (what
 // awaits it, each piece of work with its request and how its result is
 // checked and written), so weaving (Editor.Weaving) and naming
 // (Editor.Naming) plug in beside Editor.Reading. Work that needs no call
@@ -190,8 +190,8 @@
 // The old designs (Facts and Claims drawn from each Item, Stories,
 // Developments and Connections; then relating, the Briefing, the Sunday read,
 // the gatherings they made and the Feedback given on them) are gone from the
-// code. The first's judgements were dropped from the Record (system design:
-// The Record became events); the second's stay in it, read by no projection
-// (The Record is recreated when the design of its Judgements changes, not
-// translated).
+// code. The first's judgements were dropped from the Record (the storage
+// adapter's 0032_events_only.sql); the second's stay in it, read by no
+// projection (system design: The Record is recreated when the design of its
+// Judgements changes, not translated).
 package editor

@@ -173,9 +173,10 @@ type Deps struct {
 	// grain belongs to the judgement, not to the Span).
 	Cut Cutter
 	// Read, if set, runs after cutting: the Editor reads the Items
-	// awaiting reading (system design: The acts run as Items arrive), at
-	// once or by submitting them in a batch and applying the results of
-	// earlier ones (The daily acts run in batches).
+	// awaiting reading, at once, or the batch runner applies the results of
+	// earlier batches and submits what awaits each act (reading, weaving,
+	// naming) as one batch (system design: Commands that call a model run in
+	// batches).
 	Read Reader
 	// LookUp, if set, runs after reading: plain code looks up in Wikidata
 	// what the readings name, as its own step, so a look-up refused or

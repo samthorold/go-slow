@@ -122,7 +122,7 @@ func run(log *slog.Logger) error {
 	ed := editor.New(editor.Deps{
 		Store: store, Model: models, Weavings: store, Namings: store, ModelFor: models.ModelFor, Log: log,
 	})
-	// The daily acts run in batches: submitted after a Collection run, and
+	// The acts that call a model run in batches: submitted after a Collection run, and
 	// their results applied on later runs as they arrive. One batch carries
 	// every act's requests.
 	batches := editor.NewBatches(editor.BatchDeps{

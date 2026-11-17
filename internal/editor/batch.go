@@ -10,8 +10,8 @@ import (
 	"time"
 )
 
-// Batcher is the port to a provider's batch interface (system design: The
-// daily acts run in batches). Like Model it is provider-neutral: acts'
+// Batcher is the port to a provider's batch interface (system design:
+// Commands that call a model run in batches). Like Model it is provider-neutral: acts'
 // requests go in, each with its own identifier, and once the batch has ended
 // its results come out, each carrying the identifier of its request. Results
 // may come in any order; they are matched by identifier, never by position.
@@ -105,8 +105,9 @@ type PendingRequest struct {
 }
 
 // MaxAttempts is how many times a piece of work is attempted in batches
-// before it is marked failed and no longer submitted (system design: The
-// daily acts run in batches). Each attempt costs a model call, so work that
+// before it is marked failed and no longer submitted (system design: Work
+// that keeps failing is given up after three attempts, and taken up again by
+// hand). Each attempt costs a model call, so work that
 // always fails would otherwise cost one on every run, without bound.
 const MaxAttempts = 3
 
@@ -180,7 +181,7 @@ type BatchDeps struct {
 	Log      *slog.Logger
 }
 
-// Batches runs the daily acts in batches.
+// Batches runs the acts that call a model in batches.
 type Batches struct {
 	BatchDeps
 }

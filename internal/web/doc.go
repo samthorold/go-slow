@@ -8,9 +8,9 @@
 //
 // # Body and margin
 //
-// Body and margin is the layout every page showing the Editor's work shares
-// (an Item's page, a Span's, a Story's and a conversation's so far; each
-// other page adopts it in its own change).
+// Body and margin is the layout the pages showing the Editor's work share
+// (an Item's page, a Span's, a Story's, an Editor's Span's, the Items page
+// and a conversation's).
 // Each block (<li class="block"> in a <ul class="blocks">) has its text in
 // .block-body and its notes in .block-margin beside it (the quote, quiet; a
 // date only where it differs from the Item's; Entity pills; the machine
@@ -112,7 +112,7 @@
 //
 // A call's page (GET /calls/{id}, with every attempt at its work) and a
 // conversation's (/conversations/{id}, the retired Sunday read's) are for
-// diagnosis, and record no open. Each opens with a one-line .summary-head,
+// diagnosis. Each opens with a one-line .summary-head,
 // its outcome rendered by {{template "outcome"}} (templates/outcome.html,
 // view model outcome from outcomeOf: applied status-supported, refused
 // status-undecided, failed status-refuted, a turn that continued no hue),

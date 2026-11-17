@@ -17,7 +17,7 @@ import (
 // checks, and of how its input is shown. A new version is a new Judge (system
 // design: Every Judgement carries its Judge). Change it with
 // weavingInstructions, weavingSchema, checkWeaving or weavingInput.
-const WeavingVersion = 1
+const WeavingVersion = 2
 
 // weavingAct names weaving, as its requests, calls and work do.
 const weavingAct = "weaving"
@@ -31,13 +31,29 @@ type CutStory struct {
 	Spans []cut.Span
 }
 
-// Cited is a Span an Editor's Span cites: its address, its words as read,
-// and its Item's title.
+// Cited is a Span an Editor's Span cites, its words as read, and either its
+// address in its Item's text with its Item's title, or, for an earlier
+// Editor's Span, Of, its address among the Editor's Spans.
 type Cited struct {
 	Address Address
-	Words   string
-	Title   string
+	// Of is the earlier Editor's Span cited, when it is one; zero when the
+	// Span cited is a Source's.
+	Of    EditorSpanAt
+	Words string
+	Title string
 }
+
+// EditorSpanAt is an Editor's Span's address: the Story that wrote it, and
+// its place among that Story's Editor's Spans, numbered from 1 in the order
+// written. The Story is an event that never changes, so the address always
+// holds the same words.
+type EditorSpanAt struct {
+	Story int64
+	N     int
+}
+
+// IsZero reports whether a is no Editor's Span's address.
+func (a EditorSpanAt) IsZero() bool { return a.Story == 0 }
 
 // EditorSpan is a Span the Editor wrote: its words, and the Spans it cites,
 // in the order it cites them.
@@ -85,6 +101,9 @@ type WeavingStore interface {
 	// result was written, of Items collected after the switch, oldest Cut
 	// first.
 	StoriesToWeave(ctx context.Context) ([]CutStory, error)
+	// StoriesMade are the Stories the Editor made, newest first, each with
+	// its Editor's Spans and what they cite.
+	StoriesMade(ctx context.Context) ([]Story, error)
 	// WeavingRan reports whether the run keyed key has had its result
 	// written or been marked failed.
 	WeavingRan(ctx context.Context, key string) (bool, error)
@@ -95,10 +114,11 @@ type WeavingStore interface {
 	KeepWeaving(ctx context.Context, w Weaving) error
 }
 
-// weavingInstructions are weaving's instructions: the Owner's, and one
-// sentence stating the checks the Owner's leave unsaid (that an Editor's
-// Span has words, and cites only Spans shown).
-const weavingInstructions = `You are the editor of a slow-news publication. Your publication exists to see the stories behind the stories, and to take a zoomed-out view of the long-term causes. Below are Stories, each a group of numbered Spans: stretches of text as their publishers wrote them. What each Story says is already in it; write what none of them says. Write your substantive editorial opinion on one or more of them. Each opinion is a new Story: your own words, in one or more editor_spans, each citing by number the Spans it rests on, at least one. Each editor_span's body holds its words, and its cites only the numbers of Spans shown below. You don't have to write anything: if you have nothing substantive to say, return no stories.`
+// weavingInstructions are weaving's instructions: the Owner's, one sentence
+// saying what a Span marked the Editor's is and that it may be cited, and one
+// stating the checks the Owner's leave unsaid (that an Editor's Span has
+// words, and cites only Spans shown).
+const weavingInstructions = `You are the editor of a slow-news publication. Your publication exists to see the stories behind the stories, and to take a zoomed-out view of the long-term causes. Below are Stories, each a group of numbered Spans: stretches of text as their publishers wrote them. What each Story says is already in it; write what none of them says. Write your substantive editorial opinion on one or more of them. Each opinion is a new Story: your own words, in one or more editor_spans, each citing by number the Spans it rests on, at least one. Spans marked the Editor's are your own earlier words, and you may cite them too. Each editor_span's body holds its words, and its cites only the numbers of Spans shown below. You don't have to write anything: if you have nothing substantive to say, return no stories.`
 
 // weavingSchema is weaving's output schema: stories, each editor_spans, each
 // its words (body) and then the numbers of the Spans it cites (cites). The
@@ -128,9 +148,10 @@ type weavingOutput struct {
 // first run of the batch runner at or after the time of day at (in now's
 // location), unless that day's run has already been written or failed,
 // nothing has been cut since the last run written, or a run's batch is still
-// pending. A run is shown every Story cut since the last run written, and
-// its result is applied to what it was shown, however the Record has moved
-// on since.
+// pending. A run is shown every Story the Editor has made and every Story
+// cut since the last run written (system design: A weaving run is shown what
+// is new, and everything the Editor has made), and its result is applied to
+// what it was shown, however the Record has moved on since.
 func (e *Editor) Weaving(at time.Duration) BatchAct {
 	return BatchAct{
 		Name: weavingAct,
@@ -153,11 +174,16 @@ func (e *Editor) Weaving(at time.Duration) BatchAct {
 			if err != nil || len(stories) == 0 {
 				return nil, err
 			}
+			made, err := e.Weavings.StoriesMade(ctx)
+			if err != nil {
+				return nil, err
+			}
+			slices.Reverse(made)
 			return []Job{{
 				Key:     key,
-				Request: weavingRequest(stories),
+				Request: weavingRequest(made, stories),
 				ApplySent: func(ctx context.Context, sent Request, res Response, now time.Time) error {
-					shown, ok := shownIn(stories, sent)
+					shown, ok := shownIn(made, stories, sent)
 					if !ok {
 						return errors.New("weaving: the Stories its request showed no longer await weaving")
 					}
@@ -169,7 +195,7 @@ func (e *Editor) Weaving(at time.Duration) BatchAct {
 					if err := e.Weavings.KeepWeaving(ctx, w); err != nil {
 						return err
 					}
-					e.Log.InfoContext(ctx, "woven", "key", key, "shown", len(shown), "stories", len(w.Stories),
+					e.Log.InfoContext(ctx, "woven", "key", key, "shown", len(shown.stories), "stories", len(w.Stories),
 						"model", w.Judge.Model, "input_tokens", w.Usage.InputTokens, "output_tokens", w.Usage.OutputTokens)
 					return nil
 				},
@@ -194,53 +220,112 @@ func (e *Editor) pendingWeaving(ctx context.Context) (string, bool, error) {
 	return "", false, nil
 }
 
-// weavingRequest is a weaving run's request, shown the Stories.
-func weavingRequest(stories []CutStory) Request {
-	return Request{Act: weavingAct, Instructions: weavingInstructions, Input: weavingInput(stories),
+// weavingRequest is a weaving run's request, shown the Stories the Editor
+// made, oldest first, then the Stories cut since the last run.
+func weavingRequest(made []Story, stories []CutStory) Request {
+	return Request{Act: weavingAct, Instructions: weavingInstructions, Input: weavingInput(made, stories),
 		Schema: weavingSchema, Effort: EffortMedium}
 }
 
-// weavingInput shows the Stories in order, each under its Item's title and
-// date, its Spans as written, numbered S1, S2… across them all, so the
-// Stories shown first are numbered the same however many follow.
-func weavingInput(stories []CutStory) string {
-	var b strings.Builder
-	n := 0
+// weavingInput is what a run is shown: the Stories the Editor made, then
+// those cut since, numbering their Spans S1, S2… across them all.
+func weavingInput(made []Story, stories []CutStory) string {
+	sh := showMade(made)
 	for _, s := range stories {
-		b.WriteString(storyBlock(s, &n))
+		sh.cutStory(s)
 	}
-	return b.String()
+	return sh.input.String()
 }
 
-// storyBlock is one Story as weaving is shown it, its Spans numbered on
-// from n.
-func storyBlock(s CutStory, n *int) string {
-	var b strings.Builder
-	fmt.Fprintf(&b, "Story from %q", s.Item.Title)
+// woven is what a weaving run is shown: its input as written so far, each
+// Span it numbers in number order, the number of each, and the Stories cut
+// since the last run among them.
+type woven struct {
+	input   strings.Builder
+	spans   []Cited
+	numbers map[citedAt]int
+	stories []CutStory
+}
+
+// citedAt is a Span's address, whether a Source's or an Editor's.
+type citedAt struct {
+	Address Address
+	Of      EditorSpanAt
+}
+
+// showMade starts a run's input with the Stories the Editor made, oldest
+// first, each under the date it was made, its Editor's Spans in the order
+// written, each after the Spans it cites not yet shown. An Editor's Span is
+// marked as the Editor's, with the numbers it cites, so the model never
+// takes its own words for a Source's; a Source's Span is shown with its
+// Item's title. Each Span is numbered once, however many Stories cite it.
+func showMade(made []Story) *woven {
+	sh := &woven{numbers: map[citedAt]int{}}
+	for _, st := range made {
+		fmt.Fprintf(&sh.input, "Story the Editor made, %s\n", st.At.UTC().Format(time.DateOnly))
+		for i, es := range st.Spans {
+			var cites []string
+			for _, c := range es.Cites {
+				n, ok := sh.numbers[citedAt{c.Address, c.Of}]
+				if !ok {
+					n = sh.number(c)
+					if c.Of.IsZero() {
+						fmt.Fprintf(&sh.input, "S%d (from %q): %s\n", n, c.Title, c.Words)
+					} else {
+						fmt.Fprintf(&sh.input, "S%d (the Editor's): %s\n", n, c.Words)
+					}
+				}
+				cites = append(cites, fmt.Sprintf("S%d", n))
+			}
+			n := sh.number(Cited{Of: EditorSpanAt{Story: st.ID, N: i + 1}, Words: es.Body})
+			fmt.Fprintf(&sh.input, "S%d (the Editor's, citing %s): %s\n", n, strings.Join(cites, ", "), es.Body)
+		}
+		sh.input.WriteString("\n")
+	}
+	return sh
+}
+
+// number numbers c as the next Span shown.
+func (sh *woven) number(c Cited) int {
+	sh.spans = append(sh.spans, c)
+	n := len(sh.spans)
+	sh.numbers[citedAt{c.Address, c.Of}] = n
+	return n
+}
+
+// cutStory shows one Story a Cut made, under its Item's title and date, its
+// Spans as written, numbered on from those shown before it.
+func (sh *woven) cutStory(s CutStory) {
+	fmt.Fprintf(&sh.input, "Story from %q", s.Item.Title)
 	if !s.Item.Published.IsZero() {
-		fmt.Fprintf(&b, ", published %s", s.Item.Published.UTC().Format(time.DateOnly))
+		fmt.Fprintf(&sh.input, ", published %s", s.Item.Published.UTC().Format(time.DateOnly))
 	}
-	b.WriteString("\n")
+	sh.input.WriteString("\n")
 	for _, sp := range s.Spans {
-		*n++
-		fmt.Fprintf(&b, "S%d: %s\n", *n, cut.Words(s.Item.Content, sp))
+		words := cut.Words(s.Item.Content, sp)
+		n := sh.number(Cited{
+			Address: Address{SourceID: s.Item.SourceID, EntryID: s.Item.EntryID, Span: sp},
+			Words:   words, Title: s.Item.Title,
+		})
+		fmt.Fprintf(&sh.input, "S%d: %s\n", n, words)
 	}
-	b.WriteString("\n")
-	return b.String()
+	sh.input.WriteString("\n")
+	sh.stories = append(sh.stories, s)
 }
 
-// shownIn is the Stories a request was sent showing: those of stories, now
-// awaiting weaving, whose input it is. Stories are cut in order and only
-// added to, so those shown are the first of the Stories now awaiting.
-func shownIn(stories []CutStory, sent Request) ([]CutStory, bool) {
-	var b strings.Builder
-	n := 0
-	for i, s := range stories {
-		b.WriteString(storyBlock(s, &n))
+// shownIn is what a request was sent showing: the Stories the Editor made,
+// and those of stories, now awaiting weaving, whose input it is. Only
+// weaving makes Stories, and no run is sent while one is pending, so the
+// Stories made are those the request was shown; Stories are cut in order and
+// only added to, so those shown are the first of the Stories now awaiting.
+func shownIn(made []Story, stories []CutStory, sent Request) (*woven, bool) {
+	sh := showMade(made)
+	for _, s := range stories {
+		sh.cutStory(s)
 		switch {
-		case b.Len() == len(sent.Input):
-			return stories[:i+1], b.String() == sent.Input
-		case b.Len() > len(sent.Input):
+		case sh.input.Len() == len(sent.Input):
+			return sh, sh.input.String() == sent.Input
+		case sh.input.Len() > len(sent.Input):
 			return nil, false
 		}
 	}
@@ -248,11 +333,11 @@ func shownIn(stories []CutStory, sent Request) ([]CutStory, bool) {
 }
 
 // checkWeaving decodes the model's answer to req, asked of the model named
-// asked, shown the Stories shown, and runs weaving's checks over it: each
-// citation is a Span shown, each Editor's Span has words and cites at least
-// one Span, and each Story has at least one Editor's Span. A result that
-// fails them is ErrFailedChecks.
-func checkWeaving(shown []CutStory, req Request, asked string, res Response) (Weaving, error) {
+// asked, shown sh, and runs weaving's checks over it: each citation is a
+// Span shown (a Source's or an earlier Editor's), each Editor's Span has
+// words and cites at least one Span, and each Story has at least one
+// Editor's Span. A result that fails them is ErrFailedChecks.
+func checkWeaving(sh *woven, req Request, asked string, res Response) (Weaving, error) {
 	refuse := func(format string, args ...any) (Weaving, error) {
 		return Weaving{}, fmt.Errorf("weaving: %w: %s", ErrFailedChecks, fmt.Sprintf(format, args...))
 	}
@@ -265,18 +350,9 @@ func checkWeaving(shown []CutStory, req Request, asked string, res Response) (We
 	if out.Stories == nil {
 		return refuse("output does not match the schema: no stories")
 	}
-	var spans []Cited
-	for _, s := range shown {
-		for _, sp := range s.Spans {
-			spans = append(spans, Cited{
-				Address: Address{SourceID: s.Item.SourceID, EntryID: s.Item.EntryID, Span: sp},
-				Words:   cut.Words(s.Item.Content, sp),
-				Title:   s.Item.Title,
-			})
-		}
-	}
+	spans := sh.spans
 	w := Weaving{
-		ThroughCut: shown[len(shown)-1].CutID, Usage: res.Usage,
+		ThroughCut: sh.stories[len(sh.stories)-1].CutID, Usage: res.Usage,
 		Judge: Judge{Act: req.Act, Version: WeavingVersion, Model: res.Model, RequestHash: RequestHash(req, asked)},
 	}
 	for i, s := range *out.Stories {

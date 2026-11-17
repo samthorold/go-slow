@@ -101,7 +101,10 @@
 // an event of kind weaving (weavings: its day as work_key, through_cut, the
 // newest Cut it was shown, and its Judge), and each Story it made an event of
 // kind story (woven_stories), holding its Editor's Spans (editor_spans, with
-// their words) and what each cites (editor_span_cites, addresses).
+// their words) and what each cites: a Source's Span (editor_span_cites, an
+// address into its Item's text) or an earlier Editor's Span
+// (editor_span_cites_editor, 0034: its Story and place, its words read from
+// the Story that wrote it), the two sharing the order cited, m.
 // StoriesToWeave is every Cut after the newest through_cut, of Items
 // collected after the switch; StoriesMade and StoryMade the Stories made,
 // each with its call (the applied weaving call on its run's day answering

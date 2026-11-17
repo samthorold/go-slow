@@ -118,17 +118,24 @@
 // built with (DueAt), when that day's run has been neither written nor marked
 // failed (WeavingStore.WeavingRan) and something has been cut since the last
 // run written; while a run's request is in a pending batch, that run's job
-// alone. A run is one request, at EffortMedium, shown every Story cut since
-// the last run written (the storage adapter's StoriesToWeave: Cuts after its
-// through_cut, of Items collected after the switch), each under its Item's
-// title and date, its Spans as written numbered S1, S2… across them all. It
-// answers stories, each editor_spans, each body then cites (numbers). The
-// checks refuse a citation of a Span not shown, an Editor's Span with no
-// words or no citation, and a Story with none; an empty stories is a run
-// that made nothing, kept all the same. A result is applied through
+// alone. A run is one request, at EffortMedium, shown first every Story the
+// Editor has made (WeavingStore.StoriesMade), oldest first, each under the
+// date it was made, its Editor's Spans in the order written, each after the
+// Spans it cites not yet shown and marked "the Editor's" with the numbers it
+// cites; then every Story cut since the last run written (the storage
+// adapter's StoriesToWeave: Cuts after its through_cut, of Items collected
+// after the switch), each under its Item's title and date, its Spans as
+// written. Every Span shown, a Source's or an Editor's, is numbered S1, S2…
+// once, across them all (showMade, woven). It answers stories, each
+// editor_spans, each body then cites (numbers); a citation of an earlier
+// Editor's Span is held by its address (Cited.Of, an EditorSpanAt), never
+// copied. The checks refuse a citation of a Span not shown, an Editor's Span
+// with no words or no citation, and a Story with none; an empty stories is a
+// run that made nothing, kept all the same. A result is applied through
 // Job.ApplySent to the request as sent, never refused as stale: the Stories
-// it showed are the first of those now awaiting (shownIn), since Cuts are
-// only added to and numbering runs on from the first. KeepWeaving keeps the
+// it showed are those made (only weaving makes them, one run at a time) and
+// the first of those cut now awaiting (shownIn), since Cuts are only added
+// to and numbering runs on from the first. KeepWeaving keeps the
 // run (its Judge and the newest Cut shown) and each Story as its own event.
 // A run failing MaxAttempts is listed on the Items page by its day, and its
 // Stories are shown to the next day's run.

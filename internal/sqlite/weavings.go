@@ -102,6 +102,15 @@ func (s *Store) KeepWeaving(ctx context.Context, w editor.Weaving) error {
 				return fmt.Errorf("keep weaving: %w", err)
 			}
 			for m, c := range es.Cites {
+				if !c.Of.IsZero() {
+					if _, err := tx.ExecContext(ctx, `
+						INSERT INTO editor_span_cites_editor (story_id, n, m, cited_story_id, cited_n)
+						VALUES (?, ?, ?, ?, ?)`,
+						sid, n+1, m+1, c.Of.Story, c.Of.N); err != nil {
+						return fmt.Errorf("keep weaving: %w", err)
+					}
+					continue
+				}
 				if _, err := tx.ExecContext(ctx, `
 					INSERT INTO editor_span_cites (story_id, n, m, source_id, entry_id, span_start, span_end)
 					VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -190,15 +199,23 @@ func scanStory(row scanner) (editor.Story, error) {
 }
 
 // editorSpans are a Story's Editor's Spans, in the order written, each with
-// the Spans it cites, in the order cited, and their words.
+// the Spans it cites, in the order cited, and their words: a Source's Span's
+// read from its Item's text, an earlier Editor's Span's from the Judgement
+// that wrote it.
 func (s *Store) editorSpans(ctx context.Context, storyID int64) ([]editor.EditorSpan, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT e.n, e.body, c.source_id, c.entry_id, c.span_start, c.span_end, items.content, items.title
+		SELECT e.n, e.body, c.m, c.source_id, c.entry_id, c.span_start, c.span_end, items.content, items.title, 0, 0
 		FROM editor_spans e
 			JOIN editor_span_cites c ON c.story_id = e.story_id AND c.n = e.n
 			JOIN items ON items.source_id = c.source_id AND items.entry_id = c.entry_id
 		WHERE e.story_id = ?
-		ORDER BY e.n, c.m`, storyID)
+		UNION ALL
+		SELECT e.n, e.body, c.m, '', '', 0, 0, cited.body, '', c.cited_story_id, c.cited_n
+		FROM editor_spans e
+			JOIN editor_span_cites_editor c ON c.story_id = e.story_id AND c.n = e.n
+			JOIN editor_spans cited ON cited.story_id = c.cited_story_id AND cited.n = c.cited_n
+		WHERE e.story_id = ?
+		ORDER BY 1, 3`, storyID, storyID)
 	if err != nil {
 		return nil, fmt.Errorf("editor's spans of story %d: %w", storyID, err)
 	}
@@ -206,10 +223,12 @@ func (s *Store) editorSpans(ctx context.Context, storyID int64) ([]editor.Editor
 	var out []editor.EditorSpan
 	last := 0
 	for rows.Next() {
-		var n int
+		var n, m int
 		var body, text, title string
 		var a editor.Address
-		if err := rows.Scan(&n, &body, &a.SourceID, &a.EntryID, &a.Span.Start, &a.Span.End, &text, &title); err != nil {
+		var of editor.EditorSpanAt
+		if err := rows.Scan(&n, &body, &m, &a.SourceID, &a.EntryID, &a.Span.Start, &a.Span.End, &text, &title,
+			&of.Story, &of.N); err != nil {
 			return nil, fmt.Errorf("editor's spans of story %d: %w", storyID, err)
 		}
 		if n != last {
@@ -217,6 +236,10 @@ func (s *Store) editorSpans(ctx context.Context, storyID int64) ([]editor.Editor
 			last = n
 		}
 		es := &out[len(out)-1]
+		if !of.IsZero() {
+			es.Cites = append(es.Cites, editor.Cited{Of: of, Words: text})
+			continue
+		}
 		es.Cites = append(es.Cites, editor.Cited{Address: a, Words: cut.Words(text, a.Span), Title: title})
 	}
 	return out, rows.Err()

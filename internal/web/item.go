@@ -70,6 +70,8 @@ type itemPage struct {
 	// has none yet. CutBy is the Cut's Judge, as a machine label.
 	Spans []spanRow
 	CutBy string
+	// Story is the Page of the Story its newest Cut made, the one way to it.
+	Story string
 	// ReadBy is the call of the Item's newest reading, if it has one.
 	ReadBy      *made
 	Title       string
@@ -164,6 +166,7 @@ func (a *app) itemWith(w http.ResponseWriter, r *http.Request, status int, errs 
 	}
 	if cutYet {
 		p.CutBy = fmt.Sprintf("cut · %s v%d", c.Judge.Cutter, c.Judge.Version)
+		p.Story = storyPath(c.ID)
 		for i, s := range c.Spans {
 			at := editor.Address{SourceID: sourceID, EntryID: entryID, Span: s}
 			row := spanOf(i+1, text, at, it.Published, j, page)

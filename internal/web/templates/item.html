@@ -18,6 +18,7 @@
 <section aria-labelledby="text">
   <h2 id="text">Text</h2>
   <p><span class="machine">{{.CutBy}}</span>{{with .ReadBy}} {{template "made" .}}{{end}}</p>
+  <p><a href="{{.Story}}">The Story its Cut made</a></p>
   {{- with .FeedbackError}}
   <p role="alert">{{.}}</p>
   {{- end}}

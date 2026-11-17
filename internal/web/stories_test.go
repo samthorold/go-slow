@@ -189,6 +189,31 @@ func TestAStoryWithANameIsListedAndHeadedByItAndOneWithoutByItsOpeningWords(t *t
 	}
 }
 
+func TestASpansPageAndAnEditorsSpansPageKnowAStoryByItsName(t *testing.T) {
+	store := openStore(t)
+	weaveSpeech(t, store, twoOpinions)
+	nameNewest(t, store, "Devolution's price")
+	app, _ := newAppWithLog(t, saturday, store)
+
+	// S2, "Scotland will get £2 billion.", which only the named Story cites.
+	span := get(t, app, "/items/number-10/speech/spans/47-77").body
+	stories := span[strings.Index(span, `<h2 id="stories">`):]
+	if n := strings.Count(stories, ">Devolution&#39;s price</a>"); n != 3 {
+		t.Errorf("the Span's Page names the Story %d times, want 3 (as holding it, and in each citing Span):\n%s", n, stories)
+	}
+	if regexp.MustCompile(`<a href="/stories/\d+">` + regexp.QuoteMeta(newestOpening)).MatchString(stories) {
+		t.Errorf("the Span's Page lists the named Story by its opening words:\n%s", stories)
+	}
+	m := regexp.MustCompile(`<a href="(/stories/\d+/spans/2)">`).FindStringSubmatch(stories)
+	if m == nil {
+		t.Fatalf("the Span's Page does not link the Editor's Span citing it:\n%s", stories)
+	}
+	es := get(t, app, m[1]).body
+	if !regexp.MustCompile(`In <a href="/stories/\d+">Devolution&#39;s price</a>`).MatchString(es) {
+		t.Errorf("the Editor's Span's Page does not know its Story by its Name:\n%s", es)
+	}
+}
+
 func TestAFailedNamingLinksItsStory(t *testing.T) {
 	store := openStore(t)
 	weaveSpeech(t, store, twoOpinions)
@@ -289,7 +314,7 @@ func TestAStoryThatIsNotInTheRecordIsNotFound(t *testing.T) {
 	}
 }
 
-func TestOpeningTheStoriesPageOrAStorysChangesNothing(t *testing.T) {
+func TestOpeningTheStoriesPagesOrWhatTheyLinkChangesNothing(t *testing.T) {
 	store := openStore(t)
 	weaveSpeech(t, store, twoOpinions)
 	app, logs := newAppWithLog(t, saturday, store)
@@ -308,17 +333,34 @@ func TestOpeningTheStoriesPageOrAStorysChangesNothing(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		return fmt.Sprintf("%+v %+v %d", made, waiting, len(calls))
+		held, err := store.HoldingSpan(t.Context(), editor.Address{SourceID: "number-10", EntryID: "speech", Span: cut.Span{Start: 47, End: 77}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return fmt.Sprintf("%+v %+v %d %+v", made, waiting, len(calls), held)
 	}
 	before := state()
 
-	list := get(t, app, "/stories").body
 	story := storyPage(t, app, "Two billion is a down payment on devolution.").body
+	m := regexp.MustCompile(`<a href="(/stories/\d+/spans/1)">`).FindStringSubmatch(story)
+	if m == nil {
+		t.Fatalf("the Story's Page does not link its Editor's Span:\n%s", story)
+	}
+	pages := map[string]string{}
+	open := func() {
+		for _, path := range []string{"/stories", "/items/number-10/speech", "/items/number-10/speech/spans/47-77", m[1]} {
+			pages[path] = get(t, app, path).body
+		}
+		pages["cut"] = cutStoryOf(t, app, "/items/number-10/speech").body
+	}
+	open()
+	first := fmt.Sprint(pages)
 
 	if after := state(); after != before {
 		t.Errorf("opening the pages changed the Record:\nbefore %s\nafter  %s", before, after)
 	}
-	if get(t, app, "/stories").body != list || storyPage(t, app, "Two billion is a down payment on devolution.").body != story {
+	open()
+	if fmt.Sprint(pages) != first || storyPage(t, app, "Two billion is a down payment on devolution.").body != story {
 		t.Errorf("the pages changed on being opened again")
 	}
 	if strings.Contains(logs.String(), `"level":"ERROR"`) {

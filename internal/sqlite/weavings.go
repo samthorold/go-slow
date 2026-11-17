@@ -55,6 +55,105 @@ func (s *Store) StoriesToWeave(ctx context.Context) ([]editor.CutStory, error) {
 	return out, nil
 }
 
+// CutStory is the Story the Cut id made, with its Item and its Spans in
+// the order the Cut lists them, reporting whether the Record holds one. It
+// is the Cut, read as a Story (system design: The Cut gives an Item's Spans
+// one Story).
+func (s *Store) CutStory(ctx context.Context, id int64) (editor.CutStory, bool, error) {
+	c := editor.CutStory{CutID: id}
+	var published string
+	err := s.db.QueryRowContext(ctx, `
+		SELECT items.source_id, items.entry_id, items.title, items.link, items.summary, items.content, items.published
+		FROM cuts JOIN items USING (source_id, entry_id)
+		WHERE cuts.event_id = ?`, id).Scan(&c.Item.SourceID, &c.Item.EntryID, &c.Item.Title, &c.Item.Link,
+		&c.Item.Summary, &c.Item.Content, &published)
+	if errors.Is(err, sql.ErrNoRows) {
+		return editor.CutStory{}, false, nil
+	}
+	if err != nil {
+		return editor.CutStory{}, false, fmt.Errorf("story of cut %d: %w", id, err)
+	}
+	c.Item.Published = parseTime(published)
+	if c.Spans, err = s.cutSpans(ctx, id); err != nil {
+		return editor.CutStory{}, false, err
+	}
+	return c, true, nil
+}
+
+// HoldingSpan is what holds the Span at a: the Cuts listing it, whose
+// Stories hold it, and the Editor's Spans citing it.
+func (s *Store) HoldingSpan(ctx context.Context, a editor.Address) (editor.SpanHeld, error) {
+	var h editor.SpanHeld
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT cuts.event_id FROM cuts JOIN cut_spans ON cut_spans.cut_id = cuts.event_id
+		WHERE cuts.source_id = ? AND cuts.entry_id = ? AND cut_spans.span_start = ? AND cut_spans.span_end = ?
+		ORDER BY cuts.event_id`, a.SourceID, a.EntryID, a.Span.Start, a.Span.End)
+	if err != nil {
+		return h, fmt.Errorf("holding span: %w", err)
+	}
+	defer func() { _ = rows.Close() }()
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return h, fmt.Errorf("holding span: %w", err)
+		}
+		h.Cuts = append(h.Cuts, id)
+	}
+	if err := rows.Err(); err != nil {
+		return h, fmt.Errorf("holding span: %w", err)
+	}
+	_ = rows.Close()
+	h.Citing, err = s.citing(ctx, `editor_span_cites c
+		WHERE c.story_id = e.story_id AND c.n = e.n
+			AND c.source_id = ? AND c.entry_id = ? AND c.span_start = ? AND c.span_end = ?`,
+		a.SourceID, a.EntryID, a.Span.Start, a.Span.End)
+	if err != nil {
+		return h, fmt.Errorf("holding span: %w", err)
+	}
+	return h, nil
+}
+
+// CitingEditorSpan are the Editor's Spans citing the Editor's Span at a, in
+// the order written: what a wrong one's Page shows (system design: The
+// Editor writes Spans).
+func (s *Store) CitingEditorSpan(ctx context.Context, a editor.EditorSpanAt) ([]editor.CitingSpan, error) {
+	out, err := s.citing(ctx, `editor_span_cites_editor c
+		WHERE c.story_id = e.story_id AND c.n = e.n AND c.cited_story_id = ? AND c.cited_n = ?`, a.Story, a.N)
+	if err != nil {
+		return nil, fmt.Errorf("citing editor's span %d/%d: %w", a.Story, a.N, err)
+	}
+	return out, nil
+}
+
+// citing are the Editor's Spans e for which a row of cites exists, in the
+// order written, each with when its Story was made, its opening words and
+// its newest Name, if any.
+func (s *Store) citing(ctx context.Context, cites string, args ...any) ([]editor.CitingSpan, error) {
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT e.story_id, e.n, e.body, events.at,
+			(SELECT o.body FROM editor_spans o WHERE o.story_id = e.story_id AND o.n = 1),
+			coalesce((SELECT nm.name FROM story_names nm WHERE nm.story_id = e.story_id
+				ORDER BY nm.event_id DESC LIMIT 1), '')
+		FROM editor_spans e JOIN events ON events.id = e.story_id
+		WHERE EXISTS (SELECT 1 FROM `+cites+`)
+		ORDER BY e.story_id, e.n`, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+	var out []editor.CitingSpan
+	for rows.Next() {
+		var c editor.CitingSpan
+		var at string
+		if err := rows.Scan(&c.Story, &c.N, &c.Body, &at, &c.Opening, &c.Name); err != nil {
+			return nil, err
+		}
+		c.At = parseTime(at)
+		out = append(out, c)
+	}
+	return out, rows.Err()
+}
+
 // WeavingRan reports whether the weaving run keyed key has had its result
 // written or been marked failed.
 func (s *Store) WeavingRan(ctx context.Context, key string) (bool, error) {
@@ -223,16 +322,18 @@ func scanStory(row scanner) (editor.Story, error) {
 // that wrote it.
 func (s *Store) editorSpans(ctx context.Context, storyID int64) ([]editor.EditorSpan, error) {
 	rows, err := s.db.QueryContext(ctx, `
-		SELECT e.n, e.body, c.m, c.source_id, c.entry_id, c.span_start, c.span_end, items.content, items.title, 0, 0
+		SELECT e.n, e.body, c.m, c.source_id, c.entry_id, c.span_start, c.span_end, items.content, items.title,
+			items.published, 0, 0
 		FROM editor_spans e
 			JOIN editor_span_cites c ON c.story_id = e.story_id AND c.n = e.n
 			JOIN items ON items.source_id = c.source_id AND items.entry_id = c.entry_id
 		WHERE e.story_id = ?
 		UNION ALL
-		SELECT e.n, e.body, c.m, '', '', 0, 0, cited.body, '', c.cited_story_id, c.cited_n
+		SELECT e.n, e.body, c.m, '', '', 0, 0, cited.body, '', written.at, c.cited_story_id, c.cited_n
 		FROM editor_spans e
 			JOIN editor_span_cites_editor c ON c.story_id = e.story_id AND c.n = e.n
 			JOIN editor_spans cited ON cited.story_id = c.cited_story_id AND cited.n = c.cited_n
+			JOIN events written ON written.id = c.cited_story_id
 		WHERE e.story_id = ?
 		ORDER BY 1, 3`, storyID, storyID)
 	if err != nil {
@@ -243,11 +344,11 @@ func (s *Store) editorSpans(ctx context.Context, storyID int64) ([]editor.Editor
 	last := 0
 	for rows.Next() {
 		var n, m int
-		var body, text, title string
+		var body, text, title, published string
 		var a editor.Address
 		var of editor.EditorSpanAt
 		if err := rows.Scan(&n, &body, &m, &a.SourceID, &a.EntryID, &a.Span.Start, &a.Span.End, &text, &title,
-			&of.Story, &of.N); err != nil {
+			&published, &of.Story, &of.N); err != nil {
 			return nil, fmt.Errorf("editor's spans of story %d: %w", storyID, err)
 		}
 		if n != last {
@@ -256,10 +357,11 @@ func (s *Store) editorSpans(ctx context.Context, storyID int64) ([]editor.Editor
 		}
 		es := &out[len(out)-1]
 		if !of.IsZero() {
-			es.Cites = append(es.Cites, editor.Cited{Of: of, Words: text})
+			es.Cites = append(es.Cites, editor.Cited{Of: of, Words: text, Published: parseTime(published)})
 			continue
 		}
-		es.Cites = append(es.Cites, editor.Cited{Address: a, Words: cut.Words(text, a.Span), Title: title})
+		es.Cites = append(es.Cites, editor.Cited{Address: a, Words: cut.Words(text, a.Span), Title: title,
+			Published: parseTime(published)})
 	}
 	return out, rows.Err()
 }

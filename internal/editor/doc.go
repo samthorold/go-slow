@@ -92,13 +92,17 @@
 // built with (DueAt), when that day's run has been neither written nor marked
 // failed (WeavingStore.WeavingRan) and something has been cut since the last
 // run written; while a run's request is in a pending batch, that run's job
-// alone. A run is one request, at EffortMedium, shown first every Story the
+// alone. Editor.WeaveToday is the same day's run asked for by the Owner at
+// any time of day, refused where Waiting would give none (ErrWovenToday,
+// ErrWeavingPending, ErrNothingToWeave), and Batches.Submit submits it alone,
+// pending, for the batch runner to apply as it applies its own; it is priced
+// by EstimateOf at batch rates (Price.AtBatchRates). A run is one request, at EffortMedium, shown first every Story the
 // Editor has made (WeavingStore.StoriesMade), oldest first, each under the
 // date it was made, its Editor's Spans in the order written, each after the
 // Spans it cites not yet shown and marked "the Editor's" with the numbers it
 // cites; then every Story cut since the last run written (the storage
 // adapter's StoriesToWeave: Cuts after its through_cut, of Items collected
-// after the switch, and since the switch to Stories, story_switch), each
+// after the switch, and since the switch to Stories, the newest story_switch), each
 // under its Item's title and date. Every Span shown, a Source's or an
 // Editor's, is numbered S1, S2… once, across them all (showMade, woven). A
 // Source's Span is shown hydrated once its Item has a reading

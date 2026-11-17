@@ -91,11 +91,12 @@ func (s *Store) ChooseCandidate(ctx context.Context, id int64, at time.Time) err
 
 // PastUsage is what the act's applied calls answering one of its
 // judgements in the Record cost: their count, their requests' size in bytes
-// (instructions, schema and input) and their tokens in and out. Only
-// reading keeps its judgements as events today, so only reading has any.
+// (instructions, schema and input) and their tokens in and out. Reading's
+// judgements are its readings and weaving's its runs; another act has none.
 func (s *Store) PastUsage(ctx context.Context, act string) (editor.PastUsage, error) {
 	var u editor.PastUsage
-	if act != "reading" {
+	judgements, ok := map[string]string{"reading": "readings", "weaving": "weavings"}[act]
+	if !ok {
 		return u, nil
 	}
 	err := s.db.QueryRowContext(ctx, `
@@ -107,7 +108,7 @@ func (s *Store) PastUsage(ctx context.Context, act string) (editor.PastUsage, er
 			JOIN call_texts sc ON sc.hash = c.schema
 			JOIN call_texts inp ON inp.hash = c.input
 		WHERE c.act = ? AND c.outcome = 'applied' AND c.input_tokens IS NOT NULL
-			AND EXISTS (SELECT 1 FROM readings r WHERE r.request_hash = c.request_hash)`, act,
+			AND EXISTS (SELECT 1 FROM `+judgements+` r WHERE r.request_hash = c.request_hash)`, act,
 	).Scan(&u.Calls, &u.RequestBytes, &u.InputTokens, &u.OutputTokens)
 	if err != nil {
 		return u, fmt.Errorf("past usage of %s: %w", act, err)

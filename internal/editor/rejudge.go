@@ -245,9 +245,32 @@ func (r *Rejudge) Price(ctx context.Context, act RejudgeAct, rng Range) (Estimat
 	if err != nil {
 		return Estimate{}, err
 	}
-	est := Estimate{Act: act.Name, Model: r.ModelName, Requests: len(jobs), FromPast: past.Calls, Rates: Rates, jobs: jobs}
+	reqs := make([]Request, 0, len(jobs))
 	for _, j := range jobs {
-		size, err := requestBytes(j.Request)
+		reqs = append(reqs, j.Request)
+	}
+	est, err := EstimateOf(act.Name, r.ModelName, reqs, past, price, Rates)
+	est.jobs = jobs
+	return est, err
+}
+
+// BatchRates is the rate a batch's calls are charged at.
+const BatchRates = "batch"
+
+// AtBatchRates is p, a real-time price, at batch rates: half of it.
+func (p Price) AtBatchRates() Price {
+	return Price{InputPerMTok: p.InputPerMTok / 2, OutputPerMTok: p.OutputPerMTok / 2, LongAbove: p.LongAbove,
+		LongInputPerMTok: p.LongInputPerMTok / 2, LongOutputPerMTok: p.LongOutputPerMTok / 2}
+}
+
+// EstimateOf is what the act's requests, asked of model, would cost at
+// price, charged at rates: each request's input from its size, at the tokens
+// per byte of the act's past calls, and its output at their mean per call;
+// with none past, by the fallbacks. It calls no model.
+func EstimateOf(act, model string, reqs []Request, past PastUsage, price Price, rates string) (Estimate, error) {
+	est := Estimate{Act: act, Model: model, Requests: len(reqs), FromPast: past.Calls, Rates: rates}
+	for _, req := range reqs {
+		size, err := requestBytes(req)
 		if err != nil {
 			return Estimate{}, err
 		}

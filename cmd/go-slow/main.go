@@ -5,8 +5,9 @@
 // reads the environment.
 //
 // The same binary runs the one-off admin commands (admin.go: retry,
-// backfill; rejudge.go: rejudge), with the app's own config, tested end to
-// end in admin_test.go, backfill_test.go and rejudge_test.go.
+// backfill; rejudge.go: rejudge; weave.go: weave), with the app's own
+// config, tested end to end in admin_test.go, backfill_test.go,
+// rejudge_test.go and weave_test.go.
 package main
 
 import (
@@ -52,6 +53,9 @@ func main() {
 			Web: &http.Client{Timeout: fetchTimeout},
 			Models: func(key config.Secret, model string) editor.Model {
 				return claude.New(claude.Options{APIKey: string(key), Model: model})
+			},
+			Batchers: func(key config.Secret, act, model string) editor.Batcher {
+				return claude.New(claude.Options{APIKey: string(key), Model: model, ActModels: map[string]string{act: model}})
 			},
 			Now: time.Now,
 		})

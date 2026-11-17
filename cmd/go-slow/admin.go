@@ -28,7 +28,10 @@ type adminDeps struct {
 	Web *http.Client
 	// Models is the model adapter on the model named, with the key.
 	Models func(key config.Secret, model string) editor.Model
-	Now    func() time.Time
+	// Batchers is the batch interface running the act's requests on the
+	// model named, with the key.
+	Batchers func(key config.Secret, act, model string) editor.Batcher
+	Now      func() time.Time
 }
 
 // admin runs a one-off admin command, from the same binary and config as
@@ -49,6 +52,9 @@ type adminDeps struct {
 //
 //	rejudge: judges a range of the Record again with a chosen judge, priced
 //	first; see rejudge.
+//
+//	weave: submits today's weaving run now, priced first, moving the switch
+//	to Stories back to a day if asked; see weave.
 func admin(ctx context.Context, log *slog.Logger, args []string, d adminDeps) error {
 	switch args[0] {
 	case "backfill":
@@ -110,7 +116,9 @@ func admin(ctx context.Context, log *slog.Logger, args []string, d adminDeps) er
 		return nil
 	case "rejudge":
 		return rejudge(ctx, log, args[1:], d)
+	case "weave":
+		return weave(ctx, log, args[1:], d)
 	default:
-		return fmt.Errorf("unknown command %q (known: backfill, rejudge, retry)", args[0])
+		return fmt.Errorf("unknown command %q (known: backfill, rejudge, retry, weave)", args[0])
 	}
 }

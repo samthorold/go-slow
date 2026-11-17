@@ -29,7 +29,9 @@
 // readable (Call, Conversation). It keeps the switch to Stories, an event of
 // kind switch, shape 2 (story_switch.through_cut: the newest Cut then, or a
 // Record already woven, its last run's), which StoriesToWeave reads; none
-// for a Record that held no Cut.
+// for a Record that held no Cut. The Record's switch to Stories is its newest
+// (storySwitch in switch.go), so KeepStorySwitch moves it back, through
+// CutBefore a day, by keeping another, rewriting none.
 //
 // # Readings and judges
 //
@@ -56,7 +58,8 @@
 // before it and a live reading after it outranks the choice. ItemsIn is the
 // Items cut and published in a range, read or not, for judging again;
 // PastUsage the size and tokens of reading's applied calls that answered a
-// reading, which a run's estimate scales from.
+// reading, or weaving's that answered a run written, which a run's estimate
+// scales from.
 //
 // # Look-ups
 //
@@ -76,7 +79,8 @@
 // (editor_span_cites_editor, 0034: its Story and place, its words read from
 // the Story that wrote it), the two sharing the order cited, m.
 // StoriesToWeave is every Cut after the newest through_cut and the switch
-// to Stories, of Items collected after the switch; StoriesMade and StoryMade the Stories made,
+// to Stories, of Items collected after the switch (StoriesCutAfter, after a
+// Cut given); Woven whether any run is written; StoriesMade and StoryMade the Stories made,
 // each with its call (the applied weaving call on its run's day answering
 // its request hash). A kept call and a pending request also keep the effort
 // asked for (effort, ” for none).

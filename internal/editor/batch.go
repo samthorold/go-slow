@@ -268,6 +268,23 @@ func (b *Batches) ReadWaiting(ctx context.Context, now time.Time) error {
 	return b.Store.SaveBatch(ctx, batch)
 }
 
+// Submit submits one job alone, as a batch of its own of the act its request
+// names, kept pending at now as ReadWaiting keeps its batches, so the runner
+// applies its result on a later turn as it applies theirs. It returns the
+// batch's identifier. Unlike ReadWaiting's, a batch interface that fails is
+// an error: the Owner asked for this one.
+func (b *Batches) Submit(ctx context.Context, j Job, now time.Time) (string, error) {
+	act := j.Request.Act
+	id := requestID(act, j.Key)
+	batchID, err := b.Batcher.Submit(ctx, []BatchRequest{{ID: id, Request: j.Request}})
+	if err != nil {
+		return "", fmt.Errorf("submit %s %s: %w", act, j.Key, err)
+	}
+	b.Log.InfoContext(ctx, "batch submitted", "batch", batchID, "requests", 1)
+	return batchID, b.Store.SaveBatch(ctx, PendingBatch{ID: batchID, SubmittedAt: now,
+		Requests: []PendingRequest{b.pending(id, act, j)}})
+}
+
 // pending is a job's request as a pending batch keeps it.
 func (b *Batches) pending(id, act string, j Job) PendingRequest {
 	req := j.Request

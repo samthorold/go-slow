@@ -237,42 +237,91 @@ func (e *Editor) Weaving(at time.Duration) BatchAct {
 					return nil, err
 				}
 			}
-			stories, err := e.Weavings.StoriesToWeave(ctx)
-			if err != nil || len(stories) == 0 {
+			run, err := e.weavingRun(ctx, key)
+			if err != nil || len(run.Stories) == 0 {
 				return nil, err
 			}
-			made, err := e.Weavings.StoriesMade(ctx)
-			if err != nil {
-				return nil, err
-			}
-			slices.Reverse(made)
-			h, err := e.hydration(ctx, made, stories)
-			if err != nil {
-				return nil, err
-			}
-			return []Job{{
-				Key:     key,
-				Request: weavingRequest(made, stories, h),
-				ApplySent: func(ctx context.Context, sent Request, res Response, now time.Time) error {
-					shown, ok := shownIn(made, stories, sent)
-					if !ok {
-						return errors.New("weaving: the Stories its request showed no longer await weaving")
-					}
-					w, err := checkWeaving(shown, sent, modelOf(e.ModelFor, sent.Act), res)
-					if err != nil {
-						return err
-					}
-					w.Key, w.At = key, now
-					if err := e.Weavings.KeepWeaving(ctx, w); err != nil {
-						return err
-					}
-					e.Log.InfoContext(ctx, "woven", "key", key, "shown", len(shown.stories), "stories", len(w.Stories),
-						"model", w.Judge.Model, "input_tokens", w.Usage.InputTokens, "output_tokens", w.Usage.OutputTokens)
-					return nil
-				},
-			}}, nil
+			return []Job{run.Job}, nil
 		},
 	}
+}
+
+// WeavingRun is a weaving run as it is submitted: its key, what it is shown
+// (the Stories the Editor made, oldest first, and the Stories cut since the
+// last run written) and its Job.
+type WeavingRun struct {
+	Key     string
+	Made    []Story
+	Stories []CutStory
+	Job     Job
+}
+
+// weavingRun is the run keyed key as the Record stands, shown no Story cut
+// when nothing has been cut since the last run written.
+func (e *Editor) weavingRun(ctx context.Context, key string) (WeavingRun, error) {
+	stories, err := e.Weavings.StoriesToWeave(ctx)
+	if err != nil || len(stories) == 0 {
+		return WeavingRun{Key: key}, err
+	}
+	made, err := e.Weavings.StoriesMade(ctx)
+	if err != nil {
+		return WeavingRun{}, err
+	}
+	slices.Reverse(made)
+	h, err := e.hydration(ctx, made, stories)
+	if err != nil {
+		return WeavingRun{}, err
+	}
+	return WeavingRun{Key: key, Made: made, Stories: stories, Job: Job{
+		Key:     key,
+		Request: weavingRequest(made, stories, h),
+		ApplySent: func(ctx context.Context, sent Request, res Response, now time.Time) error {
+			shown, ok := shownIn(made, stories, sent)
+			if !ok {
+				return errors.New("weaving: the Stories its request showed no longer await weaving")
+			}
+			w, err := checkWeaving(shown, sent, modelOf(e.ModelFor, sent.Act), res)
+			if err != nil {
+				return err
+			}
+			w.Key, w.At = key, now
+			if err := e.Weavings.KeepWeaving(ctx, w); err != nil {
+				return err
+			}
+			e.Log.InfoContext(ctx, "woven", "key", key, "shown", len(shown.stories), "stories", len(w.Stories),
+				"model", w.Judge.Model, "input_tokens", w.Usage.InputTokens, "output_tokens", w.Usage.OutputTokens)
+			return nil
+		},
+	}}, nil
+}
+
+// The reasons the Owner's ask for today's weaving run is refused.
+var (
+	ErrWovenToday     = errors.New("today's weaving run has already been written or marked failed")
+	ErrWeavingPending = errors.New("a weaving run is in a pending batch")
+	ErrNothingToWeave = errors.New("nothing has been cut since the last weaving run written")
+)
+
+// WeaveToday is today's weaving run, keyed by the day holding now in now's
+// location, as the Owner asks for it, whatever the time of day (system
+// design: Weaving runs at most once a day): the run the timetable would
+// submit at its time, asking the same, and applied by the batch runner as
+// that is once its batch ends. It is refused, as ErrWovenToday,
+// ErrWeavingPending or ErrNothingToWeave, where the timetable would submit no
+// run either.
+func (e *Editor) WeaveToday(ctx context.Context, now time.Time) (WeavingRun, error) {
+	if _, pending, err := e.pendingWeaving(ctx); err != nil || pending {
+		return WeavingRun{}, cmp.Or(err, ErrWeavingPending)
+	}
+	key := now.Format(time.DateOnly)
+	if ran, err := e.Weavings.WeavingRan(ctx, key); err != nil || ran {
+		return WeavingRun{}, cmp.Or(err, ErrWovenToday)
+	}
+	run, err := e.weavingRun(ctx, key)
+	if err == nil && len(run.Stories) == 0 {
+		err = ErrNothingToWeave
+	}
+	return run, err
 }
 
 // pendingWeaving is the key of the weaving run in a pending batch, if any.

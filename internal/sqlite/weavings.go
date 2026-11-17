@@ -19,17 +19,30 @@ const (
 
 // StoriesToWeave are the Stories cut since the last weaving run whose result
 // was written (every Cut after its through_cut) and since the switch to
-// Stories (story_switch), of Items collected after the switch, oldest Cut
-// first, each with its Item and its Spans.
+// Stories (the newest story_switch), of Items collected after the switch,
+// oldest Cut first, each with its Item and its Spans.
 func (s *Store) StoriesToWeave(ctx context.Context) ([]editor.CutStory, error) {
+	return s.storiesCut(ctx, `max(coalesce((SELECT max(through_cut) FROM weavings), 0), `+storySwitch+`)`)
+}
+
+// StoriesCutAfter are the Stories cut after the Cut throughCut, of Items
+// collected after the switch, oldest Cut first, as StoriesToWeave reads
+// them: those awaiting a Record not yet woven were its switch to Stories
+// through throughCut.
+func (s *Store) StoriesCutAfter(ctx context.Context, throughCut int64) ([]editor.CutStory, error) {
+	return s.storiesCut(ctx, `?`, throughCut)
+}
+
+// storiesCut are the Stories cut after the Cut through, SQL taking args, of
+// Items collected after the switch, oldest Cut first.
+func (s *Store) storiesCut(ctx context.Context, through string, args ...any) ([]editor.CutStory, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT cuts.event_id, items.source_id, items.entry_id, items.title, items.link, items.summary,
 			items.content, items.published
 		FROM cuts JOIN items USING (source_id, entry_id)
-		WHERE cuts.event_id > max(coalesce((SELECT max(through_cut) FROM weavings), 0),
-				coalesce((SELECT max(through_cut) FROM story_switch), 0))
+		WHERE cuts.event_id > `+through+`
 			AND `+afterSwitch+`
-		ORDER BY cuts.event_id`)
+		ORDER BY cuts.event_id`, args...)
 	if err != nil {
 		return nil, fmt.Errorf("stories to weave: %w", err)
 	}
@@ -186,6 +199,17 @@ func (s *Store) WeavingRan(ctx context.Context, key string) (bool, error) {
 		return false, fmt.Errorf("weaving %s ran: %w", key, err)
 	}
 	return ran, nil
+}
+
+// Woven reports whether the Record is woven: a weaving run's result has been
+// written, so it carries on from that run's newest Cut, whatever its switch
+// to Stories.
+func (s *Store) Woven(ctx context.Context) (bool, error) {
+	var woven bool
+	if err := s.db.QueryRowContext(ctx, `SELECT EXISTS (SELECT 1 FROM weavings)`).Scan(&woven); err != nil {
+		return false, fmt.Errorf("woven: %w", err)
+	}
+	return woven, nil
 }
 
 // KeepWeaving keeps a weaving run as an event, with its Judge, and each Story

@@ -14,14 +14,14 @@ import (
 // and of how its input is shown. A new version is a new Judge (system design:
 // Every Judgement carries its Judge). Change it with namingInstructions,
 // namingSchema, checkNaming or namingInput.
-const NamingVersion = 1
+const NamingVersion = 2
 
 // namingAct names naming, as its requests, calls and work do.
 const namingAct = "naming"
 
 // MaxNameWords is the most words a Name may have, as namingInstructions
 // state it.
-const MaxNameWords = 8
+const MaxNameWords = 12
 
 // StoryName is a Story's Name: a short subject for the Owner to recognise it
 // by in a list, kept as a Judgement of its own with its Judge (system
@@ -52,8 +52,8 @@ type NamingStore interface {
 
 // namingInstructions are naming's instructions. They state every standard
 // checkNaming holds a Name to: that it is given, on one line, in at most
-// MaxNameWords (eight) words.
-const namingInstructions = `Below is a Story from a slow-news publication: its editor's words, in numbered parts, each followed by the passages from published articles it cites. Give the Story a name: a short subject by which a reader scanning a list of Stories recognises this one. Say what the Story is about, in plain words. The name is a single line of at most eight words.`
+// MaxNameWords (twelve) words.
+const namingInstructions = `Below is a Story from a slow-news publication: its editor's words, in numbered parts, each followed by the passages from published articles it cites. Give the Story a name: a short subject by which a reader scanning a list of Stories recognises this one. Say what the Story is about, in plain words. The name is a single line of at most twelve words.`
 
 // namingSchema is naming's output schema: the name alone.
 var namingSchema = object(map[string]any{"name": str()})

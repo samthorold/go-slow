@@ -70,8 +70,8 @@ func TestEachStoryTheEditorMadeIsNamedWithItsJudgeAndItsCall(t *testing.T) {
 	if err != nil || len(calls) != 1 || calls[0].Outcome != editor.Applied || n.Call != calls[0].ID {
 		t.Errorf("calls %+v (%v), Name's call %d, want the one applied call", calls, err, n.Call)
 	}
-	if !strings.Contains(batcher.submitted[1][0].Request.Instructions, "at most eight words") ||
-		editor.MaxNameWords != 8 {
+	if !strings.Contains(batcher.submitted[1][0].Request.Instructions, "at most twelve words") ||
+		editor.MaxNameWords != 12 {
 		t.Errorf("the instructions do not state the check on a Name's length")
 	}
 	// Named once: nothing more is asked.
@@ -161,7 +161,8 @@ func TestANamingAnswerFailingItsChecksNamesNothingAndIsAskedAgain(t *testing.T) 
 		"an empty name":       {`{"name": "  "}`, "the name is empty"},
 		"a name on two lines": {`{"name": "Scotland\nmoney"}`, "more than one line"},
 		"a name too long": {
-			`{"name": "Money follows the Prime Minister to Scotland and Motherwell"}`, "9 words, more than 8"},
+			`{"name": "Money follows the Prime Minister to Scotland, Motherwell and the ferries of the Clyde"}`,
+			"14 words, more than 12"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			store, batcher, b := woven(t)

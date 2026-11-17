@@ -59,6 +59,9 @@ type Deps struct {
 	// Weavings is the part of the Record weaving reads and keeps its
 	// Stories in; weaving runs in batches, on the batch interface's models.
 	Weavings WeavingStore
+	// Namings is the part of the Record naming reads the Stories the Editor
+	// made from and keeps their Names in; naming runs in batches too.
+	Namings NamingStore
 	// ModelFor is the model an act's calls run on, as the model adapter
 	// chooses it, kept with each call; nil leaves it unknown.
 	ModelFor func(act string) string

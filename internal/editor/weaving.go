@@ -81,17 +81,21 @@ type Story struct {
 	// Call is the kept call that made it, found by its Judge's request hash;
 	// zero if none was kept.
 	Call int64
+	// Name is its Name, the newest naming of it; its Text is empty until it
+	// has one.
+	Name StoryName
 }
 
 // CitingSpan is an Editor's Span citing a Span: its Story, its number in
 // it from 1, its words and when it was written, with its Story's opening
-// words.
+// words and its Story's newest Name, empty until it has one.
 type CitingSpan struct {
 	Story   int64
 	N       int
 	Body    string
 	At      time.Time
 	Opening string
+	Name    string
 }
 
 // SpanHeld is what holds a Span: the Cuts whose Stories list it, oldest

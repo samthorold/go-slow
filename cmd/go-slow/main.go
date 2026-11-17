@@ -70,9 +70,11 @@ func main() {
 }
 
 // batchActs are the acts run in batches, in the order their work is
-// submitted; weaving from the time of day weavingAt.
+// submitted; weaving from the time of day weavingAt, and naming after it, so
+// the Stories a run's result makes are named in the batch submitted on the
+// same turn.
 func batchActs(ed *editor.Editor, weavingAt time.Duration) []editor.BatchAct {
-	return []editor.BatchAct{ed.Reading(), ed.Relating(), ed.Weaving(weavingAt)}
+	return []editor.BatchAct{ed.Reading(), ed.Relating(), ed.Weaving(weavingAt), ed.Naming()}
 }
 
 func run(log *slog.Logger) error {
@@ -103,7 +105,7 @@ func run(log *slog.Logger) error {
 		Model:  cfg.ReadingModel,
 		ActModels: map[string]string{
 			"reading": cfg.ReadingModel, "relating": cfg.RelatingModel, "briefing": cfg.BriefingModel,
-			"sunday_read": cfg.SundayReadModel, "weaving": cfg.WeavingModel,
+			"sunday_read": cfg.SundayReadModel, "weaving": cfg.WeavingModel, "naming": cfg.NamingModel,
 		},
 	})
 	// What the readings name, and the Sunday read's tools, look Wikidata
@@ -119,7 +121,7 @@ func run(log *slog.Logger) error {
 	ed := editor.New(editor.Deps{
 		Store: store, Model: models, RelatingModel: models, Wikidata: wd,
 		Briefings: store, BriefingModel: models, SundayReads: store, SundayReadModel: models,
-		Weavings: store, ModelFor: models.ModelFor, Log: log,
+		Weavings: store, Namings: store, ModelFor: models.ModelFor, Log: log,
 	})
 	// The daily acts run in batches: submitted after a Collection run, and
 	// their results applied on later runs as they arrive. One batch carries

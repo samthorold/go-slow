@@ -400,6 +400,20 @@ func sampledOn(t *testing.T, dir, fixture string, r rule, cmd rerecordCmd, live 
 	report func(error), run func(*sampleModel) sampleResult,
 ) []error {
 	t.Helper()
+	results, err := drawSamples(t, dir, fixture, r, cmd, live, model, report, run)
+	if err != nil {
+		return []error{err}
+	}
+	return judge(fixture, r, cmd, results)
+}
+
+// drawSamples is sampledOn short of judging: each sample's result, in order,
+// or the error that leaves the fixture with none to judge (too few samples,
+// or samples of different requests).
+func drawSamples(t *testing.T, dir, fixture string, r rule, cmd rerecordCmd, live editor.Model, model string,
+	report func(error), run func(*sampleModel) sampleResult,
+) ([]sampleResult, error) {
+	t.Helper()
 	var models []*sampleModel
 	if live != nil {
 		samples := r.samples
@@ -411,7 +425,7 @@ func sampledOn(t *testing.T, dir, fixture string, r rule, cmd rerecordCmd, live 
 		}
 	} else {
 		if _, err := samplesOf(dir, fixture, r, cmd); err != nil {
-			return []error{err}
+			return nil, err
 		}
 		for k := 1; k <= r.samples; k++ {
 			models = append(models, replayingSample(t, samplePath(dir, fixture, k), model, cmd, report))
@@ -432,7 +446,7 @@ func sampledOn(t *testing.T, dir, fixture string, r rule, cmd rerecordCmd, live 
 		}
 	}
 	t.Logf("%s: %d samples, %d input, %d output tokens", fixture, len(models), total.InputTokens, total.OutputTokens)
-	return judge(fixture, r, cmd, results)
+	return results, nil
 }
 
 // liveModel is the real model an act is recorded on, named by modelVar.

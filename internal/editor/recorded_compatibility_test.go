@@ -2,6 +2,7 @@ package editor_test
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -19,10 +20,49 @@ import (
 // must pass weaving's checks. A change to what reading writes that weaving
 // can't take fails here at once, with no recording made. A change in what
 // reading judges is not a failure: a refresh brings it downstream.
-func TestReadingsCurrentRecordingsAreTakenByWeaving(t *testing.T) {
+//
+// Likewise naming is replayed over its frozen copies of what weaving used to
+// write, so weaving's current recordings, each run's first sample, over the
+// readings they were recorded on, make their Stories, and each is named on a
+// fake model whose answers pass naming's checks: every run's recording must
+// be taken by weaving's checks, and every Story it makes named.
+func TestEachActsCurrentRecordingsAreTakenByTheActsDownstream(t *testing.T) {
 	t.Parallel()
-	if err := feedWeaving(t, filepath.Join(recordedDir, "reading")); err != nil {
-		t.Error(err)
+	t.Run("reading's by weaving", func(t *testing.T) {
+		t.Parallel()
+		if err := feedWeaving(t, filepath.Join(recordedDir, "reading")); err != nil {
+			t.Error(err)
+		}
+	})
+	t.Run("weaving's by naming", func(t *testing.T) {
+		t.Parallel()
+		if err := feedNaming(t, filepath.Join(recordedDir, "weaving")); err != nil {
+			t.Error(err)
+		}
+	})
+}
+
+// A weaving naming can't be shown fails the check, naming its run: one whose
+// answer weaving's checks now refuse makes no Story to name.
+func TestTheCompatibilityCheckFailsOnAWeavingNamingCannotTake(t *testing.T) {
+	t.Parallel()
+	weavings := filepath.Join(t.TempDir(), "weaving")
+	if err := os.CopyFS(weavings, os.DirFS(filepath.Join(recordedDir, "weaving"))); err != nil {
+		t.Fatal(err)
+	}
+	name := "to-15-october"
+	path := samplePath(weavings, name, 1)
+	s, err := sampleAt(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	attempts := s.attempts()
+	attempts[len(attempts)-1].Output = json.RawMessage(citingUnshown)
+	keepSample(t, path, attempts)
+
+	err = feedNaming(t, weavings)
+	if err == nil || !strings.Contains(err.Error(), name) || !strings.Contains(err.Error(), "not taken") {
+		t.Fatalf("feedNaming = %v; want %s not taken", err, name)
 	}
 }
 
@@ -48,6 +88,49 @@ func TestTheCompatibilityCheckFailsOnAReadingWeavingCannotTake(t *testing.T) {
 	if err == nil || !strings.Contains(err.Error(), name) || !strings.Contains(err.Error(), "not hydrated") {
 		t.Fatalf("feedWeaving = %v; want %s not hydrated", err, name)
 	}
+}
+
+// feedNaming copies the first sample of each of weaving's runs under
+// weavings, with the readings they were recorded on (weavings/inputs/reading),
+// as a refresh would, and names each Story they make on a fake model: the
+// first failure.
+func feedNaming(t *testing.T, weavings string) error {
+	t.Helper()
+	frozen := t.TempDir()
+	if err := os.CopyFS(filepath.Join(frozen, "reading"), os.DirFS(filepath.Join(weavings, "inputs", "reading"))); err != nil {
+		return err
+	}
+	if err := os.MkdirAll(filepath.Join(frozen, "weaving"), 0o750); err != nil {
+		return err
+	}
+	for _, r := range weavingRuns(t) {
+		b, err := os.ReadFile(samplePath(weavings, r.name, 1))
+		if err != nil {
+			return fmt.Errorf("%s: weaving has no recording: %w", r.name, err)
+		}
+		if err := os.WriteFile(filepath.Join(frozen, "weaving", r.name+".json"), b, 0o600); err != nil {
+			return err
+		}
+	}
+	record, stories, err := wovenRecord(t, frozen)
+	if err != nil {
+		return err
+	}
+	if len(stories) == 0 {
+		return errors.New("weaving's current recordings make no Story to name")
+	}
+	fake := &namingEachStory{}
+	for _, s := range stories {
+		m := recordingSample(t, samplePath(t.TempDir(), s.name, 1), fake, "fake", namingCommand)
+		named, err := nameStory(t, copyOfRecord(t, record), m, s.id)
+		if err != nil {
+			return err
+		}
+		if named == "" {
+			return fmt.Errorf("%s: naming's checks refuse a fake's answer over weaving's current recordings", s.name)
+		}
+	}
+	return nil
 }
 
 // feedWeaving copies the first sample of each fixture's reading under

@@ -105,4 +105,7 @@ func TestTheModelAReplayHashesWithIsTheActsPin(t *testing.T) {
 	if got := pinnedModel(t, "WEAVING_MODEL"); got != "claude-opus-5-5" {
 		t.Errorf("WEAVING_MODEL is pinned to %q, want claude-opus-5-5", got)
 	}
+	if got := pinnedModel(t, "NAMING_MODEL"); got != "claude-haiku-5-5" {
+		t.Errorf("NAMING_MODEL is pinned to %q, want claude-haiku-5-5", got)
+	}
 }

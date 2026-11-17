@@ -25,7 +25,7 @@ The code builds the design the docs state, but for two things. Hydration is call
 - [`CONTEXT.md`](CONTEXT.md): the domain language (Owner, Story, Span, Item...). Use its terms in new code, tests and issues.
 - [`docs/system-design/README.md`](docs/system-design/README.md): the design, its end state and hypotheses, and why it has its shape.
 - [`docs/research/`](docs/research/): research that grounds the design.
-- [`internal/editor/testdata/recorded/README.md`](internal/editor/testdata/recorded/README.md): the Editor's recorded runs: what is where, what each act's recording asserts, refreshing frozen copies, the yield report.
+- [`internal/editor/testdata/recorded/README.md`](internal/editor/testdata/recorded/README.md): the Editor's recorded runs (reading, weaving, naming): what is where, what each act's recording asserts, refreshing frozen copies, the yield report.
 - Code:
   - `cmd/go-slow`: `main`, the composition root (it alone reads the environment), and the admin commands (`admin.go`, `rejudge.go`, `weave.go`).
   - `internal/config`: the typed config.
@@ -56,6 +56,7 @@ Recording calls the real model and costs money; the suite only replays. Re-recor
 
 - **Reading:** `go test -count=1 -timeout 90m ./internal/editor -run TestRecordedReadings -record`, with `READING_MODEL`. Five calls per fixture, more where the checks refuse an attempt.
 - **Weaving:** `go test -count=1 -timeout 90m ./internal/editor -run '^TestRecordedWeaving$' -record`, with `WEAVING_MODEL` (Claude Opus 5.5 at medium effort; about $0.89 a run of ten samples in 2026-11's, some 10–16k tokens in and 1–2.5k out a sample). Two runs, five samples each; the second rests on the first's first passing sample, so re-recording the first redraws both. It is shown each Item hydrated by its frozen copy of reading's recording (`weaving/inputs/reading/`), so a refresh of those copies redraws both too. `-max-samples 1` draws one sample of each run, to probe before paying for five.
+- **Naming:** `go test -count=1 -timeout 90m ./internal/editor -run '^TestRecordedNaming$' -record`, with `NAMING_MODEL` (Claude Haiku 5.5 at low effort; a call is some 1.3–2.4k tokens in and under 50 out, so a run of twenty samples costs about a cent). Five samples of each Story weaving's frozen copies make (`naming/inputs/weaving/`, with the readings they rest on in `naming/inputs/reading/`); a refresh of those copies redraws every Story. `-max-samples 1` draws one sample of each Story, to probe.
 - **Refresh an act's frozen copies** (to bring a downstream act onto an upstream act's newer recordings): its own change, never part of the upstream act's; every upstream act's recordings copied together. Steps: the README's *Refreshing*.
 - **Report each act's yield on every re-recording, and paste the table into the PR body**: extract the recordings being replaced (`git archive -o <scratch>/old.tar origin/main internal/editor/testdata/recorded`, then `tar -xf <scratch>/old.tar -C <scratch>/old`), then `go run ./internal/editor/yield <scratch>/old/internal/editor/testdata/recorded internal/editor/testdata/recorded`. Calls no model; what it prints is in the README.
 

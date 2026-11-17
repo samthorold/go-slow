@@ -3,18 +3,50 @@ package editor_test
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 
+	"github.com/samthorold/go-slow/internal/cut"
 	"github.com/samthorold/go-slow/internal/editor"
 )
 
-// opinionOnS1AndS3 is an answer to any weaving run: one Story of one
-// Editor's Span, citing S1 and S3, which every run is shown. Sunday's run,
-// shown Saturday's Story first, is shown the Spans it cites as S1 and S2 and
-// its Editor's Span as S3, so Sunday's answer cites an earlier Editor's Span.
-const opinionOnS1AndS3 = `{"stories": [{"editor_spans": [{"body": "What none of them says.", "cites": [1, 3]}]}]}`
+// shownLine is a line of a weaving run's input showing a numbered Span.
+var shownLine = regexp.MustCompile(`(?m)^S(\d+)[ :]`)
+
+// opinionOnShown is an answer to a weaving run shown input: one Story of one
+// Editor's Span, citing the first and third Spans shown, which every run is
+// shown. Sunday's run, shown Saturday's Story first, is shown the Spans it
+// cites first and second and its Editor's Span third, so Sunday's answer
+// cites an earlier Editor's Span.
+func opinionOnShown(input string) string {
+	shown := shownLine.FindAllStringSubmatch(input, 3)
+	return fmt.Sprintf(`{"stories": [{"editor_spans": [{"body": "What none of them says.", "cites": [%s, %s]}]}]}`,
+		shown[0][1], shown[2][1])
+}
+
+// weavingOnShown answers every weaving run with opinionOnShown, keeping each
+// request.
+type weavingOnShown struct{ sent []editor.Request }
+
+func (m *weavingOnShown) Complete(_ context.Context, req editor.Request) (editor.Response, error) {
+	m.sent = append(m.sent, req)
+	return editor.Response{Output: json.RawMessage(opinionOnShown(req.Input)), Model: "fake"}, nil
+}
+
+// frozenRoot is a recordings root holding weaving's frozen copies alone.
+func frozenRoot(t *testing.T) string {
+	t.Helper()
+	root := t.TempDir()
+	in := filepath.Join("weaving", "inputs")
+	if err := os.CopyFS(filepath.Join(root, in), os.DirFS(filepath.Join(recordedDir, in))); err != nil {
+		t.Fatal(err)
+	}
+	return root
+}
 
 // Weaving is recorded as samples of each run, and the suite replays them:
 // recorded on a fake model taking the act's checks, every property of every
@@ -23,10 +55,10 @@ func TestWeavingIsRecordedAndReplayedAsSamples(t *testing.T) {
 	if *rerecordFlag {
 		t.Skip("recording")
 	}
-	root := t.TempDir()
+	root := frozenRoot(t)
 	runs := weavingRuns(t)
 	model := pinnedModel(t, weavingCommand.modelVar)
-	live := &fakeModel{output: opinionOnS1AndS3}
+	live := &weavingOnShown{}
 	if errs := weavingVerdicts(t, root, runs, live, model, reportTo(t)); len(errs) != 0 {
 		t.Fatalf("recording: %v", errs)
 	}
@@ -58,10 +90,10 @@ func TestAWeavingReplayFailsAsStaleWhenItsRequestHasChanged(t *testing.T) {
 	if *rerecordFlag {
 		t.Skip("recording")
 	}
-	root := t.TempDir()
+	root := frozenRoot(t)
 	runs := weavingRuns(t)
 	model := pinnedModel(t, weavingCommand.modelVar)
-	if errs := weavingVerdicts(t, root, runs, &fakeModel{output: opinionOnS1AndS3}, model, reportTo(t)); len(errs) != 0 {
+	if errs := weavingVerdicts(t, root, runs, &weavingOnShown{}, model, reportTo(t)); len(errs) != 0 {
 		t.Fatalf("recording: %v", errs)
 	}
 	changedItem := weavingRuns(t)
@@ -95,12 +127,12 @@ const citingUnshown = `{"stories": [{"editor_spans": [{"body": "Words.", "cites"
 // act's checks refuse, and its second with one they take.
 type refusedThenWoven struct{ calls int }
 
-func (m *refusedThenWoven) Complete(context.Context, editor.Request) (editor.Response, error) {
+func (m *refusedThenWoven) Complete(_ context.Context, req editor.Request) (editor.Response, error) {
 	m.calls++
 	if m.calls%2 == 1 {
 		return editor.Response{Output: json.RawMessage(citingUnshown), Model: "fake"}, nil
 	}
-	return editor.Response{Output: json.RawMessage(opinionOnS1AndS3), Model: "fake"}, nil
+	return editor.Response{Output: json.RawMessage(opinionOnShown(req.Input)), Model: "fake"}, nil
 }
 
 // A sample runs as weaving runs in use, through the batch runner: an answer
@@ -110,7 +142,7 @@ func TestAWeavingSampleRefusedOnceIsAskedAgainAndPasses(t *testing.T) {
 	if *rerecordFlag {
 		t.Skip("recording")
 	}
-	root := t.TempDir()
+	root := frozenRoot(t)
 	runs := weavingRuns(t)
 	model := pinnedModel(t, weavingCommand.modelVar)
 	live := &refusedThenWoven{}
@@ -129,6 +161,38 @@ func TestAWeavingSampleRefusedOnceIsAskedAgainAndPasses(t *testing.T) {
 	}
 }
 
+// Weaving is recorded over its frozen copies of reading's recordings
+// (weaving/inputs/reading/): each run is shown its Items hydrated, a Span
+// with a Speaker as spoken, a Span read in other words in brackets, and a
+// Span Rejected left out.
+func TestWeavingIsRecordedOverItsFrozenCopiesOfReading(t *testing.T) {
+	if *rerecordFlag {
+		t.Skip("recording")
+	}
+	root := frozenRoot(t)
+	runs := weavingRuns(t)
+	live := &weavingOnShown{}
+	if errs := weavingVerdicts(t, root, runs, live, pinnedModel(t, weavingCommand.modelVar), reportTo(t)); len(errs) != 0 {
+		t.Fatalf("recording: %v", errs)
+	}
+	in := live.sent[0].Input
+	// The US–Russia response's first Span is Rejected by its frozen reading.
+	first := runs[0].items[0].item
+	rejected := cut.Words(first.Content, cut.Sentences(first.Content)[0])
+	for _, c := range []struct {
+		what string
+		ok   bool
+	}{
+		{"a Span spoken", strings.Contains(in, " (spoken by ")},
+		{"a stretch read in other words", strings.Contains(in, "[")},
+		{"no Rejected Span: " + rejected, !strings.Contains(in, rejected)},
+	} {
+		if !c.ok {
+			t.Errorf("Saturday's run is not shown %s:\n%.1500s", c.what, in)
+		}
+	}
+}
+
 // reportTo reports a stale sample as a failure of t.
 func reportTo(t *testing.T) func(error) { return func(err error) { t.Error(err) } }
 
@@ -139,7 +203,7 @@ func TestAWeavingRunRefusedOnEveryAttemptIsRefuted(t *testing.T) {
 	if *rerecordFlag {
 		t.Skip("recording")
 	}
-	root := t.TempDir()
+	root := frozenRoot(t)
 	runs := weavingRuns(t)
 	model := pinnedModel(t, weavingCommand.modelVar)
 	live := &fakeModel{output: citingUnshown}

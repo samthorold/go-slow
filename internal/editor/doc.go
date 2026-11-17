@@ -99,18 +99,29 @@
 // cites; then every Story cut since the last run written (the storage
 // adapter's StoriesToWeave: Cuts after its through_cut, of Items collected
 // after the switch, and since the switch to Stories, story_switch), each
-// under its Item's title and date, its Spans as
-// written. Every Span shown, a Source's or an Editor's, is numbered S1, S2…
-// once, across them all (showMade, woven). It answers stories, each
+// under its Item's title and date. Every Span shown, a Source's or an
+// Editor's, is numbered S1, S2… once, across them all (showMade, woven). A
+// Source's Span is shown hydrated once its Item has a reading
+// (WeavingStore.NewestReading; system design: Construction judges a Span
+// from the Story its Cut made): "spoken by" its Speaker, and each stretch
+// that refers to another read in square brackets as what it refers to
+// (Reading.Hydrated); a Span of a Story cut that is Rejected is left out and
+// keeps its number, so a Span's number never depends on its hydration. A
+// Span with no reading is shown as written: nothing waits for hydration. A
+// Span an Editor's Span cites is shown, hydrated, whether Rejected or not.
+// It answers stories, each
 // editor_spans, each body then cites (numbers); a citation of an earlier
 // Editor's Span is held by its address (Cited.Of, an EditorSpanAt), never
-// copied. The checks refuse a citation of a Span not shown, an Editor's Span
-// with no words or no citation, and a Story with none; an empty stories is a
-// run that made nothing, kept all the same. A result is applied through
-// Job.ApplySent to the request as sent, never refused as stale: the Stories
-// it showed are those made (only weaving makes them, one run at a time) and
-// the first of those cut now awaiting (shownIn), since Cuts are only added
-// to and numbering runs on from the first. KeepWeaving keeps the
+// copied. The checks refuse a citation of a Span not shown (left out
+// included), an Editor's Span with no words or no citation, and a Story with
+// none; an empty stories is a run that made nothing, kept all the same. A
+// result is applied through Job.ApplySent to the request as sent, never
+// refused as stale: the Stories it showed are those made (only weaving makes
+// them, one run at a time) and the first of those cut now awaiting, found by
+// their headings in the request as sent, and the Spans left out are read from
+// it too (shownIn), since a Span hydrated after the request went is shown
+// otherwise now; Cuts are only added to and numbering runs on from the
+// first. KeepWeaving keeps the
 // run (its Judge and the newest Cut shown) and each Story as its own event.
 // A run failing MaxAttempts is listed on the Items page by its day, and its
 // Stories are shown to the next day's run.

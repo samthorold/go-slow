@@ -1,53 +1,77 @@
 {
   "act": "weaving",
   "model": "claude-opus-5-5",
-  "request_hash": "a5bc755039bf014301b00a631d9024943c6ff2b6a34786693e0980b07f228d58",
-  "recorded_at": "2026-11-17T14:08:06.723853Z",
+  "request_hash": "68853498acd678dfccf78b58e17fb368041e95679ab3daa6cad85c3546046f5b",
+  "recorded_at": "2026-11-17T14:54:35.086461Z",
   "usage": {
-    "input_tokens": 9236,
-    "output_tokens": 1988
+    "input_tokens": 10213,
+    "output_tokens": 2453
   },
   "output": {
     "stories": [
       {
         "editor_spans": [
           {
-            "body": "Read the Ukraine statements of this week in sequence and a shift in the government's reasoning appears. The war is still framed as a moral and security cause. Increasingly, though, it is also framed as a cost-of-living problem at home. The Prime Minister made the case for an energy ceasefire partly in terms of getting diesel back onto world markets.",
+            "body": "The Derby announcement is less a new decision than the delayed delivery of an old one. Great British Railways was first proposed in 2021 under the previous government, which made the restructuring a response to the fragmentation left by 1990s privatisation. Derby was picked as the headquarters town in a public competition in 2023. What is new today is a specific building, a brownfield plot at Becketwell, and a completion date of spring 2029. That is roughly eight years from the idea to staff moving in.",
+            "cites": [
+              13,
+              15,
+              17,
+              30
+            ]
+          },
+          {
+            "body": "The size of the promise also deserves a closer look. The site will hold up to 450 staff. Ministers instead lead with 'hundreds of jobs', a £151 million estimate, and the trains Alstom is building nearby. A headquarters moves decision-making more than it creates work. Its real test is whether control over timetables, track and fares actually shifts out of Whitehall and the Department for Transport. Nothing published today says how much autonomy GBR will have.",
+            "cites": [
+              11,
+              18,
+              35,
+              36,
+              37
+            ]
+          },
+          {
+            "body": "The most revealing figure is easy to miss. Fewer than 7% of railway workers are under 25. That is the result of decades of stop-start investment and franchise contracts too short to justify training anyone. Six hundred apprentices over four years is a modest response to a retirement cliff in an industry this size. The fare freeze, billed as the first in 30 years, dates the problem precisely: regulated fares have risen by formula every year since privatisation.",
+            "cites": [
+              14,
+              16,
+              38,
+              20
+            ]
+          }
+        ]
+      },
+      {
+        "editor_spans": [
+          {
+            "body": "Read in sequence, this week's Ukraine statements show Britain as a supplier and a cheerleader, not a party to the main negotiation. The talks that matter run between Washington and Moscow. London's reply to the US–Russia agreement leaves the agreement's terms alone. It repeats existing commitments and 'fully supports US-led efforts', while saying in the same breath that Russia has rejected every ceasefire.",
+            "cites": [
+              97,
+              98,
+              100,
+              106,
+              122,
+              55
+            ]
+          },
+          {
+            "body": "There is also a domestic motive the statements only half admit. The Prime Minister presented the energy ceasefire as the quickest way to get diesel back onto world markets. The government's own response ties these conflicts to energy prices and the cost of living. The Chancellor speaks of Middle East and European wars hitting people worldwide. So the energy ceasefire serves Ukraine's grid and Britain's petrol pumps at once. That overlap helps explain why ministers keep pressing an arrangement they also say Russia ignores.",
             "cites": [
               119,
-              122
-            ]
-          },
-          {
-            "body": "The government's response to the US-Russia agreement said nothing about what that agreement contained. Its only background note was about energy prices and the cost of living.",
-            "cites": [
-              96,
               104,
               105,
-              106
-            ]
-          },
-          {
-            "body": "The Chancellor's message from the IMF opened the same way, with conflict 'hitting people across the world'.",
-            "cites": [
               79,
-              81
+              54
             ]
           },
           {
-            "body": "That is a politically durable way to sustain support for Ukraine in a fifth winter of war. It also ties British policy to a ceasefire that has no confirmed start date and that Russia has already ignored.",
+            "body": "The military numbers point to planning for a long war, not an imminent peace. Ministers have committed £1.6 billion for more than 5,000 missiles over four years. Only £10 million of the new tranche is being brought forward for this winter. Meanwhile Russia is fielding jet-powered drones that outpace the Shahed-era defences. Behind the language of 'peace' is an air-defence race in which Britain's contribution is valuable but small at the margin.",
             "cites": [
-              123,
-              54,
-              100
-            ]
-          },
-          {
-            "body": "The scale also deserves attention. The headline 'acceleration' is £10 million brought forward from a £45 million package. That package sits alongside a £1.6 billion commitment already spread over four years. Meanwhile ministers have only been asked to 'draw up' further packages. The rhetoric of going 'further and faster' is running ahead of the money.",
-            "cites": [
+              66,
+              67,
               68,
-              74,
-              71
+              56,
+              117
             ]
           }
         ]
@@ -55,60 +79,22 @@
       {
         "editor_spans": [
           {
-            "body": "The most consequential lines in the Commons statement were not about the UN. They were about Europe. The Prime Minister proposed a 'serious dialogue about the different options for our relationship in the long term' with the EU, once the November summit is done.",
-            "cites": [
-              169,
-              174
-            ]
-          },
-          {
-            "body": "This is the first time a Labour leader since 2016 has explicitly opened the question of the relationship's basic architecture, rather than tidying its edges.",
-            "cites": [
-              170,
-              171
-            ]
-          },
-          {
-            "body": "The promise that 'the British public will be the boss' reads as a deliberately unstated hint at an eventual vote.",
-            "cites": [
-              175,
-              176
-            ]
-          },
-          {
-            "body": "The groundwork is the itemised friction of veterinary checks: salmon document checks, banned seed potatoes and costly health certificates. That list is the cumulative bill of the hardest form of Brexit, presented as the case for revisiting it.",
-            "cites": [
-              158,
-              160,
-              163,
-              177
-            ]
-          }
-        ]
-      },
-      {
-        "editor_spans": [
-          {
-            "body": "The Scotland 'offer' exports the Prime Minister's own political origins: the English metro-mayor model of the past decade.",
-            "cites": [
-              84,
-              85,
-              88
-            ]
-          },
-          {
-            "body": "In doing so, it reframes the constitutional argument. The question is no longer Westminster against Holyrood. It becomes Holyrood against Scotland's own regions, with the devolved government cast as the over-centralised party.",
+            "body": "The Scottish offer brings a Manchester idea into a Scottish fight. Burnham built his career on the English metro-mayor model. He is now using it against Holyrood, accusing the Scottish Government of hoarding power devolved to it over the past 27 years. The charge has a real history behind it. After 2007, Edinburgh merged local police forces into a single national service and repeatedly capped council finances. Scottish local government is weaker today than when devolution began.",
             "cites": [
               83,
+              84,
               92,
               93
             ]
           },
           {
-            "body": "Whatever its merits, this is a contest over who speaks for Scottish localities. The vehicle is No10 North, a UK-government body, which the Scottish Government is unlikely to treat as neutral.",
+            "body": "It is also an act of party politics. A Westminster offer to deal directly with Scotland's regions through No10 North and the Scotland Office goes around the devolved government as much as it works with it. The First Minister will hear it that way, whatever is said about 'two governments, one goal'. The offer depends on cooperation from the institution whose centralisation it criticises. The likeliest outcome is a constitutional standoff rather than any new regional powers.",
             "cites": [
               85,
-              89
+              88,
+              89,
+              94,
+              95
             ]
           }
         ]
@@ -116,24 +102,24 @@
       {
         "editor_spans": [
           {
-            "body": "The Derby announcement fixes the site, not the city. Derby's role as the home of Great British Railways predates this government, a rare case of continuity in rail policy that the release leaves unmentioned.",
+            "body": "The Commons statement quietly reopens the question the 2016 referendum was supposed to settle. The Prime Minister offers a summit agenda of food standards, emissions trading, energy linkage and a youth scheme. He then goes further, calling for 'a serious dialogue about the different options' for the long-term relationship and promising that 'the British public will be the boss'. That is how leaders talk when preparing ground for a future vote, not ruling one out.",
             "cites": [
-              13,
-              25
+              151,
+              169,
+              171,
+              174,
+              175
             ]
           },
           {
-            "body": "The concrete scale is modest. The building holds up to 450 staff and will not be finished until spring 2029, which is close to the next general election.",
+            "body": "The detailed costs he lists include salmon checks, banned seed potatoes and £200 health certificates. These are the predictable results of the trade and cooperation agreement signed in 2020, which left out any veterinary or food-standards deal. The 2040 growth estimate covers a whole generation. A decade of 'drift and division' is unlikely to be undone at a single November summit.",
             "cites": [
-              17,
-              35
-            ]
-          },
-          {
-            "body": "There are 600 apprentices over four years, set against a workforce in which fewer than 7% are under 25. That is a start on the ageing-workforce problem, not a solution to it.",
-            "cites": [
-              20,
-              38
+              156,
+              158,
+              160,
+              163,
+              153,
+              177
             ]
           }
         ]

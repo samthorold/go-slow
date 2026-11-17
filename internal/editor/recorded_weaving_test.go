@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"path/filepath"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -17,8 +18,12 @@ import (
 )
 
 // The recorded runs of weaving. Its input is the Stories the fixture Items'
-// Cuts made, cut by the sentence cutter, which is plain code, so weaving
-// rests on no other act's recordings and has no frozen copies. The fixtures
+// Cuts made, cut by the sentence cutter, which is plain code, each Span
+// hydrated by its Item's reading: weaving rests on reading's recordings, and
+// is recorded over its own frozen copies of them,
+// testdata/recorded/weaving/inputs/reading/<fixture>.json, each a fixture's
+// first sample (collectAndCut). The compatibility check feeds reading's
+// current recordings to weaving (recorded_compatibility_test.go). The fixtures
 // are two runs, a day apart, over the fixture Items in the order they were
 // published (weavingRuns): the first shown the Items published up to 15
 // October, with nothing the Editor has made; the second the speech of 16
@@ -89,6 +94,7 @@ func weavingVerdicts(t *testing.T, root string, runs []weavingRun, live editor.M
 	t.Helper()
 	ctx := t.Context()
 	dir := filepath.Join(root, "weaving")
+	frozen := filepath.Join(dir, "inputs", "reading")
 	// The Record carried on so far, kept closed between runs so each sample
 	// starts from a copy of its file.
 	carried := filepath.Join(t.TempDir(), "carried.db")
@@ -101,7 +107,7 @@ func weavingVerdicts(t *testing.T, root string, runs []weavingRun, live editor.M
 		thread := 0
 		errs = append(errs, sampledOn(t, dir, r.name, dailyRule, weavingCommand, live, model, report, func(m *sampleModel) sampleResult {
 			store := copyOfRecord(t, carried)
-			collectAndCut(t, store, r)
+			collectAndCut(t, store, r, frozen)
 			shown := shownToWeave(t, store)
 			if i > 0 {
 				editorsSpansPresent(t, r.name, shown)
@@ -152,7 +158,7 @@ func weavingVerdicts(t *testing.T, root string, runs []weavingRun, live editor.M
 		if err != nil {
 			t.Fatal(err)
 		}
-		collectAndCut(t, store, r)
+		collectAndCut(t, store, r, frozen)
 		threaded := replayingSample(t, samplePath(dir, r.name, thread), model, weavingCommand, report)
 		if passed, err := weave(t, store, threaded, r.at); err != nil || !passed {
 			t.Fatalf("%s: carrying on by sample %d: passed %v, %v", r.name, thread, passed, err)
@@ -164,22 +170,74 @@ func weavingVerdicts(t *testing.T, root string, runs []weavingRun, live editor.M
 	return errs
 }
 
-// collectAndCut collects the run's Items into store at its time, and cuts
-// them.
-func collectAndCut(t *testing.T, store *sqlite.Store, r weavingRun) {
+// collectAndCut collects the run's Items into store at its time, cuts them,
+// and hydrates them by weaving's frozen copies of reading's recordings in
+// frozen (system design: Each Command is recorded over its own frozen
+// inputs), replayed unchecked. Each Item must have its copy, and be
+// hydrated by it: weaving's recordings answer the requests those copies
+// make.
+func collectAndCut(t *testing.T, store *sqlite.Store, r weavingRun, frozen string) {
 	t.Helper()
+	if err := collectCutAndHydrate(t.Context(), store, r, frozen); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// collectCutAndHydrate is collectAndCut, reporting what fails: an error
+// naming the Item whose copy is missing or not taken.
+func collectCutAndHydrate(ctx context.Context, store *sqlite.Store, r weavingRun, frozen string) error {
+	readings := frozenReadings{}
 	for _, f := range r.items {
 		it := f.item
-		if _, err := store.AddItems(t.Context(), []collect.Item{{
+		if _, err := store.AddItems(ctx, []collect.Item{{
 			SourceID: it.SourceID, EntryID: it.EntryID, Title: it.Title, Link: it.Link, Summary: it.Summary,
 			Content: it.Content, Published: it.Published, Attribution: collect.OGL, CollectedAt: r.at,
 		}}); err != nil {
-			t.Fatal(err)
+			return err
+		}
+		rec, err := keptAt(filepath.Join(frozen, f.name+".json"))
+		if err != nil {
+			return fmt.Errorf("%s: no frozen copy of its reading: %w", f.name, err)
+		}
+		readings["Title: "+it.Title+"\n"] = rec
+	}
+	if err := cut.New(store).CutNew(ctx, r.at); err != nil {
+		return err
+	}
+	ed := editor.New(editor.Deps{Store: store, Model: readings, Log: slog.New(slog.DiscardHandler)})
+	if err := ed.ReadWaiting(ctx, r.at); err != nil {
+		return err
+	}
+	for _, f := range r.items {
+		_, read, err := store.NewestReading(ctx, f.item.SourceID, f.item.EntryID)
+		if err != nil {
+			return err
+		}
+		if !read {
+			return fmt.Errorf("%s: not hydrated by its copy of reading's recording: reading's checks refuse it", f.name)
 		}
 	}
-	if err := cut.New(store).CutNew(t.Context(), r.at); err != nil {
-		t.Fatal(err)
+	return nil
+}
+
+// frozenReadings answers each reading request with the frozen copy kept for
+// the Item it shows, by the title line it opens with, unchecked.
+type frozenReadings map[string]recording
+
+func (f frozenReadings) Complete(ctx context.Context, req editor.Request) (editor.Response, error) {
+	for title, rec := range f {
+		if strings.HasPrefix(req.Input, title) {
+			return replay{rec}.Complete(ctx, req)
+		}
 	}
+	return editor.Response{}, fmt.Errorf("no frozen copy of a reading for %.80q", req.Input)
+}
+
+// keptAt is the recording kept at path: for a sample's file, its last
+// attempt, the one that passed when the sample did.
+func keptAt(path string) (recording, error) {
+	s, err := sampleAt(path)
+	return s.recording, err
 }
 
 // citedAt is a Span a run may be shown: a Source's, by its address, or an
@@ -190,10 +248,11 @@ type citedAt struct {
 }
 
 // shownToWeave is every Span a weaving run over store would be shown now,
-// with the words it would be shown: those of the Stories cut since the last
-// run, and those of the Stories the Editor made, its Editor's Spans and the
-// Spans they cite. It reads the Record, not the request, so a Story holding
-// a citation the run was not shown fails, however the act numbered it.
+// with its words as written: those of the Stories cut since the last run
+// that their hydration does not Reject, and those of the Stories the Editor
+// made, its Editor's Spans and the Spans they cite. It reads the Record, not
+// the request, so a Story holding a citation the run was not shown fails,
+// however the act numbered it.
 func shownToWeave(t *testing.T, store *sqlite.Store) map[citedAt]string {
 	t.Helper()
 	ctx := t.Context()
@@ -203,8 +262,15 @@ func shownToWeave(t *testing.T, store *sqlite.Store) map[citedAt]string {
 		t.Fatal(err)
 	}
 	for _, s := range stories {
+		r, _, err := store.NewestReading(ctx, s.Item.SourceID, s.Item.EntryID)
+		if err != nil {
+			t.Fatal(err)
+		}
 		for _, sp := range s.Spans {
-			shown[citedAt{at: editor.Address{SourceID: s.Item.SourceID, EntryID: s.Item.EntryID, Span: sp}}] = cut.Words(s.Item.Content, sp)
+			at := editor.Address{SourceID: s.Item.SourceID, EntryID: s.Item.EntryID, Span: sp}
+			if !slices.Contains(r.Rejected, at) {
+				shown[citedAt{at: at}] = cut.Words(s.Item.Content, sp)
+			}
 		}
 	}
 	made, err := store.StoriesMade(ctx)

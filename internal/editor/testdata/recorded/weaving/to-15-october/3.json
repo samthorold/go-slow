@@ -1,55 +1,46 @@
 {
   "act": "weaving",
   "model": "claude-opus-5-5",
-  "request_hash": "a5bc755039bf014301b00a631d9024943c6ff2b6a34786693e0980b07f228d58",
-  "recorded_at": "2026-11-17T14:08:26.978187Z",
+  "request_hash": "68853498acd678dfccf78b58e17fb368041e95679ab3daa6cad85c3546046f5b",
+  "recorded_at": "2026-11-17T14:54:56.991607Z",
   "usage": {
-    "input_tokens": 9236,
-    "output_tokens": 1865
+    "input_tokens": 10213,
+    "output_tokens": 1820
   },
   "output": {
     "stories": [
       {
         "editor_spans": [
           {
-            "body": "Read in sequence, London's Ukraine messaging this week rests on an energy ceasefire that is mostly out of its hands. On 9 October the government answered a US-Russia agreement by restating support for Ukraine and adding a note on energy prices and the cost of living.",
+            "body": "Read together, this week's Ukraine statements show how little of the war's direction now runs through London. The UK 'fully supports US-led efforts' and welcomed a Washington-announced energy ceasefire it had lobbied for. It did not set the terms of that ceasefire.",
             "cites": [
-              96,
-              99,
-              104,
-              106
+              106,
+              120,
+              122
             ]
           },
           {
-            "body": "On 12 October the Prime Minister welcomed President Trump's reciprocal energy ceasefire and framed it partly as the quickest way to get diesel back onto world markets. By 14 October he and Zelenskyy were describing Russian strikes on energy infrastructure since that call.",
-            "cites": [
-              119,
-              122,
-              54
-            ]
-          },
-          {
-            "body": "The British stake is plain from this: domestic fuel prices are now tied to a truce that Washington brokers and Moscow can ignore.",
-            "cites": [
-              104,
-              119,
-              54
-            ]
-          },
-          {
-            "body": "The 'doubling down' rhetoric also needs scaling. Today's package is £45 million, of which £10 million is being sped up, set against £1.6 billion already committed over four years. Further sanctions and fiscal packages are only being drawn up.",
-            "cites": [
-              62,
-              68,
-              74
-            ]
-          },
-          {
-            "body": "What Britain can deliver alone is acceleration of existing commitments and lobbying partners on an LNG shipping ban. That is real leverage over shipping and insurance, but it is not decisive.",
+            "body": "Britain's own levers are sanctions, insurance and shipping services, and air-defence missiles. These are real but marginal. The urgent winter tranche is £10 million, set against a £1.6 billion four-year programme. That points to a production-and-delivery bottleneck rather than a shortage of political will.",
             "cites": [
               65,
-              75,
-              81
+              68,
+              75
+            ]
+          },
+          {
+            "body": "The Prime Minister's reasoning on diesel shows why an energy ceasefire matters to Britain. It is the fastest way to bring fuel back to world markets without rewarding Moscow. That makes the cost of living at home part of the case.",
+            "cites": [
+              104,
+              105,
+              119
+            ]
+          },
+          {
+            "body": "This is the fifth winter of attacks on Ukraine's grid. Each autumn brings a fresh scramble for air defence against a newer threat, now jet-powered drones. That pattern argues for treating interceptor manufacturing capacity as a standing industrial priority, not a run of emergency packages.",
+            "cites": [
+              66,
+              67,
+              117
             ]
           }
         ]
@@ -57,56 +48,77 @@
       {
         "editor_spans": [
           {
-            "body": "Two of this week's domestic announcements pull in opposite directions. In Scotland the Prime Minister argues that power should not stop at Holyrood's doors and calls the Scottish Government one of Europe's most centralised devolved administrations.",
+            "body": "Great British Railways is the latest turn in an eighty-year cycle: nationalisation, privatisation, the collapse of Railtrack, Network Rail, and now reunification. Housing it in Derby's Becketwell is symbolic continuity with Britain's oldest rail industrial base.",
             "cites": [
-              83,
-              84,
-              92
+              13,
+              17,
+              20
             ]
           },
           {
-            "body": "The vehicle for his offer is No10 North and the Scotland Office, which gives Westminster a direct line to Scottish regions and cities around Holyrood. Framed as a partnership, it also challenges the 1999 settlement that made Edinburgh the gatekeeper for Scotland.",
+            "body": "The most telling figure in the announcement is not the £151 million estimate or the 450 desks. It is that under 7% of the railway workforce is under 25. Whatever the ownership model, an industry that cannot replace its engineers will struggle to deliver reliability.",
             "cites": [
-              85,
-              88,
-              89
+              35,
+              38,
+              18
             ]
           },
           {
-            "body": "Meanwhile railway reform in England runs the other way: a single nationally owned body with 'one mission', headquartered in Derby. Moving a head office to the Midlands brings jobs and growth, but it relocates central control rather than devolving it.",
+            "body": "Some claims deserve scepticism. Fares on much of the network have long been set by ministers, so a fare freeze is a policy choice rather than a dividend of public ownership. GBR will be judged on punctuality, not headquarters.",
             "cites": [
-              31,
-              34,
-              35
+              16,
+              23
             ]
-          },
+          }
+        ]
+      },
+      {
+        "editor_spans": [
           {
-            "body": "The model emerging is not devolution as such. It is a centre that chooses where to sit and whom to deal with directly.",
+            "body": "The former Greater Manchester mayor is exporting the metro-mayor model to Scotland. That is constitutionally awkward, because local government there is devolved. Proposing to work 'through No10 North and the Scotland Office' risks being read in Edinburgh as Westminster going around Holyrood.",
             "cites": [
-              18,
               82,
+              83,
+              85,
               88
             ]
+          },
+          {
+            "body": "The critique of centralisation has a long history. Scotland abolished its regional councils in 1996 and later merged its police forces into one national service. Power has drifted toward the centre under several governments, not just the present one.",
+            "cites": [
+              83,
+              92,
+              93
+            ]
+          },
+          {
+            "body": "Whether the offer gets anywhere depends on whether Holyrood sees it as partnership or encroachment. Without the First Minister's buy-in, it remains a speech.",
+            "cites": [
+              89,
+              94,
+              95
+            ]
           }
         ]
       },
       {
         "editor_spans": [
           {
-            "body": "The most consequential line in the Commons statement was not about the November summit. It was the Prime Minister's call for a 'serious dialogue' on long-term options for the EU relationship, with the public as 'the boss'. That is the language of a future vote, not of technical deals.",
+            "body": "The Commons statement quietly reopens the question of Britain's long-term relationship with Europe that has dominated a decade of politics. The concrete costs it lists show the price of the post-2020 trading arrangements: total document checks on salmon, banned seed potatoes and shellfish, and certificate fees on small exporters.",
             "cites": [
+              158,
+              160,
+              163,
               169,
-              174,
-              175
+              174
             ]
           },
           {
-            "body": "His own case for it is an itemised list of Brexit's frictions: a 100% document-check rate on salmon, banned seed potatoes and shellfish, certificate costs and spoiled produce. A decade after the referendum, government is now describing these costs openly as damage to be reversed.",
+            "body": "Framing the relationship as 'the public will be the boss' signals caution. But it also concedes that the 2016 settlement is now considered open for renegotiation by the government itself.",
             "cites": [
-              156,
-              158,
-              160,
-              161
+              171,
+              175,
+              177
             ]
           }
         ]

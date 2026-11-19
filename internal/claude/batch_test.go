@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/samthorold/go-slow/internal/claude"
@@ -25,6 +26,16 @@ func batchAPI(t *testing.T, status string, results ...map[string]any) (*claude.M
 func batchAPIWith(t *testing.T, o claude.Options, status string, results ...map[string]any) (*claude.Model, *map[string]any) {
 	t.Helper()
 	var created map[string]any
+	srv := httptest.NewServer(batchHandler(t, status, &created, results...))
+	t.Cleanup(srv.Close)
+	o.APIKey, o.BaseURL = "test-key", srv.URL
+	return claude.New(o), &created
+}
+
+// batchHandler serves batchAPI's stand-in, keeping the body of the batch
+// created in created.
+func batchHandler(t *testing.T, status string, created *map[string]any, results ...map[string]any) http.Handler {
+	t.Helper()
 	batch := func(w http.ResponseWriter) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(map[string]any{
@@ -33,14 +44,14 @@ func batchAPIWith(t *testing.T, o claude.Options, status string, results ...map[
 			"created_at":     "2026-10-24T07:00:00Z", "expires_at": "2026-10-25T07:00:00Z",
 		})
 	}
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("X-Api-Key") != "test-key" {
 			t.Errorf("request with key %q", r.Header.Get("X-Api-Key"))
 		}
 		switch {
 		case r.Method == http.MethodPost && r.URL.Path == "/v1/messages/batches":
 			body, _ := io.ReadAll(r.Body)
-			if err := json.Unmarshal(body, &created); err != nil {
+			if err := json.Unmarshal(body, created); err != nil {
 				t.Error(err)
 			}
 			batch(w)
@@ -59,10 +70,7 @@ func batchAPIWith(t *testing.T, o claude.Options, status string, results ...map[
 			t.Errorf("unexpected %s %s", r.Method, r.URL.Path)
 			http.NotFound(w, r)
 		}
-	}))
-	t.Cleanup(srv.Close)
-	o.APIKey, o.BaseURL = "test-key", srv.URL
-	return claude.New(o), &created
+	})
 }
 
 func TestEachRequestInABatchRunsOnItsActsModel(t *testing.T) {
@@ -111,6 +119,69 @@ func TestARequestsEffortIsSentWithItsOutputFormatAndNoneIsSentWithoutOne(t *test
 		params, _ := reqs[i].(map[string]any)["params"].(map[string]any)
 		if got, _ := json.Marshal(params["output_config"]); string(got) != want {
 			t.Errorf("request %d output_config = %s, want %s", i, got, want)
+		}
+	}
+}
+
+// timingOutOnceAPI is batchAPI behind a server that answers each path's
+// first request with 408 Request Timeout, as a client timeout would leave
+// it, telling the client to retry at once. count reports how many requests
+// were made to a method and path, such as "GET /v1/messages/batches/x".
+func timingOutOnceAPI(t *testing.T, status string, results ...map[string]any) (model *claude.Model, count func(string) int) {
+	t.Helper()
+	counts := map[string]int{}
+	var mu sync.Mutex
+	upstream := batchHandler(t, status, new(map[string]any), results...)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mu.Lock()
+		key := r.Method + " " + r.URL.Path
+		counts[key]++
+		first := counts[key] == 1
+		mu.Unlock()
+		if first {
+			w.Header().Set("Retry-After-Ms", "0")
+			w.WriteHeader(http.StatusRequestTimeout)
+			return
+		}
+		upstream.ServeHTTP(w, r)
+	}))
+	t.Cleanup(srv.Close)
+	count = func(key string) int {
+		mu.Lock()
+		defer mu.Unlock()
+		return counts[key]
+	}
+	return claude.New(claude.Options{Model: "claude-haiku-5-5", APIKey: "test-key", BaseURL: srv.URL}), count
+}
+
+func TestCreatingABatchThatTimesOutIsNotRetried(t *testing.T) {
+	model, count := timingOutOnceAPI(t, "in_progress")
+
+	_, err := model.Submit(t.Context(), []editor.BatchRequest{{ID: "reading-1", Request: request}})
+
+	if err == nil {
+		t.Error("a create that timed out succeeded")
+	}
+	if n := count("POST /v1/messages/batches"); n != 1 {
+		t.Errorf("%d create requests, want 1", n)
+	}
+}
+
+func TestPollingABatchAndReadingItsResultsAreRetriedAfterATimeout(t *testing.T) {
+	model, count := timingOutOnceAPI(t, "ended",
+		map[string]any{"custom_id": "reading-1", "result": map[string]any{"type": "succeeded", "message": message("end_turn", `{"facts": []}`)}})
+
+	poll, err := model.Poll(t.Context(), "msgbatch_1")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !poll.Ended || len(poll.Results) != 1 {
+		t.Errorf("poll = %+v, want ended with one result", poll)
+	}
+	for _, path := range []string{"GET /v1/messages/batches/msgbatch_1", "GET /v1/messages/batches/msgbatch_1/results"} {
+		if n := count(path); n != 2 {
+			t.Errorf("%s made %d times, want 2 (one retry)", path, n)
 		}
 	}
 }

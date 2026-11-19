@@ -1,39 +1,39 @@
 {
   "act": "weaving",
   "model": "claude-opus-5-5",
-  "request_hash": "68853498acd678dfccf78b58e17fb368041e95679ab3daa6cad85c3546046f5b",
-  "recorded_at": "2026-11-17T14:55:38.832104Z",
+  "request_hash": "999f4dd760ffd978009ba6a0e775f957bcfc0c87b03144fcbd2f4d644862274e",
+  "recorded_at": "2026-11-19T19:00:13.130477Z",
   "usage": {
-    "input_tokens": 10213,
-    "output_tokens": 2036
+    "input_tokens": 10232,
+    "output_tokens": 2357
   },
   "output": {
     "stories": [
       {
         "editor_spans": [
           {
-            "body": "The Derby announcement reads as a nationalisation victory lap, but the more durable problem sits in one line: under 7% of the railway's workforce is under 25. That points to a coming retirement wave, not a branding question.",
+            "body": "The Derby headquarters is the fourth structural reinvention of Britain's railway in under eighty years: nationalisation in 1948, privatisation in the 1990s, the collapse of Railtrack into Network Rail, and now Great British Railways. Each settlement promised to end fragmentation, and each changed more about ownership than about the problems passengers notice: ageing assets, stop-start investment, and Treasury control of the budget.",
             "cites": [
-              38
+              13,
+              15,
+              30
             ]
           },
           {
-            "body": "Up to 600 foundation apprentices spread over four years is a modest answer to that cliff, and the headquarters itself houses at most 450 staff. Whether GBR works will depend less on where its offices sit than on whether it can rebuild the skilled-trades pipeline that decades of fragmented, short-franchise ownership let wither.",
+            "body": "The scale of the announcement should be read carefully. The building will hold up to 450 staff, and it will not be finished until spring 2029. Two other things in the release are separate commitments presented alongside it: the fare freeze and the extra seats come from operators already taken into public ownership, and the train order at Alstom predates the HQ decision. A head office decides where the organisation's centre of gravity sits. It does not by itself make trains turn up.",
+            "cites": [
+              16,
+              17,
+              35,
+              36
+            ]
+          },
+          {
+            "body": "The more revealing figure is in the small print: under 7% of the rail workforce is under 25. That points to a retirement wave in skilled engineering and operations roles that no change of ownership solves. Up to 600 apprenticeships over four years is a modest answer to an industry-wide shortfall. Whether GBR succeeds will depend less on Becketwell than on whether that intake keeps growing long after the ribbon is cut.",
             "cites": [
               12,
-              14,
-              35,
-              20
-            ]
-          },
-          {
-            "body": "There is also a tension in the government's own story. The same Prime Minister who argues that power should not pool in Edinburgh is consolidating Britain's railways into a single national body run from one headquarters. Both moves can be defended, but 'rewiring the state' currently means centralising some things and devolving others, and ministers have not said which principle decides which.",
-            "cites": [
-              15,
-              31,
-              34,
-              84,
-              88
+              20,
+              38
             ]
           }
         ]
@@ -41,30 +41,33 @@
       {
         "editor_spans": [
           {
-            "body": "Read together, this week's Ukraine statements show Britain's real position. It speaks with conviction, 'for as long as it takes', but the war's diplomacy is being set in Washington and Moscow. London welcomes the US-brokered energy ceasefire and 'fully supports US-led efforts', while it also has to respond to a separate US-Russia agreement it did not shape.",
+            "body": "Taken in order, the week's statements show how far British policy on Ukraine now follows events set in Washington. On 9 October London responded to a US–Russia agreement. On 12 October the Prime Minister welcomed President Trump's reciprocal energy ceasefire. By 14 October he was condemning Russian attacks carried out since that call. The UK supports US-led efforts and repeats 'for as long as it takes', but it is not setting the terms.",
             "cites": [
-              71,
-              102,
+              97,
               106,
-              122
+              122,
+              54,
+              55,
+              61
             ]
           },
           {
-            "body": "The Prime Minister's own words show the motive is not only solidarity. He tied the ceasefire to getting diesel back onto world markets, and the government flags energy prices and the cost of living. A fifth winter of war is now a domestic economic problem for Britain, and that will shape how long 'as long as it takes' lasts.",
+            "body": "The case for an energy ceasefire is also openly linked to British living costs. The Prime Minister presented it as the fastest way to get diesel back onto world markets, and the government acknowledges energy prices and the cost of living. Pressure from households at home and the war in Ukraine are now one policy problem. That is why ministers are asking partners to match the UK's ban on shipping services for Russian LNG, a ban that is costly mainly for countries that still buy Russian gas.",
             "cites": [
-              117,
               119,
               104,
-              79
+              65,
+              75,
+              81
             ]
           },
           {
-            "body": "The military arithmetic deserves more scrutiny than it gets. £1.6 billion for more than 5,000 LMMs works out to roughly £300,000 per missile, fired at drones built to be expendable. Faster jet-powered drones raise the cost of every interception. A defence that runs on high-value interceptors loses the cost race over time, which is probably why the UK is stressing retrofits and 'innovative solutions'.",
+            "body": "The military figures point to a quieter change in the air war. Jet-powered drones are faster and fly higher than Shaheds, so they are harder to intercept cheaply. The UK's answer is £1.6 billion for more than 5,000 Lightweight Multirole Missiles over four years, with only £10 million brought forward for this winter. That is how one war of attrition looks in practice: it is a contest of production rates and cost per interception as much as of political resolve.",
             "cites": [
-              68,
               66,
               67,
-              57
+              68,
+              56
             ]
           }
         ]
@@ -72,32 +75,47 @@
       {
         "editor_spans": [
           {
-            "body": "'Britain is back' is really an admission about the last decade. The Commons statement's most concrete passages describe what Brexit's thin trade deal cost: 100% document checks on salmon, banned seed potatoes and shellfish, and certificates of up to £200 per shipment. The 20 November summit is a repair job on 2016's settlement, not a new start.",
-            "cites": [
-              183,
-              158,
-              160,
-              163,
-              149
-            ]
-          },
-          {
-            "body": "The bigger signal is the Prime Minister's call for a longer-term 'conversation' about the EU relationship, with the public as 'the boss'. That is a carefully hedged first step toward reopening the question every government since 2016 has kept closed. Whether it holds will depend on public opinion staying 'pragmatic' once specific options are on the table.",
-            "cites": [
-              169,
-              174,
-              175,
-              176
-            ]
-          },
-          {
-            "body": "The Scotland offer fits the same pattern of a leader reaching past existing institutions. Inviting Holyrood to hand power to its regions, through a Westminster-run 'No10 North', also gives London a direct channel to Scottish communities around the devolved government. It carries the Manchester mayoral model north, and Edinburgh is likely to see it as a challenge as much as an offer.",
+            "body": "The offer to Holyrood comes from a Prime Minister whose political brand was built as a metro mayor. He is now trying to apply the English model of regional deals to Scotland. The difficulty is constitutional. Westminster cannot make Holyrood hand powers down, so the 'offer' really works as political pressure, aimed over the First Minister's head at Lanarkshire, Fife and the Highlands.",
             "cites": [
               82,
               83,
+              84,
+              89,
+              93
+            ]
+          },
+          {
+            "body": "Routing this through 'No10 North' and the Scotland Office, rather than through Holyrood, continues a long-running argument about whether the UK government should deal directly with Scottish communities. That argument goes back to UK-funded regional growth deals and the post-Brexit internal market rules. Many in Edinburgh will hear 'two governments, one goal' as a bid for influence inside the devolved settlement. Whether it gets anywhere depends on trust between the two governments, and that has worn thin over 27 years.",
+            "cites": [
               85,
               88,
-              94
+              94,
+              95,
+              83
+            ]
+          }
+        ]
+      },
+      {
+        "editor_spans": [
+          {
+            "body": "The most consequential line in the Commons statement is not the summit date. It is the Prime Minister's call for a 'serious dialogue' about Britain's long-term relationship with the EU after the summit. For a decade, governments have handled the costs of Brexit one sector at a time: salmon checks, seed potatoes, export health certificates. Naming the overall relationship as an open question breaks a cross-party taboo.",
+            "cites": [
+              169,
+              170,
+              174,
+              158,
+              160,
+              163
+            ]
+          },
+          {
+            "body": "The scale is worth holding on to. Over £10 billion a year by 2040 is real money, but it is a small share of the trade friction created since 2016. Agreements on food standards and emissions trading usually require the UK to follow EU rules as they change. That is the trade-off the 'further phase' will have to set out openly, and promising that 'the public will be the boss' brings the original question back into play, not just the details.",
+            "cites": [
+              153,
+              151,
+              175,
+              176
             ]
           }
         ]

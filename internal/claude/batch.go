@@ -6,12 +6,21 @@ import (
 	"fmt"
 
 	"github.com/anthropics/anthropic-sdk-go"
+	"github.com/anthropics/anthropic-sdk-go/option"
 
 	"github.com/samthorold/go-slow/internal/editor"
 )
 
 // Submit submits acts' requests as one Message Batch, each made as Complete
 // makes it and identified by its request's ID (the batch's custom_id).
+//
+// The create is one request, never retried: creating a batch is not
+// idempotent, so a create that times out on the client after the API has
+// accepted it, retried, would submit a second, paid batch the Record never
+// learns of. A failed create needs no retry here: its work stays awaiting
+// its act, and the next Collection run submits it again (the weave command,
+// submitting on demand, reports the failure instead). Poll keeps the SDK's
+// retries, since reading a batch and its results is safe to repeat.
 func (m *Model) Submit(ctx context.Context, rs []editor.BatchRequest) (string, error) {
 	requests := make([]anthropic.MessageBatchNewParamsRequest, 0, len(rs))
 	for _, r := range rs {
@@ -24,7 +33,8 @@ func (m *Model) Submit(ctx context.Context, rs []editor.BatchRequest) (string, e
 			},
 		})
 	}
-	b, err := m.client.Messages.Batches.New(ctx, anthropic.MessageBatchNewParams{Requests: requests})
+	b, err := m.client.Messages.Batches.New(ctx, anthropic.MessageBatchNewParams{Requests: requests},
+		option.WithMaxRetries(0))
 	if err != nil {
 		return "", fmt.Errorf("batch of %d on %s: %w", len(rs), m.model, err)
 	}

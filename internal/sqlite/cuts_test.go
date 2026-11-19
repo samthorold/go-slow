@@ -74,9 +74,9 @@ func TestASecondCutterVersionAddsACutAndLeavesTheFirst(t *testing.T) {
 
 	// A second version of the cutter, keeping the whole paragraph as one
 	// Span beside the first sentence.
-	v2 := cut.Judge{Cutter: "sentences", Version: 2}
+	v2 := cut.MadeBy{Cutter: "sentences", Version: 2}
 	whole := cut.Span{Start: 3, End: len(text) - len("</p>")}
-	second := cut.Cut{SourceID: "number-10", EntryID: "jobs", Judge: v2, At: cutAt.Add(time.Hour),
+	second := cut.Cut{SourceID: "number-10", EntryID: "jobs", By: v2, At: cutAt.Add(time.Hour),
 		Spans: []cut.Span{first.Spans[0], whole}}
 	if err := s.KeepCut(t.Context(), second); err != nil {
 		t.Fatal(err)
@@ -86,17 +86,17 @@ func TestASecondCutterVersionAddsACutAndLeavesTheFirst(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if newest.Judge != v2 || newest.ID == first.ID {
-		t.Errorf("newest Cut is %+v (event %d), want the second version's", newest.Judge, newest.ID)
+	if newest.By != v2 || newest.ID == first.ID {
+		t.Errorf("newest Cut is %+v (event %d), want the second version's", newest.By, newest.ID)
 	}
 	if n := count(t, s, "cuts"); n != 2 {
 		t.Errorf("%d Cuts kept, want both", n)
 	}
-	var judge cut.Judge
+	var by cut.MadeBy
 	if err := s.db.QueryRowContext(t.Context(),
 		`SELECT cutter, cutter_version FROM cuts WHERE event_id = ?`, first.ID,
-	).Scan(&judge.Cutter, &judge.Version); err != nil || judge != cut.SentenceCutter {
-		t.Errorf("the first Cut is now %+v (%v), want it left as it was", judge, err)
+	).Scan(&by.Cutter, &by.Version); err != nil || by != cut.SentenceCutter {
+		t.Errorf("the first Cut is now %+v (%v), want it left as it was", by, err)
 	}
 	// Two Judgements over the same words name the same Span.
 	if newest.Spans[0] != first.Spans[0] {

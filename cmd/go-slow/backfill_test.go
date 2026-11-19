@@ -83,7 +83,7 @@ func summaryOnlyRecord(t *testing.T, db string) {
 		t.Fatal(err)
 	}
 	if err := store.KeepCut(ctx, cut.Cut{SourceID: "govuk-number-10", EntryID: items[1].EntryID,
-		Judge: cut.SentenceCutter, At: saturday, Spans: []cut.Span{{Start: 0, End: 5}}}); err != nil {
+		By: cut.SentenceCutter, At: saturday, Spans: []cut.Span{{Start: 0, End: 5}}}); err != nil {
 		t.Fatal(err)
 	}
 }

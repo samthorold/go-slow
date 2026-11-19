@@ -81,7 +81,7 @@ const releaseReading = `{
 // cutter.
 func toRead(it editor.Item) editor.ToRead {
 	return editor.ToRead{Item: it, Cut: cut.Cut{ID: 7, SourceID: it.SourceID, EntryID: it.EntryID,
-		Judge: cut.SentenceCutter, Spans: cut.Sentences(it.Content)}}
+		By: cut.SentenceCutter, Spans: cut.Sentences(it.Content)}}
 }
 
 // spanWords is the words at an address in it.

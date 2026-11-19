@@ -6,18 +6,17 @@ import (
 	"time"
 )
 
-// Judge is what made a Cut: the cutter and its version. A Cut is not a
-// Judgement and has no Judge in the domain's sense (CONTEXT.md); the type
-// keeps the name. A new version of a cutter adds Cuts beside its earlier
-// version's.
-type Judge struct {
+// MadeBy is what made a Cut: the cutter and its version. A Cut is not a
+// Judgement and has no Judge (CONTEXT.md). A new version of a cutter adds
+// Cuts beside its earlier version's.
+type MadeBy struct {
 	Cutter  string
 	Version int
 }
 
-// SentenceCutter is Sentences, as the Judge its Cuts name. Its version
+// SentenceCutter is Sentences, as its Cuts name what made them. Its version
 // changes whenever what Sentences lists of a text could.
-var SentenceCutter = Judge{Cutter: "sentences", Version: 1}
+var SentenceCutter = MadeBy{Cutter: "sentences", Version: 1}
 
 // Text is an Item's text as kept, which its Spans address.
 type Text struct {
@@ -31,7 +30,7 @@ type Cut struct {
 	// ID is the event's identifier in the Record; zero until kept.
 	ID                int64
 	SourceID, EntryID string
-	Judge             Judge
+	By                MadeBy
 	At                time.Time
 	Spans             []Span
 }
@@ -50,13 +49,13 @@ type Store interface {
 // Cutter cuts the Items in the Record.
 type Cutter struct {
 	store Store
-	judge Judge
+	by    MadeBy
 	cut   func(string) []Span
 }
 
 // New is the sentence cutter over the Record.
 func New(store Store) *Cutter {
-	return &Cutter{store: store, judge: SentenceCutter, cut: Sentences}
+	return &Cutter{store: store, by: SentenceCutter, cut: Sentences}
 }
 
 // CutNew cuts, at now, every Item with text that has no Cut yet: those just
@@ -87,7 +86,7 @@ func (c *Cutter) CutPublished(ctx context.Context, from, to, now time.Time) (int
 // keep cuts each text at now and keeps its Cut.
 func (c *Cutter) keep(ctx context.Context, texts []Text, now time.Time) error {
 	for _, t := range texts {
-		cut := Cut{SourceID: t.SourceID, EntryID: t.EntryID, Judge: c.judge, At: now, Spans: c.cut(t.Text)}
+		cut := Cut{SourceID: t.SourceID, EntryID: t.EntryID, By: c.by, At: now, Spans: c.cut(t.Text)}
 		if err := c.store.KeepCut(ctx, cut); err != nil {
 			return fmt.Errorf("cut %s %s: %w", t.SourceID, t.EntryID, err)
 		}

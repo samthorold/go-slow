@@ -73,7 +73,7 @@ func (s *Store) KeepCut(ctx context.Context, c cut.Cut) error {
 	if _, err := tx.ExecContext(ctx, `
 		INSERT INTO cuts (event_id, source_id, entry_id, cutter, cutter_version)
 		VALUES (?, ?, ?, ?, ?)`,
-		id, c.SourceID, c.EntryID, c.Judge.Cutter, c.Judge.Version); err != nil {
+		id, c.SourceID, c.EntryID, c.By.Cutter, c.By.Version); err != nil {
 		return fmt.Errorf("keep cut: %w", err)
 	}
 	for i, sp := range c.Spans {
@@ -97,7 +97,7 @@ func (s *Store) NewestCut(ctx context.Context, sourceID, entryID string) (cut.Cu
 			JOIN items USING (source_id, entry_id)
 		WHERE cuts.source_id = ? AND cuts.entry_id = ?
 		ORDER BY cuts.event_id DESC LIMIT 1`, sourceID, entryID,
-	).Scan(&c.ID, &c.Judge.Cutter, &c.Judge.Version, &at, &text)
+	).Scan(&c.ID, &c.By.Cutter, &c.By.Version, &at, &text)
 	if errors.Is(err, sql.ErrNoRows) {
 		return cut.Cut{}, "", false, nil
 	}

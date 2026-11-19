@@ -161,8 +161,8 @@ var hydrationSchema = map[string]any{
 	"additionalProperties": false,
 }
 
-// cited is a Span as the model cites it.
-type cited struct {
+// citedSpan is a Span as the model cites it.
+type citedSpan struct {
 	Span  int    `json:"span"`
 	Words string `json:"words"`
 }
@@ -180,10 +180,10 @@ type located struct {
 // match it.
 type hydrationOutput struct {
 	Names *[]struct {
-		At     cited  `json:"at"`
-		Kind   string `json:"kind"`
-		Name   string `json:"name"`
-		Office string `json:"office"`
+		At     citedSpan `json:"at"`
+		Kind   string    `json:"kind"`
+		Name   string    `json:"name"`
+		Office string    `json:"office"`
 	} `json:"names"`
 	RefersTo *[]struct {
 		From located `json:"from"`
@@ -191,8 +191,8 @@ type hydrationOutput struct {
 	} `json:"refers_to"`
 	Rejected *[]int `json:"rejected"`
 	Speakers *[]struct {
-		Span    cited `json:"span"`
-		Speaker cited `json:"speaker"`
+		Span    citedSpan `json:"span"`
+		Speaker citedSpan `json:"speaker"`
 	} `json:"speakers"`
 }
 
@@ -248,7 +248,7 @@ func checkHydration(tr ToHydrate, req Request, asked string, res Response) (Hydr
 	}
 	// address is the Address the model's citation stands for: the Span of
 	// the Cut it numbers, or the stretch of it its words are.
-	address := func(c cited) (Address, error) {
+	address := func(c citedSpan) (Address, error) {
 		if c.Span < 1 || c.Span > len(tr.Cut.Spans) {
 			return Address{}, fmt.Errorf("the Item has no S%d: its Spans are S1 to S%d", c.Span, len(tr.Cut.Spans))
 		}
@@ -284,9 +284,9 @@ func checkHydration(tr ToHydrate, req Request, asked string, res Response) (Hydr
 	// words recur in the Span is reached where they occur again.
 	locate := func(l located) (Address, error) {
 		if l.Within == "" {
-			return address(cited{Span: l.Span, Words: l.Words})
+			return address(citedSpan{Span: l.Span, Words: l.Words})
 		}
-		around, err := address(cited{Span: l.Span, Words: l.Within})
+		around, err := address(citedSpan{Span: l.Span, Words: l.Within})
 		if err != nil {
 			return Address{}, fmt.Errorf("%w, so they do not locate the words %q", err, l.Words)
 		}
@@ -311,7 +311,7 @@ func checkHydration(tr ToHydrate, req Request, asked string, res Response) (Hydr
 		}
 	}
 	for _, n := range *out.Rejected {
-		a, err := address(cited{Span: n})
+		a, err := address(citedSpan{Span: n})
 		if err != nil {
 			return refuse("a rejected Span: %v", err)
 		}

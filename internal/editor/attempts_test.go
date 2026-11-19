@@ -36,7 +36,7 @@ func keepsFailing(t *testing.T, answer func(editor.BatchRequest) editor.BatchRes
 	batcher := &fakeBatcher{}
 	b, _ := newBatches(store, batcher)
 	at := saturday
-	if err := b.ReadWaiting(t.Context(), at); err != nil {
+	if err := b.RunWaiting(t.Context(), at); err != nil {
 		t.Fatal(err)
 	}
 	// Each batch the speech is in ends failing its checks: the first with
@@ -44,36 +44,36 @@ func keepsFailing(t *testing.T, answer func(editor.BatchRequest) editor.BatchRes
 	for n := 1; n <= editor.MaxAttempts; n++ {
 		batcher.end(n, answer)
 		at = at.Add(15 * time.Minute)
-		if err := b.ReadWaiting(t.Context(), at); err != nil {
+		if err := b.RunWaiting(t.Context(), at); err != nil {
 			t.Fatal(err)
 		}
 	}
 	// Later runs submit nothing more.
-	if err := b.ReadWaiting(t.Context(), at.Add(time.Hour)); err != nil {
+	if err := b.RunWaiting(t.Context(), at.Add(time.Hour)); err != nil {
 		t.Fatal(err)
 	}
 
 	if len(batcher.submitted) != editor.MaxAttempts {
 		t.Fatalf("%d batches submitted, want %d: one per attempt", len(batcher.submitted), editor.MaxAttempts)
 	}
-	waiting, err := store.ItemsToRead(t.Context())
+	waiting, err := store.ItemsToHydrate(t.Context())
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(waiting) != 0 {
-		t.Errorf("the speech still awaits reading after %d failures: %+v", editor.MaxAttempts, waiting)
+		t.Errorf("the speech still awaits hydration after %d failures: %+v", editor.MaxAttempts, waiting)
 	}
 	failed, err := store.FailedWork(t.Context())
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(failed) != 1 {
-		t.Fatalf("failed work %+v, want the speech's reading", failed)
+		t.Fatalf("failed work %+v, want the speech's hydration", failed)
 	}
 	f := failed[0]
-	if f.Act != "reading" || f.EntryID != speech.EntryID || f.Title != speech.Title ||
+	if f.Act != "hydration" || f.EntryID != speech.EntryID || f.Title != speech.Title ||
 		f.Attempts != editor.MaxAttempts || !f.LastFailedAt.Equal(at) || !strings.Contains(f.Why, why) {
-		t.Errorf("failed work %+v, want the speech's reading, failed %d times, last at %v, %s", f, editor.MaxAttempts, at, why)
+		t.Errorf("failed work %+v, want the speech's hydration, failed %d times, last at %v, %s", f, editor.MaxAttempts, at, why)
 	}
 }
 
@@ -83,27 +83,27 @@ func TestRetryingAnActsFailedWorkResetsItsAttempts(t *testing.T) {
 	b, _ := newBatches(store, batcher)
 	fail := func() {
 		t.Helper()
-		if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+		if err := b.RunWaiting(t.Context(), saturday); err != nil {
 			t.Fatal(err)
 		}
 		for range editor.MaxAttempts {
 			batcher.end(len(batcher.submitted), failingChecks)
-			if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+			if err := b.RunWaiting(t.Context(), saturday); err != nil {
 				t.Fatal(err)
 			}
 		}
 	}
 	fail()
 
-	// Another act's retry leaves reading's failed work failed.
+	// Another act's retry leaves hydration's failed work failed.
 	if n, err := store.RetryFailed(t.Context(), "relating"); err != nil || n != 0 {
 		t.Fatalf("retrying relating cleared %d %v, want none", n, err)
 	}
-	if waiting, _ := store.ItemsToRead(t.Context()); len(waiting) != 0 {
-		t.Fatalf("retrying relating took reading's failed work up again: %+v", waiting)
+	if waiting, _ := store.ItemsToHydrate(t.Context()); len(waiting) != 0 {
+		t.Fatalf("retrying relating took hydration's failed work up again: %+v", waiting)
 	}
-	if n, err := store.RetryFailed(t.Context(), "reading"); err != nil || n != 1 {
-		t.Fatalf("retrying reading cleared %d %v, want the speech's", n, err)
+	if n, err := store.RetryFailed(t.Context(), "hydration"); err != nil || n != 1 {
+		t.Fatalf("retrying hydration cleared %d %v, want the speech's", n, err)
 	}
 	if failed, _ := store.FailedWork(t.Context()); len(failed) != 0 {
 		t.Errorf("failed work %+v once retried, want none", failed)
@@ -140,11 +140,11 @@ func TestABatchThatDisappearsOrNeverEndsCountsAsAFailedAttemptForItsWork(t *test
 			store := record(t)
 			b, _ := newBatches(store, batcher)
 			at := saturday
-			if err := b.ReadWaiting(t.Context(), at); err != nil {
+			if err := b.RunWaiting(t.Context(), at); err != nil {
 				t.Fatal(err)
 			}
 			// Short of the deadline, the batch is still waited for.
-			if err := b.ReadWaiting(t.Context(), at.Add(editor.BatchDeadline-time.Minute)); err != nil {
+			if err := b.RunWaiting(t.Context(), at.Add(editor.BatchDeadline-time.Minute)); err != nil {
 				t.Fatal(err)
 			}
 			if n := batcher.batches(); n != 1 {
@@ -152,7 +152,7 @@ func TestABatchThatDisappearsOrNeverEndsCountsAsAFailedAttemptForItsWork(t *test
 			}
 			for range editor.MaxAttempts {
 				at = at.Add(editor.BatchDeadline)
-				if err := b.ReadWaiting(t.Context(), at); err != nil {
+				if err := b.RunWaiting(t.Context(), at); err != nil {
 					t.Fatal(err)
 				}
 			}
@@ -164,7 +164,7 @@ func TestABatchThatDisappearsOrNeverEndsCountsAsAFailedAttemptForItsWork(t *test
 				t.Fatal(err)
 			}
 			if len(failed) != 1 || failed[0].EntryID != speech.EntryID || !failed[0].LastFailedAt.Equal(at) {
-				t.Errorf("failed work %+v, want the speech's reading, last failed at %v", failed, at)
+				t.Errorf("failed work %+v, want the speech's hydration, last failed at %v", failed, at)
 			}
 			pending, err := store.PendingBatches(t.Context())
 			if err != nil {

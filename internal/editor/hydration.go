@@ -22,7 +22,7 @@ type Piece struct {
 // words of what it refers to, followed as far as it goes (system design:
 // Hydration), made possessive where the stretch was. It is worked out, never
 // written.
-func (r Reading) Hydrated(text string, s cut.Span) []Piece {
+func (r Hydration) Hydrated(text string, s cut.Span) []Piece {
 	var within []RefersTo
 	for _, ref := range r.RefersTo {
 		if ref.From.Span.Start >= s.Start && ref.From.Span.End <= s.End {
@@ -62,7 +62,7 @@ func (r Reading) Hydrated(text string, s cut.Span) []Piece {
 // Words is the words the Span at a reads as, by r: the words of what it
 // refers to, followed as far as it goes without coming back on itself, or
 // its own.
-func (r Reading) Words(text string, a Address) string {
+func (r Hydration) Words(text string, a Address) string {
 	seen := []Address{a}
 	for {
 		i := slices.IndexFunc(r.RefersTo, func(ref RefersTo) bool { return ref.From == a })

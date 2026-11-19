@@ -13,14 +13,14 @@ import (
 	"github.com/samthorold/go-slow/internal/editor"
 )
 
-// Readings answers the queries an Item's page needs.
-type Readings interface {
+// Hydrations answers the queries an Item's page needs.
+type Hydrations interface {
 	// KeptItem is one Item as collected, reporting whether it is in the
 	// Record.
 	KeptItem(ctx context.Context, sourceID, entryID string) (editor.KeptItem, bool, error)
-	// NewestReading is the Item's newest reading of its Spans, reporting
+	// NewestHydration is the Item's newest hydration of its Spans, reporting
 	// whether it has one.
-	NewestReading(ctx context.Context, sourceID, entryID string) (editor.Reading, bool, error)
+	NewestHydration(ctx context.Context, sourceID, entryID string) (editor.Hydration, bool, error)
 	// EntitiesNamed is the Entity each key names, as the Record's look-ups
 	// have it now; a key not yet looked up is left out.
 	EntitiesNamed(ctx context.Context, keys []editor.LookupKey) (map[editor.LookupKey]editor.NamedEntity, error)
@@ -33,7 +33,7 @@ type Cuts interface {
 	NewestCut(ctx context.Context, sourceID, entryID string) (cut.Cut, string, bool, error)
 }
 
-// spanRow is one Span of the Item's newest Cut, as its newest reading
+// spanRow is one Span of the Item's newest Cut, as its newest hydration
 // judged it: its number in the Cut, its hydrated reading (its words, each
 // stretch that refers to another read as what it refers to), whether it is
 // Rejected, whose words it is and what it names.
@@ -54,7 +54,7 @@ type spanRow struct {
 }
 
 // itemPage is the view model for an Item's page: the Item as collected, and
-// its text as the Spans of its newest Cut, read as its newest reading judged
+// its text as the Spans of its newest Cut, read as its newest hydration judged
 // them.
 type itemPage struct {
 	// Spans are the Spans of the Item's newest Cut, in order; none if it
@@ -63,8 +63,8 @@ type itemPage struct {
 	CutBy string
 	// Story is the Page of the Story its newest Cut made, the one way to it.
 	Story string
-	// ReadBy is the call of the Item's newest reading, if it has one.
-	ReadBy      *made
+	// HydratedBy is the call of the Item's newest hydration, if it has one.
+	HydratedBy  *made
 	Title       string
 	Link        string
 	Summary     string
@@ -80,29 +80,29 @@ func itemPath(sourceID, entryID string) string {
 }
 
 // spanJudgements is what an Item's page and a Span's need to show its
-// Spans as read: the Item's newest reading and the Entities its names are.
+// Spans as read: the Item's newest hydration and the Entities its names are.
 type spanJudgements struct {
-	reading editor.Reading
-	read    bool
-	is      map[editor.LookupKey]editor.NamedEntity
+	hydration editor.Hydration
+	hydrated  bool
+	is        map[editor.LookupKey]editor.NamedEntity
 }
 
 // judgementsOf is what the pages need to show the Spans of the Item.
 func (a *app) judgementsOf(ctx context.Context, sourceID, entryID string, published time.Time) (spanJudgements, error) {
 	var j spanJudgements
 	var err error
-	if j.reading, j.read, err = a.Readings.NewestReading(ctx, sourceID, entryID); err != nil {
+	if j.hydration, j.hydrated, err = a.Hydrations.NewestHydration(ctx, sourceID, entryID); err != nil {
 		return j, err
 	}
-	keys := j.reading.Keys(published)
-	j.is, err = a.Readings.EntitiesNamed(ctx, keys)
+	keys := j.hydration.Keys(published)
+	j.is, err = a.Hydrations.EntitiesNamed(ctx, keys)
 	return j, err
 }
 
 // item renders the Item's page the path names.
 func (a *app) item(w http.ResponseWriter, r *http.Request) {
 	sourceID, entryID := r.PathValue("source"), r.PathValue("entry")
-	it, found, err := a.Readings.KeptItem(r.Context(), sourceID, entryID)
+	it, found, err := a.Hydrations.KeptItem(r.Context(), sourceID, entryID)
 	if err != nil {
 		a.serverError(w, r, err)
 		return
@@ -130,8 +130,8 @@ func (a *app) item(w http.ResponseWriter, r *http.Request) {
 		a.serverError(w, r, err)
 		return
 	}
-	if j.read {
-		p.ReadBy = &made{Act: "read", Call: j.reading.Call}
+	if j.hydrated {
+		p.HydratedBy = &made{Act: "hydrated", Call: j.hydration.Call}
 	}
 	if cutYet {
 		p.CutBy = fmt.Sprintf("cut · %s v%d", c.By.Cutter, c.By.Version)
@@ -146,12 +146,12 @@ func (a *app) item(w http.ResponseWriter, r *http.Request) {
 	a.render(w, r, itemTmpl, p)
 }
 
-// spanOf is the Span at, numbered n in its Cut, of text, as j's reading
-// judged it, in an Item published on published: what the reading judged of
+// spanOf is the Span at, numbered n in its Cut, of text, as j's hydration
+// judged it, in an Item published on published: what the hydration judged of
 // a stretch within it is shown with it, and the Entities it mentions as j
-// has them. A Span no reading judged reads as its words.
+// has them. A Span no hydration judged reads as its words.
 func spanOf(n int, text string, at editor.Address, published time.Time, j spanJudgements) spanRow {
-	s, r := at.Span, j.reading
+	s, r := at.Span, j.hydration
 	in := func(a editor.Address) bool { return a.Span.Start >= s.Start && a.Span.End <= s.End }
 	row := spanRow{N: n, Pieces: inPlace(r.Hydrated(text, s))}
 	for _, a := range r.Rejected {

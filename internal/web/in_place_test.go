@@ -33,7 +33,7 @@ func budget() string {
 		"<p>It is part of the town's regeneration.</p>"
 }
 
-const budgetReading = `{
+const budgetHydration = `{
   "names": [],
   "refers_to": [
     {"from": {"span": 2, "words": "This Budget"}, "to": {"span": 1, "words": "today's Budget"}},
@@ -47,8 +47,8 @@ const budgetReading = `{
   "speakers": []
 }`
 
-// readBudget seeds the budget Item, cuts it and reads it.
-func readBudget(t *testing.T, store *sqlite.Store) {
+// hydrateBudget seeds the budget Item, cuts it and hydrates it.
+func hydrateBudget(t *testing.T, store *sqlite.Store) {
 	t.Helper()
 	it := item("budget", "The Budget", saturday.Add(-24*time.Hour))
 	it.Content = budget()
@@ -56,8 +56,8 @@ func readBudget(t *testing.T, store *sqlite.Store) {
 	if err := cut.New(store).CutNew(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
-	ed := editor.New(editor.Deps{Store: store, Model: fakeModel{budgetReading}, Log: slog.New(slog.DiscardHandler)})
-	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
+	ed := editor.New(editor.Deps{Store: store, Model: fakeModel{budgetHydration}, Log: slog.New(slog.DiscardHandler)})
+	if err := ed.RunWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -75,7 +75,7 @@ func bodyOf(t *testing.T, page string, n int) string {
 
 func TestHydratedWordsAreCapitalisedAtASentencesStart(t *testing.T) {
 	store := openStore(t)
-	readBudget(t, store)
+	hydrateBudget(t, store)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	page := get(t, app, "/items/"+number10.ID+"/budget").body
@@ -87,7 +87,7 @@ func TestHydratedWordsAreCapitalisedAtASentencesStart(t *testing.T) {
 
 func TestALeadingTheOfHydratedWordsIsLoweredMidSentence(t *testing.T) {
 	store := openStore(t)
-	readBudget(t, store)
+	hydrateBudget(t, store)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	page := get(t, app, "/items/"+number10.ID+"/budget").body
@@ -99,7 +99,7 @@ func TestALeadingTheOfHydratedWordsIsLoweredMidSentence(t *testing.T) {
 
 func TestASpansPageReadsItsHydratedWordsInPlace(t *testing.T) {
 	store := openStore(t)
-	readBudget(t, store)
+	hydrateBudget(t, store)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	page := get(t, app, spanPath(t, app, "budget", 5)).body
@@ -111,7 +111,7 @@ func TestASpansPageReadsItsHydratedWordsInPlace(t *testing.T) {
 
 func TestHydratedWordsForAPossessiveArePossessive(t *testing.T) {
 	store := openStore(t)
-	readBudget(t, store)
+	hydrateBudget(t, store)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	page := get(t, app, "/items/"+number10.ID+"/budget").body

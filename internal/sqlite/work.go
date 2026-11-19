@@ -11,12 +11,12 @@ import (
 // Editor's acts key it: the Item's Source and entry, a line apart.
 const itemWorkKey = `items.source_id || char(10) || items.entry_id`
 
-// spansReadingCall is the id of the applied reading call that made the
-// reading of Spans aliased r, or 0: the one on its Item answering its
+// spansHydrationCall is the id of the applied hydration call that made the
+// hydration of Spans aliased r, or 0: the one on its Item answering its
 // request.
-func spansReadingCall(r string) string {
+func spansHydrationCall(r string) string {
 	return `coalesce((SELECT max(c.id) FROM model_calls c
-		WHERE c.act = 'reading' AND c.outcome = 'applied' AND c.request_hash = ` + r + `.request_hash
+		WHERE c.act = 'hydration' AND c.outcome = 'applied' AND c.request_hash = ` + r + `.request_hash
 			AND c.work_key = ` + r + `.source_id || char(10) || ` + r + `.entry_id), 0)`
 }
 

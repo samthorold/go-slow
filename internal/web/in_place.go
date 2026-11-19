@@ -9,10 +9,10 @@ import (
 )
 
 // inPlace is a hydrated Span's pieces with each inserted stretch's words
-// cased as they would be written where they land: the reading's words keep
+// cased as they would be written where they land: the hydration's words keep
 // their antecedent's case, which reads wrongly in place. Only the page's
 // words change; Was keeps the words the stretch was. The possessive is the
-// reading's own (editor.Piece), shared with what weaving is shown.
+// hydration's own (editor.Piece), shared with what weaving is shown.
 func inPlace(pieces []editor.Piece) []editor.Piece {
 	out := make([]editor.Piece, len(pieces))
 	var before strings.Builder

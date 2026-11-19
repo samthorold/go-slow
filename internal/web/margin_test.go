@@ -50,7 +50,7 @@ func blockOf(t *testing.T, page, text string) block {
 // folds it.
 func TestAnItemsPageHasOneControlThatFoldsTheMarginStartingOpen(t *testing.T) {
 	store := openStore(t)
-	readSpeech(t, store, speechReading)
+	hydrateSpeech(t, store, speechHydration)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	page := itemPage(t, app, "PM speech in Scotland").body

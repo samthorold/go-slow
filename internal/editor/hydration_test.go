@@ -7,10 +7,10 @@ import (
 	"github.com/samthorold/go-slow/internal/editor"
 )
 
-// read is the release's reading.
-func read(t *testing.T, output string) editor.Reading {
+// hydrate is the release's hydration, answered with output.
+func hydrate(t *testing.T, output string) editor.Hydration {
 	t.Helper()
-	r, err := editor.Read(t.Context(), &fakeModel{output: output}, "", toRead(release))
+	r, err := editor.Hydrate(t.Context(), &fakeModel{output: output}, "", toHydrate(release))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -19,7 +19,7 @@ func read(t *testing.T, output string) editor.Reading {
 
 // hydrated is a Span's hydrated reading as text, each stretch read in
 // another's words marked [as those words].
-func hydrated(r editor.Reading, text string, s cut.Span) string {
+func hydrated(r editor.Hydration, text string, s cut.Span) string {
 	out := ""
 	for _, p := range r.Hydrated(text, s) {
 		if p.Was != "" {
@@ -32,7 +32,7 @@ func hydrated(r editor.Reading, text string, s cut.Span) string {
 }
 
 func TestASpansHydratedReadingFollowsWhatItsStretchesReferTo(t *testing.T) {
-	r := read(t, releaseReading)
+	r := hydrate(t, releaseHydration)
 	spans := cut.Sentences(release.Content)
 
 	for i, want := range []string{
@@ -54,7 +54,7 @@ func TestASpansHydratedReadingFollowsWhatItsStretchesReferTo(t *testing.T) {
 func TestAReferenceIsFollowedThroughWhatItRefersTo(t *testing.T) {
 	// S4's "He" refers to S2's "the city", which refers to S3's "Derby",
 	// which (wrongly) refers back to "He".
-	r := read(t, `{"names": [], "refers_to": [
+	r := hydrate(t, `{"names": [], "refers_to": [
 		{"from": {"span": 4, "words": "He"}, "to": {"span": 2, "words": "the city"}},
 		{"from": {"span": 2, "words": "the city"}, "to": {"span": 3, "words": "Derby"}},
 		{"from": {"span": 3, "words": "Derby"}, "to": {"span": 4, "words": "He"}}
@@ -69,7 +69,7 @@ func TestAReferenceIsFollowedThroughWhatItRefersTo(t *testing.T) {
 }
 
 func TestASpanWithNothingReferredToReadsAsItsWords(t *testing.T) {
-	r := read(t, goodReadingOfRelease)
+	r := hydrate(t, goodHydrationOfRelease)
 	text := "<p>Jobs &amp; <em>growth</em>   rise.</p>"
 
 	if got := hydrated(r, text, cut.Sentences(text)[0]); got != "Jobs & growth rise." {
@@ -77,10 +77,10 @@ func TestASpanWithNothingReferredToReadsAsItsWords(t *testing.T) {
 	}
 }
 
-const goodReadingOfRelease = `{"names": [], "refers_to": [], "rejected": [], "speakers": []}`
+const goodHydrationOfRelease = `{"names": [], "refers_to": [], "rejected": [], "speakers": []}`
 
 func TestASpeakerIsNamedAsTheSpanNamingThemIsHydrated(t *testing.T) {
-	r := read(t, `{"names": [], "refers_to": [{"from": {"span": 4, "words": "He"}, "to": {"span": 1, "words": "Andy Burnham"}}],
+	r := hydrate(t, `{"names": [], "refers_to": [{"from": {"span": 4, "words": "He"}, "to": {"span": 1, "words": "Andy Burnham"}}],
 		"rejected": [], "speakers": [{"span": {"span": 4, "words": ""}, "speaker": {"span": 4, "words": "He"}}]}`)
 
 	if got := r.Words(release.Content, r.Speakers[0].By); got != "Andy Burnham" {

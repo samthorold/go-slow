@@ -15,12 +15,12 @@ import (
 )
 
 // The recorded runs of naming. Its input is a Story the Editor made, so
-// naming rests on weaving's recordings, and those on reading's: it is
+// naming rests on weaving's recordings, and those on hydration's: it is
 // recorded over its own frozen copies of both,
 // testdata/recorded/naming/inputs/weaving/<run>.json, each weaving run's
-// first sample, and testdata/recorded/naming/inputs/reading/<fixture>.json,
-// the readings those samples were recorded over (weaving's Stories cite the
-// Spans they were shown by number, which only the readings they were shown
+// first sample, and testdata/recorded/naming/inputs/hydration/<fixture>.json,
+// the hydrations those samples were recorded over (weaving's Stories cite the
+// Spans they were shown by number, which only the hydrations they were shown
 // make). Weaving's two runs are replayed from the copies in order (wovenRecord),
 // and each Story they make is a fixture of naming's, <run>-story-<n>. The
 // compatibility check feeds weaving's current recordings to naming
@@ -153,7 +153,7 @@ func storiesToName(t *testing.T, frozen string) []storyToName {
 
 // wovenRecord is the Record weaving's two runs make over the frozen copies
 // under frozen, closed at a file of its own: each run's Items collected, cut
-// and hydrated by reading's copies (frozen/reading/), then woven by weaving's
+// and hydrated by hydration's copies (frozen/hydration/), then woven by weaving's
 // copy of that run (frozen/weaving/<run>.json), replayed unchecked, as the
 // act that made it checked it. With it, each Story the runs make, in the
 // order made. A missing copy, or one weaving's checks refuse, is an error
@@ -165,7 +165,7 @@ func wovenRecord(t *testing.T, frozen string) (string, []storyToName, error) {
 	store, _ := newRecordAt(t, path, nil)
 	var stories []storyToName
 	for _, r := range weavingRuns(t) {
-		if err := collectCutAndHydrate(ctx, store, r, filepath.Join(frozen, "reading")); err != nil {
+		if err := collectCutAndHydrate(ctx, store, r, filepath.Join(frozen, "hydration")); err != nil {
 			return "", nil, err
 		}
 		before := madeIDs(t, store)
@@ -226,7 +226,7 @@ func nameStory(t *testing.T, store *sqlite.Store, m *sampleModel, id int64) (str
 	b := editor.NewBatches(editor.BatchDeps{Store: store, Batcher: &modelBatcher{model: m, prefix: "naming"},
 		Acts: []editor.BatchAct{ed.Naming()}, ModelFor: modelFor, Log: log})
 	for turn := range editor.MaxAttempts + 1 {
-		if err := b.ReadWaiting(ctx, namedAt.Add(time.Duration(turn)*time.Minute)); err != nil {
+		if err := b.RunWaiting(ctx, namedAt.Add(time.Duration(turn)*time.Minute)); err != nil {
 			return "", err
 		}
 		if m.lost != nil {

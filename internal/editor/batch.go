@@ -48,7 +48,7 @@ type BatchPoll struct {
 
 // BatchAct is an editorial act as it runs in batches: what awaits it, each
 // piece of work with its request, and how a result is checked and written
-// back. Reading, weaving and naming are three.
+// back. Hydration, weaving and naming are three.
 type BatchAct struct {
 	// Name names the act, as its requests do.
 	Name string
@@ -189,7 +189,7 @@ type Batches struct {
 // NewBatches builds the batch runner.
 func NewBatches(d BatchDeps) *Batches { return &Batches{BatchDeps: d} }
 
-// ReadWaiting is the batch runner's turn after a Collection run, at now.
+// RunWaiting is the batch runner's turn after a Collection run, at now.
 // It never waits on a batch: it applies the results of every batch that has
 // ended, resubmitting each failed request alone until its work has failed
 // MaxAttempts times, and gives up each batch past BatchDeadline as failed;
@@ -200,7 +200,7 @@ func NewBatches(d BatchDeps) *Batches { return &Batches{BatchDeps: d} }
 // later runs at no model call, and counts an attempt only if it still fails
 // at BatchDeadline. Only a failing Record is an error; a failing batch
 // interface is logged, and its work tried again on the next run.
-func (b *Batches) ReadWaiting(ctx context.Context, now time.Time) error {
+func (b *Batches) RunWaiting(ctx context.Context, now time.Time) error {
 	pending, err := b.Store.PendingBatches(ctx)
 	if err != nil {
 		return err
@@ -209,6 +209,9 @@ func (b *Batches) ReadWaiting(ctx context.Context, now time.Time) error {
 	if err != nil {
 		return err
 	}
+	// inBatch is the work in a batch still, by the identifier its act and
+	// key give it now: a request kept under an earlier name of its act (a
+	// batch submitted before reading was called hydration) is the same work.
 	inBatch := map[string]bool{}
 	for _, p := range pending {
 		s, err := b.settle(ctx, p, jobs, now)
@@ -217,13 +220,13 @@ func (b *Batches) ReadWaiting(ctx context.Context, now time.Time) error {
 		}
 		if !s.ended {
 			for _, r := range p.Requests {
-				inBatch[r.ID] = true
+				inBatch[requestID(r.Act, r.Key)] = true
 			}
 			continue
 		}
 		for _, rb := range s.resubmitted {
 			for _, r := range rb.Requests {
-				inBatch[r.ID] = true
+				inBatch[requestID(r.Act, r.Key)] = true
 			}
 		}
 		if err := b.Store.EndBatch(ctx, p.ID, s.failures, s.resubmitted); err != nil {
@@ -232,8 +235,8 @@ func (b *Batches) ReadWaiting(ctx context.Context, now time.Time) error {
 	}
 	// Results applied above are no longer waiting. Each act's work is
 	// submitted in the order the act gives it, and a batch's results are
-	// applied in the order submitted: reading's oldest Item first, so of two
-	// Items read in one batch the later-published is read second.
+	// applied in the order submitted: hydration's oldest Item first, so of two
+	// Items hydrated in one batch the later-published is hydrated second.
 	var batch PendingBatch
 	var requests []BatchRequest
 	for _, act := range b.Acts {
@@ -270,9 +273,9 @@ func (b *Batches) ReadWaiting(ctx context.Context, now time.Time) error {
 }
 
 // Submit submits one job alone, as a batch of its own of the act its request
-// names, kept pending at now as ReadWaiting keeps its batches, so the runner
+// names, kept pending at now as RunWaiting keeps its batches, so the runner
 // applies its result on a later turn as it applies theirs. It returns the
-// batch's identifier. Unlike ReadWaiting's, a batch interface that fails is
+// batch's identifier. Unlike RunWaiting's, a batch interface that fails is
 // an error: the Owner asked for this one.
 func (b *Batches) Submit(ctx context.Context, j Job, now time.Time) (string, error) {
 	act := j.Request.Act
@@ -453,28 +456,28 @@ func requestID(act, key string) string {
 	return act + "-" + hex.EncodeToString(sum[:16])
 }
 
-// Reading is the reading act as it runs in batches: the Items awaiting
-// reading, each read into the Record when its result passes the checks.
-func (e *Editor) Reading() BatchAct {
+// Hydration is the hydration act as it runs in batches: the Items awaiting
+// hydration, each hydrated into the Record when its result passes the checks.
+func (e *Editor) Hydration() BatchAct {
 	return BatchAct{
-		Name: "reading",
+		Name: "hydration",
 		Waiting: func(ctx context.Context, _ time.Time) ([]Job, error) {
-			waiting, err := e.Store.ItemsToRead(ctx)
+			waiting, err := e.Store.ItemsToHydrate(ctx)
 			if err != nil {
 				return nil, err
 			}
 			jobs := make([]Job, 0, len(waiting))
 			for _, tr := range waiting {
-				req := readingRequest(tr)
+				req := hydrationRequest(tr)
 				jobs = append(jobs, Job{
 					Key:     itemKey(tr.Item),
 					Request: req,
 					Apply: func(ctx context.Context, res Response, now time.Time) error {
-						r, err := checkReading(tr, req, modelOf(e.ModelFor, req.Act), res)
+						r, err := checkHydration(tr, req, modelOf(e.ModelFor, req.Act), res)
 						if err != nil {
 							return err
 						}
-						return e.keepReading(ctx, r, now)
+						return e.keepHydration(ctx, r, now)
 					},
 				})
 			}

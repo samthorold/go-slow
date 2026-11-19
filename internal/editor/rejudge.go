@@ -33,11 +33,11 @@ type Candidate struct {
 	// ChosenAt is when it was chosen, making it the live judge from then
 	// on; zero while it is a candidate.
 	ChosenAt time.Time
-	// Judgements is how many it has made: for reading, its readings.
+	// Judgements is how many it has made: for hydration, its hydrations.
 	Judgements int
 }
 
-// RejudgeAct is an act as it judges a Range of the Record again. Reading is
+// RejudgeAct is an act as it judges a Range of the Record again. Hydration is
 // the one today; another act plugs in by giving its own Work.
 type RejudgeAct struct {
 	// Name names the act, as its requests do, and Version is the version of
@@ -61,21 +61,21 @@ type RejudgeJob struct {
 	Apply func(ctx context.Context, res Response, now time.Time, candidate int64) error
 }
 
-// RereadingStore is the part of the Record reading a range again reads and
+// RehydratingStore is the part of the Record hydrating a range again reads and
 // writes.
-type RereadingStore interface {
+type RehydratingStore interface {
 	// ItemsIn are the Items cut and published in the range, each with its
-	// newest Cut, oldest first, whether read already or not.
-	ItemsIn(ctx context.Context, r Range) ([]ToRead, error)
-	KeepReading(ctx context.Context, r Reading) error
+	// newest Cut, oldest first, whether hydrated already or not.
+	ItemsIn(ctx context.Context, r Range) ([]ToHydrate, error)
+	KeepHydration(ctx context.Context, r Hydration) error
 }
 
-// Rereading is reading as it reads a range of the Record again: each Item
-// cut and published in the range, read as it is read in use.
-func Rereading(store RereadingStore) RejudgeAct {
+// Rehydrating is hydration as it reads a range of the Record again: each Item
+// cut and published in the range, hydrated as it is hydrated in use.
+func Rehydrating(store RehydratingStore) RejudgeAct {
 	return RejudgeAct{
-		Name:    "reading",
-		Version: ReadingVersion,
+		Name:    "hydration",
+		Version: HydrationVersion,
 		Work: func(ctx context.Context, rng Range, model string) ([]RejudgeJob, error) {
 			items, err := store.ItemsIn(ctx, rng)
 			if err != nil {
@@ -83,17 +83,17 @@ func Rereading(store RereadingStore) RejudgeAct {
 			}
 			jobs := make([]RejudgeJob, 0, len(items))
 			for _, tr := range items {
-				req := readingRequest(tr)
+				req := hydrationRequest(tr)
 				jobs = append(jobs, RejudgeJob{
 					Key:     itemKey(tr.Item),
 					Request: req,
 					Apply: func(ctx context.Context, res Response, now time.Time, candidate int64) error {
-						r, err := checkReading(tr, req, model, res)
+						r, err := checkHydration(tr, req, model, res)
 						if err != nil {
 							return err
 						}
 						r.At, r.Candidate = now, candidate
-						return store.KeepReading(ctx, r)
+						return store.KeepHydration(ctx, r)
 					},
 				})
 			}
@@ -102,7 +102,7 @@ func Rereading(store RereadingStore) RejudgeAct {
 	}
 }
 
-// KindCompared is how two readings of one Item compare on one kind of
+// KindCompared is how two hydrations of one Item compare on one kind of
 // judgement: how many each made, and how many both made, alike in every
 // part.
 type KindCompared struct {
@@ -110,9 +110,9 @@ type KindCompared struct {
 	Live, Candidate, Both int
 }
 
-// CompareReadings compares a live reading of an Item with a candidate's, a
-// kind of judgement at a time, in the order a reading judges them.
-func CompareReadings(live, candidate Reading) []KindCompared {
+// CompareHydrations compares a live hydration of an Item with a candidate's, a
+// kind of judgement at a time, in the order a hydration judges them.
+func CompareHydrations(live, candidate Hydration) []KindCompared {
 	return []KindCompared{
 		compareKind("names", live.Names, candidate.Names),
 		compareKind("refers_to", live.RefersTo, candidate.RefersTo),

@@ -22,8 +22,8 @@ var number10 = collect.Source{
 	Keeps: collect.KeepFullText, Attribution: collect.OGL, UsualGap: time.Hour,
 }
 
-// record is a Record holding the speech, cut and awaiting reading, and a
-// call readout with no text, which is not cut and so not read; with a Topic
+// record is a Record holding the speech, cut and awaiting hydration, and a
+// call readout with no text, which is not cut and so not hydrated; with a Topic
 // on Scotland, which the speech touches.
 func record(t *testing.T) *sqlite.Store {
 	t.Helper()
@@ -59,38 +59,38 @@ func record(t *testing.T) *sqlite.Store {
 	return store
 }
 
-func TestTheEditorReadsEachItemCutIntoTheRecordEachJudgementWithItsJudge(t *testing.T) {
+func TestTheEditorHydratesEachItemCutIntoTheRecordEachJudgementWithItsJudge(t *testing.T) {
 	store := record(t)
-	model := &fakeModel{output: goodReading}
+	model := &fakeModel{output: goodHydration}
 	ed, _ := newEditor(store, model)
 
-	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
+	if err := ed.RunWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 
 	if len(model.sent) != 1 {
 		t.Fatalf("model called %d times, want once: only the speech has text to cut", len(model.sent))
 	}
-	r, found, err := store.NewestReading(t.Context(), speech.SourceID, speech.EntryID)
+	r, found, err := store.NewestHydration(t.Context(), speech.SourceID, speech.EntryID)
 	if err != nil || !found {
-		t.Fatalf("NewestReading: %v %v", found, err)
+		t.Fatalf("NewestHydration: %v %v", found, err)
 	}
-	if r.Judge.Act != "reading" || r.Judge.Version != editor.ReadingVersion || r.Judge.Model != "fake" ||
+	if r.Judge.Act != "hydration" || r.Judge.Version != editor.HydrationVersion || r.Judge.Model != "fake" ||
 		r.Judge.RequestHash != editor.RequestHash(model.sent[0], "") || !r.At.Equal(saturday) {
-		t.Errorf("reading judged by %+v at %v", r.Judge, r.At)
+		t.Errorf("hydration judged by %+v at %v", r.Judge, r.At)
 	}
 	if len(r.Names) != 2 || spanWords(speech, r.Names[1].At) != "Motherwell" {
 		t.Errorf("names = %+v", r.Names)
 	}
 }
 
-func TestAnItemOnceReadIsNotReadAgain(t *testing.T) {
+func TestAnItemOnceHydratedIsNotHydratedAgain(t *testing.T) {
 	store := record(t)
-	model := &fakeModel{output: goodReading}
+	model := &fakeModel{output: goodHydration}
 	ed, _ := newEditor(store, model)
 
 	for range 2 {
-		if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
+		if err := ed.RunWaiting(t.Context(), saturday); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -100,7 +100,7 @@ func TestAnItemOnceReadIsNotReadAgain(t *testing.T) {
 	}
 }
 
-func TestAnItemTouchingNoTopicIsReadAllTheSame(t *testing.T) {
+func TestAnItemTouchingNoTopicIsHydratedAllTheSame(t *testing.T) {
 	store := record(t)
 	if _, err := store.AddItems(t.Context(), []collect.Item{{
 		SourceID: number10.ID, EntryID: "budget", Title: "The Budget", Content: "<p>The Chancellor set out the Budget.</p>",
@@ -114,41 +114,41 @@ func TestAnItemTouchingNoTopicIsReadAllTheSame(t *testing.T) {
 	model := &fakeModel{output: `{"names": [], "refers_to": [], "rejected": [], "speakers": []}`}
 	ed, _ := newEditor(store, model)
 
-	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
+	if err := ed.RunWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 
-	if _, found, err := store.NewestReading(t.Context(), number10.ID, "budget"); err != nil || !found {
-		t.Errorf("the Budget, touching no Topic, was not read (%v)", err)
+	if _, found, err := store.NewestHydration(t.Context(), number10.ID, "budget"); err != nil || !found {
+		t.Errorf("the Budget, touching no Topic, was not hydrated (%v)", err)
 	}
 }
 
-func TestAReadingThatFailsWritesNothingAndTheItemStaysAwaitingReading(t *testing.T) {
+func TestAHydrationThatFailsWritesNothingAndTheItemStaysAwaitingHydration(t *testing.T) {
 	for name, model := range map[string]*fakeModel{
-		"failing the checks": {output: refusedReading},
+		"failing the checks": {output: refusedHydration},
 		"a failed call":      {err: errors.New("overloaded")},
 	} {
 		t.Run(name, func(t *testing.T) {
 			store := record(t)
 			ed, logs := newEditor(store, model)
 
-			if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
+			if err := ed.RunWaiting(t.Context(), saturday); err != nil {
 				t.Fatal(err)
 			}
 
-			if _, found, err := store.NewestReading(t.Context(), speech.SourceID, speech.EntryID); err != nil || found {
-				t.Errorf("a failed reading was kept (%v)", err)
+			if _, found, err := store.NewestHydration(t.Context(), speech.SourceID, speech.EntryID); err != nil || found {
+				t.Errorf("a failed hydration was kept (%v)", err)
 			}
 			if logs.Len() == 0 {
 				t.Error("the failure was not logged")
 			}
-			// It is read on the next run.
-			model.err, model.output = nil, goodReading
-			if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
+			// It is hydrated on the next run.
+			model.err, model.output = nil, goodHydration
+			if err := ed.RunWaiting(t.Context(), saturday); err != nil {
 				t.Fatal(err)
 			}
-			if _, found, _ := store.NewestReading(t.Context(), speech.SourceID, speech.EntryID); !found {
-				t.Error("the Item was not read on the next run")
+			if _, found, _ := store.NewestHydration(t.Context(), speech.SourceID, speech.EntryID); !found {
+				t.Error("the Item was not hydrated on the next run")
 			}
 		})
 	}

@@ -18,8 +18,8 @@
 // left out, and the feed's validators are not saved, so the next run sees it
 // again. Backfill (backfill.go, its port TextStore) gives the text to uncut
 // Items collected with only a summary. After every run, Collection cuts the
-// Items with text and no Cut (Deps.Cut), then runs the Editor's reading and
-// look-ups (Deps.Read, Deps.LookUp).
+// Items with text and no Cut (Deps.Cut), then runs the Editor's Commands and
+// look-ups (Deps.Commands, Deps.LookUp).
 // Its timetable runs inside the app process, started by main.
 package collect
 
@@ -129,9 +129,9 @@ type ListedItem struct {
 	// HasText is whether the Item has its text, and Cut whether a Cut lists
 	// its Spans.
 	HasText, Cut bool
-	// Read is whether the Editor has read the Item's Spans; Names, Speakers
-	// and Rejected are how many of each its newest reading judged.
-	Read                      bool
+	// Hydrated is whether hydration has judged the Item's Spans; Names,
+	// Speakers and Rejected are how many of each its newest hydration judged.
+	Hydrated                  bool
 	Names, Speakers, Rejected int
 }
 
@@ -173,20 +173,20 @@ type Deps struct {
 	Sources []Source
 	Fetcher Fetcher
 	Store   Store
-	// Cut, if set, runs after every run, before reading: it cuts the
+	// Cut, if set, runs after every run, before hydration: it cuts the
 	// Items with text that have no Cut yet into Spans (system design: The
 	// grain belongs to the judgement, not to the Span).
 	Cut Cutter
-	// Read, if set, runs after cutting: the Editor reads the Items
-	// awaiting reading, at once, or the batch runner applies the results of
-	// earlier batches and submits what awaits each act (reading, weaving,
+	// Commands, if set, runs after cutting: the Editor hydrates the Items
+	// awaiting hydration, at once, or the batch runner applies the results of
+	// earlier batches and submits what awaits each act (hydration, weaving,
 	// naming) as one batch (system design: Commands that call a model run in
 	// batches).
-	Read Reader
-	// LookUp, if set, runs after reading: plain code looks up in Wikidata
-	// what the readings name, as its own step, so a look-up refused or
-	// delayed holds up no reading (system design: Entities are looked up by
-	// name, not by Span).
+	Commands Commands
+	// LookUp, if set, runs after the Commands: plain code looks up in
+	// Wikidata what the hydrations name, as its own step, so a look-up
+	// refused or delayed holds up no hydration (system design: Entities are
+	// looked up by name, not by Span).
 	LookUp Looker
 	Log    *slog.Logger
 }
@@ -202,10 +202,10 @@ type Cutter interface {
 	CutNew(ctx context.Context, now time.Time) error
 }
 
-// Reader is the Editor's reading, run over the Items awaiting it. A reading
-// that fails leaves its Item awaiting reading, for the next run.
-type Reader interface {
-	ReadWaiting(ctx context.Context, now time.Time) error
+// Commands are the Editor's Commands, run over the work awaiting them. Work
+// that fails is left awaiting its Command, for the next run.
+type Commands interface {
+	RunWaiting(ctx context.Context, now time.Time) error
 }
 
 // Collector runs Collection over its Sources.
@@ -263,9 +263,9 @@ func (c *Collector) Run(ctx context.Context, now time.Time) {
 			c.Log.ErrorContext(ctx, "cutting failed", "error", err)
 		}
 	}
-	if c.Read != nil {
-		if err := c.Read.ReadWaiting(ctx, now); err != nil {
-			c.Log.ErrorContext(ctx, "reading failed", "error", err)
+	if c.Commands != nil {
+		if err := c.Commands.RunWaiting(ctx, now); err != nil {
+			c.Log.ErrorContext(ctx, "commands failed", "error", err)
 		}
 	}
 	if c.LookUp != nil {

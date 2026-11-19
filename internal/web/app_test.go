@@ -52,15 +52,15 @@ func newAppWithLog(t *testing.T, now time.Time, store *sqlite.Store) (http.Handl
 // logging to logs.
 func appDeps(now time.Time, store *sqlite.Store, logs *bytes.Buffer) web.Deps {
 	return web.Deps{
-		Items:    store,
-		Readings: store,
-		Cuts:     store,
-		Topics:   interest.New(store),
-		Calls:    store,
-		Stories:  store,
-		Sources:  []collect.Source{number10},
-		Now:      func() time.Time { return now },
-		Log:      slog.New(slog.NewJSONHandler(logs, &slog.HandlerOptions{Level: slog.LevelDebug})),
+		Items:      store,
+		Hydrations: store,
+		Cuts:       store,
+		Topics:     interest.New(store),
+		Calls:      store,
+		Stories:    store,
+		Sources:    []collect.Source{number10},
+		Now:        func() time.Time { return now },
+		Log:        slog.New(slog.NewJSONHandler(logs, &slog.HandlerOptions{Level: slog.LevelDebug})),
 	}
 }
 

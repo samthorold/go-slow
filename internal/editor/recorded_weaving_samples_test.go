@@ -161,11 +161,11 @@ func TestAWeavingSampleRefusedOnceIsAskedAgainAndPasses(t *testing.T) {
 	}
 }
 
-// Weaving is recorded over its frozen copies of reading's recordings
-// (weaving/inputs/reading/): each run is shown its Items hydrated, a Span
+// Weaving is recorded over its frozen copies of hydration's recordings
+// (weaving/inputs/hydration/): each run is shown its Items hydrated, a Span
 // with a Speaker as spoken, a Span read in other words in brackets, and a
 // Span Rejected left out.
-func TestWeavingIsRecordedOverItsFrozenCopiesOfReading(t *testing.T) {
+func TestWeavingIsRecordedOverItsFrozenCopiesOfHydration(t *testing.T) {
 	if *rerecordFlag {
 		t.Skip("recording")
 	}
@@ -176,7 +176,7 @@ func TestWeavingIsRecordedOverItsFrozenCopiesOfReading(t *testing.T) {
 		t.Fatalf("recording: %v", errs)
 	}
 	in := live.sent[0].Input
-	// The US–Russia response's first Span is Rejected by its frozen reading.
+	// The US–Russia response's first Span is Rejected by its frozen hydration.
 	first := runs[0].items[0].item
 	rejected := cut.Words(first.Content, cut.Sentences(first.Content)[0])
 	for _, c := range []struct {

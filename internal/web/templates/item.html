@@ -11,16 +11,16 @@
 {{- if .Spans}}
 {{/* The Item's text as the Spans of its newest Cut, numbered as the Cut
      lists them: the numbers a judge cites them by. Each is read as its
-     newest reading judged it: hydrated, each stretch that refers to another
+     newest hydration judged it: hydrated, each stretch that refers to another
      shown as what it refers to (an ins, titled with the words it was);
      whose words it is, what it names, and whether it is Rejected, in its
      margin. */}}
 <section aria-labelledby="text">
   <h2 id="text">Text</h2>
-  <p><span class="machine">{{.CutBy}}</span>{{with .ReadBy}} {{template "made" .}}{{end}}</p>
+  <p><span class="machine">{{.CutBy}}</span>{{with .HydratedBy}} {{template "made" .}}{{end}}</p>
   <p><a href="{{.Story}}">The Story its Cut made</a></p>
-  {{- if not .ReadBy}}
-  <p>Awaiting reading.</p>
+  {{- if not .HydratedBy}}
+  <p>Awaiting hydration.</p>
   {{- end}}
   <div class="margined" data-margin="open">
   {{template "margin-fold" "open"}}

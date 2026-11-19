@@ -23,9 +23,9 @@ type Config struct {
 	// CollectionInterval is how often Collection runs (COLLECTION_INTERVAL,
 	// a Go duration such as 15m).
 	CollectionInterval time.Duration
-	// ReadingModel is the Claude model the Editor reads Items with
-	// (READING_MODEL, such as claude-haiku-5-5).
-	ReadingModel string
+	// HydrationModel is the Claude model the Editor hydrates Items with
+	// (HYDRATION_MODEL, such as claude-haiku-5-5).
+	HydrationModel string
 	// WeavingModel is the Claude model the Editor weaves Stories with
 	// (WEAVING_MODEL, such as claude-opus-5-5).
 	WeavingModel string
@@ -64,7 +64,7 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 	}
 	port, dbPath := get("PORT"), get("DATABASE_PATH")
 	contact, interval := get("COLLECTION_CONTACT"), get("COLLECTION_INTERVAL")
-	model := get("READING_MODEL")
+	model := get("HYDRATION_MODEL")
 	weaving, weavingTime := get("WEAVING_MODEL"), get("WEAVING_TIME")
 	naming := get("NAMING_MODEL")
 	key := get("GOSLOW_ANTHROPIC_API_KEY")
@@ -83,7 +83,7 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 	// Only the Claude adapter exists yet (open-weight models come through
 	// OpenRouter later), so any other model would fail on every call.
 	for _, v := range [][2]string{
-		{"READING_MODEL", model}, {"WEAVING_MODEL", weaving}, {"NAMING_MODEL", naming},
+		{"HYDRATION_MODEL", model}, {"WEAVING_MODEL", weaving}, {"NAMING_MODEL", naming},
 	} {
 		if !strings.HasPrefix(v[1], "claude-") {
 			return Config{}, errors.New(v[0] + " must be a Claude model such as claude-haiku-5-5, got " + strconv.Quote(v[1]))
@@ -98,7 +98,7 @@ func Load(lookup func(string) (string, bool)) (Config, error) {
 		DatabasePath:       dbPath,
 		CollectionContact:  contact,
 		CollectionInterval: every,
-		ReadingModel:       model,
+		HydrationModel:     model,
 		WeavingModel:       weaving,
 		WeavingAt:          weavingAt,
 		NamingModel:        naming,

@@ -8,9 +8,9 @@
 // provider's batch interface). Each act has its own instructions, output
 // schema and checks.
 //
-// # Reading an Item
+// # Hydrating an Item
 //
-// Reading (reading.go, ReadingVersion 3) is shown the Item as its newest
+// Hydration (hydrate.go, HydrationVersion 3) is shown the Item as its newest
 // Cut, numbered S1, S2…, and one call judges what its Spans refer to, what
 // they name (a name, its kind, and for a person the office in full; code
 // drops an office given to anything else), who speaks them and which are
@@ -21,19 +21,19 @@
 // where the stretch's words occur once in the Span), found in the Span and
 // the stretch within them; only the stretch's address is kept, and locating
 // words not in the Span or not holding the stretch are refused, naming both.
-// The Reading carries its Judge (act, ReadingVersion, which covers how code
+// The Hydration carries its Judge (act, HydrationVersion, which covers how code
 // addresses the words as well as the instructions and schema, the model
 // reported, the request's hash with the model asked for). Every Item
-// collected after the switch (sqlite.Store.Switch), cut and not yet read is
-// read, with no Topic check. A reading that fails its checks writes nothing
-// and is tried again. Reading refuses an answer in the old design's schema.
+// collected after the switch (sqlite.Store.Switch), cut and not yet hydrated is
+// hydrated, with no Topic check. A hydration that fails its checks writes nothing
+// and is tried again. Hydration refuses an answer in the old design's schema.
 //
 // # Looking up names
 //
-// Lookups.LookUpWaiting (lookup.go), run by Collection after reading
+// Lookups.LookUpWaiting (lookup.go), run by Collection after hydration
 // (collect.Deps.LookUp), looks up in Wikidata, in plain code, each LookupKey
 // no look-up has looked up (the storage adapter's NamesToLookUp, over every
-// reading's names, a candidate's included: a look-up is keyed on the name
+// hydration's names, a candidate's included: a look-up is keyed on the name
 // and shows nothing, so a chosen candidate's names are already looked up),
 // once. A key is the name and kind, and for a person named with an office,
 // the office and the Item's date in UTC (KeyOf), so "Derby" in any number of
@@ -42,13 +42,13 @@
 // alias is the name) and returns a NameLookup with its judge (Looker,
 // wikidata v1). A look-up Wikidata refuses, after the adapter's own backoff,
 // is logged and kept nowhere, so the next run tries it again; it holds up no
-// reading, which is kept already. KeepLookup keeps it as a lookup event,
+// hydration, which is kept already. KeepLookup keeps it as a lookup event,
 // with what it makes in one transaction: with no match, the Editor's own
 // Entity for its name and kind if there is none (an entity event); with a
 // match, a merge event for each unmerged Editor's Entity of its kind made
 // for the key's name or the item's label. Which Entities a Span mentions is
-// a view, never stored: Reading.Mentions (the names inside it, or reached by
-// following refers to from a stretch inside it), and Reading.Entities over
+// a view, never stored: Hydration.Mentions (the names inside it, or reached by
+// following refers to from a stretch inside it), and Hydration.Entities over
 // the storage adapter's EntitiesNamed (each key's newest look-up: its item,
 // or the Editor's Entity, or the item that was merged into), each a
 // NamedEntity (equal exactly when the same Entity).
@@ -58,7 +58,7 @@
 // The acts that call a model run in batches through Batches: an act is a BatchAct (what
 // awaits it, each piece of work with its request and how its result is
 // checked and written), so weaving (Editor.Weaving) and naming
-// (Editor.Naming) plug in beside Editor.Reading. Work that needs no call
+// (Editor.Naming) plug in beside Editor.Hydration. Work that needs no call
 // (Job.Request empty) is applied at once. One batch carries every
 // act's requests, and the Claude adapter sends each to its act's model.
 // After each Collection run, Batches applies the results of batches that
@@ -80,7 +80,7 @@
 // counting an attempt, and the work asked again as it stands. Work marked
 // failed is left out of what awaits its act by the storage adapter, listed
 // on the Items page, and taken up again only by the retry admin command.
-// Editor.ReadWaiting is the synchronous path, for when no batch interface is
+// Editor.RunWaiting is the synchronous path, for when no batch interface is
 // available.
 //
 // # Weaving
@@ -105,15 +105,15 @@
 // after the switch, and since the switch to Stories, the newest story_switch), each
 // under its Item's title and date. Every Span shown, a Source's or an
 // Editor's, is numbered S1, S2… once, across them all (showMade, woven). A
-// Source's Span is shown hydrated once its Item has a reading
-// (WeavingStore.NewestReading; system design: Construction judges a Span
+// Source's Span is shown hydrated once its Item has a hydration
+// (WeavingStore.NewestHydration; system design: Construction judges a Span
 // from the Story its Cut made): "spoken by" its Speaker, and each stretch
 // that refers to another read between ⟦ and ⟧, marks no publisher writes, as
 // what it refers to, its possessive where the stretch says whose something
-// is ("⟦Derby’s⟧ role", Reading.Hydrated, as the Pages read it), while a
+// is ("⟦Derby’s⟧ role", Hydration.Hydrated, as the Pages read it), while a
 // publisher's own square brackets are shown as written; a Span of a Story cut that is Rejected is left out and
 // keeps its number, so a Span's number never depends on its hydration. A
-// Span with no reading is shown as written: nothing waits for hydration. A
+// Span with no hydration is shown as written: nothing waits for hydration. A
 // Span an Editor's Span cites is shown, hydrated, whether Rejected or not.
 // It answers stories, each
 // editor_spans, each body then cites (numbers); a citation of an earlier
@@ -152,7 +152,7 @@
 //
 // # Kept calls
 //
-// Every model call reading, weaving and naming make is kept
+// Every model call hydration, weaving and naming make is kept
 // (calls.go), in a batch and through the synchronous paths alike
 // (Editor.callNow): a Call holds the act and work, the request as sent (a
 // batch's request is kept when it is submitted, with the pending batch), the
@@ -165,7 +165,7 @@
 // KeepCall, failed attempts with their WorkFailure in EndBatch. The storage
 // adapter keeps each distinct text once (call_texts) and refuses to rewrite
 // or remove a kept call. The calls the old designs' acts made (placing,
-// connecting, the reading that drew Facts; relating, the Briefing, the
+// connecting, the earlier reading act that drew Facts; relating, the Briefing, the
 // Sunday read's conversations, KeptConversation) stay kept, as every call
 // does, and readable on their pages; no act is shown them. Call.Precedents
 // is the Feedback a retired act's call showed as precedent, read from the
@@ -178,15 +178,15 @@
 // one judge, for the rejudge admin command: an act plugs in as a RejudgeAct
 // (its name, Version, and Work over a Range, each RejudgeJob a request and
 // an Apply that keeps its result as the live judge's or as a Candidate's),
-// reading as Rereading. Rejudge.Price is the dry run, calling no model:
+// hydration as Rehydrating. Rejudge.Price is the dry run, calling no model:
 // input tokens from each request's size at the tokens per byte of the act's
 // past applied calls, output at their mean per call (or 3 bytes a token and
 // 4000 out with none), in dollars from the adapter's PriceOf at real-time
 // rates. Rejudge.Run prices first, refuses an estimate over MaxUSD
 // (ErrOverCap), then calls in real time, a piece at a time with MaxAttempts
 // attempts each, keeping every call, and stops before an attempt whose
-// estimate would take the spent over MaxUSD. CompareReadings counts, per
-// kind of judgement, what a live and a candidate reading each made and both
+// estimate would take the spent over MaxUSD. CompareHydrations counts, per
+// kind of judgement, what a live and a candidate hydration each made and both
 // made.
 //
 // The old designs (Facts and Claims drawn from each Item, Stories,

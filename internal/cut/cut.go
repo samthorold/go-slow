@@ -7,7 +7,7 @@
 // thing with an identity of its own.
 //
 // The Cut is the first event of the Record. Collection runs
-// Cutter.CutNew after every run, before reading (collect.Deps.Cut), so the
+// Cutter.CutNew after every run, before hydration (collect.Deps.Cut), so the
 // start's run cuts the Items already in the Record, once, and an Item with
 // no text yet is cut once it is given its text. Spans are byte offsets into
 // the text as kept (the publisher's HTML): Words reads the words at an

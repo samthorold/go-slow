@@ -15,7 +15,7 @@
 {{/* pills is a row of Entities, each a pill (template "pill"). */}}
 {{define "pills"}}{{if .}}<div class="pills">{{range .}}{{template "pill" .}} {{end}}</div>{{end}}{{end}}
 
-{{/* span-judged is what a Span's reading judged of it, in its margin (a
+{{/* span-judged is what a Span's hydration judged of it, in its margin (a
      spanRow): whose words it is, what each stretch in it refers to, and
      the Entities it mentions. The words were drawn from collected text:
      inert. */}}

@@ -51,13 +51,13 @@ func (c costing) Complete(ctx context.Context, req editor.Request) (editor.Respo
 
 func TestADryRunEstimatesTokensFromTheActsPastCallsInTheRecord(t *testing.T) {
 	store := record(t)
-	past := costing{m: &fakeModel{output: goodReading}, usage: editor.Usage{InputTokens: 3000, OutputTokens: 1500}}
+	past := costing{m: &fakeModel{output: goodHydration}, usage: editor.Usage{InputTokens: 3000, OutputTokens: 1500}}
 	ed, _ := newEditor(store, past)
-	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
+	if err := ed.RunWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 
-	est, err := rejudger(store, &fakeModel{}).Price(t.Context(), editor.Rereading(store), october)
+	est, err := rejudger(store, &fakeModel{}).Price(t.Context(), editor.Rehydrating(store), october)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,9 +71,9 @@ func TestADryRunEstimatesTokensFromTheActsPastCallsInTheRecord(t *testing.T) {
 
 func TestADryRunPricesTheRequestsItWouldSendAndCallsNoModel(t *testing.T) {
 	store := record(t)
-	model := &fakeModel{output: goodReading}
+	model := &fakeModel{output: goodHydration}
 
-	est, err := rejudger(store, model).Price(t.Context(), editor.Rereading(store), october)
+	est, err := rejudger(store, model).Price(t.Context(), editor.Rehydrating(store), october)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -81,8 +81,8 @@ func TestADryRunPricesTheRequestsItWouldSendAndCallsNoModel(t *testing.T) {
 	if len(model.sent) != 0 {
 		t.Errorf("the dry run called the model %d times", len(model.sent))
 	}
-	if est.Act != "reading" || est.Model != "claude-test" || est.Requests != 1 {
-		t.Errorf("estimate = %+v, want one reading request on claude-test: only the speech is cut", est)
+	if est.Act != "hydration" || est.Model != "claude-test" || est.Requests != 1 {
+		t.Errorf("estimate = %+v, want one hydration request on claude-test: only the speech is cut", est)
 	}
 	if est.InputTokens <= 0 || est.OutputTokens <= 0 {
 		t.Errorf("estimate = %+v, want tokens in and out", est)
@@ -93,33 +93,33 @@ func TestADryRunPricesTheRequestsItWouldSendAndCallsNoModel(t *testing.T) {
 	}
 }
 
-// readLive reads the speech as the live judge on a model reporting itself
+// hydrateLive hydrates the speech as the live judge on a model reporting itself
 // as model.
-func readLive(t *testing.T, store *sqlite.Store, model string) {
+func hydrateLive(t *testing.T, store *sqlite.Store, model string) {
 	t.Helper()
-	ed, _ := newEditor(store, costing{m: &fakeModel{output: goodReading}, model: model})
-	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
+	ed, _ := newEditor(store, costing{m: &fakeModel{output: goodHydration}, model: model})
+	if err := ed.RunWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 }
 
-// viewedModel is the model of the reading of the speech a view reads.
+// viewedModel is the model of the hydration of the speech a view reads.
 func viewedModel(t *testing.T, store *sqlite.Store) string {
 	t.Helper()
-	r, found, err := store.NewestReading(t.Context(), speech.SourceID, speech.EntryID)
+	r, found, err := store.NewestHydration(t.Context(), speech.SourceID, speech.EntryID)
 	if err != nil || !found {
-		t.Fatalf("NewestReading: %v %v", found, err)
+		t.Fatalf("NewestHydration: %v %v", found, err)
 	}
 	return r.Judge.Model
 }
 
 func TestARunAsTheLiveJudgeIsWhatViewsReadFromThenOn(t *testing.T) {
 	store := record(t)
-	readLive(t, store, "claude-old")
-	model := costing{m: &fakeModel{output: goodReading}, model: "claude-test",
+	hydrateLive(t, store, "claude-old")
+	model := costing{m: &fakeModel{output: goodHydration}, model: "claude-test",
 		usage: editor.Usage{InputTokens: 1000, OutputTokens: 200}}
 
-	out, err := rejudger(store, model).Run(t.Context(), editor.Rereading(store), october, editor.RunOptions{MaxUSD: 1})
+	out, err := rejudger(store, model).Run(t.Context(), editor.Rehydrating(store), october, editor.RunOptions{MaxUSD: 1})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -131,16 +131,16 @@ func TestARunAsTheLiveJudgeIsWhatViewsReadFromThenOn(t *testing.T) {
 		t.Errorf("spent %v, want %v by the usage reported", out.USD, want)
 	}
 	if got := viewedModel(t, store); got != "claude-test" {
-		t.Errorf("a view reads %q's reading, want the run's", got)
+		t.Errorf("a view reads %q's hydration, want the run's", got)
 	}
 }
 
 func TestARunAsACandidateIsKeptAndReadByNoView(t *testing.T) {
 	store := record(t)
-	readLive(t, store, "claude-old")
-	model := costing{m: &fakeModel{output: goodReading}, model: "claude-test"}
+	hydrateLive(t, store, "claude-old")
+	model := costing{m: &fakeModel{output: goodHydration}, model: "claude-test"}
 
-	out, err := rejudger(store, model).Run(t.Context(), editor.Rereading(store), october,
+	out, err := rejudger(store, model).Run(t.Context(), editor.Rehydrating(store), october,
 		editor.RunOptions{Candidate: true, MaxUSD: 1})
 	if err != nil {
 		t.Fatal(err)
@@ -150,23 +150,23 @@ func TestARunAsACandidateIsKeptAndReadByNoView(t *testing.T) {
 		t.Errorf("outcome = %+v, want the speech judged as a candidate", out)
 	}
 	if got := viewedModel(t, store); got != "claude-old" {
-		t.Errorf("a view reads %q's reading, want still the live judge's", got)
+		t.Errorf("a view reads %q's hydration, want still the live judge's", got)
 	}
 	cands, err := store.Candidates(t.Context())
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(cands) != 1 || cands[0].ID != out.Candidate || cands[0].Model != "claude-test" ||
-		cands[0].Version != editor.ReadingVersion || cands[0].Judgements != 1 || !cands[0].Range.From.Equal(october.From) {
-		t.Errorf("candidates = %+v, want the run's, with its one reading", cands)
+		cands[0].Version != editor.HydrationVersion || cands[0].Judgements != 1 || !cands[0].Range.From.Equal(october.From) {
+		t.Errorf("candidates = %+v, want the run's, with its one hydration", cands)
 	}
 }
 
 func TestARunWhoseEstimateIsOverItsCapCallsNoModel(t *testing.T) {
 	store := record(t)
-	model := &fakeModel{output: goodReading}
+	model := &fakeModel{output: goodHydration}
 
-	_, err := rejudger(store, model).Run(t.Context(), editor.Rereading(store), october, editor.RunOptions{MaxUSD: 0.000001})
+	_, err := rejudger(store, model).Run(t.Context(), editor.Rehydrating(store), october, editor.RunOptions{MaxUSD: 0.000001})
 
 	if !errors.Is(err, editor.ErrOverCap) {
 		t.Errorf("err = %v, want over its cap", err)
@@ -188,10 +188,10 @@ func TestARunStopsBeforeACallThatCouldTakeItOverItsCap(t *testing.T) {
 		t.Fatal(err)
 	}
 	// Each call reports a dollar's worth of input: more than the estimate.
-	inner := &fakeModel{output: goodReading}
+	inner := &fakeModel{output: goodHydration}
 	model := costing{m: inner, model: "claude-test", usage: editor.Usage{InputTokens: 1_000_000}}
 
-	out, err := rejudger(store, model).Run(t.Context(), editor.Rereading(store), october, editor.RunOptions{MaxUSD: 0.5})
+	out, err := rejudger(store, model).Run(t.Context(), editor.Rehydrating(store), october, editor.RunOptions{MaxUSD: 0.5})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -205,7 +205,7 @@ func TestAPieceThatFailsItsChecksIsTriedAsInUseThenLeft(t *testing.T) {
 	store := record(t)
 	model := &fakeModel{output: `{"facts": []}`}
 
-	out, err := rejudger(store, model).Run(t.Context(), editor.Rereading(store), october, editor.RunOptions{MaxUSD: 1})
+	out, err := rejudger(store, model).Run(t.Context(), editor.Rehydrating(store), october, editor.RunOptions{MaxUSD: 1})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -213,7 +213,7 @@ func TestAPieceThatFailsItsChecksIsTriedAsInUseThenLeft(t *testing.T) {
 	if len(model.sent) != editor.MaxAttempts || out.Judged != 0 || len(out.Failed) != 1 {
 		t.Errorf("%d calls, outcome %+v: want %d attempts, then the speech left failed", len(model.sent), out, editor.MaxAttempts)
 	}
-	calls, err := store.CallsOn(t.Context(), "reading", speech.SourceID+"\n"+speech.EntryID)
+	calls, err := store.CallsOn(t.Context(), "hydration", speech.SourceID+"\n"+speech.EntryID)
 	if err != nil {
 		t.Fatal(err)
 	}

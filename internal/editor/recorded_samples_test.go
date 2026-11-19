@@ -119,7 +119,7 @@ func samplesOf(dir, fixture string, r rule, cmd rerecordCmd) ([][]recording, err
 // refuted when in refutedAtMost or fewer, and undecided between.
 type rule struct{ samples, supportedAt, refutedAtMost int }
 
-// dailyRule is reading's and weaving's.
+// dailyRule is hydration's and weaving's.
 var dailyRule = rule{samples: 5, supportedAt: 5, refutedAtMost: 3}
 
 // verdict is what a rule makes of a count.

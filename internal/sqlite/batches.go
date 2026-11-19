@@ -11,8 +11,8 @@ import (
 
 // PendingBatches are the batches submitted and not yet ended, oldest first,
 // each with its requests in the order they were submitted: results are
-// applied in that order, so of two Items read in one batch the one submitted
-// later, published later, is read second.
+// applied in that order, so of two Items hydrated in one batch the one submitted
+// later, published later, is hydrated second.
 func (s *Store) PendingBatches(ctx context.Context) ([]editor.PendingBatch, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT batches.id, batches.submitted_at, r.request_id, r.act, r.work_key,

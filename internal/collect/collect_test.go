@@ -234,50 +234,50 @@ func TestACollectionRunCutsTheItemsItCollectsIntoSpans(t *testing.T) {
 	}
 }
 
-// readAll stands in for the Editor's reading: it records each run.
-type readAll struct{ runs []time.Time }
+// runAll stands in for the Editor's Commands: it records each run.
+type runAll struct{ runs []time.Time }
 
-func (r *readAll) ReadWaiting(_ context.Context, now time.Time) error {
+func (r *runAll) RunWaiting(_ context.Context, now time.Time) error {
 	r.runs = append(r.runs, now)
 	return nil
 }
 
-func TestACollectionRunReadsTheItemsAwaitingReading(t *testing.T) {
+func TestACollectionRunRunsTheCommandsOnTheWorkAwaitingThem(t *testing.T) {
 	f := newFixture(t, feedV1, "")
-	reader := &readAll{}
-	f.collector.Read = reader
+	commands := &runAll{}
+	f.collector.Commands = commands
 
 	f.collector.Run(t.Context(), now)
 
-	if len(reader.runs) != 1 || !reader.runs[0].Equal(now) {
-		t.Errorf("reading ran at %v, want once at %v", reader.runs, now)
+	if len(commands.runs) != 1 || !commands.runs[0].Equal(now) {
+		t.Errorf("the Commands ran at %v, want once at %v", commands.runs, now)
 	}
 }
 
 // lookUpAll stands in for the look-up step: it records each run, and
-// whether reading had run before it.
+// whether the Commands had run before it.
 type lookUpAll struct {
-	reader *readAll
-	runs   []time.Time
-	after  []int
+	commands *runAll
+	runs     []time.Time
+	after    []int
 }
 
 func (l *lookUpAll) LookUpWaiting(_ context.Context, now time.Time) error {
 	l.runs = append(l.runs, now)
-	l.after = append(l.after, len(l.reader.runs))
+	l.after = append(l.after, len(l.commands.runs))
 	return nil
 }
 
-func TestACollectionRunLooksUpWhatReadingsNameAfterReading(t *testing.T) {
+func TestACollectionRunLooksUpWhatHydrationsNameAfterTheCommands(t *testing.T) {
 	f := newFixture(t, feedV1, "")
-	reader := &readAll{}
-	looker := &lookUpAll{reader: reader}
-	f.collector.Read, f.collector.LookUp = reader, looker
+	commands := &runAll{}
+	looker := &lookUpAll{commands: commands}
+	f.collector.Commands, f.collector.LookUp = commands, looker
 
 	f.collector.Run(t.Context(), now)
 
 	if len(looker.runs) != 1 || !looker.runs[0].Equal(now) || looker.after[0] != 1 {
-		t.Errorf("the look-up step ran at %v after %v readings, want once at %v, after reading", looker.runs, looker.after, now)
+		t.Errorf("the look-up step ran at %v after %v runs of the Commands, want once at %v, after them", looker.runs, looker.after, now)
 	}
 }
 

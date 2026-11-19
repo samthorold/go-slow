@@ -67,7 +67,7 @@ func stubBatches(store *sqlite.Store, b editor.Batcher, acts ...editor.BatchAct)
 
 var answerAll = answering(`{}`)
 
-// errTooBusy is a reading's Entity lookup that Wikidata's search refused.
+// errTooBusy is a hydration's Entity lookup that Wikidata's search refused.
 var errTooBusy = errors.New("wikidata wbsearchentities: API error: cirrussearch-too-busy-error")
 
 func attempts(t *testing.T, store *sqlite.Store, key string) int {
@@ -84,12 +84,12 @@ func TestOneResultFailingToApplyHoldsUpNeitherTheRestOfItsBatchNorItsOwnLaterApp
 	stub := &stubAct{keys: []string{"a", "b", "c"}, fail: map[string]error{"b": errTooBusy}}
 	batcher := &fakeBatcher{}
 	b := stubBatches(store, batcher, stub.act())
-	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 	batcher.end(1, answerAll)
 
-	if err := b.ReadWaiting(t.Context(), saturday.Add(15*time.Minute)); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday.Add(15*time.Minute)); err != nil {
 		t.Fatalf("one result failing to apply stopped the run: %v", err)
 	}
 	if !slices.Equal(stub.applied, []string{"a", "c"}) && !slices.Equal(stub.applied, []string{"c", "a"}) {
@@ -104,7 +104,7 @@ func TestOneResultFailingToApplyHoldsUpNeitherTheRestOfItsBatchNorItsOwnLaterApp
 
 	// Applying succeeds again: b is applied from the batch's result.
 	delete(stub.fail, "b")
-	if err := b.ReadWaiting(t.Context(), saturday.Add(30*time.Minute)); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday.Add(30*time.Minute)); err != nil {
 		t.Fatal(err)
 	}
 	if !slices.Contains(stub.applied, "b") {
@@ -130,13 +130,13 @@ func TestNewWorkIsSubmittedInTheRunAResultFailsToApply(t *testing.T) {
 	stub := &stubAct{keys: []string{"a", "b"}, fail: map[string]error{"b": errTooBusy}}
 	batcher := &fakeBatcher{}
 	b := stubBatches(store, batcher, stub.act())
-	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 	batcher.end(1, answerAll)
 	stub.keys = append(stub.keys, "c") // new work since the batch was submitted
 
-	if err := b.ReadWaiting(t.Context(), saturday.Add(15*time.Minute)); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday.Add(15*time.Minute)); err != nil {
 		t.Fatal(err)
 	}
 	if len(batcher.submitted) != 2 || len(batcher.submitted[1]) != 1 || batcher.submitted[1][0].Request.Input != "c" {
@@ -150,7 +150,7 @@ func TestWorkThatNeedsNoCallIsAppliedAtOnceAndSubmittedNowhere(t *testing.T) {
 	batcher := &fakeBatcher{}
 	b := stubBatches(store, batcher, stub.act())
 
-	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 
@@ -167,7 +167,7 @@ func TestAResultForWorkWhoseRequestHasChangedSinceItWasSentIsRefusedAndTheWorkAs
 	stub := &stubAct{keys: []string{"a"}}
 	batcher := &fakeBatcher{}
 	b := stubBatches(store, batcher, stub.act())
-	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 	batcher.end(1, answerAll)
@@ -175,7 +175,7 @@ func TestAResultForWorkWhoseRequestHasChangedSinceItWasSentIsRefusedAndTheWorkAs
 	// answer is to a question no longer the work's.
 	stub.input = map[string]string{"a": "a, as it stands now"}
 
-	if err := b.ReadWaiting(t.Context(), saturday.Add(15*time.Minute)); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday.Add(15*time.Minute)); err != nil {
 		t.Fatal(err)
 	}
 
@@ -195,18 +195,18 @@ func TestAResultStillFailingToApplyAtTheBatchsDeadlineCountsAnAttempt(t *testing
 	stub := &stubAct{keys: []string{"a", "b"}, fail: map[string]error{"b": errTooBusy}}
 	batcher := &fakeBatcher{}
 	b := stubBatches(store, batcher, stub.act())
-	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 	batcher.end(1, answerAll)
-	if err := b.ReadWaiting(t.Context(), saturday.Add(15*time.Minute)); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday.Add(15*time.Minute)); err != nil {
 		t.Fatal(err)
 	}
 	if n := attempts(t, store, "b"); n != 0 {
 		t.Fatalf("b counted %d attempts before the deadline, want none", n)
 	}
 
-	if err := b.ReadWaiting(t.Context(), saturday.Add(editor.BatchDeadline)); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday.Add(editor.BatchDeadline)); err != nil {
 		t.Fatal(err)
 	}
 	if n := attempts(t, store, "b"); n != 1 {

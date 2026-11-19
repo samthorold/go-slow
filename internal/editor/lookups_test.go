@@ -20,9 +20,9 @@ import (
 	"github.com/samthorold/go-slow/internal/wikidata/wikidatatest"
 )
 
-// derbyReading reads the release as naming Derby, which "the city" refers
+// derbyHydration hydrates the release as naming Derby, which "the city" refers
 // to.
-const derbyReading = `{
+const derbyHydration = `{
   "names": [{"at": {"span": 3, "words": "Derby"}, "kind": "place", "name": "Derby", "office": ""}],
   "refers_to": [{"from": {"span": 2, "words": "the city"}, "to": {"span": 3, "words": "Derby"}}],
   "rejected": [], "speakers": []
@@ -36,9 +36,9 @@ var releases = []editor.Item{
 		Published: release.Published.AddDate(0, 0, 1)},
 }
 
-// readRecord is a Record holding items, cut and read, each by a reading
+// hydratedRecord is a Record holding items, cut and hydrated, each by a hydration
 // answering output.
-func readRecord(t *testing.T, output string, items ...editor.Item) *sqlite.Store {
+func hydratedRecord(t *testing.T, output string, items ...editor.Item) *sqlite.Store {
 	t.Helper()
 	ctx := t.Context()
 	store, err := sqlite.Open(ctx, sqlitetest.Path(t))
@@ -49,13 +49,13 @@ func readRecord(t *testing.T, output string, items ...editor.Item) *sqlite.Store
 	if err := store.SyncSources(ctx, []collect.Source{number10}, saturday); err != nil {
 		t.Fatal(err)
 	}
-	readMore(t, store, output, items...)
+	hydrateMore(t, store, output, items...)
 	return store
 }
 
-// readMore lands items in store, cut and read, each by a reading answering
+// hydrateMore lands items in store, cut and read, each by a hydration answering
 // output.
-func readMore(t *testing.T, store *sqlite.Store, output string, items ...editor.Item) {
+func hydrateMore(t *testing.T, store *sqlite.Store, output string, items ...editor.Item) {
 	t.Helper()
 	ctx := t.Context()
 	for _, it := range items {
@@ -70,12 +70,12 @@ func readMore(t *testing.T, store *sqlite.Store, output string, items ...editor.
 		t.Fatal(err)
 	}
 	ed, logs := newEditor(store, &fakeModel{output: output})
-	if err := ed.ReadWaiting(ctx, saturday); err != nil {
+	if err := ed.RunWaiting(ctx, saturday); err != nil {
 		t.Fatal(err)
 	}
 	for _, it := range items {
-		if _, read, err := store.NewestReading(ctx, it.SourceID, it.EntryID); err != nil || !read {
-			t.Fatalf("%s was not read (%v)\n%s", it.EntryID, err, logs)
+		if _, hydrated, err := store.NewestHydration(ctx, it.SourceID, it.EntryID); err != nil || !hydrated {
+			t.Fatalf("%s was not hydrated (%v)\n%s", it.EntryID, err, logs)
 		}
 	}
 }
@@ -99,7 +99,7 @@ func releaseOn(entryID string, published time.Time) editor.Item {
 func TestANameWithNoMatchIsTheEditorsEntityUntilALaterLookUpMergesIt(t *testing.T) {
 	for _, tc := range []struct {
 		name string
-		// later is the later Item's reading of the name, which matches.
+		// later is the later Item's hydration of the name, which matches.
 		later string
 	}{
 		// The later look-up matches under the same name, by its office.
@@ -109,7 +109,7 @@ func TestANameWithNoMatchIsTheEditorsEntityUntilALaterLookUpMergesIt(t *testing.
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			first := releaseOn("first", speech.Published)
-			store := readRecord(t, naming("Andy Burnham", ""), first)
+			store := hydratedRecord(t, naming("Andy Burnham", ""), first)
 			nothing, _ := lookups(store, &fakeWikidata{})
 			if err := nothing.LookUpWaiting(t.Context(), saturday); err != nil {
 				t.Fatal(err)
@@ -120,7 +120,7 @@ func TestANameWithNoMatchIsTheEditorsEntityUntilALaterLookUpMergesIt(t *testing.
 			}
 
 			later := releaseOn("later", speech.Published.AddDate(0, 0, 1))
-			readMore(t, store, tc.later, later)
+			hydrateMore(t, store, tc.later, later)
 			matches, _ := lookups(store, primeMinisters())
 			if err := matches.LookUpWaiting(t.Context(), saturday.Add(time.Hour)); err != nil {
 				t.Fatal(err)
@@ -145,14 +145,14 @@ func lookups(store *sqlite.Store, wd editor.Wikidata) (*editor.Lookups, *bytes.B
 }
 
 // spanEntities are the Entities the nth Span of the Item's newest Cut
-// mentions, by its newest reading, as the Record's look-ups have them.
+// mentions, by its newest hydration, as the Record's look-ups have them.
 func spanEntities(t *testing.T, store *sqlite.Store, it editor.Item, n int) []editor.NamedEntity {
 	t.Helper()
 	c, _, _, err := store.NewestCut(t.Context(), it.SourceID, it.EntryID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	r, _, err := store.NewestReading(t.Context(), it.SourceID, it.EntryID)
+	r, _, err := store.NewestHydration(t.Context(), it.SourceID, it.EntryID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -164,7 +164,7 @@ func spanEntities(t *testing.T, store *sqlite.Store, it editor.Item, n int) []ed
 }
 
 func TestALookUpWikidataRefusesIsTriedAgainOnALaterRunAfterItsBackoff(t *testing.T) {
-	store := readRecord(t, derbyReading, releases[0])
+	store := hydratedRecord(t, derbyHydration, releases[0])
 	recorded := wikidatatest.Handler("../wikidata/testdata")
 	busy := true
 	searches := map[string]int{}
@@ -211,7 +211,7 @@ func TestALookUpWikidataRefusesIsTriedAgainOnALaterRunAfterItsBackoff(t *testing
 
 func TestAPersonNamedByOfficeIsMatchedByThePositionWikidataSaysTheyHold(t *testing.T) {
 	it := releaseOn("then", speech.Published)
-	store := readRecord(t, naming("Andy Burnham", pm), it)
+	store := hydratedRecord(t, naming("Andy Burnham", pm), it)
 	wd := primeMinisters()
 	burnham := andyBurnham
 	burnham.Positions = []editor.Tenure{{Holder: "Q269909", Office: "Q14211", Start: day(2026, time.July, 20), StartToTheDay: true}}
@@ -229,7 +229,7 @@ func TestAPersonNamedByOfficeIsMatchedByThePositionWikidataSaysTheyHold(t *testi
 }
 
 func TestTwoItemsNamingDerbyAreOneLookUp(t *testing.T) {
-	store := readRecord(t, derbyReading, releases...)
+	store := hydratedRecord(t, derbyHydration, releases...)
 	wd, searches := recordedWikidata(t)
 	lu, logs := lookups(store, wd)
 

@@ -5,7 +5,7 @@
 //
 //	go run ./internal/editor/yield <before> <after>
 //
-// It counts reading, weaving and naming. Reading is counted by the Spans its
+// It counts hydration, weaving and naming. Hydration is counted by the Spans its
 // fixture is cut into and what it judged of them; weaving by the Stories it
 // made, their Editor's Spans and the distinct Spans they cite; naming by the
 // words of the Name it gave its Story. Recordings of any
@@ -17,7 +17,7 @@
 // recorded as several samples (<fixture>/<k>.json) is counted by each
 // sample's last attempt, and shown as the range its samples drew (least–most);
 // a total is the range from every fixture's least to its most. Frozen copies
-// of upstream recordings (inputs/) are not counted. Reading's Spans are those
+// of upstream recordings (inputs/) are not counted. Hydration's Spans are those
 // the sentence cutter makes of the fixture Item, from the fixtures beside
 // either directory (../govuk). It reports, it never fails on a change in
 // yield.
@@ -84,7 +84,7 @@ type recording struct {
 }
 
 // about is what a recording's count may need beyond its output: for
-// reading, the Spans of its fixture's Cut.
+// hydration, the Spans of its fixture's Cut.
 type about struct {
 	spans int
 }
@@ -97,7 +97,7 @@ type act struct {
 }
 
 var acts = []act{
-	{"reading", []string{"Spans", "Rejected", "Names", "Speakers", "Refers to"}, countReading},
+	{"hydration", []string{"Spans", "Rejected", "Names", "Speakers", "Refers to"}, countHydration},
 	{"weaving", []string{"Stories", "Editor's Spans", "Spans cited"}, countWeaving},
 	{"naming", []string{"Words"}, countNaming},
 }
@@ -139,10 +139,10 @@ func countWeaving(out json.RawMessage, _ about) ([]int, error) {
 	return []int{len(r.Stories), spans, len(cited)}, nil
 }
 
-// countReading counts a reading of Spans: the Spans its fixture was shown
+// countHydration counts a hydration of Spans: the Spans its fixture was shown
 // as, those it Rejected, the names and speakers it gave and the stretches it
 // said refer to others.
-func countReading(out json.RawMessage, a about) ([]int, error) {
+func countHydration(out json.RawMessage, a about) ([]int, error) {
 	var r struct {
 		Names    []json.RawMessage `json:"names"`
 		RefersTo []json.RawMessage `json:"refers_to"`
@@ -179,6 +179,11 @@ func fixtureSpans(govuk, name string) (int, error) {
 	}
 	return len(cut.Sentences(doc.Details.Body)), nil
 }
+
+// oldHydration is hydration's name in a tree recorded before it was called
+// hydration (reading/<fixture>/, act "reading"): its recordings are counted
+// as hydration's, so a report against such a tree compares like with like.
+const oldHydration = "reading"
 
 // counts is one tree's yield: per act, each fixture's counts, one per sample
 // (a fixture recorded once has one), and the acts it holds recordings of but
@@ -235,6 +240,9 @@ func load(dir, govuk string) (counts, error) {
 				}
 			}
 		}
+		if rec.Act == oldHydration {
+			rec.Act = "hydration"
+		}
 		counted := false
 		for _, a := range acts {
 			if a.name != rec.Act {
@@ -245,10 +253,14 @@ func load(dir, govuk string) (counts, error) {
 			if err != nil {
 				return err
 			}
-			f := fixtureOf(strings.TrimSuffix(filepath.ToSlash(rel), ".json"))
+			rel = filepath.ToSlash(rel)
+			if rest, ok := strings.CutPrefix(rel, oldHydration+"/"); ok {
+				rel = "hydration/" + rest
+			}
+			f := fixtureOf(strings.TrimSuffix(rel, ".json"))
 			var ab about
-			if a.name == "reading" {
-				if ab.spans, err = fixtureSpans(govuk, strings.TrimPrefix(f, "reading/")); err != nil {
+			if a.name == "hydration" {
+				if ab.spans, err = fixtureSpans(govuk, strings.TrimPrefix(f, "hydration/")); err != nil {
 					return err
 				}
 			}

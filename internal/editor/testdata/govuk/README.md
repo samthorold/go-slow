@@ -1,6 +1,6 @@
 # GOV.UK fixtures
 
-Fixture Items for the recorded runs of *reading an Item* and *placing a Fact*: eight documents the Prime Minister's Office, 10 Downing Street published on GOV.UK between 10 and 16 October 2026, each as the GOV.UK Content API (`https://www.gov.uk/api/content/<path>`) returned it on 25 October 2026. Placing places their recorded readings in the order they were published. The government's response to the US-Russia agreement is there as a reaction, which placing must make a Development in no Story.
+Fixture Items for the recorded runs of hydration, weaving and naming: eight documents the Prime Minister's Office, 10 Downing Street published on GOV.UK between 10 and 16 October 2026, each as the GOV.UK Content API (`https://www.gov.uk/api/content/<path>`) returned it on 25 October 2026. Weaving is shown them, hydrated, in the order they were published.
 
 | File | Document |
 |---|---|

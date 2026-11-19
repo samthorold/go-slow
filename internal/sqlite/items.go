@@ -170,8 +170,8 @@ func (s *Store) GiveText(ctx context.Context, sourceID, entryID, text string) (b
 }
 
 // ListItems lists the Items in the Record, newest first, each with whether
-// it has its text and is cut, and whether its Spans have been read, with
-// what its newest reading judged, apart from scheduled events, which
+// it has its text and is cut, and whether its Spans have been hydrated, with
+// what its newest hydration judged, apart from scheduled events, which
 // Upcoming lists.
 func (s *Store) ListItems(ctx context.Context) ([]collect.ListedItem, error) {
 	rows, err := s.db.QueryContext(ctx, `
@@ -181,11 +181,11 @@ func (s *Store) ListItems(ctx context.Context) ([]collect.ListedItem, error) {
 			EXISTS (SELECT 1 FROM cuts
 				WHERE cuts.source_id = items.source_id AND cuts.entry_id = items.entry_id),
 			newest.event_id IS NOT NULL,
-			(SELECT count(*) FROM span_names n WHERE n.reading_id = newest.event_id),
-			(SELECT count(*) FROM speakers s WHERE s.reading_id = newest.event_id),
-			(SELECT count(*) FROM rejections j WHERE j.reading_id = newest.event_id)
+			(SELECT count(*) FROM span_names n WHERE n.hydration_id = newest.event_id),
+			(SELECT count(*) FROM speakers s WHERE s.hydration_id = newest.event_id),
+			(SELECT count(*) FROM rejections j WHERE j.hydration_id = newest.event_id)
 		FROM items JOIN sources ON sources.id = items.source_id
-			LEFT JOIN readings newest ON newest.event_id = `+newestLiveReading("items.source_id", "items.entry_id")+`
+			LEFT JOIN hydrations newest ON newest.event_id = `+newestLiveHydration("items.source_id", "items.entry_id")+`
 		WHERE items.due = ''
 		ORDER BY items.published DESC, items.collected_at DESC`)
 	if err != nil {
@@ -198,7 +198,7 @@ func (s *Store) ListItems(ctx context.Context) ([]collect.ListedItem, error) {
 		var published string
 		if err := rows.Scan(&it.SourceID, &it.EntryID,
 			&it.SourceName, &it.Title, &it.Link, &it.Summary, &published, &it.Attribution,
-			&it.HasText, &it.Cut, &it.Read, &it.Names, &it.Speakers, &it.Rejected); err != nil {
+			&it.HasText, &it.Cut, &it.Hydrated, &it.Names, &it.Speakers, &it.Rejected); err != nil {
 			return nil, fmt.Errorf("list items: %w", err)
 		}
 		it.Published = parseTime(published)

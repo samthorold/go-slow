@@ -23,7 +23,7 @@ func TestConfigIsReadFromTheEnvironment(t *testing.T) {
 		"DATABASE_PATH":            "data/go-slow.db",
 		"COLLECTION_CONTACT":       "owner@example.org",
 		"COLLECTION_INTERVAL":      "15m",
-		"READING_MODEL":            "claude-haiku-5-5",
+		"HYDRATION_MODEL":          "claude-haiku-5-5",
 		"WEAVING_MODEL":            "claude-opus-5-5",
 		"WEAVING_TIME":             "05:45",
 		"NAMING_MODEL":             "claude-haiku-5-5",
@@ -38,7 +38,7 @@ func TestConfigIsReadFromTheEnvironment(t *testing.T) {
 		DatabasePath:       "data/go-slow.db",
 		CollectionContact:  "owner@example.org",
 		CollectionInterval: 15 * time.Minute,
-		ReadingModel:       "claude-haiku-5-5",
+		HydrationModel:     "claude-haiku-5-5",
 		WeavingModel:       "claude-opus-5-5",
 		WeavingAt:          5*time.Hour + 45*time.Minute,
 		NamingModel:        "claude-haiku-5-5",
@@ -55,7 +55,7 @@ func TestMissingVariablesAreAllNamed(t *testing.T) {
 	if err == nil {
 		t.Fatal("Load succeeded with nothing set")
 	}
-	for _, name := range []string{"PORT", "DATABASE_PATH", "COLLECTION_CONTACT", "COLLECTION_INTERVAL", "READING_MODEL", "WEAVING_MODEL", "WEAVING_TIME", "NAMING_MODEL", "GOSLOW_ANTHROPIC_API_KEY"} {
+	for _, name := range []string{"PORT", "DATABASE_PATH", "COLLECTION_CONTACT", "COLLECTION_INTERVAL", "HYDRATION_MODEL", "WEAVING_MODEL", "WEAVING_TIME", "NAMING_MODEL", "GOSLOW_ANTHROPIC_API_KEY"} {
 		if !strings.Contains(err.Error(), name) {
 			t.Errorf("error %q does not name %s", err, name)
 		}
@@ -113,7 +113,7 @@ func valid() map[string]string {
 		"DATABASE_PATH":            "x.db",
 		"COLLECTION_CONTACT":       "owner@example.org",
 		"COLLECTION_INTERVAL":      "15m",
-		"READING_MODEL":            "claude-haiku-5-5",
+		"HYDRATION_MODEL":          "claude-haiku-5-5",
 		"WEAVING_MODEL":            "claude-opus-5-5",
 		"WEAVING_TIME":             "06:00",
 		"NAMING_MODEL":             "claude-haiku-5-5",
@@ -138,7 +138,7 @@ func TestEachTimeOfDayMustBeATimeOfDay(t *testing.T) {
 func TestEachActsModelMustBeAClaudeModel(t *testing.T) {
 	// Only the Claude adapter exists yet; another provider's model would be
 	// sent to Anthropic's API and fail on every call.
-	for _, name := range []string{"READING_MODEL", "WEAVING_MODEL", "NAMING_MODEL"} {
+	for _, name := range []string{"HYDRATION_MODEL", "WEAVING_MODEL", "NAMING_MODEL"} {
 		vars := valid()
 		vars[name] = "glm-5.3-flash"
 		_, err := config.Load(env(vars))

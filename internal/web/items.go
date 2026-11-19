@@ -65,25 +65,25 @@ type itemRow struct {
 	Source      string
 	When        string
 	Attribution string
-	// Page is the Item's own page, with what reading judged of it.
+	// Page is the Item's own page, with what hydration judged of it.
 	Page string
-	// HasText, Cut and Read are how far it has come; Names, Speakers and
-	// Rejected what its newest reading judged.
-	HasText, Cut, Read        bool
+	// HasText, Cut and Hydrated are how far it has come; Names, Speakers and
+	// Rejected what its newest hydration judged.
+	HasText, Cut, Hydrated    bool
 	Names, Speakers, Rejected int
 }
 
-// Status is how a collected Item stands with reading, as a machine label,
-// whatever Topics it touches (Topics select nothing): "read · 3 names, 1
-// speaker, 2 rejected", "awaiting reading", "awaiting cutting" or "no text
-// yet".
+// Status is how a collected Item stands with hydration, as a machine label,
+// whatever Topics it touches (Topics select nothing): "hydrated · 3 names,
+// 1 speaker, 2 rejected", "awaiting hydration", "awaiting cutting" or "no
+// text yet".
 func (r itemRow) Status() string {
 	switch {
-	case r.Read:
-		return "read · " + count(r.Names, "name") + ", " + count(r.Speakers, "speaker") + ", " +
+	case r.Hydrated:
+		return "hydrated · " + count(r.Names, "name") + ", " + count(r.Speakers, "speaker") + ", " +
 			strconv.Itoa(r.Rejected) + " rejected"
 	case r.Cut:
-		return "awaiting reading"
+		return "awaiting hydration"
 	case r.HasText:
 		return "awaiting cutting"
 	default:
@@ -170,7 +170,7 @@ func (a *app) items(w http.ResponseWriter, r *http.Request) {
 	}
 	for _, it := range items {
 		r := row(it, it.Published, now.Location())
-		r.HasText, r.Cut, r.Read = it.HasText, it.Cut, it.Read
+		r.HasText, r.Cut, r.Hydrated = it.HasText, it.Cut, it.Hydrated
 		r.Names, r.Speakers, r.Rejected = it.Names, it.Speakers, it.Rejected
 		p.Items = append(p.Items, r)
 	}

@@ -186,9 +186,9 @@ func TestARecordThatHeldNoItemsHasNoSwitch(t *testing.T) {
 	}
 }
 
-// Items collected before the switch are read only by re-judging: the first
-// start after it would otherwise submit the whole Record for reading.
-func TestOnlyItemsCollectedAfterTheSwitchAwaitReading(t *testing.T) {
+// Items collected before the switch are hydrated only by re-judging: the first
+// start after it would otherwise submit the whole Record for hydration.
+func TestOnlyItemsCollectedAfterTheSwitchAwaitHydration(t *testing.T) {
 	ctx := t.Context()
 	db := oldRecord(t)
 	if err := migrateTo(ctx, db, -1); err != nil {
@@ -203,7 +203,7 @@ func TestOnlyItemsCollectedAfterTheSwitchAwaitReading(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	waiting, err := s.ItemsToRead(ctx)
+	waiting, err := s.ItemsToHydrate(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -212,6 +212,6 @@ func TestOnlyItemsCollectedAfterTheSwitchAwaitReading(t *testing.T) {
 		got = append(got, tr.Item.EntryID)
 	}
 	if !slices.Equal(got, []string{"after"}) {
-		t.Errorf("awaiting reading: %v, want only the Item collected after the switch", got)
+		t.Errorf("awaiting hydration: %v, want only the Item collected after the switch", got)
 	}
 }

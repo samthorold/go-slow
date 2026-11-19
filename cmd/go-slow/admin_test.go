@@ -18,14 +18,14 @@ var saturday = time.Date(2026, time.October, 24, 7, 0, 0, 0, time.UTC)
 func env(db string) func(string) (string, bool) {
 	vars := map[string]string{
 		"PORT": "8080", "DATABASE_PATH": db, "COLLECTION_CONTACT": "owner@example.org",
-		"COLLECTION_INTERVAL": "15m", "READING_MODEL": "claude-haiku-5-5", "GOSLOW_ANTHROPIC_API_KEY": "set-your-own",
+		"COLLECTION_INTERVAL": "15m", "HYDRATION_MODEL": "claude-haiku-5-5", "GOSLOW_ANTHROPIC_API_KEY": "set-your-own",
 		"WEAVING_MODEL": "claude-opus-5-5", "WEAVING_TIME": "06:00", "NAMING_MODEL": "claude-haiku-5-5",
 	}
 	return func(k string) (string, bool) { v, ok := vars[k]; return v, ok }
 }
 
-// failedRecord is a Record at db holding an Item cut and awaiting reading,
-// whose reading is marked failed, and the day's weaving run, marked failed
+// failedRecord is a Record at db holding an Item cut and awaiting hydration,
+// whose hydration is marked failed, and the day's weaving run, marked failed
 // too.
 func failedRecord(t *testing.T, db string) {
 	t.Helper()
@@ -48,7 +48,7 @@ func failedRecord(t *testing.T, db string) {
 		t.Fatal(err)
 	}
 	var failures []editor.WorkFailure
-	for act, key := range map[string]string{"reading": src.ID + "\nspeech", "weaving": "2026-10-24"} {
+	for act, key := range map[string]string{"hydration": src.ID + "\nspeech", "weaving": "2026-10-24"} {
 		failures = append(failures, editor.WorkFailure{Act: act, Key: key, At: saturday,
 			Why: "the result fails the act's checks", Failed: true})
 	}
@@ -58,8 +58,8 @@ func failedRecord(t *testing.T, db string) {
 }
 
 // inRecord is what the Record at db holds of failed work and work awaiting
-// reading.
-func inRecord(t *testing.T, db string) (failed []editor.FailedWork, toRead []editor.ToRead) {
+// hydration.
+func inRecord(t *testing.T, db string) (failed []editor.FailedWork, toHydrate []editor.ToHydrate) {
 	t.Helper()
 	store, err := sqlite.Open(t.Context(), db)
 	if err != nil {
@@ -69,10 +69,10 @@ func inRecord(t *testing.T, db string) (failed []editor.FailedWork, toRead []edi
 	if failed, err = store.FailedWork(t.Context()); err != nil {
 		t.Fatal(err)
 	}
-	if toRead, err = store.ItemsToRead(t.Context()); err != nil {
+	if toHydrate, err = store.ItemsToHydrate(t.Context()); err != nil {
 		t.Fatal(err)
 	}
-	return failed, toRead
+	return failed, toHydrate
 }
 
 func TestTheRetryCommandTakesAnActsFailedWorkUpAgain(t *testing.T) {
@@ -80,13 +80,13 @@ func TestTheRetryCommandTakesAnActsFailedWorkUpAgain(t *testing.T) {
 	failedRecord(t, db)
 	log := slog.New(slog.DiscardHandler)
 
-	if err := admin(t.Context(), log, []string{"retry", "reading"}, adminDeps{Lookup: env(db)}); err != nil {
+	if err := admin(t.Context(), log, []string{"retry", "hydration"}, adminDeps{Lookup: env(db)}); err != nil {
 		t.Fatal(err)
 	}
 
-	failed, toRead := inRecord(t, db)
-	if len(toRead) != 1 {
-		t.Errorf("awaiting reading %+v, want the speech taken up again", toRead)
+	failed, toHydrate := inRecord(t, db)
+	if len(toHydrate) != 1 {
+		t.Errorf("awaiting hydration %+v, want the speech taken up again", toHydrate)
 	}
 	if len(failed) != 1 || failed[0].Act != "weaving" {
 		t.Errorf("failed work %+v, want only weaving's left", failed)

@@ -372,7 +372,7 @@ a.pill:hover {
 
 /* How something was made is a machine label (.machine): monospace, in the
    muted colour, always worded "<act> · call N", linking the call:
-     <a class="machine" href="/calls/43">read · call 43</a>
+     <a class="machine" href="/calls/43">hydrated · call 43</a>
    (template "made"). */
 .machine {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;

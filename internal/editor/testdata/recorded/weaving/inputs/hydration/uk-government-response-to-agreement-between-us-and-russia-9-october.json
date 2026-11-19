@@ -1,0 +1,244 @@
+{
+  "act": "hydration",
+  "model": "claude-haiku-5-5",
+  "request_hash": "7a05d8996c6aa54f75f63c9d25b10ba04132d5efc70d75c53afbd007d7f23fb5",
+  "recorded_at": "2026-11-02T15:47:36.132452Z",
+  "usage": {
+    "input_tokens": 2695,
+    "output_tokens": 5500
+  },
+  "output": {
+    "names": [
+      {
+        "at": {
+          "span": 1,
+          "words": "A UK government spokesperson"
+        },
+        "kind": "person",
+        "name": "UK government spokesperson",
+        "office": "spokesperson of the UK Government"
+      },
+      {
+        "at": {
+          "span": 2,
+          "words": "UK"
+        },
+        "kind": "place",
+        "name": "UK",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 3,
+          "words": "Ukraine"
+        },
+        "kind": "place",
+        "name": "Ukraine",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "UK"
+        },
+        "kind": "place",
+        "name": "UK",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 4,
+          "words": "Putin"
+        },
+        "kind": "person",
+        "name": "Putin",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 5,
+          "words": "Ukraine"
+        },
+        "kind": "place",
+        "name": "Ukraine",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 5,
+          "words": "Russia"
+        },
+        "kind": "place",
+        "name": "Russia",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 6,
+          "words": "Russia"
+        },
+        "kind": "place",
+        "name": "Russia",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 7,
+          "words": "Ukraine"
+        },
+        "kind": "place",
+        "name": "Ukraine",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 9,
+          "words": "UK"
+        },
+        "kind": "place",
+        "name": "UK",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 10,
+          "words": "The Government"
+        },
+        "kind": "organisation",
+        "name": "UK Government",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 11,
+          "words": "US"
+        },
+        "kind": "place",
+        "name": "US",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 11,
+          "words": "the US"
+        },
+        "kind": "place",
+        "name": "US",
+        "office": ""
+      },
+      {
+        "at": {
+          "span": 11,
+          "words": "Ukraine"
+        },
+        "kind": "place",
+        "name": "Ukraine",
+        "office": ""
+      }
+    ],
+    "refers_to": [
+      {
+        "from": {
+          "span": 3,
+          "within": "support it needs",
+          "words": "it"
+        },
+        "to": {
+          "span": 3,
+          "within": "",
+          "words": "Ukraine"
+        }
+      },
+      {
+        "from": {
+          "span": 3,
+          "within": "",
+          "words": "itself"
+        },
+        "to": {
+          "span": 3,
+          "within": "",
+          "words": "Ukraine"
+        }
+      },
+      {
+        "from": {
+          "span": 5,
+          "within": "",
+          "words": "it"
+        },
+        "to": {
+          "span": 5,
+          "within": "",
+          "words": "Ukraine"
+        }
+      }
+    ],
+    "rejected": [
+      1,
+      8
+    ],
+    "speakers": [
+      {
+        "span": {
+          "span": 2,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "A UK government spokesperson"
+        }
+      },
+      {
+        "span": {
+          "span": 3,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "A UK government spokesperson"
+        }
+      },
+      {
+        "span": {
+          "span": 4,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "A UK government spokesperson"
+        }
+      },
+      {
+        "span": {
+          "span": 5,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "A UK government spokesperson"
+        }
+      },
+      {
+        "span": {
+          "span": 6,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "A UK government spokesperson"
+        }
+      },
+      {
+        "span": {
+          "span": 7,
+          "words": ""
+        },
+        "speaker": {
+          "span": 1,
+          "words": "A UK government spokesperson"
+        }
+      }
+    ]
+  }
+}

@@ -14,8 +14,8 @@ type Switch struct {
 	// At is when the Record changed.
 	At time.Time
 	// ItemsThrough is when the newest Item the Record held then was
-	// collected: Items collected through it are read only by re-judging,
-	// never as work awaiting reading.
+	// collected: Items collected through it are hydrated only by re-judging,
+	// never as work awaiting hydration.
 	ItemsThrough time.Time
 }
 

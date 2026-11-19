@@ -155,9 +155,9 @@ type WeavingStore interface {
 	// StoriesMade are the Stories the Editor made, newest first, each with
 	// its Editor's Spans and what they cite.
 	StoriesMade(ctx context.Context) ([]Story, error)
-	// NewestReading is the reading of the Item a Projection reads, its
+	// NewestHydration is the hydration of the Item a Projection reads, its
 	// hydration, reporting whether the Item has one.
-	NewestReading(ctx context.Context, sourceID, entryID string) (Reading, bool, error)
+	NewestHydration(ctx context.Context, sourceID, entryID string) (Hydration, bool, error)
 	// KeptItem is the Item, with its text as kept, reporting whether the
 	// Record holds it.
 	KeptItem(ctx context.Context, sourceID, entryID string) (KeptItem, bool, error)
@@ -341,14 +341,14 @@ func (e *Editor) pendingWeaving(ctx context.Context) (string, bool, error) {
 }
 
 // hydration is each Item's hydration a run reads, by its item key: its
-// newest reading, with the text its addresses are into. An Item with none
+// newest hydration, with the text its addresses are into. An Item with none
 // is not in it, and its Spans are read as written.
 type hydration map[string]hydrated
 
-// hydrated is an Item's newest reading and the Item's text as kept.
+// hydrated is an Item's newest hydration and the Item's text as kept.
 type hydrated struct {
-	text    string
-	reading Reading
+	text      string
+	hydration Hydration
 }
 
 // hydration is the hydration of the Items a run is shown Spans of, those of
@@ -361,7 +361,7 @@ func (e *Editor) hydration(ctx context.Context, made []Story, stories []CutStory
 		if _, done := h[key]; done {
 			return nil
 		}
-		r, ok, err := e.Weavings.NewestReading(ctx, sourceID, entryID)
+		r, ok, err := e.Weavings.NewestHydration(ctx, sourceID, entryID)
 		if err != nil || !ok {
 			return err
 		}
@@ -369,7 +369,7 @@ func (e *Editor) hydration(ctx context.Context, made []Story, stories []CutStory
 		if err != nil || !ok {
 			return err
 		}
-		h[key] = hydrated{text: t, reading: r}
+		h[key] = hydrated{text: t, hydration: r}
 		return nil
 	}
 	for _, st := range made {
@@ -401,7 +401,7 @@ func (e *Editor) hydration(ctx context.Context, made []Story, stories []CutStory
 // rejected reports whether the Span at a is Rejected by its hydration.
 func (h hydration) rejected(a Address) bool {
 	hy, ok := h[a.SourceID+"\n"+a.EntryID]
-	return ok && slices.Contains(hy.reading.Rejected, a)
+	return ok && slices.Contains(hy.hydration.Rejected, a)
 }
 
 // hydratedOpen and hydratedClose mark a hydrated stretch as weaving is shown
@@ -424,7 +424,7 @@ func (h hydration) read(a Address, words string) (speakers, read string) {
 	if !ok {
 		return "", words
 	}
-	r, s := hy.reading, a.Span
+	r, s := hy.hydration, a.Span
 	var by []string
 	for _, sp := range r.Speakers {
 		if sp.Of.Span.Start >= s.Start && sp.Of.Span.End <= s.End {

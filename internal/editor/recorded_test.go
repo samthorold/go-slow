@@ -19,23 +19,23 @@ import (
 )
 
 // The recorded runs (system design: The Editor is tested in three tiers).
-// Each fixture Item is read by the real model five times, each sample with
+// Each fixture Item is hydrated by the real model five times, each sample with
 // its attempts against the act's checks, and every sample is kept under
-// testdata/recorded/reading/<fixture>/; the suite replays them all and
+// testdata/recorded/hydration/<fixture>/; the suite replays them all and
 // judges each property by its rule (recorded_samples_test.go), so it never
 // makes a model call. Recording is deliberate, and costs five calls per
 // fixture, and more for attempts the checks refuse:
 //
-//	go test -count=1 -timeout 90m ./internal/editor -run TestRecordedReadings -record
+//	go test -count=1 -timeout 90m ./internal/editor -run TestRecordedHydration -record
 //
-// with GOSLOW_ANTHROPIC_API_KEY and READING_MODEL set in the environment.
+// with GOSLOW_ANTHROPIC_API_KEY and HYDRATION_MODEL set in the environment.
 // It keeps the samples kept for the request the act sends now, so it resumes
 // where a stopped recording stopped, and draws the rest; fresh samples of a
 // fixture are drawn by deleting its directory first.
 var rerecordFlag = flag.Bool("record", false, "call the real model on the fixtures and keep its responses")
 
 // How each act's own recorded test is re-recorded.
-var readingCommand = rerecordCmd{"TestRecordedReadings", "READING_MODEL"}
+var hydrationCommand = rerecordCmd{"TestRecordedHydration", "HYDRATION_MODEL"}
 
 // maxSamplesFlag bounds the samples recording draws of each fixture, to
 // probe a changed act on one before paying for the rule's: a recording with
@@ -153,44 +153,44 @@ func fixture(t *testing.T, path string) (editor.Item, string) {
 	}, c.Details.Body
 }
 
-// fixtureToRead is a fixture Item as reading is given it in use: with the
+// fixtureToHydrate is a fixture Item as hydration is given it in use: with the
 // Cut the sentence cutter makes of its text.
-func fixtureToRead(it editor.Item) editor.ToRead {
-	return editor.ToRead{Item: it, Cut: cut.Cut{ID: 1, SourceID: it.SourceID, EntryID: it.EntryID,
+func fixtureToHydrate(it editor.Item) editor.ToHydrate {
+	return editor.ToHydrate{Item: it, Cut: cut.Cut{ID: 1, SourceID: it.SourceID, EntryID: it.EntryID,
 		By: cut.SentenceCutter, Spans: cut.Sentences(it.Content)}}
 }
 
-func TestRecordedReadings(t *testing.T) {
+func TestRecordedHydration(t *testing.T) {
 	paths, err := filepath.Glob("testdata/govuk/*.json")
 	if err != nil || len(paths) == 0 {
 		t.Fatalf("no fixtures: %v", err)
 	}
 	for _, path := range paths {
 		t.Run(strings.TrimSuffix(filepath.Base(path), ".json"), func(t *testing.T) {
-			for _, err := range readingVerdicts(t, recordedDir, path) {
+			for _, err := range hydrationVerdicts(t, recordedDir, path) {
 				t.Error(err)
 			}
 		})
 	}
 }
 
-// readingVerdicts replays (or records) the samples of reading the fixture
+// hydrationVerdicts replays (or records) the samples of hydration the fixture
 // Item at path, kept under root, and judges its properties: each failure.
-func readingVerdicts(t *testing.T, root, path string) []error {
+func hydrationVerdicts(t *testing.T, root, path string) []error {
 	t.Helper()
 	name := strings.TrimSuffix(filepath.Base(path), ".json")
 	it, _ := fixture(t, path)
-	tr := fixtureToRead(it)
+	tr := fixtureToHydrate(it)
 	spans := make([]string, len(tr.Cut.Spans))
 	for i, s := range tr.Cut.Spans {
 		spans[i] = cut.Words(it.Content, s)
 	}
 	casesPresent(t, name, spans)
-	return sampled(t, filepath.Join(root, "reading"), name, dailyRule, readingCommand, func(m *sampleModel) sampleResult {
-		var r editor.Reading
+	return sampled(t, filepath.Join(root, "hydration"), name, dailyRule, hydrationCommand, func(m *sampleModel) sampleResult {
+		var r editor.Hydration
 		passed, err := runSample(m, func(model editor.Model) (bool, error) {
 			var err error
-			r, err = editor.Read(t.Context(), model, m.model, tr)
+			r, err = editor.Hydrate(t.Context(), model, m.model, tr)
 			return err == nil, nil
 		})
 		if err != nil {
@@ -200,7 +200,7 @@ func readingVerdicts(t *testing.T, root, path string) []error {
 			return sampleResult{}
 		}
 		p := properties{}
-		read := readingOf{it: it, r: r, spans: tr.Cut.Spans}
+		read := hydrationOf{it: it, r: r, spans: tr.Cut.Spans}
 		bareAttributionsRejected(p, read, spans)
 		for _, q := range quotations[name] {
 			quotationSpoken(p, read, q)
@@ -222,15 +222,15 @@ func readingVerdicts(t *testing.T, root, path string) []error {
 	})
 }
 
-// readingOf is a sample's reading of a fixture, with the fixture's Spans.
-type readingOf struct {
+// hydrationOf is a sample's hydration of a fixture, with the fixture's Spans.
+type hydrationOf struct {
 	it    editor.Item
-	r     editor.Reading
+	r     editor.Hydration
 	spans []cut.Span
 }
 
 // within is whether the address a is inside Span n (from 1).
-func (o readingOf) within(a editor.Address, n int) bool {
+func (o hydrationOf) within(a editor.Address, n int) bool {
 	s := o.spans[n-1]
 	return a.Span.Start >= s.Start && a.Span.End <= s.End
 }
@@ -242,7 +242,7 @@ var bareAttribution = regexp.MustCompile(`^(\S+\s+){1,7}said:$`)
 // bareAttributionsRejected asserts each bare attribution in the fixture is
 // Rejected: it says nothing of its own, and who it names is the speaker of
 // the quotation after it.
-func bareAttributionsRejected(p properties, o readingOf, spans []string) {
+func bareAttributionsRejected(p properties, o hydrationOf, spans []string) {
 	for i, w := range spans {
 		if !bareAttribution.MatchString(w) {
 			continue
@@ -278,7 +278,7 @@ var quotations = map[string][]quotation{
 
 // quotationSpoken asserts every Span of a quotation is given as its speaker
 // who the Item says spoke it, and no one else.
-func quotationSpoken(p properties, o readingOf, q quotation) {
+func quotationSpoken(p properties, o hydrationOf, q quotation) {
 	spoken := p.property("a quoted Span's speaker is who the Item says spoke it")
 	for n := q.from; n <= q.to; n++ {
 		var by []string
@@ -317,7 +317,7 @@ var references = map[string][]reference{
 
 // referenceFollowed asserts the reference refers to its antecedent: the
 // stretch reads, followed through what it refers to, as words naming it.
-func referenceFollowed(p properties, o readingOf, ref reference) {
+func referenceFollowed(p properties, o hydrationOf, ref reference) {
 	name := "a pronoun refers to its antecedent"
 	if ref.words != "He" {
 		name = "a description refers to what it describes"
@@ -343,7 +343,7 @@ func referenceFollowed(p properties, o readingOf, ref reference) {
 // refers to quotes as exactly those, and, where it is clear, what it refers
 // to, a name or noun phrase in Span toN that the refers to quotes as exactly
 // those words (system design: The grain belongs to the judgement, not to the
-// Span). The cases are where the earlier reading act's recordings quoted more
+// Span). The cases are where the earlier hydration act's recordings quoted more
 // than the expression ("it is serious", "it won't work").
 type expression struct {
 	n     int
@@ -374,7 +374,7 @@ var expressions = map[string][]expression{
 // a clear target, refers to exactly the target's words where it refers to
 // words of Span toN holding them. It judges how a case is cited, not whether
 // it is: that the Item's references are followed is referenceFollowed's.
-func expressionQuotedExactly(p properties, o readingOf, e expression) {
+func expressionQuotedExactly(p properties, o hydrationOf, e expression) {
 	from := p.property("a referring expression is quoted as only its words")
 	to := p.property("what an expression refers to is quoted as only its name or noun phrase")
 	for _, r := range o.r.RefersTo {
@@ -427,7 +427,7 @@ func casesPresent(t *testing.T, name string, spans []string) {
 
 func TestAnExpressionQuotedWithWordsAroundItFailsItsProperty(t *testing.T) {
 	it, _ := fixture(t, "testdata/govuk/uk-government-response-to-agreement-between-us-and-russia-9-october.json")
-	tr := fixtureToRead(it)
+	tr := fixtureToHydrate(it)
 	at := func(n int, words string) editor.Address {
 		s, ok := cut.Within(it.Content, tr.Cut.Spans[n-1], words)
 		if !ok {
@@ -445,8 +445,8 @@ func TestAnExpressionQuotedWithWordsAroundItFailsItsProperty(t *testing.T) {
 		{"it", "Ukraine has repeatedly", "what an expression refers to is quoted as only its name or noun phrase"},
 	} {
 		p := properties{}
-		r := editor.Reading{RefersTo: []editor.RefersTo{{From: at(5, c.from), To: at(5, c.to)}}}
-		expressionQuotedExactly(p, readingOf{it: it, r: r, spans: tr.Cut.Spans}, e)
+		r := editor.Hydration{RefersTo: []editor.RefersTo{{From: at(5, c.from), To: at(5, c.to)}}}
+		expressionQuotedExactly(p, hydrationOf{it: it, r: r, spans: tr.Cut.Spans}, e)
 		for name, failed := range p {
 			if want := name == c.fails; want != (len(failed) > 0) {
 				t.Errorf("%q to %q: %q failed = %v", c.from, c.to, name, failed)

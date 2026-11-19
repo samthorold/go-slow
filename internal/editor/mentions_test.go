@@ -9,7 +9,7 @@ import (
 )
 
 // mentioned are the names of what the Span s mentions, by r.
-func mentioned(r editor.Reading, s cut.Span) []string {
+func mentioned(r editor.Hydration, s cut.Span) []string {
 	var out []string
 	for _, n := range r.Mentions(s) {
 		out = append(out, n.Name)
@@ -18,7 +18,7 @@ func mentioned(r editor.Reading, s cut.Span) []string {
 }
 
 func TestASpanMentionsWhatASpanInsideItNamesOrRefersTo(t *testing.T) {
-	r := read(t, releaseReading)
+	r := hydrate(t, releaseHydration)
 	spans := cut.Sentences(release.Content)
 
 	for i, want := range [][]string{
@@ -38,7 +38,7 @@ func TestASpanMentionsWhatASpanInsideItNamesOrRefersTo(t *testing.T) {
 func TestASpanMentionsWhatAChainOfReferencesReachesEachOnce(t *testing.T) {
 	// S4's "He" refers to S2's "the city", which refers to S3's "Derby",
 	// which (wrongly) refers back to "He"; S3 names Derby twice over.
-	r := read(t, `{"names": [
+	r := hydrate(t, `{"names": [
 		{"at": {"span": 3, "words": "Derby"}, "kind": "place", "name": "Derby", "office": ""},
 		{"at": {"span": 3, "words": ""}, "kind": "place", "name": "Derby", "office": ""}
 	], "refers_to": [

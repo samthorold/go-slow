@@ -12,25 +12,25 @@ import (
 
 // The compatibility check (system design: Each Command is recorded over its
 // own frozen inputs). Until a refresh, weaving is replayed over its frozen
-// copies of what reading used to write. So reading's current recordings,
+// copies of what hydration used to write. So hydration's current recordings,
 // each fixture's first sample as a refresh would copy it, hydrate the
 // fixture Items, and each of weaving's runs is woven over them on a fake
 // model answering from its request alone: every Item must be hydrated,
 // weaving's request must build and show every Item, and the fake's answer
-// must pass weaving's checks. A change to what reading writes that weaving
+// must pass weaving's checks. A change to what hydration writes that weaving
 // can't take fails here at once, with no recording made. A change in what
-// reading judges is not a failure: a refresh brings it downstream.
+// hydration judges is not a failure: a refresh brings it downstream.
 //
 // Likewise naming is replayed over its frozen copies of what weaving used to
 // write, so weaving's current recordings, each run's first sample, over the
-// readings they were recorded on, make their Stories, and each is named on a
+// hydrations they were recorded on, make their Stories, and each is named on a
 // fake model whose answers pass naming's checks: every run's recording must
 // be taken by weaving's checks, and every Story it makes named.
 func TestEachActsCurrentRecordingsAreTakenByTheActsDownstream(t *testing.T) {
 	t.Parallel()
-	t.Run("reading's by weaving", func(t *testing.T) {
+	t.Run("hydration's by weaving", func(t *testing.T) {
 		t.Parallel()
-		if err := feedWeaving(t, filepath.Join(recordedDir, "reading")); err != nil {
+		if err := feedWeaving(t, filepath.Join(recordedDir, "hydration")); err != nil {
 			t.Error(err)
 		}
 	})
@@ -66,16 +66,16 @@ func TestTheCompatibilityCheckFailsOnAWeavingNamingCannotTake(t *testing.T) {
 	}
 }
 
-// A reading weaving can't be shown fails the check, naming its fixture: one
-// whose answer reading's checks now refuse hydrates nothing.
-func TestTheCompatibilityCheckFailsOnAReadingWeavingCannotTake(t *testing.T) {
+// A hydration weaving can't be shown fails the check, naming its fixture: one
+// whose answer hydration's checks now refuse hydrates nothing.
+func TestTheCompatibilityCheckFailsOnAHydrationWeavingCannotTake(t *testing.T) {
 	t.Parallel()
-	readings := filepath.Join(t.TempDir(), "reading")
-	if err := os.CopyFS(readings, os.DirFS(filepath.Join(recordedDir, "reading"))); err != nil {
+	hydrations := filepath.Join(t.TempDir(), "hydration")
+	if err := os.CopyFS(hydrations, os.DirFS(filepath.Join(recordedDir, "hydration"))); err != nil {
 		t.Fatal(err)
 	}
 	name := "pm-speech-in-scotland-16-october-2026"
-	path := samplePath(readings, name, 1)
+	path := samplePath(hydrations, name, 1)
 	s, err := sampleAt(path)
 	if err != nil {
 		t.Fatal(err)
@@ -84,20 +84,20 @@ func TestTheCompatibilityCheckFailsOnAReadingWeavingCannotTake(t *testing.T) {
 	attempts[len(attempts)-1].Output = json.RawMessage(`{"facts": []}`)
 	keepSample(t, path, attempts)
 
-	err = feedWeaving(t, readings)
+	err = feedWeaving(t, hydrations)
 	if err == nil || !strings.Contains(err.Error(), name) || !strings.Contains(err.Error(), "not hydrated") {
 		t.Fatalf("feedWeaving = %v; want %s not hydrated", err, name)
 	}
 }
 
 // feedNaming copies the first sample of each of weaving's runs under
-// weavings, with the readings they were recorded on (weavings/inputs/reading),
+// weavings, with the hydrations they were recorded on (weavings/inputs/hydration),
 // as a refresh would, and names each Story they make on a fake model: the
 // first failure.
 func feedNaming(t *testing.T, weavings string) error {
 	t.Helper()
 	frozen := t.TempDir()
-	if err := os.CopyFS(filepath.Join(frozen, "reading"), os.DirFS(filepath.Join(weavings, "inputs", "reading"))); err != nil {
+	if err := os.CopyFS(filepath.Join(frozen, "hydration"), os.DirFS(filepath.Join(weavings, "inputs", "hydration"))); err != nil {
 		return err
 	}
 	if err := os.MkdirAll(filepath.Join(frozen, "weaving"), 0o750); err != nil {
@@ -133,16 +133,16 @@ func feedNaming(t *testing.T, weavings string) error {
 	return nil
 }
 
-// feedWeaving copies the first sample of each fixture's reading under
-// readings, as a refresh would, and weaves each of weaving's runs over the
+// feedWeaving copies the first sample of each fixture's hydration under
+// hydrations, as a refresh would, and weaves each of weaving's runs over the
 // fixture Items they hydrate, on a fake model: the first failure.
-func feedWeaving(t *testing.T, readings string) error {
+func feedWeaving(t *testing.T, hydrations string) error {
 	t.Helper()
 	frozen := t.TempDir()
 	for _, f := range fixtureItems(t) {
-		b, err := os.ReadFile(samplePath(readings, f.name, 1))
+		b, err := os.ReadFile(samplePath(hydrations, f.name, 1))
 		if err != nil {
-			return fmt.Errorf("%s: reading has no recording: %w", f.name, err)
+			return fmt.Errorf("%s: hydration has no recording: %w", f.name, err)
 		}
 		if err := os.WriteFile(filepath.Join(frozen, f.name+".json"), b, 0o600); err != nil {
 			return err
@@ -160,7 +160,7 @@ func feedWeaving(t *testing.T, readings string) error {
 			return err
 		}
 		if !passed || len(fake.sent) == 0 {
-			return fmt.Errorf("%s: weaving's checks refuse a fake's answer over reading's current recordings", r.name)
+			return fmt.Errorf("%s: weaving's checks refuse a fake's answer over hydration's current recordings", r.name)
 		}
 		in := fake.sent[len(fake.sent)-1].Input
 		for _, f := range r.items {

@@ -28,9 +28,9 @@ func callLink(t *testing.T, body, within string) string {
 	return html.UnescapeString(m[1])
 }
 
-func TestAnItemsReadingLinksToTheCallThatMadeIt(t *testing.T) {
+func TestAnItemsHydrationLinksToTheCallThatMadeIt(t *testing.T) {
 	store := openStore(t)
-	readSpeech(t, store, speechReading)
+	hydrateSpeech(t, store, speechHydration)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	page := itemPage(t, app, "PM speech in Scotland")
@@ -40,7 +40,7 @@ func TestAnItemsReadingLinksToTheCallThatMadeIt(t *testing.T) {
 		t.Fatalf("status %d, not a full page:\n%s", res.status, res.body)
 	}
 	for _, want := range []string{
-		"reading", "applied",
+		"hydration", "applied",
 		// The request: input and schema.
 		"Title: PM speech in Scotland", "S1: It’s good to be here in Motherwell.", "&#34;additionalProperties&#34;",
 		// The response, and the model that answered.
@@ -55,7 +55,7 @@ func TestAnItemsReadingLinksToTheCallThatMadeIt(t *testing.T) {
 	}
 }
 
-// failThrice fails the speech's reading three times, each attempt kept with
+// failThrice fails the speech's hydration three times, each attempt kept with
 // its call.
 func failThrice(t *testing.T, store *sqlite.Store) {
 	t.Helper()
@@ -64,12 +64,12 @@ func failThrice(t *testing.T, store *sqlite.Store) {
 	for i := range 3 {
 		at := saturday.Add(time.Duration(i-3) * time.Hour)
 		why := "the result fails the act's checks: attempt " + strconv.Itoa(i+1)
-		req := editor.Request{Act: "reading", Instructions: "Read.", Input: "Facts", Schema: map[string]any{}}
-		c := editor.Call{Act: "reading", Key: key, At: at, BatchID: "batch-" + strconv.Itoa(i+1), Model: "m",
+		req := editor.Request{Act: "hydration", Instructions: "Read.", Input: "Facts", Schema: map[string]any{}}
+		c := editor.Call{Act: "hydration", Key: key, At: at, BatchID: "batch-" + strconv.Itoa(i+1), Model: "m",
 			Request: req, RequestHash: editor.RequestHash(req, "m"), Outcome: editor.Refused, Why: why,
 			Response: &editor.Response{Output: json.RawMessage(`{}`), Model: "m", Usage: editor.Usage{InputTokens: 100, OutputTokens: 10}}}
 		if err := store.EndBatch(t.Context(), c.BatchID, []editor.WorkFailure{{
-			Act: "reading", Key: key, At: at, Why: why, Failed: i == 2, Call: &c,
+			Act: "hydration", Key: key, At: at, Why: why, Failed: i == 2, Call: &c,
 		}}, nil); err != nil {
 			t.Fatal(err)
 		}
@@ -114,7 +114,7 @@ func TestFailedWorkLinksToEveryAttemptAtIt(t *testing.T) {
 
 func TestWhatACallSentAndGotIsInertOnItsPage(t *testing.T) {
 	store := openStore(t)
-	readSpeech(t, store, strings.Replace(speechReading, `"name": "Motherwell"`, `"name": "<span hx-get=\"/evil\">Andy</span>"`, 1))
+	hydrateSpeech(t, store, strings.Replace(speechHydration, `"name": "Motherwell"`, `"name": "<span hx-get=\"/evil\">Andy</span>"`, 1))
 	app, _ := newAppWithLog(t, saturday, store)
 
 	res := get(t, app, "/calls/1")
@@ -163,7 +163,7 @@ func TestACallsPageOpensWithAOneLineSummaryHeadItsOutcomeHued(t *testing.T) {
 
 func TestACallsOutcomeTakesTheStatusHueOfItsVerdict(t *testing.T) {
 	store := openStore(t)
-	readSpeech(t, store, speechReading)
+	hydrateSpeech(t, store, speechHydration)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	head := summaryHead(t, get(t, app, "/calls/1").body)
@@ -211,10 +211,10 @@ func TestACallsInputAndOutputAreOpenAndItsBulkCollapsed(t *testing.T) {
 func TestACallsAttemptsAreCollapsedWhenThereIsOneAndOpenWhenThereAreMore(t *testing.T) {
 	store := openStore(t)
 	failThrice(t, store)
-	readSpeech(t, store, speechReading)
+	hydrateSpeech(t, store, speechHydration)
 	app, _ := newAppWithLog(t, saturday, store)
 
-	// Call 4 is the speech's one reading; calls 1 to 3 the failed attempts.
+	// Call 4 is the speech's one hydration; calls 1 to 3 the failed attempts.
 	if got := disclosure(t, get(t, app, "/calls/4").body, "this call"); got != "collapsed" {
 		t.Errorf("one attempt is %s, want collapsed", got)
 	}

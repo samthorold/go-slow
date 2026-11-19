@@ -14,7 +14,7 @@ import (
 // the Stories the Editor made that hold a Span of one of the Source's Items
 // collected in it, as many as touch a Topic (storyTouches) and as many as
 // don't, whenever they were made, and the Spans of its Items collected in
-// it, as their newest live readings read them, and how many of those are
+// it, as their newest live hydrations read them, and how many of those are
 // Rejected.
 func (s *Store) SourceCounts(ctx context.Context, from, to time.Time) ([]interest.SourceCounts, error) {
 	topics, err := s.Topics(ctx)
@@ -87,10 +87,10 @@ func (s *Store) sourceSpans(ctx context.Context, from, to time.Time) ([]interest
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT sources.id,
 			coalesce(sum((SELECT count(*) FROM cut_spans WHERE cut_spans.cut_id = r.cut_id)), 0),
-			coalesce(sum((SELECT count(*) FROM rejections WHERE rejections.reading_id = r.event_id)), 0)
+			coalesce(sum((SELECT count(*) FROM rejections WHERE rejections.hydration_id = r.event_id)), 0)
 		FROM sources
 			LEFT JOIN items ON items.source_id = sources.id AND items.collected_at > ? AND items.collected_at <= ?
-			LEFT JOIN readings r ON r.event_id = `+newestLiveReading("items.source_id", "items.entry_id")+`
+			LEFT JOIN hydrations r ON r.event_id = `+newestLiveHydration("items.source_id", "items.entry_id")+`
 		GROUP BY sources.id
 		ORDER BY sources.name`, formatTime(from), formatTime(to))
 	if err != nil {

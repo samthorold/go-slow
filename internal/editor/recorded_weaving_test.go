@@ -19,10 +19,10 @@ import (
 
 // The recorded runs of weaving. Its input is the Stories the fixture Items'
 // Cuts made, cut by the sentence cutter, which is plain code, each Span
-// hydrated by its Item's reading: weaving rests on reading's recordings, and
+// hydrated by its Item's hydration: weaving rests on hydration's recordings, and
 // is recorded over its own frozen copies of them,
-// testdata/recorded/weaving/inputs/reading/<fixture>.json, each a fixture's
-// first sample (collectAndCut). The compatibility check feeds reading's
+// testdata/recorded/weaving/inputs/hydration/<fixture>.json, each a fixture's
+// first sample (collectAndCut). The compatibility check feeds hydration's
 // current recordings to weaving (recorded_compatibility_test.go). The fixtures
 // are two runs, a day apart, over the fixture Items in the order they were
 // published (weavingRuns): the first shown the Items published up to 15
@@ -94,7 +94,7 @@ func weavingVerdicts(t *testing.T, root string, runs []weavingRun, live editor.M
 	t.Helper()
 	ctx := t.Context()
 	dir := filepath.Join(root, "weaving")
-	frozen := filepath.Join(dir, "inputs", "reading")
+	frozen := filepath.Join(dir, "inputs", "hydration")
 	// The Record carried on so far, kept closed between runs so each sample
 	// starts from a copy of its file.
 	carried := filepath.Join(t.TempDir(), "carried.db")
@@ -171,7 +171,7 @@ func weavingVerdicts(t *testing.T, root string, runs []weavingRun, live editor.M
 }
 
 // collectAndCut collects the run's Items into store at its time, cuts them,
-// and hydrates them by weaving's frozen copies of reading's recordings in
+// and hydrates them by weaving's frozen copies of hydration's recordings in
 // frozen (system design: Each Command is recorded over its own frozen
 // inputs), replayed unchecked. Each Item must have its copy, and be
 // hydrated by it: weaving's recordings answer the requests those copies
@@ -186,7 +186,7 @@ func collectAndCut(t *testing.T, store *sqlite.Store, r weavingRun, frozen strin
 // collectCutAndHydrate is collectAndCut, reporting what fails: an error
 // naming the Item whose copy is missing or not taken.
 func collectCutAndHydrate(ctx context.Context, store *sqlite.Store, r weavingRun, frozen string) error {
-	readings := frozenReadings{}
+	hydrations := frozenHydrations{}
 	for _, f := range r.items {
 		it := f.item
 		if _, err := store.AddItems(ctx, []collect.Item{{
@@ -197,40 +197,40 @@ func collectCutAndHydrate(ctx context.Context, store *sqlite.Store, r weavingRun
 		}
 		rec, err := keptAt(filepath.Join(frozen, f.name+".json"))
 		if err != nil {
-			return fmt.Errorf("%s: no frozen copy of its reading: %w", f.name, err)
+			return fmt.Errorf("%s: no frozen copy of its hydration: %w", f.name, err)
 		}
-		readings["Title: "+it.Title+"\n"] = rec
+		hydrations["Title: "+it.Title+"\n"] = rec
 	}
 	if err := cut.New(store).CutNew(ctx, r.at); err != nil {
 		return err
 	}
-	ed := editor.New(editor.Deps{Store: store, Model: readings, Log: slog.New(slog.DiscardHandler)})
-	if err := ed.ReadWaiting(ctx, r.at); err != nil {
+	ed := editor.New(editor.Deps{Store: store, Model: hydrations, Log: slog.New(slog.DiscardHandler)})
+	if err := ed.RunWaiting(ctx, r.at); err != nil {
 		return err
 	}
 	for _, f := range r.items {
-		_, read, err := store.NewestReading(ctx, f.item.SourceID, f.item.EntryID)
+		_, hydrated, err := store.NewestHydration(ctx, f.item.SourceID, f.item.EntryID)
 		if err != nil {
 			return err
 		}
-		if !read {
-			return fmt.Errorf("%s: not hydrated by its copy of reading's recording: reading's checks refuse it", f.name)
+		if !hydrated {
+			return fmt.Errorf("%s: not hydrated by its copy of hydration's recording: hydration's checks refuse it", f.name)
 		}
 	}
 	return nil
 }
 
-// frozenReadings answers each reading request with the frozen copy kept for
+// frozenHydrations answers each hydration request with the frozen copy kept for
 // the Item it shows, by the title line it opens with, unchecked.
-type frozenReadings map[string]recording
+type frozenHydrations map[string]recording
 
-func (f frozenReadings) Complete(ctx context.Context, req editor.Request) (editor.Response, error) {
+func (f frozenHydrations) Complete(ctx context.Context, req editor.Request) (editor.Response, error) {
 	for title, rec := range f {
 		if strings.HasPrefix(req.Input, title) {
 			return replay{rec}.Complete(ctx, req)
 		}
 	}
-	return editor.Response{}, fmt.Errorf("no frozen copy of a reading for %.80q", req.Input)
+	return editor.Response{}, fmt.Errorf("no frozen copy of a hydration for %.80q", req.Input)
 }
 
 // keptAt is the recording kept at path: for a sample's file, its last
@@ -262,7 +262,7 @@ func shownToWeave(t *testing.T, store *sqlite.Store) map[citedAt]string {
 		t.Fatal(err)
 	}
 	for _, s := range stories {
-		r, _, err := store.NewestReading(ctx, s.Item.SourceID, s.Item.EntryID)
+		r, _, err := store.NewestHydration(ctx, s.Item.SourceID, s.Item.EntryID)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -328,7 +328,7 @@ func weave(t *testing.T, store *sqlite.Store, m *sampleModel, at time.Time) (boo
 	b := editor.NewBatches(editor.BatchDeps{Store: store, Batcher: &modelBatcher{model: m, prefix: at.Format(time.DateOnly)},
 		Acts: []editor.BatchAct{ed.Weaving(weavingAt)}, ModelFor: modelFor, Log: log})
 	for turn := range editor.MaxAttempts + 1 {
-		if err := b.ReadWaiting(ctx, at.Add(time.Duration(turn)*time.Minute)); err != nil {
+		if err := b.RunWaiting(ctx, at.Add(time.Duration(turn)*time.Minute)); err != nil {
 			return false, err
 		}
 		if m.lost != nil {

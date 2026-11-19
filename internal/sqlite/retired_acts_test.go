@@ -19,7 +19,7 @@ import (
 const beforeStoriesOnly = 35
 
 // retiringRecord is a database at beforeStoriesOnly holding an Item cut and
-// read, and what the retired acts wrote of it, as events, with their work
+// hydrated, and what the retired acts wrote of it, as events, with their work
 // failed; woven says whether a weaving run has been written too.
 func retiringRecord(t *testing.T, woven bool) *sql.DB {
 	t.Helper()
@@ -104,14 +104,14 @@ func TestWhatTheRetiredActsWroteStaysInTheRecord(t *testing.T) {
 	for table, want := range map[string]int{
 		"relatings": 1, "relations": 1, "told_briefings": 1, "told_statements": 1, "told_citations": 1,
 		"gatherings": 1, "gathered_spans": 1, "briefings": 1, "told_reads": 1, "told_assessments": 1,
-		"assessment_grounds": 1, "sunday_reads": 1, "feedback_given": 2, "readings": 2, "cuts": 2,
+		"assessment_grounds": 1, "sunday_reads": 1, "feedback_given": 2, "hydrations": 2, "cuts": 2,
 	} {
 		if got := strs(t, db, `SELECT count(*) FROM `+table); !slices.Equal(got, []string{strconv.Itoa(want)}) {
 			t.Errorf("%s holds %v rows, want the %d kept", table, got, want)
 		}
 	}
 	if got, want := strs(t, db, `SELECT kind FROM events WHERE kind != 'switch' ORDER BY id`), []string{
-		"cut", "cut", "reading", "reading", "relating", "relation", "briefing", "statement", "gathering",
+		"cut", "cut", "hydration", "hydration", "relating", "relation", "briefing", "statement", "gathering",
 		"sunday_read", "assessment", "feedback", "refers_to", "feedback",
 	}; !slices.Equal(got, want) {
 		t.Errorf("events = %v, want every one kept, %v", got, want)
@@ -160,7 +160,7 @@ func TestNoProjectionReadsWhatTheRetiredActsWrote(t *testing.T) {
 	for _, f := range failed {
 		acts = append(acts, f.Act)
 	}
-	if !slices.Equal(acts, []string{"reading"}) {
+	if !slices.Equal(acts, []string{"hydration"}) {
 		t.Errorf("failed work listed for %v, want only the acts the Editor runs", acts)
 	}
 	counts, err := s.SourceCounts(ctx, time.Date(2026, time.November, 1, 0, 0, 0, 0, time.UTC), cutAt.AddDate(0, 1, 0))
@@ -172,7 +172,7 @@ func TestNoProjectionReadsWhatTheRetiredActsWrote(t *testing.T) {
 	}
 	// Feedback given in the app is read by no Projection: what it said was
 	// wrong is read as judged.
-	r, _, err := s.NewestReading(ctx, "s", "b")
+	r, _, err := s.NewestHydration(ctx, "s", "b")
 	if err != nil {
 		t.Fatal(err)
 	}

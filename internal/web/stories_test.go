@@ -41,7 +41,7 @@ func weave(t *testing.T, store *sqlite.Store, at time.Time, output string) {
 		Acts: []editor.BatchAct{ed.Weaving(6 * time.Hour)}, Log: log})
 	// Submitted, then applied once its batch has ended.
 	for range 2 {
-		if err := b.ReadWaiting(t.Context(), at); err != nil {
+		if err := b.RunWaiting(t.Context(), at); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -124,7 +124,7 @@ func nameNewest(t *testing.T, store *sqlite.Store, name string) {
 	b := editor.NewBatches(editor.BatchDeps{Store: store, Batcher: &namingBatcher{name: name},
 		Acts: []editor.BatchAct{ed.Naming()}, Log: log})
 	for range 2 {
-		if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+		if err := b.RunWaiting(t.Context(), saturday); err != nil {
 			t.Fatal(err)
 		}
 	}

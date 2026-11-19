@@ -74,7 +74,7 @@ The **Event** at which an **Item** enters editorial work, once: plain code lists
 _Avoid_: Segmentation, split
 
 **Hydration**:
-Judging what a **Span**'s **Spans** refer to, what it names, who speaks it and whether it is **Rejected**, from the whole **Story** its **Cut** made. The hydrated reading of a **Span** ("fantastic news for Derby") is worked out by following *refers to*, never written.
+Judging, for every **Span** of a **Story** a **Cut** made, what it and the **Spans** within it refer to, what it names, who speaks it and whether it is **Rejected**, from that whole **Story** at once. The hydrated reading of a **Span** ("fantastic news for Derby") is worked out by following *refers to*, never written.
 
 **Weaving**:
 Reading **Stories** and making new ones, each a substantive editorial opinion: the **Editor's Spans** it wrote and the **Spans** they cite. A run with nothing substantive to say makes none.

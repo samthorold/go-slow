@@ -20,7 +20,7 @@ There is no Go Guide yet; the Go tooling below is this repo's own until there is
 
 This is a map. A fact about the code lives in the code: each package's doc comment (`go doc ./internal/<pkg>`) is its overview, and its identifiers' comments the detail. A reason lives in the system design.
 
-The code builds the design the docs state, but for two things. Hydration is called *reading* in the code, the commands and the config (`READING_MODEL`); #309 changed what weaving is shown, not the name. And it judges a whole Item's Spans in one call, where the design has one call per Span (#303, which needs design first). The old design's acts (relating, the Briefing, the Sunday read, gatherings, Feedback in the app, the register) are retired: what they wrote stays in the Record, read by no Page, and their kept calls stay readable on their call's and conversation's pages.
+The code builds the design the docs state, but for one thing: hydration is called *reading* in the code, the commands and the config (`READING_MODEL`) (#335). The old design's acts (relating, the Briefing, the Sunday read, gatherings, Feedback in the app, the register) are retired: what they wrote stays in the Record, read by no Page, and their kept calls stay readable on their call's and conversation's pages.
 
 - [`CONTEXT.md`](CONTEXT.md): the domain language (Owner, Story, Span, Item...). Use its terms in new code, tests and issues.
 - [`docs/system-design/README.md`](docs/system-design/README.md): the design, its end state and hypotheses, and why it has its shape.

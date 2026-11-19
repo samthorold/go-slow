@@ -183,6 +183,36 @@ func TestAResultIsAppliedWhenASpanTheEditorCitedIsHydratedAfterItsRequestWent(t 
 	}
 }
 
+// A stretch that says whose something is reads as the possessive of what it
+// refers to, as the Item and Span Pages read it.
+func TestARunIsShownAPossessiveHydratedAsAPossessive(t *testing.T) {
+	store := record(t)
+	at := saturday
+	if _, err := store.AddItems(t.Context(), []collect.Item{{
+		SourceID: release.SourceID, EntryID: "derby-station", Title: "Derby station", Link: "https://www.gov.uk/derby-station",
+		Content:   "<p>Derby has a station.</p><p>Its role will grow.</p><p>Engineers will mark their work there.</p>",
+		Published: release.Published, Attribution: collect.OGL, CollectedAt: at,
+	}}); err != nil {
+		t.Fatal(err)
+	}
+	if err := cut.New(store).CutNew(t.Context(), at); err != nil {
+		t.Fatal(err)
+	}
+	readAt(t, store, readingByTitle{"Derby station": `{"names": [], "refers_to": [
+		{"from": {"span": 2, "words": "Its"}, "to": {"span": 1, "words": "Derby"}},
+		{"from": {"span": 3, "words": "their"}, "to": {"span": 3, "words": "Engineers"}}
+	], "rejected": [], "speakers": []}`}, at)
+	batcher := &fakeBatcher{}
+	runAt(t, weavingBatches(store, batcher), at)
+
+	in := batcher.submitted[0][0].Request.Input
+	for _, want := range []string{": [Derby’s] role will grow.\n", ": Engineers will mark [Engineers’] work there.\n"} {
+		if !strings.Contains(in, want) {
+			t.Errorf("the run was shown:\n%s\nwant it to hold %q", in, want)
+		}
+	}
+}
+
 func TestACitationOfARejectedSpanLeftOutIsRefused(t *testing.T) {
 	store, batcher, b := releaseRead(t)
 	answerLast(batcher, `{"stories": [{"editor_spans": [{"body": "Burnham said.", "cites": [3]}]}]}`)

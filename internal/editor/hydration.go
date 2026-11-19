@@ -9,7 +9,9 @@ import (
 )
 
 // Piece is a stretch of a Span's hydrated reading: its words, and for a
-// stretch read in the words of what it refers to, the words it was.
+// stretch read in the words of what it refers to, the words it was. A
+// stretch that says whose something is ("its", "the town's") reads as the
+// possessive of what it refers to ("Derby’s"), wherever it is shown.
 type Piece struct {
 	Words string
 	Was   string
@@ -18,7 +20,8 @@ type Piece struct {
 // Hydrated is the hydrated reading of the Span s of text, the Item's text
 // as kept, by r: each stretch within it that refers to another read as the
 // words of what it refers to, followed as far as it goes (system design:
-// Hydration). It is worked out, never written.
+// Hydration), made possessive where the stretch was. It is worked out, never
+// written.
 func (r Reading) Hydrated(text string, s cut.Span) []Piece {
 	var within []RefersTo
 	for _, ref := range r.RefersTo {
@@ -39,7 +42,11 @@ func (r Reading) Hydrated(text string, s cut.Span) []Piece {
 		if w := cut.Stretch(text, cut.Span{Start: at, End: ref.From.Span.Start}); w != "" {
 			out = append(out, Piece{Words: w})
 		}
-		out = append(out, Piece{Words: r.Words(text, ref.From), Was: cut.Words(text, ref.From.Span)})
+		p := Piece{Words: r.Words(text, ref.From), Was: cut.Words(text, ref.From.Span)}
+		if possessive(p.Was) {
+			p.Words = possessed(p.Words)
+		}
+		out = append(out, p)
 		at = ref.From.Span.End
 	}
 	if w := cut.Stretch(text, cut.Span{Start: at, End: s.End}); w != "" {

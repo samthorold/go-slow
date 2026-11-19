@@ -48,11 +48,11 @@
 // (Deps.Cuts, #span-N, with the machine label "cut · <cutter> v<version>"),
 // as blocks read as its newest reading judged them (spanOf): each Span
 // hydrated (editor.Reading.Hydrated: a stretch that refers to another shown
-// as the words of what it refers to, followed as far as it goes, in an <ins>
-// titled with the words it was), its words read as they would be written in
-// place by inPlace (in_place.go: capitalised at a sentence's start where the
-// stretch was, a leading "The" lowered elsewhere, made possessive where the
-// stretch was; Hydrated itself is left as it is); its
+// as the words of what it refers to, followed as far as it goes, made
+// possessive where the stretch was, in an <ins> titled with the words it
+// was), its words cased as they would be written in place by inPlace
+// (in_place.go: capitalised at a sentence's start where the stretch was, a
+// leading "The" lowered elsewhere; Hydrated itself is left as it is); its
 // margin whose words it is ("spoken by …", the speaker's Span hydrated too),
 // the Entities it mentions (editor.Reading.Entities, pills built by pillOf:
 // the Entity's name and kind, linked to its Wikidata item if it is one; a

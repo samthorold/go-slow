@@ -50,8 +50,8 @@ func TestACollectedItemIsCutAndItsCutNamesItsCutter(t *testing.T) {
 	if err != nil || !found {
 		t.Fatalf("NewestCut: found %v, %v", found, err)
 	}
-	if c.Judge != cut.SentenceCutter || c.Judge.Cutter != "sentences" || c.Judge.Version != 1 {
-		t.Errorf("Judge = %+v, want the sentence cutter, version 1", c.Judge)
+	if c.By != (cut.MadeBy{Cutter: "sentences", Version: 1}) || c.By != cut.SentenceCutter {
+		t.Errorf("made by %+v, want the sentence cutter, version 1", c.By)
 	}
 	if c.ID == 0 || !c.At.Equal(now) {
 		t.Errorf("Cut is event %d at %v, want an identifier, at %v", c.ID, c.At, now)

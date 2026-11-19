@@ -164,7 +164,7 @@ func TestABatchCallKeepsTheRequestAsSentNotAsTheWorkStandsWhenItEnds(t *testing.
 	// show one Span, not two.
 	whole := cut.Span{Start: 3, End: len(speech.Content) - len("</p>")}
 	if err := store.KeepCut(t.Context(), cut.Cut{SourceID: speech.SourceID, EntryID: speech.EntryID,
-		Judge: cut.Judge{Cutter: "whole", Version: 1}, At: saturday, Spans: []cut.Span{whole}}); err != nil {
+		By: cut.MadeBy{Cutter: "whole", Version: 1}, At: saturday, Spans: []cut.Span{whole}}); err != nil {
 		t.Fatal(err)
 	}
 	batcher.end(1, func(editor.BatchRequest) editor.BatchResult {

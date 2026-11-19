@@ -90,8 +90,8 @@ func TestABatchRunIsPricedAtHalfTheRealTimeRate(t *testing.T) {
 	}
 }
 
-// A weaving run is estimated from the runs written before it, as reading is
-// from its readings.
+// A weaving run is estimated from the runs written before it, as hydration is
+// from its hydrations.
 func TestWeavingsPastUsageIsItsWrittenRunsCalls(t *testing.T) {
 	store := record(t)
 	batcher := &fakeBatcher{}

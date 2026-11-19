@@ -38,7 +38,7 @@ type adminDeps struct {
 // the app, the config read through d.Lookup.
 //
 //	retry [act]: clears the failed marks on the work of one act run in
-//	batches (reading, weaving or naming), or of every act, resetting its
+//	batches (hydration, weaving or naming), or of every act, resetting its
 //	attempts, so the next run takes that work up again:
 //
 //	  docker compose run --rm app retry weaving

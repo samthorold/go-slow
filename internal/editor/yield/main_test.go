@@ -111,7 +111,7 @@ func TestFrozenInputsAndOtherFilesAreLeftOut(t *testing.T) {
 	before, after := t.TempDir(), t.TempDir()
 	for _, dir := range []string{before, after} {
 		write(t, dir, "weaving/x.json", `{"act": "weaving", "output": {"stories": []}}`)
-		write(t, dir, "weaving/inputs/reading/x.json", `{"act": "reading", "output": {"names": [{}], "refers_to": [], "rejected": [], "speakers": []}}`)
+		write(t, dir, "weaving/inputs/hydration/x.json", `{"act": "hydration", "output": {"names": [{}], "refers_to": [], "rejected": [], "speakers": []}}`)
 		write(t, dir, "naming/inputs/weaving/x.json", `{"act": "weaving", "output": {"stories": [{"editor_spans": []}]}}`)
 		write(t, dir, "weaving/wikidata/search.json", `[{"id": "Q1"}]`)
 	}
@@ -121,7 +121,7 @@ func TestFrozenInputsAndOtherFilesAreLeftOut(t *testing.T) {
 	if !strings.Contains(got, "| weaving/x | 0 → 0 |") {
 		t.Errorf("the report leaves out the weaving recording; it is:\n%s", got)
 	}
-	for _, unwanted := range []string{"inputs", "### reading", "wikidata", "naming", "Not counted"} {
+	for _, unwanted := range []string{"inputs", "### hydration", "wikidata", "naming", "Not counted"} {
 		if strings.Contains(got, unwanted) {
 			t.Errorf("the report has %q, which it should leave out; it is:\n%s", unwanted, got)
 		}
@@ -137,30 +137,53 @@ func TestItNeedsTwoDirectoriesThatExist(t *testing.T) {
 	}
 }
 
-// Reading is counted by what it judged of the fixture's Spans, the Spans
+// Hydration is counted by what it judged of the fixture's Spans, the Spans
 // being those the sentence cutter makes of the fixture Item beside the
 // recordings.
-func TestReadingYieldShowsTheSpansRejectedNamesSpeakersAndReferences(t *testing.T) {
+func TestHydrationYieldShowsTheSpansRejectedNamesSpeakersAndReferences(t *testing.T) {
 	root := t.TempDir()
 	before, after := filepath.Join(root, "old", "recorded"), filepath.Join(root, "repo", "recorded")
 	write(t, root, "repo/govuk/statement.json", `{"details": {"body": "<p>Ann said:</p><p>Kyiv is safe. She went there.</p>"}}`)
-	write(t, before, "reading/statement.json", `{"act": "reading", "output": {"names": [], "refers_to": [], "rejected": [], "speakers": []}}`)
-	write(t, after, "reading/statement/1.json", `{"act": "reading", "output": {
+	write(t, before, "hydration/statement.json", `{"act": "hydration", "output": {"names": [], "refers_to": [], "rejected": [], "speakers": []}}`)
+	write(t, after, "hydration/statement/1.json", `{"act": "hydration", "output": {
 		"names": [{}, {}], "refers_to": [{}], "rejected": [1], "speakers": [{}, {}]}}`)
-	write(t, after, "reading/statement/2.json", `{"act": "reading", "output": {
+	write(t, after, "hydration/statement/2.json", `{"act": "hydration", "output": {
 		"names": [{}], "refers_to": [], "rejected": [], "speakers": [{}, {}]}}`)
-	write(t, after, "reading/gone/1.json", `{"act": "reading", "output": {"names": [], "refers_to": [], "rejected": [], "speakers": []}}`)
+	write(t, after, "hydration/gone/1.json", `{"act": "hydration", "output": {"names": [], "refers_to": [], "rejected": [], "speakers": []}}`)
 
 	got := yieldOf(t, before, after)
 
 	for _, want := range []string{
 		"| Fixture | Spans | Rejected | Names | Speakers | Refers to |",
-		"| reading/statement | 3 → 3 | 0 → 0–1 | 0 → 1–2 | 0 → 2 | 0 → 0–1 |",
-		"| reading/gone (added) | – → 0 | – → 0 | – → 0 | – → 0 | – → 0 |",
+		"| hydration/statement | 3 → 3 | 0 → 0–1 | 0 → 1–2 | 0 → 2 | 0 → 0–1 |",
+		"| hydration/gone (added) | – → 0 | – → 0 | – → 0 | – → 0 | – → 0 |",
 		"| **Total** | 3 → 3 | 0 → 0–1 | 0 → 1–2 | 0 → 2 | 0 → 0–1 |",
 	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("the report has no line %q; it is:\n%s", want, got)
+		}
+	}
+}
+
+// A tree from before hydration was called hydration keeps its recordings as
+// reading's (reading/<fixture>/, act "reading"): they are hydration's, so a
+// re-recording's report against such a tree compares fixture with fixture.
+func TestReadingsRecordingsInAnOlderTreeAreCountedAsHydrations(t *testing.T) {
+	root := t.TempDir()
+	before, after := filepath.Join(root, "old", "recorded"), filepath.Join(root, "repo", "recorded")
+	write(t, root, "repo/govuk/statement.json", `{"details": {"body": "<p>Ann said:</p><p>Kyiv is safe. She went there.</p>"}}`)
+	write(t, before, "reading/statement/1.json", `{"act": "reading", "output": {"names": [{}], "refers_to": [], "rejected": [], "speakers": []}}`)
+	write(t, before, "weaving/inputs/reading/statement.json", `{"act": "reading", "output": {"names": [], "refers_to": [], "rejected": [], "speakers": []}}`)
+	write(t, after, "hydration/statement/1.json", `{"act": "hydration", "output": {"names": [{}, {}], "refers_to": [], "rejected": [], "speakers": []}}`)
+
+	got := yieldOf(t, before, after)
+
+	if want := "| hydration/statement | 3 → 3 | 0 → 0 | 1 → 2 | 0 → 0 | 0 → 0 |"; !strings.Contains(got, want) {
+		t.Errorf("the report has no line %q; it is:\n%s", want, got)
+	}
+	for _, unwanted := range []string{"reading", "(added)", "(removed)", "Not counted"} {
+		if strings.Contains(got, unwanted) {
+			t.Errorf("the report has %q, which it should leave out; it is:\n%s", unwanted, got)
 		}
 	}
 }

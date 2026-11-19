@@ -34,8 +34,8 @@ type Items interface {
 // Deps are the app's dependencies. The app reads nothing from the
 // environment: main builds these and passes them in.
 type Deps struct {
-	Items    Items
-	Readings Readings
+	Items      Items
+	Hydrations Hydrations
 	// Cuts answers an Item's Spans, from its newest Cut.
 	Cuts   Cuts
 	Topics Topics

@@ -36,7 +36,7 @@ func primeMinisters() *fakeWikidata {
 
 const pm = "Prime Minister of the United Kingdom"
 
-// named is a person's name as reading judges it, with an office.
+// named is a person's name as hydration judges it, with an office.
 func named(name, kind, office string) editor.Name {
 	return editor.Name{Name: name, Kind: kind, Office: office}
 }

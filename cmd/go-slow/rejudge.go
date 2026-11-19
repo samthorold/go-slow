@@ -31,13 +31,13 @@ type rejudgeAct struct {
 }
 
 // rejudgeActs are the acts that judge Spans by a model call and keep each
-// judgement with its judge. Only reading does today; another act is added
+// judgement with its judge. Only hydration does today; another act is added
 // here as it comes, with its RejudgeAct.
 var rejudgeActs = map[string]rejudgeAct{
-	"reading": {
-		act:       func(store *sqlite.Store) editor.RejudgeAct { return editor.Rereading(store) },
-		model:     func(cfg config.Config) string { return cfg.ReadingModel },
-		variable:  "READING_MODEL",
+	"hydration": {
+		act:       func(store *sqlite.Store) editor.RejudgeAct { return editor.Rehydrating(store) },
+		model:     func(cfg config.Config) string { return cfg.HydrationModel },
+		variable:  "HYDRATION_MODEL",
 		cutsFirst: true,
 	},
 }
@@ -56,7 +56,7 @@ const dateLayout = time.DateOnly
 // the requests it would send, the tokens and their price in dollars, and
 // calls no model and writes no judgement. Either way it first cuts the
 // Items in the range with text and no Cut, as Collection does, since
-// reading reads only Items cut: the Cuts are its only write, plain code
+// hydration reads only Items cut: the Cuts are its only write, plain code
 // with no model call (a Record from before Cuts holds none until its first
 // Collection run). With --confirm it runs, in real time,
 // stopping before a call that could take it over --max-usd. It judges as the
@@ -105,7 +105,7 @@ func rejudge(ctx context.Context, log *slog.Logger, args []string, d adminDeps) 
 	}
 	a, ok := rejudgeActs[args[0]]
 	if !ok {
-		return fmt.Errorf("rejudge: unknown act %q (known: reading)", args[0])
+		return fmt.Errorf("rejudge: unknown act %q (known: hydration)", args[0])
 	}
 	flags := flag.NewFlagSet("rejudge "+args[0], flag.ContinueOnError)
 	flags.SetOutput(io.Discard)
@@ -290,7 +290,7 @@ func findCandidate(ctx context.Context, store *sqlite.Store, id int64) (editor.C
 }
 
 // compareCandidate prints, Item by Item, each kind of judgement the live
-// reading a view reads made, the candidate's made, and both made, then the
+// hydration a view reads made, the candidate's made, and both made, then the
 // totals.
 func compareCandidate(ctx context.Context, store *sqlite.Store, w io.Writer, id int64) error {
 	p := &printer{w: w}
@@ -298,18 +298,18 @@ func compareCandidate(ctx context.Context, store *sqlite.Store, w io.Writer, id 
 	if err != nil {
 		return err
 	}
-	if c.Act != "reading" {
+	if c.Act != "hydration" {
 		return fmt.Errorf("candidate %d is of %s, which can't be compared yet", id, c.Act)
 	}
 	p.f("%s\n", describe(c))
-	readings, err := store.CandidateReadings(ctx, id)
+	hydrations, err := store.CandidateHydrations(ctx, id)
 	if err != nil {
 		return err
 	}
 	totals := map[string]*editor.KindCompared{}
 	var order []string
-	for _, cr := range readings {
-		live, found, err := store.NewestReading(ctx, cr.SourceID, cr.EntryID)
+	for _, cr := range hydrations {
+		live, found, err := store.NewestHydration(ctx, cr.SourceID, cr.EntryID)
 		if err != nil {
 			return err
 		}
@@ -322,7 +322,7 @@ func compareCandidate(ctx context.Context, store *sqlite.Store, w io.Writer, id 
 		default:
 			p.f("  live: %s v%d on %s\n", live.Judge.Act, live.Judge.Version, live.Judge.Model)
 		}
-		for _, k := range editor.CompareReadings(live, cr) {
+		for _, k := range editor.CompareHydrations(live, cr) {
 			p.f("  %-10s live %d  candidate %d  both %d\n", k.Kind, k.Live, k.Candidate, k.Both)
 			t, ok := totals[k.Kind]
 			if !ok {
@@ -335,7 +335,7 @@ func compareCandidate(ctx context.Context, store *sqlite.Store, w io.Writer, id 
 			t.Both += k.Both
 		}
 	}
-	p.f("\ntotals over %d Items\n", len(readings))
+	p.f("\ntotals over %d Items\n", len(hydrations))
 	for _, kind := range order {
 		t := totals[kind]
 		p.f("  %-10s live %d  candidate %d  both %d\n", t.Kind, t.Live, t.Candidate, t.Both)

@@ -25,7 +25,7 @@ func spanPath(t *testing.T, app http.Handler, entry string, n int) string {
 
 func TestARejectedSpansPageStrikesThroughOnlyItsText(t *testing.T) {
 	store := openStore(t)
-	readRelease(t, store, releaseReading)
+	hydrateRelease(t, store, releaseHydration)
 	app, _ := newAppWithLog(t, saturday, store)
 
 	page := get(t, app, spanPath(t, app, "release", 1)).body
@@ -48,9 +48,9 @@ func TestARejectedSpansPageStrikesThroughOnlyItsText(t *testing.T) {
 	}
 }
 
-func TestASpansPageShowsItWithItsItemEntitiesAndTheReadingsCall(t *testing.T) {
+func TestASpansPageShowsItWithItsItemEntitiesAndTheHydrationsCall(t *testing.T) {
 	store := openStore(t)
-	readRelease(t, store, releaseReading)
+	hydrateRelease(t, store, releaseHydration)
 	if err := editor.NewLookups(editor.LookupDeps{Store: store, Wikidata: derbyOnly{}, Log: slog.New(slog.DiscardHandler)}).
 		LookUpWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
@@ -73,14 +73,14 @@ func TestASpansPageShowsItWithItsItemEntitiesAndTheReadingsCall(t *testing.T) {
 			t.Errorf("the Span's page does not show %q:\n%s", want, page)
 		}
 	}
-	if !regexp.MustCompile(`<a class="machine" href="/calls/\d+">read · call \d+</a>`).MatchString(page) {
-		t.Errorf("the Span's page does not link the reading's call:\n%s", page)
+	if !regexp.MustCompile(`<a class="machine" href="/calls/\d+">hydrated · call \d+</a>`).MatchString(page) {
+		t.Errorf("the Span's page does not link the hydration's call:\n%s", page)
 	}
 }
 
 func TestASpanNotInItsItemIsNotFound(t *testing.T) {
 	store := openStore(t)
-	readRelease(t, store, releaseReading)
+	hydrateRelease(t, store, releaseHydration)
 	app, _ := newAppWithLog(t, saturday, store)
 	for _, path := range []string{
 		"/items/" + number10.ID + "/release/spans/0-99999",

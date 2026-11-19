@@ -14,19 +14,19 @@ const (
 	choiceShape    = 1
 )
 
-// newestLiveReading is the event id of the newest live reading of the Item
+// newestLiveHydration is the event id of the newest live hydration of the Item
 // whose Source and entry are the SQL expressions source and entry, or NULL
 // for none: the one a view reads (system design: Every judgement carries
-// its judge). A reading is live if it was made as the live judge, or by a
-// candidate since chosen; a chosen candidate's readings count as made when
-// it was chosen, so the choice makes them newer than every live reading
-// made before it, and a live reading made after it newer still.
-func newestLiveReading(source, entry string) string {
-	return `(SELECT lr.event_id FROM readings lr
-		LEFT JOIN candidate_readings lcr ON lcr.reading_id = lr.event_id
+// its judge). A hydration is live if it was made as the live judge, or by a
+// candidate since chosen; a chosen candidate's hydrations count as made when
+// it was chosen, so the choice makes them newer than every live hydration
+// made before it, and a live hydration made after it newer still.
+func newestLiveHydration(source, entry string) string {
+	return `(SELECT lr.event_id FROM hydrations lr
+		LEFT JOIN candidate_hydrations lcr ON lcr.hydration_id = lr.event_id
 		LEFT JOIN candidate_choices lch ON lch.candidate_id = lcr.candidate_id
 		WHERE lr.source_id = ` + source + ` AND lr.entry_id = ` + entry + `
-			AND (lcr.reading_id IS NULL OR lch.event_id IS NOT NULL)
+			AND (lcr.hydration_id IS NULL OR lch.event_id IS NOT NULL)
 		ORDER BY coalesce(lch.event_id, lr.event_id) DESC, lr.event_id DESC LIMIT 1)`
 }
 
@@ -91,11 +91,11 @@ func (s *Store) ChooseCandidate(ctx context.Context, id int64, at time.Time) err
 
 // PastUsage is what the act's applied calls answering one of its
 // judgements in the Record cost: their count, their requests' size in bytes
-// (instructions, schema and input) and their tokens in and out. Reading's
-// judgements are its readings and weaving's its runs; another act has none.
+// (instructions, schema and input) and their tokens in and out. Hydration's
+// judgements are its hydrations and weaving's its runs; another act has none.
 func (s *Store) PastUsage(ctx context.Context, act string) (editor.PastUsage, error) {
 	var u editor.PastUsage
-	judgements, ok := map[string]string{"reading": "readings", "weaving": "weavings"}[act]
+	judgements, ok := map[string]string{"hydration": "hydrations", "weaving": "weavings"}[act]
 	if !ok {
 		return u, nil
 	}
@@ -123,7 +123,7 @@ func (s *Store) Candidates(ctx context.Context) ([]editor.Candidate, error) {
 		SELECT c.event_id, c.act, c.version, c.model, c.range_from, c.range_to, e.at,
 			coalesce((SELECT ce.at FROM candidate_choices ch JOIN events ce ON ce.id = ch.event_id
 				WHERE ch.candidate_id = c.event_id), ''),
-			(SELECT count(*) FROM candidate_readings cr WHERE cr.candidate_id = c.event_id)
+			(SELECT count(*) FROM candidate_hydrations cr WHERE cr.candidate_id = c.event_id)
 		FROM candidates c JOIN events e ON e.id = c.event_id
 		ORDER BY c.event_id`)
 	if err != nil {

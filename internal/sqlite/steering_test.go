@@ -10,7 +10,7 @@ import (
 	"github.com/samthorold/go-slow/internal/interest"
 )
 
-// steeredRelease is the release (collected at cutAt), read (S1 Rejected),
+// steeredRelease is the release (collected at cutAt), hydrated (S1 Rejected),
 // with a weaving run at cutAt that made two Stories: one whose Editor's Span
 // cites S2 and S3, which names Derby, and one whose Editor's Span cites S3
 // alone; and a Topic following Derby.
@@ -23,7 +23,7 @@ func steeredRelease(t *testing.T) *Store {
 func steeredReleaseWovenAt(t *testing.T, made time.Time) *Store {
 	t.Helper()
 	s, c := cutRelease(t)
-	if err := s.KeepReading(t.Context(), releaseReading(t, c)); err != nil {
+	if err := s.KeepHydration(t.Context(), releaseHydration(t, c)); err != nil {
 		t.Fatal(err)
 	}
 	s2, s3 := editor.Cited{Address: at(t, c, 2, "")}, editor.Cited{Address: at(t, c, 3, "")}
@@ -87,7 +87,7 @@ func TestAStoryTouchingNoTopicCountsAsUntouched(t *testing.T) {
 	}
 }
 
-func TestASourceCountsItsSpansRejectedByTheirNewestReadings(t *testing.T) {
+func TestASourceCountsItsSpansRejectedByTheirNewestHydrations(t *testing.T) {
 	s := steeredRelease(t)
 
 	got := steering(t, s, cutAt.AddDate(0, 0, -28), cutAt)

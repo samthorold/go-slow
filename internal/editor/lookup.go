@@ -76,7 +76,7 @@ func LookUp(ctx context.Context, wd Wikidata, k LookupKey, now time.Time) (NameL
 
 // LookupStore is the part of the Record the look-up step reads and writes.
 type LookupStore interface {
-	// NamesToLookUp are the keys of the names readings judged that no
+	// NamesToLookUp are the keys of the names hydrations judged that no
 	// look-up has looked up yet, each once.
 	NamesToLookUp(ctx context.Context) ([]LookupKey, error)
 	// KeepLookup keeps a look-up as an event. With no match, it makes the
@@ -93,7 +93,7 @@ type LookupDeps struct {
 	Log      *slog.Logger
 }
 
-// Lookups is the look-up step: plain code, run after reading, finding in
+// Lookups is the look-up step: plain code, run after hydration, finding in
 // Wikidata what the Spans name, once per key (system design: Entities are
 // looked up by name, not by Span).
 type Lookups struct {
@@ -106,7 +106,7 @@ func NewLookups(d LookupDeps) *Lookups { return &Lookups{LookupDeps: d} }
 // LookUpWaiting looks up, at now, every key not yet looked up. A look-up
 // Wikidata refuses or fails, after the adapter's own backoff, is logged and
 // kept nowhere, so it is tried again on the next run; it stops no other,
-// and holds up no reading, which is kept already. Only a failing Record, or
+// and holds up no hydration, which is kept already. Only a failing Record, or
 // ctx ending, is an error.
 func (l *Lookups) LookUpWaiting(ctx context.Context, now time.Time) error {
 	keys, err := l.Store.NamesToLookUp(ctx)

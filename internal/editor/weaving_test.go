@@ -28,7 +28,7 @@ func weavingBatches(store *sqlite.Store, b editor.Batcher) *editor.Batches {
 // runAt is the batch runner's turn after a Collection run ending at now.
 func runAt(t *testing.T, b *editor.Batches, now time.Time) {
 	t.Helper()
-	if err := b.ReadWaiting(t.Context(), now); err != nil {
+	if err := b.RunWaiting(t.Context(), now); err != nil {
 		t.Fatal(err)
 	}
 }

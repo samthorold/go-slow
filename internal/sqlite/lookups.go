@@ -22,13 +22,13 @@ const (
 // otherwise (editor.KeyOf).
 const lookupOn = `CASE WHEN n.office = '' OR items.published = '' THEN '' ELSE substr(items.published, 1, 10) END`
 
-// NamesToLookUp are the keys of the names readings judged that no look-up
+// NamesToLookUp are the keys of the names hydrations judged that no look-up
 // has looked up yet, each once, those first judged earliest first.
 func (s *Store) NamesToLookUp(ctx context.Context) ([]editor.LookupKey, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT n.name, n.kind, n.office, `+lookupOn+` AS on_date
 		FROM span_names n
-			JOIN readings r ON r.event_id = n.reading_id
+			JOIN hydrations r ON r.event_id = n.hydration_id
 			JOIN items ON items.source_id = r.source_id AND items.entry_id = r.entry_id
 		WHERE NOT EXISTS (SELECT 1 FROM lookups l
 			WHERE l.name = n.name AND l.kind = n.kind AND l.office = n.office AND l.on_date = `+lookupOn+`)

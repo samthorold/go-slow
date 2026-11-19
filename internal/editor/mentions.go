@@ -13,7 +13,7 @@ import (
 // go without coming back on themselves (system design: Who did what is read
 // in the Span, not judged apart from it). It is worked out, never
 // written. Which Entity each name is comes from its look-up (KeyOf).
-func (r Reading) Mentions(s cut.Span) []Name {
+func (r Hydration) Mentions(s cut.Span) []Name {
 	var reached []cut.Span
 	reach := func(sp cut.Span) bool {
 		if slices.Contains(reached, sp) {
@@ -65,7 +65,7 @@ type NamedEntity struct {
 
 // Keys are the keys of every name r judged, in an Item published on
 // published, each once.
-func (r Reading) Keys(published time.Time) []LookupKey {
+func (r Hydration) Keys(published time.Time) []LookupKey {
 	var out []LookupKey
 	for _, n := range r.Names {
 		if k := KeyOf(n, published); !slices.Contains(out, k) {
@@ -79,7 +79,7 @@ func (r Reading) Keys(published time.Time) []LookupKey {
 // on published, each once: the Entity each name it mentions is, by is, the
 // Entities the Record's look-ups have for each key. A name not yet looked
 // up is in none.
-func (r Reading) Entities(s cut.Span, published time.Time, is map[LookupKey]NamedEntity) []NamedEntity {
+func (r Hydration) Entities(s cut.Span, published time.Time, is map[LookupKey]NamedEntity) []NamedEntity {
 	var out []NamedEntity
 	for _, n := range r.Mentions(s) {
 		if e, ok := is[KeyOf(n, published)]; ok && !slices.Contains(out, e) {

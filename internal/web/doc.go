@@ -46,27 +46,27 @@
 //
 // An Item's page shows its text as the numbered Spans of its newest Cut
 // (Deps.Cuts, #span-N, with the machine label "cut · <cutter> v<version>"),
-// as blocks read as its newest reading judged them (spanOf): each Span
-// hydrated (editor.Reading.Hydrated: a stretch that refers to another shown
+// as blocks read as its newest hydration judged them (spanOf): each Span
+// hydrated (editor.Hydration.Hydrated: a stretch that refers to another shown
 // as the words of what it refers to, followed as far as it goes, made
 // possessive where the stretch was, in an <ins> titled with the words it
 // was), its words cased as they would be written in place by inPlace
 // (in_place.go: capitalised at a sentence's start where the stretch was, a
 // leading "The" lowered elsewhere; Hydrated itself is left as it is); its
 // margin whose words it is ("spoken by …", the speaker's Span hydrated too),
-// the Entities it mentions (editor.Reading.Entities, pills built by pillOf:
+// the Entities it mentions (editor.Hydration.Entities, pills built by pillOf:
 // the Entity's name and kind, linked to its Wikidata item if it is one; a
 // name not yet looked up shows as read, the office for a person or else the
-// kind) and, for a Rejected Span (.struck), "rejected". The reading's call
-// is the machine label "read · call N", and an Item cut but not read says it
-// awaits reading. Each Span's number in its margin links the Span's own
+// kind) and, for a Rejected Span (.struck), "rejected". The hydration's call
+// is the machine label "hydrated · call N", and an Item cut but not hydrated says it
+// awaits hydration. Each Span's number in its margin links the Span's own
 // page.
 //
 // A Span's page, /items/{source}/{entry}/spans/{start}-{end} (span.go,
 // templates/span.html), is a bookmarkable address for any stretch within
 // the Item's text, listed by a Cut or not: the Span as its Item's newest
-// reading reads it, with its Item's citation and date, its Entities and the
-// reading's call, then the Stories holding it and the Editor's Spans citing
+// hydration reads it, with its Item's citation and date, its Entities and the
+// hydration's call, then the Stories holding it and the Editor's Spans citing
 // it (below).
 //
 // The Stories page (/stories, stories.go) lists the Stories the Editor made,
@@ -106,8 +106,8 @@
 // · Spans: N of N rejected" (the storage adapter's SourceCounts over its
 // steering window, stated on the page). Its collected Items are blocks,
 // margin open, each Item's status a .machine label (itemRow.Status: the
-// pipeline's own wording, not prose: "read · N names, N speakers, N
-// rejected", "awaiting reading", "awaiting cutting" or "no text yet"), and
+// pipeline's own wording, not prose: "hydrated · N names, N speakers, N
+// rejected", "awaiting hydration", "awaiting cutting" or "no text yet"), and
 // Upcoming folds at its foot.
 //
 // A call's page (GET /calls/{id}, with every attempt at its work) and a
@@ -120,8 +120,8 @@
 // and the tools it called) and the bulk collapsed in <details>
 // (instructions, schema, tools, what a turn was sent, a tool call's input,
 // the raw response; a call's attempts unless there are several). A call is
-// linked from an Item's reading of its Spans (found by the reading's request
-// hash, the storage adapter's spansReadingCall), from a Story's making and
+// linked from an Item's hydration of its Spans (found by the hydration's request
+// hash, the storage adapter's spansHydrationCall), from a Story's making and
 // naming, and from failed work on the Items
 // page. A conversation's turns are blocks in an open margined region, each
 // <li class="block" id="turn-N"> with its anchor, outcome and tokens in its

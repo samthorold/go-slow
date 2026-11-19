@@ -81,7 +81,7 @@ func TestEachRequestInABatchRunsOnItsActsModel(t *testing.T) {
 	placing.Act = "placing"
 
 	if _, err := model.Submit(t.Context(), []editor.BatchRequest{
-		{ID: "reading-1", Request: request},
+		{ID: "hydration-1", Request: request},
 		{ID: "placing-1", Request: placing},
 	}); err != nil {
 		t.Fatal(err)
@@ -106,7 +106,7 @@ func TestARequestsEffortIsSentWithItsOutputFormatAndNoneIsSentWithoutOne(t *test
 
 	if _, err := model.Submit(t.Context(), []editor.BatchRequest{
 		{ID: "weaving-1", Request: weaving},
-		{ID: "reading-1", Request: request},
+		{ID: "hydration-1", Request: request},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -157,7 +157,7 @@ func timingOutOnceAPI(t *testing.T, status string, results ...map[string]any) (m
 func TestCreatingABatchThatTimesOutIsNotRetried(t *testing.T) {
 	model, count := timingOutOnceAPI(t, "in_progress")
 
-	_, err := model.Submit(t.Context(), []editor.BatchRequest{{ID: "reading-1", Request: request}})
+	_, err := model.Submit(t.Context(), []editor.BatchRequest{{ID: "hydration-1", Request: request}})
 
 	if err == nil {
 		t.Error("a create that timed out succeeded")
@@ -169,7 +169,7 @@ func TestCreatingABatchThatTimesOutIsNotRetried(t *testing.T) {
 
 func TestPollingABatchAndReadingItsResultsAreRetriedAfterATimeout(t *testing.T) {
 	model, count := timingOutOnceAPI(t, "ended",
-		map[string]any{"custom_id": "reading-1", "result": map[string]any{"type": "succeeded", "message": message("end_turn", `{"facts": []}`)}})
+		map[string]any{"custom_id": "hydration-1", "result": map[string]any{"type": "succeeded", "message": message("end_turn", `{"facts": []}`)}})
 
 	poll, err := model.Poll(t.Context(), "msgbatch_1")
 	if err != nil {
@@ -199,8 +199,8 @@ func TestABatchIsSubmittedWithEachRequestsIdentifierAndTheActsCall(t *testing.T)
 	model, created := batchAPI(t, "in_progress")
 
 	id, err := model.Submit(t.Context(), []editor.BatchRequest{
-		{ID: "reading-1", Request: request},
-		{ID: "reading-2", Request: request},
+		{ID: "hydration-1", Request: request},
+		{ID: "hydration-2", Request: request},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -214,7 +214,7 @@ func TestABatchIsSubmittedWithEachRequestsIdentifierAndTheActsCall(t *testing.T)
 		t.Fatalf("requests = %v", (*created)["requests"])
 	}
 	first, _ := json.Marshal(reqs[0])
-	want := `{"custom_id":"reading-1","params":{"max_tokens":32000,` +
+	want := `{"custom_id":"hydration-1","params":{"max_tokens":32000,` +
 		`"messages":[{"content":[{"text":"Title: PM speech in Scotland","type":"text"}],"role":"user"}],` +
 		`"model":"claude-haiku-5-5",` +
 		`"output_config":{"format":{"schema":{"additionalProperties":false,"type":"object"},"type":"json_schema"}},` +
@@ -228,7 +228,7 @@ func TestABatchResultKeepsTheModelTheAPIReportsNotTheOneAskedFor(t *testing.T) {
 	moved := message("end_turn", `{"facts": []}`)
 	moved["model"] = "claude-haiku-5-5-moved"
 	model, _ := batchAPI(t, "ended",
-		map[string]any{"custom_id": "reading-1", "result": map[string]any{"type": "succeeded", "message": moved}})
+		map[string]any{"custom_id": "hydration-1", "result": map[string]any{"type": "succeeded", "message": moved}})
 
 	poll, err := model.Poll(t.Context(), "msgbatch_1")
 	if err != nil {
@@ -255,13 +255,13 @@ func TestABatchStillProcessingHasNoResults(t *testing.T) {
 
 func TestAnEndedBatchsResultsCarryTheirRequestsIdentifiers(t *testing.T) {
 	model, _ := batchAPI(t, "ended",
-		map[string]any{"custom_id": "reading-2", "result": map[string]any{"type": "succeeded", "message": message("end_turn", `{"facts": []}`)}},
-		map[string]any{"custom_id": "reading-1", "result": map[string]any{"type": "errored",
+		map[string]any{"custom_id": "hydration-2", "result": map[string]any{"type": "succeeded", "message": message("end_turn", `{"facts": []}`)}},
+		map[string]any{"custom_id": "hydration-1", "result": map[string]any{"type": "errored",
 			"error": map[string]any{"type": "error", "error": map[string]any{"type": "overloaded_error", "message": "Overloaded"}}}},
-		map[string]any{"custom_id": "reading-3", "result": map[string]any{"type": "expired"}},
-		map[string]any{"custom_id": "reading-4", "result": map[string]any{"type": "succeeded", "message": message("refusal", "")}},
-		map[string]any{"custom_id": "reading-5", "result": map[string]any{"type": "succeeded", "message": message("max_tokens", `{"facts": [`)}},
-		map[string]any{"custom_id": "reading-6", "result": map[string]any{"type": "canceled"}},
+		map[string]any{"custom_id": "hydration-3", "result": map[string]any{"type": "expired"}},
+		map[string]any{"custom_id": "hydration-4", "result": map[string]any{"type": "succeeded", "message": message("refusal", "")}},
+		map[string]any{"custom_id": "hydration-5", "result": map[string]any{"type": "succeeded", "message": message("max_tokens", `{"facts": [`)}},
+		map[string]any{"custom_id": "hydration-6", "result": map[string]any{"type": "canceled"}},
 	)
 
 	poll, err := model.Poll(t.Context(), "msgbatch_1")
@@ -276,25 +276,25 @@ func TestAnEndedBatchsResultsCarryTheirRequestsIdentifiers(t *testing.T) {
 	for _, r := range poll.Results {
 		byID[r.ID] = r
 	}
-	if r := byID["reading-2"]; r.Err != nil || string(r.Response.Output) != `{"facts": []}` ||
+	if r := byID["hydration-2"]; r.Err != nil || string(r.Response.Output) != `{"facts": []}` ||
 		r.Response.Model != "claude-haiku-5-5" || r.Response.Usage != (editor.Usage{InputTokens: 1200, OutputTokens: 340}) {
 		t.Errorf("succeeded = %+v", r)
 	}
-	if r := byID["reading-1"]; r.Err == nil || !strings.Contains(r.Err.Error(), "Overloaded") {
+	if r := byID["hydration-1"]; r.Err == nil || !strings.Contains(r.Err.Error(), "Overloaded") {
 		t.Errorf("errored = %+v", r)
 	}
-	for _, id := range []string{"reading-3", "reading-6"} {
+	for _, id := range []string{"hydration-3", "hydration-6"} {
 		if byID[id].Err == nil {
 			t.Errorf("%s has no error: %+v", id, byID[id])
 		}
 	}
-	if r := byID["reading-4"]; !errors.Is(r.Err, editor.ErrRefused) || r.Response.StopReason != "refusal" || r.Response.Raw == nil {
+	if r := byID["hydration-4"]; !errors.Is(r.Err, editor.ErrRefused) || r.Response.StopReason != "refusal" || r.Response.Raw == nil {
 		t.Errorf("refused = %+v", r)
 	}
-	if r := byID["reading-2"]; !strings.Contains(string(r.Response.Raw), `"stop_reason":"end_turn"`) || r.Response.StopReason != "end_turn" {
+	if r := byID["hydration-2"]; !strings.Contains(string(r.Response.Raw), `"stop_reason":"end_turn"`) || r.Response.StopReason != "end_turn" {
 		t.Errorf("succeeded raw = %s", r.Response.Raw)
 	}
-	if r := byID["reading-5"]; !errors.Is(r.Err, editor.ErrTruncated) {
+	if r := byID["hydration-5"]; !errors.Is(r.Err, editor.ErrTruncated) {
 		t.Errorf("truncated = %+v", r)
 	}
 }

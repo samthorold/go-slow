@@ -3,6 +3,8 @@ package editor_test
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -64,12 +66,12 @@ func newBatches(store *sqlite.Store, b editor.Batcher) (*editor.Batches, *bytes.
 	return editor.NewBatches(editor.BatchDeps{
 		Store:   store,
 		Batcher: b,
-		Acts:    []editor.BatchAct{ed.Reading()},
+		Acts:    []editor.BatchAct{ed.Hydration()},
 		Log:     log,
 	}), &logs
 }
 
-// ferries is a second Item awaiting reading.
+// ferries is a second Item awaiting hydration.
 var ferries = collect.Item{
 	SourceID: number10.ID, EntryID: "ferries", Title: "Ferries to the islands",
 	Link: "https://www.gov.uk/ferries", Summary: "Ferries to Scotland's islands will run more often.",
@@ -77,10 +79,10 @@ var ferries = collect.Item{
 	Published: saturday, Attribution: collect.OGL, CollectedAt: saturday,
 }
 
-const ferriesReading = `{"names": [{"at": {"span": 1, "words": "Scotland"}, "kind": "place", "name": "Scotland", "office": ""}],
+const ferriesHydration = `{"names": [{"at": {"span": 1, "words": "Scotland"}, "kind": "place", "name": "Scotland", "office": ""}],
   "refers_to": [], "rejected": [], "speakers": []}`
 
-// withFerries adds the ferries Item to the Record, cut and awaiting reading.
+// withFerries adds the ferries Item to the Record, cut and awaiting hydration.
 func withFerries(t *testing.T, store *sqlite.Store) {
 	t.Helper()
 	if _, err := store.AddItems(t.Context(), []collect.Item{ferries}); err != nil {
@@ -91,21 +93,21 @@ func withFerries(t *testing.T, store *sqlite.Store) {
 	}
 }
 
-// newestReading is the Item's newest reading, if it has been read.
-func newestReading(t *testing.T, store *sqlite.Store, sourceID, entryID string) (editor.Reading, bool) {
+// newestHydration is the Item's newest hydration, if it has one.
+func newestHydration(t *testing.T, store *sqlite.Store, sourceID, entryID string) (editor.Hydration, bool) {
 	t.Helper()
-	r, found, err := store.NewestReading(t.Context(), sourceID, entryID)
+	r, found, err := store.NewestHydration(t.Context(), sourceID, entryID)
 	if err != nil {
 		t.Fatal(err)
 	}
 	return r, found
 }
 
-// byItem answers each request with the reading of the Item it is about.
+// byItem answers each request with the hydration of the Item it is about.
 func byItem(r editor.BatchRequest) editor.BatchResult {
-	out := goodReading
+	out := goodHydration
 	if strings.Contains(r.Request.Input, ferries.Title) {
-		out = ferriesReading
+		out = ferriesHydration
 	}
 	return answering(out)(r)
 }
@@ -115,7 +117,7 @@ func TestABatchsResultsAreMatchedToTheirItemsByIdentifierNotPosition(t *testing.
 	withFerries(t, store)
 	batcher := &fakeBatcher{}
 	b, _ := newBatches(store, batcher)
-	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 	if len(batcher.submitted) != 1 || len(batcher.submitted[0]) != 2 {
@@ -123,14 +125,14 @@ func TestABatchsResultsAreMatchedToTheirItemsByIdentifierNotPosition(t *testing.
 	}
 
 	batcher.end(1, byItem) // answered in the reverse order
-	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 
 	for entry, want := range map[string]int{speech.EntryID: 2, ferries.EntryID: 1} {
-		got, read := newestReading(t, store, number10.ID, entry)
-		if !read || len(got.Names) != want {
-			t.Errorf("%s: read %v, names %+v, want %d", entry, read, got.Names, want)
+		got, hydrated := newestHydration(t, store, number10.ID, entry)
+		if !hydrated || len(got.Names) != want {
+			t.Errorf("%s: hydrated %v, names %+v, want %d", entry, hydrated, got.Names, want)
 		}
 	}
 }
@@ -139,14 +141,14 @@ func TestABatchStillProcessingIsWaitedForAcrossARestartWithoutBlocking(t *testin
 	store := record(t)
 	batcher := &fakeBatcher{}
 	b, _ := newBatches(store, batcher)
-	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 
 	// A restart: a new runner over the same Record, while the batch runs.
 	b, _ = newBatches(store, batcher)
 	withFerries(t, store)
-	if err := b.ReadWaiting(t.Context(), saturday.Add(15*time.Minute)); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday.Add(15*time.Minute)); err != nil {
 		t.Fatal(err)
 	}
 
@@ -156,14 +158,50 @@ func TestABatchStillProcessingIsWaitedForAcrossARestartWithoutBlocking(t *testin
 	}
 
 	batcher.end(1, byItem)
-	if err := b.ReadWaiting(t.Context(), saturday.Add(30*time.Minute)); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday.Add(30*time.Minute)); err != nil {
 		t.Fatal(err)
 	}
-	if _, read := newestReading(t, store, speech.SourceID, speech.EntryID); !read {
-		t.Error("the speech was not read when its batch ended after the restart")
+	if _, hydrated := newestHydration(t, store, speech.SourceID, speech.EntryID); !hydrated {
+		t.Error("the speech was not hydrated when its batch ended after the restart")
 	}
-	if _, read := newestReading(t, store, ferries.SourceID, ferries.EntryID); read {
-		t.Error("the ferries were read before their batch ended")
+	if _, hydrated := newestHydration(t, store, ferries.SourceID, ferries.EntryID); hydrated {
+		t.Error("the ferries were hydrated before their batch ended")
+	}
+}
+
+// A batch submitted before the act was called hydration identifies its
+// request by the act's old name; the Record's migration names the request's
+// act hydration. Its work is in a batch still, so it is not submitted again,
+// and it is hydrated when the batch ends.
+func TestABatchPendingSinceTheActWasCalledReadingIsWaitedForAndApplied(t *testing.T) {
+	store := record(t)
+	key := speech.SourceID + "\n" + speech.EntryID
+	sum := sha256.Sum256([]byte(key))
+	oldID := "reading-" + hex.EncodeToString(sum[:16])
+	if err := store.SaveBatch(t.Context(), editor.PendingBatch{ID: "batch-old", SubmittedAt: saturday,
+		Requests: []editor.PendingRequest{{ID: oldID, Act: "hydration", Key: key}}}); err != nil {
+		t.Fatal(err)
+	}
+	batcher := &fakeBatcher{}
+	b, _ := newBatches(store, batcher)
+
+	if err := b.RunWaiting(t.Context(), saturday.Add(15*time.Minute)); err != nil {
+		t.Fatal(err)
+	}
+	if len(batcher.submitted) != 0 {
+		t.Fatalf("submitted %v, want nothing: the speech is in a batch already", batcher.submitted)
+	}
+
+	batcher.ended = map[string][]editor.BatchResult{"batch-old": {{ID: oldID,
+		Response: editor.Response{Output: json.RawMessage(goodHydration), Model: "fake"}}}}
+	if err := b.RunWaiting(t.Context(), saturday.Add(30*time.Minute)); err != nil {
+		t.Fatal(err)
+	}
+	if _, hydrated := newestHydration(t, store, speech.SourceID, speech.EntryID); !hydrated {
+		t.Error("the speech was not hydrated when its batch ended")
+	}
+	if len(batcher.submitted) != 0 {
+		t.Errorf("submitted %v, want nothing more", batcher.submitted)
 	}
 }
 
@@ -178,7 +216,7 @@ func TestAFailedRequestInABatchIsResubmittedAloneAndTheRestAreApplied(t *testing
 			withFerries(t, store)
 			batcher := &fakeBatcher{}
 			b, logs := newBatches(store, batcher)
-			if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+			if err := b.RunWaiting(t.Context(), saturday); err != nil {
 				t.Fatal(err)
 			}
 
@@ -188,15 +226,15 @@ func TestAFailedRequestInABatchIsResubmittedAloneAndTheRestAreApplied(t *testing
 				}
 				return byItem(r)
 			})
-			if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+			if err := b.RunWaiting(t.Context(), saturday); err != nil {
 				t.Fatal(err)
 			}
 
-			if _, read := newestReading(t, store, speech.SourceID, speech.EntryID); !read {
+			if _, hydrated := newestHydration(t, store, speech.SourceID, speech.EntryID); !hydrated {
 				t.Error("the speech was held up by the ferries' failure")
 			}
-			if got, read := newestReading(t, store, ferries.SourceID, ferries.EntryID); read {
-				t.Errorf("the failed reading was written: %+v", got)
+			if got, hydrated := newestHydration(t, store, ferries.SourceID, ferries.EntryID); hydrated {
+				t.Errorf("the failed hydration was written: %+v", got)
 			}
 			if len(batcher.submitted) != 2 || len(batcher.submitted[1]) != 1 ||
 				!strings.Contains(batcher.submitted[1][0].Request.Input, ferries.Title) {
@@ -206,13 +244,13 @@ func TestAFailedRequestInABatchIsResubmittedAloneAndTheRestAreApplied(t *testing
 				t.Error("the failure was not logged")
 			}
 
-			// The resubmission is read when it ends, and nothing more is sent.
+			// The resubmission is hydrated when it ends, and nothing more is sent.
 			batcher.end(2, byItem)
-			if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+			if err := b.RunWaiting(t.Context(), saturday); err != nil {
 				t.Fatal(err)
 			}
-			if _, read := newestReading(t, store, ferries.SourceID, ferries.EntryID); !read {
-				t.Error("the resubmitted reading was not applied")
+			if _, hydrated := newestHydration(t, store, ferries.SourceID, ferries.EntryID); !hydrated {
+				t.Error("the resubmitted hydration was not applied")
 			}
 			if len(batcher.submitted) != 2 {
 				t.Errorf("%d batches submitted, want 2", len(batcher.submitted))
@@ -236,7 +274,7 @@ func TestABatchNotSubmittedIsLoggedAndSubmittedOnTheNextRun(t *testing.T) {
 	store := record(t)
 	b, logs := newBatches(store, downBatcher{})
 
-	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday); err != nil {
 		t.Fatalf("a failing batch interface stopped the run: %v", err)
 	}
 	if !strings.Contains(logs.String(), "unauthorised") {
@@ -245,7 +283,7 @@ func TestABatchNotSubmittedIsLoggedAndSubmittedOnTheNextRun(t *testing.T) {
 
 	batcher := &fakeBatcher{}
 	b, _ = newBatches(store, batcher)
-	if err := b.ReadWaiting(t.Context(), saturday.Add(15*time.Minute)); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday.Add(15*time.Minute)); err != nil {
 		t.Fatal(err)
 	}
 	if len(batcher.submitted) != 1 {
@@ -253,34 +291,34 @@ func TestABatchNotSubmittedIsLoggedAndSubmittedOnTheNextRun(t *testing.T) {
 	}
 }
 
-func TestTheItemsAwaitingReadingAreSubmittedAsOneBatchAndReadWhenItEnds(t *testing.T) {
+func TestTheItemsAwaitingHydrationAreSubmittedAsOneBatchAndHydratedWhenItEnds(t *testing.T) {
 	store := record(t)
 	batcher := &fakeBatcher{}
 	b, _ := newBatches(store, batcher)
 
-	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 
 	if len(batcher.submitted) != 1 || len(batcher.submitted[0]) != 1 {
 		t.Fatalf("submitted %v, want one batch of one request: only the speech has text to cut", batcher.submitted)
 	}
-	if r := batcher.submitted[0][0].Request; r.Act != "reading" || r.Instructions == "" {
-		t.Errorf("the request is not reading's: %+v", r)
+	if r := batcher.submitted[0][0].Request; r.Act != "hydration" || r.Instructions == "" {
+		t.Errorf("the request is not hydration's: %+v", r)
 	}
-	if _, read := newestReading(t, store, speech.SourceID, speech.EntryID); read {
-		t.Fatal("the speech is read before its batch has ended")
+	if _, hydrated := newestHydration(t, store, speech.SourceID, speech.EntryID); hydrated {
+		t.Fatal("the speech is hydrated before its batch has ended")
 	}
 
-	batcher.end(1, answering(goodReading))
-	if err := b.ReadWaiting(t.Context(), saturday.Add(15*time.Minute)); err != nil {
+	batcher.end(1, answering(goodHydration))
+	if err := b.RunWaiting(t.Context(), saturday.Add(15*time.Minute)); err != nil {
 		t.Fatal(err)
 	}
 
-	if got, read := newestReading(t, store, speech.SourceID, speech.EntryID); !read || len(got.Names) != 2 || !got.At.Equal(saturday.Add(15*time.Minute)) {
-		t.Errorf("the speech's reading is not in the Record: %+v", got)
+	if got, hydrated := newestHydration(t, store, speech.SourceID, speech.EntryID); !hydrated || len(got.Names) != 2 || !got.At.Equal(saturday.Add(15*time.Minute)) {
+		t.Errorf("the speech's hydration is not in the Record: %+v", got)
 	}
 	if len(batcher.submitted) != 1 {
-		t.Errorf("%d batches submitted, want one: nothing more awaits reading", len(batcher.submitted))
+		t.Errorf("%d batches submitted, want one: nothing more awaits hydration", len(batcher.submitted))
 	}
 }

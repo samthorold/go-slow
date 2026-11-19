@@ -33,39 +33,40 @@
 // (storySwitch in switch.go), so KeepStorySwitch moves it back, through
 // CutBefore a day, by keeping another, rewriting none.
 //
-// # Readings and judges
+// # Hydrations and judges
 //
-// A reading (0024_reading_spans.sql, readings.go) is an event of kind
-// reading (readings: its Item, the Cut it was shown, and its Judge, act,
+// A hydration (0024_reading_spans.sql, its tables and act renamed from
+// reading by 0037_hydration.sql; hydrations.go) is an event of kind
+// hydration (hydrations: its Item, the Cut it was shown, and its Judge, act,
 // version, model, request_hash), and each judgement it made an event of its
-// own tied to it by reading_id (kinds refers_to, name, speaker, rejected;
+// own tied to it by hydration_id (kinds refers_to, name, speaker, rejected;
 // tables refers_to, span_names, speakers, rejections), every address byte
-// offsets into the reading's own Item, so KeepReading refuses a judgement
-// addressing another Item and keeps nothing. ItemsToRead is every Item
-// collected after the switch, cut and not yet read by a live judge, with its
-// newest Cut (those collected through it are read only by rejudge);
-// NewestReading the reading of an Item a view reads, with its judgements:
-// the newest live judge's (newestLiveReading in judges.go, the one subquery
-// every view of readings goes through, the Items list's included).
+// offsets into the hydration's own Item, so KeepHydration refuses a judgement
+// addressing another Item and keeps nothing. ItemsToHydrate is every Item
+// collected after the switch, cut and not yet hydrated by a live judge, with its
+// newest Cut (those collected through it are hydrated only by rejudge);
+// NewestHydration the hydration of an Item a view reads, with its judgements:
+// the newest live judge's (newestLiveHydration in judges.go, the one subquery
+// every view of hydrations goes through, the Items list's included).
 //
 // Candidate judges (0026_candidates.sql, judges.go) are events of kind
-// candidate (candidates: act, version, model and the range), each reading a
-// candidate made tied to it in candidate_readings, written with the reading
-// (Reading.Candidate); choosing one is an event of kind choice
-// (candidate_choices), rewriting nothing. A reading is live if no candidate
-// made it or its candidate was chosen, and a chosen candidate's readings
-// count as made at the choice, so the choice outranks every live reading
-// before it and a live reading after it outranks the choice. ItemsIn is the
-// Items cut and published in a range, read or not, for judging again;
-// PastUsage the size and tokens of reading's applied calls that answered a
-// reading, or weaving's that answered a run written, which a run's estimate
+// candidate (candidates: act, version, model and the range), each hydration a
+// candidate made tied to it in candidate_hydrations, written with the hydration
+// (Hydration.Candidate); choosing one is an event of kind choice
+// (candidate_choices), rewriting nothing. A hydration is live if no candidate
+// made it or its candidate was chosen, and a chosen candidate's hydrations
+// count as made at the choice, so the choice outranks every live hydration
+// before it and a live hydration after it outranks the choice. ItemsIn is the
+// Items cut and published in a range, hydrated or not, for judging again;
+// PastUsage the size and tokens of hydration's applied calls that answered a
+// hydration, or weaving's that answered a run written, which a run's estimate
 // scales from.
 //
 // # Look-ups
 //
 // A look-up is an event of kind lookup (lookups); with no match it may make
 // the Editor's own Entity (an entity event, editor_entities), and with a
-// match a merge event (entity_merges). NamesToLookUp is every reading's
+// match a merge event (entity_merges). NamesToLookUp is every hydration's
 // names with no look-up; EntitiesNamed each key's newest look-up.
 //
 // # Weaving
@@ -87,7 +88,7 @@
 //
 // A Story's Name (0035_naming.sql, namings.go) is an event of kind
 // story_name (story_names: the Story, its words and its Judge; kind name is
-// a reading's). StoriesMade and StoryMade give each Story its newest Name and
+// a hydration's). StoriesMade and StoryMade give each Story its newest Name and
 // the applied naming call on the Story's work (keyed by the Story's event)
 // answering its request hash. StoriesToName is every Story made with none,
 // whose naming is not marked failed; FailedWork gives a failed naming its
@@ -101,6 +102,6 @@
 // Source's Items collected in it, touching a Topic when one of their Spans
 // does (storyTouches: an Editor's Span, by its own words, or a Span it
 // cites), and the Spans of its Items collected in it, by their newest live
-// readings. StoriesTouching (touching.go) is a Topic's Page, by the same
+// hydrations. StoriesTouching (touching.go) is a Topic's Page, by the same
 // test.
 package sqlite

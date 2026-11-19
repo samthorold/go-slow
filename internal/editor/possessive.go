@@ -7,7 +7,7 @@ import (
 
 // possessives are the determiners that stand for whose something is.
 // "her" is also an object ("told her"); it is read as possessive, as the
-// readings' stretches seen so far have it.
+// hydrations' stretches seen so far have it.
 var possessives = []string{"its", "their", "his", "her", "our", "my", "your"}
 
 // possessive is whether the stretch words was says whose something is: its

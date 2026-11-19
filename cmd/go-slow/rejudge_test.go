@@ -18,12 +18,12 @@ import (
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
 
-// speechReading is a reading of the speech, cut into its one Span, S1 "It
+// speechHydration is a hydration of the speech, cut into its one Span, S1 "It
 // is good to be in Scotland."
-const speechReading = `{"names": [{"at": {"span": 1, "words": "Scotland"}, "kind": "place", "name": "Scotland", "office": ""}],
+const speechHydration = `{"names": [{"at": {"span": 1, "words": "Scotland"}, "kind": "place", "name": "Scotland", "office": ""}],
 	"refers_to": [], "rejected": [], "speakers": []}`
 
-// reader is a model answering every request with a reading of the speech,
+// reader is a model answering every request with a hydration of the speech,
 // reporting itself as the model it was asked for, and counting its calls.
 type reader struct {
 	model string
@@ -32,7 +32,7 @@ type reader struct {
 
 func (r reader) Complete(context.Context, editor.Request) (editor.Response, error) {
 	*r.calls++
-	return editor.Response{Output: json.RawMessage(speechReading), Model: r.model,
+	return editor.Response{Output: json.RawMessage(speechHydration), Model: r.model,
 		Usage: editor.Usage{InputTokens: 400, OutputTokens: 100}}, nil
 }
 
@@ -54,7 +54,7 @@ func rejudging(t *testing.T, db string, calls *int, args ...string) (string, err
 	return out.String(), err
 }
 
-// viewed is the model of the reading of the speech a view reads, or "" for
+// viewed is the model of the hydration of the speech a view reads, or "" for
 // none.
 func viewed(t *testing.T, db string) string {
 	t.Helper()
@@ -63,7 +63,7 @@ func viewed(t *testing.T, db string) string {
 		t.Fatal(err)
 	}
 	defer func() { _ = store.Close() }()
-	r, found, err := store.NewestReading(t.Context(), "number-10", "speech")
+	r, found, err := store.NewestHydration(t.Context(), "number-10", "speech")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -81,7 +81,7 @@ func TestARejudgingDryRunPricesItsRequestsAndCallsNoModel(t *testing.T) {
 	failedRecord(t, db)
 	var calls int
 
-	out, err := rejudging(t, db, &calls, append([]string{"rejudge", "reading"}, range24...)...)
+	out, err := rejudging(t, db, &calls, append([]string{"rejudge", "hydration"}, range24...)...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -99,12 +99,12 @@ func TestARejudgingDryRunPricesItsRequestsAndCallsNoModel(t *testing.T) {
 		t.Errorf("the dry run printed no estimate in dollars:\n%s", out)
 	}
 	if got := viewed(t, db); got != "" {
-		t.Errorf("the dry run kept a reading by %s", got)
+		t.Errorf("the dry run kept a hydration by %s", got)
 	}
 }
 
 // A Record whose Items were never cut (an app built before Cuts) has
-// nothing to read again until they are: the dry run cuts those in its
+// nothing to hydrate again until they are: the dry run cuts those in its
 // range, as Collection would, and prices them.
 func TestARejudgingDryRunCutsTheItemsInItsRangeNotYetCutAndPricesThem(t *testing.T) {
 	ctx := t.Context()
@@ -132,7 +132,7 @@ func TestARejudgingDryRunCutsTheItemsInItsRangeNotYetCutAndPricesThem(t *testing
 	_ = store.Close()
 	var calls int
 
-	out, err := rejudging(t, db, &calls, append([]string{"rejudge", "reading"}, range24...)...)
+	out, err := rejudging(t, db, &calls, append([]string{"rejudge", "hydration"}, range24...)...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -156,7 +156,7 @@ func TestARejudgingDryRunCutsTheItemsInItsRangeNotYetCutAndPricesThem(t *testing
 		}
 	}
 	if got := viewed(t, db); got != "" {
-		t.Errorf("the dry run kept a reading by %s", got)
+		t.Errorf("the dry run kept a hydration by %s", got)
 	}
 }
 
@@ -165,7 +165,7 @@ func TestARejudgingRunNeedsACap(t *testing.T) {
 	failedRecord(t, db)
 	var calls int
 
-	_, err := rejudging(t, db, &calls, append([]string{"rejudge", "reading", "--confirm"}, range24...)...)
+	_, err := rejudging(t, db, &calls, append([]string{"rejudge", "hydration", "--confirm"}, range24...)...)
 
 	if err == nil || !strings.Contains(err.Error(), "--max-usd") {
 		t.Errorf("err = %v, want a run with no cap refused", err)
@@ -181,7 +181,7 @@ func TestARejudgingRunAsTheLiveJudgeIsWhatViewsRead(t *testing.T) {
 	var calls int
 
 	out, err := rejudging(t, db, &calls,
-		append([]string{"rejudge", "reading", "--confirm", "--max-usd", "1"}, range24...)...)
+		append([]string{"rejudge", "hydration", "--confirm", "--max-usd", "1"}, range24...)...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -193,7 +193,7 @@ func TestARejudgingRunAsTheLiveJudgeIsWhatViewsRead(t *testing.T) {
 		t.Errorf("the run printed no outcome:\n%s", out)
 	}
 	if got := viewed(t, db); got != "claude-haiku-5-5" {
-		t.Errorf("a view reads %q's reading, want the run's", got)
+		t.Errorf("a view reads %q's hydration, want the run's", got)
 	}
 }
 
@@ -202,12 +202,12 @@ func TestACandidateIsComparedWithTheLiveJudgeAndChosenToBeLive(t *testing.T) {
 	failedRecord(t, db)
 	var calls int
 	if _, err := rejudging(t, db, &calls,
-		append([]string{"rejudge", "reading", "--confirm", "--max-usd", "1"}, range24...)...); err != nil {
+		append([]string{"rejudge", "hydration", "--confirm", "--max-usd", "1"}, range24...)...); err != nil {
 		t.Fatal(err)
 	}
 
 	out, err := rejudging(t, db, &calls,
-		append([]string{"rejudge", "reading", "--candidate", "--model", "claude-opus-5-5", "--confirm", "--max-usd", "1"}, range24...)...)
+		append([]string{"rejudge", "hydration", "--candidate", "--model", "claude-opus-5-5", "--confirm", "--max-usd", "1"}, range24...)...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -216,7 +216,7 @@ func TestACandidateIsComparedWithTheLiveJudgeAndChosenToBeLive(t *testing.T) {
 		t.Fatalf("the run named no candidate:\n%s", out)
 	}
 	if got := viewed(t, db); got != "claude-haiku-5-5" {
-		t.Errorf("a view reads %q's reading, want still the live judge's", got)
+		t.Errorf("a view reads %q's hydration, want still the live judge's", got)
 	}
 
 	listed, err := rejudging(t, db, &calls, "rejudge", "candidates")
@@ -230,35 +230,35 @@ func TestACandidateIsComparedWithTheLiveJudgeAndChosenToBeLive(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{"number-10 speech", "live: reading v" + strconv.Itoa(editor.ReadingVersion) + " on claude-haiku-5-5", "names", "live 1", "candidate 1", "both 1"} {
+	for _, want := range []string{"number-10 speech", "live: hydration v" + strconv.Itoa(editor.HydrationVersion) + " on claude-haiku-5-5", "names", "live 1", "candidate 1", "both 1"} {
 		if !strings.Contains(compared, want) {
 			t.Errorf("the comparison printed no %q:\n%s", want, compared)
 		}
 	}
 
 	// The live judge is chosen by its act's configured model, so a candidate
-	// on another model is refused until READING_MODEL names it.
+	// on another model is refused until HYDRATION_MODEL names it.
 	if _, err := rejudging(t, db, &calls, "rejudge", "choose", m[1]); err == nil ||
-		!strings.Contains(err.Error(), "READING_MODEL") {
-		t.Errorf("err = %v, want the choice refused while READING_MODEL names another model", err)
+		!strings.Contains(err.Error(), "HYDRATION_MODEL") {
+		t.Errorf("err = %v, want the choice refused while HYDRATION_MODEL names another model", err)
 	}
 	if got := viewed(t, db); got != "claude-haiku-5-5" {
-		t.Errorf("a view reads %q's reading after a refused choice", got)
+		t.Errorf("a view reads %q's hydration after a refused choice", got)
 	}
 	if _, err := choosingOn(t, db, "claude-opus-5-5", m[1]); err != nil {
 		t.Fatal(err)
 	}
 	if got := viewed(t, db); got != "claude-opus-5-5" {
-		t.Errorf("a view reads %q's reading, want the chosen candidate's", got)
+		t.Errorf("a view reads %q's hydration, want the chosen candidate's", got)
 	}
 }
 
-// choosingOn runs rejudge choose with READING_MODEL set to model.
+// choosingOn runs rejudge choose with HYDRATION_MODEL set to model.
 func choosingOn(t *testing.T, db, model, id string) (string, error) {
 	t.Helper()
 	var out bytes.Buffer
 	lookup := func(k string) (string, bool) {
-		if k == "READING_MODEL" {
+		if k == "HYDRATION_MODEL" {
 			return model, true
 		}
 		return env(db)(k)

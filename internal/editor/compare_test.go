@@ -7,23 +7,23 @@ import (
 	"github.com/samthorold/go-slow/internal/editor"
 )
 
-func TestComparingReadingsCountsEachKindOfJudgementEachMadeAndBothMade(t *testing.T) {
+func TestComparingHydrationsCountsEachKindOfJudgementEachMadeAndBothMade(t *testing.T) {
 	addr := func(start, end int) editor.Address {
 		return editor.Address{SourceID: "s", EntryID: "e", Span: cut.Span{Start: start, End: end}}
 	}
 	derby := editor.Name{At: addr(0, 5), Name: "Derby", Kind: "place"}
-	live := editor.Reading{
+	live := editor.Hydration{
 		Names:    []editor.Name{derby, {At: addr(10, 15), Name: "Leeds", Kind: "place"}},
 		RefersTo: []editor.RefersTo{{From: addr(20, 28), To: addr(0, 5)}},
 		Rejected: []editor.Address{addr(30, 40)},
 	}
-	candidate := editor.Reading{
+	candidate := editor.Hydration{
 		Names:    []editor.Name{derby, {At: addr(10, 15), Name: "Leeds", Kind: "organisation"}},
 		Speakers: []editor.Speaker{{Of: addr(30, 40), By: addr(0, 5)}},
 		Rejected: []editor.Address{addr(30, 40)},
 	}
 
-	got := editor.CompareReadings(live, candidate)
+	got := editor.CompareHydrations(live, candidate)
 
 	want := []editor.KindCompared{
 		{Kind: "names", Live: 2, Candidate: 2, Both: 1},

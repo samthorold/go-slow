@@ -61,10 +61,10 @@ var (
 var instructions = "Read the Item. " + string(make([]byte, 4000))
 
 func call(input string) editor.Call {
-	req := editor.Request{Act: "reading", Instructions: instructions, Input: input,
+	req := editor.Request{Act: "hydration", Instructions: instructions, Input: input,
 		Schema: map[string]any{"type": "object", "required": []string{"facts"}}}
 	return editor.Call{
-		Act: "reading", Key: "s\n" + input, At: time.Date(2026, 10, 24, 7, 0, 0, 0, time.UTC),
+		Act: "hydration", Key: "s\n" + input, At: time.Date(2026, 10, 24, 7, 0, 0, 0, time.UTC),
 		Model: "m", Request: req, RequestHash: editor.RequestHash(req, "m"),
 		Outcome: editor.Failed, Why: "no result for the request",
 	}
@@ -89,7 +89,7 @@ func TestInstructionsAndSchemasSentManyTimesAreKeptOnce(t *testing.T) {
 	if n != 5 {
 		t.Errorf("%d texts kept, want 5: one instructions, one schema, three inputs", n)
 	}
-	got, err := s.CallsOn(t.Context(), "reading", "s\nTitle: 0")
+	got, err := s.CallsOn(t.Context(), "hydration", "s\nTitle: 0")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -107,11 +107,11 @@ func TestARequestsEffortIsKeptWithItsCallAndItsPendingBatch(t *testing.T) {
 	}
 	req := c.Request
 	if err := s.SaveBatch(t.Context(), editor.PendingBatch{ID: "b1", SubmittedAt: c.At,
-		Requests: []editor.PendingRequest{{ID: "r1", Act: "reading", Key: c.Key, Request: &req, Model: "m"}}}); err != nil {
+		Requests: []editor.PendingRequest{{ID: "r1", Act: "hydration", Key: c.Key, Request: &req, Model: "m"}}}); err != nil {
 		t.Fatal(err)
 	}
 
-	kept, err := s.CallsOn(t.Context(), "reading", c.Key)
+	kept, err := s.CallsOn(t.Context(), "hydration", c.Key)
 	if err != nil || len(kept) != 1 || kept[0].Request.Effort != editor.EffortMedium {
 		t.Errorf("kept calls %+v (%v), want one asking for medium effort", kept, err)
 	}
@@ -165,7 +165,7 @@ func TestARequestPendingFromBeforeCallsWereKeptHasNoRequest(t *testing.T) {
 	}
 	for _, q := range []string{
 		`INSERT INTO batches (id, submitted_at) VALUES ('b1', '2026-10-24T07:00:00Z')`,
-		`INSERT INTO batch_requests (batch_id, request_id, act, work_key) VALUES ('b1', 'r1', 'reading', 'k')`,
+		`INSERT INTO batch_requests (batch_id, request_id, act, work_key) VALUES ('b1', 'r1', 'hydration', 'k')`,
 	} {
 		if _, err := db.ExecContext(ctx, q); err != nil {
 			t.Fatal(err)

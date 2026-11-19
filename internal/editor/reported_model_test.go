@@ -31,43 +31,43 @@ func askingFor(store editor.Store, d editor.Deps) *editor.Editor {
 	return editor.New(d)
 }
 
-func TestAReadingKeepsTheModelReportedNotTheOneAskedFor(t *testing.T) {
+func TestAHydrationKeepsTheModelReportedNotTheOneAskedFor(t *testing.T) {
 	store := record(t)
-	ed := askingFor(store, editor.Deps{Model: reporting{&fakeModel{output: goodReading}, "reported-reading"}})
+	ed := askingFor(store, editor.Deps{Model: reporting{&fakeModel{output: goodHydration}, "reported-hydration"}})
 
-	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
+	if err := ed.RunWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 
-	r, found, err := store.NewestReading(t.Context(), speech.SourceID, speech.EntryID)
+	r, found, err := store.NewestHydration(t.Context(), speech.SourceID, speech.EntryID)
 	if err != nil || !found {
-		t.Fatalf("NewestReading: %v %v", found, err)
+		t.Fatalf("NewestHydration: %v %v", found, err)
 	}
-	if r.Judge.Model != "reported-reading" {
-		t.Errorf("read by %q, want the model reported", r.Judge.Model)
+	if r.Judge.Model != "reported-hydration" {
+		t.Errorf("hydrated by %q, want the model reported", r.Judge.Model)
 	}
 }
 
-func TestAReadingFromABatchKeepsTheModelReportedNotTheOneAskedFor(t *testing.T) {
+func TestAHydrationFromABatchKeepsTheModelReportedNotTheOneAskedFor(t *testing.T) {
 	store := record(t)
 	batcher := &fakeBatcher{}
 	b := keepingBatches(store, batcher)
-	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 	batcher.end(1, func(editor.BatchRequest) editor.BatchResult {
-		return editor.BatchResult{Response: answered(goodReading)}
+		return editor.BatchResult{Response: answered(goodHydration)}
 	})
 
-	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 
-	r, found, err := store.NewestReading(t.Context(), speech.SourceID, speech.EntryID)
+	r, found, err := store.NewestHydration(t.Context(), speech.SourceID, speech.EntryID)
 	if err != nil || !found {
-		t.Fatalf("NewestReading: %v %v", found, err)
+		t.Fatalf("NewestHydration: %v %v", found, err)
 	}
 	if r.Judge.Model != "fake-reported" {
-		t.Errorf("read by %q, want the model reported", r.Judge.Model)
+		t.Errorf("hydrated by %q, want the model reported", r.Judge.Model)
 	}
 }

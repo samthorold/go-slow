@@ -14,26 +14,26 @@ import (
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
 
-// readingByTitle answers each reading request with the reading kept for the
+// hydrationByTitle answers each hydration request with the hydration kept for the
 // Item it shows, by title, and one judging nothing for any other.
-type readingByTitle map[string]string
+type hydrationByTitle map[string]string
 
-func (m readingByTitle) Complete(_ context.Context, req editor.Request) (editor.Response, error) {
-	out := goodReadingOfRelease
-	for title, reading := range m {
+func (m hydrationByTitle) Complete(_ context.Context, req editor.Request) (editor.Response, error) {
+	out := goodHydrationOfRelease
+	for title, hydration := range m {
 		if strings.HasPrefix(req.Input, "Title: "+title+"\n") {
-			out = reading
+			out = hydration
 		}
 	}
 	return editor.Response{Output: json.RawMessage(out), Model: "fake"}, nil
 }
 
-// readAt reads every Item awaiting reading in store at at, each Item's
-// reading as readings has it.
-func readAt(t *testing.T, store *sqlite.Store, readings readingByTitle, at time.Time) {
+// hydrateAt hydrates every Item awaiting hydration in store at at, each Item's
+// hydration as hydrations has it.
+func hydrateAt(t *testing.T, store *sqlite.Store, hydrations hydrationByTitle, at time.Time) {
 	t.Helper()
-	ed := editor.New(editor.Deps{Store: store, Model: readings, Log: slog.New(slog.DiscardHandler)})
-	if err := ed.ReadWaiting(t.Context(), at); err != nil {
+	ed := editor.New(editor.Deps{Store: store, Model: hydrations, Log: slog.New(slog.DiscardHandler)})
+	if err := ed.RunWaiting(t.Context(), at); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -54,8 +54,8 @@ func withRelease(t *testing.T, store *sqlite.Store, at time.Time) {
 	}
 }
 
-// releaseHydrated is the release's Story as a run is shown it once read by
-// releaseReading, after the speech's two Spans: its S1, Rejected, left out;
+// releaseHydrated is the release's Story as a run is shown it once hydrated by
+// releaseHydration, after the speech's two Spans: its S1, Rejected, left out;
 // "the city" and "He" read as what they refer to; its S2 and S3 Andy
 // Burnham's words. The Spans keep the numbers they have as written.
 const releaseHydrated = `Story from "GBR headquarters in Derby", published 2026-10-15
@@ -67,7 +67,7 @@ S6: ⟦Andy Burnham⟧ visited the site on Monday.
 func TestARunIsShownAHydratedSpanAsReadLeavingOutARejectedOne(t *testing.T) {
 	store := record(t)
 	withRelease(t, store, saturday)
-	readAt(t, store, readingByTitle{release.Title: releaseReading}, saturday)
+	hydrateAt(t, store, hydrationByTitle{release.Title: releaseHydration}, saturday)
 	batcher := &fakeBatcher{}
 	runAt(t, weavingBatches(store, batcher), saturday)
 
@@ -77,13 +77,13 @@ func TestARunIsShownAHydratedSpanAsReadLeavingOutARejectedOne(t *testing.T) {
 	}
 }
 
-// releaseRead is a Record holding the speech and the release, the release
-// read by releaseReading, and the runner whose Saturday run has been sent.
-func releaseRead(t *testing.T) (*sqlite.Store, *fakeBatcher, *editor.Batches) {
+// releaseHydratedRecord is a Record holding the speech and the release, the release
+// hydrated by releaseHydration, and the runner whose Saturday run has been sent.
+func releaseHydratedRecord(t *testing.T) (*sqlite.Store, *fakeBatcher, *editor.Batches) {
 	t.Helper()
 	store := record(t)
 	withRelease(t, store, saturday)
-	readAt(t, store, readingByTitle{release.Title: releaseReading}, saturday)
+	hydrateAt(t, store, hydrationByTitle{release.Title: releaseHydration}, saturday)
 	batcher := &fakeBatcher{}
 	b := weavingBatches(store, batcher)
 	runAt(t, b, saturday)
@@ -91,7 +91,7 @@ func releaseRead(t *testing.T) (*sqlite.Store, *fakeBatcher, *editor.Batches) {
 }
 
 func TestACitationOfAHydratedSpanHoldsItsAddressAndItsWordsAsWritten(t *testing.T) {
-	store, batcher, b := releaseRead(t)
+	store, batcher, b := releaseHydratedRecord(t)
 	answerLast(batcher, `{"stories": [{"editor_spans": [{"body": "Derby waited.", "cites": [4, 6]}]}]}`)
 	runAt(t, b, saturday.Add(time.Hour))
 
@@ -108,9 +108,9 @@ func TestACitationOfAHydratedSpanHoldsItsAddressAndItsWordsAsWritten(t *testing.
 }
 
 // Nothing waits for hydration: a run is sent showing the release as
-// written, and the release is read before its result arrives. The result is
+// written, and the release is hydrated before its result arrives. The result is
 // applied to what the run was shown, S3 included, though the release's
-// reading has Rejected it since.
+// hydration has Rejected it since.
 func TestAResultIsAppliedToWhatTheRunWasShownWhenASpanIsHydratedAfterItsRequestWent(t *testing.T) {
 	store := record(t)
 	withRelease(t, store, saturday)
@@ -120,7 +120,7 @@ func TestAResultIsAppliedToWhatTheRunWasShownWhenASpanIsHydratedAfterItsRequestW
 	if in := batcher.submitted[0][0].Request.Input; !strings.Contains(in, "S3: Andy Burnham said:\n") {
 		t.Fatalf("the run was not shown the release as written:\n%s", in)
 	}
-	readAt(t, store, readingByTitle{release.Title: releaseReading}, saturday.Add(30*time.Minute))
+	hydrateAt(t, store, hydrationByTitle{release.Title: releaseHydration}, saturday.Add(30*time.Minute))
 	answerLast(batcher, `{"stories": [{"editor_spans": [{"body": "He said so.", "cites": [3, 6]}]}]}`)
 	runAt(t, b, saturday.Add(time.Hour))
 
@@ -138,7 +138,7 @@ func TestAResultIsAppliedToWhatTheRunWasShownWhenASpanIsHydratedAfterItsRequestW
 // The Spans an earlier Editor's Span cites are read hydrated too, and shown
 // whether or not they are Rejected, since the Editor's Span rests on them.
 func TestTheSpansTheEditorsStoriesCiteAreShownHydrated(t *testing.T) {
-	store, batcher, b := releaseRead(t)
+	store, batcher, b := releaseHydratedRecord(t)
 	answerLast(batcher, `{"stories": [{"editor_spans": [{"body": "Derby waited.", "cites": [4, 6]}]}]}`)
 	runAt(t, b, saturday.Add(time.Hour))
 	sunday := saturday.Add(24 * time.Hour)
@@ -168,7 +168,7 @@ func TestAResultIsAppliedWhenASpanTheEditorCitedIsHydratedAfterItsRequestWent(t 
 	sunday := saturday.Add(24 * time.Hour)
 	cutAt(t, store, sunday)
 	runAt(t, b, sunday)
-	readAt(t, store, readingByTitle{release.Title: releaseReading}, sunday.Add(30*time.Minute))
+	hydrateAt(t, store, hydrationByTitle{release.Title: releaseHydration}, sunday.Add(30*time.Minute))
 	answerLast(batcher, `{"stories": [{"editor_spans": [{"body": "Ferries and Derby.", "cites": [2, 4]}]}]}`)
 	runAt(t, b, sunday.Add(time.Hour))
 
@@ -198,7 +198,7 @@ func TestARunIsShownAPossessiveHydratedAsAPossessive(t *testing.T) {
 	if err := cut.New(store).CutNew(t.Context(), at); err != nil {
 		t.Fatal(err)
 	}
-	readAt(t, store, readingByTitle{"Derby station": `{"names": [], "refers_to": [
+	hydrateAt(t, store, hydrationByTitle{"Derby station": `{"names": [], "refers_to": [
 		{"from": {"span": 2, "words": "Its"}, "to": {"span": 1, "words": "Derby"}},
 		{"from": {"span": 3, "words": "their"}, "to": {"span": 3, "words": "Engineers"}}
 	], "rejected": [], "speakers": []}`}, at)
@@ -229,7 +229,7 @@ func TestARunIsShownAPublishersOwnSquareBracketsApartFromHydration(t *testing.T)
 	if err := cut.New(store).CutNew(t.Context(), at); err != nil {
 		t.Fatal(err)
 	}
-	readAt(t, store, readingByTitle{"Warsaw": `{"names": [], "refers_to": [
+	hydrateAt(t, store, hydrationByTitle{"Warsaw": `{"names": [], "refers_to": [
 		{"from": {"span": 2, "words": "She"}, "to": {"span": 1, "words": "The Foreign Secretary"}}
 	], "rejected": [], "speakers": []}`}, at)
 	batcher := &fakeBatcher{}
@@ -242,7 +242,7 @@ func TestARunIsShownAPublishersOwnSquareBracketsApartFromHydration(t *testing.T)
 }
 
 func TestACitationOfARejectedSpanLeftOutIsRefused(t *testing.T) {
-	store, batcher, b := releaseRead(t)
+	store, batcher, b := releaseHydratedRecord(t)
 	answerLast(batcher, `{"stories": [{"editor_spans": [{"body": "Burnham said.", "cites": [3]}]}]}`)
 	runAt(t, b, saturday.Add(time.Hour))
 

@@ -77,7 +77,7 @@ func main() {
 // the Stories a run's result makes are named in the batch submitted on the
 // same turn.
 func batchActs(ed *editor.Editor, weavingAt time.Duration) []editor.BatchAct {
-	return []editor.BatchAct{ed.Reading(), ed.Weaving(weavingAt), ed.Naming()}
+	return []editor.BatchAct{ed.Hydration(), ed.Weaving(weavingAt), ed.Naming()}
 }
 
 func run(log *slog.Logger) error {
@@ -99,18 +99,18 @@ func run(log *slog.Logger) error {
 	if err := store.SyncSources(ctx, sources, time.Now()); err != nil {
 		return err
 	}
-	// The Topics and the lazy-reading check: plain code, no model adapter.
+	// The Topics: plain code, no model adapter.
 	topics := interest.New(store)
 	// The Editor, each act on the model the config names for it. One
 	// adapter serves every act, sending each act's requests to its model.
 	models := claude.New(claude.Options{
 		APIKey: string(cfg.AnthropicAPIKey),
-		Model:  cfg.ReadingModel,
+		Model:  cfg.HydrationModel,
 		ActModels: map[string]string{
-			"reading": cfg.ReadingModel, "weaving": cfg.WeavingModel, "naming": cfg.NamingModel,
+			"hydration": cfg.HydrationModel, "weaving": cfg.WeavingModel, "naming": cfg.NamingModel,
 		},
 	})
-	// What the readings name is looked up in Wikidata, politely, as go-slow.
+	// What the hydrations name is looked up in Wikidata, politely, as go-slow.
 	wd := wikidata.New(wikidata.Options{
 		HTTP:      &http.Client{Timeout: fetchTimeout},
 		Endpoint:  wikidata.Endpoint,
@@ -143,9 +143,9 @@ func run(log *slog.Logger) error {
 		Store: store,
 		// Cutting is plain code: the start's run cuts the Items already in
 		// the Record, and every run those it collects.
-		Cut:  cut.New(store),
-		Read: batches,
-		// What the readings name is looked up in Wikidata after each run,
+		Cut:      cut.New(store),
+		Commands: batches,
+		// What the hydrations name is looked up in Wikidata after each run,
 		// in plain code, once per name.
 		LookUp: editor.NewLookups(editor.LookupDeps{Store: store, Wikidata: wd, Log: log}),
 		Log:    log,
@@ -164,15 +164,15 @@ func run(log *slog.Logger) error {
 	defer func() { stopCollecting(); <-collected }()
 
 	app := web.New(web.Deps{
-		Items:    store,
-		Readings: store,
-		Cuts:     store,
-		Topics:   topics,
-		Calls:    store,
-		Stories:  store,
-		Sources:  sources,
-		Now:      time.Now,
-		Log:      log,
+		Items:      store,
+		Hydrations: store,
+		Cuts:       store,
+		Topics:     topics,
+		Calls:      store,
+		Stories:    store,
+		Sources:    sources,
+		Now:        time.Now,
+		Log:        log,
 	})
 
 	ln, err := new(net.ListenConfig).Listen(ctx, "tcp", ":"+strconv.Itoa(cfg.Port))

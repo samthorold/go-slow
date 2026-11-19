@@ -11,9 +11,9 @@ import (
 // A request as an act builds it, and the same act with its instructions
 // changed: what a change to the act's code sends instead.
 var (
-	asRecorded = editor.Request{Act: "reading", Instructions: "Read the Item.", Input: "Item: one",
+	asRecorded = editor.Request{Act: "hydration", Instructions: "Read the Item.", Input: "Item: one",
 		Schema: map[string]any{"type": "object"}}
-	changed = editor.Request{Act: "reading", Instructions: "Read the Item closely.", Input: "Item: one",
+	changed = editor.Request{Act: "hydration", Instructions: "Read the Item closely.", Input: "Item: one",
 		Schema: map[string]any{"type": "object"}}
 )
 
@@ -43,7 +43,7 @@ func replayOf(t *testing.T, rec recording, model string) (*sampleModel, *[]error
 	path := samplePath(t.TempDir(), "one", 1)
 	keepSample(t, path, []recording{rec})
 	var reported []error
-	return replayingSample(t, path, model, readingCommand, func(err error) { reported = append(reported, err) }), &reported
+	return replayingSample(t, path, model, hydrationCommand, func(err error) { reported = append(reported, err) }), &reported
 }
 
 func TestAReplayAnswersTheRequestItWasRecordedFor(t *testing.T) {
@@ -73,7 +73,7 @@ func TestAReplayFailsAsStaleWhenTheActsRequestHasChanged(t *testing.T) {
 			if err == nil {
 				t.Fatal("a stale recording replayed")
 			}
-			for _, want := range []string{"one", "stale: re-record with", "go test -count=1 ./internal/editor -run TestRecordedReadings -record", "READING_MODEL"} {
+			for _, want := range []string{"one", "stale: re-record with", "go test -count=1 ./internal/editor -run TestRecordedHydration -record", "HYDRATION_MODEL"} {
 				if !strings.Contains(err.Error(), want) {
 					t.Errorf("error %q does not say %q", err, want)
 				}
@@ -99,8 +99,8 @@ func TestAReplayOfARecordingWithNoHashFailsAsStale(t *testing.T) {
 // The model a replay hashes with is the one the act is pinned to, so
 // changing a pin makes its recordings stale, as .env.example says.
 func TestTheModelAReplayHashesWithIsTheActsPin(t *testing.T) {
-	if got := pinnedModel(t, "READING_MODEL"); got != "claude-haiku-5-5" {
-		t.Errorf("READING_MODEL is pinned to %q, want claude-haiku-5-5", got)
+	if got := pinnedModel(t, "HYDRATION_MODEL"); got != "claude-haiku-5-5" {
+		t.Errorf("HYDRATION_MODEL is pinned to %q, want claude-haiku-5-5", got)
 	}
 	if got := pinnedModel(t, "WEAVING_MODEL"); got != "claude-opus-5-5" {
 		t.Errorf("WEAVING_MODEL is pinned to %q, want claude-opus-5-5", got)

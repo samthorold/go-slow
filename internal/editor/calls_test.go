@@ -17,20 +17,20 @@ import (
 // modelFor names the model each act asks for, as the adapter's config does.
 func modelFor(act string) string { return "fake-" + act }
 
-// keepingBatches is the batch runner over reading, keeping every call.
+// keepingBatches is the batch runner over hydration, keeping every call.
 func keepingBatches(store *sqlite.Store, b editor.Batcher) *editor.Batches {
 	log := slog.New(slog.NewTextHandler(&bytes.Buffer{}, nil))
 	ed := editor.New(editor.Deps{Store: store, ModelFor: modelFor, Log: log})
 	return editor.NewBatches(editor.BatchDeps{
 		Store:    store,
 		Batcher:  b,
-		Acts:     []editor.BatchAct{ed.Reading()},
+		Acts:     []editor.BatchAct{ed.Hydration()},
 		ModelFor: modelFor,
 		Log:      log,
 	})
 }
 
-// speechKey is the reading work key of the speech.
+// speechKey is the hydration work key of the speech.
 var speechKey = speech.SourceID + "\n" + speech.EntryID
 
 // answered is a provider's answer as the adapter reports it, with its raw
@@ -45,22 +45,22 @@ func answered(output string) editor.Response {
 	}
 }
 
-func TestAReadingAppliedFromABatchLeavesAKeptCall(t *testing.T) {
+func TestAHydrationAppliedFromABatchLeavesAKeptCall(t *testing.T) {
 	store := record(t)
 	batcher := &fakeBatcher{}
 	b := keepingBatches(store, batcher)
-	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 	sent := batcher.submitted[0][0].Request
 	batcher.end(1, func(editor.BatchRequest) editor.BatchResult {
-		return editor.BatchResult{Response: answered(goodReading)}
+		return editor.BatchResult{Response: answered(goodHydration)}
 	})
-	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 
-	calls, err := store.CallsOn(t.Context(), "reading", speechKey)
+	calls, err := store.CallsOn(t.Context(), "hydration", speechKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -68,7 +68,7 @@ func TestAReadingAppliedFromABatchLeavesAKeptCall(t *testing.T) {
 		t.Fatalf("kept %d calls, want 1: %+v", len(calls), calls)
 	}
 	c := calls[0]
-	if c.Act != "reading" || c.Key != speechKey || !c.At.Equal(saturday) || c.BatchID != "batch-1" {
+	if c.Act != "hydration" || c.Key != speechKey || !c.At.Equal(saturday) || c.BatchID != "batch-1" {
 		t.Errorf("call is for %s %q at %v in %q", c.Act, c.Key, c.At, c.BatchID)
 	}
 	if c.Request.Instructions != sent.Instructions || c.Request.Input != sent.Input {
@@ -77,17 +77,17 @@ func TestAReadingAppliedFromABatchLeavesAKeptCall(t *testing.T) {
 	if s, _ := json.Marshal(c.Request.Schema); string(s) != mustJSON(t, sent.Schema) {
 		t.Errorf("schema kept %s, sent %s", s, mustJSON(t, sent.Schema))
 	}
-	if c.Model != "fake-reading" {
-		t.Errorf("model asked for %q, want fake-reading", c.Model)
+	if c.Model != "fake-hydration" {
+		t.Errorf("model asked for %q, want fake-hydration", c.Model)
 	}
-	if c.RequestHash != editor.RequestHash(sent, "fake-reading") {
+	if c.RequestHash != editor.RequestHash(sent, "fake-hydration") {
 		t.Errorf("request hash %q, want the request's own", c.RequestHash)
 	}
 	if c.Response == nil {
 		t.Fatal("kept with no response")
 	}
-	want := answered(goodReading)
-	if string(c.Response.Raw) != string(want.Raw) || string(c.Response.Output) != goodReading ||
+	want := answered(goodHydration)
+	if string(c.Response.Raw) != string(want.Raw) || string(c.Response.Output) != goodHydration ||
 		c.Response.Model != "fake-reported" || c.Response.StopReason != "end_turn" || c.Response.Usage != want.Usage {
 		t.Errorf("response kept %+v", c.Response)
 	}
@@ -96,22 +96,22 @@ func TestAReadingAppliedFromABatchLeavesAKeptCall(t *testing.T) {
 	}
 }
 
-func TestAReadingRefusedByItsChecksInABatchIsKeptWithItsReason(t *testing.T) {
+func TestAHydrationRefusedByItsChecksInABatchIsKeptWithItsReason(t *testing.T) {
 	store := record(t)
 	batcher := &fakeBatcher{}
 	b := keepingBatches(store, batcher)
-	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
-	bad := refusedReading
+	bad := refusedHydration
 	batcher.end(1, func(editor.BatchRequest) editor.BatchResult {
 		return editor.BatchResult{Response: answered(bad)}
 	})
-	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 
-	calls, err := store.CallsOn(t.Context(), "reading", speechKey)
+	calls, err := store.CallsOn(t.Context(), "hydration", speechKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -131,15 +131,15 @@ func TestABatchRequestWithNoResultIsKeptWithNoResponse(t *testing.T) {
 	store := record(t)
 	batcher := &fakeBatcher{}
 	b := keepingBatches(store, batcher)
-	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 	batcher.ended = map[string][]editor.BatchResult{"batch-1": nil}
-	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 
-	calls, err := store.CallsOn(t.Context(), "reading", speechKey)
+	calls, err := store.CallsOn(t.Context(), "hydration", speechKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -155,7 +155,7 @@ func TestABatchCallKeepsTheRequestAsSentNotAsTheWorkStandsWhenItEnds(t *testing.
 	store := record(t)
 	batcher := &fakeBatcher{}
 	b := keepingBatches(store, batcher)
-	if err := b.ReadWaiting(t.Context(), saturday); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 	sent := batcher.submitted[0][0].Request
@@ -168,20 +168,20 @@ func TestABatchCallKeepsTheRequestAsSentNotAsTheWorkStandsWhenItEnds(t *testing.
 		t.Fatal(err)
 	}
 	batcher.end(1, func(editor.BatchRequest) editor.BatchResult {
-		return editor.BatchResult{Response: answered(goodReading)}
+		return editor.BatchResult{Response: answered(goodHydration)}
 	})
-	if err := b.ReadWaiting(t.Context(), saturday.Add(time.Hour)); err != nil {
+	if err := b.RunWaiting(t.Context(), saturday.Add(time.Hour)); err != nil {
 		t.Fatal(err)
 	}
 
 	c := onlyCall(t, store)
-	if c.Request.Input != sent.Input || c.RequestHash != editor.RequestHash(sent, "fake-reading") {
+	if c.Request.Input != sent.Input || c.RequestHash != editor.RequestHash(sent, "fake-hydration") {
 		t.Errorf("kept input\n%s\nwant as sent\n%s", c.Request.Input, sent.Input)
 	}
 }
 
 func TestARequestsHashCoversItsInstructionsSchemaInputAndModel(t *testing.T) {
-	req := editor.Request{Act: "reading", Instructions: "Read.", Input: "Title: x",
+	req := editor.Request{Act: "hydration", Instructions: "Read.", Input: "Title: x",
 		Schema: map[string]any{"type": "object", "properties": map[string]any{"b": 1, "a": 2}}}
 	h := editor.RequestHash(req, "m")
 	same := req
@@ -219,22 +219,22 @@ func (m *answeringModel) Complete(_ context.Context, r editor.Request) (editor.R
 	return m.res, m.err
 }
 
-// readInRealTime reads the Items awaiting reading on the synchronous path.
-func readInRealTime(t *testing.T, store *sqlite.Store, m editor.Model) {
+// hydrateInRealTime hydrates the Items awaiting hydration on the synchronous path.
+func hydrateInRealTime(t *testing.T, store *sqlite.Store, m editor.Model) {
 	t.Helper()
 	ed := editor.New(editor.Deps{
 		Store: store, Model: m, ModelFor: modelFor,
 		Log: slog.New(slog.DiscardHandler),
 	})
-	if err := ed.ReadWaiting(t.Context(), saturday); err != nil {
+	if err := ed.RunWaiting(t.Context(), saturday); err != nil {
 		t.Fatal(err)
 	}
 }
 
-// onlyCall is the one call kept on reading the speech.
+// onlyCall is the one call kept on hydrating the speech.
 func onlyCall(t *testing.T, store *sqlite.Store) editor.Call {
 	t.Helper()
-	calls, err := store.CallsOn(t.Context(), "reading", speechKey)
+	calls, err := store.CallsOn(t.Context(), "hydration", speechKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -244,17 +244,17 @@ func onlyCall(t *testing.T, store *sqlite.Store) editor.Call {
 	return calls[0]
 }
 
-func TestAReadingInRealTimeLeavesAKeptCall(t *testing.T) {
+func TestAHydrationInRealTimeLeavesAKeptCall(t *testing.T) {
 	store := record(t)
-	m := &answeringModel{res: answered(goodReading)}
+	m := &answeringModel{res: answered(goodHydration)}
 
-	readInRealTime(t, store, m)
+	hydrateInRealTime(t, store, m)
 
 	c := onlyCall(t, store)
-	if c.BatchID != "" || c.Model != "fake-reading" || !c.At.Equal(saturday) {
+	if c.BatchID != "" || c.Model != "fake-hydration" || !c.At.Equal(saturday) {
 		t.Errorf("call in %q on %q at %v", c.BatchID, c.Model, c.At)
 	}
-	if c.Request.Input != m.sent[0].Input || c.RequestHash != editor.RequestHash(m.sent[0], "fake-reading") {
+	if c.Request.Input != m.sent[0].Input || c.RequestHash != editor.RequestHash(m.sent[0], "fake-hydration") {
 		t.Errorf("request kept is not the request sent")
 	}
 	if c.Response == nil || c.Response.Model != "fake-reported" || c.Response.Usage.InputTokens != 1200 ||
@@ -266,10 +266,10 @@ func TestAReadingInRealTimeLeavesAKeptCall(t *testing.T) {
 	}
 }
 
-func TestAReadingInRealTimeRefusedByItsChecksIsKeptWithItsReason(t *testing.T) {
+func TestAHydrationInRealTimeRefusedByItsChecksIsKeptWithItsReason(t *testing.T) {
 	store := record(t)
 
-	readInRealTime(t, store, &answeringModel{res: answered(`{"facts": [], "claims": [], "extra": 1}`)})
+	hydrateInRealTime(t, store, &answeringModel{res: answered(`{"facts": [], "claims": [], "extra": 1}`)})
 
 	if c := onlyCall(t, store); c.Outcome != editor.Refused || !strings.Contains(c.Why, "schema") || c.Response == nil {
 		t.Errorf("kept %+v, want refused with why", c)
@@ -281,7 +281,7 @@ func TestAModelsRefusalInRealTimeIsKeptWithWhatCameBack(t *testing.T) {
 	refusal := answered("")
 	refusal.Output, refusal.StopReason = nil, "refusal"
 
-	readInRealTime(t, store, &answeringModel{res: refusal, err: editor.ErrRefused})
+	hydrateInRealTime(t, store, &answeringModel{res: refusal, err: editor.ErrRefused})
 
 	c := onlyCall(t, store)
 	if c.Outcome != editor.Failed || !strings.Contains(c.Why, "refused") {

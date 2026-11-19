@@ -19,14 +19,14 @@ type spanLink struct {
 }
 
 // spanPage is the view model for a Span's page: the Span as its Item's
-// newest reading reads it, its Item, and the Stories holding it.
+// newest hydration reads it, its Item, and the Stories holding it.
 type spanPage struct {
 	Span spanRow
 	Item itemCitation
 	// Published is when its Item was published.
 	Published string
-	// ReadBy is the call of its Item's newest reading, if it has one.
-	ReadBy *made
+	// HydratedBy is the call of its Item's newest hydration, if it has one.
+	HydratedBy *made
 	// Stories are the Stories holding it, and Citing the Editor's Spans
 	// citing it (system design: The Owner reads Stories).
 	Stories []storyLink
@@ -63,7 +63,7 @@ func (a *app) span(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	it, found, err := a.Readings.KeptItem(ctx, sourceID, entryID)
+	it, found, err := a.Hydrations.KeptItem(ctx, sourceID, entryID)
 	if err != nil {
 		a.serverError(w, r, err)
 		return
@@ -88,8 +88,8 @@ func (a *app) span(w http.ResponseWriter, r *http.Request) {
 		Item:      a.cite(sourceID, it.Title, itemPath(sourceID, entryID)),
 		Published: when(it.Published, a.Now().Location()),
 	}
-	if j.read {
-		p.ReadBy = &made{Act: "read", Call: j.reading.Call}
+	if j.hydrated {
+		p.HydratedBy = &made{Act: "hydrated", Call: j.hydration.Call}
 	}
 	if p.Stories, p.Citing, err = a.holding(ctx, at); err != nil {
 		a.serverError(w, r, err)

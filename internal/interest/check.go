@@ -34,7 +34,7 @@ func (t Topic) matches(text string) bool {
 // none of the work): the Stories the Editor made that it contributes to
 // (those holding a Span of one of its Items collected in the window), as
 // many as touch a Topic (one of their Spans does) and as many as don't, and
-// the Spans of its Items collected in it, as their newest readings read
+// the Spans of its Items collected in it, as their newest hydrations read
 // them, and how many of those are Rejected. It counts and selects nothing.
 type SourceCounts struct {
 	SourceID            string

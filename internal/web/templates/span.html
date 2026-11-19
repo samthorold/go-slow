@@ -1,7 +1,7 @@
 {{define "title"}}{{.Title}}{{end}}
 
 {{define "content"}}
-{{/* A Span's page: the Span as its Item's newest reading reads it, its
+{{/* A Span's page: the Span as its Item's newest hydration reads it, its
      Item, and the Stories holding it. Collected text is inert: hx-disable
      on the elements holding it. */}}
 <p>{{template "citation" .Item}}{{with .Published}} <small>{{.}}</small>{{end}}</p>
@@ -18,7 +18,7 @@
       <p class="quiet">rejected</p>
       {{- end}}
       {{- template "span-judged" .}}
-      {{- with $.ReadBy}}
+      {{- with $.HydratedBy}}
       <p>{{template "made" .}}</p>
       {{- end}}
     </div>

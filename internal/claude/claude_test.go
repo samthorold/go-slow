@@ -46,7 +46,7 @@ func apiReporting(t *testing.T, reported, stopReason, text string) (*claude.Mode
 }
 
 var request = editor.Request{
-	Act:          "reading",
+	Act:          "hydration",
 	Instructions: "Read the Item.",
 	Input:        "Title: PM speech in Scotland",
 	Schema:       map[string]any{"type": "object", "additionalProperties": false},
@@ -94,8 +94,8 @@ func TestACallLeavesRoomForTheModelsThinkingBesideItsAnswer(t *testing.T) {
 	}
 
 	// Claude Haiku 5.5 thinks unless told not to, and its thinking counts
-	// against max_tokens: reading the Commons statement, 5,697 of 9,445
-	// output tokens were thinking, and readings of it reached 14,793 of the
+	// against max_tokens: hydrating the Commons statement, 5,697 of 9,445
+	// output tokens were thinking, and hydrations of it reached 14,793 of the
 	// 16,000 the limit was (issue #90). The thinking is left as the model's
 	// own, so the request is the one the recordings answered.
 	body := *got
@@ -123,8 +123,8 @@ func TestAResponseKeepsTheModelTheAPIReportsNotTheOneAskedFor(t *testing.T) {
 func TestTheModelTheAdapterRunsEachActOnIsNamed(t *testing.T) {
 	m := claude.New(claude.Options{APIKey: "k", Model: "claude-haiku-5-5", ActModels: map[string]string{"placing": "claude-sonnet-5"}})
 
-	if m.ModelFor("reading") != "claude-haiku-5-5" || m.ModelFor("placing") != "claude-sonnet-5" {
-		t.Errorf("reading on %q, placing on %q", m.ModelFor("reading"), m.ModelFor("placing"))
+	if m.ModelFor("hydration") != "claude-haiku-5-5" || m.ModelFor("placing") != "claude-sonnet-5" {
+		t.Errorf("hydration on %q, placing on %q", m.ModelFor("hydration"), m.ModelFor("placing"))
 	}
 }
 

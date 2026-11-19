@@ -17,7 +17,7 @@ type Call struct {
 	// ID is the call's in the Record, once it is kept there.
 	ID int64
 	// Act is the act that made the call, and Key the piece of work it was
-	// for, as the act keys it (an Item, for reading).
+	// for, as the act keys it (an Item, for hydration).
 	Act, Key string
 	// At is when its outcome was known.
 	At time.Time

@@ -52,7 +52,7 @@ func (a *app) cite(sourceID, title, href string) itemCitation {
 // made is how a block was made, shown in its margin as a machine label: the
 // act and the call it made, worded "<act> · call N" on every page.
 type made struct {
-	// Act is the act, as the label words it ("read").
+	// Act is the act, as the label words it ("hydrated").
 	Act string
 	// Call is the kept call, or 0 if none was kept.
 	Call int64

@@ -8,6 +8,11 @@
 // PricesAsOf, with PricesSource) stay inside it too, used only by the
 // estimates of the rejudge and weave commands; read them again when a model changes or before
 // a run whose cap matters. A test fails if a model in .env.example has none.
+//
+// Every call has the SDK's retries but one: creating a Message Batch is made
+// once (Submit says why), since it is not idempotent and a retried create can
+// submit a second, paid batch. Polling a batch, reading its results and the
+// real-time calls are safe to repeat, and keep them.
 package claude
 
 import (
@@ -33,7 +38,8 @@ import (
 // a quarter of the model's own ceiling, so a call stays well inside timeout.
 const maxTokens = 32000
 
-// timeout bounds one call, retries included.
+// timeout bounds each attempt of a call; a call the SDK retries can take up
+// to its attempts times this, plus the backoff between them.
 const timeout = 5 * time.Minute
 
 // Options configure the adapter. main passes them from the config.

@@ -157,7 +157,7 @@ func fixture(t *testing.T, path string) (editor.Item, string) {
 // Cut the sentence cutter makes of its text.
 func fixtureToRead(it editor.Item) editor.ToRead {
 	return editor.ToRead{Item: it, Cut: cut.Cut{ID: 1, SourceID: it.SourceID, EntryID: it.EntryID,
-		Judge: cut.SentenceCutter, Spans: cut.Sentences(it.Content)}}
+		By: cut.SentenceCutter, Spans: cut.Sentences(it.Content)}}
 }
 
 func TestRecordedReadings(t *testing.T) {

@@ -229,8 +229,8 @@ func TestACollectionRunCutsTheItemsItCollectsIntoSpans(t *testing.T) {
 	if err != nil || !found {
 		t.Fatalf("the collected Item has no Cut (%v)", err)
 	}
-	if c.Judge != cut.SentenceCutter || len(c.Spans) != 2 || cut.Words(text, c.Spans[1]) != "It funds the NHS." {
-		t.Errorf("Cut by %+v into %v of %q", c.Judge, c.Spans, text)
+	if c.By != cut.SentenceCutter || len(c.Spans) != 2 || cut.Words(text, c.Spans[1]) != "It funds the NHS." {
+		t.Errorf("Cut by %+v into %v of %q", c.By, c.Spans, text)
 	}
 }
 

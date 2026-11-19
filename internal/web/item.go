@@ -58,7 +58,7 @@ type spanRow struct {
 // them.
 type itemPage struct {
 	// Spans are the Spans of the Item's newest Cut, in order; none if it
-	// has none yet. CutBy is the Cut's Judge, as a machine label.
+	// has none yet. CutBy is what made the Cut, as a machine label.
 	Spans []spanRow
 	CutBy string
 	// Story is the Page of the Story its newest Cut made, the one way to it.
@@ -134,7 +134,7 @@ func (a *app) item(w http.ResponseWriter, r *http.Request) {
 		p.ReadBy = &made{Act: "read", Call: j.reading.Call}
 	}
 	if cutYet {
-		p.CutBy = fmt.Sprintf("cut · %s v%d", c.Judge.Cutter, c.Judge.Version)
+		p.CutBy = fmt.Sprintf("cut · %s v%d", c.By.Cutter, c.By.Version)
 		p.Story = storyPath(c.ID)
 		for i, s := range c.Spans {
 			at := editor.Address{SourceID: sourceID, EntryID: entryID, Span: s}

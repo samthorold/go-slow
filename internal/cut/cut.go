@@ -2,7 +2,7 @@
 // judged of them, in plain code (system design: The grain belongs to the
 // judgement, not to the Span). A Cut is an event, not a Judgement: plain code
 // that no model call replaces, kept with its cutter and the cutter's version
-// (the type Judge) and never changed (system design: The Cut is the boundary,
+// (the type MadeBy) and never changed (system design: The Cut is the boundary,
 // not a Command); a Span is an address into the Item's text as kept, not a
 // thing with an identity of its own.
 //

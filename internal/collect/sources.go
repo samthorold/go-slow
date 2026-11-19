@@ -195,6 +195,44 @@ func Sources() []Source {
 			UsualGap: 30 * 24 * time.Hour,
 		},
 		{
+			// Testimony of Federal Reserve officials to Congress: the
+			// Chair's semiannual Monetary Policy Report, the Vice Chair for
+			// Supervision's reports, and the Board's other appearances
+			// before committees, as submitted. Its own Source beside the
+			// speeches, not a switch of their feed to the combined one: the
+			// Owner's choice (2026-11-19, #341), so each kind of statement
+			// keeps its own feed, terms and usual gap.
+			ID:        "fed-testimony",
+			Name:      "Federal Reserve Board: testimony",
+			ShortName: "Federal Reserve",
+			// The Board's testimony-only feed ("FRB: Testimony", listed on
+			// its feeds page beside speeches.xml and the combined
+			// speeches_and_testimony.xml). Reading it rather than the
+			// combined feed means no speech is collected twice.
+			FeedURL: "https://www.federalreserve.gov/feeds/testimony.xml",
+			Format:  RSS,
+			// Its items carry only the committee testified before; the
+			// text is on each testimony's page, shaped as a speech's is
+			// (checked 2026-11-19 on warsh20260714a.htm).
+			Text:        TextFromPage,
+			PageBody:    fedArticle,
+			Licence:     FedDisclaimer,
+			Attribution: FedCitation,
+			Keeps:       KeepFullText,
+			// A few appearances a year, bunched around the semiannual
+			// reports (February or March, and June or July). The feed's
+			// fifteen items on 2026-11-19 (from November 2023) went at most
+			// 161 days without one (24 June to 2 December 2025), and 128
+			// had passed since the last (14 July 2026). A hundred and
+			// eighty days keeps such a lull from showing it quiet. Some of
+			// its items are dated 30 December 1899 (an empty date in the
+			// Board's system); the gaps were read from the dates in their
+			// links.
+			UsualGap: 180 * 24 * time.Hour,
+			// It sends an ETag and a Last-Modified (2026-11-19), as the
+			// Board's other feeds do.
+		},
+		{
 			// Written ministerial statements to both Houses: government
 			// announcements made to Parliament, as made. Read through the
 			// Written Questions Service API, never the main site.

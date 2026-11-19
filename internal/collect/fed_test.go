@@ -93,6 +93,54 @@ func TestTheFedsSpeechesAreCollectedWithTheirPagesArticleBody(t *testing.T) {
 	}
 }
 
+const fedTestimony = "/newsevents/testimony/warsh20260714a.htm"
+
+func TestTheFedsTestimonyIsCollectedWithItsPagesArticleBody(t *testing.T) {
+	_, src, base := fedAt(t, "fed-testimony", "fed-testimony.rss",
+		map[string]string{fedTestimony: "fed-warsh20260714a.htm"})
+	c, store := collectorFor(t, src)
+
+	c.Run(t.Context(), now)
+
+	it, ok, err := store.KeptItem(t.Context(), src.ID, base+fedTestimony)
+	if err != nil || !ok {
+		t.Fatalf("testimony not kept: %v %v", ok, err)
+	}
+	// The body opens with the Board's note that the same remarks went to
+	// the Senate, which is part of the testimony as published.
+	if !strings.HasPrefix(it.Content, "<p><em><strong>Chairman Warsh submitted identical remarks") {
+		t.Errorf("testimony kept without its article body as its text: %.200q", it.Content)
+	}
+	if !strings.Contains(it.Content, "<p>Thank you, and I welcome your questions.</p>") {
+		t.Errorf("testimony kept without the whole of its article body: %q", it.Content)
+	}
+	// Nor the heading, nor the related content panel beside the body.
+	for _, chrome := range []string{"Watch Live", "Chairman Kevin Warsh</a>", "Hearing Transcripts", "Last Update"} {
+		if strings.Contains(it.Content, chrome) {
+			t.Errorf("testimony's text carries the page's %q: %q", chrome, it.Content)
+		}
+	}
+	if it.Attribution != collect.FedCitation {
+		t.Errorf("testimony attributed %q, want the Board's citation", it.Attribution)
+	}
+}
+
+// The Fed publishes speeches and testimony in separate feeds, and a
+// combined one. Each of its Sources reads its own, never the combined feed,
+// so no speech is collected by both.
+func TestNoTwoListedSourcesReadTheSameFeedAndNoneTheFedsCombinedOne(t *testing.T) {
+	seen := map[string]string{}
+	for _, s := range collect.Sources() {
+		if other, ok := seen[s.FeedURL]; ok {
+			t.Errorf("%s and %s both read %s", other, s.ID, s.FeedURL)
+		}
+		seen[s.FeedURL] = s.ID
+		if strings.HasSuffix(s.FeedURL, "/feeds/speeches_and_testimony.xml") {
+			t.Errorf("%s reads the Fed's combined feed, which carries the speeches Source's entries too", s.ID)
+		}
+	}
+}
+
 // A page whose shape has changed has no article body to find: its fetch has
 // failed, and the entry is left out, to be collected once it has one.
 func TestAPageWithNoArticleBodyIsAFailedFetchAndSeenAgainNextRun(t *testing.T) {

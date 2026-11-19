@@ -101,6 +101,29 @@ func TestTheStylesheetCarriesTheBodyAndMarginLayoutAndItsVocabulary(t *testing.T
 	}
 }
 
+// A pill fits its margin: no wider than the column, and free to wrap inside
+// itself, so a person named by a long office doesn't run past the page's edge
+// (#268). How it looks is judged in a browser.
+func TestTheStylesheetFitsAPillToItsMargin(t *testing.T) {
+	app := newApp(t, saturday)
+	link := stylesheetLink.FindStringSubmatch(get(t, app, "/stories").body)
+	if link == nil {
+		t.Fatal("the Stories page links no stylesheet")
+	}
+	css := get(t, app, link[1]).body
+
+	rule := regexp.MustCompile(`(?m)^\.pill\s*\{[^}]*\}`).FindString(css)
+	if rule == "" {
+		t.Fatalf("%s has no rule for the pill", link[1])
+	}
+	if !regexp.MustCompile(`max-width:\s*100%`).MatchString(rule) {
+		t.Errorf("the pill is not held to its margin's width:\n%s", rule)
+	}
+	if strings.Contains(rule, "nowrap") {
+		t.Errorf("the pill cannot wrap inside itself:\n%s", rule)
+	}
+}
+
 func TestEveryPageLinksTheStylesheetServedAsCSS(t *testing.T) {
 	app := newApp(t, saturday)
 

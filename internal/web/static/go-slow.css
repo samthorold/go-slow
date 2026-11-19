@@ -321,18 +321,23 @@ fieldset label {
    then " · " and its Role, or its kind where it has no Role, in a .pill-tag
    shown in small caps. One hue for every pill, whatever the Role:
      <span class="pill"><span hx-disable>John Healey</span> · <span class="pill-tag">actor</span></span>
-   A row of pills is a <div class="pills">. */
+   A row of pills is a <div class="pills">, a wrapping flex row, so a pill
+   too long for what is left of a line moves whole to the next. A pill too
+   long for the margin itself (a person named by a long office) is held to
+   its width and wraps inside itself; its corners round by half a line, so
+   one line is the same capsule as before and two are a rounded box. */
 .pill {
   display: inline-block;
+  max-width: 100%;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 0.8rem;
   line-height: 1.5;
   color: var(--entity);
   border: 1px solid var(--entity);
-  border-radius: 999px;
+  border-radius: 0.75em;
   padding: 0 0.6em;
   text-decoration: none;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 a.pill:hover {

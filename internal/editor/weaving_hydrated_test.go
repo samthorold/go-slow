@@ -59,9 +59,9 @@ func withRelease(t *testing.T, store *sqlite.Store, at time.Time) {
 // "the city" and "He" read as what they refer to; its S2 and S3 Andy
 // Burnham's words. The Spans keep the numbers they have as written.
 const releaseHydrated = `Story from "GBR headquarters in Derby", published 2026-10-15
-S4 (spoken by Andy Burnham): “This is fantastic news for [Derby].
+S4 (spoken by Andy Burnham): “This is fantastic news for ⟦Derby⟧.
 S5 (spoken by Andy Burnham): Derby has waited long enough.”
-S6: [Andy Burnham] visited the site on Monday.
+S6: ⟦Andy Burnham⟧ visited the site on Monday.
 `
 
 func TestARunIsShownAHydratedSpanAsReadLeavingOutARejectedOne(t *testing.T) {
@@ -146,8 +146,8 @@ func TestTheSpansTheEditorsStoriesCiteAreShownHydrated(t *testing.T) {
 	runAt(t, b, sunday)
 
 	want := `Story the Editor made, 2026-10-24
-S1 (from "GBR headquarters in Derby", spoken by Andy Burnham): “This is fantastic news for [Derby].
-S2 (from "GBR headquarters in Derby"): [Andy Burnham] visited the site on Monday.
+S1 (from "GBR headquarters in Derby", spoken by Andy Burnham): “This is fantastic news for ⟦Derby⟧.
+S2 (from "GBR headquarters in Derby"): ⟦Andy Burnham⟧ visited the site on Monday.
 S3 (the Editor's, citing S1, S2): Derby waited.
 `
 	if in := batcher.submitted[len(batcher.submitted)-1][0].Request.Input; !strings.HasPrefix(in, want) {
@@ -206,10 +206,38 @@ func TestARunIsShownAPossessiveHydratedAsAPossessive(t *testing.T) {
 	runAt(t, weavingBatches(store, batcher), at)
 
 	in := batcher.submitted[0][0].Request.Input
-	for _, want := range []string{": [Derby’s] role will grow.\n", ": Engineers will mark [Engineers’] work there.\n"} {
+	for _, want := range []string{": ⟦Derby’s⟧ role will grow.\n", ": Engineers will mark ⟦Engineers’⟧ work there.\n"} {
 		if !strings.Contains(in, want) {
 			t.Errorf("the run was shown:\n%s\nwant it to hold %q", in, want)
 		}
+	}
+}
+
+// A publisher's own square brackets ("yesterday [TUE]") are shown as written,
+// and a hydrated stretch in marks no publisher writes, so the two are told
+// apart.
+func TestARunIsShownAPublishersOwnSquareBracketsApartFromHydration(t *testing.T) {
+	store := record(t)
+	at := saturday
+	if _, err := store.AddItems(t.Context(), []collect.Item{{
+		SourceID: release.SourceID, EntryID: "warsaw", Title: "Warsaw", Link: "https://www.gov.uk/warsaw",
+		Content:   "<p>The Foreign Secretary went to Warsaw.</p><p>She spoke there yesterday [TUE].</p>",
+		Published: release.Published, Attribution: collect.OGL, CollectedAt: at,
+	}}); err != nil {
+		t.Fatal(err)
+	}
+	if err := cut.New(store).CutNew(t.Context(), at); err != nil {
+		t.Fatal(err)
+	}
+	readAt(t, store, readingByTitle{"Warsaw": `{"names": [], "refers_to": [
+		{"from": {"span": 2, "words": "She"}, "to": {"span": 1, "words": "The Foreign Secretary"}}
+	], "rejected": [], "speakers": []}`}, at)
+	batcher := &fakeBatcher{}
+	runAt(t, weavingBatches(store, batcher), at)
+
+	in := batcher.submitted[0][0].Request.Input
+	if want := ": ⟦The Foreign Secretary⟧ spoke there yesterday [TUE].\n"; !strings.Contains(in, want) {
+		t.Errorf("the run was shown:\n%s\nwant it to hold %q", in, want)
 	}
 }
 

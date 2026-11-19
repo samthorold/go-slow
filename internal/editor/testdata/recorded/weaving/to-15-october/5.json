@@ -1,18 +1,63 @@
 {
   "act": "weaving",
   "model": "claude-opus-5-5",
-  "request_hash": "999f4dd760ffd978009ba6a0e775f957bcfc0c87b03144fcbd2f4d644862274e",
-  "recorded_at": "2026-11-19T19:00:13.130477Z",
+  "request_hash": "c9268fae194e6de3018490b09c280d2b84923f08a2d72e316c039377441de1d2",
+  "recorded_at": "2026-11-19T19:21:11.797607Z",
   "usage": {
-    "input_tokens": 10232,
-    "output_tokens": 2357
+    "input_tokens": 10514,
+    "output_tokens": 2220
   },
   "output": {
     "stories": [
       {
         "editor_spans": [
           {
-            "body": "The Derby headquarters is the fourth structural reinvention of Britain's railway in under eighty years: nationalisation in 1948, privatisation in the 1990s, the collapse of Railtrack into Network Rail, and now Great British Railways. Each settlement promised to end fragmentation, and each changed more about ownership than about the problems passengers notice: ageing assets, stop-start investment, and Treasury control of the budget.",
+            "body": "The energy ceasefire is not only about sparing Ukrainian civilians. The Prime Minister said plainly that it is also the quickest way to get diesel back onto world markets. That puts British fuel prices and the cost of living in the same calculation as Ukraine's survival.",
+            "cites": [
+              119,
+              104,
+              105
+            ]
+          },
+          {
+            "body": "This explains why London has hitched its line so closely to Washington. Downing Street praises President Trump's ceasefire call and the 'US-led efforts', then blames Russia for ignoring them.",
+            "cites": [
+              122,
+              106,
+              54,
+              64
+            ]
+          },
+          {
+            "body": "The lesson of four years of war is that Europe still has little leverage of its own. Its strongest tool is not on the battlefield. It is control of the shipping and insurance services Russia needs to sell its gas, which is why the Chancellor is pressing others to copy the LNG maritime services ban.",
+            "cites": [
+              65,
+              75,
+              81
+            ]
+          },
+          {
+            "body": "The military numbers deserve a closer look. 'Accelerating' delivery means moving £10 million of a £45 million tranche forward. That sits against a £1.6 billion commitment spread over four years.",
+            "cites": [
+              68,
+              62
+            ]
+          },
+          {
+            "body": "The real long-term contest is cost. Russia's jet-powered drones fly faster and higher than propeller-driven Shaheds, and must be shot down with missiles. Whether Ukraine's allies can produce interceptors cheaply and quickly enough will decide more than any summit communiqué.",
+            "cites": [
+              66,
+              67,
+              56,
+              57
+            ]
+          }
+        ]
+      },
+      {
+        "editor_spans": [
+          {
+            "body": "Great British Railways is being presented as Labour's renationalisation. But Derby as the home of a single railway body is the product of a reform process that began under the previous government. That process grew out of years of disillusion with the fragmented system created by 1990s privatisation.",
             "cites": [
               13,
               15,
@@ -20,20 +65,26 @@
             ]
           },
           {
-            "body": "The scale of the announcement should be read carefully. The building will hold up to 450 staff, and it will not be finished until spring 2029. Two other things in the release are separate commitments presented alongside it: the fare freeze and the extra seats come from operators already taken into public ownership, and the train order at Alstom predates the HQ decision. A head office decides where the organisation's centre of gravity sits. It does not by itself make trains turn up.",
+            "body": "The quieter warning is demographic. Fewer than 7% of railway staff are under 25. Six hundred apprentices over four years is a modest answer to a workforce that will soon retire in large numbers.",
+            "cites": [
+              38,
+              20,
+              12
+            ]
+          },
+          {
+            "body": "The local numbers are also smaller than the headlines suggest. The headquarters holds up to 450 staff, and many of them may move from existing roles rather than be newly hired. The building will not be finished until 2029.",
+            "cites": [
+              35,
+              17,
+              18
+            ]
+          },
+          {
+            "body": "The judgement on public ownership will rest on whether trains run reliably, not on where the head office sits. A fare freeze is easy in year one and harder to sustain.",
             "cites": [
               16,
-              17,
-              35,
-              36
-            ]
-          },
-          {
-            "body": "The more revealing figure is in the small print: under 7% of the rail workforce is under 25. That points to a retirement wave in skilled engineering and operations roles that no change of ownership solves. Up to 600 apprenticeships over four years is a modest answer to an industry-wide shortfall. Whether GBR succeeds will depend less on Becketwell than on whether that intake keeps growing long after the ribbon is cut.",
-            "cites": [
-              12,
-              20,
-              38
+              23
             ]
           }
         ]
@@ -41,57 +92,28 @@
       {
         "editor_spans": [
           {
-            "body": "Taken in order, the week's statements show how far British policy on Ukraine now follows events set in Washington. On 9 October London responded to a US–Russia agreement. On 12 October the Prime Minister welcomed President Trump's reciprocal energy ceasefire. By 14 October he was condemning Russian attacks carried out since that call. The UK supports US-led efforts and repeats 'for as long as it takes', but it is not setting the terms.",
-            "cites": [
-              97,
-              106,
-              122,
-              54,
-              55,
-              61
-            ]
-          },
-          {
-            "body": "The case for an energy ceasefire is also openly linked to British living costs. The Prime Minister presented it as the fastest way to get diesel back onto world markets, and the government acknowledges energy prices and the cost of living. Pressure from households at home and the war in Ukraine are now one policy problem. That is why ministers are asking partners to match the UK's ban on shipping services for Russian LNG, a ban that is costly mainly for countries that still buy Russian gas.",
-            "cites": [
-              119,
-              104,
-              65,
-              75,
-              81
-            ]
-          },
-          {
-            "body": "The military figures point to a quieter change in the air war. Jet-powered drones are faster and fly higher than Shaheds, so they are harder to intercept cheaply. The UK's answer is £1.6 billion for more than 5,000 Lightweight Multirole Missiles over four years, with only £10 million brought forward for this winter. That is how one war of attrition looks in practice: it is a contest of production rates and cost per interception as much as of political resolve.",
-            "cites": [
-              66,
-              67,
-              68,
-              56
-            ]
-          }
-        ]
-      },
-      {
-        "editor_spans": [
-          {
-            "body": "The offer to Holyrood comes from a Prime Minister whose political brand was built as a metro mayor. He is now trying to apply the English model of regional deals to Scotland. The difficulty is constitutional. Westminster cannot make Holyrood hand powers down, so the 'offer' really works as political pressure, aimed over the First Minister's head at Lanarkshire, Fife and the Highlands.",
+            "body": "Burnham is bringing the metro-mayor model he ran in Greater Manchester to Scotland. Framed as an 'offer', it is also a political challenge to Holyrood: the argument is that the Scottish Parliament has gathered power at the centre much as Westminster once did.",
             "cites": [
               82,
               83,
               84,
-              89,
+              88
+            ]
+          },
+          {
+            "body": "The underlying problem is real. Since 1999, devolution in Britain has mostly moved power between national capitals rather than down to towns and regions.",
+            "cites": [
+              83,
+              92,
               93
             ]
           },
           {
-            "body": "Routing this through 'No10 North' and the Scotland Office, rather than through Holyrood, continues a long-running argument about whether the UK government should deal directly with Scottish communities. That argument goes back to UK-funded regional growth deals and the post-Brexit internal market rules. Many in Edinburgh will hear 'two governments, one goal' as a bid for influence inside the devolved settlement. Whether it gets anywhere depends on trust between the two governments, and that has worn thin over 27 years.",
+            "body": "But because the proposal is routed through No10 North and the Scotland Office, it can easily be read as Westminster going around Edinburgh. That reading could make the reform less likely to happen.",
             "cites": [
               85,
-              88,
-              94,
-              95,
-              83
+              89,
+              94
             ]
           }
         ]
@@ -99,21 +121,54 @@
       {
         "editor_spans": [
           {
-            "body": "The most consequential line in the Commons statement is not the summit date. It is the Prime Minister's call for a 'serious dialogue' about Britain's long-term relationship with the EU after the summit. For a decade, governments have handled the costs of Brexit one sector at a time: salmon checks, seed potatoes, export health certificates. Naming the overall relationship as an open question breaks a cross-party taboo.",
+            "body": "The most consequential line in the Commons statement was not about Ukraine. It was the opening of a 'serious dialogue' on Britain's long-term relationship with the EU, a decade after the referendum.",
             "cites": [
               169,
-              170,
               174,
+              175
+            ]
+          },
+          {
+            "body": "The evidence the Prime Minister chose is the paperwork cost of Brexit for food exporters:",
+            "cites": [
+              156,
+              157,
               158,
-              160,
+              160
+            ]
+          },
+          {
+            "body": "- full document checks on salmon",
+            "cites": [
+              158
+            ]
+          },
+          {
+            "body": "- banned seed potatoes and shellfish",
+            "cites": [
+              160
+            ]
+          },
+          {
+            "body": "- certificates and border charges of up to £1,400 per shipment",
+            "cites": [
+              162,
               163
             ]
           },
           {
-            "body": "The scale is worth holding on to. Over £10 billion a year by 2040 is real money, but it is a small share of the trade friction created since 2016. Agreements on food standards and emissions trading usually require the UK to follow EU rules as they change. That is the trade-off the 'further phase' will have to set out openly, and promising that 'the public will be the boss' brings the original question back into play, not just the details.",
+            "body": "That choice signals that the politics has shifted from sovereignty to the price of groceries and energy.",
             "cites": [
-              153,
-              151,
+              164,
+              165,
+              166
+            ]
+          },
+          {
+            "body": "The repeated slogan 'Britain is back' quietly admits that the country spent those years away. Promising 'the British public will be the boss' is careful language for a debate the government knows could reopen old divisions.",
+            "cites": [
+              183,
+              177,
               175,
               176
             ]

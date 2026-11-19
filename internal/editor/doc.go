@@ -108,8 +108,9 @@
 // Source's Span is shown hydrated once its Item has a reading
 // (WeavingStore.NewestReading; system design: Construction judges a Span
 // from the Story its Cut made): "spoken by" its Speaker, and each stretch
-// that refers to another read in square brackets as what it refers to
-// (Reading.Hydrated); a Span of a Story cut that is Rejected is left out and
+// that refers to another read in square brackets as what it refers to, its
+// possessive where the stretch says whose something is ("[Derby’s] role",
+// Reading.Hydrated, as the Pages read it); a Span of a Story cut that is Rejected is left out and
 // keeps its number, so a Span's number never depends on its hydration. A
 // Span with no reading is shown as written: nothing waits for hydration. A
 // Span an Editor's Span cites is shown, hydrated, whether Rejected or not.

@@ -1,25 +1,32 @@
 {
   "act": "weaving",
   "model": "claude-opus-5-5",
-  "request_hash": "999f4dd760ffd978009ba6a0e775f957bcfc0c87b03144fcbd2f4d644862274e",
-  "recorded_at": "2026-11-19T18:59:19.891933Z",
+  "request_hash": "c9268fae194e6de3018490b09c280d2b84923f08a2d72e316c039377441de1d2",
+  "recorded_at": "2026-11-19T19:20:15.999739Z",
   "usage": {
-    "input_tokens": 10232,
-    "output_tokens": 1818
+    "input_tokens": 10514,
+    "output_tokens": 2403
   },
   "output": {
     "stories": [
       {
         "editor_spans": [
           {
-            "body": "Fares frozen 'for the first time in 30 years' is a quiet admission of what is being undone. Thirty years ago was the privatisation of British Rail. Great British Railways is less a new idea than a reassembly of the integrated railway that the 1990s broke into franchises and infrastructure.",
+            "body": "The Derby headquarters is less important than the number buried near the end of the release: under 7% of the railway's workforce is under 25. Thirty years of fragmented franchising left an industry that rarely planned for the long term. Its staff aged while each operator recruited for its own contract term.",
             "cites": [
-              15,
-              16
+              38
             ]
           },
           {
-            "body": "The Derby headquarters will not be finished until spring 2029 and will house up to 450 staff. That makes 'hundreds of rail jobs' accurate but modest. The building is a symbol of where the railway is run from; whether passengers see better service depends on decisions that the HQ itself will not make.",
+            "body": "Up to 600 apprentices over four years, about 150 a year, is a modest answer to an age profile like that. The test of GBR is whether a single public owner will treat workforce renewal as a structural task rather than a launch-day figure.",
+            "cites": [
+              12,
+              20,
+              38
+            ]
+          },
+          {
+            "body": "The local economics are also more modest than the rhetoric of 'hundreds of rail jobs'. The building holds up to 450 staff, many of whom will be relocated or consolidated rather than newly hired. Construction does not finish until spring 2029, so the visible payoff comes years after the political credit is claimed.",
             "cites": [
               17,
               18,
@@ -27,10 +34,10 @@
             ]
           },
           {
-            "body": "The more revealing figure sits further down: less than 7% of the railway's workforce is under 25. That is the long shadow of decades with little coordinated training across a fragmented industry. Up to 600 apprentices over four years is a start against an ageing workforce, not a solution to it.",
+            "body": "Derby's real advantage is that it already concentrates rail manufacturing, such as the Alstom fleet order, alongside administration. Clustering is how a rail hub sustains itself, and an HQ is the cheapest piece of that to announce.",
             "cites": [
-              38,
-              20
+              36,
+              37
             ]
           }
         ]
@@ -38,28 +45,41 @@
       {
         "editor_spans": [
           {
-            "body": "Read together, the week's Ukraine statements show Britain running two messages at once. It 'fully supports' the US-led track and Trump's energy ceasefire. It also insists Russia has repeatedly rejected ceasefires and 'has no interest in peace'. London is hedging against a Washington-brokered deal it cannot shape.",
-            "cites": [
-              106,
-              122,
-              100,
-              55
-            ]
-          },
-          {
-            "body": "There is a domestic motive too. The Prime Minister framed the energy ceasefire as the quickest way to get diesel back onto world markets. The government's own response pairs Ukraine with energy prices and the cost of living. Support for Kyiv is being argued partly through household bills.",
+            "body": "Read together, a week of Ukraine statements shows British policy being pulled by energy markets as much as by solidarity. The Prime Minister told the Commons that the 'quickest way' to get diesel back onto world markets is an energy ceasefire. He said this in the same statement as sending air defence and refuelling support to Saudi Arabia amid Houthi strikes.",
             "cites": [
               119,
-              104,
-              79
+              134,
+              137,
+              138
             ]
           },
           {
-            "body": "The scale deserves perspective. £1.6 billion for more than 5,000 missiles over four years is the real commitment. The 'acceleration' for this winter is £10 million of it. Ukraine is entering its fifth winter under bombardment, and the gap between rhetoric of 'further and faster' and the sums actually moved is worth watching.",
+            "body": "That is the story behind the story. With conflict in both the Middle East and Europe squeezing fuel supply, an energy ceasefire is in Britain's own cost-of-living interest. That helps explain why London quickly welcomed a US-brokered arrangement and stressed that it 'fully supports US-led efforts'. Meanwhile Russia continued striking energy infrastructure.",
             "cites": [
+              79,
+              104,
+              105,
+              106,
+              122,
+              54
+            ]
+          },
+          {
+            "body": "The concrete numbers are smaller than the rhetoric of going 'further and faster'. £10 million of a £45 million missile package is being accelerated, against a £1.6 billion, four-year LMM commitment already on the books. Further sanctions, military and fiscal packages are still being 'drawn up'.",
+            "cites": [
+              65,
               68,
-              117,
-              71
+              71,
+              74
+            ]
+          },
+          {
+            "body": "Britain's lever is increasingly economic rather than military: shipping, insurance and the LNG services ban. The Chancellor is urging partners at the IMF to copy that ban. Whether allies follow will matter more than the next tranche of missiles.",
+            "cites": [
+              65,
+              75,
+              81,
+              118
             ]
           }
         ]
@@ -67,47 +87,59 @@
       {
         "editor_spans": [
           {
-            "body": "A Prime Minister who built his reputation as a metro mayor is now exporting that model. 'No10 North' and the push for regional power in Scotland follow the logic of English combined authorities.",
+            "body": "The Prime Minister's Commons statement does more than preview a food-and-energy deal. It opens a conversation about the 'longer term' EU relationship and frames the last decade as 'drift and division'. A decade is, not coincidentally, the time since the 2016 referendum.",
             "cites": [
-              85,
-              88
+              169,
+              170,
+              174,
+              177
             ]
           },
           {
-            "body": "Aiming the push at Holyrood rather than Westminster is politically pointed. Twenty-seven years after devolution, Burnham casts the Scottish Government as one of Europe's most centralised administrations. That turns devolution's own argument against its first beneficiary.",
+            "body": "The granular list of frictions shows what a hard Brexit actually cost exporters: 100% document checks on salmon, banned seed potatoes and shellfish, and certificates of up to £200 each. A projected £10 billion a year by 2040 recovers only part of that. This is why he is preparing ground for a bigger question.",
             "cites": [
+              153,
+              158,
+              160,
+              162,
+              163
+            ]
+          },
+          {
+            "body": "The promise that 'the British public will be the boss', with 'care and complete transparency', reads as a careful signal. Any deeper realignment would need explicit public consent. The government is testing that appetite before the 20 November summit rather than after it.",
+            "cites": [
+              149,
+              175,
+              176
+            ]
+          }
+        ]
+      },
+      {
+        "editor_spans": [
+          {
+            "body": "Andy Burnham built his career as a metro mayor, and his offer to Holyrood exports that model north. Local government in Scotland is devolved, so Westminster cannot impose regional mayors there. It can only 'make an offer' and argue that Edinburgh hoards power.",
+            "cites": [
+              82,
               83,
-              84,
-              92
+              85,
+              89
             ]
           },
           {
-            "body": "Whether the 'offer' is genuine will be tested by what Westminster is prepared to fund and cede directly, not by what it asks Edinburgh to give up.",
+            "body": "That makes the offer as much political positioning as policy. It casts the Scottish Government as the centraliser and Labour as the champion of Lanarkshire, Fife and the Highlands. It also routes the effort through No10 North and the Scotland Office rather than through Holyrood's own institutions.",
             "cites": [
-              89,
+              88,
+              92,
+              93,
               94
             ]
-          }
-        ]
-      },
-      {
-        "editor_spans": [
-          {
-            "body": "The EU summit list is essentially an inventory of the frictions created in 2016–2020. It includes salmon checks, banned seed potatoes and burgers, export certificates, and lost criminal-record sharing.",
-            "cites": [
-              158,
-              159,
-              160,
-              163,
-              167
-            ]
           },
           {
-            "body": "The bigger signal is the call for a 'serious dialogue' on the long-term relationship, paired with the assurance that the public will be 'the boss'. After 'a decade of drift and division', the government is testing whether opinion has moved far enough to reopen the question without reopening the wound.",
+            "body": "The long-running flaw it exposes is real. Devolution after 1999 moved power to Edinburgh but largely stopped there. Whether this becomes reform or merely a new front in the Labour–SNP contest depends on whether the Scottish Government sees any gain in accepting.",
             "cites": [
-              174,
-              175,
-              177
+              83,
+              84
             ]
           }
         ]

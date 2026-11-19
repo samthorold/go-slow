@@ -174,11 +174,11 @@ type WeavingStore interface {
 // weavingInstructions are weaving's instructions: the Owner's, one sentence
 // saying what a Span marked the Editor's is and that it may be cited, one
 // stating the checks the Owner's leave unsaid (that an Editor's Span has
-// words, and cites only Spans shown), and a clause saying that words in
-// square brackets are a hydrated Span's, standing in for the publisher's
-// words that refer to them, so the model never takes them for the
-// publisher's.
-const weavingInstructions = `You are the editor of a slow-news publication. Your publication exists to see the stories behind the stories, and to take a zoomed-out view of the long-term causes. Below are Stories, each a group of numbered Spans: stretches of text as their publishers wrote them, except that words in square brackets stand in for words that refer to them. What each Story says is already in it; write what none of them says. Write your substantive editorial opinion on one or more of them. Each opinion is a new Story: your own words, in one or more editor_spans, each citing by number the Spans it rests on, at least one. Spans marked the Editor's are your own earlier words, and you may cite them too. Each editor_span's body holds its words, and its cites only the numbers of Spans shown below. You don't have to write anything: if you have nothing substantive to say, return no stories.`
+// words, and cites only Spans shown), and a clause saying that words between
+// ⟦ and ⟧ (hydratedOpen, hydratedClose) are a hydrated Span's, standing in
+// for the publisher's words that refer to them, so the model never takes
+// them for the publisher's.
+const weavingInstructions = `You are the editor of a slow-news publication. Your publication exists to see the stories behind the stories, and to take a zoomed-out view of the long-term causes. Below are Stories, each a group of numbered Spans: stretches of text as their publishers wrote them, except that words between ⟦ and ⟧ stand in for words that refer to them. What each Story says is already in it; write what none of them says. Write your substantive editorial opinion on one or more of them. Each opinion is a new Story: your own words, in one or more editor_spans, each citing by number the Spans it rests on, at least one. Spans marked the Editor's are your own earlier words, and you may cite them too. Each editor_span's body holds its words, and its cites only the numbers of Spans shown below. You don't have to write anything: if you have nothing substantive to say, return no stories.`
 
 // weavingSchema is weaving's output schema: stories, each editor_spans, each
 // its words (body) and then the numbers of the Spans it cites (cites). The
@@ -404,10 +404,21 @@ func (h hydration) rejected(a Address) bool {
 	return ok && slices.Contains(hy.reading.Rejected, a)
 }
 
+// hydratedOpen and hydratedClose mark a hydrated stretch as weaving is shown
+// it: white square brackets, which no publisher writes, so a publisher's own
+// square brackets ("yesterday [TUE]") are shown as written and never read
+// as hydration's (system design: Hydration is shown in marks no publisher
+// writes).
+const (
+	hydratedOpen  = "⟦"
+	hydratedClose = "⟧"
+)
+
 // read is the Span at a as its hydration reads it: who speaks it, as the
 // words naming them read, empty for none judged, and its words with each
-// stretch that refers to another read, in square brackets, as the words of
-// what it refers to. With no hydration, it is words, as written.
+// stretch that refers to another read, between hydratedOpen and
+// hydratedClose, as the words of what it refers to. With no hydration, it is
+// words, as written.
 func (h hydration) read(a Address, words string) (speakers, read string) {
 	hy, ok := h[a.SourceID+"\n"+a.EntryID]
 	if !ok {
@@ -425,7 +436,7 @@ func (h hydration) read(a Address, words string) (speakers, read string) {
 	var b strings.Builder
 	for _, p := range r.Hydrated(hy.text, s) {
 		if p.Was != "" {
-			b.WriteString("[" + p.Words + "]")
+			b.WriteString(hydratedOpen + p.Words + hydratedClose)
 			continue
 		}
 		b.WriteString(p.Words)

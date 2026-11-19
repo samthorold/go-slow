@@ -268,7 +268,7 @@ func (e *Editor) weavingRun(ctx context.Context, key string) (WeavingRun, error)
 		return WeavingRun{}, err
 	}
 	slices.Reverse(made)
-	h, err := e.hydration(ctx, made, stories)
+	h, err := e.hydratedItems(ctx, made, stories)
 	if err != nil {
 		return WeavingRun{}, err
 	}
@@ -340,22 +340,22 @@ func (e *Editor) pendingWeaving(ctx context.Context) (string, bool, error) {
 	return "", false, nil
 }
 
-// hydration is each Item's hydration a run reads, by its item key: its
+// hydratedItems is each Item's hydration a run reads, by its item key: its
 // newest hydration, with the text its addresses are into. An Item with none
 // is not in it, and its Spans are read as written.
-type hydration map[string]hydrated
+type hydratedItems map[string]hydrated
 
 // hydrated is an Item's newest hydration and the Item's text as kept.
 type hydrated struct {
-	text      string
-	hydration Hydration
+	text   string
+	newest Hydration
 }
 
-// hydration is the hydration of the Items a run is shown Spans of, those of
-// the Stories made and of stories, as the Record holds it now: nothing waits
-// for an Item to be hydrated.
-func (e *Editor) hydration(ctx context.Context, made []Story, stories []CutStory) (hydration, error) {
-	h := hydration{}
+// hydratedItems is the hydration of the Items a run is shown Spans of, those
+// of the Stories made and of stories, as the Record holds it now: nothing
+// waits for an Item to be hydrated.
+func (e *Editor) hydratedItems(ctx context.Context, made []Story, stories []CutStory) (hydratedItems, error) {
+	h := hydratedItems{}
 	add := func(sourceID, entryID string, text func() (string, bool, error)) error {
 		key := sourceID + "\n" + entryID
 		if _, done := h[key]; done {
@@ -369,7 +369,7 @@ func (e *Editor) hydration(ctx context.Context, made []Story, stories []CutStory
 		if err != nil || !ok {
 			return err
 		}
-		h[key] = hydrated{text: t, hydration: r}
+		h[key] = hydrated{text: t, newest: r}
 		return nil
 	}
 	for _, st := range made {
@@ -399,9 +399,9 @@ func (e *Editor) hydration(ctx context.Context, made []Story, stories []CutStory
 }
 
 // rejected reports whether the Span at a is Rejected by its hydration.
-func (h hydration) rejected(a Address) bool {
+func (h hydratedItems) rejected(a Address) bool {
 	hy, ok := h[a.SourceID+"\n"+a.EntryID]
-	return ok && slices.Contains(hy.hydration.Rejected, a)
+	return ok && slices.Contains(hy.newest.Rejected, a)
 }
 
 // hydratedOpen and hydratedClose mark a hydrated stretch as weaving is shown
@@ -419,12 +419,12 @@ const (
 // stretch that refers to another read, between hydratedOpen and
 // hydratedClose, as the words of what it refers to. With no hydration, it is
 // words, as written.
-func (h hydration) read(a Address, words string) (speakers, read string) {
+func (h hydratedItems) read(a Address, words string) (speakers, read string) {
 	hy, ok := h[a.SourceID+"\n"+a.EntryID]
 	if !ok {
 		return "", words
 	}
-	r, s := hy.hydration, a.Span
+	r, s := hy.newest, a.Span
 	var by []string
 	for _, sp := range r.Speakers {
 		if sp.Of.Span.Start >= s.Start && sp.Of.Span.End <= s.End {
@@ -447,7 +447,7 @@ func (h hydration) read(a Address, words string) (speakers, read string) {
 // show is the Span at a as a run is shown it after its number, its words as
 // written words: what is said of it (its title, for a Span cited by an
 // Editor's Span, and who speaks it), in brackets, then its words as read.
-func (h hydration) show(a Address, words, title string) string {
+func (h hydratedItems) show(a Address, words, title string) string {
 	speakers, read := h.read(a, words)
 	var said []string
 	if title != "" {
@@ -465,7 +465,7 @@ func (h hydration) show(a Address, words, title string) string {
 // weavingRequest is a weaving run's request, shown the Stories the Editor
 // made, oldest first, then the Stories cut since the last run, each Span
 // as h hydrates it.
-func weavingRequest(made []Story, stories []CutStory, h hydration) Request {
+func weavingRequest(made []Story, stories []CutStory, h hydratedItems) Request {
 	return Request{Act: weavingAct, Instructions: weavingInstructions, Input: weavingInput(made, stories, h),
 		Schema: weavingSchema, Effort: EffortMedium}
 }
@@ -473,7 +473,7 @@ func weavingRequest(made []Story, stories []CutStory, h hydration) Request {
 // weavingInput is what a run is shown: the Stories the Editor made, then
 // those cut since, numbering their Spans S1, S2… across them all, each as h
 // hydrates it.
-func weavingInput(made []Story, stories []CutStory, h hydration) string {
+func weavingInput(made []Story, stories []CutStory, h hydratedItems) string {
 	sh := showMade(made, h)
 	for _, s := range stories {
 		sh.cutStory(s, h)
@@ -506,7 +506,7 @@ type citedAt struct {
 // Item's title, as h hydrates it, and shown whether it is Rejected or not,
 // since an Editor's Span rests on it. Each Span is numbered once, however
 // many Stories cite it.
-func showMade(made []Story, h hydration) *woven {
+func showMade(made []Story, h hydratedItems) *woven {
 	sh := &woven{numbers: map[citedAt]int{}}
 	for _, st := range made {
 		fmt.Fprintf(&sh.input, "Story the Editor made, %s\n", st.At.UTC().Format(time.DateOnly))
@@ -544,7 +544,7 @@ func (sh *woven) number(c Cited) int {
 // Spans numbered on from those shown before it, each as h hydrates it. A
 // Span h Rejects is left out, and keeps its number, so every Span has the
 // same number however it is hydrated.
-func (sh *woven) cutStory(s CutStory, h hydration) {
+func (sh *woven) cutStory(s CutStory, h hydratedItems) {
 	sh.input.WriteString(cutStoryHeader(s))
 	for _, sp := range s.Spans {
 		words := cut.Words(s.Item.Content, sp)

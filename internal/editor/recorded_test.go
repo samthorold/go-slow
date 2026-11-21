@@ -56,9 +56,13 @@ type recording struct {
 	// provider returned it and StopReason why it stopped: a conversation's
 	// next turn sends the turn back as it came, so its request (and its
 	// hash) is rebuilt from them. None for an act that answers at once.
-	Calls      []editor.ToolCall `json:"calls,omitempty"`
-	Raw        json.RawMessage   `json:"raw,omitempty"`
-	StopReason string            `json:"stop_reason,omitempty"`
+	Calls []editor.ToolCall `json:"calls,omitempty"`
+	// Results are what the tools returned to the turn's Calls, as the next
+	// turn sent them back: kept for whoever counts what the tools found (the
+	// yield report), and checked on replay against what they return now.
+	Results    []editor.ToolResult `json:"results,omitempty"`
+	Raw        json.RawMessage     `json:"raw,omitempty"`
+	StopReason string              `json:"stop_reason,omitempty"`
 	// Text is the text of a turn that called tools, which is no answer and
 	// need not be JSON: kept here, not as Output.
 	Text string `json:"text,omitempty"`

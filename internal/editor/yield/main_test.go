@@ -107,6 +107,49 @@ func TestNamingIsCountedByTheWordsOfItsNames(t *testing.T) {
 	}
 }
 
+// An act that calls tools (weaving) has its tools counted too: per fixture,
+// each tool's asks over every attempt of every sample, and how many of its
+// answers held anything (named a Story, and was no error), with a total per
+// tool. An older tree that keeps no tool results shows its answers as not
+// known.
+func TestEachToolsAsksAndTheAnswersHoldingAnythingAreCounted(t *testing.T) {
+	before, after := t.TempDir(), t.TempDir()
+	write(t, before, "weaving/sunday/1.json", `{"act": "weaving", "output": {"stories": []},
+		"earlier_attempts": [{"act": "weaving", "output": null, "calls": [
+			{"ID": "a", "Name": "find"}, {"ID": "b", "Name": "open_story"}]}]}`)
+	write(t, after, "weaving/sunday/1.json", `{"act": "weaving", "output": {"stories": []},
+		"earlier_attempts": [
+			{"act": "weaving", "output": null, "calls": [{"ID": "a", "Name": "find"}, {"ID": "b", "Name": "find"}],
+			 "results": [{"CallID": "a", "Content": "Story 3, the Editor's, made 2026-10-15; cited by no later Editor's Span\n  S9 (the Editor's): x"},
+			             {"CallID": "b", "Content": "No earlier Story has a Span with the words \"y\"."}]},
+			{"act": "weaving", "output": null, "calls": [{"ID": "c", "Name": "open_story"}],
+			 "results": [{"CallID": "c", "Content": "There is no earlier Story 7: open a Story by its number in a catalogue.", "IsError": true}]}]}`)
+	write(t, after, "weaving/sunday/2.json", `{"act": "weaving", "output": {"stories": []},
+		"earlier_attempts": [{"act": "weaving", "output": null, "calls": [{"ID": "d", "Name": "find"}],
+			"results": [{"CallID": "d", "Content": "2 earlier Stories have Spans with the words \"z\".\nStory 1, from \"T\", from s; cited by no later Editor's Span"}]}]}`)
+	write(t, after, "weaving/saturday/1.json", `{"act": "weaving", "output": {"stories": []}}`)
+
+	got := yieldOf(t, before, after)
+
+	for _, want := range []string{
+		"### weaving's tools",
+		"| Fixture | Tool | Asks | Held anything |",
+		"| weaving/sunday | find | 1 → 3 | ? → 2 |",
+		"| weaving/sunday | open_story | 1 → 1 | ? → 0 |",
+		"| **Total** | find | 1 → 3 | ? → 2 |",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("the report has no line %q; it is:\n%s", want, got)
+		}
+	}
+	if strings.Contains(got, "weaving/saturday | find") {
+		t.Errorf("the report counts tools for a fixture that called none; it is:\n%s", got)
+	}
+	if strings.Contains(got, "naming's tools") || strings.Contains(got, "hydration's tools") {
+		t.Errorf("the report counts tools for an act that calls none; it is:\n%s", got)
+	}
+}
+
 func TestFrozenInputsAndOtherFilesAreLeftOut(t *testing.T) {
 	before, after := t.TempDir(), t.TempDir()
 	for _, dir := range []string{before, after} {

@@ -168,6 +168,18 @@
           }
         }
       ],
+      "results": [
+        {
+          "CallID": "toolu_01KDrg7obKsEjs8WP5drmduX",
+          "Content": "No earlier Story has a Span with the words \"Great British Railways headquarters\".",
+          "IsError": false
+        },
+        {
+          "CallID": "toolu_011zPhDYicrtZ3mRNUzEJB88",
+          "Content": "No earlier Story has a Span with the words \"No10 North\".",
+          "IsError": false
+        }
+      ],
       "raw": {
         "model": "claude-opus-5-5",
         "id": "msg_011ChFr8kQxjBK5EmG6aRpfb",
@@ -251,6 +263,18 @@
           "Input": {
             "words": "Great British Railways"
           }
+        }
+      ],
+      "results": [
+        {
+          "CallID": "toolu_01XQeuWBMGeL7XmESCx29mf8",
+          "Content": "No earlier Story has a Span with the words \"energy ceasefire\".",
+          "IsError": false
+        },
+        {
+          "CallID": "toolu_011wPiKSZJ2T6Jj4HRZs8TYK",
+          "Content": "No earlier Story has a Span with the words \"Great British Railways\".",
+          "IsError": false
         }
       ],
       "raw": {

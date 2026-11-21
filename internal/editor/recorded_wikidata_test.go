@@ -48,8 +48,8 @@ const wikidataContact = "owner@example.org"
 
 // The recorded runs' Record resolves at least one person the fixtures name
 // two ways, by an office alone and by a name, to one Wikidata item. Run with
-// -record-wikidata, it first fetches every response from the real Wikidata,
-// replacing those kept.
+// -record-wikidata, it first fetches from the real Wikidata every response
+// not kept yet (fetchWikidata).
 func TestRecordedWikidata(t *testing.T) {
 	dir := filepath.Join(recordedDir, "weaving", "inputs", "wikidata")
 	if *recordWikidataFlag {
@@ -84,6 +84,47 @@ func TestRecordedWikidata(t *testing.T) {
 	}
 	if len(resolved) == 0 {
 		t.Errorf("no person named both by an office and by a name is one Wikidata item: %v", byItem)
+	}
+}
+
+// Each kept search answers the search its name says (its searchinfo), and
+// no two kept files' names differ only in case: on a filesystem that ignores
+// case (macOS's) one would have overwritten the other, and a replay on one
+// that doesn't (CI's Linux) would find a response missing.
+func TestEachKeptWikidataResponseIsUnderItsOwnName(t *testing.T) {
+	dir := filepath.Join(recordedDir, "weaving", "inputs", "wikidata")
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) == 0 {
+		t.Fatal("no responses kept")
+	}
+	seen := map[string]string{}
+	for _, e := range entries {
+		name := e.Name()
+		if other, ok := seen[strings.ToLower(name)]; ok {
+			t.Errorf("%s and %s differ only in case", other, name)
+		}
+		seen[strings.ToLower(name)] = name
+		if !strings.HasPrefix(name, "search-") {
+			continue
+		}
+		b, err := os.ReadFile(filepath.Join(dir, name)) //nolint:gosec // the test's own testdata
+		if err != nil {
+			t.Fatal(err)
+		}
+		var res struct {
+			Searchinfo struct {
+				Search string `json:"search"`
+			} `json:"searchinfo"`
+		}
+		if err := json.Unmarshal(b, &res); err != nil {
+			t.Fatalf("%s: %v", name, err)
+		}
+		if want := wikidatatest.SearchName(res.Searchinfo.Search); name != want {
+			t.Errorf("%s answers a search for %q, kept as %s", name, res.Searchinfo.Search, want)
+		}
 	}
 }
 
@@ -167,8 +208,10 @@ func fixturesWikidata(t *testing.T, dir string) *wikidata.Client {
 	})
 }
 
-// fetchWikidata replaces the responses kept in dir with the real Wikidata's
-// to every look-up the fixtures' hydrations make, made as in use: one Record
+// fetchWikidata keeps in dir the real Wikidata's responses to every look-up
+// the fixtures' hydrations make that dir does not hold yet, so it resumes a
+// stopped fetch, and never moves a response weaving's recordings rest on;
+// to fetch every one again, delete dir first. Look-ups are made as in use: one Record
 // carrying both runs, every name looked up through the Wikidata adapter,
 // polite by Wikimedia's rules (its User-Agent, a request at a time, Gap
 // apart, maxlag, backing off), each response kept as it came but for the
@@ -176,9 +219,6 @@ func fixturesWikidata(t *testing.T, dir string) *wikidata.Client {
 // it by. A look-up that fails fails the fetch.
 func fetchWikidata(t *testing.T, dir string) {
 	t.Helper()
-	if err := os.RemoveAll(dir); err != nil {
-		t.Fatal(err)
-	}
 	if err := os.MkdirAll(dir, 0o750); err != nil {
 		t.Fatal(err)
 	}
@@ -206,6 +246,13 @@ type keeping struct {
 }
 
 func (k keeping) RoundTrip(req *http.Request) (*http.Response, error) {
+	if kept, err := os.ReadFile(filepath.Join(k.dir, wikidatatest.Name(req))); err == nil {
+		// Kept already: answered from dir, with no call to Wikidata.
+		return &http.Response{
+			StatusCode: http.StatusOK, Status: "200 OK", Header: http.Header{"Content-Type": {"application/json"}},
+			Body: io.NopCloser(bytes.NewReader(kept)), ContentLength: int64(len(kept)), Request: req,
+		}, nil
+	}
 	res, err := http.DefaultTransport.RoundTrip(req)
 	if err != nil || res.StatusCode != http.StatusOK {
 		return res, err

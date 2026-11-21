@@ -25,7 +25,7 @@ import (
 // which is plain code, each Span hydrated by its Item's hydration and shown
 // with the Entities it mentions (each name looked up in a Wikidata that
 // matches nothing, so an Editor's Entity), and it reaches earlier Stories by
-// asking (find, find_entity, open_story), each turn a request of its own. Weaving rests on hydration's recordings, and is recorded over
+// asking (find, find_entity, find_citing, open_story), each turn a request of its own. Weaving rests on hydration's recordings, and is recorded over
 // its own frozen copies of them,
 // testdata/recorded/weaving/inputs/hydration/<fixture>.json, each a fixture's
 // first sample (collectAndCut). The compatibility check feeds hydration's

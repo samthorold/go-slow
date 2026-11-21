@@ -23,8 +23,9 @@ import (
 // instructions: a change to it is a new WeavingVersion, and a re-record.
 
 // weavingTools are the tools a run asks the Record with: find, by words;
-// find_entity, by an Entity a Span it was shown mentions; and open_story, a
-// Story from a catalogue, whole.
+// find_entity, by an Entity a Span it was shown mentions; find_citing, by a
+// Story it was shown, for the Stories citing it; and open_story, a Story
+// from a catalogue, whole.
 var weavingTools = []Tool{
 	{
 		Name: "find",
@@ -45,6 +46,14 @@ var weavingTools = []Tool{
 			"publishers' Stories with a Span mentioning the Entity, whatever words the Span calls it by: a Span " +
 			"mentions an Entity when it names it, or refers to words that do.",
 		Schema: object(map[string]any{"entity": str()}),
+	},
+	{
+		Name: "find_citing",
+		Description: "Find your own earlier Stories that cite an earlier Story shown to you, asked for by its number " +
+			"where a catalogue lists it or you opened it: those with an Editor's Span citing one of its Spans, which " +
+			"follows your own earlier reasoning to what followed or corrected it. The answer is a catalogue as " +
+			"find's is, each Editor's Span citing the Story numbered so you can cite it.",
+		Schema: object(map[string]any{"story": integer()}),
 	},
 	{
 		Name: "open_story",
@@ -111,6 +120,14 @@ func (r earlierRecord) answer(sh *woven, c ToolCall) (string, bool) {
 			return `find_entity takes {"entity": "..."}, the id of an Entity a Span shown to you mentions.`, true
 		}
 		return r.findEntity(sh, *in.Entity)
+	case "find_citing":
+		var in struct {
+			Story *int64 `json:"story"`
+		}
+		if err := dec.Decode(&in); err != nil || in.Story == nil {
+			return `find_citing takes {"story": N}, the number of an earlier Story shown to you.`, true
+		}
+		return r.findCiting(sh, *in.Story)
 	case "open_story":
 		var in struct {
 			Story *int64 `json:"story"`
@@ -120,7 +137,7 @@ func (r earlierRecord) answer(sh *woven, c ToolCall) (string, bool) {
 		}
 		return r.open(sh, *in.Story)
 	}
-	return fmt.Sprintf("There is no tool %q: ask with find, find_entity or open_story.", c.Name), true
+	return fmt.Sprintf("There is no tool %q: ask with find, find_entity, find_citing or open_story.", c.Name), true
 }
 
 // entry is a Story a catalogue lists: when it is from, its heading, and the
@@ -135,7 +152,7 @@ type entry struct {
 func (r earlierRecord) find(sh *woven, words string) string {
 	return r.catalogue(sh, ask{
 		cut:  func(_ Address, read string) bool { return holdsWords(read, words) },
-		made: func(body string) bool { return holdsWords(body, words) },
+		made: func(es EditorSpan) bool { return holdsWords(es.Body, words) },
 		with: fmt.Sprintf("with the words %q", words),
 		more: "hold the words",
 	})
@@ -166,14 +183,52 @@ func (r earlierRecord) findEntity(sh *woven, asked string) (string, bool) {
 	}), false
 }
 
+// findCiting is the catalogue of the Stories holding an Editor's Span that
+// cites a Span of the earlier Story id: for a Story a Cut made, one of its
+// Spans; for one the Editor made, one of its Editor's Spans. Only the
+// Editor's Spans cite, so only Stories the Editor made are listed. It is an
+// error told to the model when no answer to the run's asks named the Story,
+// as for an Entity it was never shown (findEntity).
+func (r earlierRecord) findCiting(sh *woven, id int64) (string, bool) {
+	if !slices.Contains(sh.stories, id) {
+		return fmt.Sprintf("No Story shown to you is numbered %d: ask what cites an earlier Story by its number "+
+			"where a catalogue lists it or you opened it.", id), true
+	}
+	var cites func(EditorSpan) bool
+	if i := slices.IndexFunc(r.cuts, func(s CutStory) bool { return s.CutID == id }); i >= 0 {
+		cites = func(es EditorSpan) bool { return citesCut(es, r.cuts[i]) }
+	} else {
+		cites = func(es EditorSpan) bool { return citesMade(es, id) }
+	}
+	return r.catalogue(sh, ask{
+		made: cites,
+		with: fmt.Sprintf("citing a Span of Story %d", id),
+		more: "cite it",
+	}), false
+}
+
+// citesCut reports whether es cites a Span of the Story s a Cut made.
+func citesCut(es EditorSpan, s CutStory) bool {
+	return slices.ContainsFunc(es.Cites, func(c Cited) bool {
+		return c.Of.IsZero() && c.Address.SourceID == s.Item.SourceID && c.Address.EntryID == s.Item.EntryID &&
+			slices.Contains(s.Spans, c.Address.Span)
+	})
+}
+
+// citesMade reports whether es cites an Editor's Span of the Story id the
+// Editor made.
+func citesMade(es EditorSpan, id int64) bool {
+	return slices.ContainsFunc(es.Cites, func(c Cited) bool { return c.Of.Story == id })
+}
+
 // ask is what a catalogue lists earlier Stories by: whether a Span of a
 // Story a Cut made matches it, by its address and its words as read, and
-// whether an Editor's Span does by its words (nil for none); with, how the
-// answer says what Spans matching hold ("with the words ..."), and more, what
-// the Spans not shown do ("hold the words").
+// whether an Editor's Span does (either nil for none); with, how the answer
+// says what Spans matching hold ("with the words ..."), and more, what the
+// Spans not shown do ("hold the words").
 type ask struct {
 	cut        func(a Address, read string) bool
-	made       func(body string) bool
+	made       func(es EditorSpan) bool
 	with, more string
 }
 
@@ -183,6 +238,9 @@ type ask struct {
 func (r earlierRecord) catalogue(sh *woven, q ask) string {
 	var entries []entry
 	for _, s := range r.cuts {
+		if q.cut == nil {
+			break
+		}
 		var lines []string
 		var matched []int
 		for i, sp := range s.Spans {
@@ -219,7 +277,7 @@ func (r earlierRecord) catalogue(sh *woven, q ask) string {
 		}
 		var matched []int
 		for i, es := range st.Spans {
-			if q.made(es.Body) {
+			if q.made(es) {
 				matched = append(matched, i)
 			}
 		}
@@ -328,10 +386,7 @@ func (r earlierRecord) cutHeading(s CutStory) string {
 	citing := 0
 	for _, st := range r.made {
 		for _, es := range st.Spans {
-			if slices.ContainsFunc(es.Cites, func(c Cited) bool {
-				return c.Of.IsZero() && c.Address.SourceID == s.Item.SourceID && c.Address.EntryID == s.Item.EntryID &&
-					slices.Contains(s.Spans, c.Address.Span)
-			}) {
+			if citesCut(es, s) {
 				citing++
 			}
 		}
@@ -347,7 +402,7 @@ func (r earlierRecord) madeHeading(st Story, opening bool) string {
 	citing := 0
 	for _, other := range r.made {
 		for _, es := range other.Spans {
-			if slices.ContainsFunc(es.Cites, func(c Cited) bool { return c.Of.Story == st.ID }) {
+			if citesMade(es, st.ID) {
 				citing++
 			}
 		}
@@ -449,8 +504,13 @@ func (e NamedEntity) handle() string {
 	return fmt.Sprintf("E%d", e.EditorID)
 }
 
-// shownEntity is an Entity's id as a run is shown it.
-var shownEntity = regexp.MustCompile(`\{((?:Q|E)[0-9]+)\}`)
+// shownEntity is an Entity's id as a run is shown it, and shownStory an
+// earlier Story's number as an answer names it, heading a catalogue's entry
+// or the Story opened, at the start of a line.
+var (
+	shownEntity = regexp.MustCompile(`\{((?:Q|E)[0-9]+)\}`)
+	shownStory  = regexp.MustCompile(`(?m)^Story ([0-9]+), `)
+)
 
 // entitiesShown are the ids of the Entities the run has been shown a Span
 // mentioning, read from what it was sent (its opening, and the answers to
@@ -458,9 +518,29 @@ var shownEntity = regexp.MustCompile(`\{((?:Q|E)[0-9]+)\}`)
 // from what was sent, as left-out Spans are (shownIn), since a Span looked up
 // or hydrated since is shown otherwise now.
 func (t WeavingTurns) entitiesShown() []string {
+	return t.sent(shownEntity)
+}
+
+// storiesShown are the numbers of the earlier Stories the answers to the
+// run's asks have named, each once: those it may ask what cites by
+// find_citing. Its opening names no Story by number.
+func (t WeavingTurns) storiesShown() []int64 {
+	var out []int64
+	for _, s := range t.sent(shownStory) {
+		var id int64
+		if _, err := fmt.Sscan(s, &id); err == nil {
+			out = append(out, id)
+		}
+	}
+	return out
+}
+
+// sent is what each match of re's first group in what the run was sent (its
+// opening, and the answers to its asks) holds, each once, in the order sent.
+func (t WeavingTurns) sent(re *regexp.Regexp) []string {
 	var out []string
 	add := func(text string) {
-		for _, m := range shownEntity.FindAllStringSubmatch(text, -1) {
+		for _, m := range re.FindAllStringSubmatch(text, -1) {
 			if !slices.Contains(out, m[1]) {
 				out = append(out, m[1])
 			}

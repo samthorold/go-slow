@@ -19,7 +19,7 @@ import (
 // version is a new Judge (system design: Every Judgement carries its Judge).
 // Change it with weavingInstructions, weavingSchema, weavingTools,
 // checkWeaving, weavingInput or what the asks answer (weaving_asks.go).
-const WeavingVersion = 5
+const WeavingVersion = 6
 
 // weavingAct names weaving, as its requests, calls and work do.
 const weavingAct = "weaving"
@@ -228,7 +228,7 @@ type WeavingStore interface {
 // between ⟦ and ⟧ (hydratedOpen, hydratedClose) are a hydrated Span's,
 // standing in for the publisher's words that refer to them, so the model
 // never takes them for the publisher's.
-const weavingInstructions = `You are the editor of a slow-news publication. Your publication exists to see the stories behind the stories, and to take a zoomed-out view of the long-term causes. Below are the Stories new since your last run, each a group of numbered Spans: stretches of text as their publishers wrote them, except that words between ⟦ and ⟧ stand in for words that refer to them. What each Story says is already in it; write what none of them says. Earlier Stories, the publishers' and your own, however old, are not shown: find them by asking for words with find, or for an Entity a Span shown to you mentions with find_entity, each of which answers with a catalogue, and read one whole with open_story. A Span says which Entities it mentions, each by its name and an id between { and }, which find_entity asks by. Ask as many times as you need before you answer. Write your substantive editorial opinion on one or more Stories, new or earlier. Each opinion is a new Story: your own words, in one or more editor_spans, each citing by number the Spans it rests on, at least one. Spans marked the Editor's are your own earlier words, and you may cite them too. Each editor_span's body holds its words, and its cites only the numbers of Spans shown to you, below or in what find, find_entity and open_story answered. You don't have to write anything: if you have nothing substantive to say, return no stories.`
+const weavingInstructions = `You are the editor of a slow-news publication. Your publication exists to see the stories behind the stories, and to take a zoomed-out view of the long-term causes. Below are the Stories new since your last run, each a group of numbered Spans: stretches of text as their publishers wrote them, except that words between ⟦ and ⟧ stand in for words that refer to them. What each Story says is already in it; write what none of them says. Earlier Stories, the publishers' and your own, however old, are not shown: find them by asking for words with find, for an Entity a Span shown to you mentions with find_entity, or for what cites an earlier Story shown to you with find_citing, each of which answers with a catalogue, and read one whole with open_story. A Span says which Entities it mentions, each by its name and an id between { and }, which find_entity asks by. Ask as many times as you need before you answer. Write your substantive editorial opinion on one or more Stories, new or earlier. Each opinion is a new Story: your own words, in one or more editor_spans, each citing by number the Spans it rests on, at least one. Spans marked the Editor's are your own earlier words, and you may cite them too. Each editor_span's body holds its words, and its cites only the numbers of Spans shown to you, below or in what find, find_entity, find_citing and open_story answered. You don't have to write anything: if you have nothing substantive to say, return no stories.`
 
 // weavingSchema is weaving's output schema: stories, each editor_spans, each
 // its words (body) and then the numbers of the Spans it cites (cites). The
@@ -357,7 +357,8 @@ func (t WeavingTurns) request() Request {
 
 // woven is what the run has been shown so far, to number on from.
 func (t WeavingTurns) woven() *woven {
-	sh := &woven{numbers: map[citedAt]int{}, left: slices.Clone(t.Left), newCuts: t.New, entities: t.entitiesShown()}
+	sh := &woven{numbers: map[citedAt]int{}, left: slices.Clone(t.Left), newCuts: t.New, entities: t.entitiesShown(),
+		stories: t.storiesShown()}
 	for _, c := range t.Shown {
 		sh.number(c)
 	}
@@ -711,14 +712,16 @@ func weavingInput(stories []CutStory, h hydratedItems) string {
 
 // woven is what a weaving run has been shown: each Span it numbers in number
 // order, the number of each, the numbers left out (Spans Rejected), the
-// Cuts of the Stories new to it, and the ids of the Entities it was shown a
-// Span mentioning before its latest turn.
+// Cuts of the Stories new to it, and, before its latest turn, the ids of the
+// Entities it was shown a Span mentioning and the numbers of the earlier
+// Stories its asks' answers named.
 type woven struct {
 	spans    []Cited
 	numbers  map[citedAt]int
 	left     []int
 	newCuts  []int64
 	entities []string
+	stories  []int64
 }
 
 // citedAt is a Span's address, whether a Source's or an Editor's.

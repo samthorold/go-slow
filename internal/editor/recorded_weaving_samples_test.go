@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 
@@ -187,6 +188,79 @@ func TestAWeavingSampleRefusedOnceIsAskedAgainAndPasses(t *testing.T) {
 	}
 	if errs := weavingVerdicts(t, root, runs, nil, model, reportTo(t)); len(errs) != 0 {
 		t.Errorf("replaying: %v", errs)
+	}
+}
+
+// A sample keeps, beside each turn that called tools, what each tool
+// returned, as the next turn sent it back: the replay doesn't need it, but
+// whoever counts what the tools found does (the yield report).
+func TestAWeavingSampleKeepsWhatItsToolsReturned(t *testing.T) {
+	if *rerecordFlag {
+		t.Skip("recording")
+	}
+	root := frozenRoot(t)
+	runs := weavingRuns(t)
+	live := &weavingOnShown{}
+	if errs := weavingVerdicts(t, root, runs, live, pinnedModel(t, weavingCommand.modelVar), reportTo(t)); len(errs) != 0 {
+		t.Fatalf("recording: %v", errs)
+	}
+	s, err := sampleAt(samplePath(filepath.Join(root, "weaving"), runs[1].name, 1))
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := s.attempts()
+	if len(got) != 2 {
+		t.Fatalf("kept %d attempts, want the turn that asked and the answer", len(got))
+	}
+	// The last request recorded is Sunday's fifth sample's second turn; every
+	// sample's asks are answered from the same Record, so alike.
+	last := live.sent[len(live.sent)-1]
+	want := last.Messages[len(last.Messages)-1].Results
+	if !slices.Equal(got[0].Results, want) {
+		t.Errorf("the turn that asked keeps results %+v, want %+v", got[0].Results, want)
+	}
+	if got[1].Results != nil {
+		t.Errorf("the answer, which called no tool, keeps results %+v", got[1].Results)
+	}
+}
+
+// A replay whose tools now return other than a sample kept (the Record they
+// answer from, or how they answer, changed) fails as stale, naming the run,
+// the tool and the command that re-records it; and so does a sample that
+// keeps no results for a turn that called tools.
+func TestAWeavingReplayFailsAsStaleWhenItsToolsReturnOtherwise(t *testing.T) {
+	if *rerecordFlag {
+		t.Skip("recording")
+	}
+	model := pinnedModel(t, weavingCommand.modelVar)
+	for name, change := range map[string]func(*recording){
+		"a result changed": func(r *recording) { r.Results[0].Content += " And more." },
+		"no results kept":  func(r *recording) { r.Results = nil },
+	} {
+		t.Run(name, func(t *testing.T) {
+			root := frozenRoot(t)
+			runs := weavingRuns(t)
+			if errs := weavingVerdicts(t, root, runs, &weavingOnShown{}, model, reportTo(t)); len(errs) != 0 {
+				t.Fatalf("recording: %v", errs)
+			}
+			path := samplePath(filepath.Join(root, "weaving"), runs[0].name, 2)
+			s, err := sampleAt(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			change(&s.EarlierAttempts[0])
+			keepSample(t, path, s.attempts())
+			var reported []error
+			weavingVerdicts(t, root, runs, nil, model, func(err error) { reported = append(reported, err) })
+			if len(reported) == 0 {
+				t.Fatal("a sample whose tools returned otherwise replayed")
+			}
+			for _, want := range []string{runs[0].name + " sample 2", "stale: re-record with", "-run TestRecordedWeaving -record", "find"} {
+				if !strings.Contains(reported[0].Error(), want) {
+					t.Errorf("%q does not say %q", reported[0], want)
+				}
+			}
+		})
 	}
 }
 

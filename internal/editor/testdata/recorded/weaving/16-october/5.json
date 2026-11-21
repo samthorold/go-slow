@@ -125,6 +125,23 @@
           }
         }
       ],
+      "results": [
+        {
+          "CallID": "toolu_01JQFEibWK4ahp6PpsyDXsAd",
+          "Content": "No earlier Story has a Span with the words \"Ravenscraig\".",
+          "IsError": false
+        },
+        {
+          "CallID": "toolu_01JNQoDeSb6pzpajWEw8Dvg1",
+          "Content": "No earlier Story has a Span mentioning {E630}.",
+          "IsError": false
+        },
+        {
+          "CallID": "toolu_0157h3LndFJhSRoS8y6oPhmV",
+          "Content": "1 earlier Story has Spans with the words \"devolution\".\n\nStory 5, from \"Prime Minister makes offer to Holyrood to work together to empower Scottish regions\", published 2026-10-15, from govuk-number-10; cited by 1 later Editor's Span\n  · In a speech today, the Prime Minister will invite Scotland’s First Minister to work with ⟦Andy Burnham⟧ on the common good of pushing more power out of both Westminster and Holyrood, unlocking jobs and opportunity in every region.\n  S352 (mentioning Lanarkshire {E487}, Andy Burnham {E411}, Scottish Government {E489}, Scottish Parliament {E485}, Westminster {E483}): Delivering ⟦Andy Burnham’s⟧ remarks after speaking with young people today in Lanarkshire, Andy Burnham will emphasise the Scottish Government is one of the most centralised devolved administrations in Europe, with Holyrood not giving people who know their areas best enough of a say, despite significant devolution from Westminster over the last 27 years.\n  S353 (mentioning Andy Burnham {E411}, Scottish Parliament {E485}): Because power was never supposed to stop at the doors of the Scottish Parliament, the Prime Minister will argue the next stage of devolution should place more decision-making in the hands of Scotland’s regions and cities to drive reindustrialisation.\n  · As part of that offer, ⟦Andy Burnham⟧ will call on the Scottish Government to work with the UK Government through No10 North and the Scotland Office to develop a new model of regional empowerment for Scotland, ensuring communities with their own strengths, identity and ambitions can seize new economic opportunities and unlock their potential.\n  …\n  S354 (spoken by Douglas Alexander, mentioning Scottish Parliament {E485}): Devolution has done a great deal, but power was never supposed to stop at the doors of the Scottish Parliament.\n  · People in North Lanarkshire, in Fife or in the Highlands know what their communities need better than any minister, whether they sit in London or Edinburgh.\n",
+          "IsError": false
+        }
+      ],
       "raw": {
         "model": "claude-opus-5-5",
         "id": "msg_011ChFrGic3MbANeTNwoPBam",
@@ -212,6 +229,13 @@
           "Input": {
             "story": 5
           }
+        }
+      ],
+      "results": [
+        {
+          "CallID": "toolu_017yBbCgKDx6UtcUZvPqQJtv",
+          "Content": "1 earlier Story has Spans citing a Span of Story 5.\n\nStory 509, the Editor's, made 2026-10-24: \"The Prime Minister's 'offer' to Holyrood is really a challenge. Local government in Scotland is devolved, so Westminster has no power to hand Scottish regions anything. It can only shame the Scottish Government by calling it one of the most centralised in Europe. Andy Burnham is offering the city-region model that made his name in Manchester, delivered through No10 North and the Scotland Office. In effect it creates a second route by which Westminster can deal directly with Scottish regions. The Derby headquarters and the East Midlands mayor's comments come from the same playbook. Whether Scotland's First Minister accepts will show whether this is about governing or about positioning.\"; cited by no later Editor's Span\n  S355 (the Editor's): The Prime Minister's 'offer' to Holyrood is really a challenge. Local government in Scotland is devolved, so Westminster has no power to hand Scottish regions anything. It can only shame the Scottish Government by calling it one of the most centralised in Europe. Andy Burnham is offering the city-region model that made his name in Manchester, delivered through No10 North and the Scotland Office. In effect it creates a second route by which Westminster can deal directly with Scottish regions. The Derby headquarters and the East Midlands mayor's comments come from the same playbook. Whether Scotland's First Minister accepts will show whether this is about governing or about positioning.\n",
+          "IsError": false
         }
       ],
       "raw": {

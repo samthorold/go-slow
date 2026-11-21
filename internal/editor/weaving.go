@@ -202,6 +202,10 @@ type WeavingStore interface {
 	// under way (it has asked, and has neither been written nor marked
 	// failed), as its last turn kept it, reporting whether there is one.
 	WeavingInProgress(ctx context.Context) (WeavingTurns, bool, error)
+	// WeavingTurnsOf is the conversation of the run keyed key as its last
+	// kept turn left it, under way or marked failed, reporting whether it
+	// kept a turn.
+	WeavingTurnsOf(ctx context.Context, key string) (WeavingTurns, bool, error)
 	// KeepWeavingTurns keeps a run's conversation as it stands after a turn,
 	// at at.
 	KeepWeavingTurns(ctx context.Context, t WeavingTurns, at time.Time) error
@@ -309,14 +313,14 @@ type WeavingRun struct {
 }
 
 // weavingRun is the run keyed key's next turn as the Record stands: its
-// conversation's next, if it is under way; otherwise its first, shown the
+// conversation's next, if it has kept a turn; otherwise its first, shown the
 // Stories cut since the last run written, and no Job when nothing has been.
 func (e *Editor) weavingRun(ctx context.Context, key string) (WeavingRun, error) {
-	conv, under, err := e.Weavings.WeavingInProgress(ctx)
+	conv, kept, err := e.Weavings.WeavingTurnsOf(ctx, key)
 	if err != nil {
 		return WeavingRun{}, err
 	}
-	if under && conv.Key == key {
+	if kept {
 		req := conv.request()
 		return WeavingRun{Key: key, Job: Job{Key: key, Request: req,
 			ApplySent: func(ctx context.Context, sent Request, res Response, now time.Time) error {
@@ -416,9 +420,8 @@ func (e *Editor) weavingTurn(ctx context.Context, conv WeavingTurns, sent Reques
 // withinCap is nil unless the run conv is of has a cap (the Owner's
 // --max-usd) that its next turn would take it over: what its turns have
 // cost so far, this one's usage included, and the next turn's estimate, at
-// batch rates, priced on the model act runs on (Deps.PriceOf). Over it, the
-// run is given up (ErrGiveUp). Input read from the provider's cache is
-// priced at a tenth of the input rate, as Anthropic charges it.
+// batch rates, priced on the model act runs on (weavingCost). Over it, the
+// run is given up (ErrGiveUp).
 func (e *Editor) withinCap(ctx context.Context, conv WeavingTurns, act string, turn Usage) error {
 	if e.PriceOf == nil {
 		return nil
@@ -427,15 +430,40 @@ func (e *Editor) withinCap(ctx context.Context, conv WeavingTurns, act string, t
 	if err != nil || !capped {
 		return err
 	}
-	model := modelOf(e.ModelFor, act)
-	price, ok := e.PriceOf(model)
-	if !ok {
-		return fmt.Errorf("weaving: %w: no price known for model %q to hold the run to its cap", ErrGiveUp, model)
+	usd, next, err := e.weavingCost(ctx, conv.Key, act, conv.request(), turn)
+	if errors.Is(err, errNoPrice) {
+		return fmt.Errorf("weaving: %w: %w to hold the run to its cap", ErrGiveUp, err)
 	}
-	price = price.AtBatchRates()
-	calls, err := e.Weavings.CallsOn(ctx, weavingAct, conv.Key)
 	if err != nil {
 		return err
+	}
+	if usd+next.USD > maxUSD {
+		return fmt.Errorf("weaving: %w: its next turn would take it over its cap of $%.2f: $%.2f spent, the next turn ~$%.2f",
+			ErrGiveUp, maxUSD, usd, next.USD)
+	}
+	return nil
+}
+
+// errNoPrice is a model with no price known.
+var errNoPrice = errors.New("no price known")
+
+// weavingCost is what the run keyed key has spent, its kept calls' usage and
+// turn's, and next's estimate, its next turn's, in dollars at batch rates on
+// the model act runs on (Deps.PriceOf). Input read from the provider's cache
+// is priced at a tenth of the input rate, as Anthropic charges it.
+func (e *Editor) weavingCost(ctx context.Context, key, act string, next Request, turn Usage) (float64, Estimate, error) {
+	model := modelOf(e.ModelFor, act)
+	if e.PriceOf == nil {
+		return 0, Estimate{}, fmt.Errorf("%w for model %q", errNoPrice, model)
+	}
+	price, ok := e.PriceOf(model)
+	if !ok {
+		return 0, Estimate{}, fmt.Errorf("%w for model %q", errNoPrice, model)
+	}
+	price = price.AtBatchRates()
+	calls, err := e.Weavings.CallsOn(ctx, weavingAct, key)
+	if err != nil {
+		return 0, Estimate{}, err
 	}
 	spent := turn
 	for _, c := range calls {
@@ -446,17 +474,48 @@ func (e *Editor) withinCap(ctx context.Context, conv WeavingTurns, act string, t
 	usd := price.cost(spent.InputTokens, spent.OutputTokens) + float64(spent.CacheReadTokens)/1e6*price.InputPerMTok/10
 	past, err := e.Weavings.PastUsage(ctx, weavingAct)
 	if err != nil {
-		return err
+		return 0, Estimate{}, err
 	}
-	next, err := EstimateOf(weavingAct, model, []Request{conv.request()}, past, price, BatchRates)
+	est, err := EstimateOf(weavingAct, model, []Request{next}, past, price, BatchRates)
+	return usd, est, err
+}
+
+// GivenUp is a weaving run marked failed, as the Owner is shown it before
+// resuming it: its next turn, what it has spent, its next turn's estimate,
+// both in dollars at batch rates, and its cap, if the Owner gave it one.
+type GivenUp struct {
+	Run      WeavingRun
+	SpentUSD float64
+	Next     Estimate
+	MaxUSD   float64
+	Capped   bool
+}
+
+// OverCap reports whether the run's next turn would take it over its cap:
+// resumed under it, it would be given up again.
+func (g GivenUp) OverCap() bool { return g.Capped && g.SpentUSD+g.Next.USD > g.MaxUSD }
+
+// GivenUpWeaving is the weaving run keyed key, marked failed, as it would
+// resume once its failed mark is cleared (system design: Work that keeps
+// failing is given up after three attempts, and taken up again by hand): its
+// next turn is its last kept turn's next, or its first again if it kept none,
+// shown the Stories cut since the last run written. It calls no model and
+// writes nothing. ErrNothingToWeave is a run with no turn kept and nothing
+// awaiting weaving.
+func (e *Editor) GivenUpWeaving(ctx context.Context, key string) (GivenUp, error) {
+	run, err := e.weavingRun(ctx, key)
 	if err != nil {
-		return err
+		return GivenUp{}, err
 	}
-	if usd+next.USD > maxUSD {
-		return fmt.Errorf("weaving: %w: its next turn would take it over its cap of $%.2f: $%.2f spent, the next turn ~$%.2f",
-			ErrGiveUp, maxUSD, usd, next.USD)
+	if run.Job.Key == "" {
+		return GivenUp{}, ErrNothingToWeave
 	}
-	return nil
+	g := GivenUp{Run: run}
+	if g.MaxUSD, g.Capped, err = e.Weavings.WeavingCap(ctx, key); err != nil {
+		return GivenUp{}, err
+	}
+	g.SpentUSD, g.Next, err = e.weavingCost(ctx, key, weavingAct, run.Job.Request, Usage{})
+	return g, err
 }
 
 // The reasons the Owner's ask for today's weaving run is refused.
@@ -486,6 +545,12 @@ func (e *Editor) WeaveToday(ctx context.Context, now time.Time) (WeavingRun, err
 		err = ErrNothingToWeave
 	}
 	return run, err
+}
+
+// WeavingUnderWay is the key of the weaving run under way, if any: its
+// conversation kept between turns, or its turn in a pending batch.
+func (e *Editor) WeavingUnderWay(ctx context.Context) (string, bool, error) {
+	return e.pendingWeaving(ctx)
 }
 
 // pendingWeaving is the key of the weaving run under way, if any: its

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"os"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -154,30 +153,23 @@ func storiesToName(t *testing.T, frozen string) []storyToName {
 
 // wovenRecord is the Record weaving's two runs make over the frozen copies
 // under frozen, closed at a file of its own: each run's Items collected, cut
-// and hydrated by hydration's copies (frozen/hydration/), then woven by weaving's
+// and hydrated by hydration's copies (frozen/hydration/), their names looked
+// up in Wikidata's copies (frozen/wikidata/), then woven by weaving's
 // copy of that run (frozen/weaving/<run>.json), replayed unchecked, as the
 // act that made it checked it. With it, each Story the runs make, in the
 // order made. A missing copy, or one weaving's checks refuse, is an error
 // naming its run.
 func wovenRecord(t *testing.T, frozen string) (string, []storyToName, error) {
 	t.Helper()
-	ctx := t.Context()
 	path := filepath.Join(t.TempDir(), "woven.db")
 	store, _ := newRecordAt(t, path, nil)
 	var stories []storyToName
-	// Weaving's copies recorded since Wikidata's responses were recorded
-	// (frozen/wikidata/) looked their names up in them: they are looked up
-	// so again, or the asks those copies made are answered otherwise. Copies
-	// recorded before looked up nothing found.
-	wd := filepath.Join(frozen, "wikidata")
-	_, err := os.Stat(wd)
-	lookUp := err == nil
+	// Weaving's copies looked their names up in Wikidata's recorded
+	// responses (frozen/wikidata/): they are looked up so again, or the asks
+	// those copies made are answered otherwise.
+	wd := fixturesWikidata(t, filepath.Join(frozen, "wikidata"))
 	for _, r := range weavingRuns(t) {
-		if lookUp {
-			lookUpThrough(t, store, r, filepath.Join(frozen, "hydration"), fixturesWikidata(t, wd))
-		} else if err := collectCutAndHydrate(ctx, store, r, filepath.Join(frozen, "hydration")); err != nil {
-			return "", nil, err
-		}
+		lookUpThrough(t, store, r, filepath.Join(frozen, "hydration"), wd)
 		before := madeIDs(t, store)
 		copied := filepath.Join(frozen, "weaving", r.name+".json")
 		s, err := sampleAt(copied)
@@ -205,24 +197,12 @@ func wovenRecord(t *testing.T, frozen string) (string, []storyToName, error) {
 }
 
 // weaveFrozen weaves the run r over store by s, a frozen copy of one of
-// weaving's samples kept at copied, as the act that made it checked it. A
-// copy of a conversation (its turns kept as they came back) is replayed
-// unchecked, every attempt in order, through the batch runner. A copy
-// recorded before a run was a conversation, weaving's version 3, keeps no
-// turn as it came back: it is kept as version 3 numbered what it was shown
-// (editor.KeepAsWeavingVersion3), at the time a run's result was applied.
+// weaving's samples kept at copied, as the act that made it checked it: the
+// conversation, its turns kept as they came back, is replayed unchecked,
+// every attempt in order, through the batch runner.
 func weaveFrozen(t *testing.T, store *sqlite.Store, r weavingRun, copied string, s sampleFile) error {
 	t.Helper()
-	attempts := s.attempts()
-	if !slices.ContainsFunc(attempts, func(a recording) bool { return a.Raw != nil }) {
-		ed := editor.New(editor.Deps{Weavings: store, Log: slog.New(slog.DiscardHandler)})
-		if err := editor.KeepAsWeavingVersion3(t.Context(), ed, r.at.Format(time.DateOnly), r.at.Add(time.Minute),
-			editor.Response{Output: s.Output, Model: s.Model, Usage: s.Usage}); err != nil {
-			return fmt.Errorf("%s: its weaving is not taken: %w", r.name, err)
-		}
-		return nil
-	}
-	m := &sampleModel{t: t, path: copied, attempts: attempts, model: "frozen", unchecked: true,
+	m := &sampleModel{t: t, path: copied, attempts: s.attempts(), model: "frozen", unchecked: true,
 		cmd: weavingCommand, report: func(error) {}}
 	passed, err := weave(t, store, m, r.at)
 	if err != nil {

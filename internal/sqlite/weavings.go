@@ -3,6 +3,7 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -33,15 +34,27 @@ func (s *Store) StoriesCutAfter(ctx context.Context, throughCut int64) ([]editor
 	return s.storiesCut(ctx, `?`, throughCut)
 }
 
+// StoriesCutThrough are the Stories cut through the Cut through, whenever
+// their Items were collected, oldest Cut first: the earlier Stories a
+// weaving run's asks are answered from.
+func (s *Store) StoriesCutThrough(ctx context.Context, through int64) ([]editor.CutStory, error) {
+	return s.storiesWhere(ctx, `cuts.event_id <= ?`, through)
+}
+
 // storiesCut are the Stories cut after the Cut through, SQL taking args, of
 // Items collected after the switch, oldest Cut first.
 func (s *Store) storiesCut(ctx context.Context, through string, args ...any) ([]editor.CutStory, error) {
+	return s.storiesWhere(ctx, `cuts.event_id > `+through+` AND `+afterSwitch, args...)
+}
+
+// storiesWhere are the Stories of the Cuts where holds, SQL taking args,
+// oldest Cut first.
+func (s *Store) storiesWhere(ctx context.Context, where string, args ...any) ([]editor.CutStory, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT cuts.event_id, items.source_id, items.entry_id, items.title, items.link, items.summary,
 			items.content, items.published
 		FROM cuts JOIN items USING (source_id, entry_id)
-		WHERE cuts.event_id > `+through+`
-			AND `+afterSwitch+`
+		WHERE `+where+`
 		ORDER BY cuts.event_id`, args...)
 	if err != nil {
 		return nil, fmt.Errorf("stories to weave: %w", err)
@@ -199,6 +212,71 @@ func (s *Store) WeavingRan(ctx context.Context, key string) (bool, error) {
 		return false, fmt.Errorf("weaving %s ran: %w", key, err)
 	}
 	return ran, nil
+}
+
+// WeavingInProgress is the conversation of the weaving run under way, as
+// its newest turn kept it: the newest kept turns of a run that has neither
+// been written nor marked failed. A run retried by hand (its failed mark
+// cleared) is under way again, from where it stopped.
+func (s *Store) WeavingInProgress(ctx context.Context) (editor.WeavingTurns, bool, error) {
+	var t editor.WeavingTurns
+	var conversation string
+	err := s.db.QueryRowContext(ctx, `
+		SELECT t.conversation FROM weaving_turns t
+		WHERE NOT EXISTS (SELECT 1 FROM weavings w WHERE w.work_key = t.work_key)
+			AND NOT EXISTS (SELECT 1 FROM work_attempts a
+				WHERE a.act = 'weaving' AND a.work_key = t.work_key AND a.failed = 1)
+		ORDER BY t.at DESC, t.turn DESC LIMIT 1`).Scan(&conversation)
+	if errors.Is(err, sql.ErrNoRows) {
+		return t, false, nil
+	}
+	if err != nil {
+		return t, false, fmt.Errorf("weaving in progress: %w", err)
+	}
+	if err := json.Unmarshal([]byte(conversation), &t); err != nil {
+		return t, false, fmt.Errorf("weaving in progress: %w", err)
+	}
+	return t, true, nil
+}
+
+// KeepWeavingTurns keeps a weaving run's conversation as it stands after a
+// turn, at at.
+func (s *Store) KeepWeavingTurns(ctx context.Context, t editor.WeavingTurns, at time.Time) error {
+	b, err := json.Marshal(t)
+	if err != nil {
+		return fmt.Errorf("keep weaving turns: %w", err)
+	}
+	if _, err := s.db.ExecContext(ctx, `
+		INSERT INTO weaving_turns (work_key, turn, at, conversation) VALUES (?, ?, ?, ?)`,
+		t.Key, len(t.Messages)/2, formatTime(at), string(b)); err != nil {
+		return fmt.Errorf("keep weaving turns: %w", err)
+	}
+	return nil
+}
+
+// KeepWeavingCap keeps the most the weaving run keyed key may spend over all
+// its turns, in dollars at batch rates, replacing any it had.
+func (s *Store) KeepWeavingCap(ctx context.Context, key string, usd float64) error {
+	if _, err := s.db.ExecContext(ctx, `
+		INSERT INTO weaving_caps (work_key, max_usd) VALUES (?, ?)
+		ON CONFLICT (work_key) DO UPDATE SET max_usd = excluded.max_usd`, key, usd); err != nil {
+		return fmt.Errorf("keep weaving cap: %w", err)
+	}
+	return nil
+}
+
+// WeavingCap is the most the weaving run keyed key may spend, reporting
+// whether it has a cap.
+func (s *Store) WeavingCap(ctx context.Context, key string) (float64, bool, error) {
+	var usd float64
+	err := s.db.QueryRowContext(ctx, `SELECT max_usd FROM weaving_caps WHERE work_key = ?`, key).Scan(&usd)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, false, nil
+	}
+	if err != nil {
+		return 0, false, fmt.Errorf("weaving cap: %w", err)
+	}
+	return usd, true, nil
 }
 
 // Woven reports whether the Record is woven: a weaving run's result has been

@@ -1,38 +1,41 @@
 {
   "act": "weaving",
   "model": "claude-opus-5-5",
-  "request_hash": "c9268fae194e6de3018490b09c280d2b84923f08a2d72e316c039377441de1d2",
-  "recorded_at": "2026-11-19T19:20:43.578333Z",
+  "request_hash": "d6cb722d3efb6a32c856217a157ee66bca9184ec20ff1edc789b9bdbd22e3b15",
+  "recorded_at": "2026-11-21T08:55:09.605824Z",
   "usage": {
-    "input_tokens": 10514,
-    "output_tokens": 2104
+    "input_tokens": 407,
+    "output_tokens": 1958,
+    "cache_read_input_tokens": 11273
   },
   "output": {
     "stories": [
       {
         "editor_spans": [
           {
-            "body": "Derby's naming as the home of Great British Railways is presented as a fresh milestone, but the bigger story is how long the railway has waited for one. The idea of a single guiding body dates back to the post-privatisation fragmentation of the 1990s. Derby won the competition for the headquarters under the previous government. Even so, today's plan has construction starting only in 2027 and finishing in spring 2029.",
+            "body": "Derby's 'railways in its DNA' line is true, and it points to a cycle the announcement doesn't mention. Britain's railway was nationalised in 1948, privatised in the mid-1990s and is now being brought back under public control. Each time, the decision came from the government of the day. Neither model was locked in. A headquarters building is the most visible sign of the change. It is also the easiest part to deliver.",
             "cites": [
+              10,
               13,
+              15,
+              25
+            ]
+          },
+          {
+            "body": "Look at the numbers and the timing. The building will hold up to 450 staff. Construction starts in early 2027 and is due to finish by spring 2029. That means GBR will spend most of this Parliament without its permanent home, and the 'hundreds of jobs' are partly jobs being moved, not new ones. The benefits claimed now, such as frozen fares and extra seats, come from operators being taken into public hands. They do not come from the HQ. The test of GBR is whether one organisation actually runs track and trains better, and a site announcement can't show that.",
+            "cites": [
+              16,
               17,
-              30
-            ]
-          },
-          {
-            "body": "The scale also deserves a sober look. The building will house up to 450 staff, which matches the 'hundreds of jobs' line, but it is an administrative centre rather than an industrial revival. The more durable asset for the city is the train-building work at Alstom's Derby site, which depends on a steady flow of orders rather than on where managers sit.",
-            "cites": [
-              35,
               18,
-              36
+              35
             ]
           },
           {
-            "body": "The figure that should worry ministers is buried near the end: fewer than 7% of rail workers are under 25. Up to 600 apprentices over four years is welcome, but it is small against an industry whose engineering and driving workforce is ageing out. Public ownership changes who collects the revenue. It does not by itself solve the skills cliff, and that will decide whether 'your train turning up' becomes reliable.",
+            "body": "The longer-term problem is in one figure: less than 7% of the railway's workforce is under 25. That is a skills shortage building over decades, and it will outlast any change in who owns the railway. Up to 600 apprentices over four years is a start. Most of the government's statements are about place and ownership, but this age gap is what will limit the railway in the 2030s.",
             "cites": [
-              38,
+              14,
               20,
-              23
+              38
             ]
           }
         ]
@@ -40,26 +43,34 @@
       {
         "editor_spans": [
           {
-            "body": "Britain's Ukraine rhetoric has grown steadily louder: 'rock-solid', 'for as long as it takes', 'go further and faster'. The deliverables are steadier and smaller. The headline acceleration is £10 million of a £45 million missile package, set against an existing £1.6 billion multi-year commitment. Meanwhile Ukraine faces its fifth winter of bombardment, and Russia has escalated with jet-powered drones that are harder to intercept.",
-            "cites": [
-              61,
-              71,
-              68,
-              66,
-              67,
-              117
-            ]
-          },
-          {
-            "body": "The energy ceasefire also shows how far the UK's own interests and Kyiv's now overlap. The Prime Minister openly links it to getting diesel back onto world markets, and the government concedes the war's effects on energy prices and household costs. The initiative itself belongs to Washington, with London supporting it and lobbying for it. Russia's escalation after the ceasefire call suggests that pressure through sanctions and LNG shipping bans, slow as it is, matters more than declarations.",
+            "body": "The most revealing line in this week's Ukraine statements is about diesel, not missiles. The Prime Minister called an energy ceasefire the quickest way to get diesel 'back onto world markets without rewarding the aggressor.' The same government warns that international conflicts affect energy prices and the cost of living. So Western interest in a pause on energy strikes is about inflation at home as well as protecting Ukrainians. That helps explain why London backed a US-Russia arrangement it has little control over.",
             "cites": [
               119,
               122,
               104,
-              106,
-              54,
+              105,
+              106
+            ]
+          },
+          {
+            "body": "The UK is pushing both ways at once. It is tightening the squeeze on Russian energy revenue: sanctions covering over 90% of Russia's oil producing capacity and a ban on maritime services for Russian LNG. At the same time it wants global fuel supply eased. The Chancellor's pitch at the IMF shows the tension. He asks partners to give up Russian LNG while saying conflict 'is hitting people across the world.' Within days, the leaders were saying Russia had 'no interest in peace'. The ceasefire was not holding, and the cost of that falls on European energy bills as well as on Ukraine.",
+            "cites": [
+              118,
               65,
-              118
+              75,
+              79,
+              81,
+              54,
+              55
+            ]
+          },
+          {
+            "body": "Compare the scale with the language. 'Go further and faster' amounts to bringing forward £10 million of a £45 million missile delivery, inside a £1.6 billion LMM programme that was already committed. The larger promises of sanctions, military and fiscal packages have been requested from ministers but not yet set out. When Ukraine faces a fifth winter of bombardment, it matters how quickly support is delivered more than how much is promised.",
+            "cites": [
+              68,
+              71,
+              74,
+              117
             ]
           }
         ]
@@ -67,46 +78,153 @@
       {
         "editor_spans": [
           {
-            "body": "The Prime Minister's offer to Holyrood is a former metro mayor exporting the English combined-authority model into a devolved space Westminster does not control. Local government in Scotland is Holyrood's responsibility, so this can only be an invitation. Routed through 'No10 North' and the Scotland Office, it will look to many in Edinburgh like an attempt to build a direct Westminster relationship with Scottish regions over the Scottish Government's head.",
+            "body": "Read together, the Commons statement and the Lanarkshire speech show a Prime Minister reopening two settlements his predecessors treated as closed. One is Britain's long-term relationship with the EU, now described as a conversation 'we must have'. The other is the structure of devolution in Scotland. In both cases he says the status quo is the problem. In both cases the first step is a modest, practical deal, with a larger rethink promised for later.",
             "cites": [
-              82,
-              85,
-              88,
-              89
+              169,
+              170,
+              171,
+              174,
+              84
             ]
           },
           {
-            "body": "The underlying charge, that Holyrood has centralised, has substance after a generation in which services and budgets were pulled towards Edinburgh. But the outcome depends on trust between two governments of different parties. A model announced in a London speech rather than negotiated first is a weak starting point.",
+            "body": "The Scotland offer follows the English city-region model, a background Andy Burnham brings from Greater Manchester. That model sends power below the devolved government rather than through it. Calling Holyrood one of Europe's most centralised devolved administrations is also a political move: it presents Westminster as the one handing out power and Edinburgh as the one holding on to it. Working through No10 North and the Scotland Office gives the UK government a route into Scottish regions that goes round the Scottish Government. How Holyrood answers will show whether this is real partnership or competition for who gets credit with Scottish voters.",
             "cites": [
               83,
-              92,
+              85,
+              88,
+              93,
               94
-            ]
-          }
-        ]
-      },
-      {
-        "editor_spans": [
-          {
-            "body": "The most consequential line of the Commons statement is not the summit date. It is the Prime Minister's call for a 'serious dialogue' about the long-term UK-EU relationship. That is the first explicit opening from a sitting prime minister to revisit the post-2016 settlement. His list of border frictions reads as an itemised audit of what the 2020 trade deal left out: salmon document checks, banned seed potatoes, certificates costing hundreds of pounds per shipment.",
-            "cites": [
-              174,
-              169,
-              158,
-              160,
-              163
-            ]
-          },
-          {
-            "body": "The government's estimate of £10 billion a year by 2040 is modest next to the trade lost since Brexit. That gap explains why the conversation is turning to the longer-term relationship. 'The British public will be the boss' is a promise that will be tested if that dialogue goes anywhere. The phrase 'a decade of drift' is the closest Downing Street has come to naming the referendum as its cause.",
-            "cites": [
-              153,
-              175,
-              177
             ]
           }
         ]
       }
     ]
-  }
+  },
+  "raw": {
+    "model": "claude-opus-5-5",
+    "id": "msg_011ChFnvA4Ymy24tvjXLQGH8",
+    "type": "message",
+    "role": "assistant",
+    "content": [
+      {
+        "type": "thinking",
+        "thinking": "",
+        "signature": "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"
+      },
+      {
+        "type": "text",
+        "text": "{\"stories\":[{\"editor_spans\":[{\"body\":\"Derby's 'railways in its DNA' line is true, and it points to a cycle the announcement doesn't mention. Britain's railway was nationalised in 1948, privatised in the mid-1990s and is now being brought back under public control. Each time, the decision came from the government of the day. Neither model was locked in. A headquarters building is the most visible sign of the change. It is also the easiest part to deliver.\",\"cites\":[10,13,15,25]},{\"body\":\"Look at the numbers and the timing. The building will hold up to 450 staff. Construction starts in early 2027 and is due to finish by spring 2029. That means GBR will spend most of this Parliament without its permanent home, and the 'hundreds of jobs' are partly jobs being moved, not new ones. The benefits claimed now, such as frozen fares and extra seats, come from operators being taken into public hands. They do not come from the HQ. The test of GBR is whether one organisation actually runs track and trains better, and a site announcement can't show that.\",\"cites\":[16,17,18,35]},{\"body\":\"The longer-term problem is in one figure: less than 7% of the railway's workforce is under 25. That is a skills shortage building over decades, and it will outlast any change in who owns the railway. Up to 600 apprentices over four years is a start. Most of the government's statements are about place and ownership, but this age gap is what will limit the railway in the 2030s.\",\"cites\":[14,20,38]}]},{\"editor_spans\":[{\"body\":\"The most revealing line in this week's Ukraine statements is about diesel, not missiles. The Prime Minister called an energy ceasefire the quickest way to get diesel 'back onto world markets without rewarding the aggressor.' The same government warns that international conflicts affect energy prices and the cost of living. So Western interest in a pause on energy strikes is about inflation at home as well as protecting Ukrainians. That helps explain why London backed a US-Russia arrangement it has little control over.\",\"cites\":[119,122,104,105,106]},{\"body\":\"The UK is pushing both ways at once. It is tightening the squeeze on Russian energy revenue: sanctions covering over 90% of Russia's oil producing capacity and a ban on maritime services for Russian LNG. At the same time it wants global fuel supply eased. The Chancellor's pitch at the IMF shows the tension. He asks partners to give up Russian LNG while saying conflict 'is hitting people across the world.' Within days, the leaders were saying Russia had 'no interest in peace'. The ceasefire was not holding, and the cost of that falls on European energy bills as well as on Ukraine.\",\"cites\":[118,65,75,79,81,54,55]},{\"body\":\"Compare the scale with the language. 'Go further and faster' amounts to bringing forward £10 million of a £45 million missile delivery, inside a £1.6 billion LMM programme that was already committed. The larger promises of sanctions, military and fiscal packages have been requested from ministers but not yet set out. When Ukraine faces a fifth winter of bombardment, it matters how quickly support is delivered more than how much is promised.\",\"cites\":[68,71,74,117]}]},{\"editor_spans\":[{\"body\":\"Read together, the Commons statement and the Lanarkshire speech show a Prime Minister reopening two settlements his predecessors treated as closed. One is Britain's long-term relationship with the EU, now described as a conversation 'we must have'. The other is the structure of devolution in Scotland. In both cases he says the status quo is the problem. In both cases the first step is a modest, practical deal, with a larger rethink promised for later.\",\"cites\":[169,170,171,174,84]},{\"body\":\"The Scotland offer follows the English city-region model, a background Andy Burnham brings from Greater Manchester. That model sends power below the devolved government rather than through it. Calling Holyrood one of Europe's most centralised devolved administrations is also a political move: it presents Westminster as the one handing out power and Edinburgh as the one holding on to it. Working through No10 North and the Scotland Office gives the UK government a route into Scottish regions that goes round the Scottish Government. How Holyrood answers will show whether this is real partnership or competition for who gets credit with Scottish voters.\",\"cites\":[83,85,88,93,94]}]}]}"
+      }
+    ],
+    "container": null,
+    "stop_reason": "end_turn",
+    "stop_sequence": null,
+    "stop_details": null,
+    "usage": {
+      "input_tokens": 2,
+      "cache_creation_input_tokens": 405,
+      "cache_read_input_tokens": 11273,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 405,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 1958,
+      "output_tokens_details": {
+        "thinking_tokens": 508
+      },
+      "service_tier": "standard",
+      "inference_geo": "global",
+      "speed": "standard"
+    },
+    "diagnostics": null
+  },
+  "stop_reason": "end_turn",
+  "earlier_attempts": [
+    {
+      "act": "weaving",
+      "model": "claude-opus-5-5",
+      "request_hash": "d679a1efd08ae68530600e4e682df6790869cb0aaccd36327ddb313f97d7658f",
+      "recorded_at": "2026-11-21T08:54:47.63576Z",
+      "usage": {
+        "input_tokens": 4,
+        "output_tokens": 308,
+        "cache_read_input_tokens": 11273
+      },
+      "output": null,
+      "calls": [
+        {
+          "ID": "toolu_018aiEGD7YeTHxJGiUaKV4Sc",
+          "Name": "find",
+          "Input": {
+            "words": "Great British Railways"
+          }
+        },
+        {
+          "ID": "toolu_0128hQWcH4513p8Rsm5UCvA4",
+          "Name": "find",
+          "Input": {
+            "words": "energy ceasefire"
+          }
+        }
+      ],
+      "raw": {
+        "model": "claude-opus-5-5",
+        "id": "msg_011ChFnusPSwEeiD25or43Wa",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "thinking",
+            "thinking": "",
+            "signature": "CAQShAkKEAgUGAI4AUIIdGhpbmtpbmcSDLxOI2BDJ4SL86LDVBoMK2w/qar/g4TYXVciIjCi/q9sqANA+FVvpQRkpVgKL/vVPJ2DynNsOXBNVZpCq9Ps9kp2Xebhb1yJ0/65Fe0qoQiawfokKuYig2eiThoDtyoBZ78V/sO3CKEY+JHLOh4kQcnqMgWiTwKNJAVdMaZ0VaglyiqJDdyjr0P2av6i9uH78g093qsttMT1W+J8ebvTLFSAsmD4WRWFOLfF8Klp9mF+JY21ooORG6MhOp8lgtLFVCMZYTnevNoYw4+gLD81xmDjM0IhBXcm/aY6SqpazSTYJPSsY1gvogoQhbteoy/rot5gbH1WZ4+TQU4i4ne6qtqHS4M3aFxoIo/kk7jZdhkFgVOHXGx7ArvkrgQM0ibhc9YDLjoxWHv/s+Fp62iYv2dmBpHafBIrH+2GBbEJ229WhkTdTHCS4bKSzkEFal2mL9+Mhr6Mjt0k2TdHtELBYBgqxTP8RMf63NuUzr8Zv3pBgQce+72ojxhHPDi1+qyHVvMwUzr/ZhxM8E4ApDJbKAp+sWaKq4Agg84oFNsrKwEXgM4jRBfLxJleEzwQqhjIFu+kV5zSWa9M4b6SjxN3bH6ZH+rQ2at7KglqQVlE1Mk+x60k9hk+laCK+CMPSxNJ+StV9ncON09JmMHfSWjZE8Wf4HGlleGGEYBbwjm3vhEohwmmDuTq4bB3NXbO7BvfnFOTf2k/Y2ztZ8OVzgs6Chl8e+9Z5KrV0Fq1hiQYY7AqdHwnLRiWjFyMS41O/xp5rK6YKadmniFoqn6TIOsqiMdXQQyQtGqYW4jLUmElLAKrcvGdIPyqJ0brHWaS1p+yfV/EU1TwIHyo8q1zWZcZh3JSjqCoH9MHtHZzapw2L8GGahy/iNyv6P4XBwRMrcJL6bTlOYhhs18yRTxJO01QrC+XwgCbQ5ywE0pVhucwV0Odx3PaGGDgAdm6G1vJ9h2tmww7bRLHpo7gf4XZROKYY9ddZI4fqO0obTLJCkce51Fg6JZvNMhYWh8VieG1OUCBmVlx2N6ivWy016/Nq+d/bVafqTtrP7y3FPD//v8dGF2T6dp8zZ/2eYS765joDb+IT7TAyw9uNAaTLUCotRVxmy4A54BSuPqpQ6UMIhlB2tfk+znLJasOPVUqnUjxGWX8qGp+GUCqjqmxTdf5uRg5BXozKfRE4pP05vlailcvy/j2iCYDM03sfxu3/Mvt6DX1SB3oC7MnoaaL94VxgxCrtWHJH7f5FpX4ZjALA+at5hhcCQ6aBJ+UKxcHcx+DXssSsVL9dd1iyv8goFVLc7h8gczmJSKITNwp5M/frYiiCp/4V/vXMto4cK2t7ahZAui/ix3DKwjJ1uxfgZcTij0Q+ixqHZKxnxuKaZ7HgbJpdtzEJhbAL4fPd5bRk88pDmMf8Os5yEW2vUnAj8gK2E3Nura9slR3bapxG8OF5G/pVFIv2i3GmmVCqCwTp9IBVYYenyPmezvkQ/gy+MFxwvr8XZswP5k056DJWhToVxSJ3zIvGAE="
+          },
+          {
+            "type": "tool_use",
+            "id": "toolu_018aiEGD7YeTHxJGiUaKV4Sc",
+            "name": "find",
+            "input": {
+              "words": "Great British Railways"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          },
+          {
+            "type": "tool_use",
+            "id": "toolu_0128hQWcH4513p8Rsm5UCvA4",
+            "name": "find",
+            "input": {
+              "words": "energy ceasefire"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ],
+        "container": null,
+        "stop_reason": "tool_use",
+        "stop_sequence": null,
+        "stop_details": null,
+        "usage": {
+          "input_tokens": 4,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 11273,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 308,
+          "output_tokens_details": {
+            "thinking_tokens": 209
+          },
+          "service_tier": "standard",
+          "inference_geo": "global",
+          "speed": "standard"
+        },
+        "diagnostics": null
+      },
+      "stop_reason": "tool_use"
+    }
+  ]
 }

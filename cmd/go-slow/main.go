@@ -121,6 +121,9 @@ func run(log *slog.Logger) error {
 	})
 	ed := editor.New(editor.Deps{
 		Store: store, Model: models, Weavings: store, Namings: store, ModelFor: models.ModelFor, Log: log,
+		// A weaving run the Owner asked for with --max-usd is held to it
+		// over its turns, priced as the weave command priced it.
+		PriceOf: claude.PriceOf,
 	})
 	// The acts that call a model run in batches: submitted after a Collection run, and
 	// their results applied on later runs as they arrive. One batch carries

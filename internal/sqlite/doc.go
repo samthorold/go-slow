@@ -86,6 +86,18 @@
 // its request hash). A kept call and a pending request also keep the effort
 // asked for (effort, ” for none).
 //
+// A run is a conversation (0038_weaving_conversation.sql): a kept call and a
+// pending request keep a conversation's tools and messages as one text
+// (conversation, JSON in call_texts; NULL for a request that is none), a
+// kept call the tools its response called (calls), and a turn that asked is
+// kept 'continued' (model_calls rebuilt to allow it). Between turns, a run's
+// conversation is work state, not an event (weaving_turns: editor.WeavingTurns
+// as JSON, one row a turn); WeavingInProgress is the newest of a run neither
+// written nor marked failed. StoriesCutThrough is every Cut through one
+// given, whenever collected: the earlier Stories a run's asks are answered
+// from. weaving_caps keeps the most a run the Owner asked for may spend
+// (KeepWeavingCap, WeavingCap).
+//
 // A Story's Name (0035_naming.sql, namings.go) is an event of kind
 // story_name (story_names: the Story, its words and its Judge; kind name is
 // a hydration's). StoriesMade and StoryMade give each Story its newest Name and

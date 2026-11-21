@@ -295,7 +295,20 @@ func requestBytes(req Request) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	return int64(len(req.Instructions) + len(schema) + len(req.Input)), nil
+	n := int64(len(req.Instructions) + len(schema) + len(req.Input))
+	if len(req.Tools) > 0 || len(req.Messages) > 0 {
+		// A conversation's turn sends its tools and the conversation so far,
+		// as the storage adapter keeps them.
+		conv, err := json.Marshal(struct {
+			Tools    []Tool    `json:",omitempty"`
+			Messages []Message `json:",omitempty"`
+		}{req.Tools, req.Messages})
+		if err != nil {
+			return 0, err
+		}
+		n += int64(len(conv))
+	}
+	return n, nil
 }
 
 // ErrOverCap is a run whose estimate is over the most it may spend.

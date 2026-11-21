@@ -21,15 +21,18 @@ import (
 //
 //	weave [--since YYYY-MM-DD] [--confirm --max-usd N]
 //
-// Without --confirm it is a dry run: it prints what the run would be shown
-// (the Stories the Editor made, and each Story cut since the last run, by its
-// Item's title and date) and its estimated price at batch rates, and calls
-// no model and writes nothing. With --confirm it submits the run as a batch,
-// keyed by today in the time zone TZ, whatever the time of day; the app
-// applies its result after a Collection run once the batch ends, and names
-// its Stories as usual. It is refused, writing nothing, when its estimate is
+// Without --confirm it is a dry run: it prints what the run's first turn
+// would be shown (each Story cut since the last run, by its Item's title and
+// date) and that turn's estimated price at batch rates, saying that later
+// turns depend on what the model asks, and calls no model and writes
+// nothing. With --confirm it submits the run's first turn as a batch, keyed
+// by today in the time zone TZ, whatever the time of day, keeping --max-usd
+// as the run's cap; the app applies each turn after a Collection run once
+// its batch ends, submits the next while the model asks, gives the run up
+// when a next turn would take it over its cap, and names its Stories as
+// usual. It is refused, writing nothing, when the first turn's estimate is
 // over --max-usd, when today's run has been written or marked failed, when a
-// weaving run's batch is pending, or when nothing awaits weaving.
+// weaving run is under way, or when nothing awaits weaving.
 //
 // --since moves the switch to Stories back to the day, in TZ, for a Record
 // not yet woven: it keeps a new switch through the newest Cut of an Item
@@ -95,8 +98,8 @@ func weave(ctx context.Context, log *slog.Logger, args []string, d adminDeps) er
 			return fmt.Errorf("weave: %w", err)
 		}
 		p := &printer{w: d.Stdout}
-		p.f("weave today's run, %s, on %s: shown %d Stories made and %d Stories cut\n",
-			run.Key, model, len(run.Made), len(run.Stories))
+		p.f("weave today's run, %s, on %s: its first turn shown the %d Stories cut since the last run\n",
+			run.Key, model, len(run.Stories))
 		for _, s := range run.Stories {
 			date := "undated"
 			if !s.Item.Published.IsZero() {
@@ -114,6 +117,7 @@ func weave(ctx context.Context, log *slog.Logger, args []string, d adminDeps) er
 			return err
 		}
 		printEstimate(p, est)
+		p.f("that is the first turn's: later turns depend on what the model asks, and --max-usd caps the whole run\n")
 		if !*confirm {
 			p.f("dry run: no model was called and nothing written. Run again with --confirm --max-usd N to submit it.\n")
 			return p.err
@@ -128,6 +132,11 @@ func weave(ctx context.Context, log *slog.Logger, args []string, d adminDeps) er
 				return err
 			}
 			p.f("switch to Stories moved back to %s\n", *since)
+		}
+		// The cap is kept before the run is submitted, so the app's batch
+		// runner holds every later turn to it.
+		if err := store.KeepWeavingCap(ctx, run.Key, *maxUSD); err != nil {
+			return err
 		}
 		batches := editor.NewBatches(editor.BatchDeps{
 			Store: store, Batcher: d.Batchers(cfg.AnthropicAPIKey, "weaving", model), ModelFor: modelFor, Log: log,

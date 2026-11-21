@@ -1,6 +1,10 @@
 // Package claude is the model adapter for Claude, through Anthropic's
 // Messages API. It answers the Editor's model port with structured output
-// against the act's own schema; nothing of Anthropic's types leaves it.
+// against the act's own schema; nothing of Anthropic's types leaves it. A
+// conversation's turn (weaving's) is a request like any other, carrying
+// strict tools beside its output format and the turns before it, passed
+// back as they came (Model.params), and answered with the tools it called
+// beside its text (answer).
 //
 // It speaks the Messages API and the Message Batches API (Options.ActModels
 // sends each request of a batch to its act's model) through
@@ -24,6 +28,7 @@ import (
 
 	"github.com/anthropics/anthropic-sdk-go"
 	"github.com/anthropics/anthropic-sdk-go/option"
+	"github.com/anthropics/anthropic-sdk-go/packages/param"
 
 	"github.com/samthorold/go-slow/internal/editor"
 )
@@ -88,7 +93,11 @@ func New(o Options) *Model {
 // input as the user's turn, and its schema as the required output format.
 // A refusal or an answer cut off at its length is an error, never output.
 func (m *Model) Complete(ctx context.Context, r editor.Request) (editor.Response, error) {
-	msg, err := m.client.Messages.New(ctx, m.params(r))
+	p, err := m.params(r)
+	if err != nil {
+		return editor.Response{}, fmt.Errorf("%s on %s: %w", r.Act, m.ModelFor(r.Act), err)
+	}
+	msg, err := m.client.Messages.New(ctx, p)
 	if err != nil {
 		return editor.Response{}, fmt.Errorf("%s on %s: %w", r.Act, m.ModelFor(r.Act), err)
 	}
@@ -101,8 +110,15 @@ func (m *Model) Complete(ctx context.Context, r editor.Request) (editor.Response
 
 // params are an act's call as a message: its instructions as the system
 // prompt, its input as the user's turn, its schema as the output format.
-func (m *Model) params(r editor.Request) anthropic.MessageNewParams {
-	return anthropic.MessageNewParams{
+// A conversation's turn (weaving's) also carries its tools, as strict tools
+// beside the output format, and the conversation after its input: each turn
+// the model took, passed back exactly as it came (its thinking included, as
+// the API requires), and the tools' results as the user's turn after it. It
+// is cached, the top-level marker placing the breakpoint on its last block,
+// since each turn sends everything the turn before it sent; a request that
+// is no conversation is sent as it always was.
+func (m *Model) params(r editor.Request) (anthropic.MessageNewParams, error) {
+	p := anthropic.MessageNewParams{
 		Model:     anthropic.Model(m.ModelFor(r.Act)),
 		MaxTokens: maxTokens,
 		System:    []anthropic.TextBlockParam{{Text: r.Instructions}},
@@ -116,18 +132,60 @@ func (m *Model) params(r editor.Request) anthropic.MessageNewParams {
 			Effort: anthropic.OutputConfigEffort(r.Effort),
 		},
 	}
+	if len(r.Tools) == 0 && len(r.Messages) == 0 {
+		return p, nil
+	}
+	for _, t := range r.Tools {
+		props := t.Schema["properties"]
+		required, _ := t.Schema["required"].([]string)
+		extra := map[string]any{}
+		for k, v := range t.Schema {
+			if k != "type" && k != "properties" && k != "required" {
+				extra[k] = v
+			}
+		}
+		p.Tools = append(p.Tools, anthropic.ToolUnionParam{OfTool: &anthropic.ToolParam{
+			Name:        t.Name,
+			Description: param.NewOpt(t.Description),
+			Strict:      param.NewOpt(true),
+			InputSchema: anthropic.ToolInputSchemaParam{Properties: props, Required: required, ExtraFields: extra},
+		}})
+	}
+	for _, msg := range r.Messages {
+		switch {
+		case msg.Assistant != nil:
+			var turn anthropic.Message
+			if err := json.Unmarshal(msg.Assistant.Raw, &turn); err != nil {
+				return p, fmt.Errorf("a turn not given back as it came: %w", err)
+			}
+			p.Messages = append(p.Messages, turn.ToParam())
+		case msg.Results != nil:
+			blocks := make([]anthropic.ContentBlockParamUnion, 0, len(msg.Results))
+			for _, res := range msg.Results {
+				blocks = append(blocks, anthropic.NewToolResultBlock(res.CallID, res.Content, res.IsError))
+			}
+			p.Messages = append(p.Messages, anthropic.NewUserMessage(blocks...))
+		default:
+			p.Messages = append(p.Messages, anthropic.NewUserMessage(anthropic.NewTextBlock(msg.User)))
+		}
+	}
+	p.CacheControl = anthropic.NewCacheControlEphemeralParam()
+	return p, nil
 }
 
-// answer is a message as the Editor's port gives it: its text output, or
-// an error for a refusal or an answer cut off at its length. Either way the
-// message as returned comes with it, for the kept call.
+// answer is a message as the Editor's port gives it: its text output and
+// the tools it called, or an error for a refusal or an answer cut off at
+// its length. Either way the message as returned comes with it, for the
+// kept call, and for a conversation's next turn. Input tokens written to the
+// cache count as input, those read from it apart.
 func answer(msg *anthropic.Message) (editor.Response, error) {
 	res := editor.Response{
 		Model:      string(msg.Model),
 		StopReason: string(msg.StopReason),
 		Usage: editor.Usage{
-			InputTokens:  msg.Usage.InputTokens,
-			OutputTokens: msg.Usage.OutputTokens,
+			InputTokens:     msg.Usage.InputTokens + msg.Usage.CacheCreationInputTokens,
+			OutputTokens:    msg.Usage.OutputTokens,
+			CacheReadTokens: msg.Usage.CacheReadInputTokens,
 		},
 	}
 	if raw := msg.RawJSON(); raw != "" {
@@ -141,8 +199,11 @@ func answer(msg *anthropic.Message) (editor.Response, error) {
 	}
 	var text strings.Builder
 	for _, block := range msg.Content {
-		if b, ok := block.AsAny().(anthropic.TextBlock); ok {
+		switch b := block.AsAny().(type) {
+		case anthropic.TextBlock:
 			text.WriteString(b.Text)
+		case anthropic.ToolUseBlock:
+			res.Calls = append(res.Calls, editor.ToolCall{ID: b.ID, Name: b.Name, Input: b.Input})
 		}
 	}
 	res.Output = json.RawMessage(text.String())

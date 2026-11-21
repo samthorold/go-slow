@@ -2,10 +2,9 @@ package editor
 
 import "encoding/json"
 
-// The shapes of a kept conversation (KeptConversation): one an act had with
-// a model, a turn at a time, the model calling tools. Only the retired
-// Sunday read held conversations, and no act holds one now; they are kept
-// for good, so these shapes stay to read them.
+// The shapes of a conversation an act has with a model, a turn at a time,
+// the model calling tools: weaving's, a Request's Tools and Messages, kept
+// with its calls; and the retired Sunday read's, kept as KeptConversation.
 
 // Tool is a tool the model could call, by name, with input matching Schema.
 type Tool struct {
@@ -27,7 +26,8 @@ type Message struct {
 type Turn struct {
 	Text  string
 	Calls []ToolCall
-	// Raw is the turn in the provider's own form.
+	// Raw is the turn in the provider's own form, passed back to it as it
+	// came.
 	Raw   json.RawMessage
 	Model string
 	// StopReason is why the model stopped, as the provider says it.
@@ -48,4 +48,10 @@ type ToolResult struct {
 	CallID  string
 	Content string
 	IsError bool
+}
+
+// turnOf is the model's turn as a response gives it, to pass back.
+func turnOf(res Response) *Turn {
+	return &Turn{Text: string(res.Output), Calls: res.Calls, Raw: res.Raw, Model: res.Model,
+		StopReason: res.StopReason, Usage: res.Usage}
 }

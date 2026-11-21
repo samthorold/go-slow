@@ -24,12 +24,16 @@ import (
 func (m *Model) Submit(ctx context.Context, rs []editor.BatchRequest) (string, error) {
 	requests := make([]anthropic.MessageBatchNewParamsRequest, 0, len(rs))
 	for _, r := range rs {
-		p := m.params(r.Request)
+		p, err := m.params(r.Request)
+		if err != nil {
+			return "", fmt.Errorf("batch request %s: %w", r.ID, err)
+		}
 		requests = append(requests, anthropic.MessageBatchNewParamsRequest{
 			CustomID: r.ID,
 			Params: anthropic.MessageBatchNewParamsRequestParams{
 				Model: p.Model, MaxTokens: p.MaxTokens, System: p.System,
 				Messages: p.Messages, OutputConfig: p.OutputConfig,
+				Tools: p.Tools, CacheControl: p.CacheControl,
 			},
 		})
 	}

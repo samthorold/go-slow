@@ -1,6 +1,9 @@
 package editor_test
 
 import (
+	"encoding/json"
+	"errors"
+	"fmt"
 	"log/slog"
 	"strings"
 	"testing"
@@ -289,53 +292,152 @@ func wovenThenFerries(t *testing.T) (*sqlite.Store, *fakeBatcher, *editor.Batche
 	return store, batcher, b, sunday
 }
 
-func TestARunIsShownEveryStoryTheEditorMadeItsSpansMarkedAsTheEditors(t *testing.T) {
+// A run is shown only what is new: the Stories cut since the last run, and
+// nothing earlier, the Editor's own Stories included, which it reaches only
+// by asking (system design: A weaving run is shown what is new, and finds for
+// itself what bears on it).
+func TestARunIsShownOnlyTheStoriesCutSinceTheLastRunAndCanAskForEarlierOnes(t *testing.T) {
 	_, batcher, b, sunday := wovenThenFerries(t)
 	runAt(t, b, sunday)
 	if len(batcher.submitted) != 2 {
 		t.Fatalf("submitted %d batches, want Sunday's run", len(batcher.submitted))
 	}
-	want := `Story the Editor made, 2026-10-24
-S1 (from "PM speech in Scotland: 16 October 2026"): It’s good to be back in Scotland, to be here in Motherwell.
-S2 (from "PM speech in Scotland: 16 October 2026"): Scotland will get £2 billion.
-S3 (the Editor's, citing S1, S2): Money follows the Prime Minister to Scotland.
-S4 (the Editor's, citing S1): Motherwell is where it lands first.
-
-Story from "Ferries to the islands", published 2026-10-24
-S5: Ferries to Scotland's islands will run more often.
+	want := `Story from "Ferries to the islands", published 2026-10-24
+S1: Ferries to Scotland's islands will run more often.
 
 `
-	if got := batcher.submitted[1][0].Request.Input; got != want {
-		t.Errorf("Sunday's run was shown:\n%s\nwant:\n%s", got, want)
+	sent := batcher.submitted[1][0].Request
+	if sent.Input != want || len(sent.Messages) != 0 {
+		t.Errorf("Sunday's run was shown:\n%s\n%+v\nwant:\n%s", sent.Input, sent.Messages, want)
+	}
+	var tools []string
+	for _, tool := range sent.Tools {
+		tools = append(tools, tool.Name)
+	}
+	if strings.Join(tools, " ") != "find open_story" {
+		t.Errorf("the run can call %v, want find and open_story", tools)
 	}
 }
 
-func TestAStoryCitingAnEarlierEditorsSpanHoldsItByAddress(t *testing.T) {
+// asking is a turn of the model's calling tools: the name and input of
+// each, in order.
+func asking(calls ...string) editor.Response {
+	res := answered("")
+	res.StopReason = "tool_use"
+	for i := 0; i+1 < len(calls); i += 2 {
+		res.Calls = append(res.Calls, editor.ToolCall{ID: fmt.Sprintf("call-%d", i/2+1), Name: calls[i],
+			Input: json.RawMessage(calls[i+1])})
+	}
+	raw, _ := json.Marshal(map[string]any{"id": "msg", "asked": calls})
+	res.Raw = raw
+	return res
+}
+
+// respondLast answers the last batch submitted with res.
+func respondLast(batcher *fakeBatcher, res editor.Response) {
+	batcher.end(len(batcher.submitted), func(editor.BatchRequest) editor.BatchResult {
+		return editor.BatchResult{Response: res}
+	})
+}
+
+// lastSent is the request the last batch submitted sent.
+func lastSent(t *testing.T, batcher *fakeBatcher) editor.Request {
+	t.Helper()
+	if len(batcher.submitted) == 0 {
+		t.Fatal("nothing submitted")
+	}
+	return batcher.submitted[len(batcher.submitted)-1][0].Request
+}
+
+// answerOf is the result the request's last message sends back for the call.
+func answerOf(t *testing.T, req editor.Request, callID string) string {
+	t.Helper()
+	if len(req.Messages) == 0 {
+		t.Fatal("the request carries no conversation")
+	}
+	for _, r := range req.Messages[len(req.Messages)-1].Results {
+		if r.CallID == callID {
+			return r.Content
+		}
+	}
+	t.Fatalf("no result for %s in %+v", callID, req.Messages[len(req.Messages)-1])
+	return ""
+}
+
+// A run reaches an earlier Story by asking for words: the next turn, in a
+// batch of its own, is sent the conversation so far with a catalogue of
+// the earlier Stories holding them, its own included, each matched Span
+// numbered on from those shown; and its answer may cite them (system design:
+// A run asks by words, Entities and citations, and is answered with a
+// catalogue).
+func TestARunAsksForWordsAndCitesWhatTheCatalogueShowsIt(t *testing.T) {
 	store, batcher, b, sunday := wovenThenFerries(t)
 	earlier := madeStories(t, store)[0]
 	runAt(t, b, sunday)
-	answerLast(batcher, `{"stories": [{"editor_spans": [
-	  {"body": "The money and the ferries are one promise.", "cites": [3, 5]}
-	]}]}`)
+	respondLast(batcher, asking("find", `{"words": "motherwell"}`))
 	runAt(t, b, sunday.Add(time.Hour))
+
+	if len(batcher.submitted) != 3 {
+		t.Fatalf("submitted %d batches, want the run's second turn in a third", len(batcher.submitted))
+	}
+	turn2 := lastSent(t, batcher)
+	if turn2.Input != batcher.submitted[1][0].Request.Input || len(turn2.Messages) != 2 ||
+		turn2.Messages[0].Assistant == nil || len(turn2.Messages[0].Assistant.Calls) != 1 {
+		t.Fatalf("the second turn sent %+v, want the first turn's input, then its turn and the results", turn2.Messages)
+	}
+	catalogue := answerOf(t, turn2, "call-1")
+	for _, want := range []string{
+		fmt.Sprintf("Story %d, the Editor's, made 2026-10-24: \"Money follows the Prime Minister to Scotland.\"", earlier.ID),
+		"S2 (the Editor's): Motherwell is where it lands first.\n",
+		`from "PM speech in Scotland: 16 October 2026", published 2026-10-16, from govuk-number-10; cited by 2 later Editor's Spans`,
+		"S3: It’s good to be back in Scotland, to be here in Motherwell.\n",
+	} {
+		if !strings.Contains(catalogue, want) {
+			t.Errorf("the catalogue:\n%s\nwant it to hold %q", catalogue, want)
+		}
+	}
+
+	answerLast(batcher, `{"stories": [{"editor_spans": [
+	  {"body": "The money, Motherwell and the ferries are one promise.", "cites": [1, 2, 3]}
+	]}]}`)
+	runAt(t, b, sunday.Add(2*time.Hour))
 
 	stories := madeStories(t, store)
 	if len(stories) != 2 {
 		t.Fatalf("made %d Stories, want a second", len(stories))
 	}
 	cites := stories[0].Spans[0].Cites
-	if len(cites) != 2 {
-		t.Fatalf("cites %+v, want two", cites)
+	if len(cites) != 3 || cites[0].Address.EntryID != ferries.EntryID ||
+		cites[1].Of != (editor.EditorSpanAt{Story: earlier.ID, N: 2}) || cites[1].Words != "Motherwell is where it lands first." ||
+		cites[2].Address.EntryID != speech.EntryID || cites[2].Words != "It’s good to be back in Scotland, to be here in Motherwell." {
+		t.Errorf("cites %+v, want the ferries, the earlier Editor's Span by address and the speech", cites)
 	}
-	if want := (editor.EditorSpanAt{Story: earlier.ID, N: 1}); cites[0].Of != want ||
-		cites[0].Words != "Money follows the Prime Minister to Scotland." {
-		t.Errorf("cites %+v, want the earlier Editor's Span at %+v", cites[0], want)
+	calls, err := store.CallsOn(t.Context(), "weaving", "2026-10-25")
+	if err != nil || len(calls) != 2 || calls[0].Outcome != editor.Continued || calls[1].Outcome != editor.Applied ||
+		stories[0].Call != calls[1].ID || stories[0].Judge.RequestHash != editor.RequestHash(turn2, "fake-weaving") {
+		t.Errorf("calls %+v (%v), Story's call %d, want the turn that asked continued and the one that answered applied",
+			calls, err, stories[0].Call)
 	}
-	if !cites[1].Of.IsZero() || cites[1].Address.EntryID != ferries.EntryID {
-		t.Errorf("cites %+v, want the ferries", cites[1])
+}
+
+// A run's turns go a batch at a time, over as many Collection runs as it
+// takes, and while any of them is under way no other run is submitted, nor
+// asked for by the Owner, however many days pass.
+func TestARunThatAsksSpansCollectionRunsAndNoOtherRunGoesMeanwhile(t *testing.T) {
+	store, batcher, b, sunday := wovenThenFerries(t)
+	runAt(t, b, sunday)
+	respondLast(batcher, asking("find", `{"words": "Scotland"}`))
+	runAt(t, b, sunday.Add(time.Hour))
+	respondLast(batcher, asking("find", `{"words": "billion"}`, "find", `{"words": "nothing at all"}`))
+	runAt(t, b, sunday.Add(2*time.Hour))
+	if len(batcher.submitted) != 4 {
+		t.Fatalf("submitted %d batches, want the run's third turn in a fourth", len(batcher.submitted))
+	}
+	third := lastSent(t, batcher)
+	if len(third.Messages) != 4 || !strings.Contains(answerOf(t, third, "call-2"), `No earlier Story has a Span with the words "nothing at all".`) {
+		t.Errorf("the third turn sent %+v", third.Messages)
 	}
 
-	// The next run shows it citing the earlier Editor's Span by its number.
 	monday := sunday.Add(24 * time.Hour)
 	it := ferries
 	it.EntryID, it.CollectedAt = "ferries-again", monday
@@ -346,24 +448,62 @@ func TestAStoryCitingAnEarlierEditorsSpanHoldsItByAddress(t *testing.T) {
 		t.Fatal(err)
 	}
 	runAt(t, b, monday)
-	in := batcher.submitted[len(batcher.submitted)-1][0].Request.Input
-	if !strings.Contains(in, "S5 (from \"Ferries to the islands\"): Ferries to Scotland's islands will run more often.\n"+
-		"S6 (the Editor's, citing S3, S5): The money and the ferries are one promise.\n") {
-		t.Errorf("Monday's run was shown:\n%s", in)
+	if len(batcher.submitted) != 4 {
+		t.Errorf("submitted %d batches, want no run on Monday while Sunday's is under way", len(batcher.submitted))
+	}
+	if _, err := weavingEditor(store).WeaveToday(t.Context(), monday); !errors.Is(err, editor.ErrWeavingPending) {
+		t.Errorf("today's run asked for while one is under way: %v, want ErrWeavingPending", err)
+	}
+
+	answerLast(batcher, `{"stories": []}`)
+	runAt(t, b, monday.Add(time.Hour))
+	if len(batcher.submitted) != 5 || strings.Contains(lastSent(t, batcher).Input, "S2") ||
+		lastSent(t, batcher).Input != "Story from \"Ferries to the islands\", published 2026-10-24\nS1: Ferries to Scotland's islands will run more often.\n\n" {
+		t.Errorf("submitted %d batches, the last shown:\n%s\nwant Monday's run shown what was cut since Sunday's", len(batcher.submitted),
+			lastSent(t, batcher).Input)
 	}
 }
 
-func TestACitationOfANumberNotShownIsRefusedBesideTheEditorsStories(t *testing.T) {
+// A catalogue shows the first few Spans of a Story matching throughout and
+// says how many more match, so a broad ask doesn't cost what it matched.
+func TestACatalogueShowsTheFirstFewMatchesOfAStoryAndHowManyMore(t *testing.T) {
+	store := record(t)
+	it := ferries
+	it.EntryID, it.Content = "many-ferries", strings.Repeat("<p>A ferry sails.</p><p>Gulls follow.</p>", 7)
+	if _, err := store.AddItems(t.Context(), []collect.Item{it}); err != nil {
+		t.Fatal(err)
+	}
+	if err := cut.New(store).CutNew(t.Context(), saturday); err != nil {
+		t.Fatal(err)
+	}
+	batcher := &fakeBatcher{}
+	b := weavingBatches(store, batcher)
+	runAt(t, b, saturday)
+	answerLast(batcher, `{"stories": []}`)
+	runAt(t, b, saturday.Add(time.Hour))
+	sunday := saturday.Add(24 * time.Hour)
+	cutAt(t, store, sunday)
+	runAt(t, b, sunday)
+	respondLast(batcher, asking("find", `{"words": "ferry"}`))
+	runAt(t, b, sunday.Add(time.Hour))
+
+	got := answerOf(t, lastSent(t, batcher), "call-1")
+	if n := strings.Count(got, ": A ferry sails."); n != 5 || !strings.Contains(got, "… and 2 more Spans of it hold the words") {
+		t.Errorf("the catalogue shows %d matches:\n%s\nwant 5, and 2 more said", n, got)
+	}
+}
+
+func TestACitationOfANumberNotShownIsRefusedWhateverTheEditorHasMade(t *testing.T) {
 	store, batcher, b, sunday := wovenThenFerries(t)
 	runAt(t, b, sunday)
-	answerLast(batcher, `{"stories": [{"editor_spans": [{"body": "Words.", "cites": [6]}]}]}`)
+	answerLast(batcher, `{"stories": [{"editor_spans": [{"body": "Words.", "cites": [2]}]}]}`)
 	runAt(t, b, sunday.Add(time.Hour))
 
 	if got := madeStories(t, store); len(got) != 1 {
 		t.Errorf("made %d Stories, want none beside the first", len(got))
 	}
 	calls, err := store.CallsOn(t.Context(), "weaving", "2026-10-25")
-	if err != nil || len(calls) != 1 || calls[0].Outcome != editor.Refused || !strings.Contains(calls[0].Why, "S1 to S5") {
+	if err != nil || len(calls) != 1 || calls[0].Outcome != editor.Refused || !strings.Contains(calls[0].Why, "S1 to S1") {
 		t.Errorf("calls %+v (%v), want one refused for citing a Span not shown", calls, err)
 	}
 }

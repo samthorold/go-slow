@@ -1,68 +1,392 @@
 {
   "act": "weaving",
   "model": "claude-opus-5-5",
-  "request_hash": "242f0ba41bc66e4efa062d1fab7bf0bf9a43f49aa976d8dc476d82e1c536dad5",
-  "recorded_at": "2026-11-19T19:21:32.387687Z",
+  "request_hash": "8e305f50ae528c16b9b78ba6f087c1e6fca00bf3e4836caf282c36fe7ca08f03",
+  "recorded_at": "2026-11-21T08:56:05.729652Z",
   "usage": {
-    "input_tokens": 16473,
-    "output_tokens": 1679
+    "input_tokens": 2056,
+    "output_tokens": 1816,
+    "cache_read_input_tokens": 12937
   },
   "output": {
     "stories": [
       {
         "editor_spans": [
           {
-            "body": "The full Motherwell speech partly answers the test set here last week, that the offer would be genuine only if it carried money and powers. The Prime Minister did not only urge Holyrood to devolve. He offered to hand over some of Westminster's own power: a devolved model of DWP employment support, plus innovation, enterprise and employability funding matched to Scottish regions. Offering away reserved powers is a different act from lecturing another government about centralisation.",
+            "body": "The most concrete part of the Motherwell speech comes near the end and is easy to miss among the stories about steelworks and football. Burnham offers to devolve DWP employment support, but only if Scotland follows the 'Easterhouse principle' and runs it from the bottom up. Employment support is one of the few levers Westminster still holds over everyday life in Scotland, and here it is attached to a condition about how Holyrood governs. That makes the 'genuine offer' more pointed than his pre-briefing let on. Westminster is offering to hand over a reserved power, and the price is that Edinburgh agrees to push power down to local level as well. If the Scottish Government accepts, it takes on the Prime Minister's model of local delivery. If it refuses, it looks like the government holding on to power. That fits what we said about the pre-briefing: the offer works as a wedge whatever Holyrood answers.",
             "cites": [
-              51,
-              356,
-              357,
-              350,
-              267
-            ]
-          },
-          {
-            "body": "The design still has a flaw. The employment model is to be 'shaped by Holyrood', so whether the Easterhouse principle of 'names not numbers' ever reaches an estate depends on Edinburgh passing power further down. That is the same Edinburgh the Prime Minister says is too slow on local government reform. He can open the door, but he cannot walk anyone through it.",
-            "cites": [
-              357,
+              305,
+              306,
+              308,
+              310,
+              313,
+              315,
               366,
-              361,
-              326,
-              327
+              352
             ]
           },
           {
-            "body": "The more telling detail is that the National Economic Council will meet the First Ministers for the first time since he took office. Britain's arrangements between its governments are still run by occasional summits and goodwill rather than standing institutions. A promise to work together that depends on one Prime Minister's temperament will last only as long as he is in office. If he means 'place-first', he should make the joint body permanent and give it a statutory footing.",
+            "body": "His diagnosis is that Scotland, 'the most devolved nation in the UK, is itself one of the most centralised nations in Europe'. That is broadly fair, but it comes from a long history the speech leaves out. Scotland's councils were reorganised in 1996 into 32 large unitary authorities, which put local government a long way from the communities it serves. From 2007 Holyrood froze council tax for most of a decade and paid councils from the centre to make up the money. That left councils relying on Edinburgh's block grant, which Edinburgh relied on getting from London. So the centralisation he criticises was not an accident of the 1999 settlement. It came from the way money flows: every level of government in Scotland depends for its funding on the level above it. Handing down powers over 'innovation, enterprise and employability' changes little unless the funding and the power to raise money at local level change too. The speech promises the first and says nothing about the second.",
             "cites": [
-              369,
-              317,
-              318,
-              320
+              153,
+              141,
+              143,
+              144,
+              271,
+              275,
+              276,
+              299
             ]
           },
           {
-            "body": "The bus story is the most honest part of the speech. Buying Alexander Dennis vehicles meant paying 'even a little more' to sustain Scottish communities. That is a real break with the Treasury habit of buying the cheapest contract anywhere in the world, the same accounting under which Ravenscraig's closure looked rational from hundreds of miles away. If all UK procurement is to work that way, ministers should publish the premium they are willing to pay and change the value-for-money rules openly. Otherwise the old orthodoxy will quietly reassert itself.",
+            "body": "The story about the Greater Manchester buses deserves a closer look. In 2025 Alexander Dennis said it might move its Falkirk production to Scarborough because UK orders had dried up and Chinese manufacturers were winning on price. Contracts from a single mayor did not secure its future in Scotland. That is the real test of his 'circular benefits' argument. A procurement rule that only works when one politician decides to pay a bit more cannot rebuild industry. It has to be written into rules every public buyer follows, and it has to fit trade law. He promises this for 'all public procurement in the UK', but gives no mechanism, while the same speech looks forward to closer ties with the EU, whose rules limit buy-local procurement.",
             "cites": [
-              246,
-              247,
-              248,
-              249,
-              252,
-              135,
-              136
+              195,
+              196,
+              197,
+              198,
+              201,
+              190,
+              194
             ]
           },
           {
-            "body": "The numbers he cited show how slow this work will be. Ravenscraig's site is still being filled more than thirty years on. One in six young people are not in education, employment or training. Life expectancy differs by seven years across ten miles. Deindustrialisation took a generation to do this, and devolution deals will take at least as long to undo it. Judge them on a decade of results, not one summit.",
+            "body": "Ravenscraig is a good place to make the argument, but it complicates it too. The works closed in 1992, four years after British Steel was privatised. The decision was taken in a company boardroom as well as in Whitehall, and it followed a world steel market that no Scottish region could have resisted on its own. Devolving decisions to communities is not wrong, but local control alone would not have kept Ravenscraig open. The places in this speech, from Motherwell and Leigh to Aberdeen and Grangemouth today, were hollowed out by forces of capital and global trade, not just by distance from London. Moving power down to local level is the part he talks about most. Whether the money and those wider forces will follow is the part he does not answer.",
             "cites": [
-              137,
-              281,
-              168,
-              172
+              80,
+              81,
+              82,
+              84,
+              86,
+              108,
+              183,
+              174
             ]
           }
         ]
       }
     ]
-  }
+  },
+  "raw": {
+    "model": "claude-opus-5-5",
+    "id": "msg_011ChFnzKVCGZiXQoF9gF8Kj",
+    "type": "message",
+    "role": "assistant",
+    "content": [
+      {
+        "type": "thinking",
+        "thinking": "",
+        "signature": "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"
+      },
+      {
+        "type": "text",
+        "text": "{\"stories\":[{\"editor_spans\":[{\"body\":\"The most concrete part of the Motherwell speech comes near the end and is easy to miss among the stories about steelworks and football. Burnham offers to devolve DWP employment support, but only if Scotland follows the 'Easterhouse principle' and runs it from the bottom up. Employment support is one of the few levers Westminster still holds over everyday life in Scotland, and here it is attached to a condition about how Holyrood governs. That makes the 'genuine offer' more pointed than his pre-briefing let on. Westminster is offering to hand over a reserved power, and the price is that Edinburgh agrees to push power down to local level as well. If the Scottish Government accepts, it takes on the Prime Minister's model of local delivery. If it refuses, it looks like the government holding on to power. That fits what we said about the pre-briefing: the offer works as a wedge whatever Holyrood answers.\",\"cites\":[305,306,308,310,313,315,366,352]},{\"body\":\"His diagnosis is that Scotland, 'the most devolved nation in the UK, is itself one of the most centralised nations in Europe'. That is broadly fair, but it comes from a long history the speech leaves out. Scotland's councils were reorganised in 1996 into 32 large unitary authorities, which put local government a long way from the communities it serves. From 2007 Holyrood froze council tax for most of a decade and paid councils from the centre to make up the money. That left councils relying on Edinburgh's block grant, which Edinburgh relied on getting from London. So the centralisation he criticises was not an accident of the 1999 settlement. It came from the way money flows: every level of government in Scotland depends for its funding on the level above it. Handing down powers over 'innovation, enterprise and employability' changes little unless the funding and the power to raise money at local level change too. The speech promises the first and says nothing about the second.\",\"cites\":[153,141,143,144,271,275,276,299]},{\"body\":\"The story about the Greater Manchester buses deserves a closer look. In 2025 Alexander Dennis said it might move its Falkirk production to Scarborough because UK orders had dried up and Chinese manufacturers were winning on price. Contracts from a single mayor did not secure its future in Scotland. That is the real test of his 'circular benefits' argument. A procurement rule that only works when one politician decides to pay a bit more cannot rebuild industry. It has to be written into rules every public buyer follows, and it has to fit trade law. He promises this for 'all public procurement in the UK', but gives no mechanism, while the same speech looks forward to closer ties with the EU, whose rules limit buy-local procurement.\",\"cites\":[195,196,197,198,201,190,194]},{\"body\":\"Ravenscraig is a good place to make the argument, but it complicates it too. The works closed in 1992, four years after British Steel was privatised. The decision was taken in a company boardroom as well as in Whitehall, and it followed a world steel market that no Scottish region could have resisted on its own. Devolving decisions to communities is not wrong, but local control alone would not have kept Ravenscraig open. The places in this speech, from Motherwell and Leigh to Aberdeen and Grangemouth today, were hollowed out by forces of capital and global trade, not just by distance from London. Moving power down to local level is the part he talks about most. Whether the money and those wider forces will follow is the part he does not answer.\",\"cites\":[80,81,82,84,86,108,183,174]}]}]}"
+      }
+    ],
+    "container": null,
+    "stop_reason": "end_turn",
+    "stop_sequence": null,
+    "stop_details": null,
+    "usage": {
+      "input_tokens": 2,
+      "cache_creation_input_tokens": 2054,
+      "cache_read_input_tokens": 12937,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 2054,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 1816,
+      "output_tokens_details": {
+        "thinking_tokens": 644
+      },
+      "service_tier": "standard",
+      "inference_geo": "global",
+      "speed": "standard"
+    },
+    "diagnostics": null
+  },
+  "stop_reason": "end_turn",
+  "earlier_attempts": [
+    {
+      "act": "weaving",
+      "model": "claude-opus-5-5",
+      "request_hash": "2781e1952af6dcbb9d1ea4286b9fde69eb9385eaccba35fa4cf8966b6f742e0c",
+      "recorded_at": "2026-11-21T08:55:40.33222Z",
+      "usage": {
+        "input_tokens": 4,
+        "output_tokens": 228,
+        "cache_read_input_tokens": 11702
+      },
+      "output": null,
+      "calls": [
+        {
+          "ID": "toolu_01LAp5hoqPYywNZwfTY8Dd1B",
+          "Name": "find",
+          "Input": {
+            "words": "Easterhouse"
+          }
+        },
+        {
+          "ID": "toolu_01L25sZijuCYtNY3Y4c69X6t",
+          "Name": "find",
+          "Input": {
+            "words": "DWP devolution"
+          }
+        },
+        {
+          "ID": "toolu_0113NAryRjo5iuPNo49Y2sfT",
+          "Name": "find",
+          "Input": {
+            "words": "Milburn"
+          }
+        }
+      ],
+      "raw": {
+        "model": "claude-opus-5-5",
+        "id": "msg_011ChFnynfnCF49ant1ieYoq",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "thinking",
+            "thinking": "",
+            "signature": "CAQSnAYKEAgUGAI4AUIIdGhpbmtpbmcSDObocupfmwCWDscO1RoMHnybvlxVV8RI63+gIjBc3aHxCoB+gNjbOxdmuOb3j5dNifxYeuCgNihkwYuRVpzBWzlWPlr1LuVhhr8MARQquQVE7bVuWwoYQlyfwb7ziA7VMvoqsoHyU4uqSE2FRTIdcWADdzALOQl9AS5pLcP1U8HhbFXXLK0UZkP7+xB3VyZGpMIcEmNs26yzPJhoyS2/JR5/2LApnyQV3V8ZGGxslGr/LXETTHQr7DWfC7Z0+8RQLXHc/7ZMprvuIaQH+02L3t76mW+MD4ZqA0XQHeg6+EO2DDzgC0uJT8HUj1CjLHX2cvPd5D3R3fE1iwe7yaF5oSGKUjNUjMY1EXQfHngaN3y2yrAoNGFqiEv/dBvZsz+LWAVkz5z4fd7rUI9uie0OTQ0jSguzxVaVMBLj/Q2qKAo/jfmrwVIZ/eGoEPcO+W5cnXkzmtlooWixbL67nKvDxpfBDfQUzG95D9mERDcZzru/h4fMdlKWtF3dezNadnxYFEk5BAAIbcoPYIhC6Nm6rYDpwR/noIBOnImcLZ+5rPUZtwYazS8zG5FJNEyLxVX8tXxtQpkkaRlMxd/ghCktLJP7j4hovz+giPFneQTxo2U1eDSfBkny3jbc+JCalWBCCAs0NAHCMOH+b4vtfFLLMeflNqAkjk8YiNlosGDimHnlH5C7sw4hCTZJA6HOw0PryQh59rNXpOYTHuzEYxJBiHUk7goadWFeNiQ2FQP+25xEs56BgZeNDQXagllhijmoURtazyUFSYjjDhuRPXuPKjSCUlt1tSl2m40QsxPkzttvRDX9VcJhaaSU+yLW8rClpz74BkinfluA+8N11PMuvQVjiqPsp6O1xHEoiu9CpoWEW1vMNBwGhziN3xhkhSzrV61v+O4jNsLYfCIVUA/H30/Cdjlw4are7ewdnTkFbEFIFMSoU99KZXY1SH/dNmjIRJliBimC2WPDjnyL6iFSyztsis5gqsENEISN0XhVv80BfPuvOEHuVYJoDYKeyCcFj3pTnznmjg/QGAE="
+          },
+          {
+            "type": "tool_use",
+            "id": "toolu_01LAp5hoqPYywNZwfTY8Dd1B",
+            "name": "find",
+            "input": {
+              "words": "Easterhouse"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          },
+          {
+            "type": "tool_use",
+            "id": "toolu_01L25sZijuCYtNY3Y4c69X6t",
+            "name": "find",
+            "input": {
+              "words": "DWP devolution"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          },
+          {
+            "type": "tool_use",
+            "id": "toolu_0113NAryRjo5iuPNo49Y2sfT",
+            "name": "find",
+            "input": {
+              "words": "Milburn"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ],
+        "container": null,
+        "stop_reason": "tool_use",
+        "stop_sequence": null,
+        "stop_details": null,
+        "usage": {
+          "input_tokens": 4,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 11702,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 228,
+          "output_tokens_details": {
+            "thinking_tokens": 85
+          },
+          "service_tier": "standard",
+          "inference_geo": "global",
+          "speed": "standard"
+        },
+        "diagnostics": null
+      },
+      "stop_reason": "tool_use"
+    },
+    {
+      "act": "weaving",
+      "model": "claude-opus-5-5",
+      "request_hash": "f5b99082348e46d77c197728675838e9779e69b2219052992c7df9a420f99727",
+      "recorded_at": "2026-11-21T08:55:42.333899Z",
+      "usage": {
+        "input_tokens": 368,
+        "output_tokens": 143,
+        "cache_read_input_tokens": 11702
+      },
+      "output": null,
+      "calls": [
+        {
+          "ID": "toolu_01FGmDk1ZmADDKQx2T89VrjK",
+          "Name": "find",
+          "Input": {
+            "words": "devolution"
+          }
+        },
+        {
+          "ID": "toolu_01LnpADQxZze9XVZi8Tz61kB",
+          "Name": "find",
+          "Input": {
+            "words": "Ravenscraig"
+          }
+        },
+        {
+          "ID": "toolu_0184M5M1RMuoA7LEn8hPRY9f",
+          "Name": "find",
+          "Input": {
+            "words": "Scotland centralised"
+          }
+        }
+      ],
+      "raw": {
+        "model": "claude-opus-5-5",
+        "id": "msg_011ChFnz3U2oZf8tarNa17Nu",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_01FGmDk1ZmADDKQx2T89VrjK",
+            "name": "find",
+            "input": {
+              "words": "devolution"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          },
+          {
+            "type": "tool_use",
+            "id": "toolu_01LnpADQxZze9XVZi8Tz61kB",
+            "name": "find",
+            "input": {
+              "words": "Ravenscraig"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          },
+          {
+            "type": "tool_use",
+            "id": "toolu_0184M5M1RMuoA7LEn8hPRY9f",
+            "name": "find",
+            "input": {
+              "words": "Scotland centralised"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ],
+        "container": null,
+        "stop_reason": "tool_use",
+        "stop_sequence": null,
+        "stop_details": null,
+        "usage": {
+          "input_tokens": 2,
+          "cache_creation_input_tokens": 366,
+          "cache_read_input_tokens": 11702,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 366,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 143,
+          "output_tokens_details": {
+            "thinking_tokens": 0
+          },
+          "service_tier": "standard",
+          "inference_geo": "global",
+          "speed": "standard"
+        },
+        "diagnostics": null
+      },
+      "stop_reason": "tool_use"
+    },
+    {
+      "act": "weaving",
+      "model": "claude-opus-5-5",
+      "request_hash": "10b874987440f2921dc196d5bcbe9728d32b1a474205c205fd6abd282dce2aae",
+      "recorded_at": "2026-11-21T08:55:44.118988Z",
+      "usage": {
+        "input_tokens": 871,
+        "output_tokens": 93,
+        "cache_read_input_tokens": 12068
+      },
+      "output": null,
+      "calls": [
+        {
+          "ID": "toolu_01AEX1BqRfnEKeXKne8k2jcm",
+          "Name": "open_story",
+          "Input": {
+            "story": 5
+          }
+        },
+        {
+          "ID": "toolu_01J2TqP8oaA5ikmH6mpa5umf",
+          "Name": "find",
+          "Input": {
+            "words": "Holyrood"
+          }
+        }
+      ],
+      "raw": {
+        "model": "claude-opus-5-5",
+        "id": "msg_011ChFnzBykAbNVVyqMC43sm",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_01AEX1BqRfnEKeXKne8k2jcm",
+            "name": "open_story",
+            "input": {
+              "story": 5
+            },
+            "caller": {
+              "type": "direct"
+            }
+          },
+          {
+            "type": "tool_use",
+            "id": "toolu_01J2TqP8oaA5ikmH6mpa5umf",
+            "name": "find",
+            "input": {
+              "words": "Holyrood"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ],
+        "container": null,
+        "stop_reason": "tool_use",
+        "stop_sequence": null,
+        "stop_details": null,
+        "usage": {
+          "input_tokens": 2,
+          "cache_creation_input_tokens": 869,
+          "cache_read_input_tokens": 12068,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 869,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 93,
+          "output_tokens_details": {
+            "thinking_tokens": 0
+          },
+          "service_tier": "standard",
+          "inference_geo": "global",
+          "speed": "standard"
+        },
+        "diagnostics": null
+      },
+      "stop_reason": "tool_use"
+    }
+  ]
 }

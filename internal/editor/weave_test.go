@@ -33,9 +33,8 @@ func TestTodaysWeavingRunAskedForBeforeItsTimeIsSubmittedAndApplied(t *testing.T
 	if err != nil {
 		t.Fatal(err)
 	}
-	if run.Key != "2026-10-24" || len(run.Stories) != 1 || len(run.Made) != 0 {
-		t.Errorf("run keyed %q shown %d Stories cut and %d made, want today's shown the speech", run.Key,
-			len(run.Stories), len(run.Made))
+	if run.Key != "2026-10-24" || len(run.Stories) != 1 {
+		t.Errorf("run keyed %q shown %d Stories cut, want today's shown the speech", run.Key, len(run.Stories))
 	}
 	if _, err := b.Submit(ctx, run.Job, beforeWeavingAt); err != nil {
 		t.Fatal(err)
@@ -67,6 +66,55 @@ func TestTodaysWeavingRunAskedForBeforeItsTimeIsSubmittedAndApplied(t *testing.T
 	runAt(t, b, saturday)
 	if len(batcher.submitted) != 1 {
 		t.Errorf("submitted %d batches after today's run, want no second run today", len(batcher.submitted))
+	}
+}
+
+// cappedWeaving is the batch runner over weaving whose Editor prices calls
+// on claude-opus-5-5's rates, $4 and $20 a million tokens, and the run keyed
+// key capped at usd.
+func cappedWeaving(t *testing.T, store *sqlite.Store, b editor.Batcher, key string, usd float64) *editor.Batches {
+	t.Helper()
+	if err := store.KeepWeavingCap(t.Context(), key, usd); err != nil {
+		t.Fatal(err)
+	}
+	log := slog.New(slog.DiscardHandler)
+	ed := editor.New(editor.Deps{Store: store, Weavings: store, ModelFor: modelFor, Log: log,
+		PriceOf: func(string) (editor.Price, bool) { return editor.Price{InputPerMTok: 4, OutputPerMTok: 20}, true }})
+	return editor.NewBatches(editor.BatchDeps{
+		Store: store, Batcher: b, Acts: []editor.BatchAct{ed.Weaving(weavingAt)}, ModelFor: modelFor, Log: log,
+	})
+}
+
+// The Owner's --max-usd caps a run's whole conversation: a turn that asked,
+// whose next turn would take what the run has spent over its cap, gives the
+// run up, marked failed with why, and nothing more is submitted. A run under
+// its cap goes on.
+func TestARunWhoseNextTurnWouldTakeItOverItsCapIsGivenUp(t *testing.T) {
+	for name, tc := range map[string]struct {
+		usd       float64
+		submitted int
+	}{"over": {usd: 0.02, submitted: 1}, "under": {usd: 1, submitted: 2}} {
+		t.Run(name, func(t *testing.T) {
+			store := record(t)
+			batcher := &fakeBatcher{}
+			b := cappedWeaving(t, store, batcher, "2026-10-24", tc.usd)
+			runAt(t, b, saturday)
+			// 1200 tokens in and 340 out at batch rates: $0.0058; the next turn
+			// is some 1300 tokens in and 4000 out by the fallback: $0.04.
+			respondLast(batcher, asking("find", `{"words": "Motherwell"}`))
+			runAt(t, b, saturday.Add(time.Hour))
+
+			if len(batcher.submitted) != tc.submitted {
+				t.Fatalf("submitted %d batches, want %d", len(batcher.submitted), tc.submitted)
+			}
+			failed, err := store.FailedWork(t.Context())
+			if err != nil {
+				t.Fatal(err)
+			}
+			if over := len(failed) == 1 && failed[0].Act == "weaving" && strings.Contains(failed[0].Why, "over its cap of $0.02"); over != (name == "over") {
+				t.Errorf("failed work %+v", failed)
+			}
+		})
 	}
 }
 

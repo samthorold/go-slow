@@ -1,6 +1,7 @@
 package editor_test
 
 import (
+	"encoding/json"
 	"log/slog"
 	"strconv"
 	"strings"
@@ -104,25 +105,28 @@ func TestNoCommandIsShownAName(t *testing.T) {
 	sunday := saturday.Add(24 * time.Hour)
 	cutAt(t, store, sunday)
 	runAt(t, b, sunday)
-	// The run is shown the named Story: its Editor's Spans, but not its Name.
-	weaving := batcher.submitted[2][0].Request.Input
-	if !strings.Contains(weaving, "S3 (the Editor's, citing S1, S2): Money follows the Prime Minister to Scotland.") {
-		t.Fatalf("the second weaving run was not shown the named Story:\n%s", weaving)
-	}
-	// Its Story cites the named Story's first Editor's Span, S3.
-	answerLast(batcher, `{"stories": [{"editor_spans": [{"body": "Ferries follow the money.", "cites": [3, 5]}]}]}`)
+	// The run finds the named Story by asking: its Editor's Spans, but not
+	// its Name.
+	respondLast(batcher, asking("find", `{"words": "money follows"}`))
 	runAt(t, b, sunday.Add(time.Hour))
-	if len(batcher.submitted) != 4 {
-		t.Fatalf("submitted %d batches, want a second weaving and its naming", len(batcher.submitted))
+	if found := answerOf(t, lastSent(t, batcher), "call-1"); !strings.Contains(found,
+		"S2 (the Editor's): Money follows the Prime Minister to Scotland.") {
+		t.Fatalf("the second weaving run did not find the named Story:\n%s", found)
 	}
-	naming := batcher.submitted[3][0].Request.Input
+	// Its Story cites the named Story's first Editor's Span, S2.
+	answerLast(batcher, `{"stories": [{"editor_spans": [{"body": "Ferries follow the money.", "cites": [1, 2]}]}]}`)
+	runAt(t, b, sunday.Add(2*time.Hour))
+	if len(batcher.submitted) != 5 {
+		t.Fatalf("submitted %d batches, want a second weaving's two turns and its naming", len(batcher.submitted))
+	}
+	naming := batcher.submitted[4][0].Request.Input
 	if !strings.Contains(naming, "cites the Editor's earlier words: Money follows the Prime Minister to Scotland.") {
 		t.Errorf("the second naming was not shown the earlier Editor's Span it cites as the Editor's:\n%s", naming)
 	}
 	for _, batch := range batcher.submitted {
 		for _, r := range batch {
-			if strings.Contains(r.Request.Input, "Scotland's £2 billion") ||
-				strings.Contains(r.Request.Instructions, "Scotland's £2 billion") {
+			b, _ := json.Marshal(r.Request)
+			if strings.Contains(string(b), "Scotland's £2 billion") {
 				t.Errorf("%s was shown a Name:\n%s", r.Request.Act, r.Request.Input)
 			}
 		}

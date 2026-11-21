@@ -166,8 +166,9 @@ func TestAWeaveDryRunPrintsWhatTheRunIsShownAndItsPriceAndWritesNothing(t *testi
 		t.Fatal(err)
 	}
 
-	for _, want := range []string{"2026-10-24", "claude-opus-5-5", "0 Stories made", "1 Stories cut",
-		"PM speech in Scotland", "batch rates", "prices as of 2026-10-06", "dry run", "--confirm"} {
+	for _, want := range []string{"2026-10-24", "claude-opus-5-5", "its first turn shown the 1 Stories cut",
+		"PM speech in Scotland", "batch rates", "prices as of 2026-10-06", "later turns depend on what the model asks",
+		"--max-usd caps the whole run", "dry run", "--confirm"} {
 		if !strings.Contains(r.out, want) {
 			t.Errorf("the dry run printed no %q:\n%s", want, r.out)
 		}
@@ -205,6 +206,15 @@ func TestAWeaveRunIsSubmittedAsAPendingBatchKeyedByTodayBeforeItsTime(t *testing
 	}
 	if !strings.Contains(r.out, "batch-weave") {
 		t.Errorf("the run printed no batch:\n%s", r.out)
+	}
+	// The cap is kept with the run, so the app holds its later turns to it.
+	store, err := sqlite.Open(t.Context(), db)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = store.Close() }()
+	if usd, capped, err := store.WeavingCap(t.Context(), "2026-10-24"); err != nil || !capped || usd != 1 {
+		t.Errorf("the run's cap is $%v (%v, %v), want $1 kept", usd, capped, err)
 	}
 }
 
@@ -262,7 +272,7 @@ func TestWeaveRefusesWritingNothing(t *testing.T) {
 		"a malformed day": {switchedRecord, october(25), []string{"--since", "22 October"}, "--since"},
 		"a woven Record": {wovenRecord, october(26), []string{"--since", "2026-10-22", "--confirm", "--max-usd", "1"},
 			"woven"},
-		"a run pending": {pendingRecord, october(26), []string{"--confirm", "--max-usd", "1"}, "pending"},
+		"a run pending": {pendingRecord, october(26), []string{"--confirm", "--max-usd", "1"}, "under way"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			db := filepath.Join(t.TempDir(), "go-slow.db")

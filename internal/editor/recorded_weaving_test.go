@@ -5,8 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"math"
 	"path/filepath"
+	"regexp"
 	"slices"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -17,22 +20,29 @@ import (
 	"github.com/samthorold/go-slow/internal/sqlite"
 )
 
-// The recorded runs of weaving. Its input is the Stories the fixture Items'
-// Cuts made, cut by the sentence cutter, which is plain code, each Span
-// hydrated by its Item's hydration: weaving rests on hydration's recordings, and
-// is recorded over its own frozen copies of them,
+// The recorded runs of weaving. A run is a conversation: its first turn is
+// shown the Stories the fixture Items' Cuts made, cut by the sentence cutter,
+// which is plain code, each Span hydrated by its Item's hydration, and it
+// reaches earlier Stories by asking (find, open_story), each turn a request
+// of its own. Weaving rests on hydration's recordings, and is recorded over
+// its own frozen copies of them,
 // testdata/recorded/weaving/inputs/hydration/<fixture>.json, each a fixture's
 // first sample (collectAndCut). The compatibility check feeds hydration's
 // current recordings to weaving (recorded_compatibility_test.go). The fixtures
 // are two runs, a day apart, over the fixture Items in the order they were
 // published (weavingRuns): the first shown the Items published up to 15
-// October, with nothing the Editor has made; the second the speech of 16
-// October, and the Stories the first run made, carried on by its first
-// sample to pass its checks, so citing an earlier Editor's Span is
-// exercised. Each run is sampled five times (dailyRule), each sample as in
-// use, through the batch runner, up to MaxAttempts against the act's checks,
-// and kept under testdata/recorded/weaving/<run>/. Recording costs five calls
-// per run on Claude Opus 5.5, and more for attempts the checks refuse:
+// October, with nothing earlier in the Record; the second the speech of 16
+// October, its asks answered from the earlier Record the first run left:
+// the first run's Cut Stories (some bearing on the speech, Burnham's
+// devolution and his Commons statement; some not, a Lord-Lieutenant's
+// appointment) and the Stories the first run made, carried on by its first
+// sample to pass its checks, all of it made from committed recordings, so
+// the asks' answers, and each turn's request, are the same on every replay.
+// Each run is sampled five times (dailyRule), each sample as in use,
+// through the batch runner, every turn and every attempt against the act's
+// checks, and kept under testdata/recorded/weaving/<run>/, its calls in the
+// order made. Recording costs a call per turn of each sample on Claude Opus
+// 5.5, and more for attempts the checks refuse:
 //
 //	go test -count=1 -timeout 90m ./internal/editor -run '^TestRecordedWeaving$' -record
 //
@@ -42,8 +52,9 @@ import (
 //
 // What it asserts is limited to what code can say: each run passes its
 // checks within its attempts, and every citation of every Story it makes is
-// a Span the run was shown, with the words it was shown. Whether an opinion
-// is any good, or that a run makes any Story, is read in use.
+// a Span the run was shown, with the words it was shown; and at least one
+// sample of the second run reaches an earlier Story through an ask. Whether
+// an opinion is any good, or that a run makes any Story, is read in use.
 func TestRecordedWeaving(t *testing.T) {
 	t.Parallel()
 	root := ownDirectory(t, "weaving")
@@ -58,7 +69,7 @@ func TestRecordedWeaving(t *testing.T) {
 }
 
 // weavingCommand is how weaving's recorded test is re-recorded.
-var weavingCommand = rerecordCmd{"TestRecordedWeaving", "WEAVING_MODEL"}
+var weavingCommand = rerecordCmd{test: "TestRecordedWeaving", modelVar: "WEAVING_MODEL", conversation: true}
 
 // weavingRun is one of weaving's fixtures: the Items collected and cut at
 // at, and woven at at.
@@ -105,14 +116,15 @@ func weavingVerdicts(t *testing.T, root string, runs []weavingRun, live editor.M
 	var errs []error
 	for i, r := range runs {
 		thread := 0
+		reached := 0
 		errs = append(errs, sampledOn(t, dir, r.name, dailyRule, weavingCommand, live, model, report, func(m *sampleModel) sampleResult {
 			store := copyOfRecord(t, carried)
 			collectAndCut(t, store, r, frozen)
-			shown := shownToWeave(t, store)
-			if i > 0 {
-				editorsSpansPresent(t, r.name, shown)
-			}
+			shown := shownAsNew(t, store)
 			before := madeIDs(t, store)
+			if i > 0 && len(before) == 0 {
+				t.Fatalf("%s: the earlier Record holds no Story the Editor made: the run before it, carried on by its first sample to pass, made none", r.name)
+			}
 			passed, err := weave(t, store, m, r.at)
 			if err != nil {
 				t.Fatal(err)
@@ -122,6 +134,9 @@ func weavingVerdicts(t *testing.T, root string, runs []weavingRun, live editor.M
 			}
 			if thread == 0 {
 				thread = sampleNumber(m.path)
+			}
+			if shownByAsks(t, store, r.at.Format(time.DateOnly), shown) {
+				reached++
 			}
 			p := properties{}
 			citedShown := p.property("every citation is a Span the run was shown")
@@ -149,6 +164,9 @@ func weavingVerdicts(t *testing.T, root string, runs []weavingRun, live editor.M
 		})...)
 		if thread == 0 {
 			return append(errs, fmt.Errorf("%s: no sample passes its checks, and the runs after it rest on one: they are not judged", r.name))
+		}
+		if i > 0 && reached == 0 {
+			errs = append(errs, fmt.Errorf("%s: no sample reaches an earlier Story through an ask", r.name))
 		}
 		if i == len(runs)-1 {
 			break
@@ -247,13 +265,12 @@ type citedAt struct {
 	of editor.EditorSpanAt
 }
 
-// shownToWeave is every Span a weaving run over store would be shown now,
-// with its words as written: those of the Stories cut since the last run
-// that their hydration does not Reject, and those of the Stories the Editor
-// made, its Editor's Spans and the Spans they cite. It reads the Record, not
-// the request, so a Story holding a citation the run was not shown fails,
+// shownAsNew is every Span a weaving run over store would be shown as new
+// now, with its words as written: those of the Stories cut since the last
+// run that their hydration does not Reject. It reads the Record, not the
+// request, so a Story holding a citation the run was not shown fails,
 // however the act numbered it.
-func shownToWeave(t *testing.T, store *sqlite.Store) map[citedAt]string {
+func shownAsNew(t *testing.T, store *sqlite.Store) map[citedAt]string {
 	t.Helper()
 	ctx := t.Context()
 	shown := map[citedAt]string{}
@@ -273,11 +290,57 @@ func shownToWeave(t *testing.T, store *sqlite.Store) map[citedAt]string {
 			}
 		}
 	}
+	return shown
+}
+
+// answeredStory is a Story an ask's answer names, a catalogue's entry or the
+// Story opened, at the start of a line.
+var answeredStory = regexp.MustCompile(`(?m)^\s*Story (\d+),`)
+
+// shownByAsks adds to shown every Span of each earlier Story the answers to
+// the run keyed key's asks named, as its kept calls hold them, with its
+// words as written: a Story a Cut made, its Spans; one the Editor made, its
+// Editor's Spans and what they cite. It reports whether any answer named
+// one: whether the run reached an earlier Story through an ask. A catalogue
+// numbers only the Spans that match, so this is looser than what the run was
+// shown: it catches a citation of a Story no ask reached.
+func shownByAsks(t *testing.T, store *sqlite.Store, key string, shown map[citedAt]string) bool {
+	t.Helper()
+	ctx := t.Context()
+	calls, err := store.CallsOn(ctx, "weaving", key)
+	if err != nil {
+		t.Fatal(err)
+	}
+	named := map[int64]bool{}
+	for _, c := range calls {
+		for _, m := range c.Request.Messages {
+			for _, r := range m.Results {
+				for _, id := range answeredStory.FindAllStringSubmatch(r.Content, -1) {
+					n, _ := strconv.ParseInt(id[1], 10, 64)
+					named[n] = true
+				}
+			}
+		}
+	}
+	cuts, err := store.StoriesCutThrough(ctx, math.MaxInt64)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, s := range cuts {
+		if named[s.CutID] {
+			for _, sp := range s.Spans {
+				shown[citedAt{at: editor.Address{SourceID: s.Item.SourceID, EntryID: s.Item.EntryID, Span: sp}}] = cut.Words(s.Item.Content, sp)
+			}
+		}
+	}
 	made, err := store.StoriesMade(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
 	for _, st := range made {
+		if !named[st.ID] {
+			continue
+		}
 		for n, es := range st.Spans {
 			shown[citedAt{of: editor.EditorSpanAt{Story: st.ID, N: n + 1}}] = es.Body
 			for _, c := range es.Cites {
@@ -285,19 +348,7 @@ func shownToWeave(t *testing.T, store *sqlite.Store) map[citedAt]string {
 			}
 		}
 	}
-	return shown
-}
-
-// editorsSpansPresent fails unless the run is shown an Editor's Span, the
-// case the run is there for.
-func editorsSpansPresent(t *testing.T, run string, shown map[citedAt]string) {
-	t.Helper()
-	for c := range shown {
-		if !c.of.IsZero() {
-			return
-		}
-	}
-	t.Fatalf("%s is shown no Editor's Span: the run before it, carried on by its first sample to pass, made no Story", run)
+	return len(named) > 0
 }
 
 // madeIDs are the ids of the Stories the Editor has made in store.
@@ -314,9 +365,15 @@ func madeIDs(t *testing.T, store *sqlite.Store) []int64 {
 	return ids
 }
 
+// maxTurns bounds the batch runner's turns a sample of weaving is given,
+// every turn of its conversation and every attempt at one: a sample still
+// under way after them has not passed.
+const maxTurns = 40
+
 // weave runs one sample of weaving on m over store, as in use: through the
 // batch runner from at, its batches answered at once by m, turn after turn
-// until no batch is pending, up to MaxAttempts against the act's checks. It
+// until no batch is pending (each turn of the conversation, and up to
+// MaxAttempts of each against the act's checks), at most maxTurns. It
 // reports whether the run's result was written. An error is the Record's, or
 // a live call lost (errLost), which stops the sample unkept.
 func weave(t *testing.T, store *sqlite.Store, m *sampleModel, at time.Time) (bool, error) {
@@ -327,7 +384,7 @@ func weave(t *testing.T, store *sqlite.Store, m *sampleModel, at time.Time) (boo
 	ed := editor.New(editor.Deps{Store: store, Weavings: store, ModelFor: modelFor, Log: log})
 	b := editor.NewBatches(editor.BatchDeps{Store: store, Batcher: &modelBatcher{model: m, prefix: at.Format(time.DateOnly)},
 		Acts: []editor.BatchAct{ed.Weaving(weavingAt)}, ModelFor: modelFor, Log: log})
-	for turn := range editor.MaxAttempts + 1 {
+	for turn := range maxTurns {
 		if err := b.RunWaiting(ctx, at.Add(time.Duration(turn)*time.Minute)); err != nil {
 			return false, err
 		}

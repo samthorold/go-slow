@@ -122,12 +122,37 @@ func TestAskingWhatCitesAStoryTheRunWasNeverShownIsAnErrorItReads(t *testing.T) 
 	if got := resultOf(t, lastSent(t, batcher), "call-1"); !got.IsError {
 		t.Errorf("asking again, after an error named it, is answered %+v, want an error", got)
 	}
-	// Opened from a catalogue, or listed in one, a Story is shown.
-	respondLast(batcher, asking("open_story", fmt.Sprintf(`{"story": %d}`, speechCut)))
+	// Listed in a catalogue, or opened from one, a Story is shown.
+	respondLast(batcher, asking("find", `{"words": "motherwell"}`))
 	runAt(t, b, monday.Add(3*time.Hour))
 	respondLast(batcher, ask)
 	runAt(t, b, monday.Add(4*time.Hour))
 	if got := resultOf(t, lastSent(t, batcher), "call-1"); got.IsError {
-		t.Errorf("asking what cites the speech once opened is answered %+v, want a catalogue", got)
+		t.Errorf("asking what cites the speech once listed is answered %+v, want a catalogue", got)
+	}
+}
+
+// Opening a Story no answer named is an error the run reads, as asking what
+// cites one is, and the run carries on: a Story is opened from a catalogue
+// (system design: A run asks by words, Entities and citations, and is
+// answered with a catalogue), and once one lists it, it opens.
+func TestOpeningAStoryNoAnswerNamedIsAnErrorItReads(t *testing.T) {
+	store, batcher, b, monday := citedThenCitedAgain(t)
+	speechCut := cutOf(t, store, speech.SourceID, speech.EntryID)
+	runAt(t, b, monday)
+	open := asking("open_story", fmt.Sprintf(`{"story": %d}`, speechCut))
+	respondLast(batcher, open)
+	runAt(t, b, monday.Add(time.Hour))
+	if got := resultOf(t, lastSent(t, batcher), "call-1"); !got.IsError ||
+		!strings.Contains(got.Content, fmt.Sprintf("No Story shown to you is numbered %d", speechCut)) {
+		t.Errorf("opening the speech, never named, is answered %+v, want an error", got)
+	}
+	respondLast(batcher, asking("find", `{"words": "motherwell"}`))
+	runAt(t, b, monday.Add(2*time.Hour))
+	respondLast(batcher, open)
+	runAt(t, b, monday.Add(3*time.Hour))
+	if got := resultOf(t, lastSent(t, batcher), "call-1"); got.IsError ||
+		!strings.HasPrefix(got.Content, fmt.Sprintf("Story %d, ", speechCut)) {
+		t.Errorf("opening the speech once a catalogue listed it is answered %+v, want it whole", got)
 	}
 }

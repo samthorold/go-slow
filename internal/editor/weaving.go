@@ -19,7 +19,7 @@ import (
 // version is a new Judge (system design: Every Judgement carries its Judge).
 // Change it with weavingInstructions, weavingSchema, weavingTools,
 // checkWeaving, weavingInput or what the asks answer (weaving_asks.go).
-const WeavingVersion = 6
+const WeavingVersion = 7
 
 // weavingAct names weaving, as its requests, calls and work do.
 const weavingAct = "weaving"

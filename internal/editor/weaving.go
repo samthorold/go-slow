@@ -19,7 +19,7 @@ import (
 // version is a new Judge (system design: Every Judgement carries its Judge).
 // Change it with weavingInstructions, weavingSchema, weavingTools,
 // checkWeaving, weavingInput or what the asks answer (weaving_asks.go).
-const WeavingVersion = 4
+const WeavingVersion = 5
 
 // weavingAct names weaving, as its requests, calls and work do.
 const weavingAct = "weaving"
@@ -191,6 +191,10 @@ type WeavingStore interface {
 	// WeavingRan reports whether the run keyed key has had its result
 	// written or been marked failed.
 	WeavingRan(ctx context.Context, key string) (bool, error)
+	// EntitiesNamed is the Entity each key names, as the Record's look-ups
+	// have it now (an Editor's Entity merged into a Wikidata item read as
+	// the item); a key not yet looked up is left out.
+	EntitiesNamed(ctx context.Context, keys []LookupKey) (map[LookupKey]NamedEntity, error)
 	// PendingBatches are the batches not yet ended, among which a weaving
 	// run's may be.
 	PendingBatches(ctx context.Context) ([]PendingBatch, error)
@@ -217,13 +221,14 @@ type WeavingStore interface {
 
 // weavingInstructions are weaving's instructions: the Owner's, a sentence
 // saying that earlier Stories are reached by asking, and how, one saying
-// what a Span marked the Editor's is and that it may be cited, one stating
+// how a Span says which Entities it mentions (entityOpen, entityClose), so
+// the model can ask by them, one saying what a Span marked the Editor's is and that it may be cited, one stating
 // the checks the Owner's leave unsaid (that an Editor's Span has words, and
 // cites only Spans shown, wherever shown), and a clause saying that words
 // between ⟦ and ⟧ (hydratedOpen, hydratedClose) are a hydrated Span's,
 // standing in for the publisher's words that refer to them, so the model
 // never takes them for the publisher's.
-const weavingInstructions = `You are the editor of a slow-news publication. Your publication exists to see the stories behind the stories, and to take a zoomed-out view of the long-term causes. Below are the Stories new since your last run, each a group of numbered Spans: stretches of text as their publishers wrote them, except that words between ⟦ and ⟧ stand in for words that refer to them. What each Story says is already in it; write what none of them says. Earlier Stories, the publishers' and your own, however old, are not shown: find them by asking for words with find, which answers with a catalogue, and read one whole with open_story. Ask as many times as you need before you answer. Write your substantive editorial opinion on one or more Stories, new or earlier. Each opinion is a new Story: your own words, in one or more editor_spans, each citing by number the Spans it rests on, at least one. Spans marked the Editor's are your own earlier words, and you may cite them too. Each editor_span's body holds its words, and its cites only the numbers of Spans shown to you, below or in what find and open_story answered. You don't have to write anything: if you have nothing substantive to say, return no stories.`
+const weavingInstructions = `You are the editor of a slow-news publication. Your publication exists to see the stories behind the stories, and to take a zoomed-out view of the long-term causes. Below are the Stories new since your last run, each a group of numbered Spans: stretches of text as their publishers wrote them, except that words between ⟦ and ⟧ stand in for words that refer to them. What each Story says is already in it; write what none of them says. Earlier Stories, the publishers' and your own, however old, are not shown: find them by asking for words with find, or for an Entity a Span shown to you mentions with find_entity, each of which answers with a catalogue, and read one whole with open_story. A Span says which Entities it mentions, each by its name and an id between { and }, which find_entity asks by. Ask as many times as you need before you answer. Write your substantive editorial opinion on one or more Stories, new or earlier. Each opinion is a new Story: your own words, in one or more editor_spans, each citing by number the Spans it rests on, at least one. Spans marked the Editor's are your own earlier words, and you may cite them too. Each editor_span's body holds its words, and its cites only the numbers of Spans shown to you, below or in what find, find_entity and open_story answered. You don't have to write anything: if you have nothing substantive to say, return no stories.`
 
 // weavingSchema is weaving's output schema: stories, each editor_spans, each
 // its words (body) and then the numbers of the Spans it cites (cites). The
@@ -352,7 +357,7 @@ func (t WeavingTurns) request() Request {
 
 // woven is what the run has been shown so far, to number on from.
 func (t WeavingTurns) woven() *woven {
-	sh := &woven{numbers: map[citedAt]int{}, left: slices.Clone(t.Left), newCuts: t.New}
+	sh := &woven{numbers: map[citedAt]int{}, left: slices.Clone(t.Left), newCuts: t.New, entities: t.entitiesShown()}
 	for _, c := range t.Shown {
 		sh.number(c)
 	}
@@ -508,18 +513,23 @@ func (e *Editor) pendingWeaving(ctx context.Context) (string, bool, error) {
 // is not in it, and its Spans are read as written.
 type hydratedItems map[string]hydrated
 
-// hydrated is an Item's newest hydration and the Item's text as kept.
+// hydrated is an Item's newest hydration, the Item's text as kept and when
+// it was published, and the Entity each name its hydration judged is, as the
+// Record's look-ups have it.
 type hydrated struct {
-	text   string
-	newest Hydration
+	text      string
+	published time.Time
+	newest    Hydration
+	is        map[LookupKey]NamedEntity
 }
 
 // hydratedItems is the hydration of the Items a run is shown Spans of, those
-// of the Stories made and of stories, as the Record holds it now: nothing
-// waits for an Item to be hydrated.
+// of the Stories made and of stories, with the Entities their names are, as
+// the Record holds them now: nothing waits for an Item to be hydrated, or a
+// name to be looked up.
 func (e *Editor) hydratedItems(ctx context.Context, made []Story, stories []CutStory) (hydratedItems, error) {
 	h := hydratedItems{}
-	add := func(sourceID, entryID string, text func() (string, bool, error)) error {
+	add := func(sourceID, entryID string, item func() (Item, bool, error)) error {
 		key := sourceID + "\n" + entryID
 		if _, done := h[key]; done {
 			return nil
@@ -528,16 +538,16 @@ func (e *Editor) hydratedItems(ctx context.Context, made []Story, stories []CutS
 		if err != nil || !ok {
 			return err
 		}
-		t, ok, err := text()
+		it, ok, err := item()
 		if err != nil || !ok {
 			return err
 		}
-		h[key] = hydrated{text: t, newest: r}
+		h[key] = hydrated{text: it.Content, published: it.Published, newest: r}
 		return nil
 	}
 	for _, s := range stories {
-		if err := add(s.Item.SourceID, s.Item.EntryID, func() (string, bool, error) {
-			return s.Item.Content, true, nil
+		if err := add(s.Item.SourceID, s.Item.EntryID, func() (Item, bool, error) {
+			return s.Item, true, nil
 		}); err != nil {
 			return nil, err
 		}
@@ -549,16 +559,63 @@ func (e *Editor) hydratedItems(ctx context.Context, made []Story, stories []CutS
 					continue
 				}
 				a := c.Address
-				if err := add(a.SourceID, a.EntryID, func() (string, bool, error) {
+				if err := add(a.SourceID, a.EntryID, func() (Item, bool, error) {
 					it, ok, err := e.Weavings.KeptItem(ctx, a.SourceID, a.EntryID)
-					return it.Content, ok, err
+					return it.Item, ok, err
 				}); err != nil {
 					return nil, err
 				}
 			}
 		}
 	}
+	var keys []LookupKey
+	seen := map[LookupKey]bool{}
+	for _, hy := range h {
+		for _, k := range hy.newest.Keys(hy.published) {
+			if !seen[k] {
+				seen[k] = true
+				keys = append(keys, k)
+			}
+		}
+	}
+	if len(keys) == 0 {
+		return h, nil
+	}
+	is, err := e.Weavings.EntitiesNamed(ctx, keys)
+	if err != nil {
+		return nil, err
+	}
+	for key, hy := range h {
+		hy.is = is
+		h[key] = hy
+	}
 	return h, nil
+}
+
+// entity is the Entity whose id (NamedEntity.handle) is id, among those the
+// Items' names are, reporting whether there is one.
+func (h hydratedItems) entity(id string) (NamedEntity, bool) {
+	for _, hy := range h {
+		// Every Item's names are read from the one map of the Record's.
+		for _, e := range hy.is {
+			if e.handle() == id {
+				return e, true
+			}
+		}
+		break
+	}
+	return NamedEntity{}, false
+}
+
+// mentions are the Entities the Span at a mentions, by its hydration, as
+// the Record's look-ups have them: none for a Span not hydrated, or whose
+// names are not yet looked up.
+func (h hydratedItems) mentions(a Address) []NamedEntity {
+	hy, ok := h[a.SourceID+"\n"+a.EntryID]
+	if !ok {
+		return nil
+	}
+	return hy.newest.Entities(a.Span, hy.published, hy.is)
 }
 
 // rejected reports whether the Span at a is Rejected by its hydration.
@@ -609,7 +666,9 @@ func (h hydratedItems) read(a Address, words string) (speakers, read string) {
 
 // show is the Span at a as a run is shown it after its number, its words as
 // written words: what is said of it (its title, for a Span cited by an
-// Editor's Span, and who speaks it), in brackets, then its words as read.
+// Editor's Span, who speaks it, and the Entities it mentions, each by its
+// name and its id, which find_entity asks by), in brackets, then its words
+// as read.
 func (h hydratedItems) show(a Address, words, title string) string {
 	speakers, read := h.read(a, words)
 	var said []string
@@ -618,6 +677,13 @@ func (h hydratedItems) show(a Address, words, title string) string {
 	}
 	if speakers != "" {
 		said = append(said, "spoken by "+speakers)
+	}
+	if es := h.mentions(a); len(es) > 0 {
+		named := make([]string, 0, len(es))
+		for _, e := range es {
+			named = append(named, e.Name+" "+entityOpen+e.handle()+entityClose)
+		}
+		said = append(said, "mentioning "+strings.Join(named, ", "))
 	}
 	if len(said) == 0 {
 		return ": " + read
@@ -644,13 +710,15 @@ func weavingInput(stories []CutStory, h hydratedItems) string {
 }
 
 // woven is what a weaving run has been shown: each Span it numbers in number
-// order, the number of each, the numbers left out (Spans Rejected), and the
-// Cuts of the Stories new to it.
+// order, the number of each, the numbers left out (Spans Rejected), the
+// Cuts of the Stories new to it, and the ids of the Entities it was shown a
+// Span mentioning before its latest turn.
 type woven struct {
-	spans   []Cited
-	numbers map[citedAt]int
-	left    []int
-	newCuts []int64
+	spans    []Cited
+	numbers  map[citedAt]int
+	left     []int
+	newCuts  []int64
+	entities []string
 }
 
 // citedAt is a Span's address, whether a Source's or an Editor's.

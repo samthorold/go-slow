@@ -22,9 +22,10 @@ import (
 
 // The recorded runs of weaving. A run is a conversation: its first turn is
 // shown the Stories the fixture Items' Cuts made, cut by the sentence cutter,
-// which is plain code, each Span hydrated by its Item's hydration, and it
-// reaches earlier Stories by asking (find, open_story), each turn a request
-// of its own. Weaving rests on hydration's recordings, and is recorded over
+// which is plain code, each Span hydrated by its Item's hydration and shown
+// with the Entities it mentions (each name looked up in a Wikidata that
+// matches nothing, so an Editor's Entity), and it reaches earlier Stories by
+// asking (find, find_entity, open_story), each turn a request of its own. Weaving rests on hydration's recordings, and is recorded over
 // its own frozen copies of them,
 // testdata/recorded/weaving/inputs/hydration/<fixture>.json, each a fixture's
 // first sample (collectAndCut). The compatibility check feeds hydration's
@@ -193,12 +194,32 @@ func weavingVerdicts(t *testing.T, root string, runs []weavingRun, live editor.M
 // frozen (system design: Each Command is recorded over its own frozen
 // inputs), replayed unchecked. Each Item must have its copy, and be
 // hydrated by it: weaving's recordings answer the requests those copies
-// make.
+// make. Then every name hydrated is looked up, in a Wikidata that matches
+// nothing (noWikidata), so each is an Editor's Entity, one per name and
+// kind, and a run is shown which a Span mentions and can ask by them.
 func collectAndCut(t *testing.T, store *sqlite.Store, r weavingRun, frozen string) {
 	t.Helper()
 	if err := collectCutAndHydrate(t.Context(), store, r, frozen); err != nil {
 		t.Fatal(err)
 	}
+	lu := editor.NewLookups(editor.LookupDeps{Store: store, Wikidata: noWikidata{}, Log: slog.New(slog.DiscardHandler)})
+	if err := lu.LookUpWaiting(t.Context(), r.at); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// noWikidata is a Wikidata that holds nothing: the recorded runs make no
+// network call, and Wikidata's answers for the fixtures' names are not
+// recorded, so a name the fixtures share is one Entity only when hydration
+// gives it the same name and kind.
+type noWikidata struct{}
+
+func (noWikidata) Search(context.Context, string) ([]string, error) { return nil, nil }
+
+func (noWikidata) Items(context.Context, []string) ([]editor.WikidataItem, error) { return nil, nil }
+
+func (noWikidata) Labels(context.Context, []string) (map[string]string, error) {
+	return map[string]string{}, nil
 }
 
 // collectCutAndHydrate is collectAndCut, reporting what fails: an error

@@ -1,58 +1,65 @@
 {
   "act": "weaving",
   "model": "claude-opus-5-5",
-  "request_hash": "8e5b7ed977bb4a44e72006195be666d5e71c9be285bc9ef4518a79db9283c839",
-  "recorded_at": "2026-11-21T08:56:49.783915Z",
+  "request_hash": "365e8b593a0a0995a88dc3c1181af50f34f257cb82b976e27f6467466c4a3bde",
+  "recorded_at": "2026-11-21T09:18:30.052885Z",
   "usage": {
-    "input_tokens": 2134,
-    "output_tokens": 1488,
-    "cache_read_input_tokens": 11964
+    "input_tokens": 1743,
+    "output_tokens": 1596,
+    "cache_read_input_tokens": 17024
   },
   "output": {
     "stories": [
       {
         "editor_spans": [
           {
-            "body": "I've already argued (S355) that the Prime Minister's Motherwell speech puts pressure on Holyrood by presenting Westminster as the champion of Scotland's regions. This time I want to look at the one concrete item in the speech, the 'offer of DWP devolution', because it shows what the strategy can and cannot deliver. Most of what Burnham offered is either money Holyrood already partly controls or small sums. There is £10 million for defence colleges, matched by Edinburgh. The £1 billion for research and innovation is spread across the whole UK. And there is a promise to 'explore' giving Scottish regions some say over research funding. Employment support is different. The Department for Work and Pensions is reserved to Westminster. It is the one lever where London actually holds something Edinburgh cannot simply take, which makes it the real bargaining chip.",
+            "body": "The full text of the Motherwell speech includes something the briefing the day before (Story 5) left out: an offer to devolve DWP employment support. That is the only concrete thing in it. Everything else has been said before, including the line that power 'was never supposed to stop at the doors of the Scottish Parliament', the regional empowerment pitch and the No10 North branding. The rest is meetings to design a model 'in the immediate months ahead'. Employment support is a power Westminster holds and Holyrood can't take for itself, so this is the one real incentive Burnham has to offer. It explains why he can talk as if Westminster and Holyrood were equals and still expect John Swinney to stay at the table.",
             "cites": [
               305,
               306,
-              175,
-              213,
-              216,
-              355
+              296,
+              318,
+              352,
+              353
             ]
           },
           {
-            "body": "The offer is vaguer than it sounds. Scotland already runs its own devolved employment programmes, a result of the post-referendum settlement. What it does not control is the core of the benefits system: Jobcentres, Universal Credit and the conditions and sanctions attached to claims. The speech never says whether those are on the table. It promises a model 'similar to the one in England', and English devolution so far has meant mayors commissioning programmes, not running the benefits system. Until the National Economic Council sets out the details, 'DWP devolution' could mean anything from a new commissioning budget to real control over how claimants are treated. Those are very different things.",
+            "body": "The offer comes with conditions. Scotland would design the model 'shaped by Holyrood', but it 'has to be based on the Easterhouse principle', and 'if it's not based on that, it won't work.' So the power is handed to Edinburgh along with instructions on how to use it. That is the same top-down approach the speech criticises everywhere else. In fairness, this also goes against how I read the briefing. This offer is routed through Holyrood, not around it. The question is no longer whether Westminster will bypass Edinburgh. It is whether Edinburgh will accept a devolved power on the condition that it pushes that power further down to local level.",
             "cites": [
               306,
-              318,
-              215
-            ]
-          },
-          {
-            "body": "There is also a tension at the centre of the speech that nobody seems to have noticed. Burnham builds his case on the 'Easterhouse principle': names not numbers, person-centred support, no 'computer says no'. In the same passage he says he 'won't have a country where we get comfortable with the idea of kids in their 20s just being there on benefits', and he points to the Milburn review of young people out of work. The language of trust and the language of tougher expectations sit side by side. The real question for Holyrood is which one comes with the devolved powers. If Scotland is handed the job of delivering employment support while Westminster keeps the benefit rules and sanctions, Edinburgh would take the political blame for a system it still does not design.",
-            "cites": [
-              235,
-              241,
-              242,
-              254,
               310,
-              312
+              311,
+              312,
+              313,
+              238,
+              366
             ]
           },
           {
-            "body": "The speech is right about the long-term cause. Ravenscraig closed in 1992, and more than thirty years later the site is still being filled. The towns built around coal and steel are still the places with empty high streets, shrinking working populations and gaps in life expectancy. Burnham's own diagnosis is that these decisions were taken 'hundreds of miles away' by people who never lived with the consequences. But his answer is a negotiation between two capitals over who gets to let go. Neither government has yet offered Motherwell or Inverclyde a permanent revenue base of their own. Without one, 'power to the regions' amounts to schemes and pots of money that regions have to bid for, and that is the kind of centralised control the speech says it is against.",
+            "body": "There is a gap in the speech's own account of what went wrong. It explains Ravenscraig and Leigh in terms of where decisions were made: 'hundreds of miles away', with 'nobody asked'. But the clearest success Burnham describes is not about local control. It is about ownership and spending. He brought Greater Manchester's buses back under public control, which let him order them from Alexander Dennis in Falkirk instead of the cheapest bidder anywhere in the world. That decision helped Falkirk because Manchester had money to spend and chose where to spend it, not because Falkirk was given more power. Pushing employability budgets and R\u0026D decisions down to regions does nothing about who owns a steelworks or a refinery. Those are the decisions that emptied Motherwell and Leigh.",
             "cites": [
-              82,
               84,
-              86,
-              104,
-              109,
-              117,
-              274,
-              276
+              91,
+              92,
+              195,
+              197,
+              198,
+              199,
+              299,
+              216
+            ]
+          },
+          {
+            "body": "The present-day versions of Ravenscraig get the least attention. Aberdeen is 'very much on my mind' and he'll have 'more to say in due course'. On Grangemouth he offers 'working with the Scottish government' on 'new investment'. The thirty-year-old closure gets a whole passage of personal memory. The losses happening now, across North Sea oil and gas and Scotland's last refinery, get a sentence each with nothing promised. Whether this approach is any different will show in what happens to those two places, not in redesigned job-centre services.",
+            "cites": [
+              108,
+              183,
+              184,
+              185,
+              81,
+              82,
+              83,
+              86
             ]
           }
         ]
@@ -61,18 +68,18 @@
   },
   "raw": {
     "model": "claude-opus-5-5",
-    "id": "msg_011ChFo3umYS4LahUCn3BaAM",
+    "id": "msg_011ChFphe1RvnmfKfRfLLxF8",
     "type": "message",
     "role": "assistant",
     "content": [
       {
         "type": "thinking",
         "thinking": "",
-        "signature": "CAQSmg8KEAgUGAI4AUIIdGhpbmtpbmcSDCsqggt5fG+X1MH8XBoMepJaHqgPpc8Jf/QUIjCYka4wPyl5wZ2R3DlZeUNZzAGTy6LNG9aDFGWOHC6yAHm3TF/l7Wm/R+0P7ymTPQgqtw41JxCMOQkjdX7cy4152BKkjr/5XYSXkREWXAZrYbvpUeIhNJr7kFS+CHCjww3ImHW7MpNaofF3DUquC9cMYmKYPuaK4GHDeuXRa6ZnlGHUkjnoOX47J3rixwmM6xvyEHiq96cDDT2PUpZ9nwECnRvc1id31xYm8f5QYXjKQtHB2OzeDsZ1QLYg3z8DMCEqcFZ5bFoiLGnHK6E489GZhfzGsrF6FLX4K/aUZgxs4oq5iraYNjL6f0y9E2feCq3x1XfuU6yzI+7MJeHeSRHhFufoE1n0yRt7tFTBGMt7v0hyv8yaTAWjr2B72MNlGzv3tFONHiZkGa4dH8Y5tJ/dWsnVnts2pOtkLk+eyRjP2HKaUhsdyV4/g2rvtn2SXdZe2onVEsi2jGvRzC0J7vmDpO+QPWHpDb199m8L68PirL8b1W+ReRKB4C9K2OuMNXOAFSCNbW0PxZy6e26Hw/NW/7wnwitEHjfkRsJKjh8+nfcQt+VkFuU1oHdzYBIFmGDN6lTohZdBw8IIRElYihZAZzi9LVOPZaJn2ODukpV9KByWXQm7hmAgSVepXmToJ/XujzqzxK3Pcf4EegF+uf5VO8jrZn0TAHZ641XTsUBMho3IAvSWKFRrwWbo8JsOCobe+CT8mZ4LwavXQGWGFPrRi/ZofQvypvXF19RIVvHobcblfXOBtKmsSDpUMbuos8cBd8bsPUHhW8X0sJxSaJ/ZT/PU9QppoD0wQ1dza/ouU2jqfnx/CS4YWU9MfXJkNjpi+JO1GE+8cENA6Pupcb9RTauQNMSs3ts5EfDf2oVBUjpN159OQ8/wE8RGdeyL3eG9rq/sVypGJHbi+MuwoUZnfaDi8ZDRKuBR+05Wv20N7lgBaQFKPxVbFgbzgMno1hgrNg+BoQdOFRx1Apqjs9rCVqRYMK8G3R4otLcTw8Sv0xBWmDwRlV4AJygeNj2j8Vyu6VwdUuGxKQSrgV5MTqqeG4sntIxq1waX2uwtrdWrT88fRcb8c4yZTCw8S5paR18qVvM5TsHeGmDAOW93ycr8LgjVL/NsvZXA0gCTVOh4zlCn4GsQOkzob2lqGsy2CR7KzQMN0tscJtNucg298SFjtVFkMZanQ9uYDDrAdjmLpOUB67ju7KpoBcM9C0aju8J7aSnh7W7TFOudCz0PMlxwUXdj/YXZR2zYWD96Rj9HkkoN+/lZien3OYAQz9gaG5P2jNvv0CDLD6peaAV13uMsPSOHH1Pqd8yFLSg72KNFWYuPQvjngF4xqgGOSabQCPf7AGecqsMgwCaKdrgQx5w7cC0Kk4JnEzo2H6ywGBzfZ8sEZy7E2TJziDBLgIr8VLkWVD3SZtpxiYPD874/ETt+DQtQc88tO54moIMSEzLBOj1Sjm9/u8nkH4XF2/EbLkiaAMN3Nhj8/0oF0c2IRW+FsBgRXb8dFwltNKAn2JbXGCu7mnWtlKOp17vB3tSamW22cxMvrvw3IqjYKdnQ1TfF9lz2jse9VTGjHvqXuTAuoTyRCEuUqsri8c2YthgyygCixISE3iF0QPRrr4SlrGuKekzdNFZU9qwOdMuoIxbf70cQ5VSGPPN6sxpPaRysYB1USrK/eHbio8f8JWT9wSX8XQJzoOPzZPvVhA2SSmz41bQlEULmI3lxPHJhYYZc0V3OxdGksvtpDQ/OLxYfltAX3bFO1C/Yn3IKmLRgPgSUyAnKfldKwy2rTSms4Ycnh9qyhCTMnaXFEW3XTStMjyxKhKLctO+PHk4t5QfpeD4lh4WXys4sC+hwUM1LlwXUwhIGs29lOmGckPdHJ2LtgpmL/woRyp3hQyWW6Z4v560CwNymRK9XnfvaOBCdrtwYWRmvzK+44McZkov1ImbcjewwiSqZ7YQpdiD7oSzBGcROp+PewI5yNrAAclaegX/VGs8HvQ3HsLFc95FHPyn8N2ucf+5a7whgpLXRxxZ23CiQ5T2ADjD71jyklhStexkDW1eYCdEplDYx/SjNbIhbOP5JFitrz2T9C9fFnCfJ5xuPvVGfovVD3j9A4sgRN7g28Lv1D1/hxl5te+sdN13aFzwJAgp9qLNzYDjOXzFVRb69l7E4OlcSIzFGi9F+90PfYMMiEPYTiHPh1583cHemuVxrBVLbjSi1pD1Tuj8tvcTme7Z/yAff68XeQPtDO8ZpumiqakpuiVgLxLxv2GR4J/Dpaje3+326IewTpfdNob61D2R9gY7urDWc32d0F/IVxZqN7GfzD22wO0jD+lNrthUeDwSttNeG6XLpr459F6goUYS+osEiRz9dzPBbTzAzcdED4J12wTy4n+i14dcXQKgD+e2AIZfqfxFKOq5YQ4UjFF3M6mnD+JqOotjZKRDLM1GNkTnH9K0EXHihjoSltoqKZPARcYgLXNeI5kPdV1vifYk3xTnqJN8JtPAfNJhEavYX8r9lyhxLWoffOAO28jAeXbGdhPVIjwev8xgB"
+        "signature": "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"
       },
       {
         "type": "text",
-        "text": "{\"stories\":[{\"editor_spans\":[{\"body\":\"I've already argued (S355) that the Prime Minister's Motherwell speech puts pressure on Holyrood by presenting Westminster as the champion of Scotland's regions. This time I want to look at the one concrete item in the speech, the 'offer of DWP devolution', because it shows what the strategy can and cannot deliver. Most of what Burnham offered is either money Holyrood already partly controls or small sums. There is £10 million for defence colleges, matched by Edinburgh. The £1 billion for research and innovation is spread across the whole UK. And there is a promise to 'explore' giving Scottish regions some say over research funding. Employment support is different. The Department for Work and Pensions is reserved to Westminster. It is the one lever where London actually holds something Edinburgh cannot simply take, which makes it the real bargaining chip.\",\"cites\":[305,306,175,213,216,355]},{\"body\":\"The offer is vaguer than it sounds. Scotland already runs its own devolved employment programmes, a result of the post-referendum settlement. What it does not control is the core of the benefits system: Jobcentres, Universal Credit and the conditions and sanctions attached to claims. The speech never says whether those are on the table. It promises a model 'similar to the one in England', and English devolution so far has meant mayors commissioning programmes, not running the benefits system. Until the National Economic Council sets out the details, 'DWP devolution' could mean anything from a new commissioning budget to real control over how claimants are treated. Those are very different things.\",\"cites\":[306,318,215]},{\"body\":\"There is also a tension at the centre of the speech that nobody seems to have noticed. Burnham builds his case on the 'Easterhouse principle': names not numbers, person-centred support, no 'computer says no'. In the same passage he says he 'won't have a country where we get comfortable with the idea of kids in their 20s just being there on benefits', and he points to the Milburn review of young people out of work. The language of trust and the language of tougher expectations sit side by side. The real question for Holyrood is which one comes with the devolved powers. If Scotland is handed the job of delivering employment support while Westminster keeps the benefit rules and sanctions, Edinburgh would take the political blame for a system it still does not design.\",\"cites\":[235,241,242,254,310,312]},{\"body\":\"The speech is right about the long-term cause. Ravenscraig closed in 1992, and more than thirty years later the site is still being filled. The towns built around coal and steel are still the places with empty high streets, shrinking working populations and gaps in life expectancy. Burnham's own diagnosis is that these decisions were taken 'hundreds of miles away' by people who never lived with the consequences. But his answer is a negotiation between two capitals over who gets to let go. Neither government has yet offered Motherwell or Inverclyde a permanent revenue base of their own. Without one, 'power to the regions' amounts to schemes and pots of money that regions have to bid for, and that is the kind of centralised control the speech says it is against.\",\"cites\":[82,84,86,104,109,117,274,276]}]}]}"
+        "text": "{\"stories\":[{\"editor_spans\":[{\"body\":\"The full text of the Motherwell speech includes something the briefing the day before (Story 5) left out: an offer to devolve DWP employment support. That is the only concrete thing in it. Everything else has been said before, including the line that power 'was never supposed to stop at the doors of the Scottish Parliament', the regional empowerment pitch and the No10 North branding. The rest is meetings to design a model 'in the immediate months ahead'. Employment support is a power Westminster holds and Holyrood can't take for itself, so this is the one real incentive Burnham has to offer. It explains why he can talk as if Westminster and Holyrood were equals and still expect John Swinney to stay at the table.\",\"cites\":[305,306,296,318,352,353]},{\"body\":\"The offer comes with conditions. Scotland would design the model 'shaped by Holyrood', but it 'has to be based on the Easterhouse principle', and 'if it's not based on that, it won't work.' So the power is handed to Edinburgh along with instructions on how to use it. That is the same top-down approach the speech criticises everywhere else. In fairness, this also goes against how I read the briefing. This offer is routed through Holyrood, not around it. The question is no longer whether Westminster will bypass Edinburgh. It is whether Edinburgh will accept a devolved power on the condition that it pushes that power further down to local level.\",\"cites\":[306,310,311,312,313,238,366]},{\"body\":\"There is a gap in the speech's own account of what went wrong. It explains Ravenscraig and Leigh in terms of where decisions were made: 'hundreds of miles away', with 'nobody asked'. But the clearest success Burnham describes is not about local control. It is about ownership and spending. He brought Greater Manchester's buses back under public control, which let him order them from Alexander Dennis in Falkirk instead of the cheapest bidder anywhere in the world. That decision helped Falkirk because Manchester had money to spend and chose where to spend it, not because Falkirk was given more power. Pushing employability budgets and R\u0026D decisions down to regions does nothing about who owns a steelworks or a refinery. Those are the decisions that emptied Motherwell and Leigh.\",\"cites\":[84,91,92,195,197,198,199,299,216]},{\"body\":\"The present-day versions of Ravenscraig get the least attention. Aberdeen is 'very much on my mind' and he'll have 'more to say in due course'. On Grangemouth he offers 'working with the Scottish government' on 'new investment'. The thirty-year-old closure gets a whole passage of personal memory. The losses happening now, across North Sea oil and gas and Scotland's last refinery, get a sentence each with nothing promised. Whether this approach is any different will show in what happens to those two places, not in redesigned job-centre services.\",\"cites\":[108,183,184,185,81,82,83,86]}]}]}"
       }
     ],
     "container": null,
@@ -81,15 +88,15 @@
     "stop_details": null,
     "usage": {
       "input_tokens": 2,
-      "cache_creation_input_tokens": 2132,
-      "cache_read_input_tokens": 11964,
+      "cache_creation_input_tokens": 1741,
+      "cache_read_input_tokens": 17024,
       "cache_creation": {
-        "ephemeral_5m_input_tokens": 2132,
+        "ephemeral_5m_input_tokens": 1741,
         "ephemeral_1h_input_tokens": 0
       },
-      "output_tokens": 1488,
+      "output_tokens": 1596,
       "output_tokens_details": {
-        "thinking_tokens": 440
+        "thinking_tokens": 616
       },
       "service_tier": "standard",
       "inference_geo": "global",
@@ -102,47 +109,54 @@
     {
       "act": "weaving",
       "model": "claude-opus-5-5",
-      "request_hash": "2781e1952af6dcbb9d1ea4286b9fde69eb9385eaccba35fa4cf8966b6f742e0c",
-      "recorded_at": "2026-11-21T08:56:31.120307Z",
+      "request_hash": "43fd0e24aa1597ad0661866f8ce78db17d8e7b32d0158aafdcd5f599c3ab3bf1",
+      "recorded_at": "2026-11-21T09:18:01.581568Z",
       "usage": {
         "input_tokens": 4,
-        "output_tokens": 165,
-        "cache_read_input_tokens": 11702
+        "output_tokens": 230,
+        "cache_read_input_tokens": 13372
       },
       "output": null,
       "calls": [
         {
-          "ID": "toolu_01DRRfZotUb3dVpdttBBPKUM",
+          "ID": "toolu_01PajUeYwXDrZ6fe4dzZuT7d",
           "Name": "find",
           "Input": {
-            "words": "Easterhouse"
+            "words": "Scotland devolution"
           }
         },
         {
-          "ID": "toolu_01NraiyiY3ceVAQ6usCBpPKx",
+          "ID": "toolu_01X7jjaFyEXoiXMtZRMBfwXu",
+          "Name": "find_entity",
+          "Input": {
+            "entity": "E687"
+          }
+        },
+        {
+          "ID": "toolu_01EobkBVtazdabLiZ8ZwUHJG",
           "Name": "find",
           "Input": {
-            "words": "devolution Scotland"
+            "words": "Easterhouse"
           }
         }
       ],
       "raw": {
         "model": "claude-opus-5-5",
-        "id": "msg_011ChFo3ZMxTYnDoB5jwzj16",
+        "id": "msg_011ChFpgeo2GSMud615HuY4i",
         "type": "message",
         "role": "assistant",
         "content": [
           {
             "type": "thinking",
             "thinking": "",
-            "signature": "CAQS/QUKEAgUGAI4AUIIdGhpbmtpbmcSDIF96ntXmTAHJGo6TxoMzO0+6U0lAw26RVuDIjCEWiPxsQ2x2ZI7AjRioea9fSMPGkaSkLjYOQhLO1/coSQc6aH26lFBFf4Fc5mgFEgqmgXC5sese3ckyDEanExUI2HJ1PDKqHyVtkxb4iXJhSomhZR82ITsnwctHUxk4NkCrlBP6V2Zfvr/mMvLzEootjRfZ1/3fmjS5F6hXzAjCNMV513z6vyrKhgn5QKO2igw6J83i8mu76MWwcOprXCG5XRgrad7S872yJMTAjSt7P7tFEU03KuOjorkXc6lCh+iNk/lgw4jKryAigjUKLXbWEfZ3tq4GWZJlU/ZX3tdVJJJfI0uP1c9WLTZJmfWMc3lGjKuBSQgAGzv59tW6+OHuWNIgs9c1sgkb5Ymr1H7Rq6fDoZBQyyUWl22otWvW08vyDzvd61gH6zcFEfmmvHYDXqdZfAR+uHM2bpNOhqz7Lke9Ii/l8rBYAw9jnol/zYEsPyCw4H9PttwQkgZY+rsiCMdvs4ZUZHuH172hvPvYsASfMXbNBwybCxlFNSpJv8iEclis4oxW4Mz4/JSu6jJSx9c159V68uGh8+ee9FcJwDTA+fhUg059OqqUcazKJF98is+r/7whZAg7OPtpM0QWrCtxZ3AQInIqpK0tAk+8eiqCN/n0Fo17ifZNsaddMSlpC4Odnt48isEcUAvZ8DhVkWKNis7sIUIPuH69HU/8fkrBDTrmeOP4hLMPzSGRIABGL0Gup7AgH2/XHFo3m08ByD33OnEANNYv7qCMDMeilHTKuB7by2vG9p+rw1Nf+DApNzqJ0hmG8rtOvV5CGuBqyFVmuSTDUpqLQo1wGA+ho9v2YjFZcrDll/Z0ZAzIubn0JnWv/Dfigt8KAh9jFsayj3wI+SwMtcgycA0xgopwpwVRkFCIrGRhJFwwHRaIwWN+4ON6eGqI0q+r9r17DDaTsGn2GVMbCzO6QlFJPziOvOqpa70bnot7XeGv70YAQ=="
+            "signature": "CAQSnAYKEAgUGAI4AUIIdGhpbmtpbmcSDFFOknsCR4JsMUxLxhoMrg8v8ckf6dGM9RSkIjBsiyAnYLFXQhGLm8DFw3dDk+V3GJmhvE1jDhNInuREf41y1/R5GlPAPtBPKMNTrdYquQU5dM86LWmVkrrgqycVXu/V5BGu+gdgWdE9mm3lTUmMQhUhmrQEbIg4T91BbzKjCgn7yUk4fKDt8KPIarFVE+pNGwL/wvI4Zx7dXsPqhHtBN4a0vm/UwlKF7LmkGmDdmKMqGutJ47R8xfcsuJ//Rj7UhyozWyLInUMn+RBD4oxhNyFpoHSSKNvOlCvTn7wyXemlbaaPzAz65We4rV3CYohiIM3WzMQ13UylmZPGadIHQqK31E2z5KABKi9+jbdV11b9AU+bHYhpZ/xI1stK3fso8j9AJFu5PBsGxiOW4Pgmt5zavZ7B1QnqeU/g4+e4ksFgzfChraHjY3A5odV35IgBBfgU3m3sexUCCzueyV5kVm80STpsiXbwC3dtufsqYdTES3P7PKEJkbZXxw+A87lUkZ6EIA8ne6JYqCG4yzzG4d60CUn06c5auQ5oZuN2n/23RYjRCbWKRNMq1yIek3qldjjU7xMCx4/Uy/1zPsFzTh/0AJNPRNNgqiy6LVmtzgAsx6kfuhYQjYOD7hBHe4GEWvdngi9OBat6cvHnXQHoQyd+bPjIpFJjZeM/wg2GYg6GsioJlakRPytVIG86c+4UQCBqfPUBqqP8M5NfpeZDo4jbRVsd9YTGQtpmPJHjo157CONKbLXyCZijmA39MpWIc47MaO/+wDz7KalZ8eam1Fq/KAngKtQD5M49Z/1WkU7MdbLMI+tbPsNypu7z0VdqlhQZBwUIImsaT+ivy+CLq1+b/P5UTaA3wbK7GgnekU39CVxBrKeR7t7T/Z5V0L1NuFCLOyJYGTNwWmPvPXyObnbgtMLS3yUcB/yGoO+FBGOSEeN+ssO0wPjCAelnk7bmMNFhBxOdnxlaceYW7SinsVQDXEIlcNLFIH5m2xlRA1oTyCNFkaHHVJacNvDTrmsEpNg4tej63aBkGAE="
           },
           {
             "type": "tool_use",
-            "id": "toolu_01DRRfZotUb3dVpdttBBPKUM",
+            "id": "toolu_01PajUeYwXDrZ6fe4dzZuT7d",
             "name": "find",
             "input": {
-              "words": "Easterhouse"
+              "words": "Scotland devolution"
             },
             "caller": {
               "type": "direct"
@@ -150,10 +164,21 @@
           },
           {
             "type": "tool_use",
-            "id": "toolu_01NraiyiY3ceVAQ6usCBpPKx",
+            "id": "toolu_01X7jjaFyEXoiXMtZRMBfwXu",
+            "name": "find_entity",
+            "input": {
+              "entity": "E687"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          },
+          {
+            "type": "tool_use",
+            "id": "toolu_01EobkBVtazdabLiZ8ZwUHJG",
             "name": "find",
             "input": {
-              "words": "devolution Scotland"
+              "words": "Easterhouse"
             },
             "caller": {
               "type": "direct"
@@ -167,14 +192,14 @@
         "usage": {
           "input_tokens": 4,
           "cache_creation_input_tokens": 0,
-          "cache_read_input_tokens": 11702,
+          "cache_read_input_tokens": 13372,
           "cache_creation": {
             "ephemeral_5m_input_tokens": 0,
             "ephemeral_1h_input_tokens": 0
           },
-          "output_tokens": 165,
+          "output_tokens": 230,
           "output_tokens_details": {
-            "thinking_tokens": 66
+            "thinking_tokens": 84
           },
           "service_tier": "standard",
           "inference_geo": "global",
@@ -187,39 +212,39 @@
     {
       "act": "weaving",
       "model": "claude-opus-5-5",
-      "request_hash": "0af4045bd0d8ecf69612fb814c27805c02e7261081e7bc7a4015adc68e54f6cf",
-      "recorded_at": "2026-11-21T08:56:32.810911Z",
+      "request_hash": "c97aaa1697ffbfbf5d34c9f2049d3cdbeb1fe40e9ca77f18d2a2a6135c26e9f2",
+      "recorded_at": "2026-11-21T09:18:04.092625Z",
       "usage": {
-        "input_tokens": 264,
-        "output_tokens": 92,
-        "cache_read_input_tokens": 11702
+        "input_tokens": 374,
+        "output_tokens": 94,
+        "cache_read_input_tokens": 13372
       },
       "output": null,
       "calls": [
         {
-          "ID": "toolu_013EuP3tSvQw7seDu5YwGxno",
+          "ID": "toolu_01VgLsXA62gTCWqzfSeRrPd7",
           "Name": "find",
           "Input": {
             "words": "devolution"
           }
         },
         {
-          "ID": "toolu_01St6aXYNG5ZaeKhzZdpHux2",
-          "Name": "find",
+          "ID": "toolu_01D4GWUFUNjypzBA9YXqaS1p",
+          "Name": "find_entity",
           "Input": {
-            "words": "Burnham"
+            "entity": "E629"
           }
         }
       ],
       "raw": {
         "model": "claude-opus-5-5",
-        "id": "msg_011ChFo3nZhp7schetjm5XEC",
+        "id": "msg_011ChFpgut8LztfbVk8qiB94",
         "type": "message",
         "role": "assistant",
         "content": [
           {
             "type": "tool_use",
-            "id": "toolu_013EuP3tSvQw7seDu5YwGxno",
+            "id": "toolu_01VgLsXA62gTCWqzfSeRrPd7",
             "name": "find",
             "input": {
               "words": "devolution"
@@ -230,10 +255,10 @@
           },
           {
             "type": "tool_use",
-            "id": "toolu_01St6aXYNG5ZaeKhzZdpHux2",
-            "name": "find",
+            "id": "toolu_01D4GWUFUNjypzBA9YXqaS1p",
+            "name": "find_entity",
             "input": {
-              "words": "Burnham"
+              "entity": "E629"
             },
             "caller": {
               "type": "direct"
@@ -246,15 +271,203 @@
         "stop_details": null,
         "usage": {
           "input_tokens": 2,
-          "cache_creation_input_tokens": 262,
-          "cache_read_input_tokens": 11702,
+          "cache_creation_input_tokens": 372,
+          "cache_read_input_tokens": 13372,
           "cache_creation": {
-            "ephemeral_5m_input_tokens": 262,
+            "ephemeral_5m_input_tokens": 372,
             "ephemeral_1h_input_tokens": 0
           },
-          "output_tokens": 92,
+          "output_tokens": 94,
           "output_tokens_details": {
             "thinking_tokens": 0
+          },
+          "service_tier": "standard",
+          "inference_geo": "global",
+          "speed": "standard"
+        },
+        "diagnostics": null
+      },
+      "stop_reason": "tool_use"
+    },
+    {
+      "act": "weaving",
+      "model": "claude-opus-5-5",
+      "request_hash": "3e81036477cc75b69222070f563cbf0a26bfebb0253903456a0674d23167218f",
+      "recorded_at": "2026-11-21T09:18:06.700398Z",
+      "usage": {
+        "input_tokens": 887,
+        "output_tokens": 116,
+        "cache_read_input_tokens": 13744
+      },
+      "output": null,
+      "calls": [
+        {
+          "ID": "toolu_01MXnn3Ccp7sxagwDsoKkY2q",
+          "Name": "open_story",
+          "Input": {
+            "story": 5
+          }
+        },
+        {
+          "ID": "toolu_01SCZu5D6rJfRtcQ8CT8eBEv",
+          "Name": "find",
+          "Input": {
+            "words": "centralised"
+          }
+        }
+      ],
+      "raw": {
+        "model": "claude-opus-5-5",
+        "id": "msg_011ChFph6ZaWd1d2vzrWm4Ek",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "thinking",
+            "thinking": "",
+            "signature": "CAQS9AUKEAgUGAI4AUIIdGhpbmtpbmcSDI2SlvmaIsyTfU6FqRoMkjOtsf7lpI2zEPjSIjAVVbL5hjLPhyZ2xDaJZiY9iJvCqWeHsj676DsYbzRJbcxdao2M+eDubLYVqpby56IqkQVlFLaMhq3eP4RoGaUUqY54dk+pAQyzr5d6Uf1CFhZqVsNHxU3x5jcD9IVmbXhkE5+Z2IVw2QByUGlPkwsHMrTtuGt+zYILoz0BpavZELJKSX/+v6pMex+RYWEa6UwOJ3A8vIhELk1+93XCxr4KrrSgs6S42MdBkefyv4MCwnz8ULXohHQjZvYAaYfnBuqboG8Jq5EpNNXfc0xZndCaFakquXAq5BRwBrb5ZmWFTxr4MJmZ/xyx4RzVA98euFrPwlgnESsPdFsS6TzhdzkGecUkjRf7q6gzkhC0Zg0GBsR0jc5UrYp0I1caqQcfNXOSqIlpQ16ns6s543+Oosh9ctJVUIUju0k2Ru9HUgD7HZXve6TZy2CRDKUXjpZf/Arb4+RV/9W2zniNzLLWjAsnJTtedr4V7bT3flTExWjjdEWfnQxi3AhK6LDfjwUEEthovBbCxq5RpKIZZqwxG4Lrv/FjEMHJd1pznmkRm6nMAHyx4dUrCSds7yduMIKOu5ijkIE4XeOI9u7iZ5r3jSQ9cjVUNp0NCin0TAjmDZ90rb17T8t/K4HNceZnHneHPqiCHW6d1Z2+pE11WUYrzqB14MsugAPaFww3T9G33B3v26nV0HLE4ourncbveduguIvyvDOVq8KOpVJUf5N3pLu/w8/7LpB/ePNg+IN07uOQARdL+4nfD19HvemRC+iPWhgNSOhY0C1xavHvpg2JhxheRgRKbL4I5HWv04F6jVOGegyPIQp9qxmrCxHWsdKNUfWgSCkHEBH7rzR5dbBEkP/ie7pUYc3C0hHWsXqeUHuaELbKFmCXAFs+lAzPyOp3oAQBSoo3RldXXXv6sXiosFe/qirEl1xHxnZgtcZrHjHFG5IDZHkYAQ=="
+          },
+          {
+            "type": "tool_use",
+            "id": "toolu_01MXnn3Ccp7sxagwDsoKkY2q",
+            "name": "open_story",
+            "input": {
+              "story": 5
+            },
+            "caller": {
+              "type": "direct"
+            }
+          },
+          {
+            "type": "tool_use",
+            "id": "toolu_01SCZu5D6rJfRtcQ8CT8eBEv",
+            "name": "find",
+            "input": {
+              "words": "centralised"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ],
+        "container": null,
+        "stop_reason": "tool_use",
+        "stop_sequence": null,
+        "stop_details": null,
+        "usage": {
+          "input_tokens": 2,
+          "cache_creation_input_tokens": 885,
+          "cache_read_input_tokens": 13744,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 885,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 116,
+          "output_tokens_details": {
+            "thinking_tokens": 24
+          },
+          "service_tier": "standard",
+          "inference_geo": "global",
+          "speed": "standard"
+        },
+        "diagnostics": null
+      },
+      "stop_reason": "tool_use"
+    },
+    {
+      "act": "weaving",
+      "model": "claude-opus-5-5",
+      "request_hash": "4d8425178584d420ce66760231ebfb49e310a6b4186602adce426d73aa414d90",
+      "recorded_at": "2026-11-21T09:18:11.449143Z",
+      "usage": {
+        "input_tokens": 2397,
+        "output_tokens": 329,
+        "cache_read_input_tokens": 14629
+      },
+      "output": null,
+      "calls": [
+        {
+          "ID": "toolu_011GoQwkBqLBMjbGjzfXhoXq",
+          "Name": "open_story",
+          "Input": {
+            "story": 509
+          }
+        },
+        {
+          "ID": "toolu_01VWPhCjDeFwsVdBhaDAUzNv",
+          "Name": "find",
+          "Input": {
+            "words": "Milburn"
+          }
+        },
+        {
+          "ID": "toolu_01Aiof6jzQ4K6VskA5yBqTk3",
+          "Name": "find",
+          "Input": {
+            "words": "Grangemouth"
+          }
+        }
+      ],
+      "raw": {
+        "model": "claude-opus-5-5",
+        "id": "msg_011ChFphHg4iyJpsGqVjbSNE",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "thinking",
+            "thinking": "",
+            "signature": "CAQSoAkKEAgUGAI4AUIIdGhpbmtpbmcSDFXcLc1IpAwjsKIa6hoMjSQPgVjOoC9Wv1jUIjDQ6DYjLgf2NUFselwyjMJEYqRQulIMwDnpMxeEY1h4L+2bOfQzQTz3JCk1RXSXsOIqvQjBNri5CDrGldYeYtF9gSRC4E//v7RP6DTd4A9OZfaAQTYt8Ea2+vmXHWHoWfagFsY3G1s+ASIYg3/pPABHYeA80m4mVB4TFB9ZZlaISiFFTJfon3UR+p6m+uQgxBmYrYYEfuBxtGxNasGz39G/0gbEcLfgRyacaF75ely9RdAVAVBfzRqWdWAa0zLXnVfz8UptRor/TEPXEtm03GhPwMoyFi+ilc3eKp/99O4OsmtTy3c+qOyRyq6EjFZelG4MV3T0tv0H8A3Eyi8GPfqG93rVymPXxE+wrUIEcv09LnGB6Z9XtZ0pEEuoH03wPFUNWMV7ttjbX+77aK7VHajaiMn+f3XKCFqqJ1DbVetIncaDP/q7SEuOGZN/3YOE+Obc75RzOCG6x0bf4v/pFJccsVYxBLrk6sZlOHWkEuFL8Fd9Oc6VlntDq+rg1l0p38QGij0j5RKLkimAsflAjS9esk9s4mObL4RkrDTEaRQFASDFyir/zSOs5txUDW9iV0Ga1VRlk4Sleq+JQ+tVrAiCmKBnIUKdvzsDtwfL0DgWwpyjr4Jf0YXT7ArtPRLdNfAawXc+0KCOK5ZHLB+fGAGU/XEdeT93y7agcvI5lzUygrI177Y5tPJuojer/fhsmEv8Ucf7DLTRRC9kOI15Yx2tTNPtnXhDxxYZmzWMBkN41n43ugT8qkwlKN9vT2FZdJWb3IhWzRYxJWizYbb5i3BuW1HoGXm5zyae4qLNywxJoc9qfvn1zOOH6yGpqIBKdTUtnZQ6ntEy5B8lXk2uJETwxDFaiA/ZONOHYRs5Z4ycZkLrlZASU9GvCB7gzentSsTJUK86znLHgHfQmR23Q6AV1YZ6MBfUWMz/16YQPg6VCqjyNxZ6n+uUKys/lZI3pIWYn5OWuh0+/YHQO1ylzo3nn7U6tnNNQ9nHQcDoa2OaVaQXpDDlv+QwoJUWswrizXV3b+FJNKra9+h/Sys5cS14GD18wBNbXKDcMcRDzFVHEzpxWBzrvMbegg2u4I1ofs+Vg8lMtZpQ1WA0YudlOUhGC4vr+xnQHpQd6FzgNf4tlBdtyl6/SDRjMutn8rZoqbpXmwtsuXpnq1s8A0yALlNpuHSyEsXqKHhjioaXte1mP43z/3n0FY0MO7P/oGU0SBSesbfCUlC4wdgkcJk1Mh2y0qPRwT1t8hqeAGD3Tp3Ojij0pRzsF/YByXIEGmN0BJS4VdfezaQaUMuxxxMR+P3x/YbpErB7SU2yWvjGuJzn+USleC6nqRDuhOa9xgBtIu1Cs6cwD+vXg64fS5aMG1xsQG2XyR3GZBkKoSMWvuV5kwM9XjXK9iUtWHX+Mz99yjhlS2MjzLvzn40rXTbc5JXyr0ups+oYIJW48EPbpdCt8B3M7ggubGQG8K+1POu0Ogy5WvZOydu94wL+Vwd+lFhWj5JKGe3/9CLAe3V2+vp8RBgB"
+          },
+          {
+            "type": "tool_use",
+            "id": "toolu_011GoQwkBqLBMjbGjzfXhoXq",
+            "name": "open_story",
+            "input": {
+              "story": 509
+            },
+            "caller": {
+              "type": "direct"
+            }
+          },
+          {
+            "type": "tool_use",
+            "id": "toolu_01VWPhCjDeFwsVdBhaDAUzNv",
+            "name": "find",
+            "input": {
+              "words": "Milburn"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          },
+          {
+            "type": "tool_use",
+            "id": "toolu_01Aiof6jzQ4K6VskA5yBqTk3",
+            "name": "find",
+            "input": {
+              "words": "Grangemouth"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ],
+        "container": null,
+        "stop_reason": "tool_use",
+        "stop_sequence": null,
+        "stop_details": null,
+        "usage": {
+          "input_tokens": 2,
+          "cache_creation_input_tokens": 2395,
+          "cache_read_input_tokens": 14629,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 2395,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 329,
+          "output_tokens_details": {
+            "thinking_tokens": 189
           },
           "service_tier": "standard",
           "inference_geo": "global",

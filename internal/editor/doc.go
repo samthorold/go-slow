@@ -103,7 +103,7 @@
 // by EstimateOf at batch rates (Price.AtBatchRates).
 //
 // A run is a conversation, each turn a request at EffortMedium carrying the
-// tools find, find_entity and open_story (weavingTools) and the conversation
+// tools find, find_entity, find_citing and open_story (weavingTools) and the conversation
 // so far (Request.Messages; system design: A weaving run is shown what is new, and
 // finds for itself what bears on it). Its first turn is shown only every
 // Story cut since the last run written (the storage adapter's
@@ -140,7 +140,11 @@
 // with the same catalogue, of the Cuts' Stories with a Span mentioning the
 // Entity asked for, an id the run was shown before the turn (read from what
 // it was sent, WeavingTurns.entitiesShown), and any other id as an error the
-// model reads; open_story shows an
+// model reads; find_citing answers with the same catalogue, of the Editor's
+// Stories holding an Editor's Span that cites a Span of the Story asked for
+// (a Cut's Span, or for the Editor's Story, one of its Editor's Spans), a
+// Story an answer named before the turn (WeavingTurns.storiesShown), and any
+// other number as an error the model reads; open_story shows an
 // earlier Story whole, a Cut's each Span numbered (a Rejected one left out),
 // the Editor's each Editor's Span after the Spans it cites, read hydrated
 // whether Rejected or not, marked "the Editor's". A Span keeps its number

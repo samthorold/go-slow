@@ -57,8 +57,8 @@ func TestARunAsksByAnEntityItWasShownAndFindsSpansMentioningItInOtherWords(t *te
 	for _, tool := range first.Tools {
 		tools = append(tools, tool.Name)
 	}
-	if strings.Join(tools, " ") != "find find_entity open_story" {
-		t.Errorf("the run can call %v, want find, find_entity and open_story", tools)
+	if strings.Join(tools, " ") != "find find_entity find_citing open_story" {
+		t.Errorf("the run can call %v, want find, find_entity, find_citing and open_story", tools)
 	}
 
 	respondLast(batcher, asking("find_entity", `{"entity": "Q269909"}`))

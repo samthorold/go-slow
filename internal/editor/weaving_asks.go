@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"slices"
 	"strings"
 	"time"
@@ -21,8 +22,9 @@ import (
 // a tool answers is shown to the model, so it is part of the act's
 // instructions: a change to it is a new WeavingVersion, and a re-record.
 
-// weavingTools are the tools a run asks the Record with: find, by words,
-// and open_story, a Story from a catalogue, whole.
+// weavingTools are the tools a run asks the Record with: find, by words;
+// find_entity, by an Entity a Span it was shown mentions; and open_story, a
+// Story from a catalogue, whole.
 var weavingTools = []Tool{
 	{
 		Name: "find",
@@ -34,6 +36,15 @@ var weavingTools = []Tool{
 			"as whole words, whatever their case, in Spans as they read with the words between ⟦ and ⟧, so a " +
 			"name finds the Spans that refer to it in other words.",
 		Schema: object(map[string]any{"words": str()}),
+	},
+	{
+		Name: "find_entity",
+		Description: "Find earlier Stories by an Entity a Span shown to you mentions: a person, organisation, place " +
+			"or named occasion, asked for by its id, between { and } after its name (Q and digits for a Wikidata " +
+			"item, E and digits for one of the Editor's own). The answer is a catalogue as find's is, of the " +
+			"publishers' Stories with a Span mentioning the Entity, whatever words the Span calls it by: a Span " +
+			"mentions an Entity when it names it, or refers to words that do.",
+		Schema: object(map[string]any{"entity": str()}),
 	},
 	{
 		Name: "open_story",
@@ -92,6 +103,14 @@ func (r earlierRecord) answer(sh *woven, c ToolCall) (string, bool) {
 			return `find takes {"words": "..."}, the words to find.`, true
 		}
 		return r.find(sh, *in.Words), false
+	case "find_entity":
+		var in struct {
+			Entity *string `json:"entity"`
+		}
+		if err := dec.Decode(&in); err != nil || in.Entity == nil || strings.TrimSpace(*in.Entity) == "" {
+			return `find_entity takes {"entity": "..."}, the id of an Entity a Span shown to you mentions.`, true
+		}
+		return r.findEntity(sh, *in.Entity)
 	case "open_story":
 		var in struct {
 			Story *int64 `json:"story"`
@@ -101,7 +120,7 @@ func (r earlierRecord) answer(sh *woven, c ToolCall) (string, bool) {
 		}
 		return r.open(sh, *in.Story)
 	}
-	return fmt.Sprintf("There is no tool %q: ask with find or open_story.", c.Name), true
+	return fmt.Sprintf("There is no tool %q: ask with find, find_entity or open_story.", c.Name), true
 }
 
 // entry is a Story a catalogue lists: when it is from, its heading, and the
@@ -112,10 +131,56 @@ type entry struct {
 	lines func() string
 }
 
-// find is the catalogue of the earlier Stories with a Span holding words,
-// newest first, at most catalogueSize: each Span matched numbered (shown,
-// so it can be cited), between the Spans around it, unnumbered.
+// find is the catalogue of the earlier Stories with a Span holding words.
 func (r earlierRecord) find(sh *woven, words string) string {
+	return r.catalogue(sh, ask{
+		cut:  func(_ Address, read string) bool { return holdsWords(read, words) },
+		made: func(body string) bool { return holdsWords(body, words) },
+		with: fmt.Sprintf("with the words %q", words),
+		more: "hold the words",
+	})
+}
+
+// findEntity is the catalogue of the earlier Stories with a Span mentioning
+// the Entity whose id is asked (its marks and case aside), or an error told
+// to the model when the run was never shown a Span mentioning it, naming the
+// id without its marks, so the error never reads as showing it. An Editor's
+// Span mentions no Entity, since nothing hydrates it, so only Stories a Cut
+// made are listed.
+func (r earlierRecord) findEntity(sh *woven, asked string) (string, bool) {
+	id := strings.ToUpper(strings.Trim(strings.TrimSpace(asked), entityOpen+entityClose+" "))
+	if !slices.Contains(sh.entities, id) {
+		return fmt.Sprintf("No Span shown to you mentions an Entity with the id %q: ask for an Entity by the id "+
+			"between { and } after its name where a Span shown to you mentions it.", id), true
+	}
+	named := entityOpen + id + entityClose
+	if e, ok := r.h.entity(id); ok {
+		named = e.Name + " " + named
+	}
+	return r.catalogue(sh, ask{
+		cut: func(a Address, _ string) bool {
+			return slices.ContainsFunc(r.h.mentions(a), func(e NamedEntity) bool { return e.handle() == id })
+		},
+		with: "mentioning " + named,
+		more: "mention it",
+	}), false
+}
+
+// ask is what a catalogue lists earlier Stories by: whether a Span of a
+// Story a Cut made matches it, by its address and its words as read, and
+// whether an Editor's Span does by its words (nil for none); with, how the
+// answer says what Spans matching hold ("with the words ..."), and more, what
+// the Spans not shown do ("hold the words").
+type ask struct {
+	cut        func(a Address, read string) bool
+	made       func(body string) bool
+	with, more string
+}
+
+// catalogue is the catalogue of the earlier Stories with a Span matching
+// the ask q, newest first, at most catalogueSize: each Span matched numbered
+// (shown, so it can be cited), between the Spans around it, unnumbered.
+func (r earlierRecord) catalogue(sh *woven, q ask) string {
 	var entries []entry
 	for _, s := range r.cuts {
 		var lines []string
@@ -124,7 +189,7 @@ func (r earlierRecord) find(sh *woven, words string) string {
 			a := r.address(s, sp)
 			_, read := r.h.read(a, cut.Words(s.Item.Content, sp))
 			lines = append(lines, read)
-			if !r.h.rejected(a) && holdsWords(read, words) {
+			if !r.h.rejected(a) && q.cut(a, read) {
 				matched = append(matched, i)
 			}
 		}
@@ -133,7 +198,7 @@ func (r earlierRecord) find(sh *woven, words string) string {
 		}
 		entries = append(entries, entry{at: s.Item.Published, id: s.CutID,
 			lines: func() string {
-				return r.cutHeading(s) + "\n" + around(matched, len(s.Spans), func(i int, match bool) string {
+				return r.cutHeading(s) + "\n" + around(matched, len(s.Spans), q.more, func(i int, match bool) string {
 					sp := s.Spans[i]
 					a := r.address(s, sp)
 					if r.h.rejected(a) {
@@ -149,9 +214,12 @@ func (r earlierRecord) find(sh *woven, words string) string {
 			}})
 	}
 	for _, st := range r.made {
+		if q.made == nil {
+			break
+		}
 		var matched []int
 		for i, es := range st.Spans {
-			if holdsWords(es.Body, words) {
+			if q.made(es.Body) {
 				matched = append(matched, i)
 			}
 		}
@@ -160,7 +228,7 @@ func (r earlierRecord) find(sh *woven, words string) string {
 		}
 		entries = append(entries, entry{at: st.At, id: st.ID,
 			lines: func() string {
-				return r.madeHeading(st, true) + "\n" + around(matched, len(st.Spans), func(i int, match bool) string {
+				return r.madeHeading(st, true) + "\n" + around(matched, len(st.Spans), q.more, func(i int, match bool) string {
 					body := st.Spans[i].Body
 					if !match {
 						return "  · " + body + "\n"
@@ -171,19 +239,19 @@ func (r earlierRecord) find(sh *woven, words string) string {
 			}})
 	}
 	if len(entries) == 0 {
-		return fmt.Sprintf("No earlier Story has a Span with the words %q.", words)
+		return fmt.Sprintf("No earlier Story has a Span %s.", q.with)
 	}
 	slices.SortFunc(entries, func(a, b entry) int { return cmp.Or(b.at.Compare(a.at), cmp.Compare(b.id, a.id)) })
 	var b strings.Builder
 	switch {
 	case len(entries) > catalogueSize:
-		fmt.Fprintf(&b, "%d earlier Stories have Spans with the words %q; the %d newest are listed, newest first.\n",
-			len(entries), words, catalogueSize)
+		fmt.Fprintf(&b, "%d earlier Stories have Spans %s; the %d newest are listed, newest first.\n",
+			len(entries), q.with, catalogueSize)
 		entries = entries[:catalogueSize]
 	case len(entries) == 1:
-		fmt.Fprintf(&b, "1 earlier Story has Spans with the words %q.\n", words)
+		fmt.Fprintf(&b, "1 earlier Story has Spans %s.\n", q.with)
 	default:
-		fmt.Fprintf(&b, "%d earlier Stories have Spans with the words %q, newest first.\n", len(entries), words)
+		fmt.Fprintf(&b, "%d earlier Stories have Spans %s, newest first.\n", len(entries), q.with)
 	}
 	for _, e := range entries {
 		b.WriteString("\n" + e.lines())
@@ -306,8 +374,9 @@ func citedBy(n int) string {
 // around is the lines of a Story's Spans a catalogue shows: each matched,
 // the first matchesShown of them, and the one before and after each, in
 // order, line(i, matched) writing Span i, and "  …" where Spans are skipped
-// between them; then how many more match, if any.
-func around(matched []int, spans int, line func(i int, match bool) string) string {
+// between them; then how many more match, if any, saying they hold what was
+// asked for.
+func around(matched []int, spans int, hold string, line func(i int, match bool) string) string {
 	more := len(matched) - matchesShown
 	if more > 0 {
 		matched = matched[:matchesShown]
@@ -329,7 +398,7 @@ func around(matched []int, spans int, line func(i int, match bool) string) strin
 		b.WriteString(line(i, slices.Contains(matched, i)))
 	}
 	if more > 0 {
-		fmt.Fprintf(&b, "  … and %d more Spans of it hold the words: open the Story to read them\n", more)
+		fmt.Fprintf(&b, "  … and %d more Spans of it %s: open the Story to read them\n", more, hold)
 	}
 	return b.String()
 }
@@ -362,3 +431,46 @@ func holdsWords(text, words string) bool {
 }
 
 func isWordRune(r rune) bool { return unicode.IsLetter(r) || unicode.IsDigit(r) }
+
+// entityOpen and entityClose mark an Entity's id where a run is shown that a
+// Span mentions it, after its name: "Andy Burnham {Q269909}".
+const (
+	entityOpen  = "{"
+	entityClose = "}"
+)
+
+// handle is the id a run is shown e by, and asks for it by: a Wikidata
+// item's own id (an Editor's Entity merged into one included), or E and the
+// Editor's Entity's id in the Record.
+func (e NamedEntity) handle() string {
+	if e.WikidataID != "" {
+		return e.WikidataID
+	}
+	return fmt.Sprintf("E%d", e.EditorID)
+}
+
+// shownEntity is an Entity's id as a run is shown it.
+var shownEntity = regexp.MustCompile(`\{((?:Q|E)[0-9]+)\}`)
+
+// entitiesShown are the ids of the Entities the run has been shown a Span
+// mentioning, read from what it was sent (its opening, and the answers to
+// its asks), each once: those it may ask for by find_entity. They are read
+// from what was sent, as left-out Spans are (shownIn), since a Span looked up
+// or hydrated since is shown otherwise now.
+func (t WeavingTurns) entitiesShown() []string {
+	var out []string
+	add := func(text string) {
+		for _, m := range shownEntity.FindAllStringSubmatch(text, -1) {
+			if !slices.Contains(out, m[1]) {
+				out = append(out, m[1])
+			}
+		}
+	}
+	add(t.Input)
+	for _, m := range t.Messages {
+		for _, r := range m.Results {
+			add(r.Content)
+		}
+	}
+	return out
+}

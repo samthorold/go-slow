@@ -103,8 +103,8 @@
 // by EstimateOf at batch rates (Price.AtBatchRates).
 //
 // A run is a conversation, each turn a request at EffortMedium carrying the
-// tools find and open_story (weavingTools) and the conversation so far
-// (Request.Messages; system design: A weaving run is shown what is new, and
+// tools find, find_entity and open_story (weavingTools) and the conversation
+// so far (Request.Messages; system design: A weaving run is shown what is new, and
 // finds for itself what bears on it). Its first turn is shown only every
 // Story cut since the last run written (the storage adapter's
 // StoriesToWeave: Cuts after its through_cut, of Items collected after the
@@ -116,7 +116,11 @@
 // that refers to another read between ⟦ and ⟧, marks no publisher writes, as
 // what it refers to, its possessive where the stretch says whose something
 // is ("⟦Derby’s⟧ role", Hydration.Hydrated, as the Pages read it), while a
-// publisher's own square brackets are shown as written; a Span of a Story
+// publisher's own square brackets are shown as written; "mentioning" each
+// Entity it mentions (Hydration.Entities, by the look-ups the Record holds
+// now, WeavingStore.EntitiesNamed), by its name and its id between { and }
+// (NamedEntity.handle: a Wikidata item's id, or E and an Editor's Entity's,
+// one merged into an item shown as the item); a Span of a Story
 // cut that is Rejected is left out and keeps its number, so a Span's number
 // never depends on its hydration. A Span with no hydration is shown as
 // written: nothing waits for hydration.
@@ -132,7 +136,11 @@
 // Item's title, date and Source, the Editor's by its date and first Editor's
 // Span, with how many later Editor's Spans cite it, then its first
 // matchesShown matched Spans, each numbered on from what the run has been
-// shown, between the Spans around it unnumbered (·); open_story shows an
+// shown, between the Spans around it unnumbered (·); find_entity answers
+// with the same catalogue, of the Cuts' Stories with a Span mentioning the
+// Entity asked for, an id the run was shown before the turn (read from what
+// it was sent, WeavingTurns.entitiesShown), and any other id as an error the
+// model reads; open_story shows an
 // earlier Story whole, a Cut's each Span numbered (a Rejected one left out),
 // the Editor's each Editor's Span after the Spans it cites, read hydrated
 // whether Rejected or not, marked "the Editor's". A Span keeps its number

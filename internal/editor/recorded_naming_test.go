@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"os"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -164,8 +165,17 @@ func wovenRecord(t *testing.T, frozen string) (string, []storyToName, error) {
 	path := filepath.Join(t.TempDir(), "woven.db")
 	store, _ := newRecordAt(t, path, nil)
 	var stories []storyToName
+	// Weaving's copies recorded since Wikidata's responses were recorded
+	// (frozen/wikidata/) looked their names up in them: they are looked up
+	// so again, or the asks those copies made are answered otherwise. Copies
+	// recorded before looked up nothing found.
+	wd := filepath.Join(frozen, "wikidata")
+	_, err := os.Stat(wd)
+	lookUp := err == nil
 	for _, r := range weavingRuns(t) {
-		if err := collectCutAndHydrate(ctx, store, r, filepath.Join(frozen, "hydration")); err != nil {
+		if lookUp {
+			lookUpThrough(t, store, r, filepath.Join(frozen, "hydration"), fixturesWikidata(t, wd))
+		} else if err := collectCutAndHydrate(ctx, store, r, filepath.Join(frozen, "hydration")); err != nil {
 			return "", nil, err
 		}
 		before := madeIDs(t, store)

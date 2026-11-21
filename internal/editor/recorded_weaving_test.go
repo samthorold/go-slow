@@ -23,8 +23,9 @@ import (
 // The recorded runs of weaving. A run is a conversation: its first turn is
 // shown the Stories the fixture Items' Cuts made, cut by the sentence cutter,
 // which is plain code, each Span hydrated by its Item's hydration and shown
-// with the Entities it mentions (each name looked up in a Wikidata that
-// matches nothing, so an Editor's Entity), and it reaches earlier Stories by
+// with the Entities it mentions (each name looked up in Wikidata's recorded
+// responses, testdata/recorded/weaving/inputs/wikidata/, so a name Wikidata
+// knows is its item, and one it doesn't an Editor's Entity), and it reaches earlier Stories by
 // asking (find, find_entity, find_citing, open_story), each turn a request of its own. Weaving rests on hydration's recordings, and is recorded over
 // its own frozen copies of them,
 // testdata/recorded/weaving/inputs/hydration/<fixture>.json, each a fixture's
@@ -107,6 +108,7 @@ func weavingVerdicts(t *testing.T, root string, runs []weavingRun, live editor.M
 	ctx := t.Context()
 	dir := filepath.Join(root, "weaving")
 	frozen := filepath.Join(dir, "inputs", "hydration")
+	wd := filepath.Join(dir, "inputs", "wikidata")
 	// The Record carried on so far, kept closed between runs so each sample
 	// starts from a copy of its file.
 	carried := filepath.Join(t.TempDir(), "carried.db")
@@ -120,7 +122,7 @@ func weavingVerdicts(t *testing.T, root string, runs []weavingRun, live editor.M
 		reached := 0
 		errs = append(errs, sampledOn(t, dir, r.name, dailyRule, weavingCommand, live, model, report, func(m *sampleModel) sampleResult {
 			store := copyOfRecord(t, carried)
-			collectAndCut(t, store, r, frozen)
+			collectAndCut(t, store, r, frozen, wd)
 			shown := shownAsNew(t, store)
 			before := madeIDs(t, store)
 			if i > 0 && len(before) == 0 {
@@ -177,7 +179,7 @@ func weavingVerdicts(t *testing.T, root string, runs []weavingRun, live editor.M
 		if err != nil {
 			t.Fatal(err)
 		}
-		collectAndCut(t, store, r, frozen)
+		collectAndCut(t, store, r, frozen, wd)
 		threaded := replayingSample(t, samplePath(dir, r.name, thread), model, weavingCommand, report)
 		if passed, err := weave(t, store, threaded, r.at); err != nil || !passed {
 			t.Fatalf("%s: carrying on by sample %d: passed %v, %v", r.name, thread, passed, err)
@@ -194,32 +196,15 @@ func weavingVerdicts(t *testing.T, root string, runs []weavingRun, live editor.M
 // frozen (system design: Each Command is recorded over its own frozen
 // inputs), replayed unchecked. Each Item must have its copy, and be
 // hydrated by it: weaving's recordings answer the requests those copies
-// make. Then every name hydrated is looked up, in a Wikidata that matches
-// nothing (noWikidata), so each is an Editor's Entity, one per name and
-// kind, and a run is shown which a Span mentions and can ask by them.
-func collectAndCut(t *testing.T, store *sqlite.Store, r weavingRun, frozen string) {
+// make. Then every name hydrated is looked up through the Wikidata adapter
+// in Wikidata's responses recorded in wd (fixturesWikidata), so a name
+// Wikidata knows is its item, one person named by an office and by a name is
+// one Entity, and one it doesn't know an Editor's Entity; a run is shown
+// which a Span mentions and can ask by them. A look-up with no response
+// recorded fails the test.
+func collectAndCut(t *testing.T, store *sqlite.Store, r weavingRun, frozen, wd string) {
 	t.Helper()
-	if err := collectCutAndHydrate(t.Context(), store, r, frozen); err != nil {
-		t.Fatal(err)
-	}
-	lu := editor.NewLookups(editor.LookupDeps{Store: store, Wikidata: noWikidata{}, Log: slog.New(slog.DiscardHandler)})
-	if err := lu.LookUpWaiting(t.Context(), r.at); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// noWikidata is a Wikidata that holds nothing: the recorded runs make no
-// network call, and Wikidata's answers for the fixtures' names are not
-// recorded, so a name the fixtures share is one Entity only when hydration
-// gives it the same name and kind.
-type noWikidata struct{}
-
-func (noWikidata) Search(context.Context, string) ([]string, error) { return nil, nil }
-
-func (noWikidata) Items(context.Context, []string) ([]editor.WikidataItem, error) { return nil, nil }
-
-func (noWikidata) Labels(context.Context, []string) (map[string]string, error) {
-	return map[string]string{}, nil
+	lookUpThrough(t, store, r, frozen, fixturesWikidata(t, wd))
 }
 
 // collectCutAndHydrate is collectAndCut, reporting what fails: an error

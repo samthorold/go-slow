@@ -8,7 +8,12 @@
 // It counts hydration, weaving and naming. Hydration is counted by the Spans its
 // fixture is cut into and what it judged of them; weaving by the Stories it
 // made, their Editor's Spans and the distinct Spans they cite; naming by the
-// words of the Name it gave its Story. Recordings of any
+// words of the Name it gave its Story. An act that calls tools (weaving) has
+// a second table, its tools: per fixture, each tool's asks over every attempt
+// of every sample, and how many of its answers held anything (named a Story,
+// and were no error), with each tool's total; ? where the tree keeps no
+// answer to some ask (one recorded before samples kept their tool results).
+// Recordings of any
 // other act (a retired act's, in an older tree) are not counted: the report
 // ends by naming those acts.
 //
@@ -24,6 +29,7 @@
 package main
 
 import (
+	"cmp"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -32,6 +38,8 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -77,10 +85,73 @@ func fixturesBeside(dirs ...string) string {
 	return ""
 }
 
-// recording is the little of a kept response the report needs.
+// recording is the little of a kept response the report needs: a sample's
+// last attempt, with the attempts before it, and of a turn that called
+// tools, its calls and what the tools returned (none kept in an older tree).
 type recording struct {
-	Act    string          `json:"act"`
-	Output json.RawMessage `json:"output"`
+	Act     string          `json:"act"`
+	Output  json.RawMessage `json:"output"`
+	Calls   []toolCall      `json:"calls"`
+	Results []toolResult    `json:"results"`
+	Earlier []recording     `json:"earlier_attempts"`
+}
+
+type toolCall struct {
+	ID   string `json:"ID"`
+	Name string `json:"Name"`
+}
+
+type toolResult struct {
+	CallID  string `json:"CallID"`
+	Content string `json:"Content"`
+	IsError bool   `json:"IsError"`
+}
+
+// namesAStory is a line of a tool's answer naming a Story, a catalogue's
+// entry or the Story opened: an answer holds anything when it names one and
+// is no error.
+var namesAStory = regexp.MustCompile(`(?m)^\s*Story \d+,`)
+
+// asked is what a tool was asked in a fixture's samples: its asks, and how
+// many of its answers held anything; unknown when some ask's answer was not
+// kept.
+type asked struct {
+	asks, held int
+	unknown    bool
+}
+
+func (a asked) add(o asked) asked {
+	return asked{asks: a.asks + o.asks, held: a.held + o.held, unknown: a.unknown || o.unknown}
+}
+
+// heldCell is how many answers held anything, or ? where not every answer
+// was kept.
+func (a asked) heldCell() string {
+	if a.unknown {
+		return "?"
+	}
+	return strconv.Itoa(a.held)
+}
+
+// toolsAsked counts each tool rec's attempts called: their asks, and the
+// answers that held anything.
+func toolsAsked(rec recording) map[string]asked {
+	out := map[string]asked{}
+	for _, a := range append(slices.Clone(rec.Earlier), rec) {
+		for _, c := range a.Calls {
+			n := out[c.Name]
+			n.asks++
+			i := slices.IndexFunc(a.Results, func(r toolResult) bool { return r.CallID == c.ID })
+			switch {
+			case i < 0:
+				n.unknown = true
+			case !a.Results[i].IsError && namesAStory.MatchString(a.Results[i].Content):
+				n.held++
+			}
+			out[c.Name] = n
+		}
+	}
+	return out
 }
 
 // about is what a recording's count may need beyond its output: for
@@ -192,6 +263,22 @@ const oldHydration = "reading"
 type counts struct {
 	acts      map[string]map[string][][]int
 	uncounted map[string]bool
+	// tools are, per act and fixture, what each tool was asked over the
+	// fixture's samples, for an act that calls tools.
+	tools map[string]map[string]map[string]asked
+}
+
+// addTools adds what the tools were asked in one of fixture's samples of act.
+func (c counts) addTools(act, fixture string, tools map[string]asked) {
+	for tool, n := range tools {
+		if c.tools[act] == nil {
+			c.tools[act] = map[string]map[string]asked{}
+		}
+		if c.tools[act][fixture] == nil {
+			c.tools[act][fixture] = map[string]asked{}
+		}
+		c.tools[act][fixture][tool] = c.tools[act][fixture][tool].add(n)
+	}
 }
 
 // fixtureOf is the fixture a recording at rel (with no extension) is of: a
@@ -205,7 +292,7 @@ func fixtureOf(rel string) string {
 }
 
 func load(dir, govuk string) (counts, error) {
-	c := counts{acts: map[string]map[string][][]int{}, uncounted: map[string]bool{}}
+	c := counts{acts: map[string]map[string][][]int{}, uncounted: map[string]bool{}, tools: map[string]map[string]map[string]asked{}}
 	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -272,6 +359,7 @@ func load(dir, govuk string) (counts, error) {
 				c.acts[a.name] = map[string][][]int{}
 			}
 			c.acts[a.name][f] = append(c.acts[a.name][f], n)
+			c.addTools(a.name, f, toolsAsked(rec))
 		}
 		if !counted && rec.Act != "" {
 			c.uncounted[rec.Act] = true
@@ -327,6 +415,7 @@ func report(b *strings.Builder, before, after counts) {
 			cells[i] = totalBefore[i].String() + " → " + totalAfter[i].String()
 		}
 		fmt.Fprintf(b, "| **Total** | %s |\n\n", strings.Join(cells, " | "))
+		reportTools(b, a.name, before, after)
 	}
 	uncounted := map[string]bool{}
 	for act := range before.uncounted {
@@ -343,6 +432,56 @@ func report(b *strings.Builder, before, after counts) {
 		sort.Strings(names)
 		fmt.Fprintf(b, "Not counted: %s\n", strings.Join(names, ", "))
 	}
+}
+
+// reportTools writes, for an act that called tools in either tree, each
+// fixture's asks of each tool and the answers that held anything, before →
+// after, summed over the fixture's samples, and each tool's total.
+// A fixture a tree has no recording of shows a dash on that side.
+func reportTools(b *strings.Builder, act string, before, after counts) {
+	rows := map[[2]string]bool{}
+	tools := map[string]bool{}
+	for _, side := range []counts{before, after} {
+		for f, byTool := range side.tools[act] {
+			for tool := range byTool {
+				rows[[2]string{f, tool}] = true
+				tools[tool] = true
+			}
+		}
+	}
+	if len(rows) == 0 {
+		return
+	}
+	keys := make([][2]string, 0, len(rows))
+	for k := range rows {
+		keys = append(keys, k)
+	}
+	slices.SortFunc(keys, func(x, y [2]string) int { return cmp.Or(cmp.Compare(x[0], y[0]), cmp.Compare(x[1], y[1])) })
+	fmt.Fprintf(b, "### %s's tools\n\n| Fixture | Tool | Asks | Held anything |\n|---|---|---|---|\n", act)
+	totalBefore, totalAfter := map[string]asked{}, map[string]asked{}
+	cellOf := func(side counts, total map[string]asked, f, tool string) (string, string) {
+		if _, recorded := side.acts[act][f]; !recorded {
+			return "–", "–"
+		}
+		n := side.tools[act][f][tool]
+		total[tool] = total[tool].add(n)
+		return strconv.Itoa(n.asks), n.heldCell()
+	}
+	for _, k := range keys {
+		wasAsks, wasHeld := cellOf(before, totalBefore, k[0], k[1])
+		nowAsks, nowHeld := cellOf(after, totalAfter, k[0], k[1])
+		fmt.Fprintf(b, "| %s | %s | %s → %s | %s → %s |\n", k[0], k[1], wasAsks, nowAsks, wasHeld, nowHeld)
+	}
+	names := make([]string, 0, len(tools))
+	for tool := range tools {
+		names = append(names, tool)
+	}
+	sort.Strings(names)
+	for _, tool := range names {
+		was, now := totalBefore[tool], totalAfter[tool]
+		fmt.Fprintf(b, "| **Total** | %s | %d → %d | %s → %s |\n", tool, was.asks, now.asks, was.heldCell(), now.heldCell())
+	}
+	b.WriteString("\n")
 }
 
 // span is the least and most a fixture's samples drew in a column.

@@ -296,6 +296,10 @@ func sleep(ctx context.Context, d time.Duration) error {
 }
 
 func (s *sampleModel) Complete(ctx context.Context, req editor.Request) (editor.Response, error) {
+	if err := s.told(req); err != nil {
+		s.report(err)
+		return editor.Response{}, err
+	}
 	hash := editor.RequestHash(req, s.model)
 	if s.next < len(s.attempts) {
 		a := s.attempts[s.next]
@@ -339,6 +343,71 @@ func (s *sampleModel) Complete(ctx context.Context, req editor.Request) (editor.
 	s.next++
 	keepSample(s.t, s.path, s.attempts)
 	return res, err
+}
+
+// told keeps, recording, or checks, replaying, what the tools returned to
+// the asks of the attempt req sends their results back to (a conversation's
+// next turn): replaying, results other than the attempt keeps, or none kept,
+// fail as stale. A request sending no results back, or results to no attempt
+// answered so far, has nothing to keep.
+func (s *sampleModel) told(req editor.Request) error {
+	if s.unchecked || len(req.Messages) == 0 {
+		return nil
+	}
+	results := req.Messages[len(req.Messages)-1].Results
+	if len(results) == 0 {
+		return nil
+	}
+	i := s.next - 1
+	for i >= 0 && !answers(s.attempts[i].Calls, results) {
+		i--
+	}
+	if i < 0 {
+		return nil
+	}
+	a := &s.attempts[i]
+	if slices.Equal(a.Results, results) {
+		return nil
+	}
+	if s.live != nil {
+		a.Results = slices.Clone(results)
+		keepSample(s.t, s.path, s.attempts)
+		return nil
+	}
+	name := filepath.Base(filepath.Dir(s.path)) + " sample " + strings.TrimSuffix(filepath.Base(s.path), ".json")
+	if a.Results == nil {
+		names := make([]string, 0, len(a.Calls))
+		for _, c := range a.Calls {
+			names = append(names, c.Name)
+		}
+		return fmt.Errorf("%s: stale: re-record with %s; attempt %d keeps no results of its asks (%s), so what its tools return now is not known to be what they returned",
+			name, s.cmd, i+1, strings.Join(names, ", "))
+	}
+	for k, r := range results {
+		if k >= len(a.Results) || r != a.Results[k] {
+			kept := editor.ToolResult{}
+			if k < len(a.Results) {
+				kept = a.Results[k]
+			}
+			return fmt.Errorf("%s: stale: re-record with %s; attempt %d's %s ask now returns %.200q, which the sample kept as %.200q",
+				name, s.cmd, i+1, a.Calls[k].Name, r.Content, kept.Content)
+		}
+	}
+	return fmt.Errorf("%s: stale: re-record with %s; attempt %d kept %d results of its asks, its tools now return %d",
+		name, s.cmd, i+1, len(a.Results), len(results))
+}
+
+// answers is whether results answer calls, one each, in order.
+func answers(calls []editor.ToolCall, results []editor.ToolResult) bool {
+	if len(calls) != len(results) {
+		return false
+	}
+	for k, c := range calls {
+		if results[k].CallID != c.ID {
+			return false
+		}
+	}
+	return true
 }
 
 // more is whether another attempt can be made at the sample: in use, up to

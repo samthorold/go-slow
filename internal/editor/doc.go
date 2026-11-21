@@ -157,7 +157,11 @@
 // then on, submitted on the same turn of the batch runner. A run the Owner
 // capped (WeavingStore.WeavingCap, kept by the weave command) is given up
 // (ErrGiveUp), marked failed, when its next turn would take what it has
-// spent over its cap, priced by Deps.PriceOf at batch rates.
+// spent over its cap, priced by Deps.PriceOf at batch rates. A run given up
+// is shown as it would resume (GivenUpWeaving: what it has spent, its cap,
+// and its next turn, from its last kept turn, with that turn's estimate), so
+// the retry command resumes one given up over its cap only under a higher
+// cap, priced first.
 //
 // A turn that calls no tool is the answer: stories, each editor_spans, each
 // body then cites (numbers); a citation of an earlier Editor's Span is held

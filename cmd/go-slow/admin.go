@@ -6,8 +6,6 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
-	"slices"
-	"strings"
 	"time"
 
 	"github.com/samthorold/go-slow/internal/collect"
@@ -39,7 +37,9 @@ type adminDeps struct {
 //
 //	retry [act]: clears the failed marks on the work of one act run in
 //	batches (hydration, weaving or naming), or of every act, resetting its
-//	attempts, so the next run takes that work up again:
+//	attempts, so the next run takes that work up again; a weaving run given
+//	up over its cap is resumed only under a higher one, priced first; see
+//	retry:
 //
 //	  docker compose run --rm app retry weaving
 //
@@ -88,32 +88,7 @@ func admin(ctx context.Context, log *slog.Logger, args []string, d adminDeps) er
 		log.Info("items given their text", "given", n)
 		return nil
 	case "retry":
-		var act string
-		if len(args) > 1 {
-			act = args[1]
-		}
-		var known []string
-		for _, a := range batchActs(editor.New(editor.Deps{}), 0) {
-			known = append(known, a.Name)
-		}
-		if act != "" && !slices.Contains(known, act) {
-			return fmt.Errorf("unknown act %q (known: %s)", act, strings.Join(known, ", "))
-		}
-		cfg, err := config.Load(d.Lookup)
-		if err != nil {
-			return err
-		}
-		store, err := sqlite.Open(ctx, cfg.DatabasePath)
-		if err != nil {
-			return err
-		}
-		defer func() { _ = store.Close() }()
-		n, err := store.RetryFailed(ctx, act)
-		if err != nil {
-			return err
-		}
-		log.Info("failed work cleared for retry", "act", act, "cleared", n)
-		return nil
+		return retry(ctx, log, args[1:], d)
 	case "rejudge":
 		return rejudge(ctx, log, args[1:], d)
 	case "weave":

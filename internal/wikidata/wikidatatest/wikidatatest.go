@@ -13,7 +13,7 @@ import (
 // in dir, and 404 for one never recorded. A response is recorded under a
 // name made from its request:
 //
-//	search-<text>.json        wbsearchentities, spaces as _
+//	search-<text>.json        wbsearchentities, spaces as _, slashes as %2F
 //	items-<ids>.json          wbgetentities with claims, ids joined by _
 //	labels-<ids>.json         wbgetentities with labels only
 //
@@ -38,7 +38,7 @@ func Name(r *http.Request) string {
 	ids := strings.ReplaceAll(q.Get("ids"), "|", "_")
 	switch {
 	case q.Get("action") == "wbsearchentities":
-		return "search-" + strings.ReplaceAll(q.Get("search"), " ", "_") + ".json"
+		return "search-" + strings.NewReplacer(" ", "_", "/", "%2F").Replace(q.Get("search")) + ".json"
 	case q.Get("action") == "wbgetentities" && q.Get("props") == "labels":
 		return "labels-" + ids + ".json"
 	case q.Get("action") == "wbgetentities":

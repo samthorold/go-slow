@@ -91,13 +91,16 @@ func TestTheCompatibilityCheckFailsOnAHydrationWeavingCannotTake(t *testing.T) {
 }
 
 // feedNaming copies the first sample of each of weaving's runs under
-// weavings, with the hydrations they were recorded on (weavings/inputs/hydration),
-// as a refresh would, and names each Story they make on a fake model: the
+// weavings, with the hydrations and Wikidata's responses they were recorded on
+// (weavings/inputs/hydration, weavings/inputs/wikidata), as a refresh would, and names each Story they make on a fake model: the
 // first failure.
 func feedNaming(t *testing.T, weavings string) error {
 	t.Helper()
 	frozen := t.TempDir()
 	if err := os.CopyFS(filepath.Join(frozen, "hydration"), os.DirFS(filepath.Join(weavings, "inputs", "hydration"))); err != nil {
+		return err
+	}
+	if err := os.CopyFS(filepath.Join(frozen, "wikidata"), os.DirFS(filepath.Join(weavings, "inputs", "wikidata"))); err != nil {
 		return err
 	}
 	if err := os.MkdirAll(filepath.Join(frozen, "weaving"), 0o750); err != nil {

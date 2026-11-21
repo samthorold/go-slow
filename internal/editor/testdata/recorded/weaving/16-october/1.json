@@ -1,58 +1,57 @@
 {
   "act": "weaving",
   "model": "claude-opus-5-5",
-  "request_hash": "4a384a0736ee354153c1a83b46a842ab4613ad7ce23a0d0d95db273d78490f5e",
-  "recorded_at": "2026-11-21T09:35:09.282841Z",
+  "request_hash": "a3e179591249d6aeab6875c94e86e3a8759832450cc79431d902767913de2e69",
+  "recorded_at": "2026-11-21T10:48:08.990488Z",
   "usage": {
-    "input_tokens": 1995,
-    "output_tokens": 1546,
-    "cache_read_input_tokens": 14869
+    "input_tokens": 642,
+    "output_tokens": 1461,
+    "cache_read_input_tokens": 16448
   },
   "output": {
     "stories": [
       {
         "editor_spans": [
           {
-            "body": "Last week I called the Prime Minister's 'offer' to Holyrood a challenge with nothing in it. My reasoning was that local government in Scotland is devolved, so Westminster has nothing to hand to Scottish regions. The full speech partly corrects me. Its one concrete item is 'DWP devolution': a Scottish model of local employment support, shaped by Holyrood. Employment support is one of the few levers in Scotland that Westminster still holds, so this is a real power to give away, not just a lecture. Even so, it goes to Holyrood rather than to the regions directly, and that confirms the shape I described. Westminster gives something to Edinburgh, then dares Edinburgh to pass it on to the regions.",
-            "cites": [
-              355,
-              305,
-              306,
-              307
-            ]
-          },
-          {
-            "body": "The longer story behind the speech is one it only half tells. Andy Burnham dates the damage to Ravenscraig and the Lancashire pit closures: decisions 'taken hundreds of miles away' by people who would never live with the results. That loss of trust is one of the main reasons Scotland voted for its own Parliament. Holyrood then pulled power towards itself. It kept just 32 large councils, and its proudest achievements, which Burnham lists himself (public water, nationalised rail, free personal care), are all run nationally. A Parliament created because of distant decisions became a new centre. Burnham's warning that Scottish towns could fall behind northern English cities that are 'powering up' is the first time a Prime Minister has used England's patchwork of mayors as a measuring stick against Holyrood.",
-            "cites": [
-              84,
-              85,
-              141,
-              146,
-              147,
-              148,
-              153,
-              279
-            ]
-          },
-          {
-            "body": "The speech's own evidence is weaker than its argument. Its central example, the Easterhouse 'names not numbers' approach, is a local project that worked without any transfer of formal powers. It shows a way of delivering services, not a case for redrawing who holds power. Burnham now wants to scale it up into 'the way we support everybody, everywhere'. That is exactly the kind of national rollout of a local success that has repeatedly failed elsewhere. The other hard proof he offers, buying Alexander Dennis buses, came from bus franchising and procurement choices, not from devolution as such.",
+            "body": "The Prime Minister's speech shows the limits of his offer. The new part is 'DWP devolution', meaning employment support run locally. It is built on what he calls the Easterhouse principle, 'names not numbers', and he says he wants to take it from 'a project on one estate' to 'the way we support everybody, everywhere'. Those two aims pull against each other. What he praised in Easterhouse was small and run by the people on the estate themselves: help with clothes, paid travel, a personal route into work for each young person. When a model like that becomes a national programme, it usually turns back into the same targets and box-ticking he says he is against. The speech never says how the approach would survive being rolled out across a whole country, and it is the scaling, not the principle, that will decide whether it works.",
             "cites": [
               36,
+              46,
+              47,
               51,
-              61,
+              242,
+              305,
+              306,
+              310,
               315,
-              316,
-              195,
-              198
+              316
             ]
           },
           {
-            "body": "Two things to watch. First, the National Economic Council meeting with the devolved First Ministers, the first since he took office, will show whether the employment offer comes with money and a timetable. Second, the welfare framing is significant: one in six young people not in work, education or training, and 'I won't have... kids in their 20s just being there on benefits'. That suggests the devolved employment support will come attached to conditions set by the Treasury and the Milburn review. If so, Holyrood would be taking on the political risk of welfare reform without controlling its terms.",
+            "body": "The way the offer is built also matters. Most of what he wants pushed down to local level, such as councils, skills and the reform of local government, is already Holyrood's business, not Westminster's. What the UK Government actually controls is a smaller set of funds for innovation, enterprise and employability, which it says could be matched to Scotland's regions. So 'pushing power out from Westminster and Holyrood' carries different weight for each government. Westminster would be giving away some UK-level funding streams. Holyrood would be asked to give up powers it holds itself. And by saying that 'Scotland could lose out' while northern English cities are 'starting to power up', the Prime Minister sets up a comparison that puts pressure on Holyrood. This fits what we noted last week about the press release: he is competing with Holyrood on its own ground while presenting it as cooperation. The first real test is the National Economic Council meeting he has promised. If the Scottish Government's answer there sets the terms, the offer is joint. If it does not, the offer works mainly as a way to get past Holyrood.",
             "cites": [
+              275,
+              276,
+              278,
+              279,
+              299,
               318,
-              230,
-              235,
-              241
+              328,
+              364,
+              353
+            ]
+          },
+          {
+            "body": "Ravenscraig is the emotional centre of the speech, but the history he tells is simpler than what happened. He describes the closure as 'a decision taken hundreds of miles away by people' who would never live with what followed. That is true in spirit. But when the works shut in 1992, British Steel had already been privatised, so the closing was done by a company, under a policy in London that chose not to step in. The difference matters for what he is promising now. The places he names, Ravenscraig, Bickershaw and Aberdeen today, were not let down for lack of a local say over employment support. They were let down because, when the industry went, nobody had a plan for what would replace it. Devolving employment support does nothing about that. He says Aberdeen is 'very much on my mind' and that he will have more to say 'in due course'. Given the history he has just told, that is the obvious next test.",
+            "cites": [
+              80,
+              82,
+              84,
+              86,
+              90,
+              91,
+              92,
+              108
             ]
           }
         ]
@@ -61,18 +60,18 @@
   },
   "raw": {
     "model": "claude-opus-5-5",
-    "id": "msg_011ChFqyFfKqPAueZbFLguM4",
+    "id": "msg_011ChFwYCNPF1FvSstzF2fWp",
     "type": "message",
     "role": "assistant",
     "content": [
       {
         "type": "thinking",
         "thinking": "",
-        "signature": "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"
+        "signature": "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"
       },
       {
         "type": "text",
-        "text": "{\"stories\":[{\"editor_spans\":[{\"body\":\"Last week I called the Prime Minister's 'offer' to Holyrood a challenge with nothing in it. My reasoning was that local government in Scotland is devolved, so Westminster has nothing to hand to Scottish regions. The full speech partly corrects me. Its one concrete item is 'DWP devolution': a Scottish model of local employment support, shaped by Holyrood. Employment support is one of the few levers in Scotland that Westminster still holds, so this is a real power to give away, not just a lecture. Even so, it goes to Holyrood rather than to the regions directly, and that confirms the shape I described. Westminster gives something to Edinburgh, then dares Edinburgh to pass it on to the regions.\",\"cites\":[355,305,306,307]},{\"body\":\"The longer story behind the speech is one it only half tells. Andy Burnham dates the damage to Ravenscraig and the Lancashire pit closures: decisions 'taken hundreds of miles away' by people who would never live with the results. That loss of trust is one of the main reasons Scotland voted for its own Parliament. Holyrood then pulled power towards itself. It kept just 32 large councils, and its proudest achievements, which Burnham lists himself (public water, nationalised rail, free personal care), are all run nationally. A Parliament created because of distant decisions became a new centre. Burnham's warning that Scottish towns could fall behind northern English cities that are 'powering up' is the first time a Prime Minister has used England's patchwork of mayors as a measuring stick against Holyrood.\",\"cites\":[84,85,141,146,147,148,153,279]},{\"body\":\"The speech's own evidence is weaker than its argument. Its central example, the Easterhouse 'names not numbers' approach, is a local project that worked without any transfer of formal powers. It shows a way of delivering services, not a case for redrawing who holds power. Burnham now wants to scale it up into 'the way we support everybody, everywhere'. That is exactly the kind of national rollout of a local success that has repeatedly failed elsewhere. The other hard proof he offers, buying Alexander Dennis buses, came from bus franchising and procurement choices, not from devolution as such.\",\"cites\":[36,51,61,315,316,195,198]},{\"body\":\"Two things to watch. First, the National Economic Council meeting with the devolved First Ministers, the first since he took office, will show whether the employment offer comes with money and a timetable. Second, the welfare framing is significant: one in six young people not in work, education or training, and 'I won't have... kids in their 20s just being there on benefits'. That suggests the devolved employment support will come attached to conditions set by the Treasury and the Milburn review. If so, Holyrood would be taking on the political risk of welfare reform without controlling its terms.\",\"cites\":[318,230,235,241]}]}]}"
+        "text": "{\"stories\":[{\"editor_spans\":[{\"body\":\"The Prime Minister's speech shows the limits of his offer. The new part is 'DWP devolution', meaning employment support run locally. It is built on what he calls the Easterhouse principle, 'names not numbers', and he says he wants to take it from 'a project on one estate' to 'the way we support everybody, everywhere'. Those two aims pull against each other. What he praised in Easterhouse was small and run by the people on the estate themselves: help with clothes, paid travel, a personal route into work for each young person. When a model like that becomes a national programme, it usually turns back into the same targets and box-ticking he says he is against. The speech never says how the approach would survive being rolled out across a whole country, and it is the scaling, not the principle, that will decide whether it works.\",\"cites\":[36,46,47,51,242,305,306,310,315,316]},{\"body\":\"The way the offer is built also matters. Most of what he wants pushed down to local level, such as councils, skills and the reform of local government, is already Holyrood's business, not Westminster's. What the UK Government actually controls is a smaller set of funds for innovation, enterprise and employability, which it says could be matched to Scotland's regions. So 'pushing power out from Westminster and Holyrood' carries different weight for each government. Westminster would be giving away some UK-level funding streams. Holyrood would be asked to give up powers it holds itself. And by saying that 'Scotland could lose out' while northern English cities are 'starting to power up', the Prime Minister sets up a comparison that puts pressure on Holyrood. This fits what we noted last week about the press release: he is competing with Holyrood on its own ground while presenting it as cooperation. The first real test is the National Economic Council meeting he has promised. If the Scottish Government's answer there sets the terms, the offer is joint. If it does not, the offer works mainly as a way to get past Holyrood.\",\"cites\":[275,276,278,279,299,318,328,364,353]},{\"body\":\"Ravenscraig is the emotional centre of the speech, but the history he tells is simpler than what happened. He describes the closure as 'a decision taken hundreds of miles away by people' who would never live with what followed. That is true in spirit. But when the works shut in 1992, British Steel had already been privatised, so the closing was done by a company, under a policy in London that chose not to step in. The difference matters for what he is promising now. The places he names, Ravenscraig, Bickershaw and Aberdeen today, were not let down for lack of a local say over employment support. They were let down because, when the industry went, nobody had a plan for what would replace it. Devolving employment support does nothing about that. He says Aberdeen is 'very much on my mind' and that he will have more to say 'in due course'. Given the history he has just told, that is the obvious next test.\",\"cites\":[80,82,84,86,90,91,92,108]}]}]}"
       }
     ],
     "container": null,
@@ -81,15 +80,15 @@
     "stop_details": null,
     "usage": {
       "input_tokens": 2,
-      "cache_creation_input_tokens": 1993,
-      "cache_read_input_tokens": 14869,
+      "cache_creation_input_tokens": 640,
+      "cache_read_input_tokens": 16448,
       "cache_creation": {
-        "ephemeral_5m_input_tokens": 1993,
+        "ephemeral_5m_input_tokens": 640,
         "ephemeral_1h_input_tokens": 0
       },
-      "output_tokens": 1546,
+      "output_tokens": 1461,
       "output_tokens_details": {
-        "thinking_tokens": 584
+        "thinking_tokens": 497
       },
       "service_tier": "standard",
       "inference_geo": "global",
@@ -102,70 +101,58 @@
     {
       "act": "weaving",
       "model": "claude-opus-5-5",
-      "request_hash": "b7ea828ae8abd4e8f783ac2442a86dd03502a703f0e1909adb110d5326be40b6",
-      "recorded_at": "2026-11-21T09:34:45.827587Z",
+      "request_hash": "b68f0c43528861c314fcdba064ea956c0c180efcc3d2983f32d66fc02d7327ae",
+      "recorded_at": "2026-11-21T10:47:48.084211Z",
       "usage": {
-        "input_tokens": 13595,
-        "output_tokens": 252
+        "input_tokens": 13851,
+        "output_tokens": 174
       },
       "output": null,
       "calls": [
         {
-          "ID": "toolu_01Ak9gk715HtNMz4dD1BWVEk",
+          "ID": "toolu_01V9sNVgkaKSeh14UxjNSUFG",
           "Name": "find",
           "Input": {
-            "words": "Ravenscraig"
+            "words": "devolution Scotland"
           }
         },
         {
-          "ID": "toolu_015NnLEwkSZUDZ6KsLL5zaTj",
-          "Name": "find",
-          "Input": {
-            "words": "DWP devolution"
-          }
-        },
-        {
-          "ID": "toolu_01TafdzVpuKSVxuueJ92hd6c",
+          "ID": "toolu_01AXnJ1dHYU3heiXPmiN5FEs",
           "Name": "find_entity",
           "Input": {
-            "entity": "E688"
+            "entity": "Q269909"
           }
         }
       ],
       "results": [
         {
-          "CallID": "toolu_01Ak9gk715HtNMz4dD1BWVEk",
-          "Content": "No earlier Story has a Span with the words \"Ravenscraig\".",
+          "CallID": "toolu_01V9sNVgkaKSeh14UxjNSUFG",
+          "Content": "No earlier Story has a Span with the words \"devolution Scotland\".",
           "IsError": false
         },
         {
-          "CallID": "toolu_015NnLEwkSZUDZ6KsLL5zaTj",
-          "Content": "No earlier Story has a Span with the words \"DWP devolution\".",
-          "IsError": false
-        },
-        {
-          "CallID": "toolu_01TafdzVpuKSVxuueJ92hd6c",
-          "Content": "No earlier Story has a Span mentioning {E688}.",
+          "CallID": "toolu_01AXnJ1dHYU3heiXPmiN5FEs",
+          "Content": "3 earlier Stories have Spans mentioning Andy Burnham {Q269909}, newest first.\n\nStory 5, from \"Prime Minister makes offer to Holyrood to work together to empower Scottish regions\", published 2026-10-15, from govuk-number-10; cited by 1 later Editor's Span\n  S352 (mentioning Andy Burnham {Q269909}, Scotland’s First Minister {E420}, Parliament of the United Kingdom {Q11010}, Scottish Parliament {Q206171}): In a speech today, the Prime Minister will invite Scotland’s First Minister to work with ⟦Andy Burnham⟧ on the common good of pushing more power out of both Westminster and Holyrood, unlocking jobs and opportunity in every region.\n  S353 (mentioning Lanarkshire {Q530296}, Andy Burnham {Q269909}, Scottish Government {Q32521}, Scottish Parliament {Q206171}, Parliament of the United Kingdom {Q11010}): Delivering ⟦Andy Burnham’s⟧ remarks after speaking with young people today in Lanarkshire, Andy Burnham will emphasise the Scottish Government is one of the most centralised devolved administrations in Europe, with Holyrood not giving people who know their areas best enough of a say, despite significant devolution from Westminster over the last 27 years.\n  S354 (mentioning Andy Burnham {Q269909}, Scottish Parliament {Q206171}): Because power was never supposed to stop at the doors of the Scottish Parliament, the Prime Minister will argue the next stage of devolution should place more decision-making in the hands of Scotland’s regions and cities to drive reindustrialisation.\n  S355 (mentioning Andy Burnham {Q269909}, Scottish Government {Q32521}, Government of the United Kingdom {Q6063}, Number 10 North {Q140382294}, Scotland Office {Q277020}, Scotland {Q22}): As part of that offer, ⟦Andy Burnham⟧ will call on the Scottish Government to work with the UK Government through No10 North and the Scotland Office to develop a new model of regional empowerment for Scotland, ensuring communities with their own strengths, identity and ambitions can seize new economic opportunities and unlock their potential.\n  …\n  · People in North Lanarkshire, in Fife or in the Highlands know what their communities need better than any minister, whether they sit in London or Edinburgh.\n  S356 (spoken by Douglas Alexander, mentioning Andy Burnham {Q269909}, Scottish Government {Q32521}, Scotland Office {Q277020}): The Prime Minister’s offer to the Scottish Government is a genuine one, and the Scotland Office is ready to roll up its sleeves alongside ⟦Scottish Government⟧ to make it happen.\n  · Two governments, one goal - good jobs and real opportunity in every corner of Scotland.\n\nStory 3, from \"PM meeting with President Zelenskyy of Ukraine: 14 October 2026\", published 2026-10-14, from govuk-number-10; cited by 1 later Editor's Span\n  S357 (mentioning Andy Burnham {Q269909}, Volodymyr Zelenskyy {Q3874799}, Downing Street {Q192687}): The Prime Minister welcomed President Volodymyr Zelenskyy of Ukraine to Downing Street this afternoon.\n  · The leaders began by reflecting on their call on Saturday, and Russia’s blatant indiscriminate attacks on civilians and energy infrastructure since President Trump called for an energy ceasefire.\n  · It was clear that Russia had no interest in peace, the leaders underlined.\n  S358 (spoken by the Prime Minister, mentioning Andy Burnham {Q269909}, Russia {Q159}, Ukraine {Q212}, Uttarakhand {Q1499}): Turning to how Ukraine’s allies could step up support, particularly in response to Russia’s barrage of jet-powered drones, the Prime Minister set out the UK’s latest package of Lightweight Multirole Missiles.\n  S359 (spoken by the Prime Minister, mentioning Andy Burnham {Q269909}, Ukraine {Q212}, Uttarakhand {Q1499}): The UK would continue to develop innovative military solutions for use on the battlefield in Ukraine, including retrofitting British capability onto equipment gifted from other partners, the Prime Minister added.\n  · On long range missiles, the leaders discussed how the UK could accelerate defensive support to Ukraine ahead of the winter.\n  S360 (spoken by the Prime Minister, mentioning Andy Burnham {Q269909}, Uttarakhand {Q1499}): The UK would also continue its diplomatic efforts to support international supplies of defensive equipment too, the Prime Minister added.\n  · Both looked forward to speaking again soon.\n\nStory 4, from \"President Zelenskyy to visit Downing Street as the UK doubles down on support for Ukraine and calls on partners to follow suit\", published 2026-10-13, from govuk-number-10; cited by 2 later Editor's Spans\n  S361 (mentioning Volodymyr Zelenskyy {Q3874799}, Andy Burnham {Q269909}, Downing Street {Q192687}, United Kingdom {Q145}, Ukraine {Q212}): Prime Minister to host President Volodymyr Zelenskyy at Downing Street today to underline the UK’s rock-solid support for Ukraine for as long as it takes\n  S362 (mentioning United Kingdom {Q145}, Volodymyr Zelenskyy {Q3874799}, Andy Burnham {Q269909}, Ukraine {Q212}): UK will double down on support for Ukraine, with the Prime Minister set to tell President Zelenskyy that ⟦Prime Minister Andy Burnham⟧ has asked Ministers to draw up further sanctions, military support and fiscal packages to provide urgent support in the coming weeks, and will accelerate delivery of critical air defence missiles\n  · Comes as the Chancellor presses partners at the IMF meetings to step up support for Ukraine and ensure Russia heeds the US’ call for a full energy ceasefire.\n  …\n  · Russia’s aggression cannot be allowed to succeed on our continent.\n  S363 (mentioning Andy Burnham {Q269909}): The Prime Minister has also asked Ministers to draw up further sanctions, military aid, and fiscal packages to provide urgent support in the coming weeks.\n  · Meanwhile, Chancellor John Healey will use ⟦Chancellor of the Exchequer John Healey’s⟧ meetings at the IMF in Bangkok to urge partners to fully implement an equivalent ban on Russian LNG, following the UK’s lead.\n",
           "IsError": false
         }
       ],
       "raw": {
         "model": "claude-opus-5-5",
-        "id": "msg_011ChFqxck4mG6Xw4tzxcFzc",
+        "id": "msg_011ChFwXiKg4rHDw7AzNjvZR",
         "type": "message",
         "role": "assistant",
         "content": [
           {
             "type": "thinking",
             "thinking": "",
-            "signature": "CAQS4gYKEAgUGAI4AUIIdGhpbmtpbmcSDMGgjWXU+cd9dQvGORoMdTZAx9PB4MTdx4suIjDHVVbsrcOXQuujVOBf/9clN6+H9EdasUGkgidHc4cLGgOy5Htu5fpECQzkx0mBuM0q/wVKA9KbTfiV3LLKutJ2G5ViU0eToB38yangL1chjX4ehsg9VTEkE1lqKwoCI2F6QGClGTw+/bfiOTHS/VeQXNp9Hh/X/aqKIzzeQwaYDm8gjCXSHrjOsp21o0034mStYyCzLua7qTUJpkOh5UhAZ955D+7xICGtZCuneFFQ15w8kXqoj9Ug16K/AVFWZpUJCcBBlW4m4yG9l3lrmnzkeBamD2nXq9FjQzLK816HSZ84ttq63NWf5+73idahTFiEHwGdfvTsQPntnCbyfTekW/njIQI5d/xTmSYCudQ3ignoKAJhKm1jrh1HhpyqKvaXQflIwbggHrfeeseCnQZ9UD/Uc6+hZYYSjnlTgCtZzKzHCOHFjxqbPC6JvLUtlVHv3yf1t6B4BGAN93G3n3ZGCQ3jrbJZFeKjfhAoEd1tL9tWCzuHbWQzfw9iJ6YWsmlC+68cQ1iN6CYnIx4ElnKQRqBMOY6/MnaQ2Q1AMNoyRbr/H6DXSk5WOzxxeUal6ZXTDaNHvC8IExS/tyUtsHPd4M3bQRxlJY2snMl2SUSyQhEZ2724RmW8lnm1IhdMY+hViTZ2b9k6TDuPmt8edEpfwG4UN1HRCQ9pg5ao+OK0FE78nUHv6aYhmLaGO79qsPVQ+4b+0Co/1GzlCWAzu1SWhVNuygJgB3qKEy8a0ZOxukYjbQtWu5Q9p05LP6p3pLF9oKU07Awd3VkE114HOb14Yr6g6gyQY/voSsX4scWpViHuzwPOgdJ6uvKCtl+ywU9airNeWH11kNgBbxYY0iIQUJ21AEz/Mf8RI0x35uMuTIbLpVxQWPf1laMoUOZ2GoG6veMmTMdNA/rKNwX5yeoxyMPHOsbG0Jpq7D2gMWmf/mtPABj9ZrOIfooY6Dp1XDzSMVnFBnrWnIo5qOBWGpFpfwj/TxEZzMqp3XLgBY7+gQuOmJctXAQFPFpeGGrps9Osl7ZaGWuAWwh5P0wSY2Qz7yNmudnkyyQW0PyUTvTdrmG5RLVpf+hHSuGvMBoWr2C8QxgB"
+            "signature": "CAQSmAYKEAgUGAI4AUIIdGhpbmtpbmcSDKKSG4sSCir4m4FGshoM3V1u0Np4KfboWvzqIjAUk3KjhaW4Ysca1mkfGqAkmKBvuYNzpDBLhIGT8FqhT3t7biKzBi7tBjlpR/N+6UAqtQWY4xER2CrtzLXWV4796C1COxHXxwUHN1igZcU5W+UWhBrKxbKfz3/Bmq2SeNztb/sPisTnWZSJdGVwGTG8wK3zsDFbYh2JWiRYFxO8qrspD4MxdActCxW05LDc6B0gfjf9k7SH6us/ZlbTDY10yCh06kceFzrHe4i7r0/Y4/swKPg/NUe8ihM910wUPz5mkZM+QfIhTkQNJah/wuPuP81qidzn7n5oLcmarVl/RUTbWx8mmwxvzg0UUGbg2oRAgDG/0SGiKxCebLlor4r9+KdUAS1k9htTYmKHP/+eDpDo1KSkZ7Ej53xN87DE+OAmwqz16LNGWA/I+AQpJYJ/QScS7uXMoB1Nk1BDr1EsOxHfBmv8dZxfV1Cfj3i36VT+ZKpigv0sF1OrdPy+5dgqDmCpj6zXWnc4CyvTgslrKAeH9BYfSTz0FtjJorWDpGGP1SCPGnLxMCuPLRhR6lqtXDnPaPuVUNGYV3pySnDVxNQ5mMok/HiBDQQI4b47htTeP8kcuDSKHj0P5myL1QoZv3PaGVvXG/6SGZihtSo5r+IpuMTAIDYFuHW/zTQDRD2OY5SL00sT3npKCAs+xTWcqBhkSLGAA/y/zIq9nFem8Y0Sycd/Vz9OOEPUtPyAiyLWLc35psz7YQrYOKPZqt+K1Imq72eVRtNUr1XL1O0uY3vPUFnvO1SVG0swcedF8QaWnWAyRDmDIcyM+1/uyk/s8TOfj1yJ053wDpGaQ8ruXxi4abV8wyh8r0rRw4tmQgoQlIUO1SvshzuurdmqGkOTQzxhozHeh/jqa/OAZbVLkMEblW3tmIVqzt/gU1qe+71vtlcwgMhLVfMjZ1wIWPPkN4iEpizmbND3NdPQEguMBwBUETkWqhqYsYZa52a+IzwORr8zilWC8sfnTc/XsGuK+uEwJg9LX5MYAQ=="
           },
           {
             "type": "tool_use",
-            "id": "toolu_01Ak9gk715HtNMz4dD1BWVEk",
+            "id": "toolu_01V9sNVgkaKSeh14UxjNSUFG",
             "name": "find",
             "input": {
-              "words": "Ravenscraig"
+              "words": "devolution Scotland"
             },
             "caller": {
               "type": "direct"
@@ -173,21 +160,10 @@
           },
           {
             "type": "tool_use",
-            "id": "toolu_015NnLEwkSZUDZ6KsLL5zaTj",
-            "name": "find",
-            "input": {
-              "words": "DWP devolution"
-            },
-            "caller": {
-              "type": "direct"
-            }
-          },
-          {
-            "type": "tool_use",
-            "id": "toolu_01TafdzVpuKSVxuueJ92hd6c",
+            "id": "toolu_01AXnJ1dHYU3heiXPmiN5FEs",
             "name": "find_entity",
             "input": {
-              "entity": "E688"
+              "entity": "Q269909"
             },
             "caller": {
               "type": "direct"
@@ -200,15 +176,15 @@
         "stop_details": null,
         "usage": {
           "input_tokens": 4,
-          "cache_creation_input_tokens": 13591,
+          "cache_creation_input_tokens": 13847,
           "cache_read_input_tokens": 0,
           "cache_creation": {
-            "ephemeral_5m_input_tokens": 13591,
+            "ephemeral_5m_input_tokens": 13847,
             "ephemeral_1h_input_tokens": 0
           },
-          "output_tokens": 252,
+          "output_tokens": 174,
           "output_tokens_details": {
-            "thinking_tokens": 106
+            "thinking_tokens": 73
           },
           "service_tier": "standard",
           "inference_geo": "global",
@@ -221,143 +197,39 @@
     {
       "act": "weaving",
       "model": "claude-opus-5-5",
-      "request_hash": "68408eecabd20725eccf6d4c6f98e6f39b8951611bca9aa8d439d639b6635bde",
-      "recorded_at": "2026-11-21T09:34:48.107107Z",
+      "request_hash": "5b8aa694367bea79fccc747e7beae48268675a301b7b05edbdaf4a97778ef718",
+      "recorded_at": "2026-11-21T10:47:51.096941Z",
       "usage": {
-        "input_tokens": 396,
-        "output_tokens": 94,
-        "cache_read_input_tokens": 13591
+        "input_tokens": 2603,
+        "output_tokens": 48,
+        "cache_read_input_tokens": 13847
       },
       "output": null,
       "calls": [
         {
-          "ID": "toolu_01JKE4xkwkZrcPHF83Z96qNk",
-          "Name": "find",
-          "Input": {
-            "words": "devolution"
-          }
-        },
-        {
-          "ID": "toolu_019hxxoSqZpGJWQnoKv8asXw",
-          "Name": "find_entity",
-          "Input": {
-            "entity": "E630"
-          }
-        }
-      ],
-      "results": [
-        {
-          "CallID": "toolu_01JKE4xkwkZrcPHF83Z96qNk",
-          "Content": "1 earlier Story has Spans with the words \"devolution\".\n\nStory 5, from \"Prime Minister makes offer to Holyrood to work together to empower Scottish regions\", published 2026-10-15, from govuk-number-10; cited by 1 later Editor's Span\n  · In a speech today, the Prime Minister will invite Scotland’s First Minister to work with ⟦Andy Burnham⟧ on the common good of pushing more power out of both Westminster and Holyrood, unlocking jobs and opportunity in every region.\n  S352 (mentioning Lanarkshire {E487}, Andy Burnham {E411}, Scottish Government {E489}, Scottish Parliament {E485}, Westminster {E483}): Delivering ⟦Andy Burnham’s⟧ remarks after speaking with young people today in Lanarkshire, Andy Burnham will emphasise the Scottish Government is one of the most centralised devolved administrations in Europe, with Holyrood not giving people who know their areas best enough of a say, despite significant devolution from Westminster over the last 27 years.\n  S353 (mentioning Andy Burnham {E411}, Scottish Parliament {E485}): Because power was never supposed to stop at the doors of the Scottish Parliament, the Prime Minister will argue the next stage of devolution should place more decision-making in the hands of Scotland’s regions and cities to drive reindustrialisation.\n  · As part of that offer, ⟦Andy Burnham⟧ will call on the Scottish Government to work with the UK Government through No10 North and the Scotland Office to develop a new model of regional empowerment for Scotland, ensuring communities with their own strengths, identity and ambitions can seize new economic opportunities and unlock their potential.\n  …\n  S354 (spoken by Douglas Alexander, mentioning Scottish Parliament {E485}): Devolution has done a great deal, but power was never supposed to stop at the doors of the Scottish Parliament.\n  · People in North Lanarkshire, in Fife or in the Highlands know what their communities need better than any minister, whether they sit in London or Edinburgh.\n",
-          "IsError": false
-        },
-        {
-          "CallID": "toolu_019hxxoSqZpGJWQnoKv8asXw",
-          "Content": "No earlier Story has a Span mentioning {E630}.",
-          "IsError": false
-        }
-      ],
-      "raw": {
-        "model": "claude-opus-5-5",
-        "id": "msg_011ChFqxwTC3EM8rkkbA7Tsz",
-        "type": "message",
-        "role": "assistant",
-        "content": [
-          {
-            "type": "tool_use",
-            "id": "toolu_01JKE4xkwkZrcPHF83Z96qNk",
-            "name": "find",
-            "input": {
-              "words": "devolution"
-            },
-            "caller": {
-              "type": "direct"
-            }
-          },
-          {
-            "type": "tool_use",
-            "id": "toolu_019hxxoSqZpGJWQnoKv8asXw",
-            "name": "find_entity",
-            "input": {
-              "entity": "E630"
-            },
-            "caller": {
-              "type": "direct"
-            }
-          }
-        ],
-        "container": null,
-        "stop_reason": "tool_use",
-        "stop_sequence": null,
-        "stop_details": null,
-        "usage": {
-          "input_tokens": 2,
-          "cache_creation_input_tokens": 394,
-          "cache_read_input_tokens": 13591,
-          "cache_creation": {
-            "ephemeral_5m_input_tokens": 394,
-            "ephemeral_1h_input_tokens": 0
-          },
-          "output_tokens": 94,
-          "output_tokens_details": {
-            "thinking_tokens": 0
-          },
-          "service_tier": "standard",
-          "inference_geo": "global",
-          "speed": "standard"
-        },
-        "diagnostics": null
-      },
-      "stop_reason": "tool_use"
-    },
-    {
-      "act": "weaving",
-      "model": "claude-opus-5-5",
-      "request_hash": "3c376e6e839cf2aa4d8a627d1e36f9a74320ccc21b2a8d120a391cbf5f096242",
-      "recorded_at": "2026-11-21T09:34:50.109067Z",
-      "usage": {
-        "input_tokens": 886,
-        "output_tokens": 92,
-        "cache_read_input_tokens": 13985
-      },
-      "output": null,
-      "calls": [
-        {
-          "ID": "toolu_01Luz35e81yLNi11m4VDiqDs",
+          "ID": "toolu_018mm37TBj2KtqCknDkneT2K",
           "Name": "find_citing",
           "Input": {
             "story": 5
           }
-        },
-        {
-          "ID": "toolu_01YHW6vMf6WVKwDTzKoXtkQV",
-          "Name": "open_story",
-          "Input": {
-            "story": 5
-          }
         }
       ],
       "results": [
         {
-          "CallID": "toolu_01Luz35e81yLNi11m4VDiqDs",
-          "Content": "1 earlier Story has Spans citing a Span of Story 5.\n\nStory 509, the Editor's, made 2026-10-24: \"The Prime Minister's 'offer' to Holyrood is really a challenge. Local government in Scotland is devolved, so Westminster has no power to hand Scottish regions anything. It can only shame the Scottish Government by calling it one of the most centralised in Europe. Andy Burnham is offering the city-region model that made his name in Manchester, delivered through No10 North and the Scotland Office. In effect it creates a second route by which Westminster can deal directly with Scottish regions. The Derby headquarters and the East Midlands mayor's comments come from the same playbook. Whether Scotland's First Minister accepts will show whether this is about governing or about positioning.\"; cited by no later Editor's Span\n  S355 (the Editor's): The Prime Minister's 'offer' to Holyrood is really a challenge. Local government in Scotland is devolved, so Westminster has no power to hand Scottish regions anything. It can only shame the Scottish Government by calling it one of the most centralised in Europe. Andy Burnham is offering the city-region model that made his name in Manchester, delivered through No10 North and the Scotland Office. In effect it creates a second route by which Westminster can deal directly with Scottish regions. The Derby headquarters and the East Midlands mayor's comments come from the same playbook. Whether Scotland's First Minister accepts will show whether this is about governing or about positioning.\n",
-          "IsError": false
-        },
-        {
-          "CallID": "toolu_01YHW6vMf6WVKwDTzKoXtkQV",
-          "Content": "Story 5, from \"Prime Minister makes offer to Holyrood to work together to empower Scottish regions\", published 2026-10-15, from govuk-number-10; cited by 1 later Editor's Span\nS356 (mentioning Andy Burnham {E411}, Scotland’s First Minister {E481}, Westminster {E483}, Scottish Parliament {E485}): In a speech today, the Prime Minister will invite Scotland’s First Minister to work with ⟦Andy Burnham⟧ on the common good of pushing more power out of both Westminster and Holyrood, unlocking jobs and opportunity in every region.\nS352 (mentioning Lanarkshire {E487}, Andy Burnham {E411}, Scottish Government {E489}, Scottish Parliament {E485}, Westminster {E483}): Delivering ⟦Andy Burnham’s⟧ remarks after speaking with young people today in Lanarkshire, Andy Burnham will emphasise the Scottish Government is one of the most centralised devolved administrations in Europe, with Holyrood not giving people who know their areas best enough of a say, despite significant devolution from Westminster over the last 27 years.\nS353 (mentioning Andy Burnham {E411}, Scottish Parliament {E485}): Because power was never supposed to stop at the doors of the Scottish Parliament, the Prime Minister will argue the next stage of devolution should place more decision-making in the hands of Scotland’s regions and cities to drive reindustrialisation.\nS357 (mentioning Andy Burnham {E411}, Scottish Government {E489}, UK Government {E329}, No10 North {E491}, Scotland Office {E493}, Scotland {E397}): As part of that offer, ⟦Andy Burnham⟧ will call on the Scottish Government to work with the UK Government through No10 North and the Scotland Office to develop a new model of regional empowerment for Scotland, ensuring communities with their own strengths, identity and ambitions can seize new economic opportunities and unlock their potential.\nS359 (spoken by Prime Minister Andy Burnham, mentioning Scotland’s First Minister {E481}): During my first week in office, I told the First Minister that I wanted to work with ⟦Scotland’s First Minister⟧ to spread opportunities to communities across Scotland’s regions and cities.\nS360 (spoken by Prime Minister Andy Burnham, mentioning No10 North {E491}): Through No10 North, we are rewiring the state and I want to make sure regions in Scotland are fully part of this.\nS361 (spoken by Prime Minister Andy Burnham, mentioning Scottish Government {E489}): This is me making an offer to the Scottish Government.\nS362 (spoken by Prime Minister Andy Burnham): With us working together, there is no limit to what we can achieve for the Scottish people.\nS354 (spoken by Douglas Alexander, mentioning Scottish Parliament {E485}): Devolution has done a great deal, but power was never supposed to stop at the doors of the Scottish Parliament.\nS364 (spoken by Douglas Alexander, mentioning North Lanarkshire {E497}, Fife {E499}, the Highlands {E501}, London {E503}, Edinburgh {E505}): People in North Lanarkshire, in Fife or in the Highlands know what their communities need better than any minister, whether they sit in London or Edinburgh.\nS365 (spoken by Douglas Alexander, mentioning Andy Burnham {E411}, Scottish Government {E489}, Scotland Office {E493}): The Prime Minister’s offer to the Scottish Government is a genuine one, and the Scotland Office is ready to roll up its sleeves alongside ⟦Scottish Government⟧ to make it happen.\nS366 (spoken by Douglas Alexander, mentioning Scotland {E397}): Two governments, one goal - good jobs and real opportunity in every corner of Scotland.\n",
+          "CallID": "toolu_018mm37TBj2KtqCknDkneT2K",
+          "Content": "1 earlier Story has Spans citing a Span of Story 5.\n\nStory 435, the Editor's, made 2026-10-24: \"Read together, three announcements from one week show a single political strategy: Great British Railways' headquarters going to Derby, the 'No10 North' offer to Holyrood, and the apprenticeship pledges. Each moves institutions and decisions away from London. The Scotland offer goes further. It turns Westminster's devolution argument against the Scottish Government, calling it 'one of the most centralised devolved administrations in Europe.' That gives the Prime Minister a way to compete with Holyrood on its own ground while appearing to offer cooperation.\"; cited by no later Editor's Span\n  S364 (the Editor's): Read together, three announcements from one week show a single political strategy: Great British Railways' headquarters going to Derby, the 'No10 North' offer to Holyrood, and the apprenticeship pledges. Each moves institutions and decisions away from London. The Scotland offer goes further. It turns Westminster's devolution argument against the Scottish Government, calling it 'one of the most centralised devolved administrations in Europe.' That gives the Prime Minister a way to compete with Holyrood on its own ground while appearing to offer cooperation.\n  · The timing for the railway is worth noting. Building at Becketwell starts in early 2027 and is due to finish by spring 2029. That is close to the latest date for the next general election, so the building meant to embody public ownership may only just be ready before voters judge it. Until then, the claimed benefits depend on things a minister can announce, such as a fare freeze and extra seats, rather than an organisation that already exists. The headline 600 apprenticeships are also spread over four years and sit within a much bigger youth employment scheme.\n",
           "IsError": false
         }
       ],
       "raw": {
         "model": "claude-opus-5-5",
-        "id": "msg_011ChFqy749pAF4bzc9Awfjw",
+        "id": "msg_011ChFwXyTVpHoUkJwnC1hmN",
         "type": "message",
         "role": "assistant",
         "content": [
           {
             "type": "tool_use",
-            "id": "toolu_01Luz35e81yLNi11m4VDiqDs",
+            "id": "toolu_018mm37TBj2KtqCknDkneT2K",
             "name": "find_citing",
             "input": {
               "story": 5
@@ -365,17 +237,6 @@
             "caller": {
               "type": "direct"
             }
-          },
-          {
-            "type": "tool_use",
-            "id": "toolu_01YHW6vMf6WVKwDTzKoXtkQV",
-            "name": "open_story",
-            "input": {
-              "story": 5
-            },
-            "caller": {
-              "type": "direct"
-            }
           }
         ],
         "container": null,
@@ -384,13 +245,13 @@
         "stop_details": null,
         "usage": {
           "input_tokens": 2,
-          "cache_creation_input_tokens": 884,
-          "cache_read_input_tokens": 13985,
+          "cache_creation_input_tokens": 2601,
+          "cache_read_input_tokens": 13847,
           "cache_creation": {
-            "ephemeral_5m_input_tokens": 884,
+            "ephemeral_5m_input_tokens": 2601,
             "ephemeral_1h_input_tokens": 0
           },
-          "output_tokens": 92,
+          "output_tokens": 48,
           "output_tokens_details": {
             "thinking_tokens": 0
           },

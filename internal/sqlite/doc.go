@@ -93,10 +93,13 @@
 // kept 'continued' (model_calls rebuilt to allow it). Between turns, a run's
 // conversation is work state, not an event (weaving_turns: editor.WeavingTurns
 // as JSON, one row a turn); WeavingInProgress is the newest of a run neither
-// written nor marked failed. StoriesCutThrough is every Cut through one
-// given, whenever collected: the earlier Stories a run's asks are answered
+// written nor marked failed, and WeavingTurnsOf the newest of a run by its
+// key, marked failed or not, which a run resumes from. StoriesCutThrough is
+// every Cut through one given, whenever collected: the earlier Stories a
+// run's asks are answered
 // from. weaving_caps keeps the most a run the Owner asked for may spend
-// (KeepWeavingCap, WeavingCap).
+// (KeepWeavingCap, WeavingCap). RetryFailed clears failed marks, keeping
+// those it is given (a run given up over its cap), and ClearFailed one.
 //
 // A Story's Name (0035_naming.sql, namings.go) is an event of kind
 // story_name (story_names: the Story, its words and its Judge; kind name is

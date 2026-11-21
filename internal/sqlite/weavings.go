@@ -239,6 +239,27 @@ func (s *Store) WeavingInProgress(ctx context.Context) (editor.WeavingTurns, boo
 	return t, true, nil
 }
 
+// WeavingTurnsOf is the conversation of the weaving run keyed key as its
+// newest kept turn left it, whether the run is under way or marked failed,
+// reporting whether it kept a turn.
+func (s *Store) WeavingTurnsOf(ctx context.Context, key string) (editor.WeavingTurns, bool, error) {
+	var t editor.WeavingTurns
+	var conversation string
+	err := s.db.QueryRowContext(ctx, `
+		SELECT conversation FROM weaving_turns WHERE work_key = ?
+		ORDER BY at DESC, turn DESC LIMIT 1`, key).Scan(&conversation)
+	if errors.Is(err, sql.ErrNoRows) {
+		return t, false, nil
+	}
+	if err != nil {
+		return t, false, fmt.Errorf("weaving turns of %s: %w", key, err)
+	}
+	if err := json.Unmarshal([]byte(conversation), &t); err != nil {
+		return t, false, fmt.Errorf("weaving turns of %s: %w", key, err)
+	}
+	return t, true, nil
+}
+
 // KeepWeavingTurns keeps a weaving run's conversation as it stands after a
 // turn, at at.
 func (s *Store) KeepWeavingTurns(ctx context.Context, t editor.WeavingTurns, at time.Time) error {

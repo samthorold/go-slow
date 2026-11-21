@@ -73,11 +73,23 @@ func (s *Store) FailedWork(ctx context.Context) ([]editor.FailedWork, error) {
 	return out, nil
 }
 
+// Work is a piece of an act's work, by its key.
+type Work struct {
+	Act, Key string
+}
+
 // RetryFailed clears the failed marks on the named act's work, or every
 // act's when act is empty, resetting its attempts, so the next run takes it
-// up again. It reports how much work it cleared.
-func (s *Store) RetryFailed(ctx context.Context, act string) (int, error) {
-	res, err := s.db.ExecContext(ctx, `DELETE FROM work_attempts WHERE failed = 1 AND (? = '' OR act = ?)`, act, act)
+// up again; the work kept keeps its mark. It reports how much work it
+// cleared.
+func (s *Store) RetryFailed(ctx context.Context, act string, kept ...Work) (int, error) {
+	query := `DELETE FROM work_attempts WHERE failed = 1 AND (? = '' OR act = ?)`
+	args := []any{act, act}
+	for _, w := range kept {
+		query += ` AND NOT (act = ? AND work_key = ?)`
+		args = append(args, w.Act, w.Key)
+	}
+	res, err := s.db.ExecContext(ctx, query, args...)
 	if err != nil {
 		return 0, fmt.Errorf("retry failed work: %w", err)
 	}
@@ -86,6 +98,20 @@ func (s *Store) RetryFailed(ctx context.Context, act string) (int, error) {
 		return 0, fmt.Errorf("retry failed work: %w", err)
 	}
 	return int(n), nil
+}
+
+// ClearFailed clears the failed mark on one piece of the act's work,
+// resetting its attempts, reporting whether it was marked.
+func (s *Store) ClearFailed(ctx context.Context, w Work) (bool, error) {
+	res, err := s.db.ExecContext(ctx, `DELETE FROM work_attempts WHERE failed = 1 AND act = ? AND work_key = ?`, w.Act, w.Key)
+	if err != nil {
+		return false, fmt.Errorf("clear failed %s %s: %w", w.Act, w.Key, err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return false, fmt.Errorf("clear failed %s %s: %w", w.Act, w.Key, err)
+	}
+	return n > 0, nil
 }
 
 func boolInt(b bool) int {

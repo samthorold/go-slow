@@ -77,11 +77,9 @@ func cappedWeaving(t *testing.T, store *sqlite.Store, b editor.Batcher, key stri
 	if err := store.KeepWeavingCap(t.Context(), key, usd); err != nil {
 		t.Fatal(err)
 	}
-	log := slog.New(slog.DiscardHandler)
-	ed := editor.New(editor.Deps{Store: store, Weavings: store, ModelFor: modelFor, Log: log,
-		PriceOf: func(string) (editor.Price, bool) { return editor.Price{InputPerMTok: 4, OutputPerMTok: 20}, true }})
 	return editor.NewBatches(editor.BatchDeps{
-		Store: store, Batcher: b, Acts: []editor.BatchAct{ed.Weaving(weavingAt)}, ModelFor: modelFor, Log: log,
+		Store: store, Batcher: b, Acts: []editor.BatchAct{cappedEditor(store).Weaving(weavingAt)}, ModelFor: modelFor,
+		Log: slog.New(slog.DiscardHandler),
 	})
 }
 
@@ -115,6 +113,99 @@ func TestARunWhoseNextTurnWouldTakeItOverItsCapIsGivenUp(t *testing.T) {
 				t.Errorf("failed work %+v", failed)
 			}
 		})
+	}
+}
+
+// cappedEditor is the Editor cappedWeaving weaves with.
+func cappedEditor(store *sqlite.Store) *editor.Editor {
+	return editor.New(editor.Deps{Store: store, Weavings: store, ModelFor: modelFor, Log: slog.New(slog.DiscardHandler),
+		PriceOf: func(string) (editor.Price, bool) { return editor.Price{InputPerMTok: 4, OutputPerMTok: 20}, true }})
+}
+
+// givenUpOverCap is a Record whose run keyed saturday's day, capped at
+// $0.02, was given up over its cap on its first turn, which asked: the batch
+// runner and its batch interface.
+func givenUpOverCap(t *testing.T, store *sqlite.Store) (*editor.Batches, *fakeBatcher) {
+	t.Helper()
+	batcher := &fakeBatcher{}
+	b := cappedWeaving(t, store, batcher, "2026-10-24", 0.02)
+	runAt(t, b, saturday)
+	respondLast(batcher, asking("find", `{"words": "Motherwell"}`))
+	runAt(t, b, saturday.Add(time.Hour))
+	return b, batcher
+}
+
+// A run given up over its cap is shown to the Owner as it would resume: what
+// it has spent, its cap, and its next turn with that turn's estimate; resumed
+// under a higher cap, its next turn is submitted and applied as any turn is.
+func TestARunGivenUpOverItsCapIsPricedAndResumedWithAHigherCap(t *testing.T) {
+	ctx := t.Context()
+	store := record(t)
+	b, batcher := givenUpOverCap(t, store)
+	first := batcher.submitted[0][0].Request
+
+	g, err := cappedEditor(store).GivenUpWeaving(ctx, "2026-10-24")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 1200 tokens in and 340 out at batch rates: $0.0058.
+	if !g.Capped || g.MaxUSD != 0.02 || math.Abs(g.SpentUSD-0.0058) > 1e-9 {
+		t.Errorf("given up capped %v at $%v having spent $%v, want $0.0058 spent of $0.02", g.Capped, g.MaxUSD, g.SpentUSD)
+	}
+	if g.Next.USD <= 0 || g.Next.Rates != editor.BatchRates || !g.OverCap() {
+		t.Errorf("next turn %+v, over its cap %v, want it priced at batch rates and over", g.Next, g.OverCap())
+	}
+	if g.Run.Key != "2026-10-24" || editor.RequestHash(g.Run.Job.Request, "") != editor.RequestHash(first, "") {
+		t.Errorf("resumes %q asking:\n%s\nwant its first turn again, nothing of it kept", g.Run.Key, g.Run.Job.Request.Input)
+	}
+
+	if err := store.KeepWeavingCap(ctx, "2026-10-24", 1); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := store.RetryFailed(ctx, "weaving"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := b.Submit(ctx, g.Run.Job, saturday.Add(2*time.Hour)); err != nil {
+		t.Fatal(err)
+	}
+	answerLast(batcher, oneOpinion)
+	runAt(t, b, saturday.Add(3*time.Hour))
+	if got := madeStories(t, store); len(got) != 1 {
+		t.Errorf("made %d Stories, want the resumed run's one", len(got))
+	}
+}
+
+// A run given up over its cap after turns it kept resumes from the last of
+// them, its spending every turn's, the one given up included.
+func TestARunGivenUpAfterKeptTurnsResumesFromTheLast(t *testing.T) {
+	ctx := t.Context()
+	store := record(t)
+	batcher := &fakeBatcher{}
+	b := cappedWeaving(t, store, batcher, "2026-10-24", 0.05)
+	runAt(t, b, saturday)
+	respondLast(batcher, asking("find", `{"words": "Motherwell"}`))
+	runAt(t, b, saturday.Add(time.Hour))
+	if len(batcher.submitted) != 2 {
+		t.Fatalf("submitted %d batches, want the run's second turn", len(batcher.submitted))
+	}
+	second := batcher.submitted[1][0].Request
+	respondLast(batcher, asking("find", `{"words": "Scotland"}`))
+	runAt(t, b, saturday.Add(2*time.Hour))
+	if failed, err := store.FailedWork(ctx); err != nil || len(failed) != 1 {
+		t.Fatalf("failed work %+v (%v), want the run given up", failed, err)
+	}
+
+	g, err := cappedEditor(store).GivenUpWeaving(ctx, "2026-10-24")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if math.Abs(g.SpentUSD-2*0.0058) > 1e-9 {
+		t.Errorf("spent $%v, want both turns' $0.0116", g.SpentUSD)
+	}
+	if editor.RequestHash(g.Run.Job.Request, "") != editor.RequestHash(second, "") {
+		t.Errorf("resumes asking %d messages, want its second turn, the last kept", len(g.Run.Job.Request.Messages))
 	}
 }
 

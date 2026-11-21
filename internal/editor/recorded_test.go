@@ -35,7 +35,7 @@ import (
 var rerecordFlag = flag.Bool("record", false, "call the real model on the fixtures and keep its responses")
 
 // How each act's own recorded test is re-recorded.
-var hydrationCommand = rerecordCmd{"TestRecordedHydration", "HYDRATION_MODEL"}
+var hydrationCommand = rerecordCmd{test: "TestRecordedHydration", modelVar: "HYDRATION_MODEL"}
 
 // maxSamplesFlag bounds the samples recording draws of each fixture, to
 // probe a changed act on one before paying for the rule's: a recording with
@@ -52,6 +52,16 @@ type recording struct {
 	RecordedAt  time.Time       `json:"recorded_at"`
 	Usage       editor.Usage    `json:"usage"`
 	Output      json.RawMessage `json:"output"`
+	// Calls are the tools a conversation's turn called, Raw the turn as the
+	// provider returned it and StopReason why it stopped: a conversation's
+	// next turn sends the turn back as it came, so its request (and its
+	// hash) is rebuilt from them. None for an act that answers at once.
+	Calls      []editor.ToolCall `json:"calls,omitempty"`
+	Raw        json.RawMessage   `json:"raw,omitempty"`
+	StopReason string            `json:"stop_reason,omitempty"`
+	// Text is the text of a turn that called tools, which is no answer and
+	// need not be JSON: kept here, not as Output.
+	Text string `json:"text,omitempty"`
 	// Err is the error the adapter took an answer that came back as (a
 	// refusal, an answer cut off), with no output: an attempt that failed.
 	Err string `json:"error,omitempty"`
@@ -64,7 +74,12 @@ type recording struct {
 type replay struct{ rec recording }
 
 func (r replay) Complete(context.Context, editor.Request) (editor.Response, error) {
-	return editor.Response{Output: r.rec.Output, Model: r.rec.Model, Usage: r.rec.Usage}, r.rec.err()
+	out := r.rec.Output
+	if len(r.rec.Calls) > 0 {
+		out = json.RawMessage(r.rec.Text)
+	}
+	return editor.Response{Output: out, Model: r.rec.Model, Usage: r.rec.Usage,
+		Calls: r.rec.Calls, Raw: r.rec.Raw, StopReason: r.rec.StopReason}, r.rec.err()
 }
 
 // err is the error the recording was kept with, nil for none: the same
@@ -82,8 +97,14 @@ func (r recording) err() error {
 }
 
 // rerecordCmd is how a recorded test is re-recorded: the test, and the
-// variable naming the model its act runs on.
-type rerecordCmd struct{ test, modelVar string }
+// variable naming the model its act runs on. An act that is a conversation
+// (weaving) is recorded turn by turn, so a sample's attempts answer the
+// requests of its turns, and only its first turn's is the same in every
+// sample.
+type rerecordCmd struct {
+	test, modelVar string
+	conversation   bool
+}
 
 func (c rerecordCmd) String() string {
 	return fmt.Sprintf("go test -count=1 ./internal/editor -run %s -record (GOSLOW_ANTHROPIC_API_KEY and %s set)", c.test, c.modelVar)
@@ -494,6 +515,13 @@ func (r recorder) Complete(ctx context.Context, req editor.Request) (editor.Resp
 	}
 	*r.rec = recording{Act: req.Act, Model: res.Model, RequestHash: editor.RequestHash(req, r.asked),
 		RecordedAt: time.Now().UTC(), Usage: res.Usage, Output: res.Output}
+	if len(req.Tools) > 0 {
+		// A conversation's turn: kept whole, since the next turn sends it back.
+		r.rec.Calls, r.rec.Raw, r.rec.StopReason = res.Calls, res.Raw, res.StopReason
+		if len(res.Calls) > 0 {
+			r.rec.Text, r.rec.Output = string(res.Output), nil
+		}
+	}
 	if err != nil {
 		r.rec.Err = err.Error()
 	}

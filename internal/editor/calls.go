@@ -127,15 +127,39 @@ type KeptTurn struct {
 // schema encoded with its object keys sorted (as encoding/json does for a
 // map), so the same request always hashes the same; then effort, only for a
 // request that asks for one, so a request asking for none hashes as it did
-// before requests could.
+// before requests could; then, only for a conversation, its tools and its
+// messages after the input (each turn of the model's by what came back, its
+// text, its calls and the turn in the provider's own form, and each set of
+// results as sent), so a request with neither hashes as it did before acts
+// could hold conversations, and each turn of one hashes apart.
 func RequestHash(r Request, model string) string {
+	type hashedTurn struct {
+		Text  string          `json:"text"`
+		Calls []ToolCall      `json:"calls"`
+		Raw   json.RawMessage `json:"raw"`
+	}
+	type hashedMessage struct {
+		User      string       `json:"user,omitempty"`
+		Results   []ToolResult `json:"results,omitempty"`
+		Assistant *hashedTurn  `json:"assistant,omitempty"`
+	}
+	var messages []hashedMessage
+	for _, m := range r.Messages {
+		h := hashedMessage{User: m.User, Results: m.Results}
+		if t := m.Assistant; t != nil {
+			h.Assistant = &hashedTurn{Text: t.Text, Calls: t.Calls, Raw: t.Raw}
+		}
+		messages = append(messages, h)
+	}
 	return hashOf(struct {
-		Instructions string         `json:"instructions"`
-		Input        string         `json:"input"`
-		Model        string         `json:"model"`
-		Schema       map[string]any `json:"schema"`
-		Effort       string         `json:"effort,omitempty"`
-	}{r.Instructions, r.Input, model, r.Schema, r.Effort})
+		Instructions string          `json:"instructions"`
+		Input        string          `json:"input"`
+		Model        string          `json:"model"`
+		Schema       map[string]any  `json:"schema"`
+		Effort       string          `json:"effort,omitempty"`
+		Tools        []Tool          `json:"tools,omitempty"`
+		Messages     []hashedMessage `json:"messages,omitempty"`
+	}{r.Instructions, r.Input, model, r.Schema, r.Effort, r.Tools, messages})
 }
 
 // hashOf is the hex SHA-256 of v's JSON encoding, the one way a request is

@@ -73,9 +73,10 @@ func TestAStorysTimelineOrdersTheSpansItHoldsByPublication(t *testing.T) {
 }
 
 // weaveOnSunday weaves, after Saturday's twoOpinions, a Sunday Story citing
-// the ferries (S6, published Sunday), the earlier Editor's Span "Motherwell
-// is where…" (S2, written Saturday) and the speech's "Scotland will get £2
-// billion." (S3, published Thursday), in that order.
+// the ferries (S1, published Sunday), the earlier Editor's Span "Motherwell
+// is where…" (S2, written Saturday, found asking for "Motherwell") and the
+// speech's "Scotland will get £2 billion." (S5, published Thursday, found
+// asking for "billion"), in that order.
 func weaveOnSunday(t *testing.T, store *sqlite.Store) time.Time {
 	t.Helper()
 	weaveSpeech(t, store, twoOpinions)
@@ -83,8 +84,8 @@ func weaveOnSunday(t *testing.T, store *sqlite.Store) time.Time {
 	ferries := item("ferries", "Ferries to the islands", sunday)
 	ferries.Content = "<p>Ferries to Scotland's islands will run more often.</p>"
 	seed(t, store, saturday.AddDate(0, 0, -7), ferries)
-	weave(t, store, sunday, `{"stories": [{"editor_spans": [
-	  {"body": "The ferries follow the money to the islands.", "cites": [6, 2, 3]}
+	weaveAsking(t, store, sunday, []string{"Motherwell", "billion"}, `{"stories": [{"editor_spans": [
+	  {"body": "The ferries follow the money to the islands.", "cites": [1, 2, 5]}
 	]}]}`)
 	return sunday
 }

@@ -55,7 +55,7 @@ func TestRecordedNaming(t *testing.T) {
 }
 
 // namingCommand is how naming's recorded test is re-recorded.
-var namingCommand = rerecordCmd{"TestRecordedNaming", "NAMING_MODEL"}
+var namingCommand = rerecordCmd{test: "TestRecordedNaming", modelVar: "NAMING_MODEL"}
 
 // namesDiffer is naming's property beside its checks.
 const namesDiffer = "its Name is no other Story's"
@@ -170,18 +170,12 @@ func wovenRecord(t *testing.T, frozen string) (string, []storyToName, error) {
 		}
 		before := madeIDs(t, store)
 		copied := filepath.Join(frozen, "weaving", r.name+".json")
-		rec, err := keptAt(copied)
+		s, err := sampleAt(copied)
 		if err != nil {
 			return "", nil, fmt.Errorf("%s: no frozen copy of its weaving: %w", r.name, err)
 		}
-		m := &sampleModel{t: t, path: copied, attempts: []recording{rec}, model: "frozen", unchecked: true,
-			cmd: weavingCommand, report: func(error) {}}
-		passed, err := weave(t, store, m, r.at)
-		if err != nil {
-			return "", nil, fmt.Errorf("%s: its weaving is not taken: %w", r.name, err)
-		}
-		if !passed {
-			return "", nil, fmt.Errorf("%s: its weaving is not taken: weaving's checks refuse it", r.name)
+		if err := weaveFrozen(t, store, r, copied, s); err != nil {
+			return "", nil, err
 		}
 		made := madeIDs(t, store)
 		slices.Sort(made) // in the order the run wrote them
@@ -198,6 +192,36 @@ func wovenRecord(t *testing.T, frozen string) (string, []storyToName, error) {
 		return "", nil, err
 	}
 	return path, stories, nil
+}
+
+// weaveFrozen weaves the run r over store by s, a frozen copy of one of
+// weaving's samples kept at copied, as the act that made it checked it. A
+// copy of a conversation (its turns kept as they came back) is replayed
+// unchecked, every attempt in order, through the batch runner. A copy
+// recorded before a run was a conversation, weaving's version 3, keeps no
+// turn as it came back: it is kept as version 3 numbered what it was shown
+// (editor.KeepAsWeavingVersion3), at the time a run's result was applied.
+func weaveFrozen(t *testing.T, store *sqlite.Store, r weavingRun, copied string, s sampleFile) error {
+	t.Helper()
+	attempts := s.attempts()
+	if !slices.ContainsFunc(attempts, func(a recording) bool { return a.Raw != nil }) {
+		ed := editor.New(editor.Deps{Weavings: store, Log: slog.New(slog.DiscardHandler)})
+		if err := editor.KeepAsWeavingVersion3(t.Context(), ed, r.at.Format(time.DateOnly), r.at.Add(time.Minute),
+			editor.Response{Output: s.Output, Model: s.Model, Usage: s.Usage}); err != nil {
+			return fmt.Errorf("%s: its weaving is not taken: %w", r.name, err)
+		}
+		return nil
+	}
+	m := &sampleModel{t: t, path: copied, attempts: attempts, model: "frozen", unchecked: true,
+		cmd: weavingCommand, report: func(error) {}}
+	passed, err := weave(t, store, m, r.at)
+	if err != nil {
+		return fmt.Errorf("%s: its weaving is not taken: %w", r.name, err)
+	}
+	if !passed {
+		return fmt.Errorf("%s: its weaving is not taken: weaving's checks refuse it", r.name)
+	}
+	return nil
 }
 
 // oneStory is the Record as naming one Story sees it: that Story alone is

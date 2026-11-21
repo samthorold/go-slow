@@ -20,6 +20,24 @@
   {{- end}}
   <h3>Input</h3>
   <pre hx-disable>{{.Input}}</pre>
+  {{- if .Turns}}
+  {{/* A conversation's turns before this call: what the model asked, and
+       what the Record answered, in the order made, open. */}}
+  <h3>The conversation since</h3>
+  <ol>
+  {{- range .Turns}}
+    <li>
+      {{- with .Text}}<pre hx-disable>{{.}}</pre>{{end}}
+      {{- range .Calls}}
+      <p>Asked <code hx-disable>{{.Name}}</code> (<code hx-disable>{{.ID}}</code>):</p>
+      <pre hx-disable>{{.Input}}</pre>
+      <p>Answered{{if .IsError}}, an error{{end}}:</p>
+      <pre hx-disable>{{.Result}}</pre>
+      {{- end}}
+    </li>
+  {{- end}}
+  </ol>
+  {{- end}}
   <details>
     <summary>Instructions</summary>
     <pre hx-disable>{{.Instructions}}</pre>
@@ -28,6 +46,12 @@
     <summary>Schema</summary>
     <pre hx-disable>{{.Schema}}</pre>
   </details>
+  {{- if .Tools}}
+  <details>
+    <summary>Tools</summary>
+    <pre hx-disable>{{.Tools}}</pre>
+  </details>
+  {{- end}}
 </section>
 
 <section aria-labelledby="response">
@@ -35,6 +59,10 @@
   {{- if .Answered}}
   <p>Answered by <code hx-disable>{{.ReportedModel}}</code>, stopping for <code hx-disable>{{.StopReason}}</code>.
     {{.Tokens.Total}} tokens: {{.Tokens.Input}} input, {{.Tokens.Output}} output{{if .Tokens.CacheRead}}, {{.Tokens.CacheRead}} read from the cache{{end}}.</p>
+  {{- range .Calls}}
+  <p>Asked <code hx-disable>{{.Name}}</code> (<code hx-disable>{{.ID}}</code>):</p>
+  <pre hx-disable>{{.Input}}</pre>
+  {{- end}}
   <h3>Output</h3>
   <pre hx-disable>{{.Output}}</pre>
   <details>

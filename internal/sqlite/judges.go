@@ -91,7 +91,8 @@ func (s *Store) ChooseCandidate(ctx context.Context, id int64, at time.Time) err
 
 // PastUsage is what the act's applied calls answering one of its
 // judgements in the Record cost: their count, their requests' size in bytes
-// (instructions, schema and input) and their tokens in and out. Hydration's
+// (instructions, schema and input, and a conversation's tools and messages)
+// and their tokens in and out. Hydration's
 // judgements are its hydrations and weaving's its runs; another act has none.
 func (s *Store) PastUsage(ctx context.Context, act string) (editor.PastUsage, error) {
 	var u editor.PastUsage
@@ -101,12 +102,14 @@ func (s *Store) PastUsage(ctx context.Context, act string) (editor.PastUsage, er
 	}
 	err := s.db.QueryRowContext(ctx, `
 		SELECT count(*),
-			coalesce(sum(length(CAST(i.text AS BLOB)) + length(CAST(sc.text AS BLOB)) + length(CAST(inp.text AS BLOB))), 0),
+			coalesce(sum(length(CAST(i.text AS BLOB)) + length(CAST(sc.text AS BLOB)) + length(CAST(inp.text AS BLOB))
+				+ coalesce(length(CAST(v.text AS BLOB)), 0)), 0),
 			coalesce(sum(c.input_tokens + coalesce(c.cache_read_tokens, 0)), 0), coalesce(sum(c.output_tokens), 0)
 		FROM model_calls c
 			JOIN call_texts i ON i.hash = c.instructions
 			JOIN call_texts sc ON sc.hash = c.schema
 			JOIN call_texts inp ON inp.hash = c.input
+			LEFT JOIN call_texts v ON v.hash = c.conversation
 		WHERE c.act = ? AND c.outcome = 'applied' AND c.input_tokens IS NOT NULL
 			AND EXISTS (SELECT 1 FROM `+judgements+` r WHERE r.request_hash = c.request_hash)`, act,
 	).Scan(&u.Calls, &u.RequestBytes, &u.InputTokens, &u.OutputTokens)

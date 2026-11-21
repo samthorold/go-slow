@@ -36,6 +36,14 @@ type Request struct {
 	// answer (EffortLow, EffortMedium, EffortHigh); empty leaves it to the
 	// model's own default. It is part of the request, as its model is.
 	Effort string
+	// Tools are the tools the model may call, for an act that is a
+	// conversation (weaving); none for an act that answers at once.
+	Tools []Tool
+	// Messages are the conversation after Input, in order: each turn the
+	// model took (Message.Assistant, as it came back) and what the act sent
+	// back (Message.Results of the tools it called). Empty on a
+	// conversation's first turn.
+	Messages []Message
 }
 
 // The efforts an act can ask a model for, provider-neutral: an adapter maps
@@ -50,8 +58,12 @@ const (
 // an answer with no usable output (ErrRefused, ErrTruncated) still returns
 // what came back, so the answer can be kept.
 type Response struct {
-	// Output is the model's JSON output.
+	// Output is the model's JSON output: its text, which is the answer when
+	// it calls no tool.
 	Output json.RawMessage
+	// Calls are the tools the model called, in order: a conversation's turn
+	// that is not yet its answer.
+	Calls []ToolCall
 	// Raw is the whole response exactly as the provider returned it, in its
 	// own form (thinking and refusals included), for the kept call.
 	Raw json.RawMessage

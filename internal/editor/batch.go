@@ -104,6 +104,12 @@ type PendingRequest struct {
 	Model   string
 }
 
+// ErrGiveUp is a result that gives its work up at once, whatever its
+// attempts: the batch runner marks it failed with why, as it marks work
+// that has failed MaxAttempts times, and submits it no more (a weaving run
+// whose next turn would take it over its cap).
+var ErrGiveUp = errors.New("the work is given up")
+
 // MaxAttempts is how many times a piece of work is attempted in batches
 // before it is marked failed and no longer submitted (system design: Work
 // that keeps failing is given up after three attempts, and taken up again by
@@ -361,6 +367,7 @@ func (b *Batches) settle(ctx context.Context, p PendingBatch, jobs map[string]ma
 		}
 		call := b.call(p.ID, r, j, now).answered(res.Response)
 		outcome := Failed
+		giveUp := false
 		sent := j.Request
 		if r.Request != nil {
 			sent = *r.Request
@@ -373,8 +380,14 @@ func (b *Batches) settle(ctx context.Context, p PendingBatch, jobs map[string]ma
 		}
 		if res.Err == nil {
 			err := j.apply(ctx, sent, res.Response, now)
-			if err == nil {
-				if err := b.Store.KeepCall(ctx, call.ended(Applied, nil)); err != nil {
+			if err == nil || errors.Is(err, ErrContinued) {
+				done := Applied
+				if err != nil {
+					// A conversation's turn that asked: its next turn is the
+					// work's request from now on.
+					done = Continued
+				}
+				if err := b.Store.KeepCall(ctx, call.ended(done, nil)); err != nil {
 					return settled{}, err
 				}
 				b.Log.InfoContext(ctx, "batch result applied", "batch", p.ID, "act", r.Act, "key", r.Key,
@@ -385,6 +398,8 @@ func (b *Batches) settle(ctx context.Context, p PendingBatch, jobs map[string]ma
 			switch {
 			case errors.Is(err, ErrFailedChecks):
 				res.Err, outcome = err, Refused
+			case errors.Is(err, ErrGiveUp):
+				res.Err, giveUp = err, true
 			case ctx.Err() != nil:
 				return settled{}, err
 			case now.Sub(p.SubmittedAt) < BatchDeadline:
@@ -405,7 +420,7 @@ func (b *Batches) settle(ctx context.Context, p PendingBatch, jobs map[string]ma
 		if err != nil {
 			return settled{}, err
 		}
-		f := WorkFailure{Act: r.Act, Key: r.Key, At: now, Why: res.Err.Error(), Failed: prior+1 >= MaxAttempts, Call: &call}
+		f := WorkFailure{Act: r.Act, Key: r.Key, At: now, Why: res.Err.Error(), Failed: giveUp || prior+1 >= MaxAttempts, Call: &call}
 		s.failures = append(s.failures, f)
 		if f.Failed {
 			b.Log.ErrorContext(ctx, "work failed", "batch", p.ID, "act", r.Act, "key", r.Key,

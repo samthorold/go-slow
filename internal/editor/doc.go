@@ -5,7 +5,9 @@
 // model is an adapter).
 //
 // The ports are provider-neutral: Model (one call, at once) and Batcher (a
-// provider's batch interface). Each act has its own instructions, output
+// provider's batch interface); a conversation's turn is a Request like any
+// other, carrying its tools and the conversation so far, and its Response
+// the tools the model called. Each act has its own instructions, output
 // schema and checks.
 //
 // # Hydrating an Item
@@ -85,52 +87,81 @@
 //
 // # Weaving
 //
-// Weaving (weaving.go, WeavingVersion; system design: Weaving asks for an
-// editor's opinion, and need get none) is a BatchAct whose work is
-// one run a day, keyed by the day (time.DateOnly in now's location): its
-// Waiting, told now, gives a job only at or after the time of day it was
-// built with (DueAt), when that day's run has been neither written nor marked
-// failed (WeavingStore.WeavingRan) and something has been cut since the last
-// run written; while a run's request is in a pending batch, that run's job
-// alone. Editor.WeaveToday is the same day's run asked for by the Owner at
+// Weaving (weaving.go, weaving_asks.go, WeavingVersion; system design:
+// Weaving asks for an editor's opinion, and need get none) is a BatchAct
+// whose work is one run a day, keyed by the day (time.DateOnly in now's
+// location): its Waiting, told now, gives a job only at or after the time of
+// day it was built with (DueAt), when that day's run has been neither
+// written nor marked failed (WeavingStore.WeavingRan) and something has been
+// cut since the last run written; while a run is under way (its turn in a
+// pending batch, or its conversation kept between turns,
+// WeavingStore.WeavingInProgress), that run's next turn alone.
+// Editor.WeaveToday is the same day's first turn asked for by the Owner at
 // any time of day, refused where Waiting would give none (ErrWovenToday,
 // ErrWeavingPending, ErrNothingToWeave), and Batches.Submit submits it alone,
 // pending, for the batch runner to apply as it applies its own; it is priced
-// by EstimateOf at batch rates (Price.AtBatchRates). A run is one request, at EffortMedium, shown first every Story the
-// Editor has made (WeavingStore.StoriesMade), oldest first, each under the
-// date it was made, its Editor's Spans in the order written, each after the
-// Spans it cites not yet shown and marked "the Editor's" with the numbers it
-// cites; then every Story cut since the last run written (the storage
-// adapter's StoriesToWeave: Cuts after its through_cut, of Items collected
-// after the switch, and since the switch to Stories, the newest story_switch), each
-// under its Item's title and date. Every Span shown, a Source's or an
-// Editor's, is numbered S1, S2… once, across them all (showMade, woven). A
-// Source's Span is shown hydrated once its Item has a hydration
+// by EstimateOf at batch rates (Price.AtBatchRates).
+//
+// A run is a conversation, each turn a request at EffortMedium carrying the
+// tools find and open_story (weavingTools) and the conversation so far
+// (Request.Messages; system design: A weaving run is shown what is new, and
+// finds for itself what bears on it). Its first turn is shown only every
+// Story cut since the last run written (the storage adapter's
+// StoriesToWeave: Cuts after its through_cut, of Items collected after the
+// switch, and since the switch to Stories, the newest story_switch), each
+// under its Item's title and date, its Spans numbered S1, S2… (weavingInput,
+// woven). A Span is shown hydrated once its Item has a hydration
 // (WeavingStore.NewestHydration; system design: Construction judges a Span
 // from the Story its Cut made): "spoken by" its Speaker, and each stretch
 // that refers to another read between ⟦ and ⟧, marks no publisher writes, as
 // what it refers to, its possessive where the stretch says whose something
 // is ("⟦Derby’s⟧ role", Hydration.Hydrated, as the Pages read it), while a
-// publisher's own square brackets are shown as written; a Span of a Story cut that is Rejected is left out and
-// keeps its number, so a Span's number never depends on its hydration. A
-// Span with no hydration is shown as written: nothing waits for hydration. A
-// Span an Editor's Span cites is shown, hydrated, whether Rejected or not.
-// It answers stories, each
-// editor_spans, each body then cites (numbers); a citation of an earlier
-// Editor's Span is held by its address (Cited.Of, an EditorSpanAt), never
-// copied. The checks refuse a citation of a Span not shown (left out
-// included), an Editor's Span with no words or no citation, and a Story with
-// none; an empty stories is a run that made nothing, kept all the same. A
-// result is applied through Job.ApplySent to the request as sent, never
-// refused as stale: the Stories it showed are those made (only weaving makes
-// them, one run at a time) and the first of those cut now awaiting, found by
-// their headings in the request as sent, and the Spans left out are read from
-// it too (shownIn), since a Span hydrated after the request went is shown
-// otherwise now; Cuts are only added to and numbering runs on from the
-// first. KeepWeaving keeps the
-// run (its Judge and the newest Cut shown) and each Story as its own event.
-// A run failing MaxAttempts is listed on the Items page by its day, and its
-// Stories are shown to the next day's run.
+// publisher's own square brackets are shown as written; a Span of a Story
+// cut that is Rejected is left out and keeps its number, so a Span's number
+// never depends on its hydration. A Span with no hydration is shown as
+// written: nothing waits for hydration.
+//
+// A turn that calls tools is answered, when its result is applied, from the
+// Record as it stands (earlierRecord: every Story cut through the run's
+// newest new one but its new ones, WeavingStore.StoriesCutThrough, and every
+// Story the Editor made, WeavingStore.StoriesMade, each Span read as hydrated
+// now): find matches words case-insensitively as whole words in each Span
+// as hydrated (marks dropped; a Rejected Span matches nothing) and in the
+// Editor's Spans, and answers with a catalogue, newest first, at most
+// catalogueSize Stories: each by its number (its event), a Cut's by its
+// Item's title, date and Source, the Editor's by its date and first Editor's
+// Span, with how many later Editor's Spans cite it, then its first
+// matchesShown matched Spans, each numbered on from what the run has been
+// shown, between the Spans around it unnumbered (·); open_story shows an
+// earlier Story whole, a Cut's each Span numbered (a Rejected one left out),
+// the Editor's each Editor's Span after the Spans it cites, read hydrated
+// whether Rejected or not, marked "the Editor's". A Span keeps its number
+// however often it is shown. The turn is kept as the run's conversation
+// (WeavingTurns: the opening as sent, the messages since, every Span shown
+// by number and those left out; WeavingStore.KeepWeavingTurns), its call
+// kept Continued (ErrContinued), and the next turn is the run's work from
+// then on, submitted on the same turn of the batch runner. A run the Owner
+// capped (WeavingStore.WeavingCap, kept by the weave command) is given up
+// (ErrGiveUp), marked failed, when its next turn would take what it has
+// spent over its cap, priced by Deps.PriceOf at batch rates.
+//
+// A turn that calls no tool is the answer: stories, each editor_spans, each
+// body then cites (numbers); a citation of an earlier Editor's Span is held
+// by its address (Cited.Of, an EditorSpanAt), never copied. The checks
+// refuse a citation of a Span not shown (left out included), wherever shown
+// (as new, in a catalogue or an opened Story), an Editor's Span with no
+// words or no citation, and a Story with none; an empty stories is a run
+// that made nothing, kept all the same. A result is applied through
+// Job.ApplySent to the request as sent, never refused as stale: on the
+// first turn, the Stories it showed are the first of those cut now
+// awaiting, found by their headings in the request as sent, and the Spans
+// left out are read from it too (shownIn), since a Span hydrated after the
+// request went is shown otherwise now; on a later turn, to the conversation
+// kept, which it must answer. KeepWeaving keeps the run (its Judge, the final
+// turn's request hash, and the newest Cut shown as new) and each Story as
+// its own event. A run failing MaxAttempts (over its turns) is listed on the
+// Items page by its day, and its new Stories are shown to the next day's
+// run; the retry admin command takes it up again from its last kept turn.
 //
 // # Naming
 //
@@ -145,8 +176,8 @@
 // A Story never changes once made, so a result is applied through
 // Job.Apply as any other. KeepName keeps it as a Judgement of its own;
 // Story.Name is the newest. No act is shown a Name: weaving's input shows
-// the Stories the Editor made by their date and Spans alone, and naming's a
-// Story's Editor's Spans and what they cite.
+// no Name, its catalogues and opened Stories the Editor's by their date and
+// Spans alone, and naming's a Story's Editor's Spans and what they cite.
 // Naming follows weaving in the batch runner's acts, so a run's Stories are
 // named in the batch submitted on the turn its result is applied.
 //
@@ -161,12 +192,16 @@
 // provider's own form, beside its reported model, usage and stop reason; nil
 // when none came), the outcome (applied, refused by the checks, or failed)
 // with its reason, and RequestHash, the one hash of a request (instructions,
-// schema, input, model) that recorded runs share. Applied calls go through
+// schema, input, model, effort, and a conversation's tools and messages)
+// that recorded runs share. A conversation's call keeps its whole
+// conversation in its request, and the tools its response called; a turn
+// that asked is kept Continued. Applied calls go through
 // KeepCall, failed attempts with their WorkFailure in EndBatch. The storage
 // adapter keeps each distinct text once (call_texts) and refuses to rewrite
 // or remove a kept call. The calls the old designs' acts made (placing,
 // connecting, the earlier reading act that drew Facts; relating, the Briefing, the
-// Sunday read's conversations, KeptConversation) stay kept, as every call
+// Sunday read's conversations, KeptConversation, whose shapes weaving's
+// conversation reuses: Tool, Message, Turn, ToolCall, ToolResult) stay kept, as every call
 // does, and readable on their pages; no act is shown them. Call.Precedents
 // is the Feedback a retired act's call showed as precedent, read from the
 // Record; no act shows any now, so nothing that makes a call carries them.

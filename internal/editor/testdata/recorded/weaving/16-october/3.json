@@ -1,68 +1,277 @@
 {
   "act": "weaving",
   "model": "claude-opus-5-5",
-  "request_hash": "242f0ba41bc66e4efa062d1fab7bf0bf9a43f49aa976d8dc476d82e1c536dad5",
-  "recorded_at": "2026-11-19T19:21:48.976371Z",
+  "request_hash": "02bf97540038f6cd205ae90d7d1ceb88724ce4501d1989d46d78c700a835f4f9",
+  "recorded_at": "2026-11-21T08:56:27.925192Z",
   "usage": {
-    "input_tokens": 16473,
-    "output_tokens": 1349
+    "input_tokens": 2095,
+    "output_tokens": 1565,
+    "cache_read_input_tokens": 12050
   },
   "output": {
     "stories": [
       {
         "editor_spans": [
           {
-            "body": "The Motherwell speech gives the Holyrood offer more substance than the press release suggested. Burnham is not only asking Edinburgh to devolve its own powers. He is offering something Westminster controls: DWP employment support, shaped by Holyrood. He is also floating devolved innovation, enterprise and employability funding, and has called a National Economic Council with the devolved First Ministers. That is a real incentive. It partly answers my earlier point that Westminster had little power to compel anything here. It cannot compel, but it can pay.",
+            "body": "Burnham's speech in Motherwell tells a single story about Ravenscraig, Leigh and Scottish centralisation: distant decision-makers abandoned places, and the fix is to push power down. The history he leaves out complicates his diagnosis. Ravenscraig closed in 1992. The owner was British Steel, privatised in 1988, so the decision was a corporate one made under a Westminster government that had already given up on industrial strategy. In 1992 no level of local government could have stopped it. That did not change when the Scottish Parliament arrived. Pushing power down to regions does nothing about decisions made in boardrooms, and that is how the next Ravenscraig would most likely happen. Grangemouth, which he mentions himself, is the current example.",
             "cites": [
-              51,
-              350,
-              356,
-              357,
-              369
+              80,
+              81,
+              82,
+              83,
+              84,
+              183
             ]
           },
           {
-            "body": "The speech has a sound historical diagnosis. Ravenscraig and the Leigh pits were closed by people who never had to live with the consequences, and nobody planned the transition. More than thirty years on, the Ravenscraig site is still not fully filled. Those decisions taught a generation that the state does things to places, not with them. That loss of trust is what Burnham is really trying to repair.",
+            "body": "The more pointed omission concerns who centralised Scotland. In 1996, three years before Holyrood existed, Westminster abolished Strathclyde Regional Council and the other Scottish regions. Strathclyde covered Motherwell, Glasgow and Inverclyde and was exactly the kind of strong regional body Burnham now wants to build. Holyrood then inherited 32 unitary councils with no regional tier above them. Later Scottish governments made things worse with years of council tax freezes and ring-fenced funding. So when he calls Scotland 'one of the most centralised nations in Europe', he is describing a structure that Westminster and Holyrood built between them. Blaming it on Edinburgh alone, as the Number 10 briefing did, is selective history. The City Region Deals he praises were a partial attempt to rebuild the regional level that 1996 took away.",
             "cites": [
-              133,
-              134,
-              135,
-              137,
-              142,
-              143,
-              172
+              153,
+              352,
+              271,
+              274,
+              109,
+              117
             ]
           },
           {
-            "body": "There is a tension at the centre of the plan. Easterhouse worked because it was small, local and personal: tailored pathways, clothes for interviews, travel paid. Burnham now wants to take that model 'nationwide', 'the way we support everybody, everywhere'. Scaling a bottom-up project through a national employment system is exactly how good local practice turns into the top-down, tick-box scheme he condemns in the same speech. The test of the DWP offer is whether the money and discretion reach the estate level, or stop at Holyrood.",
+            "body": "The concrete part of the offer is DWP devolution, and it shows how the offer is built. Holyrood already has some employability powers, and Burnham is offering a localised employment-support model 'shaped by Holyrood'. But he then says it 'has to be based on the Easterhouse principle' and must 'go right down'. Westminster would hand over a power and also set how far down Holyrood has to pass it on. That fits what I argued before: the offer is designed so that Westminster wins whether Edinburgh accepts or refuses. What will show whether it is real is whether the money for it gets close to what Greater Manchester's devolution deals came with. Without that money, Holyrood would get a target to meet but not the means to meet it.",
             "cites": [
-              97,
-              98,
-              100,
-              102,
-              289,
-              366,
-              367,
-              359,
-              360
-            ]
-          },
-          {
-            "body": "The rest of the material is still modest. The flagship example of cooperation is £10 million matched for two defence colleges. Meanwhile one in six young Scots is not in education, employment or training. The procurement idea of paying a little more to buy British, as with Manchester's Falkirk-built buses, is the most radical part of the speech, but it is stated as a wish, not a policy. The warning that Scottish towns could be 'underpowered' while northern English cities power up is a lever on the SNP. It may prove more persuasive than the open hand.",
-            "cites": [
-              226,
-              229,
-              281,
-              246,
-              248,
-              249,
-              252,
-              329,
-              330
+              305,
+              306,
+              308,
+              309,
+              310,
+              355,
+              357
             ]
           }
         ]
       }
     ]
-  }
+  },
+  "raw": {
+    "model": "claude-opus-5-5",
+    "id": "msg_011ChFo2Eh2KwwffFAczDdXa",
+    "type": "message",
+    "role": "assistant",
+    "content": [
+      {
+        "type": "thinking",
+        "thinking": "",
+        "signature": "CAQS9BQKEAgUGAI4AUIIdGhpbmtpbmcSDKa7NjOIqcYwPCZKeBoMYfMaspoCQTOQ42iZIjDuQWQvQxoDeqLevWXHYkT+FSrC1M0Nns71NhYVShlqTt2NJ0GZElY8bJ2L0bORz60qkRRKhqbLkSf04RD7KB1xYi6bgsB3cor8OLHH+mSI8mBRpwsK7w7j47CP9afbjWuNhfZugmjoL8r6U80FkeQ7OdztT9fHiL9AsNyp8ua0BrXZpOiwHyVwez0RVrAU1mn3Ugk38nlCCJn/u+4Cz9zFKYiou/853Ph2uAeCbXOViE02u5TNr0YQH7zuVV06xDytDxT1iL/coAHMN6PtQZHM4KH/il216JewqTPaUDMomvCnWaz5R73nwRE1+wiYefJHdU3Ta524ZTvgLdiWzSGmuAsRqxLDvi1GiooTHLbN7mWEVfbMCTE7Vc5x5uKMbK7AqkDf1x6x2WLsuEENr6YHmgGVBO0mltbz2zIg5Tu1Dt7bIs+nd4cd5+zXH4y0o5iUckfKcvSN2zWsCJ6d3p9ZP4J27tXBrAguLLCNjgIK3kTzyedTXrYSOAeUWM0X8jV471Bwnh9+KA5AJLI8ust+IcxZcQCE4vac0ORUvHJS7BEZhlRND+ZouEzdI6Au2hX0LF7E5G34ynWPmNDh8SXHMm4S7IzvszgLiqTz0vUAtN3VStCsKrsY7JKLFFZnwUUIPZGZ0jbRQB8lGbs7FhQj1KKt70A9//iR9bH5mgm8HESrywfs/K/deJTZokx4sOmgKzUn+uAhA49SuOcs5IVmqmfyreoqFEZavfVT4qDGqx4LayNdkDylW2b/Nr/IolF/QeNli+DeHEhTEbtsGgZsRshIs3ldKAf0TIemhHqmdLGDNS/YXePuraffTcAUhsaqjfUjoHVfZmEeYwfJ9QpINdUCYYU+++2/j/q/HU6JxgpLf0eVZnUACHm1g3k4b032aaves1cuy+g/LEl8axIgJ3C8L8p+GTcBwB+M0svD388LEUQxbSrZ59lq5ejm7TELyTkyTrUcy3A5eVquHRtEHoRLEkV8cLh2lOiHbXVxc2wa6o8Dq9vsIzFltoEcRE3bfnJkXr/7PbQIqRG/5QmXo/7xMkFFiCkQGXv4w6+rBRVpsiQ/Ty0/fzvOaCEh2bd4yy99qQ9Xl1XrGBq51Yvmd00AVsz8SjUZhrmcvaxUZAtEsKN//NxokRwljHHxcH9bH6wXBqKTNv8dPthLFNXAH33q4THPIR/ciV5ThCnMkadKkG+/GWHnDoOg6LpdelGzNTsMOwEex8lXjwui8FdVYaAEDowiBGyiH0WJbeuZHX/o61pEhUUi/eF0ItgjP4i5J1AdQ5x84tYXTixWUsB5LqIs5n0FZ1Q3mIbN3mdDJEyhJPXCacECg8tDGBSAxjAtHqxC7glQAFOrXXjZqQaxqFu7oSBqaQknscUQotaQBsqbZAUV86Nhceo3r7O1gfVaAgSCk4ElsbT4jAAt9SjUXA+I2sAWHrbHGQHhoAm0FBWwlc8EVfWAnbpEJTRI6w6eUyyXX38oVco6K/ZGTLYbrwynyOJ0KNTaBW3MDa2gHERFUqJd8uaz3Id3B5QCxPmle8p7RUsvg7/iV8QiycJOOfBvTVrLLZhXuxPdRU4kNwt+hVuYgv3LTkRhmdw1epDdDtOYpSfLhxIRWHL/cLS/tcwzReMJ5+LIA2Hmlv6OQPokR/Bd0EX1uC/7CnRjiR5tFf1x/A9lwyAGpjiaCAEfnNaM1z/BC2dBqq53Hu40fxpPVmp4N0BJpQqh7RlOJ/93+WGH6psF7pGZjmN0/GcgE6oLnStZdIV34VpX74F0guy8G8fdHp7aOht/K/sFYX6QqlJbO9hijzDYMIEhk6+Z/Do05jLnNLG490POaRXw+6sz39gg+P8EuF2sKHiJ6MSFuzCUm6kge4MnatMKWs7sZrSXJo/eYJSmTH5Xl3ueu+DEa8Mfuv7rH2SjJQE/Vr6P3/qVVwJOEB/2xSWBq2ACDoVAW/OBmASOikdc/O2ANbQvbr0dcMzes/10ODBVeitN2UbuKJYafDtd6E+g2ljXkT2BnK9wh5ACZW/vo599dKx/fxdvnaUuo7y/W/uZf/y7zTe1Un3ryNovCX/ptZk5Wd239LywCNLgscDT7Q6ZiXXQ+lGT56L+BwLKgfGIHV1S57UZH/RI5vyVLWyWGonJv++zEK1YMJAQYVaWWS4WWWugMTb5P5PKRV2FvJ0hP/KfoXFjAx4ITcsRYIAD3P+feWOXphVHynta01sxf9K6+ZxdOmNSSvGGGclzSgtIBDK6s/uIKXf6gQhg9GO676edCFmXN/lmbZiFs4Fy/KUB/nxfJ8/Xi1nphXKelO7mJPlirDxsu1pXhh7MIKzBtomuHKAjh2HOn15upTXBixdlOqQYE3MkFmvx536E61p/L5HjJYycgbW/S0vXj+xrNe9xhbxkAaEINnvpd7MbwnyF3OJz0TIaPEp1WJuRqNt1Psyn6sBQCUvtJQA12DHEVJS4Lh2kM0aUDET7KdXf3raYBvMbioJCmXuByHn8Y3cnXezTeO01m6BND3SVNHSj3It3gjqOfh2IQGHxEyYViBdENeqBbcwSAZbpkopaoBMSZpHvfJT7IpMCz2s+MtdbeHykiBeoztAfItkh4Rc/fE73galtok7Ay+nd+K8z88SjLmuoGfz+DBr8vacfaEfjoVgYObza2AG4zKNR/FZItlv1tbiK5u9suPhxuKOiJR83daFGoGCEME9zqR0DrrJccfrnne0qLQe2IwZC2zGb6hau6Z28zcef7o1Gz94/AMDWX1N3c5OEwt6WAj1Me7F9tsrn82WMEqYT5ZjIBEW/PIykj24UDNcUy3alz1eWiC9iZTsRg8xZaT5ns1pqLciT7t+7ITa7uF3oy5FCvmL/rxao0dtplZh9dnLMZvlB4qKrw7b0nJKeXf8D78ZoYv6bE5b7SXUsI4IwuF4RTYybx/BUcfc9LzLTKZWPykTJHTnP6LyY7soCANzx2Fg2uePoKI/ojSYNvxKV/33aCxorFffIJL8fa+P1s/2QcS/6uFUafYdZEWYfgltD9S3sK3P3ftDiHAgdcfvW0DvatI02XlW+6CGafy4ceJ/GpieEhWxenXOmGJb0j4jjwF/s5e2fbFoD72kWUBFSXsLDlXQBs2eagPrc1TQlQ2MfYQwvSRoVpRI7uAMT5OAesZ0jPYr1ZQ5Qw7HXreOk9M/e/rKfCehDbtOJ0ITotGUuFfVyZpCU0BVBO8Vs8IyqVa1MuaJaVKKX+7NM17suwmI8LE4fgTe6LWLS73qOaCC7D2ZYDJg4D0Wr8oUVT1YmS/kR65KTWGkftEEYONK/D8ASgP7y1zMVDdYWsukIP200j8SW03NSbBVDuNn+qpRSRXUoIQOdsegVPMQmneTus5QTWOEtQdcZIyjraT1Wy1x/Y+ubdK6T+VFTl2YlGSDyZyLmXBWZTPjuiXUY8kw/bl7yvXrbNDTa0okrL3M7mI4nSA28+VQi0CjmLgZ9WJT9jgrGabFd/+NaHtr9+KqyFUYYboULGBQf17MCEiIYAQ=="
+      },
+      {
+        "type": "text",
+        "text": "{\"stories\":[{\"editor_spans\":[{\"body\":\"Burnham's speech in Motherwell tells a single story about Ravenscraig, Leigh and Scottish centralisation: distant decision-makers abandoned places, and the fix is to push power down. The history he leaves out complicates his diagnosis. Ravenscraig closed in 1992. The owner was British Steel, privatised in 1988, so the decision was a corporate one made under a Westminster government that had already given up on industrial strategy. In 1992 no level of local government could have stopped it. That did not change when the Scottish Parliament arrived. Pushing power down to regions does nothing about decisions made in boardrooms, and that is how the next Ravenscraig would most likely happen. Grangemouth, which he mentions himself, is the current example.\",\"cites\":[80,81,82,83,84,183]},{\"body\":\"The more pointed omission concerns who centralised Scotland. In 1996, three years before Holyrood existed, Westminster abolished Strathclyde Regional Council and the other Scottish regions. Strathclyde covered Motherwell, Glasgow and Inverclyde and was exactly the kind of strong regional body Burnham now wants to build. Holyrood then inherited 32 unitary councils with no regional tier above them. Later Scottish governments made things worse with years of council tax freezes and ring-fenced funding. So when he calls Scotland 'one of the most centralised nations in Europe', he is describing a structure that Westminster and Holyrood built between them. Blaming it on Edinburgh alone, as the Number 10 briefing did, is selective history. The City Region Deals he praises were a partial attempt to rebuild the regional level that 1996 took away.\",\"cites\":[153,352,271,274,109,117]},{\"body\":\"The concrete part of the offer is DWP devolution, and it shows how the offer is built. Holyrood already has some employability powers, and Burnham is offering a localised employment-support model 'shaped by Holyrood'. But he then says it 'has to be based on the Easterhouse principle' and must 'go right down'. Westminster would hand over a power and also set how far down Holyrood has to pass it on. That fits what I argued before: the offer is designed so that Westminster wins whether Edinburgh accepts or refuses. What will show whether it is real is whether the money for it gets close to what Greater Manchester's devolution deals came with. Without that money, Holyrood would get a target to meet but not the means to meet it.\",\"cites\":[305,306,308,309,310,355,357]}]}]}"
+      }
+    ],
+    "container": null,
+    "stop_reason": "end_turn",
+    "stop_sequence": null,
+    "stop_details": null,
+    "usage": {
+      "input_tokens": 2,
+      "cache_creation_input_tokens": 2093,
+      "cache_read_input_tokens": 12050,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 2093,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 1565,
+      "output_tokens_details": {
+        "thinking_tokens": 717
+      },
+      "service_tier": "standard",
+      "inference_geo": "global",
+      "speed": "standard"
+    },
+    "diagnostics": null
+  },
+  "stop_reason": "end_turn",
+  "earlier_attempts": [
+    {
+      "act": "weaving",
+      "model": "claude-opus-5-5",
+      "request_hash": "2781e1952af6dcbb9d1ea4286b9fde69eb9385eaccba35fa4cf8966b6f742e0c",
+      "recorded_at": "2026-11-21T08:56:08.286107Z",
+      "usage": {
+        "input_tokens": 4,
+        "output_tokens": 208,
+        "cache_read_input_tokens": 11702
+      },
+      "output": null,
+      "calls": [
+        {
+          "ID": "toolu_01W9hjM49mWpDzvzhcEq1AC3",
+          "Name": "find",
+          "Input": {
+            "words": "Easterhouse"
+          }
+        },
+        {
+          "ID": "toolu_015x9o6ir5GGcUGu7ZZVhWvL",
+          "Name": "find",
+          "Input": {
+            "words": "Number 10 North"
+          }
+        },
+        {
+          "ID": "toolu_01EThytPDPmXSu1NWsFzGw4a",
+          "Name": "find",
+          "Input": {
+            "words": "DWP devolution"
+          }
+        }
+      ],
+      "raw": {
+        "model": "claude-opus-5-5",
+        "id": "msg_011ChFo1v5KynD5jCgrDzoJg",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "thinking",
+            "thinking": "",
+            "signature": "CAQS6wUKEAgUGAI4AUIIdGhpbmtpbmcSDKyS9YWnY4uusvpwwxoMP80A5cpdIv7qBkGjIjBDVLzMJc463Z5/TbsBZciwVKCCmRu1i/4z3cygmbzsiPMUd8RxSjCYGqN+9Axh14cqiAXyJ/sj4ARa+qeRPYhYm5x7qr68SjDb89X+D++3I/B0hYsErIeJrbaoAv2y3Lf2pt7y8hhIfLAG2Txr9JPNCtGpxLjAVJSxOb+AvvZqekZw4T47vnrzomwuh+dFTa+j9Kg6yw/iEOIxj38S4+S9wuUeqMHXGrdlestsJFHkhZ2p/Ky25nZxAZ3abyfNDeorToUN1RSO5AU8wLCB08lLAL+Zf8URNr+/d2YomcQkhcigv6AzewLJ2lgeHbe9Pvf5JL0O3Pa+MoctHdjDrccx/nHL+77feIz2JLrS1IavrGG550Cl1IvhXJoBWR12ETUKsJfTWWE158EVv29BnyBKTz9yDURG6R3Z2HQtA+dP4Ff40gjnDlSp7NQpXN187Odu5J5imc1tBhjkyYmp99i48W05aM2/cc4KkQ3cQEISbwCGPh+gBuLt5aIJUI/YhjziJdNeOHslokjkBMkWE/YbCgIDx3nLFi7g2QN+G3ZLOoJk+qRi5yof1UnbSJyj0qHyqasbw5JyJ/PPFQ79iP4lt0oPnVHfmVHydxBw/sfv7aMzt2gI0H+kIAx0ys5d3Er9zxeK2OlzfRj9bgkS/83dxlQ9UguyTlJtLLXmDcEARPrf5qqCMJJkt67PrMp+36DVCu4i3c23FvP2ohfJoZjcKdlGvRNseFmIlt1SbXbuVf6O7brNh6aylA1QEuOr8DQCvcgpxJ9dPUWrq/e9dqmJ9C+xMW6K8qw1J4XKi9c2Kg053ei4GTLVTlVi2t7FJbOcWQKM6diS3PVGqVL5+5ECbtbHuKFA0u+xJs3gCnglNADGeSr1JFY9ipScok0s2CcZWmogaoHFz/D/kUApBh26D5867VLwm2EbQ1gYAQ=="
+          },
+          {
+            "type": "tool_use",
+            "id": "toolu_01W9hjM49mWpDzvzhcEq1AC3",
+            "name": "find",
+            "input": {
+              "words": "Easterhouse"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          },
+          {
+            "type": "tool_use",
+            "id": "toolu_015x9o6ir5GGcUGu7ZZVhWvL",
+            "name": "find",
+            "input": {
+              "words": "Number 10 North"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          },
+          {
+            "type": "tool_use",
+            "id": "toolu_01EThytPDPmXSu1NWsFzGw4a",
+            "name": "find",
+            "input": {
+              "words": "DWP devolution"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ],
+        "container": null,
+        "stop_reason": "tool_use",
+        "stop_sequence": null,
+        "stop_details": null,
+        "usage": {
+          "input_tokens": 4,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 11702,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 208,
+          "output_tokens_details": {
+            "thinking_tokens": 63
+          },
+          "service_tier": "standard",
+          "inference_geo": "global",
+          "speed": "standard"
+        },
+        "diagnostics": null
+      },
+      "stop_reason": "tool_use"
+    },
+    {
+      "act": "weaving",
+      "model": "claude-opus-5-5",
+      "request_hash": "972170c079ed77d38577353dbbae800f8c644a8a0c030efa6579f968b4a1e88f",
+      "recorded_at": "2026-11-21T08:56:10.098362Z",
+      "usage": {
+        "input_tokens": 350,
+        "output_tokens": 93,
+        "cache_read_input_tokens": 11702
+      },
+      "output": null,
+      "calls": [
+        {
+          "ID": "toolu_01UJhgu1ePvseQyTw6aS7T9o",
+          "Name": "find",
+          "Input": {
+            "words": "devolution"
+          }
+        },
+        {
+          "ID": "toolu_01UPr3wZ23gaQPxDuZ5y69uu",
+          "Name": "find",
+          "Input": {
+            "words": "Scottish government"
+          }
+        }
+      ],
+      "raw": {
+        "model": "claude-opus-5-5",
+        "id": "msg_011ChFo26wC14JehfipkMzwo",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "toolu_01UJhgu1ePvseQyTw6aS7T9o",
+            "name": "find",
+            "input": {
+              "words": "devolution"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          },
+          {
+            "type": "tool_use",
+            "id": "toolu_01UPr3wZ23gaQPxDuZ5y69uu",
+            "name": "find",
+            "input": {
+              "words": "Scottish government"
+            },
+            "caller": {
+              "type": "direct"
+            }
+          }
+        ],
+        "container": null,
+        "stop_reason": "tool_use",
+        "stop_sequence": null,
+        "stop_details": null,
+        "usage": {
+          "input_tokens": 2,
+          "cache_creation_input_tokens": 348,
+          "cache_read_input_tokens": 11702,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 348,
+            "ephemeral_1h_input_tokens": 0
+          },
+          "output_tokens": 93,
+          "output_tokens_details": {
+            "thinking_tokens": 0
+          },
+          "service_tier": "standard",
+          "inference_geo": "global",
+          "speed": "standard"
+        },
+        "diagnostics": null
+      },
+      "stop_reason": "tool_use"
+    }
+  ]
 }

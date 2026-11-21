@@ -96,9 +96,14 @@ func samplesOf(dir, fixture string, r rule, cmd rerecordCmd) ([][]recording, err
 		if err != nil {
 			return nil, err
 		}
-		for _, a := range s.attempts() {
+		for i, a := range s.attempts() {
 			if hash == "" {
 				hash = a.RequestHash
+			}
+			if cmd.conversation && i > 0 {
+				// A later turn's request is the sample's own: each turn sends
+				// back the turns before it, as that sample's model took them.
+				continue
 			}
 			if a.RequestHash != hash {
 				return nil, fmt.Errorf("%s: sample %d answers a request the samples before it did not (request hash %s, not %s); "+

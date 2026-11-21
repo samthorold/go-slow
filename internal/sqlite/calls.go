@@ -30,8 +30,18 @@ func keepText(ctx context.Context, tx execer, text string) (string, error) {
 }
 
 // requestTexts are a request's texts as kept: the hashes of its
-// instructions, schema and input.
-type requestTexts struct{ instructions, schema, input string }
+// instructions, schema and input, and of its conversation (its tools and
+// messages), invalid for a request that is none.
+type requestTexts struct {
+	instructions, schema, input string
+	conversation                sql.NullString
+}
+
+// conversationOf is a request's tools and messages as kept, one JSON text.
+type conversationOf struct {
+	Tools    []editor.Tool    `json:",omitempty"`
+	Messages []editor.Message `json:",omitempty"`
+}
 
 func keepRequest(ctx context.Context, tx execer, r editor.Request) (requestTexts, error) {
 	schema, err := json.Marshal(r.Schema)
@@ -48,7 +58,32 @@ func keepRequest(ctx context.Context, tx execer, r editor.Request) (requestTexts
 	if t.input, err = keepText(ctx, tx, r.Input); err != nil {
 		return t, err
 	}
+	if len(r.Tools) > 0 || len(r.Messages) > 0 {
+		b, err := json.Marshal(conversationOf{r.Tools, r.Messages})
+		if err != nil {
+			return t, fmt.Errorf("keep request conversation: %w", err)
+		}
+		h, err := keepText(ctx, tx, string(b))
+		if err != nil {
+			return t, err
+		}
+		t.conversation = sql.NullString{String: h, Valid: true}
+	}
 	return t, nil
+}
+
+// readConversation sets r's tools and messages from their kept text, if
+// it has one.
+func readConversation(r *editor.Request, text sql.NullString) error {
+	if !text.Valid {
+		return nil
+	}
+	var c conversationOf
+	if err := json.Unmarshal([]byte(text.String), &c); err != nil {
+		return fmt.Errorf("conversation: %w", err)
+	}
+	r.Tools, r.Messages = c.Tools, c.Messages
+	return nil
 }
 
 // KeepCall keeps a model call, as sent and as it came back.
@@ -69,9 +104,16 @@ func keepCall(ctx context.Context, tx execer, c editor.Call) error {
 	if err != nil {
 		return err
 	}
-	var response, output, reported, stop sql.NullString
+	var response, output, reported, stop, calls sql.NullString
 	var in, out, cached sql.NullInt64
 	if r := c.Response; r != nil {
+		if len(r.Calls) > 0 {
+			b, err := json.Marshal(r.Calls)
+			if err != nil {
+				return fmt.Errorf("keep %s call: %w", c.Act, err)
+			}
+			calls = sql.NullString{String: string(b), Valid: true}
+		}
 		response = sql.NullString{String: string(r.Raw), Valid: r.Raw != nil}
 		output = sql.NullString{String: string(r.Output), Valid: r.Output != nil}
 		reported = sql.NullString{String: r.Model, Valid: true}
@@ -85,13 +127,13 @@ func keepCall(ctx context.Context, tx execer, c editor.Call) error {
 	// empty array the column, NOT NULL, needs.
 	if _, err := tx.ExecContext(ctx, `
 		INSERT INTO model_calls (act, work_key, at, batch_id, model, request_hash,
-			instructions, schema, input, effort, precedents,
-			response, output, reported_model, stop_reason, input_tokens, output_tokens, cache_read_tokens,
+			instructions, schema, input, effort, precedents, conversation,
+			response, output, reported_model, stop_reason, input_tokens, output_tokens, cache_read_tokens, calls,
 			outcome, why)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '[]', ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '[]', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		c.Act, c.Key, formatTime(c.At), c.BatchID, c.Model, c.RequestHash,
-		t.instructions, t.schema, t.input, c.Request.Effort,
-		response, output, reported, stop, in, out, cached,
+		t.instructions, t.schema, t.input, c.Request.Effort, t.conversation,
+		response, output, reported, stop, in, out, cached, calls,
 		string(c.Outcome), c.Why); err != nil {
 		return fmt.Errorf("keep %s call: %w", c.Act, err)
 	}
@@ -102,26 +144,30 @@ func keepCall(ctx context.Context, tx execer, c editor.Call) error {
 // reads them.
 const callColumns = `
 	c.id, c.act, c.work_key, c.at, c.batch_id, c.model, c.request_hash,
-	i.text, s.text, n.text, c.effort, c.precedents,
+	i.text, s.text, n.text, c.effort, c.precedents, v.text,
 	c.response, c.output, c.reported_model, c.stop_reason, c.input_tokens, c.output_tokens, c.cache_read_tokens,
-	c.outcome, c.why
+	c.calls, c.outcome, c.why
 	FROM model_calls c
 		JOIN call_texts i ON i.hash = c.instructions
 		JOIN call_texts s ON s.hash = c.schema
-		JOIN call_texts n ON n.hash = c.input`
+		JOIN call_texts n ON n.hash = c.input
+		LEFT JOIN call_texts v ON v.hash = c.conversation`
 
 type scanner interface{ Scan(dest ...any) error }
 
 func scanCall(row scanner) (editor.Call, error) {
 	var c editor.Call
 	var at, schema, precedents, outcome string
-	var response, output, reported, stop sql.NullString
+	var conversation, response, output, reported, stop, calls sql.NullString
 	var in, out, cached sql.NullInt64
 	if err := row.Scan(&c.ID, &c.Act, &c.Key, &at, &c.BatchID, &c.Model, &c.RequestHash,
-		&c.Request.Instructions, &schema, &c.Request.Input, &c.Request.Effort, &precedents,
+		&c.Request.Instructions, &schema, &c.Request.Input, &c.Request.Effort, &precedents, &conversation,
 		&response, &output, &reported, &stop, &in, &out, &cached,
-		&outcome, &c.Why); err != nil {
+		&calls, &outcome, &c.Why); err != nil {
 		return c, err
+	}
+	if err := readConversation(&c.Request, conversation); err != nil {
+		return c, fmt.Errorf("call %d %w", c.ID, err)
 	}
 	c.At, c.Outcome, c.Request.Act = parseTime(at), editor.Outcome(outcome), c.Act
 	if err := json.Unmarshal([]byte(schema), &c.Request.Schema); err != nil {
@@ -143,6 +189,11 @@ func scanCall(row scanner) (editor.Call, error) {
 		}
 		if output.Valid {
 			c.Response.Output = json.RawMessage(output.String)
+		}
+		if calls.Valid {
+			if err := json.Unmarshal([]byte(calls.String), &c.Response.Calls); err != nil {
+				return c, fmt.Errorf("call %d calls: %w", c.ID, err)
+			}
 		}
 	}
 	return c, nil

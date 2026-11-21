@@ -34,7 +34,11 @@ type Deps struct {
 	// ModelFor is the model an act's calls run on, as the model adapter
 	// chooses it, kept with each call; nil leaves it unknown.
 	ModelFor func(act string) string
-	Log      *slog.Logger
+	// PriceOf is a model's price at real-time rates, as the model adapter
+	// keeps it, for holding a weaving run to the cap the Owner gave it; nil
+	// holds no run to one.
+	PriceOf func(model string) (Price, bool)
+	Log     *slog.Logger
 }
 
 // Editor does the editorial work over the Record.

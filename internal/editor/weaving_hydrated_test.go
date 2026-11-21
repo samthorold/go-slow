@@ -3,6 +3,7 @@ package editor_test
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"strings"
 	"testing"
@@ -135,29 +136,69 @@ func TestAResultIsAppliedToWhatTheRunWasShownWhenASpanIsHydratedAfterItsRequestW
 	}
 }
 
-// The Spans an earlier Editor's Span cites are read hydrated too, and shown
-// whether or not they are Rejected, since the Editor's Span rests on them.
-func TestTheSpansTheEditorsStoriesCiteAreShownHydrated(t *testing.T) {
+// An earlier Story the Editor made, opened, is shown whole: the Spans its
+// Editor's Spans cite read hydrated, and shown whether or not they are
+// Rejected, since the Editor's Span rests on them, each numbered on from
+// what the run was shown, then its Editor's Spans, marked as the Editor's.
+func TestAnOpenedStoryOfTheEditorsIsShownWholeItsCitedSpansHydrated(t *testing.T) {
 	store, batcher, b := releaseHydratedRecord(t)
 	answerLast(batcher, `{"stories": [{"editor_spans": [{"body": "Derby waited.", "cites": [4, 6]}]}]}`)
+	runAt(t, b, saturday.Add(time.Hour))
+	earlier := madeStories(t, store)[0]
+	sunday := saturday.Add(24 * time.Hour)
+	cutAt(t, store, sunday)
+	runAt(t, b, sunday)
+	respondLast(batcher, asking("open_story", fmt.Sprintf(`{"story": %d}`, earlier.ID)))
+	runAt(t, b, sunday.Add(time.Hour))
+
+	want := fmt.Sprintf(`Story %d, the Editor's, made 2026-10-24; cited by no later Editor's Span
+S2 (from "GBR headquarters in Derby", spoken by Andy Burnham): “This is fantastic news for ⟦Derby⟧.
+S3 (from "GBR headquarters in Derby"): ⟦Andy Burnham⟧ visited the site on Monday.
+S4 (the Editor's, citing S2, S3): Derby waited.
+`, earlier.ID)
+	if got := answerOf(t, lastSent(t, batcher), "call-1"); got != want {
+		t.Errorf("open_story answered:\n%s\nwant:\n%s", got, want)
+	}
+}
+
+// A run asking for a name finds the Spans that refer to it in other words,
+// as hydrated ("He" read as Andy Burnham), but no Span hydration Rejects, and
+// is shown each match between the Spans around it, unnumbered.
+func TestAnAskForWordsFindsSpansByTheirHydratedText(t *testing.T) {
+	store, batcher, b := releaseHydratedRecord(t)
+	answerLast(batcher, `{"stories": []}`)
 	runAt(t, b, saturday.Add(time.Hour))
 	sunday := saturday.Add(24 * time.Hour)
 	cutAt(t, store, sunday)
 	runAt(t, b, sunday)
+	respondLast(batcher, asking("find", `{"words": "Andy  BURNHAM"}`))
+	runAt(t, b, sunday.Add(time.Hour))
 
-	want := `Story the Editor made, 2026-10-24
-S1 (from "GBR headquarters in Derby", spoken by Andy Burnham): “This is fantastic news for ⟦Derby⟧.
-S2 (from "GBR headquarters in Derby"): ⟦Andy Burnham⟧ visited the site on Monday.
-S3 (the Editor's, citing S1, S2): Derby waited.
+	got := answerOf(t, lastSent(t, batcher), "call-1")
+	want := `1 earlier Story has Spans with the words "Andy  BURNHAM".
+
+Story %d, from "GBR headquarters in Derby", published 2026-10-15, from govuk-number-10; cited by no later Editor's Span
+  · Derby has waited long enough.”
+  S2: ⟦Andy Burnham⟧ visited the site on Monday.
 `
-	if in := batcher.submitted[len(batcher.submitted)-1][0].Request.Input; !strings.HasPrefix(in, want) {
-		t.Errorf("Sunday's run was shown:\n%s\nwant it to start:\n%s", in, want)
+	cuts, err := store.StoriesCutThrough(t.Context(), 1<<40)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var releaseCut int64
+	for _, c := range cuts {
+		if c.Item.EntryID == release.EntryID {
+			releaseCut = c.CutID
+		}
+	}
+	if want = fmt.Sprintf(want, releaseCut); got != want {
+		t.Errorf("find answered:\n%s\nwant:\n%s", got, want)
 	}
 }
 
-// A Span an earlier Editor's Span cites, hydrated after the run showing it
-// went, leaves the run's result applied to what it was shown.
-func TestAResultIsAppliedWhenASpanTheEditorCitedIsHydratedAfterItsRequestWent(t *testing.T) {
+// A Span an earlier Editor's Span cites, hydrated after the run was shown
+// it, leaves the run's answer applied to what it was shown.
+func TestAResultIsAppliedWhenASpanTheRunOpenedIsHydratedAfter(t *testing.T) {
 	store := record(t)
 	withRelease(t, store, saturday)
 	batcher := &fakeBatcher{}
@@ -165,12 +206,15 @@ func TestAResultIsAppliedWhenASpanTheEditorCitedIsHydratedAfterItsRequestWent(t 
 	runAt(t, b, saturday)
 	answerLast(batcher, `{"stories": [{"editor_spans": [{"body": "Derby waited.", "cites": [4, 6]}]}]}`)
 	runAt(t, b, saturday.Add(time.Hour))
+	earlier := madeStories(t, store)[0]
 	sunday := saturday.Add(24 * time.Hour)
 	cutAt(t, store, sunday)
 	runAt(t, b, sunday)
-	hydrateAt(t, store, hydrationByTitle{release.Title: releaseHydration}, sunday.Add(30*time.Minute))
-	answerLast(batcher, `{"stories": [{"editor_spans": [{"body": "Ferries and Derby.", "cites": [2, 4]}]}]}`)
+	respondLast(batcher, asking("open_story", fmt.Sprintf(`{"story": %d}`, earlier.ID)))
 	runAt(t, b, sunday.Add(time.Hour))
+	hydrateAt(t, store, hydrationByTitle{release.Title: releaseHydration}, sunday.Add(90*time.Minute))
+	answerLast(batcher, `{"stories": [{"editor_spans": [{"body": "Ferries and Derby.", "cites": [3, 1]}]}]}`)
+	runAt(t, b, sunday.Add(2*time.Hour))
 
 	stories := madeStories(t, store)
 	if len(stories) != 2 {

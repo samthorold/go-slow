@@ -47,17 +47,59 @@ func weave(t *testing.T, store *sqlite.Store, at time.Time, output string) {
 	}
 }
 
+// askingBatcher answers a weaving run's first turn by asking for each of
+// words, and every turn after with output.
+type askingBatcher struct {
+	refusingBatcher
+	words []string
+}
+
+func (b *askingBatcher) Poll(_ context.Context, id string) (editor.BatchPoll, error) {
+	var out []editor.BatchResult
+	for _, r := range b.submitted[id] {
+		res := editor.Response{Output: json.RawMessage(b.output), Model: "fake"}
+		if len(r.Request.Messages) == 0 {
+			res = editor.Response{Output: json.RawMessage(""), Raw: json.RawMessage(`{}`), Model: "fake"}
+			for i, w := range b.words {
+				in, _ := json.Marshal(map[string]string{"words": w})
+				res.Calls = append(res.Calls, editor.ToolCall{ID: fmt.Sprintf("call-%d", i+1), Name: "find", Input: in})
+			}
+		}
+		out = append(out, editor.BatchResult{ID: r.ID, Response: res})
+	}
+	return editor.BatchPoll{Ended: true, Results: out}, nil
+}
+
+// weaveAsking is weave, the run first asking for each of words, each match
+// numbered on from the Stories new to it, then answering output.
+func weaveAsking(t *testing.T, store *sqlite.Store, at time.Time, words []string, output string) {
+	t.Helper()
+	if err := cut.New(store).CutNew(t.Context(), at); err != nil {
+		t.Fatal(err)
+	}
+	log := slog.New(slog.DiscardHandler)
+	ed := editor.New(editor.Deps{Store: store, Weavings: store, Log: log})
+	b := editor.NewBatches(editor.BatchDeps{Store: store, Batcher: &askingBatcher{refusingBatcher{output: output}, words},
+		Acts: []editor.BatchAct{ed.Weaving(6 * time.Hour)}, Log: log})
+	// Submitted, asked, answered, then applied once its batch has ended.
+	for range 3 {
+		if err := b.RunWaiting(t.Context(), at); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
 func TestAStorysPageShowsAnEarlierEditorsSpanItCitesLinkingTheStoryThatWroteIt(t *testing.T) {
 	store := openStore(t)
 	weaveSpeech(t, store, twoOpinions)
-	// Sunday's run is shown the two Stories made (S1 to S5, the earlier
-	// Editor's Span "Motherwell is where…" S2), then the ferries as S6.
+	// Sunday's run is shown the ferries as S1, and asking for "Motherwell"
+	// finds the earlier Editor's Span "Motherwell is where…", S2.
 	sunday := saturday.Add(24 * time.Hour)
 	ferries := item("ferries", "Ferries to the islands", sunday)
 	ferries.Content = "<p>Ferries to Scotland's islands will run more often.</p>"
 	seed(t, store, saturday.AddDate(0, 0, -7), ferries)
-	weave(t, store, sunday, `{"stories": [{"editor_spans": [
-	  {"body": "The ferries follow the money to the islands.", "cites": [2, 6]}
+	weaveAsking(t, store, sunday, []string{"Motherwell"}, `{"stories": [{"editor_spans": [
+	  {"body": "The ferries follow the money to the islands.", "cites": [2, 1]}
 	]}]}`)
 	app, _ := newAppWithLog(t, sunday, store)
 

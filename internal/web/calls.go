@@ -41,6 +41,12 @@ type callPage struct {
 	Schema       string
 	Input        string
 	Precedents   string
+	// Tools and Turns are a conversation's: the tools the model could call,
+	// and each turn it took before this one with what was sent back.
+	Tools string
+	Turns []askedRow
+	// Calls are the tools this call's response called, if it asked.
+	Calls []calledRow
 	// The response as returned, if one came.
 	Answered      bool
 	ReportedModel string
@@ -81,6 +87,44 @@ type outcome struct {
 func outcomeOf(o editor.Outcome) outcome {
 	hue := map[editor.Outcome]string{editor.Applied: "supported", editor.Refused: "undecided", editor.Failed: "refuted"}[o]
 	return outcome{Word: string(o), Hue: hue}
+}
+
+// askedRow is a turn of a conversation before the call: what the model said
+// and the tools it called, each with what was sent back.
+type askedRow struct {
+	N     int
+	Text  string
+	Calls []askRow
+}
+
+// askRow is one tool the model called, and its result.
+type askRow struct {
+	calledRow
+	Result  string
+	IsError bool
+}
+
+// turnsOf is a request's conversation as its call's page shows it.
+func turnsOf(ms []editor.Message) []askedRow {
+	var out []askedRow
+	results := map[string]editor.ToolResult{}
+	for _, m := range ms {
+		for _, r := range m.Results {
+			results[r.CallID] = r
+		}
+	}
+	for _, m := range ms {
+		if m.Assistant == nil {
+			continue
+		}
+		row := askedRow{N: len(out) + 1, Text: m.Assistant.Text}
+		for _, c := range m.Assistant.Calls {
+			r := results[c.ID]
+			row.Calls = append(row.Calls, askRow{calledRow{c.ID, c.Name, pretty(c.Input)}, r.Content, r.IsError})
+		}
+		out = append(out, row)
+	}
+	return out
 }
 
 type attemptRow struct {
@@ -156,9 +200,17 @@ func (a *app) call(w http.ResponseWriter, r *http.Request) {
 		ps = append(ps, strconv.FormatInt(f, 10))
 	}
 	p.Precedents = strings.Join(ps, ", ")
+	if len(c.Request.Tools) > 0 {
+		tools, _ := json.Marshal(c.Request.Tools)
+		p.Tools = pretty(tools)
+	}
+	p.Turns = turnsOf(c.Request.Messages)
 	if res := c.Response; res != nil {
 		p.Answered, p.ReportedModel, p.StopReason = true, res.Model, res.StopReason
 		p.Tokens, p.Output, p.Raw = tokensOf(res.Usage), pretty(res.Output), pretty(res.Raw)
+		for _, call := range res.Calls {
+			p.Calls = append(p.Calls, calledRow{call.ID, call.Name, pretty(call.Input)})
+		}
 	}
 	for _, at := range attempts {
 		row := attemptRow{Page: callPath(at.ID), At: when(at.At, loc), Outcome: outcomeOf(at.Outcome), Why: at.Why, This: at.ID == c.ID}

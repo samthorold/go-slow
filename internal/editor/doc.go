@@ -145,7 +145,9 @@
 // (a Cut's Span, or for the Editor's Story, one of its Editor's Spans), a
 // Story an answer named before the turn (WeavingTurns.storiesShown), and any
 // other number as an error the model reads; open_story shows an
-// earlier Story whole, a Cut's each Span numbered (a Rejected one left out),
+// earlier Story an answer named before the turn whole (any other number an
+// error the model reads, as for find_citing), a Cut's each Span numbered (a
+// Rejected one left out),
 // the Editor's each Editor's Span after the Spans it cites, read hydrated
 // whether Rejected or not, marked "the Editor's". A Span keeps its number
 // however often it is shown. The turn is kept as the run's conversation

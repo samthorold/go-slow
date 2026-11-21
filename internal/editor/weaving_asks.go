@@ -318,11 +318,16 @@ func (r earlierRecord) catalogue(sh *woven, q ask) string {
 }
 
 // open is the Story id shown whole, each of its Spans numbered (shown, so it
-// can be cited), or an error told to the model when the Record holds no
-// earlier Story id.
+// can be cited), or an error told to the model when no answer to the run's
+// asks named the Story, as for what cites one (findCiting), or the Record
+// holds no earlier Story id.
 func (r earlierRecord) open(sh *woven, id int64) (string, bool) {
 	if slices.Contains(sh.newCuts, id) {
 		return fmt.Sprintf("Story %d is one of the new Stories shown at the start, its Spans numbered there.", id), false
+	}
+	if !slices.Contains(sh.stories, id) {
+		return fmt.Sprintf("No Story shown to you is numbered %d: open an earlier Story by its number where a "+
+			"catalogue lists it.", id), true
 	}
 	var b strings.Builder
 	for _, s := range r.cuts {
@@ -523,7 +528,7 @@ func (t WeavingTurns) entitiesShown() []string {
 
 // storiesShown are the numbers of the earlier Stories the answers to the
 // run's asks have named, each once: those it may ask what cites by
-// find_citing. Its opening names no Story by number.
+// find_citing, and open by open_story. Its opening names no Story by number.
 func (t WeavingTurns) storiesShown() []int64 {
 	var out []int64
 	for _, s := range t.sent(shownStory) {

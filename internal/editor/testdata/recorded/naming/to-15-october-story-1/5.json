@@ -1,41 +1,13 @@
 {
   "act": "naming",
   "model": "claude-haiku-5-5",
-  "request_hash": "08a8fc7ea3815cee38bca07ed463f72f2bd2f63ee7345ee6e778ad41a0dde477",
-  "recorded_at": "2026-11-21T11:25:28.689677Z",
+  "request_hash": "cf62c1bb2fa71cef006c5abd6806679477f4222f79d990db100da6766c9c2bc0",
+  "recorded_at": "2026-11-23T12:24:41.078225Z",
   "usage": {
-    "input_tokens": 1896,
-    "output_tokens": 44
+    "input_tokens": 2219,
+    "output_tokens": 36
   },
   "output": {
-    "name": "UK's Ukraine ceasefire push: energy prices, Russia LNG ban, and Trump deal"
-  },
-  "earlier_attempts": [
-    {
-      "act": "naming",
-      "model": "claude-haiku-5-5",
-      "request_hash": "08a8fc7ea3815cee38bca07ed463f72f2bd2f63ee7345ee6e778ad41a0dde477",
-      "recorded_at": "2026-11-21T11:25:25.411863Z",
-      "usage": {
-        "input_tokens": 1896,
-        "output_tokens": 39
-      },
-      "output": {
-        "name": "UK Ukraine policy: energy prices versus Russia pressure and the LNG services ban"
-      }
-    },
-    {
-      "act": "naming",
-      "model": "claude-haiku-5-5",
-      "request_hash": "08a8fc7ea3815cee38bca07ed463f72f2bd2f63ee7345ee6e778ad41a0dde477",
-      "recorded_at": "2026-11-21T11:25:26.993045Z",
-      "usage": {
-        "input_tokens": 1896,
-        "output_tokens": 39
-      },
-      "output": {
-        "name": "UK Ukraine policy: energy prices versus Russia pressure and the LNG services ban"
-      }
-    }
-  ]
+    "name": "UK government's shifting response to the US-Russia Ukraine energy ceasefire"
+  }
 }

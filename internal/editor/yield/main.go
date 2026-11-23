@@ -13,7 +13,10 @@
 // of every sample, and how many of its answers held anything (named a Story,
 // and were no error), with each tool's total; ? where the tree keeps no
 // answer to some ask (one recorded before samples kept their tool results).
-// Recordings of any
+// Its find asks have a third table: per fixture, how many landed on a Span
+// holding every word asked, how many on Spans holding only some, and how many
+// on none, read from the line under each Span an answer shows saying which of
+// the words it holds (findLandings). Recordings of any
 // other act (a retired act's, in an older tree) are not counted: the report
 // ends by naming those acts.
 //
@@ -154,6 +157,52 @@ func toolsAsked(rec recording) map[string]asked {
 	return out
 }
 
+// landed is how an act's find asks landed: on a Span holding every word
+// asked, on Spans holding only some, or on none.
+type landed struct{ every, some, none int }
+
+func (l landed) add(o landed) landed {
+	return landed{every: l.every + o.every, some: l.some + o.some, none: l.none + o.none}
+}
+
+// holdsEvery and holdsSome are the lines under a Span a find answer shows,
+// saying it holds every word asked (or the one word asked), or only some.
+var (
+	holdsEvery = regexp.MustCompile(`(?m)^\s+holding (?:every word:|the word ")`)
+	holdsSome  = regexp.MustCompile(`(?m)^\s+holding \d+ of the \d+ words:`)
+)
+
+// findLandings counts how rec's attempts' find asks landed, each by its
+// answer: on every word where a Span it shows holds every word; on some
+// where its Spans hold only some; on none where it names no Story, or is an
+// error. An answer naming Stories with no line saying what its Spans hold
+// was recorded when an ask matched as a phrase, so it landed on every word.
+// An ask whose answer was not kept is not counted.
+func findLandings(rec recording) landed {
+	var out landed
+	for _, a := range append(slices.Clone(rec.Earlier), rec) {
+		for _, c := range a.Calls {
+			if c.Name != "find" {
+				continue
+			}
+			i := slices.IndexFunc(a.Results, func(r toolResult) bool { return r.CallID == c.ID })
+			if i < 0 {
+				continue
+			}
+			r := a.Results[i]
+			switch {
+			case r.IsError || !namesAStory.MatchString(r.Content):
+				out.none++
+			case holdsEvery.MatchString(r.Content), !holdsSome.MatchString(r.Content):
+				out.every++
+			default:
+				out.some++
+			}
+		}
+	}
+	return out
+}
+
 // about is what a recording's count may need beyond its output: for
 // hydration, the Spans of its fixture's Cut.
 type about struct {
@@ -266,6 +315,21 @@ type counts struct {
 	// tools are, per act and fixture, what each tool was asked over the
 	// fixture's samples, for an act that calls tools.
 	tools map[string]map[string]map[string]asked
+	// landings are, per act and fixture, how its find asks landed over the
+	// fixture's samples, for an act that asked find.
+	landings map[string]map[string]landed
+}
+
+// addLandings adds how the find asks of one of fixture's samples of act
+// landed, if it asked any.
+func (c counts) addLandings(act, fixture string, l landed) {
+	if l == (landed{}) {
+		return
+	}
+	if c.landings[act] == nil {
+		c.landings[act] = map[string]landed{}
+	}
+	c.landings[act][fixture] = c.landings[act][fixture].add(l)
 }
 
 // addTools adds what the tools were asked in one of fixture's samples of act.
@@ -292,7 +356,8 @@ func fixtureOf(rel string) string {
 }
 
 func load(dir, govuk string) (counts, error) {
-	c := counts{acts: map[string]map[string][][]int{}, uncounted: map[string]bool{}, tools: map[string]map[string]map[string]asked{}}
+	c := counts{acts: map[string]map[string][][]int{}, uncounted: map[string]bool{}, tools: map[string]map[string]map[string]asked{},
+		landings: map[string]map[string]landed{}}
 	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -360,6 +425,7 @@ func load(dir, govuk string) (counts, error) {
 			}
 			c.acts[a.name][f] = append(c.acts[a.name][f], n)
 			c.addTools(a.name, f, toolsAsked(rec))
+			c.addLandings(a.name, f, findLandings(rec))
 		}
 		if !counted && rec.Act != "" {
 			c.uncounted[rec.Act] = true
@@ -416,6 +482,7 @@ func report(b *strings.Builder, before, after counts) {
 		}
 		fmt.Fprintf(b, "| **Total** | %s |\n\n", strings.Join(cells, " | "))
 		reportTools(b, a.name, before, after)
+		reportLandings(b, a.name, before, after)
 	}
 	uncounted := map[string]bool{}
 	for act := range before.uncounted {
@@ -482,6 +549,44 @@ func reportTools(b *strings.Builder, act string, before, after counts) {
 		fmt.Fprintf(b, "| **Total** | %s | %d → %d | %s → %s |\n", tool, was.asks, now.asks, was.heldCell(), now.heldCell())
 	}
 	b.WriteString("\n")
+}
+
+// reportLandings writes, for an act that asked find in either tree, each
+// fixture's find asks by how they landed (every word, some, none), before →
+// after, summed over the fixture's samples, and the total. A fixture a tree
+// has no recording of shows a dash on that side. It is a count, with no rule
+// on it.
+func reportLandings(b *strings.Builder, act string, before, after counts) {
+	fixtures := map[string]bool{}
+	for _, side := range []counts{before, after} {
+		for f := range side.landings[act] {
+			fixtures[f] = true
+		}
+	}
+	if len(fixtures) == 0 {
+		return
+	}
+	names := make([]string, 0, len(fixtures))
+	for f := range fixtures {
+		names = append(names, f)
+	}
+	sort.Strings(names)
+	fmt.Fprintf(b, "### %s's find asks\n\n| Fixture | Every word | Some | None |\n|---|---|---|---|\n", act)
+	var totalBefore, totalAfter landed
+	cells := func(side counts, total *landed, f string) [3]string {
+		if _, recorded := side.acts[act][f]; !recorded {
+			return [3]string{"–", "–", "–"}
+		}
+		l := side.landings[act][f]
+		*total = total.add(l)
+		return [3]string{strconv.Itoa(l.every), strconv.Itoa(l.some), strconv.Itoa(l.none)}
+	}
+	for _, f := range names {
+		was, now := cells(before, &totalBefore, f), cells(after, &totalAfter, f)
+		fmt.Fprintf(b, "| %s | %s → %s | %s → %s | %s → %s |\n", f, was[0], now[0], was[1], now[1], was[2], now[2])
+	}
+	fmt.Fprintf(b, "| **Total** | %d → %d | %d → %d | %d → %d |\n\n", totalBefore.every, totalAfter.every,
+		totalBefore.some, totalAfter.some, totalBefore.none, totalAfter.none)
 }
 
 // span is the least and most a fixture's samples drew in a column.

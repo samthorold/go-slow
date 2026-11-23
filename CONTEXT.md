@@ -127,7 +127,7 @@ _Avoid_: Interest, beat, subject; Depth (how closely a **Topic** is followed is 
 
 ## Flagged ambiguities
 
-- **"Story"** in newsroom usage means both a single published piece and the ongoing subject it belongs to (Reuters uses both senses in one sentence). Here it means only a group of **Spans**; a single published piece is an **Item**, and an ongoing subject is followed through a **Topic**.
+- **"Story"** in newsroom usage means both a single published piece and the ongoing subject it belongs to (Reuters uses both senses in one sentence). Here it means only a group of **Spans**; a single published piece is an **Item**, and an ongoing subject has no term of its own: the **Owner** follows one through a **Topic**, and the **Editor** through its own **Stories** and the later ones that cite them.
 
 - **"Event"** means something kept in the **Record**, never something that happened in the world: what happened in the world is said by a **Span**, and a named occasion (the Budget) is an **Entity**.
 

@@ -434,7 +434,7 @@ func TestARunThatAsksSpansCollectionRunsAndNoOtherRunGoesMeanwhile(t *testing.T)
 		t.Fatalf("submitted %d batches, want the run's third turn in a fourth", len(batcher.submitted))
 	}
 	third := lastSent(t, batcher)
-	if len(third.Messages) != 4 || !strings.Contains(answerOf(t, third, "call-2"), `No earlier Story has a Span with the words "nothing at all".`) {
+	if len(third.Messages) != 4 || !strings.Contains(answerOf(t, third, "call-2"), `No earlier Story has a Span holding any of the words "nothing at all".`) {
 		t.Errorf("the third turn sent %+v", third.Messages)
 	}
 
@@ -488,7 +488,7 @@ func TestACatalogueShowsTheFirstFewMatchesOfAStoryAndHowManyMore(t *testing.T) {
 	runAt(t, b, sunday.Add(time.Hour))
 
 	got := answerOf(t, lastSent(t, batcher), "call-1")
-	if n := strings.Count(got, ": A ferry sails."); n != 5 || !strings.Contains(got, "… and 2 more Spans of it hold the words") {
+	if n := strings.Count(got, ": A ferry sails."); n != 5 || !strings.Contains(got, "… and 2 more Spans of it hold any of the words") {
 		t.Errorf("the catalogue shows %d matches:\n%s\nwant 5, and 2 more said", n, got)
 	}
 }

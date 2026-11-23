@@ -156,8 +156,8 @@ func TestAnOpenedStoryOfTheEditorsIsShownWholeItsCitedSpansHydrated(t *testing.T
 
 	want := fmt.Sprintf(`Story %d, the Editor's, made 2026-10-24; cited by no later Editor's Span
 S3 (from "GBR headquarters in Derby", spoken by Andy Burnham): “This is fantastic news for ⟦Derby⟧.
-S4 (from "GBR headquarters in Derby"): ⟦Andy Burnham⟧ visited the site on Monday.
-S2 (the Editor's, citing S3, S4): Derby waited.
+S5 (from "GBR headquarters in Derby"): ⟦Andy Burnham⟧ visited the site on Monday.
+S2 (the Editor's, citing S3, S5): Derby waited.
 `, earlier.ID)
 	if got := answerOf(t, lastSent(t, batcher), "call-1"); got != want {
 		t.Errorf("open_story answered:\n%s\nwant:\n%s", got, want)
@@ -178,11 +178,12 @@ func TestAnAskForWordsFindsSpansByTheirHydratedText(t *testing.T) {
 	runAt(t, b, sunday.Add(time.Hour))
 
 	got := answerOf(t, lastSent(t, batcher), "call-1")
-	want := `1 earlier Story has Spans with the words "Andy  BURNHAM".
+	want := `1 earlier Story has Spans holding any of the words "Andy  BURNHAM".
 
 Story %d, from "GBR headquarters in Derby", published 2026-10-15, from govuk-number-10; cited by no later Editor's Span
   · Derby has waited long enough.”
   S2: ⟦Andy Burnham⟧ visited the site on Monday.
+    holding every word: "Andy", "BURNHAM"
 `
 	cuts, err := store.StoriesCutThrough(t.Context(), 1<<40)
 	if err != nil {
@@ -218,7 +219,7 @@ func TestAResultIsAppliedWhenASpanTheRunOpenedIsHydratedAfter(t *testing.T) {
 	respondLast(batcher, asking("open_story", fmt.Sprintf(`{"story": %d}`, earlier.ID)))
 	runAt(t, b, sunday.Add(time.Hour))
 	hydrateAt(t, store, hydrationByTitle{release.Title: releaseHydration}, sunday.Add(90*time.Minute))
-	answerLast(batcher, `{"stories": [{"editor_spans": [{"body": "Ferries and Derby.", "cites": [4, 1]}]}]}`)
+	answerLast(batcher, `{"stories": [{"editor_spans": [{"body": "Ferries and Derby.", "cites": [5, 1]}]}]}`)
 	runAt(t, b, sunday.Add(2*time.Hour))
 
 	stories := madeStories(t, store)

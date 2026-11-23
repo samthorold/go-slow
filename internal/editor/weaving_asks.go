@@ -30,19 +30,22 @@ var weavingTools = []Tool{
 	{
 		Name: "find",
 		Description: "Find earlier Stories, the publishers' and your own, by words. The answer is a catalogue of the " +
-			"Stories with a Span holding the words, newest first: each Story by its number, what it is (a " +
+			"Stories with a Span holding the words: each Story by its number, what it is (a " +
 			"publisher's by its title, your own by its first words), when it is from, for a publisher's its " +
 			"Source, and how many of your later Spans cite it; then each Span holding the words, numbered so you " +
 			"can cite it, between the Spans around it, marked · and unnumbered, for context. Words are matched " +
 			"as whole words, whatever their case, in Spans as they read with the words between ⟦ and ⟧, so a " +
-			"name finds the Spans that refer to it in other words.",
+			"name finds the Spans that refer to it in other words. A Span holding any of the words matches; " +
+			"those holding the most come first, each saying which of the words it holds. Your own Stories are " +
+			"in your words, so asking as you would put the subject finds them.",
 		Schema: object(map[string]any{"words": str()}),
 	},
 	{
 		Name: "find_entity",
 		Description: "Find earlier Stories by an Entity a Span shown to you mentions: a person, organisation, place " +
 			"or named occasion, asked for by its id, between { and } after its name (Q and digits for a Wikidata " +
-			"item, E and digits for one of the Editor's own). The answer is a catalogue as find's is, of the " +
+			"item, E and digits for one of the Editor's own). The answer is a catalogue as find's is, newest " +
+			"first, of the " +
 			"publishers' Stories with a Span mentioning the Entity, whatever words the Span calls it by: a Span " +
 			"mentions an Entity when it names it, or refers to words that do.",
 		Schema: object(map[string]any{"entity": str()}),
@@ -52,7 +55,7 @@ var weavingTools = []Tool{
 		Description: "Find your own earlier Stories that cite an earlier Story shown to you, asked for by its number " +
 			"where a catalogue lists it or you opened it: those with an Editor's Span citing one of its Spans, which " +
 			"follows your own earlier reasoning to what followed or corrected it. The answer is a catalogue as " +
-			"find's is, each Editor's Span citing the Story numbered so you can cite it.",
+			"find's is, newest first, each Editor's Span citing the Story numbered so you can cite it.",
 		Schema: object(map[string]any{"story": integer()}),
 	},
 	{
@@ -63,10 +66,11 @@ var weavingTools = []Tool{
 	},
 }
 
-// catalogueSize is the most Stories a catalogue lists, the newest, and
-// matchesShown the most Spans it shows of each, the first: a broad ask is
-// answered with its newest matches rather than with an answer that grows
-// with the Record, and a Story matching throughout is opened to be read.
+// catalogueSize is the most Stories a catalogue lists, the first in its
+// order, and matchesShown the most Spans it shows of each, the first (for
+// words, those holding the most of them): a broad ask is answered with its
+// first matches rather than with an answer that grows with the Record, and a
+// Story matching throughout is opened to be read.
 const (
 	catalogueSize = 20
 	matchesShown  = 5
@@ -140,22 +144,46 @@ func (r earlierRecord) answer(sh *woven, c ToolCall) (string, bool) {
 	return fmt.Sprintf("There is no tool %q: ask with find, find_entity, find_citing or open_story.", c.Name), true
 }
 
-// entry is a Story a catalogue lists: when it is from, its heading, and the
-// lines under it.
+// entry is a Story a catalogue lists: when it is from, the most of the words
+// asked that one of its Spans holds, its heading, and the lines under it.
 type entry struct {
 	at    time.Time
 	id    int64
+	most  int
 	lines func() string
 }
 
 // find is the catalogue of the earlier Stories with a Span holding words.
 func (r earlierRecord) find(sh *woven, words string) string {
+	asked := askedWords(words)
+	held := func(text string) (bool, []string) {
+		h := heldWords(text, asked)
+		return len(h) > 0, h
+	}
 	return r.catalogue(sh, ask{
-		cut:  func(_ Address, read string) bool { return holdsWords(read, words) },
-		made: func(es EditorSpan) bool { return holdsWords(es.Body, words) },
-		with: fmt.Sprintf("with the words %q", words),
-		more: "hold the words",
+		cut:     func(_ Address, read string) (bool, []string) { return held(read) },
+		made:    func(es EditorSpan) (bool, []string) { return held(es.Body) },
+		with:    fmt.Sprintf("holding any of the words %q", words),
+		more:    "hold any of the words",
+		ranked:  true,
+		holding: func(held []string) string { return holding(held, len(asked)) },
 	})
+}
+
+// holding is the line under a Span a catalogue shows matching an ask by
+// words, saying which of the words it holds, held of the asked many.
+func holding(held []string, asked int) string {
+	quoted := make([]string, len(held))
+	for i, w := range held {
+		quoted[i] = fmt.Sprintf("%q", w)
+	}
+	switch {
+	case asked == 1:
+		return "    holding the word " + quoted[0] + "\n"
+	case len(held) == asked:
+		return "    holding every word: " + strings.Join(quoted, ", ") + "\n"
+	}
+	return fmt.Sprintf("    holding %d of the %d words: %s\n", len(held), asked, strings.Join(quoted, ", "))
 }
 
 // findEntity is the catalogue of the earlier Stories with a Span mentioning
@@ -175,8 +203,8 @@ func (r earlierRecord) findEntity(sh *woven, asked string) (string, bool) {
 		named = e.Name + " " + named
 	}
 	return r.catalogue(sh, ask{
-		cut: func(a Address, _ string) bool {
-			return slices.ContainsFunc(r.h.mentions(a), func(e NamedEntity) bool { return e.handle() == id })
+		cut: func(a Address, _ string) (bool, []string) {
+			return slices.ContainsFunc(r.h.mentions(a), func(e NamedEntity) bool { return e.handle() == id }), nil
 		},
 		with: "mentioning " + named,
 		more: "mention it",
@@ -194,11 +222,11 @@ func (r earlierRecord) findCiting(sh *woven, id int64) (string, bool) {
 		return fmt.Sprintf("No Story shown to you is numbered %d: ask what cites an earlier Story by its number "+
 			"where a catalogue lists it or you opened it.", id), true
 	}
-	var cites func(EditorSpan) bool
+	var cites func(EditorSpan) (bool, []string)
 	if i := slices.IndexFunc(r.cuts, func(s CutStory) bool { return s.CutID == id }); i >= 0 {
-		cites = func(es EditorSpan) bool { return citesCut(es, r.cuts[i]) }
+		cites = func(es EditorSpan) (bool, []string) { return citesCut(es, r.cuts[i]), nil }
 	} else {
-		cites = func(es EditorSpan) bool { return citesMade(es, id) }
+		cites = func(es EditorSpan) (bool, []string) { return citesMade(es, id), nil }
 	}
 	return r.catalogue(sh, ask{
 		made: cites,
@@ -223,18 +251,43 @@ func citesMade(es EditorSpan, id int64) bool {
 
 // ask is what a catalogue lists earlier Stories by: whether a Span of a
 // Story a Cut made matches it, by its address and its words as read, and
-// whether an Editor's Span does (either nil for none); with, how the answer
-// says what Spans matching hold ("with the words ..."), and more, what the
-// Spans not shown do ("hold the words").
+// whether an Editor's Span does (either nil for none), each with the words
+// asked for it holds (none for an ask by anything but words); with, how the
+// answer says what Spans matching hold ("holding any of the words ..."), and
+// more, what the Spans not shown do ("hold any of the words"); ranked,
+// whether the Stories whose Spans hold the most words come first, and
+// holding, the line under each matched Span saying which it holds (nil for
+// none).
 type ask struct {
-	cut        func(a Address, read string) bool
-	made       func(es EditorSpan) bool
+	cut        func(a Address, read string) (bool, []string)
+	made       func(es EditorSpan) (bool, []string)
 	with, more string
+	ranked     bool
+	holding    func(held []string) string
+}
+
+// line is the line under a Span a catalogue shows matching q, holding held:
+// which of the words it holds, for an ask by words.
+func (q ask) line(held []string) string {
+	if q.holding == nil {
+		return ""
+	}
+	return q.holding(held)
+}
+
+// best is the Spans matched, those holding the most of the words first, in
+// order among equals: those a catalogue shows, the first matchesShown.
+func best(matched []int, held map[int][]string) []int {
+	out := slices.Clone(matched)
+	slices.SortStableFunc(out, func(a, b int) int { return cmp.Compare(len(held[b]), len(held[a])) })
+	return out
 }
 
 // catalogue is the catalogue of the earlier Stories with a Span matching
-// the ask q, newest first, at most catalogueSize: each Span matched numbered
-// (shown, so it can be cited), between the Spans around it, unnumbered.
+// the ask q, those whose Spans hold the most of the words asked first (for
+// an ask by words), newest first among equals, at most catalogueSize: each
+// Span matched numbered (shown, so it can be cited), between the Spans
+// around it, unnumbered.
 func (r earlierRecord) catalogue(sh *woven, q ask) string {
 	var entries []entry
 	for _, s := range r.cuts {
@@ -243,20 +296,26 @@ func (r earlierRecord) catalogue(sh *woven, q ask) string {
 		}
 		var lines []string
 		var matched []int
+		held := map[int][]string{}
+		most := 0
 		for i, sp := range s.Spans {
 			a := r.address(s, sp)
 			_, read := r.h.read(a, cut.Words(s.Item.Content, sp))
 			lines = append(lines, read)
-			if !r.h.rejected(a) && q.cut(a, read) {
-				matched = append(matched, i)
+			if r.h.rejected(a) {
+				continue
+			}
+			if ok, h := q.cut(a, read); ok {
+				matched, held[i] = append(matched, i), h
+				most = max(most, len(h))
 			}
 		}
 		if len(matched) == 0 {
 			continue
 		}
-		entries = append(entries, entry{at: s.Item.Published, id: s.CutID,
+		entries = append(entries, entry{at: s.Item.Published, id: s.CutID, most: most,
 			lines: func() string {
-				return r.cutHeading(s) + "\n" + around(matched, len(s.Spans), q.more, func(i int, match bool) string {
+				return r.cutHeading(s) + "\n" + around(best(matched, held), len(s.Spans), q.more, func(i int, match bool) string {
 					sp := s.Spans[i]
 					a := r.address(s, sp)
 					if r.h.rejected(a) {
@@ -267,7 +326,7 @@ func (r earlierRecord) catalogue(sh *woven, q ask) string {
 					}
 					words := cut.Words(s.Item.Content, sp)
 					n := sh.shown(Cited{Address: a, Words: words, Title: s.Item.Title, Published: s.Item.Published})
-					return fmt.Sprintf("  S%d%s\n", n, r.h.show(a, words, ""))
+					return fmt.Sprintf("  S%d%s\n", n, r.h.show(a, words, "")) + q.line(held[i])
 				})
 			}})
 	}
@@ -276,40 +335,49 @@ func (r earlierRecord) catalogue(sh *woven, q ask) string {
 			break
 		}
 		var matched []int
+		held := map[int][]string{}
+		most := 0
 		for i, es := range st.Spans {
-			if q.made(es) {
-				matched = append(matched, i)
+			if ok, h := q.made(es); ok {
+				matched, held[i] = append(matched, i), h
+				most = max(most, len(h))
 			}
 		}
 		if len(matched) == 0 {
 			continue
 		}
-		entries = append(entries, entry{at: st.At, id: st.ID,
+		entries = append(entries, entry{at: st.At, id: st.ID, most: most,
 			lines: func() string {
-				return r.madeHeading(st, true) + "\n" + around(matched, len(st.Spans), q.more, func(i int, match bool) string {
+				return r.madeHeading(st, true) + "\n" + around(best(matched, held), len(st.Spans), q.more, func(i int, match bool) string {
 					body := st.Spans[i].Body
 					if !match {
 						return "  · " + body + "\n"
 					}
 					n := sh.shown(Cited{Of: EditorSpanAt{Story: st.ID, N: i + 1}, Words: body, Published: st.At})
-					return fmt.Sprintf("  S%d (the Editor's): %s\n", n, body)
+					return fmt.Sprintf("  S%d (the Editor's): %s\n", n, body) + q.line(held[i])
 				})
 			}})
 	}
 	if len(entries) == 0 {
 		return fmt.Sprintf("No earlier Story has a Span %s.", q.with)
 	}
-	slices.SortFunc(entries, func(a, b entry) int { return cmp.Or(b.at.Compare(a.at), cmp.Compare(b.id, a.id)) })
+	slices.SortFunc(entries, func(a, b entry) int {
+		return cmp.Or(cmp.Compare(b.most, a.most), b.at.Compare(a.at), cmp.Compare(b.id, a.id))
+	})
+	which, order := "newest", "newest first"
+	if q.ranked {
+		which, order = "holding the most", "those holding the most first, newest first among equals"
+	}
 	var b strings.Builder
 	switch {
 	case len(entries) > catalogueSize:
-		fmt.Fprintf(&b, "%d earlier Stories have Spans %s; the %d newest are listed, newest first.\n",
-			len(entries), q.with, catalogueSize)
+		fmt.Fprintf(&b, "%d earlier Stories have Spans %s; the %d %s are listed, %s.\n",
+			len(entries), q.with, catalogueSize, which, order)
 		entries = entries[:catalogueSize]
 	case len(entries) == 1:
 		fmt.Fprintf(&b, "1 earlier Story has Spans %s.\n", q.with)
 	default:
-		fmt.Fprintf(&b, "%d earlier Stories have Spans %s, newest first.\n", len(entries), q.with)
+		fmt.Fprintf(&b, "%d earlier Stories have Spans %s, %s.\n", len(entries), q.with, order)
 	}
 	for _, e := range entries {
 		b.WriteString("\n" + e.lines())
@@ -463,15 +531,37 @@ func around(matched []int, spans int, hold string, line func(i int, match bool) 
 	return b.String()
 }
 
-// holdsWords reports whether text, as read with its hydrated stretches'
-// marks dropped, holds words as whole words, whatever their case and
-// however they are spaced.
-func holdsWords(text, words string) bool {
-	norm := func(s string) string {
-		s = strings.NewReplacer(hydratedOpen, "", hydratedClose, "").Replace(s)
-		return strings.Join(strings.Fields(strings.ToLower(s)), " ")
+// askedWords are the words of an ask, as asked: split at spaces, each
+// trimmed of what is not a letter or digit at its ends (quotes, commas, the
+// hydration marks), each once whatever its case, in the order asked.
+func askedWords(words string) []string {
+	var out []string
+	for _, f := range strings.Fields(words) {
+		w := strings.TrimFunc(f, func(r rune) bool { return !isWordRune(r) })
+		if w != "" && !slices.ContainsFunc(out, func(o string) bool { return strings.EqualFold(o, w) }) {
+			out = append(out, w)
+		}
 	}
-	t, w := norm(text), norm(words)
+	return out
+}
+
+// heldWords are those of words that text, as read with its hydrated
+// stretches' marks dropped, holds as whole words, whatever their case, in
+// the order of words.
+func heldWords(text string, words []string) []string {
+	t := strings.ToLower(strings.NewReplacer(hydratedOpen, "", hydratedClose, "").Replace(text))
+	var out []string
+	for _, w := range words {
+		if holdsWord(t, strings.ToLower(w)) {
+			out = append(out, w)
+		}
+	}
+	return out
+}
+
+// holdsWord reports whether t holds w as a whole word: not inside a longer
+// one, as "he" is inside "the".
+func holdsWord(t, w string) bool {
 	if w == "" {
 		return false
 	}

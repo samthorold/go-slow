@@ -150,6 +150,42 @@ func TestEachToolsAsksAndTheAnswersHoldingAnythingAreCounted(t *testing.T) {
 	}
 }
 
+// Weaving's find asks are counted per fixture by how they landed: on a Span
+// holding every word asked, on Spans holding only some, or on none (an
+// answer naming no Story, or an error). An answer whose Spans say nothing of
+// what they hold was matched as a phrase, before an ask matched any of its
+// words, so it landed on every word.
+func TestWeavingsFindAsksAreCountedByHowTheyLanded(t *testing.T) {
+	before, after := t.TempDir(), t.TempDir()
+	write(t, before, "weaving/sunday/1.json", `{"act": "weaving", "output": {"stories": []},
+		"earlier_attempts": [{"act": "weaving", "output": null, "calls": [{"ID": "a", "Name": "find"}, {"ID": "b", "Name": "find"}],
+			"results": [{"CallID": "a", "Content": "1 earlier Story has Spans with the words \"x y\".\n\nStory 1, from \"T\", from s; cited by no later Editor's Span\n  S2: x y\n"},
+			            {"CallID": "b", "Content": "No earlier Story has a Span with the words \"z\"."}]}]}`)
+	write(t, after, "weaving/sunday/1.json", `{"act": "weaving", "output": {"stories": []},
+		"earlier_attempts": [{"act": "weaving", "output": null,
+			"calls": [{"ID": "a", "Name": "find"}, {"ID": "b", "Name": "find"}, {"ID": "c", "Name": "find"}, {"ID": "d", "Name": "find_entity"}],
+			"results": [
+				{"CallID": "a", "Content": "Story 1, from \"T\", from s; cited by no later Editor's Span\n  S2: x\n    holding 1 of the 2 words: \"x\"\n  S3: x y\n    holding every word: \"x\", \"y\"\n"},
+				{"CallID": "b", "Content": "Story 1, from \"T\", from s; cited by no later Editor's Span\n  S2: x\n    holding 1 of the 2 words: \"x\"\n"},
+				{"CallID": "c", "Content": "Story 1, from \"T\", from s; cited by no later Editor's Span\n  S2: x\n    holding the word \"x\"\n"},
+				{"CallID": "d", "Content": "Story 1, from \"T\", from s; cited by no later Editor's Span\n  S2: x\n"}]}]}`)
+	write(t, after, "weaving/sunday/2.json", `{"act": "weaving", "output": {"stories": []},
+		"earlier_attempts": [{"act": "weaving", "output": null, "calls": [{"ID": "a", "Name": "find"}],
+			"results": [{"CallID": "a", "Content": "No earlier Story has a Span holding any of the words \"q\"."}]}]}`)
+
+	got := yieldOf(t, before, after)
+
+	for _, want := range []string{
+		"### weaving's find asks\n\n| Fixture | Every word | Some | None |\n|---|---|---|---|\n",
+		"| weaving/sunday | 1 → 2 | 0 → 1 | 1 → 1 |",
+		"| **Total** | 1 → 2 | 0 → 1 | 1 → 1 |",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("the report has no %q; it is:\n%s", want, got)
+		}
+	}
+}
+
 func TestFrozenInputsAndOtherFilesAreLeftOut(t *testing.T) {
 	before, after := t.TempDir(), t.TempDir()
 	for _, dir := range []string{before, after} {

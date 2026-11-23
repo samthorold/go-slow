@@ -129,15 +129,18 @@
 // Record as it stands (earlierRecord: every Story cut through the run's
 // newest new one but its new ones, WeavingStore.StoriesCutThrough, and every
 // Story the Editor made, WeavingStore.StoriesMade, each Span read as hydrated
-// now): find matches words case-insensitively as whole words in each Span
-// as hydrated (marks dropped; a Rejected Span matches nothing) and in the
-// Editor's Spans, and answers with a catalogue, newest first, at most
-// catalogueSize Stories: each by its number (its event), a Cut's by its
-// Item's title, date and Source, the Editor's by its date and first Editor's
-// Span, with how many later Editor's Spans cite it, then its first
-// matchesShown matched Spans, each numbered on from what the run has been
-// shown, between the Spans around it unnumbered (·); find_entity answers
-// with the same catalogue, of the Cuts' Stories with a Span mentioning the
+// now): find matches a Span holding any of its words (askedWords),
+// case-insensitively as whole words, in each Span as hydrated (marks
+// dropped; a Rejected Span matches nothing) and in the Editor's Spans, and
+// answers with a catalogue, those Stories whose Spans hold the most of the
+// words first, newest first among equals, at most catalogueSize Stories:
+// each by its number (its event), a Cut's by its Item's title, date and
+// Source, the Editor's by its date and first Editor's Span, with how many
+// later Editor's Spans cite it, then the matchesShown matched Spans holding
+// the most of the words, each numbered on from what the run has been shown
+// and saying which of the words it holds (holding), between the Spans around
+// it unnumbered (·); find_entity answers with the same catalogue, newest
+// first, of the Cuts' Stories with a Span mentioning the
 // Entity asked for, an id the run was shown before the turn (read from what
 // it was sent, WeavingTurns.entitiesShown), and any other id as an error the
 // model reads; find_citing answers with the same catalogue, of the Editor's
